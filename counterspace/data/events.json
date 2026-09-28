@@ -13,10 +13,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "high",
-  "notes": "SWF: passed within kill radius. Air-launched from B-47.",
+  "notes": "SWF Table 1-4: \"Success (passed within kill radius)\" alongside \"Unknown results due to loss of telemetry\"; launch site listed as Unknown.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1962-starfish-prime",
@@ -32,10 +32,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "1.4 Mt at ~400 km over Johnston Island. Created artificial radiation belt that damaged several satellites. Not in SWF DA-ASAT tables; included only as the nuclear marker the legal band references.",
+  "notes": "1.4 Mt at ~250 miles (~400 km) near Johnston Island. SWF p. 12-05 (PDF p. 269): such tests are known to have damaged or destroyed satellites in orbit. Not in SWF DA-ASAT tables; included only as the nuclear marker the legal band references.",
   "source": "DOE/NV-209 Rev. 16 (2015)",
   "source_url": "https://nnss.gov/wp-content/uploads/2023/08/DOE_NV-209_Rev16.pdf",
-  "pin": "Operation Dominic/Fishbowl entry, 9 July 1962",
+  "pin": "Table of U.S. nuclear tests, Starfish Prime row (Operation Fishbowl, 07/09/1962, \"High altitude - 250 miles\", 1.4 Mt), PDF pp. 41-42; secondary: SWF p. 12-05 (PDF p. 269)",
   "scene_3d": "starfish"
  },
  {
@@ -55,7 +55,7 @@
   "notes": "Reached designated point in space.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1963-nike-zeus-feb",
@@ -74,7 +74,7 @@
   "notes": "Intercept of designated point in space.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1964-nike-zeus-jan",
@@ -93,7 +93,7 @@
   "notes": "Successful intercept of simulated satellite target.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1964-p437-feb",
@@ -109,10 +109,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "high",
-  "notes": "Passed within kill radius (nuclear-armed system; test unarmed).",
+  "notes": "Passed within kill radius. SWF p. 01-21 (PDF p. 70): Program 437 was designed around a 1.4 Mt W49 warhead.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1964-p437-mar",
@@ -131,7 +131,7 @@
   "notes": "Backup missile passed within kill radius.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1964-p437-apr",
@@ -150,7 +150,7 @@
   "notes": "Passed within kill radius.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1964-p437-may",
@@ -169,7 +169,7 @@
   "notes": "Failed (missed intercept point).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1964-p437-nov",
@@ -188,7 +188,7 @@
   "notes": "Combat test launch; passed within kill radius.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1965-p437-apr",
@@ -207,7 +207,7 @@
   "notes": "Passed within kill radius.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1967-p437-mar",
@@ -226,7 +226,7 @@
   "notes": "Combat evaluation launch.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1968-p437-may",
@@ -245,7 +245,7 @@
   "notes": "Combat evaluation launch.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-23 (PDF p. 72)"
+  "pin": "Table 1-4, p. 01-23 (PDF p. 72)"
  },
  {
   "id": "us-1968-p437-nov",
@@ -264,7 +264,7 @@
   "notes": "Combat evaluation launch.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-24 (PDF p. 73)"
+  "pin": "Table 1-4, p. 01-24 (PDF p. 73)"
  },
  {
   "id": "us-1970-p437-mar",
@@ -283,7 +283,7 @@
   "notes": "Passed within kill radius.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-24 (PDF p. 73)"
+  "pin": "Table 1-4, p. 01-24 (PDF p. 73)"
  },
  {
   "id": "us-1984-asm135-jan",
@@ -302,7 +302,7 @@
   "notes": "Missile test, no target.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-24 (PDF p. 73)"
+  "pin": "Table 1-4, p. 01-24 (PDF p. 73)"
  },
  {
   "id": "us-1985-solwind",
@@ -318,10 +318,13 @@
   "fragments_in_orbit": 0,
   "fragments_as_of": "2026-02",
   "confidence": "high",
-  "notes": "Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; Table 1-4 gives 555 km (apogee column). Builder uses Table 5-1 for all intercept altitudes.",
+  "notes": "Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept altitudes. Tracked-debris count (285) is from Table 5-1; the zero 'still on orbit' figure could not be isolated from the jumbled Table 5-1 text extraction and reflects the debris having decayed.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 05-01 (PDF p. 212)",
+  "pin": "Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-22 (PDF p. 71); Table 1-4, p. 01-24 (PDF p. 73)",
+  "conflicts": [
+   "Intercept altitude: 530 km (Table 5-1, p. 05-01) vs 555 km (prose p. 01-22; Table 1-4 p. 01-24)"
+  ],
   "scene_3d": "solwind"
  },
  {
@@ -337,10 +340,10 @@
   "operational_use": false,
   "effect": "Test of MIRACL chemical laser (and a low-power laser) against an orbiting satellite; detailed results not public. Secretary of Defense Cohen called it consistent with US policy.",
   "confidence": "high",
-  "notes": "Exact day (17 Oct) from contemporaneous DoD reporting; SWF gives October 1997.",
+  "notes": "SWF gives October 1997 only. The exact day (17 Oct) is from FlightGlobal (Oct. 1997) and Arms Control Association reporting. The laser was fired at White Sands Missile Range, NM (SWF fn. 259 cites the WSMR High Energy Laser Systems Test Facility); MSTI-3 was a USAF experimental satellite that had completed its mission.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 01-35 (PDF p. 84)",
+  "pin": "MIRACL passage, p. 01-35 (PDF p. 84)",
   "scene_3d": "laser"
  },
  {
@@ -356,10 +359,10 @@
   "operational_use": false,
   "effect": "Uplink jamming of Persian-language programming originating in California.",
   "confidence": "medium",
-  "notes": "SWF: Iran 'has been accused'; jamming from Havana began 2003, similar jamming from Bulgaria and Libya 2005/2006. Attribution kept at 'alleged'. Day/month not given; span uses whole years.",
+  "notes": "SWF: Iran 'has been accused'; the Telstar 12 jamming from Havana 'started in 2003' and similar jamming occurred from Bulgaria and Libya in 2005/2006. Attribution kept at 'alleged'. Day/month not given; span uses whole years (2006 end year = last year SWF dates for these third-country sites).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 09-05 (PDF p. 247)"
+  "pin": "Iranian EW passage, p. 09-05 (PDF p. 247)"
  },
  {
   "id": "iq-2003-gps",
@@ -393,10 +396,13 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Likely rocket test. Altitude not reported. SWF Table 3-3 dates it 7 July; Appendix Table 16-3 dates it 5 July. Appendix date used.",
+  "notes": "Likely rocket test. Altitude not reported. SWF Table 3-3 (p. 03-22) dates it 7 July; Appendix Table 16-3 (p. 16-04) dates it 5 July. Appendix date used.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 16-04 (PDF p. 308)"
+  "pin": "Table 16-3, p. 16-04 (PDF p. 308)",
+  "conflicts": [
+   "Date: 5 July (Table 16-3, p. 16-04) vs 7 July (Table 3-3, p. 03-22)"
+  ]
  },
  {
   "id": "cn-2006-laser",
@@ -414,7 +420,7 @@
   "notes": "Point event (year only). Anonymous-source press report; kept low confidence and 'alleged'.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-26 (PDF p. 187)"
+  "pin": "Chinese DE section, text at fn. 207, p. 03-26 (PDF p. 187)"
  },
  {
   "id": "cn-2006-sc19",
@@ -430,10 +436,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Likely near-miss of orbital target. Altitude not reported.",
+  "notes": "Likely near-miss of orbital target. Altitude not reported. Same date in Table 3-3 (p. 03-22, PDF p. 183).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 16-04 (PDF p. 308)"
+  "pin": "Table 16-3, p. 16-04 (PDF p. 308)"
  },
  {
   "id": "cn-2007-fy1c",
@@ -452,7 +458,10 @@
   "notes": "Largest debris-generating event on record. Conflict inside SWF 2026: Table 5-1 gives 880 km and 3,532 tracked pieces; Table 3-3 gives 865 km apogee and 3,533 pieces. Table 5-1 used for consistency with the other intercepts.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 05-01 (PDF p. 212)",
+  "pin": "Table 5-1, p. 05-01 (PDF p. 212)",
+  "conflicts": [
+   "Altitude/pieces: 880 km, 3,532 (Table 5-1, p. 05-01) vs 865 km apogee, 3,533 (Table 3-3, p. 03-22)"
+  ],
   "scene_3d": "fengyun"
  },
  {
@@ -469,10 +478,13 @@
   "fragments_in_orbit": 0,
   "fragments_as_of": "2026-02",
   "confidence": "high",
-  "notes": "Missile-defense interceptor (SM-3) used against a satellite: the case shows the ballistic missile defense / ASAT overlap. Date is 20 Feb 2008 US Eastern time (21 Feb UTC). Table 1-4 lists 2,700 km in its apogee column (interceptor reach, not intercept); Table 5-1 intercept altitude used.",
+  "notes": "Missile-defense interceptor (SM-3) used against a satellite: the case shows the ballistic missile defense / ASAT overlap. Date is 20 Feb 2008 US Eastern time (21 Feb UTC). Debris did not re-enter within weeks: SWF p. 01-24 (PDF p. 73) says the 175 trackable pieces 'took about 20 months to de-orbit entirely' (Table 5-1 lifespan column: 1.7 years). Altitude conflict inside SWF: the prose on p. 01-24 says 240 km, while Table 5-1 (p. 05-01) says 220 km; Table 1-4 (p. 01-24) lists 2,700 km in its apogee column (interceptor reach, not intercept). Table 5-1 (220 km) used, per the builder rule.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 05-01 (PDF p. 212)",
+  "pin": "Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-24 (PDF p. 73); Table 1-4, p. 01-24 (PDF p. 73)",
+  "conflicts": [
+   "Intercept altitude: 220 km (Table 5-1, p. 05-01) vs 240 km (prose p. 01-24) vs 2,700 km apogee column (Table 1-4, p. 01-24)"
+  ],
   "scene_3d": "burnt-frost"
  },
  {
@@ -486,12 +498,12 @@
   "target_system": "Eutelsat satellites carrying BBC Persian and Voice of America",
   "target_regime": "GEO_comms",
   "operational_use": false,
-  "effect": "Uplink jamming of Persian-language broadcasts. In 2010 the ITU, acting on Eutelsat complaints, asked Iran to help stop jamming originating from its territory.",
+  "effect": "Uplink jamming of Persian-language broadcasts. In 2010 the ITU, acting on two Eutelsat complaints, ordered Iran (SWF's word) to assist in stopping jamming originating from its territory.",
   "confidence": "medium",
-  "notes": "Attribution coded 'multi_government' because an intergovernmental body (ITU) located the source in Iranian territory; ITU did not find the Iranian state responsible. Start/end years follow the brief's seed and are not dated precisely in SWF (it cites 2010 ITU action and 2022 renewed jamming).",
+  "notes": "Attribution coded 'multi_government' because an intergovernmental body (ITU) located the source in Iranian territory; ITU did not find the Iranian state responsible. SWF dates only the 2010 ITU action and Eutelsat's Oct. 2022 report of renewed jamming from Iran; the 2009 start follows Eutelsat's appeals from May 2009 (Eutelsat/HRW) and the 2012 end is the last year of the first documented phase, so the span understates the 2022 episode.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 09-06 (PDF p. 248)"
+  "pin": "Iranian EW passage, text above fn. 58, p. 09-06 (PDF p. 248)"
  },
  {
   "id": "cn-2010-midcourse",
@@ -510,13 +522,13 @@
   "notes": "Destruction of suborbital target; no orbital debris.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "kp-2010-gps",
   "domain": "non_kinetic",
   "category": "gnss_jamming",
-  "start": "2010-08-01",
+  "start": "2010-08-23",
   "end": null,
   "actor": "North Korea",
   "attribution": "official_government",
@@ -525,10 +537,10 @@
   "operational_use": false,
   "effect": "Repeated downlink (terrestrial) GPS jamming near the inter-Korean border; South Korea raised it with the ITU, ICAO and IMO; further interference reported in November 2024.",
   "confidence": "high",
-  "notes": "Terrestrial jamming of receivers, not an attack on GPS satellites (SWF 12-05 says so expressly). Campaign span, not individual incidents. Start month from South Korean government reporting of the 2010 campaign; treated as ongoing.",
+  "notes": "Terrestrial jamming of receivers, not an attack on GPS satellites (SWF p. 12-05: 'no impact on the GPS satellites themselves'). Campaign span, not individual incidents. SWF does not date the first episode; start is the first publicly known incident, 23 Aug 2010 (GPS World, Inside GNSS). Treated as ongoing (SWF p. 12-06: Nov. 2024 interference; Oct. 2025 ICAO finding).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 12-05 to 12-06 (PDF p. 269-270)"
+  "pin": "Section 12.3, p. 12-05 to 12-06 (PDF p. 269-270)"
  },
  {
   "id": "cn-2013-midcourse",
@@ -547,7 +559,7 @@
   "notes": "Suborbital intercept; altitude not reported.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "cn-2013-dn2",
@@ -563,10 +575,13 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Not an intercept. Chinese Academy of Sciences said 10,000 km; US officials said 'nearly to GEO'; technical analysis cited by SWF puts apogee at least ~30,000 km. Builder plots ~30,000 km (SWF Table 3-3 value).",
+  "notes": "Not an intercept. Chinese Academy of Sciences said 10,000 km; the US military said 'nearly to GEO' (36,000 km); technical analysis cited by SWF (p. 03-20) puts apogee at least ~30,000 km. Builder plots ~30,000 km (SWF Table 3-3 value).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-20, 03-22 (PDF p. 181, 183)",
+  "pin": "Prose p. 03-20 (PDF p. 181); Table 3-3, p. 03-22 (PDF p. 183)",
+  "conflicts": [
+   "Apogee: 10,000 km (CAS) vs ~36,000 km (US military) vs at least ~30,000 km (analysis cited by SWF)"
+  ],
   "scene_3d": "dn2"
  },
  {
@@ -582,10 +597,10 @@
   "operational_use": true,
   "effect": "Jamming and spoofing of GNSS in occupied territory and conflict zones; C4ADS logged nearly 10,000 suspected spoofing incidents across Russia, Crimea and Syria.",
   "confidence": "high",
-  "notes": "Attribution level follows the C4ADS open-source report SWF relies on; governments have also blamed Russia, but the source for the span is OSINT. Covers jamming and spoofing.",
+  "notes": "Attribution level follows the C4ADS open-source report SWF relies on (p. 02-28: nearly 10,000 suspected incidents in Russia, Crimea and Syria); governments have also blamed Russia, but the source for the span is OSINT. Covers jamming and spoofing. SWF's cited pages do not date the start: the March 2014 start is from external reporting that Russia has jammed GPS in eastern Ukraine since the 2014 Crimea conflict (Breaking Defense; Foreign Policy, Oct. 2015).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-26 to 02-28 (PDF p. 139-141)"
+  "pin": "GNSS passages, C4ADS report at fn. 220, p. 02-27 to 02-28 (PDF p. 140-141)"
  },
  {
   "id": "cn-2014-dn2",
@@ -601,10 +616,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Likely intercept test; US State Department called it a non-destructive ASAT test.",
+  "notes": "SWF Table 3-3 lists it as a likely intercept test with a likely ballistic-missile target. Type 'non_destructive' is the builder's coding: SWF reports no debris.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "cn-2015-dn3",
@@ -623,7 +638,7 @@
   "notes": "Likely rocket test.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "ru-2015-nudol",
@@ -639,10 +654,13 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "low",
-  "notes": "First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015.",
+  "notes": "First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 (p. 16-03) dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015 (used).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)",
+  "conflicts": [
+   "Date: 18 Nov 2015 (Table 2-4, p. 02-21) vs 18 Oct 2015 (Table 16-2, p. 16-03)"
+  ]
  },
  {
   "id": "ru-2016-syria",
@@ -657,10 +675,10 @@
   "operational_use": true,
   "effect": "GNSS spoofing/jamming around Russian bases in Syria; reported effects on aircraft in the region.",
   "confidence": "medium",
-  "notes": "Start date is the earliest period in the C4ADS dataset as summarized by SWF (2016); the seed said 2017. Builder uses 2016 at medium confidence.",
+  "notes": "SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The seed said 2017; builder uses 2016 at medium confidence.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-28 (PDF p. 141)"
+  "pin": "C4ADS passage, p. 02-28 (PDF p. 141)"
  },
  {
   "id": "ru-2016-nudol-may",
@@ -679,7 +697,7 @@
   "notes": "Likely rocket test. SWF marks the 100 km apogee with '?'.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)"
  },
  {
   "id": "ru-2016-nudol-dec",
@@ -698,7 +716,7 @@
   "notes": "Likely rocket test. SWF marks the 100 km apogee with '?'.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)"
  },
  {
   "id": "cn-2017-dn3",
@@ -717,7 +735,7 @@
   "notes": "Likely intercept test; reportedly malfunctioned.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "cn-2018-dn3",
@@ -736,7 +754,7 @@
   "notes": "Likely intercept test.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "ru-2018-peresvet",
@@ -751,10 +769,10 @@
   "operational_use": false,
   "effect": "Peresvet mobile laser announced by President Putin; later described as dazzling satellites. Deployment status announced, not demonstrated against a satellite.",
   "confidence": "medium",
-  "notes": "Self-declared by the Russian government; no public evidence of use against a satellite.",
+  "notes": "Named in Putin's 1 March 2018 speech (SWF p. 02-36); SWF describes it as appearing designed to protect mobile ICBMs from being imaged. Self-declared by the Russian government; no public evidence of use against a satellite.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-35 (PDF p. 148)",
+  "pin": "Peresvet section, p. 02-36 (PDF p. 149)",
   "scene_3d": "laser"
  },
  {
@@ -774,7 +792,7 @@
   "notes": "First test from a mobile launcher.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)"
  },
  {
   "id": "ru-2018-trident",
@@ -789,10 +807,10 @@
   "operational_use": false,
   "effect": "GPS disruption affecting civil aviation during the exercise; Norway said in March 2019 it had proof of Russian interference.",
   "confidence": "high",
-  "notes": "Exercise dates 25 Oct - 7 Nov 2018 (NATO). Norway and Finland both raised it; coded 'official_government' (each state spoke for itself).",
+  "notes": "SWF does not name the exercise or give dates: it says (Nov. 2018) media reported jamming in Norway and Finland during a major NATO exercise, and that Norway's government claimed in March 2019 it had proof of Russian interference. Dates 25 Oct - 7 Nov 2018 are the Trident Juncture exercise window (NATO; Norway's ministry put the jamming at 16 Oct - 7 Nov). Coded 'official_government' on Norway's claim; Finland only expressed concern (external reporting).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-28 (PDF p. 141)"
+  "pin": "text above fn. 217-218, p. 02-28 (PDF p. 141)"
  },
  {
   "id": "ru-2018-nudol-dec",
@@ -808,10 +826,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Likely KKV; no intercept.",
+  "notes": "Payload column: Likely KKV. Appendix Table 16-2 (p. 16-03): potential KKV, no intercept.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)"
  },
  {
   "id": "in-2019-shakti",
@@ -827,10 +845,10 @@
   "fragments_in_orbit": 0,
   "fragments_as_of": "2026-02",
   "confidence": "high",
-  "notes": "Indian officials said debris would decay within 45 days; some pieces were tracked above the ISS and lasted longer. Seed '~400 estimated' pieces not found in SWF; not used.",
+  "notes": "Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km. Seed '~400 estimated' pieces not found in SWF; not used.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 05-01 (PDF p. 212)",
+  "pin": "Table 5-1, p. 05-01 (PDF p. 212); prose p. 04-04 (PDF p. 204)",
   "scene_3d": "shakti"
  },
  {
@@ -847,10 +865,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Successful, nothing hit. US Space Command publicly criticized the test.",
+  "notes": "Successful, nothing hit. US Space Command issued a public statement on the test (SWF p. 02-20, fn. 148).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)"
  },
  {
   "id": "ru-2020-nudol-dec",
@@ -866,10 +884,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Successful, nothing hit.",
+  "notes": "Successful, nothing hit. US Space Command issued a public statement (SWF p. 02-20, fn. 149).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-21 (PDF p. 134)"
+  "pin": "Table 2-4, p. 02-21 (PDF p. 134)"
  },
  {
   "id": "cn-2021-dn3",
@@ -885,10 +903,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Announced by China as a land-based midcourse interception test.",
+  "notes": "Announced by China as a 'land-based midcourse missile intercept technology test' (SWF p. 03-21, PDF p. 182).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183); prose p. 03-21 (PDF p. 182)"
  },
  {
   "id": "ru-2021-cosmos1408",
@@ -904,10 +922,10 @@
   "fragments_in_orbit": 5,
   "fragments_as_of": "2026-02",
   "confidence": "high",
-  "notes": "ISS crew sheltered in docked vehicles. SWF text: more than 1,800 cataloged pieces, 5 still in orbit as of February 2026. Latest destructive DA-ASAT test in SWF 2026 (no destructive test through the report's cutoff).",
+  "notes": "ISS crew sheltered in docked vehicles. SWF text: more than 1,800 cataloged pieces, 5 still in orbit as of February 2026 (p. 02-21). Last destructive DA-ASAT test listed in SWF 2026 (Table 5-1); the report lists no later destructive test.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 05-01 (PDF p. 212)",
+  "pin": "Table 5-1, p. 05-01 (PDF p. 212); prose p. 02-21 (PDF p. 134)",
   "scene_3d": "cosmos1408"
  },
  {
@@ -921,12 +939,12 @@
   "target_system": "Viasat KA-SAT user terminals (modems) and management network",
   "target_regime": "ground_segment",
   "operational_use": true,
-  "effect": "AcidRain wiper disabled tens of thousands of modems in Ukraine and Europe about an hour before the invasion; satellite itself unaffected.",
+  "effect": "AcidRain wiper disabled tens of thousands of modems in Ukraine and Europe in the first hours of the invasion; satellite itself unaffected.",
   "confidence": "high",
-  "notes": "Publicly attributed to the GRU by the United States, United Kingdom and European Union in May 2022.",
+  "notes": "Timing: SWF p. 15-06 says 'within hours' of Russian troops crossing the border; p. 15-07 adds that independent analysts noted it began one hour before the first troops crossed. Publicly attributed to the GRU by the United States, United Kingdom and European Union in May 2022 (p. 15-07).",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 15-06 to 15-07 (PDF p. 292-293)",
+  "pin": "Viasat case study, p. 15-06 to 15-07 (PDF p. 292-293)",
   "scene_3d": "viasat"
  },
  {
@@ -940,17 +958,17 @@
   "target_system": "Starlink user terminals in Ukraine",
   "target_regime": "LEO_constellation",
   "operational_use": true,
-  "effect": "Jamming claimed by SpaceX (March 2022); Ukrainian official attributed May 2024 outages to Russian EW testing.",
+  "effect": "SpaceX CEO Elon Musk said in March 2022 that Russia had jammed a Starlink terminal; a Ukrainian official attributed May 2024 outages to Russian EW testing.",
   "confidence": "medium",
   "notes": "SWF notes no independent validation of the type or magnitude of the jamming; coded 'alleged'.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-32; 15-07 (PDF p. 145, 293)"
+  "pin": "Starlink passage, fns. 259-261, p. 02-32 (PDF p. 145)"
  },
  {
   "id": "cn-2022-dn3",
   "domain": "kinetic",
-  "date": "2022-06-19",
+  "date": "2022-06-21",
   "state": "China",
   "system": "Possible DN-3",
   "target": "Likely ballistic missile",
@@ -961,10 +979,13 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "SWF Table 3-3 gives 19 June 2022; Appendix Table 16-3 gives 21 June 2022. Table 3-3 used.",
+  "notes": "SWF Table 3-3 gives 19 June 2022; the prose (p. 03-21) and Appendix Table 16-3 (p. 16-04) give 21 June 2022, the date of China's announcement. Prose/appendix date used.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Prose p. 03-21 (PDF p. 182); Table 16-3, p. 16-04 (PDF p. 308); Table 3-3, p. 03-22 (PDF p. 183)",
+  "conflicts": [
+   "Date: 21 June (prose p. 03-21; Table 16-3 p. 16-04) vs 19 June (Table 3-3, p. 03-22)"
+  ]
  },
  {
   "id": "cn-2023-dn3",
@@ -980,10 +1001,10 @@
   "fragments_in_orbit": null,
   "fragments_as_of": null,
   "confidence": "medium",
-  "notes": "Likely intercept test.",
+  "notes": "Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and 15 April 2023. 14 April used.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 03-22 (PDF p. 183)"
+  "pin": "Table 3-3, p. 03-22 (PDF p. 183)"
  },
  {
   "id": "mideast-2023-gnss",
@@ -998,10 +1019,10 @@
   "operational_use": true,
   "effect": "Extensive jamming/spoofing in the Eastern Mediterranean and Middle East affecting air traffic management; Israel's own submission to the ITU RRB (Nov 2025) addressed interference cases.",
   "confidence": "medium",
-  "notes": "Actor set is mixed. Israel has acknowledged defensive GNSS disruption; spoofing near Iran was reported by aviation-security sources (AIN, Sept 2023). Coded at the level SWF supports for Israel; other actors not attributed here.",
+  "notes": "Actor set is mixed: SWF p. 10-02 says it is hard to tell from open sources whether Israel, Hamas or others conduct the EW. The IDF stated publicly it was jamming GPS 'in a proactive manner for various operational needs'; Lebanon blamed Israel (Mar. 2024). Coded at the level SWF supports for Israel; other actors not attributed. SWF (p. 10-01) also reports interference before the row's start, in spring 2023 (20% of regional aircraft in April 2023); the row starts at the Oct. 2023 escalation.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 10-02; 09-06 (PDF p. 255, 248)"
+  "pin": "Section 10.3, p. 10-01 to 10-02 (PDF p. 254-255)"
  },
  {
   "id": "ru-2023-baltic",
@@ -1019,7 +1040,7 @@
   "notes": "SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). Terrestrial jamming of receivers, not attacks on satellites.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-29 to 02-30 (PDF p. 142-143)",
+  "pin": "Baltic GNSS passages, p. 02-29 to 02-30 (PDF p. 142-143)",
   "scene_3d": "gnss"
  },
  {
@@ -1035,9 +1056,9 @@
   "operational_use": true,
   "effect": "Hijacked/jammed broadcasts over Ukrainian channels; European states complained; RRB (July 2024) said interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka.",
   "confidence": "high",
-  "notes": "Attribution rests on complaining governments (Sweden, France and others); the RRB described origin locations but did not make a state-responsibility finding.",
+  "notes": "SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'official_government' as in the original ledger.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
-  "pin": "p. 02-32 (PDF p. 145)"
+  "pin": "ITU RRB passage, fn. 272, p. 02-32 (PDF p. 145)"
  }
 ]

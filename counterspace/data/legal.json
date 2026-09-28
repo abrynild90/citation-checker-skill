@@ -33,7 +33,7 @@
   "label": "ABM Treaty Art. XII",
   "short_note": "Bars interference with the other party's 'national technical means' of verification (bilateral; US withdrew 2002).",
   "citation": "Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, May 26, 1972, 23 U.S.T. 3435.",
-  "source_url": "https://2009-2017.state.gov/t/avc/trty/101888.htm",
+  "source_url": "https://www.armscontrol.org/factsheets/anti-ballistic-missile-abm-treaty-glance",
   "soft_law": false
  },
  {
@@ -44,18 +44,18 @@
   "label": "PAROS (UNGA agenda item)",
   "short_note": "First PAROS resolutions adopted Dec 9, 1981 (UNGA 36/97 C; 36/99). CD Ad Hoc Committee on PAROS met 1985-94. No treaty has resulted.",
   "citation": "G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981).",
-  "source_url": "https://digitallibrary.un.org/record/28200",
+  "source_url": "https://www.unoosa.org/oosa/oosadoc/data/resolutions/1981/general_assembly_36th_session/res_3697c.html",
   "soft_law": false
  },
  {
   "id": "cd-paros-committee",
-  "start": "1985-01-01",
-  "end": "1994-12-31",
+  "start": "1985-03-29",
+  "end": "1994-08-23",
   "kind": "negotiation_span",
   "label": "CD Ad Hoc Committee on PAROS",
-  "short_note": "Conference on Disarmament committee re-established annually 1985-1994; mandate lapsed.",
-  "citation": "Conference on Disarmament, Ad Hoc Committee on the Prevention of an Arms Race in Outer Space (1985-1994).",
-  "source_url": "https://disarmament.unoda.org/topics/outerspace/paros/",
+  "short_note": "Established by the Conference on Disarmament on Mar. 29, 1985; met annually 1985-1994; final meeting Aug. 23, 1994; never re-established.",
+  "citation": "Conference on Disarmament, Report of the Ad Hoc Committee on Prevention of an Arms Race in Outer Space, CD/1271 (Aug. 24, 1994); see UNIDIR, The Conference on Disarmament and the Prevention of an Arms Race in Outer Space.",
+  "source_url": "https://unidir.org/files/publication/pdfs/the-conference-on-disarmament-and-the-prevention-of-an-arms-race-in-outer-space-370.pdf",
   "soft_law": false
  },
  {
@@ -64,8 +64,8 @@
   "end": null,
   "kind": "treaty",
   "label": "ITU Constitution Arts. 45 & 48",
-  "short_note": "Adopted Geneva 1992; in force July 1, 1994. Art. 45 prohibits harmful interference; Art. 48 gives military radio installations 'complete freedom' (the core gap for jamming). The Radio Regulations sit beneath the Constitution.",
-  "citation": "Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, 1825 U.N.T.S. 331.",
+  "short_note": "Adopted Geneva 1992; in force July 1, 1994. Art. 45 prohibits harmful interference; Art. 48 lets Members 'retain their entire freedom' regarding military radio installations (the core gap for jamming). The Radio Regulations sit beneath the Constitution.",
+  "citation": "Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, 1825 U.N.T.S. 331, 361-62.",
   "source_url": "https://www.itu.int/en/council/Documents/basic-texts/Constitution-E.pdf",
   "soft_law": false,
   "scene_3d": "gnss",
@@ -81,8 +81,8 @@
   "kind": "negotiation_span",
   "label": "PPWT draft (Russia-China)",
   "short_note": "Draft treaty on preventing placement of weapons in outer space, tabled at the CD. Does not cover ground-based (direct-ascent) ASATs.",
-  "citation": "Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008).",
-  "source_url": "https://digitallibrary.un.org/record/622364",
+  "citation": "Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) (tabled at the CD Feb. 12, 2008).",
+  "source_url": "https://digitallibrary.un.org/record/633470",
   "soft_law": false
  },
  {
@@ -92,7 +92,7 @@
   "kind": "negotiation_span",
   "label": "PPWT updated draft",
   "short_note": "Revised draft; still silent on ground-based ASATs and testing.",
-  "citation": "Updated Draft PPWT, CD/1985 (June 12, 2014).",
+  "citation": "Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014).",
   "source_url": "https://digitallibrary.un.org/record/774287",
   "soft_law": false
  },
@@ -122,23 +122,12 @@
   "soft_law": false
  },
  {
-  "id": "milamos-2022",
-  "start": "2022-01-01",
-  "end": null,
-  "kind": "unilateral",
-  "label": "McGill (MILAMOS) Manual Vol. I (soft law)",
-  "short_note": "Expert manual on international law applicable to military uses of outer space. Not binding law.",
-  "citation": "McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules (Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022).",
-  "source_url": "https://www.mcgill.ca/milamos/",
-  "soft_law": true
- },
- {
   "id": "us-moratorium-2022",
   "start": "2022-04-18",
   "end": null,
   "kind": "unilateral",
   "label": "US DA-ASAT test moratorium",
-  "short_note": "US commits not to conduct destructive direct-ascent ASAT missile tests. Followed by Canada, New Zealand, Japan, Germany, UK, France and others; SWF counts 38 states in total.",
+  "short_note": "US commits not to conduct destructive direct-ascent ASAT missile tests. Other states followed; SWF counts 38 countries in total.",
   "citation": "The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space (Apr. 18, 2022); SWF 2026, p. 01-50.",
   "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2022/04/18/fact-sheet-vice-president-harris-advances-national-security-norms-in-space/",
   "soft_law": false,
@@ -159,6 +148,17 @@
   "soft_law": false
  },
  {
+  "id": "milamos-2022",
+  "start": "2022-07-01",
+  "end": null,
+  "kind": "unilateral",
+  "label": "McGill (MILAMOS) Manual Vol. I (soft law)",
+  "short_note": "Expert manual on international law applicable to military uses of outer space. Not binding law.",
+  "citation": "McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules (Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022).",
+  "source_url": "https://www.mcgill.ca/milamos/",
+  "soft_law": true
+ },
+ {
   "id": "unga-77-41",
   "start": "2022-12-07",
   "end": null,
@@ -166,10 +166,11 @@
   "label": "UNGA 77/41 (DA-ASAT tests)",
   "short_note": "Calls on states to commit not to conduct destructive direct-ascent ASAT missile tests. Adopted 155-9-9.",
   "citation": "G.A. Res. 77/41 (Dec. 7, 2022).",
-  "source_url": "https://digitallibrary.un.org/record/3996915",
+  "source_url": "https://digitallibrary.un.org/record/3997622",
   "soft_law": false,
   "related_events": [
-   "ru-2021-cosmos1408"
+   "ru-2021-cosmos1408",
+   "in-2019-shakti"
   ]
  },
  {
@@ -179,8 +180,8 @@
   "kind": "unilateral",
   "label": "Woomera Manual (soft law)",
   "short_note": "Expert manual on international law of military space operations. Not binding law.",
-  "citation": "The Woomera Manual on the International Law of Military Space Activities and Operations (Jack Beard et al. eds., Oxford Univ. Press 2024).",
-  "source_url": "https://law.adelaide.edu.au/woomera/",
+  "citation": "The Woomera Manual on the International Law of Military Space Operations (Jack Beard & Dale Stephens eds., Oxford Univ. Press 2024).",
+  "source_url": "https://global.oup.com/academic/product/the-woomera-manual-on-the-international-law-of-military-space-operations-9780192870667",
   "soft_law": true
  },
  {
@@ -200,8 +201,8 @@
   "end": null,
   "kind": "resolution",
   "label": "ITU RRB: 'grave concern' (Sweden, France)",
-  "short_note": "Radio Regulations Board expressed grave concern about intentional harmful interference to Swedish and French satellites that seemed to originate from earth stations in Russia.",
-  "citation": "ITU Radio Regulations Board, 96th meeting (July 2024), summary of decisions; SWF 2026, p. 02-32.",
+  "short_note": "Radio Regulations Board expressed grave concern about intentional harmful interference to Swedish and French satellites that seemed to originate from earth stations near Moscow, Kaliningrad and Pavlovka.",
+  "citation": "ITU Radio Regulations Board, 96th Meeting, Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145).",
   "source_url": "https://www.itu.int/en/ITU-R/conferences/RRB/Pages/default.aspx",
   "soft_law": false,
   "scene_3d": "gnss",
@@ -211,28 +212,29 @@
  },
  {
   "id": "icao-2025",
-  "start": "2025-10-01",
+  "start": "2025-10-03",
   "end": null,
   "kind": "resolution",
-  "label": "ICAO: Russia's GNSS interference breaches Chicago Convention",
-  "short_note": "ICAO found GNSS interference originating in Russia infringed the 1944 Chicago Convention, condemned it, and called on Russia to meet its obligations.",
-  "citation": "ICAO action on GNSS radio frequency interference (Oct. 2025), as reported in SWF 2026, p. 02-30.",
-  "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
+  "label": "ICAO: GNSS interference breaches Chicago Convention",
+  "short_note": "The ICAO Assembly determined that GNSS interference originating in Russia (and in North Korea) infringed the 1944 Chicago Convention, condemned it, and called on both to fulfill their obligations.",
+  "citation": "ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06.",
+  "source_url": "https://www.icao.int/news/icao-assembly-condemns-gnss-radio-frequency-interference-originating-dprk-and-russian",
   "soft_law": false,
   "scene_3d": "gnss",
   "related_events": [
-   "ru-2023-baltic"
+   "ru-2023-baltic",
+   "kp-2010-gps"
   ]
  },
  {
   "id": "itu-rrb-2025",
-  "start": "2025-11-01",
+  "start": "2025-11-10",
   "end": null,
   "kind": "resolution",
   "label": "ITU RRB 100th meeting: urges Russia to cease RNSS interference",
   "short_note": "Board again urged Russia to immediately cease harmful interference to radionavigation-satellite service receivers in Estonia, Finland, Latvia and Lithuania.",
-  "citation": "ITU Radio Regulations Board, 100th meeting (Nov. 2025); SWF 2026, p. 02-30.",
-  "source_url": "https://www.itu.int/en/ITU-R/conferences/RRB/Pages/default.aspx",
+  "citation": "ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245.",
+  "source_url": "https://www.itu.int/harmful-interference-to-rnss/",
   "soft_law": false,
   "scene_3d": "gnss",
   "related_events": [

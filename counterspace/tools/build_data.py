@@ -13,45 +13,53 @@ SWF_URL = ("https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/"
 DEBRIS_ASOF = "2026-02"  # SWF 2026 Table 5-1 / Nudol text: "As of February 2026"
 
 
-def swf(pin, pdf):
-    return dict(source=SWF, source_url=SWF_URL, pin=f"p. {pin} (PDF p. {pdf})")
+def swf(pin, pdf, what=""):
+    """SWF pin: printed section-page plus PDF page index; `what` names the table or passage."""
+    w = f"{what}, " if what else ""
+    return dict(source=SWF, source_url=SWF_URL, pin=f"{w}p. {pin} (PDF p. {pdf})")
+
+
+def swfx(pin_text):
+    """SWF row whose pin spans several passages (free-text pin)."""
+    return dict(source=SWF, source_url=SWF_URL, pin=pin_text)
 
 
 def k(id, date, state, system, target, type, alt, kind, frag=None, orbit=None,
-      conf="high", notes="", scene=None, src=None):
+      conf="high", notes="", scene=None, src=None, conflicts=None):
     row = dict(id=id, domain="kinetic", date=date, state=state, system=system,
                target=target, type=type, altitude_km=alt, altitude_kind=kind,
                fragments_cataloged=frag, fragments_in_orbit=orbit,
                fragments_as_of=DEBRIS_ASOF if frag is not None else None,
                confidence=conf, notes=notes)
     row.update(src)
+    if conflicts:
+        row["conflicts"] = conflicts
     if scene:
         row["scene_3d"] = scene
     return row
 
 
-T14a = lambda: swf("01-23", 72)   # Table 1-4, first page
-T14b = lambda: swf("01-24", 73)   # Table 1-4, continued
-T51 = lambda: swf("05-01", 212)   # Table 5-1 debris
-T24 = lambda: swf("02-21", 134)   # Table 2-4 Nudol
-T33 = lambda: swf("03-22", 183)   # Table 3-3 China
-T163 = lambda: swf("16-03", 307)  # Appendix Table 16-2 Russia
-T164 = lambda: swf("16-04", 308)  # Appendix Tables 16-3/16-4
-T41 = lambda: swf("04-03 to 04-04", "203-204")
+T14a = lambda: swf("01-23", 72, "Table 1-4")   # Table 1-4, first page
+T14b = lambda: swf("01-24", 73, "Table 1-4")   # Table 1-4, continued
+T51 = lambda: swf("05-01", 212, "Table 5-1")   # Table 5-1 debris
+T24 = lambda: swf("02-21", 134, "Table 2-4")   # Table 2-4 Nudol
+T33 = lambda: swf("03-22", 183, "Table 3-3")   # Table 3-3 China
+T163 = lambda: swf("16-03", 307, "Table 16-2")  # Appendix Table 16-2 Russia
+T164 = lambda: swf("16-04", 308, "Table 16-3")  # Appendix Table 16-3 (China)
 
 K = [
     k("us-1959-bold-orion", "1959-10-13", "United States", "Bold Orion", "Explorer 6",
-      "flyby", 200, "apogee", notes="SWF: passed within kill radius. Air-launched from B-47.",
+      "flyby", 200, "apogee", notes="SWF Table 1-4: \"Success (passed within kill radius)\" alongside \"Unknown results due to loss of telemetry\"; launch site listed as Unknown.",
       src=T14a()),
     k("us-1962-starfish-prime", "1962-07-09", "United States", "Thor / W49 (Operation Fishbowl)",
       "None (high-altitude nuclear test)", "nuclear", 400, "detonation", conf="medium",
-      notes="1.4 Mt at ~400 km over Johnston Island. Created artificial radiation belt that "
-            "damaged several satellites. Not in SWF DA-ASAT tables; included only as the nuclear "
-            "marker the legal band references.",
+      notes="1.4 Mt at ~250 miles (~400 km) near Johnston Island. SWF p. 12-05 (PDF p. 269): such "
+            "tests are known to have damaged or destroyed satellites in orbit. Not in SWF DA-ASAT tables; "
+            "included only as the nuclear marker the legal band references.",
       scene="starfish",
       src=dict(source="DOE/NV-209 Rev. 16 (2015)",
                source_url="https://nnss.gov/wp-content/uploads/2023/08/DOE_NV-209_Rev16.pdf",
-               pin="Operation Dominic/Fishbowl entry, 9 July 1962")),
+               pin="Table of U.S. nuclear tests, Starfish Prime row (Operation Fishbowl, 07/09/1962, \"High altitude - 250 miles\", 1.4 Mt), PDF pp. 41-42; secondary: SWF p. 12-05 (PDF p. 269)")),
     k("us-1962-nike-zeus-wsmr", "1962-12-17", "United States", "Program 505 (Nike Zeus)", "None",
       "non_destructive", 160, "apogee", notes="Reached designated point in space.", src=T14a()),
     k("us-1963-nike-zeus-feb", "1963-02-15", "United States", "Program 505 (Nike Zeus)", "None",
@@ -59,7 +67,7 @@ K = [
     k("us-1964-nike-zeus-jan", "1964-01-04", "United States", "Program 505 (Nike Zeus)", "None (simulated target)",
       "non_destructive", 146, "apogee", notes="Successful intercept of simulated satellite target.", src=T14a()),
     k("us-1964-p437-feb", "1964-02-14", "United States", "Program 437 (Thor)", "Transit 2A rocket body",
-      "non_destructive", 1000, "apogee", notes="Passed within kill radius (nuclear-armed system; test unarmed).", src=T14a()),
+      "non_destructive", 1000, "apogee", notes="Passed within kill radius. SWF p. 01-21 (PDF p. 70): Program 437 was designed around a 1.4 Mt W49 warhead.", src=T14a()),
     k("us-1964-p437-mar", "1964-03-01", "United States", "Program 437 (Thor)", "Unknown",
       "non_destructive", 674, "apogee", notes="Backup missile passed within kill radius.", src=T14a()),
     k("us-1964-p437-apr", "1964-04-21", "United States", "Program 437 (Thor)", "Unknown",
@@ -82,26 +90,37 @@ K = [
       "non_destructive", 1000, "apogee", notes="Missile test, no target.", src=T14b()),
     k("us-1985-solwind", "1985-09-13", "United States", "ASM-135 (F-15)", "Solwind P78-1",
       "destructive", 530, "intercept", frag=285, orbit=0,
-      notes="Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; Table 1-4 gives 555 km "
-            "(apogee column). Builder uses Table 5-1 for all intercept altitudes.",
-      scene="solwind", src=T51()),
+      notes="Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and "
+            "Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept "
+            "altitudes. Tracked-debris count (285) is from Table 5-1; the zero 'still on orbit' figure "
+            "could not be isolated from the jumbled Table 5-1 text extraction and reflects the debris having decayed.",
+      conflicts=["Intercept altitude: 530 km (Table 5-1, p. 05-01) vs 555 km (prose p. 01-22; Table 1-4 p. 01-24)"],
+      scene="solwind", src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-22 (PDF p. 71); Table 1-4, p. 01-24 (PDF p. 73)")),
     k("us-2008-burnt-frost", "2008-02-20", "United States", "SM-3 (USS Lake Erie)", "USA-193",
       "destructive", 220, "intercept", frag=175, orbit=0,
       notes="Missile-defense interceptor (SM-3) used against a satellite: the case shows the "
             "ballistic missile defense / ASAT overlap. Date is 20 Feb 2008 US Eastern time "
-            "(21 Feb UTC). Table 1-4 lists 2,700 km in its apogee column (interceptor reach, "
-            "not intercept); Table 5-1 intercept altitude used.",
-      scene="burnt-frost", src=T51()),
+            "(21 Feb UTC). Debris did not re-enter within weeks: SWF p. 01-24 (PDF p. 73) says the 175 "
+            "trackable pieces 'took about 20 months to de-orbit entirely' (Table 5-1 lifespan column: 1.7 years). "
+            "Altitude conflict inside SWF: the prose on p. 01-24 says 240 km, while Table 5-1 (p. 05-01) "
+            "says 220 km; Table 1-4 (p. 01-24) lists 2,700 km in its apogee column (interceptor reach, "
+            "not intercept). Table 5-1 (220 km) used, per the builder rule.",
+      conflicts=["Intercept altitude: 220 km (Table 5-1, p. 05-01) vs 240 km (prose p. 01-24) vs 2,700 km apogee column (Table 1-4, p. 01-24)"],
+      scene="burnt-frost",
+      src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-24 (PDF p. 73); Table 1-4, p. 01-24 (PDF p. 73)")),
     k("cn-2005-sc19", "2005-07-05", "China", "SC-19", "None known", "non_destructive", None, "apogee",
-      conf="medium", notes="Likely rocket test. Altitude not reported. SWF Table 3-3 dates it 7 July; "
-            "Appendix Table 16-3 dates it 5 July. Appendix date used.", src=T164()),
+      conf="medium", notes="Likely rocket test. Altitude not reported. SWF Table 3-3 (p. 03-22) dates it 7 July; "
+            "Appendix Table 16-3 (p. 16-04) dates it 5 July. Appendix date used.",
+      conflicts=["Date: 5 July (Table 16-3, p. 16-04) vs 7 July (Table 3-3, p. 03-22)"], src=T164()),
     k("cn-2006-sc19", "2006-02-06", "China", "SC-19", "None known", "non_destructive", None, "apogee",
-      conf="medium", notes="Likely near-miss of orbital target. Altitude not reported.", src=T164()),
+      conf="medium", notes="Likely near-miss of orbital target. Altitude not reported. Same date in Table 3-3 "
+            "(p. 03-22, PDF p. 183).", src=T164()),
     k("cn-2007-fy1c", "2007-01-11", "China", "SC-19", "Fengyun-1C", "destructive", 880, "intercept",
       frag=3532, orbit=2351,
       notes="Largest debris-generating event on record. Conflict inside SWF 2026: Table 5-1 gives "
             "880 km and 3,532 tracked pieces; Table 3-3 gives 865 km apogee and 3,533 pieces. "
             "Table 5-1 used for consistency with the other intercepts.",
+      conflicts=["Altitude/pieces: 880 km, 3,532 (Table 5-1, p. 05-01) vs 865 km apogee, 3,533 (Table 3-3, p. 03-22)"],
       scene="fengyun", src=T51()),
     k("cn-2010-midcourse", "2010-01-11", "China", "SC-19", "CSS-X-11 ballistic missile", "midcourse_intercept",
       250, "intercept", notes="Destruction of suborbital target; no orbital debris.", src=T33()),
@@ -110,13 +129,15 @@ K = [
       notes="Suborbital intercept; altitude not reported.", src=T33()),
     k("cn-2013-dn2", "2013-05-13", "China", "Possible DN-2", "None known", "apogee_only", 30000, "apogee",
       conf="medium",
-      notes="Not an intercept. Chinese Academy of Sciences said 10,000 km; US officials said 'nearly "
-            "to GEO'; technical analysis cited by SWF puts apogee at least ~30,000 km. Builder "
-            "plots ~30,000 km (SWF Table 3-3 value).",
-      scene="dn2", src=swf("03-20, 03-22", "181, 183")),
+      notes="Not an intercept. Chinese Academy of Sciences said 10,000 km; the US military said 'nearly "
+            "to GEO' (36,000 km); technical analysis cited by SWF (p. 03-20) puts apogee at least ~30,000 km. "
+            "Builder plots ~30,000 km (SWF Table 3-3 value).",
+      conflicts=["Apogee: 10,000 km (CAS) vs ~36,000 km (US military) vs at least ~30,000 km (analysis cited by SWF)"],
+      scene="dn2", src=swfx("Prose p. 03-20 (PDF p. 181); Table 3-3, p. 03-22 (PDF p. 183)")),
     k("cn-2014-dn2", "2014-07-23", "China", "Possible DN-2", "Likely ballistic missile", "non_destructive",
       None, "apogee", conf="medium",
-      notes="Likely intercept test; US State Department called it a non-destructive ASAT test.",
+      notes="SWF Table 3-3 lists it as a likely intercept test with a likely ballistic-missile target. "
+            "Type 'non_destructive' is the builder's coding: SWF reports no debris.",
       src=T33()),
     k("cn-2015-dn3", "2015-10-30", "China", "Possible DN-3", "None known", "non_destructive", None, "apogee",
       conf="medium", notes="Likely rocket test.", src=T33()),
@@ -125,16 +146,21 @@ K = [
     k("cn-2018-dn3", "2018-02-05", "China", "Possible DN-3", "CSS-5 ballistic missile", "midcourse_intercept",
       None, "intercept", conf="medium", notes="Likely intercept test.", src=T33()),
     k("cn-2021-dn3", "2021-02-04", "China", "Possible DN-3", "Likely ballistic missile", "midcourse_intercept",
-      None, "intercept", conf="medium", notes="Announced by China as a land-based midcourse interception test.", src=T33()),
-    k("cn-2022-dn3", "2022-06-19", "China", "Possible DN-3", "Likely ballistic missile", "midcourse_intercept",
+      None, "intercept", conf="medium", notes="Announced by China as a 'land-based midcourse missile intercept technology test' (SWF p. 03-21, PDF p. 182).", src=swfx("Table 3-3, p. 03-22 (PDF p. 183); prose p. 03-21 (PDF p. 182)")),
+    k("cn-2022-dn3", "2022-06-21", "China", "Possible DN-3", "Likely ballistic missile", "midcourse_intercept",
       None, "intercept", conf="medium",
-      notes="SWF Table 3-3 gives 19 June 2022; Appendix Table 16-3 gives 21 June 2022. Table 3-3 used.",
-      src=T33()),
+      notes="SWF Table 3-3 gives 19 June 2022; the prose (p. 03-21) and Appendix Table 16-3 (p. 16-04) give 21 June "
+            "2022, the date of China's announcement. Prose/appendix date used.",
+      conflicts=["Date: 21 June (prose p. 03-21; Table 16-3 p. 16-04) vs 19 June (Table 3-3, p. 03-22)"],
+      src=swfx("Prose p. 03-21 (PDF p. 182); Table 16-3, p. 16-04 (PDF p. 308); Table 3-3, p. 03-22 (PDF p. 183)")),
     k("cn-2023-dn3", "2023-04-14", "China", "Possible DN-3", "Likely ballistic missile", "midcourse_intercept",
-      None, "intercept", conf="medium", notes="Likely intercept test.", src=T33()),
+      None, "intercept", conf="medium",
+      notes="Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and "
+            "15 April 2023. 14 April used.", src=T33()),
     k("ru-2015-nudol", "2015-11-18", "Russia", "Nudol", "None", "non_destructive", 200, "apogee", conf="low",
       notes="First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 "
-            "dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015.", src=T24()),
+            "(p. 16-03) dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015 (used).",
+      conflicts=["Date: 18 Nov 2015 (Table 2-4, p. 02-21) vs 18 Oct 2015 (Table 16-2, p. 16-03)"], src=T24()),
     k("ru-2016-nudol-may", "2016-05-25", "Russia", "Nudol", "None", "non_destructive", 100, "apogee", conf="low",
       notes="Likely rocket test. SWF marks the 100 km apogee with '?'.", src=T24()),
     k("ru-2016-nudol-dec", "2016-12-16", "Russia", "Nudol", "None", "non_destructive", 100, "apogee", conf="low",
@@ -142,22 +168,25 @@ K = [
     k("ru-2018-nudol-mar", "2018-03-26", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
       conf="medium", notes="First test from a mobile launcher.", src=T24()),
     k("ru-2018-nudol-dec", "2018-12-23", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
-      conf="medium", notes="Likely KKV; no intercept.", src=T24()),
+      conf="medium", notes="Payload column: Likely KKV. Appendix Table 16-2 (p. 16-03): potential KKV, no intercept.", src=T24()),
     k("ru-2020-nudol-apr", "2020-04-15", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
-      conf="medium", notes="Successful, nothing hit. US Space Command publicly criticized the test.", src=T24()),
+      conf="medium", notes="Successful, nothing hit. US Space Command issued a public statement on the test (SWF p. 02-20, fn. 148).", src=T24()),
     k("ru-2020-nudol-dec", "2020-12-16", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
-      conf="medium", notes="Successful, nothing hit.", src=T24()),
+      conf="medium", notes="Successful, nothing hit. US Space Command issued a public statement (SWF p. 02-20, fn. 149).",
+      src=T24()),
     k("in-2019-shakti", "2019-03-27", "India", "PDV Mk-II (Mission Shakti)", "Microsat-R", "destructive",
       300, "intercept", frag=130, orbit=0,
-      notes="Indian officials said debris would decay within 45 days; some pieces were tracked "
-            "above the ISS and lasted longer. Seed '~400 estimated' pieces not found in SWF; not used.",
-      scene="shakti", src=T51()),
+      notes="Indian officials said most debris would re-enter within days and all of it within 45 days at most "
+            "(SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, "
+            "and some pieces were thrown up to 2,250 km. Seed '~400 estimated' pieces not found in SWF; not used.",
+      scene="shakti",
+      src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 04-04 (PDF p. 204)")),
     k("ru-2021-cosmos1408", "2021-11-15", "Russia", "Nudol (PL-19)", "Cosmos 1408", "destructive",
       470, "intercept", frag=1807, orbit=5,
       notes="ISS crew sheltered in docked vehicles. SWF text: more than 1,800 cataloged pieces, 5 still "
-            "in orbit as of February 2026. Latest destructive DA-ASAT test in SWF 2026 (no destructive "
-            "test through the report's cutoff).",
-      scene="cosmos1408", src=T51()),
+            "in orbit as of February 2026 (p. 02-21). Last destructive DA-ASAT test listed in SWF 2026 "
+            "(Table 5-1); the report lists no later destructive test.",
+      scene="cosmos1408", src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 02-21 (PDF p. 134)")),
 ]
 
 # ---------------------------------------------------------------- non-kinetic
@@ -179,16 +208,18 @@ NK = [
        "MSTI-3 (retired USAF experimental satellite)", "ISR_LEO", False,
        "Test of MIRACL chemical laser (and a low-power laser) against an orbiting satellite; detailed "
        "results not public. Secretary of Defense Cohen called it consistent with US policy.",
-       "high", swf("01-35", 84),
-       notes="Exact day (17 Oct) from contemporaneous DoD reporting; SWF gives October 1997.",
+       "high", swf("01-35", 84, "MIRACL passage"),
+       notes="SWF gives October 1997 only. The exact day (17 Oct) is from FlightGlobal (Oct. 1997) and Arms Control "
+             "Association reporting. The laser was fired at White Sands Missile Range, NM (SWF fn. 259 cites the WSMR "
+             "High Energy Laser Systems Test Facility); MSTI-3 was a USAF experimental satellite that had completed its mission.",
        scene="laser"),
     nk("ir-2003-telstar12", "2003-01-01", "2006-12-31", "Iran (jamming from Cuba; later Bulgaria, Libya)",
        "ew_uplink", "alleged", "Telstar 12 Persian-language broadcasts", "GEO_comms", False,
        "Uplink jamming of Persian-language programming originating in California.",
-       "medium", swf("09-05", 247),
-       notes="SWF: Iran 'has been accused'; jamming from Havana began 2003, similar jamming from "
-             "Bulgaria and Libya 2005/2006. Attribution kept at 'alleged'. Day/month not given; "
-             "span uses whole years."),
+       "medium", swf("09-05", 247, "Iranian EW passage"),
+       notes="SWF: Iran 'has been accused'; the Telstar 12 jamming from Havana 'started in 2003' and similar jamming "
+             "occurred from Bulgaria and Libya in 2005/2006. Attribution kept at 'alleged'. Day/month not given; "
+             "span uses whole years (2006 end year = last year SWF dates for these third-country sites)."),
     nk("iq-2003-gps", "2003-03-20", "2003-03-25", "Iraq", "gnss_jamming", "official_government",
        "GPS receivers of coalition munitions and aircraft", "GNSS_MEO", True,
        "Russian-made GPS jammers fielded against coalition forces; US officials reported destroying "
@@ -202,71 +233,82 @@ NK = [
        "US optical imaging satellites", "ISR_LEO", False,
        "DefenseNews cited anonymous US officials claiming lasers 'dazzled' US satellites; later "
        "reporting suggested only illumination; senior officials said no satellite was materially damaged.",
-       "low", swf("03-26", 187),
+       "low", swf("03-26", 187, "Chinese DE section, text at fn. 207"),
        notes="Point event (year only). Anonymous-source press report; kept low confidence and 'alleged'."),
     nk("ir-2009-eutelsat", "2009-01-01", "2012-12-31", "Iran", "ew_uplink", "multi_government",
        "Eutelsat satellites carrying BBC Persian and Voice of America", "GEO_comms", False,
-       "Uplink jamming of Persian-language broadcasts. In 2010 the ITU, acting on Eutelsat complaints, "
-       "asked Iran to help stop jamming originating from its territory.",
-       "medium", swf("09-06", 248),
+       "Uplink jamming of Persian-language broadcasts. In 2010 the ITU, acting on two Eutelsat complaints, "
+       "ordered Iran (SWF's word) to assist in stopping jamming originating from its territory.",
+       "medium", swf("09-06", 248, "Iranian EW passage, text above fn. 58"),
        notes="Attribution coded 'multi_government' because an intergovernmental body (ITU) located the "
-             "source in Iranian territory; ITU did not find the Iranian state responsible. Start/end "
-             "years follow the brief's seed and are not dated precisely in SWF (it cites 2010 ITU action "
-             "and 2022 renewed jamming)."),
-    nk("kp-2010-gps", "2010-08-01", None, "North Korea", "gnss_jamming", "official_government",
+             "source in Iranian territory; ITU did not find the Iranian state responsible. SWF dates only the "
+             "2010 ITU action and Eutelsat's Oct. 2022 report of renewed jamming from Iran; the 2009 start follows "
+             "Eutelsat's appeals from May 2009 (Eutelsat/HRW) and the 2012 end is the last year of the first "
+             "documented phase, so the span understates the 2022 episode."),
+    nk("kp-2010-gps", "2010-08-23", None, "North Korea", "gnss_jamming", "official_government",
        "GPS receivers of aircraft, ships and vehicles in South Korea", "GNSS_MEO", False,
        "Repeated downlink (terrestrial) GPS jamming near the inter-Korean border; South Korea raised it "
        "with the ITU, ICAO and IMO; further interference reported in November 2024.",
-       "high", swf("12-05 to 12-06", "269-270"),
-       notes="Terrestrial jamming of receivers, not an attack on GPS satellites (SWF 12-05 says so "
-             "expressly). Campaign span, not individual incidents. Start month from South Korean "
-             "government reporting of the 2010 campaign; treated as ongoing."),
+       "high", swf("12-05 to 12-06", "269-270", "Section 12.3"),
+       notes="Terrestrial jamming of receivers, not an attack on GPS satellites (SWF p. 12-05: 'no impact on the "
+             "GPS satellites themselves'). Campaign span, not individual incidents. SWF does not date the first "
+             "episode; start is the first publicly known incident, 23 Aug 2010 (GPS World, Inside GNSS). Treated as "
+             "ongoing (SWF p. 12-06: Nov. 2024 interference; Oct. 2025 ICAO finding)."),
     nk("ru-2014-ukraine", "2014-03-01", None, "Russia", "gnss_spoofing", "researcher_osint",
        "GNSS receivers in Ukraine, Crimea and the Black Sea", "GNSS_MEO", True,
        "Jamming and spoofing of GNSS in occupied territory and conflict zones; C4ADS logged nearly "
        "10,000 suspected spoofing incidents across Russia, Crimea and Syria.",
-       "high", swf("02-26 to 02-28", "139-141"),
-       notes="Attribution level follows the C4ADS open-source report SWF relies on; governments have also "
-             "blamed Russia, but the source for the span is OSINT. Covers jamming and spoofing."),
+       "high", swf("02-27 to 02-28", "140-141", "GNSS passages, C4ADS report at fn. 220"),
+       notes="Attribution level follows the C4ADS open-source report SWF relies on (p. 02-28: nearly 10,000 suspected "
+             "incidents in Russia, Crimea and Syria); governments have also blamed Russia, but the source for the span "
+             "is OSINT. Covers jamming and spoofing. SWF's cited pages do not date the start: the March 2014 start is "
+             "from external reporting that Russia has jammed GPS in eastern Ukraine since the 2014 Crimea conflict "
+             "(Breaking Defense; Foreign Policy, Oct. 2015)."),
     nk("ru-2016-syria", "2016-02-01", None, "Russia", "gnss_jamming", "researcher_osint",
        "GNSS receivers in and around Syria and the eastern Mediterranean", "GNSS_MEO", True,
        "GNSS spoofing/jamming around Russian bases in Syria; reported effects on aircraft in the region.",
-       "medium", swf("02-28", 141),
-       notes="Start date is the earliest period in the C4ADS dataset as summarized by SWF (2016); the seed "
-             "said 2017. Builder uses 2016 at medium confidence."),
+       "medium", swf("02-28", 141, "C4ADS passage"),
+       notes="SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The seed said 2017; builder uses 2016 "
+             "at medium confidence."),
     nk("ru-2018-trident", "2018-10-25", "2018-11-07", "Russia", "gnss_jamming", "official_government",
        "GPS receivers in northern Norway and Finland during NATO Trident Juncture", "GNSS_MEO", False,
        "GPS disruption affecting civil aviation during the exercise; Norway said in March 2019 it had "
        "proof of Russian interference.",
-       "high", swf("02-28", 141),
-       notes="Exercise dates 25 Oct - 7 Nov 2018 (NATO). Norway and Finland both raised it; coded "
-             "'official_government' (each state spoke for itself)."),
+       "high", swf("02-28", 141, "text above fn. 217-218"),
+       notes="SWF does not name the exercise or give dates: it says (Nov. 2018) media reported jamming in Norway "
+             "and Finland during a major NATO exercise, and that Norway's government claimed in March 2019 it had "
+             "proof of Russian interference. Dates 25 Oct - 7 Nov 2018 are the Trident Juncture exercise window "
+             "(NATO; Norway's ministry put the jamming at 16 Oct - 7 Nov). Coded 'official_government' on Norway's "
+             "claim; Finland only expressed concern (external reporting)."),
     nk("ru-2018-peresvet", "2018-03-01", "2018-03-01", "Russia", "directed_energy", "official_government",
        "Satellites overflying Russian mobile ICBM units (stated purpose)", "ISR_LEO", False,
        "Peresvet mobile laser announced by President Putin; later described as dazzling satellites. "
        "Deployment status announced, not demonstrated against a satellite.",
-       "medium", swf("02-35", 148),
-       notes="Self-declared by the Russian government; no public evidence of use against a satellite.",
+       "medium", swf("02-36", 149, "Peresvet section"),
+       notes="Named in Putin's 1 March 2018 speech (SWF p. 02-36); SWF describes it as appearing designed to protect "
+             "mobile ICBMs from being imaged. Self-declared by the Russian government; no public evidence of use "
+             "against a satellite.",
        scene="laser"),
     nk("ru-2022-viasat", "2022-02-24", "2022-02-24", "Russia", "cyber", "multi_government",
        "Viasat KA-SAT user terminals (modems) and management network", "ground_segment", True,
-       "AcidRain wiper disabled tens of thousands of modems in Ukraine and Europe about an hour before "
-       "the invasion; satellite itself unaffected.",
-       "high", swf("15-06 to 15-07", "292-293"),
-       notes="Publicly attributed to the GRU by the United States, United Kingdom and European Union in "
-             "May 2022.",
+       "AcidRain wiper disabled tens of thousands of modems in Ukraine and Europe in the first hours of the "
+       "invasion; satellite itself unaffected.",
+       "high", swf("15-06 to 15-07", "292-293", "Viasat case study"),
+       notes="Timing: SWF p. 15-06 says 'within hours' of Russian troops crossing the border; p. 15-07 adds that "
+             "independent analysts noted it began one hour before the first troops crossed. Publicly attributed to "
+             "the GRU by the United States, United Kingdom and European Union in May 2022 (p. 15-07).",
        scene="viasat"),
     nk("ru-2022-starlink", "2022-03-01", None, "Russia", "ew_downlink", "alleged",
        "Starlink user terminals in Ukraine", "LEO_constellation", True,
-       "Jamming claimed by SpaceX (March 2022); Ukrainian official attributed May 2024 outages to Russian "
-       "EW testing.",
-       "medium", swf("02-32; 15-07", "145, 293"),
+       "SpaceX CEO Elon Musk said in March 2022 that Russia had jammed a Starlink terminal; a Ukrainian "
+       "official attributed May 2024 outages to Russian EW testing.",
+       "medium", swf("02-32", "145", "Starlink passage, fns. 259-261"),
        notes="SWF notes no independent validation of the type or magnitude of the jamming; coded 'alleged'."),
     nk("ru-2023-baltic", "2023-12-01", None, "Russia", "gnss_jamming", "multi_government",
        "GNSS receivers of civil aircraft and ships over the Baltic region", "GNSS_MEO", True,
        "Widespread jamming and spoofing affecting Finland, Sweden, Poland and the Baltic states, often "
        "traced to Kaliningrad and St. Petersburg; Finnair paused Tartu flights (Apr 2024).",
-       "high", swf("02-29 to 02-30", "142-143"),
+       "high", swf("02-29 to 02-30", "142-143", "Baltic GNSS passages"),
        notes="SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-"
              "government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). "
              "Terrestrial jamming of receivers, not attacks on satellites.",
@@ -275,17 +317,21 @@ NK = [
        "official_government", "GNSS receivers of aircraft over Israel and neighboring states", "GNSS_MEO", True,
        "Extensive jamming/spoofing in the Eastern Mediterranean and Middle East affecting air traffic "
        "management; Israel's own submission to the ITU RRB (Nov 2025) addressed interference cases.",
-       "medium", swf("10-02; 09-06", "255, 248"),
-       notes="Actor set is mixed. Israel has acknowledged defensive GNSS disruption; spoofing near Iran "
-             "was reported by aviation-security sources (AIN, Sept 2023). Coded at the level SWF supports "
-             "for Israel; other actors not attributed here."),
+       "medium", swf("10-01 to 10-02", "254-255", "Section 10.3"),
+       notes="Actor set is mixed: SWF p. 10-02 says it is hard to tell from open sources whether Israel, Hamas or "
+             "others conduct the EW. The IDF stated publicly it was jamming GPS 'in a proactive manner for various "
+             "operational needs'; Lebanon blamed Israel (Mar. 2024). Coded at the level SWF supports for Israel; other "
+             "actors not attributed. SWF (p. 10-01) also reports interference before the row's start, in spring 2023 "
+             "(20% of regional aircraft in April 2023); the row starts at the Oct. 2023 escalation."),
     nk("ru-2024-eu-sats", "2024-03-01", None, "Russia (origin locations cited by ITU RRB)", "ew_uplink",
        "official_government", "Swedish and French broadcasting satellites", "GEO_comms", True,
        "Hijacked/jammed broadcasts over Ukrainian channels; European states complained; RRB (July 2024) "
        "said interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka.",
-       "high", swf("02-32", 145),
-       notes="Attribution rests on complaining governments (Sweden, France and others); the RRB described "
-             "origin locations but did not make a state-responsibility finding."),
+       "high", swf("02-32", 145, "ITU RRB passage, fn. 272"),
+       notes="SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the "
+             "interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It "
+             "described origin locations but made no state-responsibility finding; coded 'official_government' "
+             "as in the original ledger."),
 ]
 
 # ---------------------------------------------------------------- legal
@@ -318,22 +364,25 @@ L = [
        "(bilateral; US withdrew 2002).",
        "Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, "
        "May 26, 1972, 23 U.S.T. 3435.",
-       "https://2009-2017.state.gov/t/avc/trty/101888.htm"),
+       "https://www.armscontrol.org/factsheets/anti-ballistic-missile-abm-treaty-glance"),
     lg("paros-1981", "1981-12-09", None, "negotiation_span", "PAROS (UNGA agenda item)",
        "First PAROS resolutions adopted Dec 9, 1981 (UNGA 36/97 C; 36/99). CD Ad Hoc Committee on "
        "PAROS met 1985-94. No treaty has resulted.",
        "G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981).",
-       "https://digitallibrary.un.org/record/28200"),
-    lg("cd-paros-committee", "1985-01-01", "1994-12-31", "negotiation_span", "CD Ad Hoc Committee on PAROS",
-       "Conference on Disarmament committee re-established annually 1985-1994; mandate lapsed.",
-       "Conference on Disarmament, Ad Hoc Committee on the Prevention of an Arms Race in Outer Space (1985-1994).",
-       "https://disarmament.unoda.org/topics/outerspace/paros/"),
+       "https://www.unoosa.org/oosa/oosadoc/data/resolutions/1981/general_assembly_36th_session/res_3697c.html"),
+    lg("cd-paros-committee", "1985-03-29", "1994-08-23", "negotiation_span", "CD Ad Hoc Committee on PAROS",
+       "Established by the Conference on Disarmament on Mar. 29, 1985; met annually 1985-1994; final meeting Aug. 23, "
+       "1994; never re-established.",
+       "Conference on Disarmament, Report of the Ad Hoc Committee on Prevention of an Arms Race in Outer Space, "
+       "CD/1271 (Aug. 24, 1994); see UNIDIR, The Conference on Disarmament and the Prevention of an Arms Race in "
+       "Outer Space.",
+       "https://unidir.org/files/publication/pdfs/the-conference-on-disarmament-and-the-prevention-of-an-arms-race-in-outer-space-370.pdf"),
     lg("itu-1992", "1992-12-22", None, "treaty", "ITU Constitution Arts. 45 & 48",
        "Adopted Geneva 1992; in force July 1, 1994. Art. 45 prohibits harmful interference; Art. 48 "
-       "gives military radio installations 'complete freedom' (the core gap for jamming). The Radio "
+       "lets Members 'retain their entire freedom' regarding military radio installations (the core gap for jamming). The Radio "
        "Regulations sit beneath the Constitution.",
        "Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, "
-       "1825 U.N.T.S. 331.",
+       "1825 U.N.T.S. 331, 361-62.",
        "https://www.itu.int/en/council/Documents/basic-texts/Constitution-E.pdf",
        scene="gnss", related=["ru-2023-baltic", "ru-2024-eu-sats"]),
     lg("tallinn-2017", "2017-02-01", None, "unilateral", "Tallinn Manual 2.0 (soft law)",
@@ -344,11 +393,12 @@ L = [
     lg("ppwt-2008", "2008-02-12", None, "negotiation_span", "PPWT draft (Russia-China)",
        "Draft treaty on preventing placement of weapons in outer space, tabled at the CD. Does not "
        "cover ground-based (direct-ascent) ASATs.",
-       "Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008).",
-       "https://digitallibrary.un.org/record/622364"),
+       "Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) "
+       "(tabled at the CD Feb. 12, 2008).",
+       "https://digitallibrary.un.org/record/633470"),
     lg("ppwt-2014", "2014-06-10", None, "negotiation_span", "PPWT updated draft",
        "Revised draft; still silent on ground-based ASATs and testing.",
-       "Updated Draft PPWT, CD/1985 (June 12, 2014).",
+       "Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014).",
        "https://digitallibrary.un.org/record/774287"),
     lg("unga-75-36", "2020-12-07", None, "resolution", "UNGA 75/36",
        "Reducing space threats through norms, rules and principles of responsible behaviour.",
@@ -358,13 +408,13 @@ L = [
        "G.A. Res. 76/231 (Dec. 24, 2021) (establishing OEWG, 2022-2023).",
        "https://meetings.unoda.org/open-ended-working-group-on-reducing-space-threats-2022"),
     lg("us-moratorium-2022", "2022-04-18", None, "unilateral", "US DA-ASAT test moratorium",
-       "US commits not to conduct destructive direct-ascent ASAT missile tests. Followed by Canada, "
-       "New Zealand, Japan, Germany, UK, France and others; SWF counts 38 states in total.",
+       "US commits not to conduct destructive direct-ascent ASAT missile tests. Other states "
+       "followed; SWF counts 38 countries in total.",
        "The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space "
        "(Apr. 18, 2022); SWF 2026, p. 01-50.",
        "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2022/04/18/fact-sheet-vice-president-harris-advances-national-security-norms-in-space/",
        scene="cosmos1408", related=["ru-2021-cosmos1408"]),
-    lg("milamos-2022", "2022-01-01", None, "unilateral", "McGill (MILAMOS) Manual Vol. I (soft law)",
+    lg("milamos-2022", "2022-07-01", None, "unilateral", "McGill (MILAMOS) Manual Vol. I (soft law)",
        "Expert manual on international law applicable to military uses of outer space. Not binding law.",
        "McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules "
        "(Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022).",
@@ -372,8 +422,8 @@ L = [
     lg("unga-77-41", "2022-12-07", None, "resolution", "UNGA 77/41 (DA-ASAT tests)",
        "Calls on states to commit not to conduct destructive direct-ascent ASAT missile tests. "
        "Adopted 155-9-9.",
-       "G.A. Res. 77/41 (Dec. 7, 2022).", "https://digitallibrary.un.org/record/3996915",
-       related=["ru-2021-cosmos1408"]),
+       "G.A. Res. 77/41 (Dec. 7, 2022).", "https://digitallibrary.un.org/record/3997622",
+       related=["ru-2021-cosmos1408", "in-2019-shakti"]),
     lg("unsc-veto-2024", "2024-04-24", None, "veto", "Russian veto: nuclear weapons in orbit",
        "Russia vetoed a US-Japan draft reaffirming OST Art. IV (no nuclear weapons in orbit). Vote "
        "13-1-1 (China abstained). The draft did not concern DA-ASAT testing.",
@@ -381,25 +431,29 @@ L = [
        "https://press.un.org/en/2024/sc15678.doc.htm"),
     lg("woomera-2024", "2024-01-01", None, "unilateral", "Woomera Manual (soft law)",
        "Expert manual on international law of military space operations. Not binding law.",
-       "The Woomera Manual on the International Law of Military Space Activities and Operations "
-       "(Jack Beard et al. eds., Oxford Univ. Press 2024).",
-       "https://law.adelaide.edu.au/woomera/", soft=True),
+       "The Woomera Manual on the International Law of Military Space Operations "
+       "(Jack Beard & Dale Stephens eds., Oxford Univ. Press 2024).",
+       "https://global.oup.com/academic/product/the-woomera-manual-on-the-international-law-of-military-space-operations-9780192870667",
+       soft=True),
     lg("itu-rrb-2024", "2024-07-01", None, "resolution", "ITU RRB: 'grave concern' (Sweden, France)",
        "Radio Regulations Board expressed grave concern about intentional harmful interference to "
-       "Swedish and French satellites that seemed to originate from earth stations in Russia.",
-       "ITU Radio Regulations Board, 96th meeting (July 2024), summary of decisions; SWF 2026, p. 02-32.",
+       "Swedish and French satellites that seemed to originate from earth stations near Moscow, Kaliningrad and Pavlovka.",
+       "ITU Radio Regulations Board, 96th Meeting, Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145).",
        "https://www.itu.int/en/ITU-R/conferences/RRB/Pages/default.aspx",
        scene="gnss", related=["ru-2024-eu-sats"]),
-    lg("icao-2025", "2025-10-01", None, "resolution", "ICAO: Russia's GNSS interference breaches Chicago Convention",
-       "ICAO found GNSS interference originating in Russia infringed the 1944 Chicago Convention, "
-       "condemned it, and called on Russia to meet its obligations.",
-       "ICAO action on GNSS radio frequency interference (Oct. 2025), as reported in SWF 2026, p. 02-30.",
-       SWF_URL, scene="gnss", related=["ru-2023-baltic"]),
-    lg("itu-rrb-2025", "2025-11-01", None, "resolution", "ITU RRB 100th meeting: urges Russia to cease RNSS interference",
+    lg("icao-2025", "2025-10-03", None, "resolution", "ICAO: GNSS interference breaches Chicago Convention",
+       "The ICAO Assembly determined that GNSS interference originating in Russia (and in North Korea) infringed "
+       "the 1944 Chicago Convention, condemned it, and called on both to fulfill their obligations.",
+       "ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian "
+       "Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06.",
+       "https://www.icao.int/news/icao-assembly-condemns-gnss-radio-frequency-interference-originating-dprk-and-russian",
+       scene="gnss", related=["ru-2023-baltic", "kp-2010-gps"]),
+    lg("itu-rrb-2025", "2025-11-10", None, "resolution", "ITU RRB 100th meeting: urges Russia to cease RNSS interference",
        "Board again urged Russia to immediately cease harmful interference to radionavigation-satellite "
        "service receivers in Estonia, Finland, Latvia and Lithuania.",
-       "ITU Radio Regulations Board, 100th meeting (Nov. 2025); SWF 2026, p. 02-30.",
-       "https://www.itu.int/en/ITU-R/conferences/RRB/Pages/default.aspx",
+       "ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite "
+       "Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245.",
+       "https://www.itu.int/harmful-interference-to-rnss/",
        scene="gnss", related=["ru-2023-baltic"]),
 ]
 
@@ -461,9 +515,199 @@ CAP_SOURCES = {
     "direct_ascent": "SWF 2026 Tables 1-4, 2-4, 3-3, 4-1 and Appendix 16; chapter sections x.2 (pp. 06-01 to 14-01).",
     "co_orbital": "SWF 2026 Table 2-1, Appendix Table 16-1/16-2 (Delta 180, IS, Naryad), chapter sections x.1.",
     "electronic_warfare": "SWF 2026 chapter sections x.3 (e.g., pp. 01-26, 02-25, 09-05, 10-02, 12-05); Telstar 12 (09-05).",
-    "directed_energy": "SWF 2026 chapter sections x.4 (pp. 01-33 MIRACL, 02-34 Terra-3/Peresvet, 03-26).",
-    "cyber": "SWF 2026 ch. 15, p. 15-02 (US, Russia, China, France, Iran, Israel, North Korea); Viasat p. 15-07.",
+    "directed_energy": "SWF 2026 chapter sections x.4 (pp. 01-33 to 01-35 US incl. MIRACL, 02-34 to 02-36 Russia incl. Peresvet, 03-26 China).",
+    "cyber": "SWF 2026 ch. 15, p. 15-02 (US, Russia, China, France, Iran, Israel, North Korea); Viasat pp. 15-06 to 15-07.",
 }
+
+
+LEDGER_ASOF = "2026-09-28"
+ATTR_LEGEND = [
+    ("official_government", "A government (or its military) has said so itself, or a government has publicly made the claim."),
+    ("multi_government", "Several governments or an intergovernmental body (ITU, ICAO) made or located the attribution; not a finding of state responsibility."),
+    ("researcher_osint", "Open-source researchers or a nonprofit are the source; no government attribution relied on."),
+    ("alleged", "Reported or claimed without independent validation; kept at the source's own hedge."),
+]
+CONF_LEGEND = [
+    ("high", "Date and value match SWF tables or text with no unresolved internal conflict."),
+    ("medium", "Source is hedged ('likely', 'possible'), a value is missing, or a date conflict was resolved by a builder rule."),
+    ("low", "SWF itself marks the value with '?' or the report is an anonymous-source press account."),
+]
+TYPE_LEGEND = [
+    ("destructive", "Intercept that created cataloged debris (SWF Table 5-1)."),
+    ("non_destructive", "Test with no debris reported, or no target; includes rocket-only tests."),
+    ("midcourse_intercept", "Suborbital intercept of a missile target; no orbital debris."),
+    ("apogee_only", "Launch to high altitude; not an intercept (DN-2, 2013)."),
+    ("flyby", "Pass within a kill radius of a satellite without a kill."),
+    ("nuclear", "High-altitude nuclear detonation (Starfish Prime only)."),
+]
+KIND_LEGEND = [
+    ("intercept", "Altitude of the intercept (SWF Table 5-1 for destructive tests)."),
+    ("apogee", "Maximum altitude of the missile or rocket (SWF Tables 1-4, 2-4, 3-3)."),
+    ("detonation", "Burst altitude of the nuclear test."),
+]
+
+
+def _ref(row):
+    return "[%s]" % ("SWF" if row["source"] == SWF else row["id"])
+
+
+def ledger_md(events):
+    kin = sorted([e for e in events if e["domain"] == "kinetic"], key=lambda r: r["date"])
+    nk_ = sorted([e for e in events if e["domain"] == "non_kinetic"], key=lambda r: r["start"])
+    leg = sorted(L, key=lambda r: r["start"])
+    o = []
+    a = o.append
+    a("# Counterspace Timeline Ledger")
+    a("")
+    a("The reference dataset behind the Counterspace Timeline. It lists %d kinetic events, %d non-kinetic operations and "
+      "%d legal items, each with a source and a pin to the page that supports it. Everything here is generated by "
+      "`tools/build_data.py` from the same rows that produce `data/events.json`, `data/legal.json` and "
+      "`data/capabilities.json`; edit the script, not this file." % (len(kin), len(nk_), len(leg)))
+    a("")
+    a("## As-of dates")
+    a("")
+    a("- **Ledger as of:** %s." % LEDGER_ASOF)
+    a("- **Primary source:** Secure World Foundation, *Global Counterspace Capabilities: An Open Source Assessment*, "
+      "9th ed. (April 2026). Baseline: no destructive DA-ASAT test after 15 Nov 2021.")
+    a("- **Debris counts** are as of %s (SWF Table 5-1 and Nudol text)." % DEBRIS_ASOF)
+    a("- **Not used:** CSIS *Space Threat Assessment 2026* had not been published when this was checked.")
+    a("- **Verification:** see `verification_log.md`; design decisions are in `methodology.md`.")
+    a("")
+    a("## How to read the pins")
+    a("")
+    a("SWF pins give the table or passage, the printed section-page (for example `p. 05-01`) and the PDF page index "
+      "(`PDF p. 212`). Non-SWF pins name the passage. Where a row cites several places, all are listed. "
+      "`[SWF]` links to the report PDF (URL under Sources).")
+    a("")
+    a("## Legend of fields")
+    a("")
+    a("**Kinetic rows**")
+    a("")
+    a("| field | meaning |")
+    a("|---|---|")
+    a("| id | Stable row key used by the page and by `related_events` in the legal items. |")
+    a("| date | Test date (YYYY-MM-DD), as the row note explains where sources differ. |")
+    a("| type | Test outcome class (below). |")
+    a("| alt (km) / kind | Altitude and what it measures (below). Blank when SWF reports none. |")
+    a("| cataloged / in orbit | Tracked debris pieces created / still on orbit as of %s (destructive tests only). |" % DEBRIS_ASOF)
+    a("| conf | Confidence in the row (below). |")
+    a("")
+    a("Type: " + "; ".join("`%s` = %s" % x for x in TYPE_LEGEND))
+    a("")
+    a("Altitude kind: " + "; ".join("`%s` = %s" % x for x in KIND_LEGEND))
+    a("")
+    a("**Non-kinetic rows**")
+    a("")
+    a("| field | meaning |")
+    a("|---|---|")
+    a("| start / end | Campaign or event span; `ongoing` means no end is documented. Year-only sources use 1 Jan or 31 Dec. |")
+    a("| category | `directed_energy`, `ew_uplink`, `ew_downlink`, `gnss_jamming`, `gnss_spoofing` or `cyber`. |")
+    a("| attribution | How firmly the source attributes the act (below). Never upgraded beyond the source. |")
+    a("| target regime | What the effect hit: `ISR_LEO`, `GEO_comms`, `GNSS_MEO`, `LEO_constellation` or `ground_segment`. GNSS jamming hits receivers, not satellites; the code names the signal. |")
+    a("| operational | `True` if used in a real conflict or operation, `False` if a test, a dispute or a non-conflict interference case. |")
+    a("")
+    a("Attribution levels: " + " ".join("**%s**: %s" % x for x in ATTR_LEGEND))
+    a("")
+    a("Confidence: " + " ".join("**%s**: %s" % x for x in CONF_LEGEND))
+    a("")
+    a("**Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. "
+      "Soft-law manuals are marked (soft law) and are not binding.")
+    a("")
+    # kinetic
+    a("## Kinetic events (chronological)")
+    a("")
+    a("| date | id | state | system | target | type | alt (km) | kind | cataloged | in orbit | conf | pin |")
+    a("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    refs = {}
+    for r in kin:
+        if r["source"] != SWF:
+            refs[r["id"]] = (r["source"], r["source_url"])
+        pn = r["pin"] if r["source"] == SWF else "%s: %s" % (_ref(r), r["pin"])
+        a("| {date} | {id} | {state} | {system} | {target} | {type} | {a} | {altitude_kind} | {f} | {o} | {confidence} | {pn} |".format(
+            a=r["altitude_km"] if r["altitude_km"] is not None else "-",
+            f=r["fragments_cataloged"] if r["fragments_cataloged"] is not None else "-",
+            o=r["fragments_in_orbit"] if r["fragments_in_orbit"] is not None else "-", pn=pn, **r))
+    a("")
+    a("## Non-kinetic events (by start date)")
+    a("")
+    a("| start | end | id | actor | category | attribution | target regime | operational | conf | pin |")
+    a("|---|---|---|---|---|---|---|---|---|---|")
+    for r in nk_:
+        if r["source"] != SWF:
+            refs[r["id"]] = (r["source"], r["source_url"])
+        pn = r["pin"] if r["source"] == SWF else "%s: %s" % (_ref(r), r["pin"])
+        a("| {start} | {e} | {id} | {actor} | {category} | {attribution} | {target_regime} | {operational_use} | {confidence} | {pn} |".format(
+            e=r["end"] or "ongoing", pn=pn, **r))
+    a("")
+    a("## Legal items (by start date)")
+    a("")
+    a("| start | end | id | kind | label | citation |")
+    a("|---|---|---|---|---|---|")
+    for r in leg:
+        a("| %s | %s | %s | %s%s | %s | %s |" % (
+            r["start"], r["end"] or "", r["id"], r["kind"], " (soft law)" if r["soft_law"] else "",
+            r["label"], r["citation"]))
+    a("")
+    a("## Conflicts inside the sources")
+    a("")
+    a("Where SWF (or a source) disagrees with itself, the row keeps one value under a stated rule and records the other here "
+      "and in the row's `conflicts` field. Rule: Table 5-1 for intercept altitude and debris counts; the appendix or "
+      "announcement date where two SWF places outvote a table.")
+    a("")
+    a("| id | conflict |")
+    a("|---|---|")
+    for r in events:
+        for c in r.get("conflicts", []):
+            a("| %s | %s |" % (r["id"], c))
+    a("")
+    a("## Notes by row")
+    a("")
+    for r in events:
+        if r.get("notes"):
+            a("- **%s** (%s): %s" % (r["id"], r.get("date") or r.get("start"), r["notes"]))
+    a("")
+    a("## Capability coding (Chart B)")
+    a("")
+    a("Cells give the number of states coded **D** (demonstrated) and **P** (developing or latent) per decade.")
+    a("")
+    a("Rules:")
+    a("")
+    a("1. **D** = the state has tested or used the capability. Once D, a state stays counted as D in later decades.")
+    a("2. **P** = programs, R&D or latent capability (for example, missile defense with inherent ASAT reach).")
+    a("3. The **2020s** column follows the SWF 2026 chapter sections for its 13 countries. **Earlier decades are the "
+      "builder's reconstruction** and are labeled that way on the chart; they are not SWF-assessed.")
+    a("4. Iraq is outside SWF's 13 countries, so the 2003 GNSS-jamming event is excluded from this chart.")
+    a("5. The 2020s matrix in SWF is graphical, so the D/P split could not be machine-checked; see `verification_log.md`.")
+    a("")
+    a("| category | " + " | ".join(DEC) + " |")
+    a("|---" * (len(DEC) + 1) + "|")
+    for c, d in CAP.items():
+        cells = []
+        for dec in DEC:
+            st = d.get(dec, {})
+            nd, np_ = sum(v == "D" for v in st.values()), sum(v == "P" for v in st.values())
+            cells.append("%dD/%dP" % (nd, np_) if st else "-")
+        a("| %s | " % c + " | ".join(cells) + " |")
+    a("")
+    a("**2020s membership.**")
+    a("")
+    for c, d in CAP.items():
+        st = d["2020s"]
+        a("- %s: D = %s; P = %s." % (c, ", ".join(k for k, v in st.items() if v == "D") or "none",
+                                     ", ".join(k for k, v in st.items() if v == "P") or "none"))
+    a("")
+    a("Category sources:")
+    a("")
+    for c, t in CAP_SOURCES.items():
+        a("- **%s**: %s" % (c, t))
+    a("")
+    a("## Sources")
+    a("")
+    a("- [SWF]: " + SWF_URL)
+    for i, (src, url) in sorted(refs.items()):
+        a("- [%s]: %s <%s>" % (i, src, url))
+    a("")
+    return "\n".join(o)
 
 
 def main():
@@ -476,43 +720,8 @@ def main():
                      "'D' = demonstrated (tested or used), 'P' = developing or latent.")
     (OUT / "capabilities.json").write_text(json.dumps(caps, indent=1, ensure_ascii=False))
 
-    md = ["# Counterspace Timeline Ledger", "",
-          f"Primary source: Secure World Foundation, *Global Counterspace Capabilities* (9th ed., April 2026). "
-          f"Debris counts as of {DEBRIS_ASOF}. Pins give SWF printed page (section-page) and PDF page.", "",
-          "## Kinetic events", "",
-          "| id | date | state | system | target | type | alt (km) | kind | cataloged | in orbit | conf | source | pin |",
-          "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
-    for r in [e for e in events if e["domain"] == "kinetic"]:
-        md.append("| {id} | {date} | {state} | {system} | {target} | {type} | {a} | {altitude_kind} | {f} | {o} | "
-                  "{confidence} | [{source}]({source_url}) | {pin} |".format(
-                      a=r["altitude_km"] if r["altitude_km"] is not None else "—",
-                      f=r["fragments_cataloged"] if r["fragments_cataloged"] is not None else "—",
-                      o=r["fragments_in_orbit"] if r["fragments_in_orbit"] is not None else "—", **r))
-    md += ["", "## Non-kinetic events", "",
-           "| id | start | end | actor | category | attribution | target regime | operational | conf | source | pin |",
-           "|---|---|---|---|---|---|---|---|---|---|---|"]
-    for r in [e for e in events if e["domain"] == "non_kinetic"]:
-        md.append("| {id} | {start} | {e} | {actor} | {category} | {attribution} | {target_regime} | {operational_use} | "
-                  "{confidence} | [{source}]({source_url}) | {pin} |".format(e=r["end"] or "ongoing", **r))
-    md += ["", "## Legal items", "", "| id | start | end | kind | label | citation |", "|---|---|---|---|---|---|"]
-    for r in sorted(L, key=lambda r: r["start"]):
-        md.append(f"| {r['id']} | {r['start']} | {r['end'] or ''} | {r['kind']}{' (soft law)' if r['soft_law'] else ''} | "
-                  f"{r['label']} | [{r['citation']}]({r['source_url']}) |")
-    md += ["", "## Notes by row", ""]
-    for r in events:
-        if r.get("notes"):
-            md.append(f"- **{r['id']}**: {r['notes']}")
-    md += ["", "## Capability coding (Chart B)", "", "| category | " + " | ".join(DEC) + " |",
-           "|---" * (len(DEC) + 1) + "|"]
-    for c, d in CAP.items():
-        cells = []
-        for dec in DEC:
-            s = d.get(dec, {})
-            cells.append(f"{sum(v=='D' for v in s.values())}D/{sum(v=='P' for v in s.values())}P")
-        md.append(f"| {c} | " + " | ".join(cells) + " |")
-    md += ["", "Sources: " + "; ".join(f"**{c}**: {s}" for c, s in CAP_SOURCES.items()), "",
-           "See `verification_log.md` for the independent verification pass."]
-    (OUT.parent / "ledger.md").write_text("\n".join(md) + "\n")
+    md = ledger_md(events)
+    (OUT.parent / "ledger.md").write_text(md)
     print(len(K), "kinetic", len(NK), "non-kinetic", len(L), "legal")
 
 

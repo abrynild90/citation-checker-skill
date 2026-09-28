@@ -195,8 +195,8 @@
   "direct_ascent": "SWF 2026 Tables 1-4, 2-4, 3-3, 4-1 and Appendix 16; chapter sections x.2 (pp. 06-01 to 14-01).",
   "co_orbital": "SWF 2026 Table 2-1, Appendix Table 16-1/16-2 (Delta 180, IS, Naryad), chapter sections x.1.",
   "electronic_warfare": "SWF 2026 chapter sections x.3 (e.g., pp. 01-26, 02-25, 09-05, 10-02, 12-05); Telstar 12 (09-05).",
-  "directed_energy": "SWF 2026 chapter sections x.4 (pp. 01-33 MIRACL, 02-34 Terra-3/Peresvet, 03-26).",
-  "cyber": "SWF 2026 ch. 15, p. 15-02 (US, Russia, China, France, Iran, Israel, North Korea); Viasat p. 15-07."
+  "directed_energy": "SWF 2026 chapter sections x.4 (pp. 01-33 to 01-35 US incl. MIRACL, 02-34 to 02-36 Russia incl. Peresvet, 03-26 China).",
+  "cyber": "SWF 2026 ch. 15, p. 15-02 (US, Russia, China, France, Iran, Israel, North Korea); Viasat pp. 15-06 to 15-07."
  },
  "note": "2020s = SWF 2026 assessment (13 countries). Earlier decades reconstructed by builder; 'D' = demonstrated (tested or used), 'P' = developing or latent."
 }
