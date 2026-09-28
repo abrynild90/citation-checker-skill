@@ -1,7 +1,7 @@
 // ============================================================================
 // Counterspace Timeline: charts, legal band, lag panel, scene overlay.
 // ============================================================================
-import { SCENES, HERO, buildSim, GLHost, renderSVG, setLand, PARTICLE_BUDGET } from './scenes.js';
+import { SCENES, HERO, buildSim, GLHost, renderSVG, setLand, PARTICLE_BUDGET, loadEarth, earthReady, EARTH_URL } from './scenes.js';
 
 const D = JSON.parse(document.getElementById('cs-data').textContent);
 setLand(D.land);
@@ -452,7 +452,7 @@ function drawMethod() {
   <li><b>Chart B:</b> the 2020s follow SWF 2026 chapter sections. Earlier decades are the builder’s reconstruction from SWF test tables, country chapters and fact sheets, labeled “reconstructed.” A state counts as “demonstrated” once it has tested or used the capability, and it stays counted in later decades; “developing” covers programs and latent capability. In category mode the stack counts state-capability pairs. In kinetic vs. non-kinetic mode it counts unique states per group.</li>
   <li><b>3D scenes:</b> illustrative only, never orbit-propagated. Radial distance is compressed (altitude<sup>0.45</sup>); Earth is to scale. Particle counts equal cataloged fragments up to a budget of ${PARTICLE_BUDGET.toLocaleString()} on this device. No quantity should be read from a scene.</li></ul>
   <h3>Licensing</h3>
-  <p>SWF material is licensed CC BY-NC 4.0. This page uses facts only. Every chart, graphic and sentence here is original; no SWF or CSIS figures, graphics or prose are reproduced. Coastlines come from Natural Earth (public domain) via world-atlas.</p>
+  <p>SWF material is licensed CC BY-NC 4.0. This page uses facts only. Every chart, graphic and sentence here is original; no SWF or CSIS figures, graphics or prose are reproduced. Earth imagery in the 3D scenes is NASA’s Blue Marble (a U.S. government work, public domain), loaded from a pinned copy on jsDelivr only after the page has rendered and never with reduced motion. Vector coastlines (static diagrams and fallback) come from Natural Earth (public domain) via world-atlas.</p>
   <h3>All cited sources (${cites.length})</h3>
   <ol class="cites">${cites.map(r => `<li><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source || r.citation)}</a>${r.source ? '' : ''}</li>`).join('')}</ol>
   <p class="note">The full ledger (every row with its pin), the verification log and the builder decisions are in <code>ledger.md</code>, <code>verification_log.md</code> and <code>methodology.md</code>.</p>`;
@@ -503,7 +503,7 @@ async function openScene(id, originEl) {
   document.getElementById('sceneCaption').textContent = cfg.caption;
   const ev = byId[cfg.event];
   document.getElementById('sceneSrc').innerHTML = `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}`;
-  document.getElementById('sceneScale').textContent = `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
+  document.getElementById('sceneScale').textContent = `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale. Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
   const rel = document.getElementById('scRelated'); rel.disabled = !cfg.related; rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
   const sim = buildSim(cfg); const cams = document.getElementById('scCams'); cams.innerHTML = '';
   const h = await getHost();
@@ -574,8 +574,12 @@ document.getElementById('themeBtn').onclick = () => {
 // ---------------------------------------------------------------- boot
 function drawAll() { guides.length = 0; drawLegal(); drawA(); drawC(); drawB(); drawL(); }
 chipsB(); drawAll(); drawMethod(); startHero();
+// Earth imagery (~1.5 MB) is not part of the page: it is prefetched once the page has
+// loaded and the browser is idle, and skipped entirely without WebGL or with reduced motion.
+function prefetchEarth() { getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
+addEventListener('load', () => (window.requestIdleCallback || (f => setTimeout(f, 1200)))(prefetchEarth, { timeout: 4000 }));
 let rz = 0, lastW = innerWidth; addEventListener('resize', () => { if (innerWidth === lastW) return; lastW = innerWidth; clearTimeout(rz); rz = setTimeout(drawAll, 150); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') hideCard(); });
 
 // Test / export hooks (no storage).
-window.__cs = { exportSVG, openScene, closeScene, memory: () => host?.memory(), contexts: () => document.querySelectorAll('canvas').length, scenes: ORDER.map(s => s.id), host: () => host };
+window.__cs = { earthReady, EARTH_URL, exportSVG, openScene, closeScene, memory: () => host?.memory(), contexts: () => document.querySelectorAll('canvas').length, scenes: ORDER.map(s => s.id), host: () => host };

@@ -17,11 +17,17 @@ const hscroll = p => p.evaluate(() => document.documentElement.scrollWidth - doc
 await run('desktop-dark', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark' }, async p => {
   await p.screenshot({ path: `${out}/desktop-dark-full.png`, fullPage: true });
   const res = { hscroll: await hscroll(p), mem: [] };
+  // Earth imagery must arrive after the page's load event, not as part of the page.
+  const t0 = Date.now(); await p.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 20000 }).catch(() => {});
+  res.earthReady = await p.evaluate(() => window.__cs.earthReady()); res.earthWaitMs = Date.now() - t0;
+  res.earthAfterLoad = await p.evaluate(u => { const e = performance.getEntriesByName(u)[0], n = performance.getEntriesByType('navigation')[0]; return e ? { start: Math.round(e.startTime), loadEvent: Math.round(n.loadEventEnd), kb: Math.round((e.transferSize || e.encodedBodySize) / 1024) } : null; }, await p.evaluate(() => window.__cs.EARTH_URL));
+  await p.waitForTimeout(500); await p.screenshot({ path: `${out}/hero.png`, clip: { x: 0, y: 0, width: 1440, height: 900 } });
   const base = await p.evaluate(() => window.__cs.memory());
   res.baseMem = base;
   for (const id of await p.evaluate(() => window.__cs.scenes)) {
     await p.evaluate(id => window.__cs.openScene(id), id); await p.waitForTimeout(2600);
     await p.screenshot({ path: `${out}/scene-${id}.png` });
+    if (id === 'fengyun') res.still = await p.evaluate(async () => { const h = window.__cs.host(); const u = h.stillPNG('Test', 'cite'); const img = new Image(); img.src = u; await img.decode(); return [img.width, img.height, Math.round(u.length / 1024)]; });
     res.mem.push([id, await p.evaluate(() => window.__cs.memory()), await p.evaluate(() => window.__cs.contexts())]);
     await p.evaluate(() => window.__cs.closeScene()); await p.waitForTimeout(300);
   }
