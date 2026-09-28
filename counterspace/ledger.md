@@ -40,7 +40,7 @@ Each table section opens with its row count. Section order: reference material f
 
 ## How to read the pins
 
-SWF pins give the table or passage, the printed section-page (for example `p. 05-01`) and the PDF page index (`PDF p. 212`). Non-SWF pins name the passage. Where a row cites several places, all are listed. `[SWF]` links to the report PDF (URL under Sources).
+SWF pins give the table or passage, the printed section-page (for example `p. 05-01`) and the PDF page index (`PDF p. 212`). Non-SWF pins name the passage. Where a row cites several places, all are listed. For the few non-SWF rows the pin starts with the source key in brackets, for example `[iq-2003-gps]`; the full cite is under Sources. `[SWF]` stands for the report PDF (URL under Sources).
 
 ## Legend of fields
 
@@ -55,9 +55,20 @@ SWF pins give the table or passage, the printed section-page (for example `p. 05
 | cataloged / in orbit | Tracked debris pieces created / still on orbit as of 2026-02 (destructive tests only). |
 | conf | Confidence in the row (below). |
 
-Type: `destructive` = Intercept that created cataloged debris (SWF Table 5-1).; `non_destructive` = Test with no debris reported, or no target; includes rocket-only tests.; `midcourse_intercept` = Suborbital intercept of a missile target; no orbital debris.; `apogee_only` = Launch to high altitude; not an intercept (DN-2, 2013).; `flyby` = Pass within a kill radius of a satellite without a kill.; `nuclear` = High-altitude nuclear detonation (Starfish Prime only).
+| type | meaning |
+|---|---|
+| `destructive` | Intercept that created cataloged debris (SWF Table 5-1). |
+| `non_destructive` | Test with no debris reported, or no target; includes rocket-only tests. |
+| `midcourse_intercept` | Suborbital intercept of a missile target; no orbital debris. |
+| `apogee_only` | Launch to high altitude; not an intercept (DN-2, 2013). |
+| `flyby` | Pass within a kill radius of a satellite without a kill. |
+| `nuclear` | High-altitude nuclear detonation (Starfish Prime only). |
 
-Altitude kind: `intercept` = Altitude of the intercept (SWF Table 5-1 for destructive tests).; `apogee` = Maximum altitude of the missile or rocket (SWF Tables 1-4, 2-4, 3-3).; `detonation` = Burst altitude of the nuclear test.
+| altitude kind | meaning |
+|---|---|
+| `intercept` | Altitude of the intercept (SWF Table 5-1 for destructive tests). |
+| `apogee` | Maximum altitude of the missile or rocket (SWF Tables 1-4, 2-4, 3-3). |
+| `detonation` | Burst altitude of the nuclear test. |
 
 **Non-kinetic rows**
 
@@ -69,9 +80,18 @@ Altitude kind: `intercept` = Altitude of the intercept (SWF Table 5-1 for destru
 | target regime | What the effect hit: `ISR_LEO`, `GEO_comms`, `GNSS_MEO`, `LEO_constellation` or `ground_segment`. GNSS jamming hits receivers, not satellites; the code names the signal. |
 | operational | `True` if used in a real conflict or operation, `False` if a test, a dispute or a non-conflict interference case. |
 
-Attribution levels: **official_government**: A government (or its military) has said so itself, or a government has publicly made the claim. **multi_government**: Several governments or an intergovernmental body (ITU, ICAO) made or located the attribution; not a finding of state responsibility. **researcher_osint**: Open-source researchers or a nonprofit are the source; no government attribution relied on. **alleged**: Reported or claimed without independent validation; kept at the source's own hedge.
+| attribution level | meaning |
+|---|---|
+| `official_government` | A government (or its military) has said so itself, or a government has publicly made the claim. |
+| `multi_government` | Several governments or an intergovernmental body (ITU, ICAO) made or located the attribution; not a finding of state responsibility. |
+| `researcher_osint` | Open-source researchers or a nonprofit are the source; no government attribution relied on. |
+| `alleged` | Reported or claimed without independent validation; kept at the source's own hedge. |
 
-Confidence: **high**: Date and value match SWF tables or text with no unresolved internal conflict. **medium**: Source is hedged ('likely', 'possible'), a value is missing, or a date conflict was resolved by a builder rule. **low**: SWF itself marks the value with '?' or the report is an anonymous-source press account.
+| confidence | meaning |
+|---|---|
+| `high` | Date and value match SWF tables or text with no unresolved internal conflict. |
+| `medium` | Source is hedged ('likely', 'possible'), a value is missing, or a date conflict was resolved by a builder rule. |
+| `low` | SWF itself marks the value with '?', only one SWF table lists the row, or the report is an anonymous-source press account. |
 
 **Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. Soft-law manuals are marked (soft law) and are not binding.
 
@@ -212,25 +232,25 @@ Counts per calendar year (kinetic by test date; non-kinetic and legal by start d
 
 | start | end | id | kind | label | citation |
 |---|---|---|---|---|---|
-| 1963-08-05 |  | ltbt-1963 | treaty | Limited Test Ban Treaty | Treaty Banning Nuclear Weapon Tests in the Atmosphere, in Outer Space and Under Water, Aug. 5, 1963, 14 U.S.T. 1313, 480 U.N.T.S. 43. |
-| 1967-01-27 |  | ost-1967 | treaty | Outer Space Treaty | Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer Space, Jan. 27, 1967, 18 U.S.T. 2410, 610 U.N.T.S. 205. |
-| 1972-05-26 |  | abm-1972 | treaty | ABM Treaty Art. XII | Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, May 26, 1972, 23 U.S.T. 3435. |
-| 1981-12-09 |  | paros-1981 | negotiation_span | PAROS (UNGA agenda item) | G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981). |
+| 1963-08-05 | - | ltbt-1963 | treaty | Limited Test Ban Treaty | Treaty Banning Nuclear Weapon Tests in the Atmosphere, in Outer Space and Under Water, Aug. 5, 1963, 14 U.S.T. 1313, 480 U.N.T.S. 43. |
+| 1967-01-27 | - | ost-1967 | treaty | Outer Space Treaty | Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer Space, Jan. 27, 1967, 18 U.S.T. 2410, 610 U.N.T.S. 205. |
+| 1972-05-26 | - | abm-1972 | treaty | ABM Treaty Art. XII | Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, May 26, 1972, 23 U.S.T. 3435. |
+| 1981-12-09 | - | paros-1981 | negotiation_span | PAROS (UNGA agenda item) | G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981). |
 | 1985-03-29 | 1994-08-23 | cd-paros-committee | negotiation_span | CD Ad Hoc Committee on PAROS | Conference on Disarmament, Report of the Ad Hoc Committee on Prevention of an Arms Race in Outer Space, CD/1271 (Aug. 24, 1994); see UNIDIR, The Conference on Disarmament and the Prevention of an Arms Race in Outer Space. |
-| 1992-12-22 |  | itu-1992 | treaty | ITU Constitution Arts. 45 & 48 | Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, 1825 U.N.T.S. 331, 361-62. |
-| 2008-02-12 |  | ppwt-2008 | negotiation_span | PPWT draft (Russia-China) | Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) (tabled at the CD Feb. 12, 2008). |
-| 2014-06-10 |  | ppwt-2014 | negotiation_span | PPWT updated draft | Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014). |
-| 2017-02-01 |  | tallinn-2017 | unilateral (soft law) | Tallinn Manual 2.0 (soft law) | Tallinn Manual 2.0 on the International Law Applicable to Cyber Operations (Michael N. Schmitt ed., Cambridge Univ. Press 2017). |
-| 2020-12-07 |  | unga-75-36 | resolution | UNGA 75/36 | G.A. Res. 75/36 (Dec. 7, 2020). |
-| 2022-04-18 |  | us-moratorium-2022 | unilateral | US DA-ASAT test moratorium | The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space (Apr. 18, 2022); SWF 2026, p. 01-50. |
+| 1992-12-22 | - | itu-1992 | treaty | ITU Constitution Arts. 45 & 48 | Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, 1825 U.N.T.S. 331, 361-62. |
+| 2008-02-12 | - | ppwt-2008 | negotiation_span | PPWT draft (Russia-China) | Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) (tabled at the CD Feb. 12, 2008). |
+| 2014-06-10 | - | ppwt-2014 | negotiation_span | PPWT updated draft | Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014). |
+| 2017-02-01 | - | tallinn-2017 | unilateral (soft law) | Tallinn Manual 2.0 (soft law) | Tallinn Manual 2.0 on the International Law Applicable to Cyber Operations (Michael N. Schmitt ed., Cambridge Univ. Press 2017). |
+| 2020-12-07 | - | unga-75-36 | resolution | UNGA 75/36 | G.A. Res. 75/36 (Dec. 7, 2020). |
+| 2022-04-18 | - | us-moratorium-2022 | unilateral | US DA-ASAT test moratorium | The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space (Apr. 18, 2022); SWF 2026, p. 01-50. |
 | 2022-05-09 | 2023-09-01 | oewg-2022 | negotiation_span | OEWG on space threats | G.A. Res. 76/231 (Dec. 24, 2021) (establishing OEWG, 2022-2023). |
-| 2022-07-01 |  | milamos-2022 | unilateral (soft law) | McGill (MILAMOS) Manual Vol. I (soft law) | McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules (Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022). |
-| 2022-12-07 |  | unga-77-41 | resolution | UNGA 77/41 (DA-ASAT tests) | G.A. Res. 77/41 (Dec. 7, 2022). |
-| 2024-01-01 |  | woomera-2024 | unilateral (soft law) | Woomera Manual (soft law) | The Woomera Manual on the International Law of Military Space Operations (Jack Beard & Dale Stephens eds., Oxford Univ. Press 2024). |
-| 2024-04-24 |  | unsc-veto-2024 | veto | Russian veto: nuclear weapons in orbit | U.N. SCOR, 79th Sess., 9616th mtg., U.N. Doc. S/PV.9616 (Apr. 24, 2024); draft S/2024/302. |
-| 2024-07-01 |  | itu-rrb-2024 | resolution | ITU RRB: 'grave concern' (Sweden, France) | ITU Radio Regulations Board, 96th Meeting (June 24-28, 2024), Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145). |
-| 2025-10-03 |  | icao-2025 | resolution | ICAO: GNSS interference an 'infraction' of the Chicago Convention | ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06. |
-| 2025-11-10 |  | itu-rrb-2025 | resolution | ITU RRB 100th meeting: urges Russia to cease RNSS interference | ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245. |
+| 2022-07-01 | - | milamos-2022 | unilateral (soft law) | McGill (MILAMOS) Manual Vol. I (soft law) | McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules (Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022). |
+| 2022-12-07 | - | unga-77-41 | resolution | UNGA 77/41 (DA-ASAT tests) | G.A. Res. 77/41 (Dec. 7, 2022). |
+| 2024-01-01 | - | woomera-2024 | unilateral (soft law) | Woomera Manual (soft law) | The Woomera Manual on the International Law of Military Space Operations (Jack Beard & Dale Stephens eds., Oxford Univ. Press 2024). |
+| 2024-04-24 | - | unsc-veto-2024 | veto | Russian veto: nuclear weapons in orbit | U.N. SCOR, 79th Sess., 9616th mtg., U.N. Doc. S/PV.9616 (Apr. 24, 2024); draft S/2024/302. |
+| 2024-07-01 | - | itu-rrb-2024 | resolution | ITU RRB: 'grave concern' (Sweden, France) | ITU Radio Regulations Board, 96th Meeting (June 24-28, 2024), Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145). |
+| 2025-10-03 | - | icao-2025 | resolution | ICAO: GNSS interference an 'infraction' of the Chicago Convention | ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06. |
+| 2025-11-10 | - | itu-rrb-2025 | resolution | ITU RRB 100th meeting: urges Russia to cease RNSS interference | ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245. |
 
 ## Conflicts inside the sources
 
@@ -288,7 +308,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **ru-2015-nudol-apr** (2015-04-22): Failed at launch (SWF Table 2-4 note). Appendix Table 16-2 lists the date as a rocket test (unsuccessful). No apogee reported.
 - **cn-2015-dn3** (2015-10-30): Likely rocket test.
 - **ru-2015-nudol** (2015-11-18): First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 (p. 16-03) dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015 (used).
-- **ru-2016-syria** (2016-02-01): SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The seed said 2017; builder uses 2016 at medium confidence.
+- **ru-2016-syria** (2016-02-01): SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. An earlier draft said 2017; the ledger uses 2016 at medium confidence.
 - **ru-2016-nudol-may** (2016-05-25): Likely rocket test. SWF marks the 100 km apogee with '?'.
 - **ru-2016-nudol-dec** (2016-12-16): Likely rocket test. SWF marks the 100 km apogee with '?'.
 - **cn-2017-dn3** (2017-07-23): Likely intercept test; reportedly malfunctioned.
@@ -297,7 +317,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **ru-2018-nudol-mar** (2018-03-26): First test from a mobile launcher.
 - **ru-2018-trident** (2018-10-25): SWF does not name the exercise or give dates: it says (Nov. 2018) media reported jamming in Norway and Finland during a major NATO exercise, and that Norway's government claimed in March 2019 it had proof of Russian interference. Dates 25 Oct - 7 Nov 2018 are the Trident Juncture exercise window (NATO; Norway's ministry put the jamming at 16 Oct - 7 Nov). Coded 'official_government' on Norway's claim; Finland only expressed concern (external reporting).
 - **ru-2018-nudol-dec** (2018-12-23): Payload column: Likely KKV. Appendix Table 16-2 (p. 16-03): potential KKV, no intercept.
-- **in-2019-shakti** (2019-03-27): Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km. Seed '~400 estimated' pieces not found in SWF; not used.
+- **in-2019-shakti** (2019-03-27): Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km. An earlier estimate of about 400 pieces is not in SWF and is not used.
 - **ru-2019-nudol-jun** (2019-06-14): Listed only in Appendix Table 16-2 (not in Table 2-4), with the note 'Potential KKV, no intercept' (note paired to the row by column order in the text extraction). No apogee reported. Coded low confidence because a single table lists it.
 - **ru-2019-nudol-nov** (2019-11-15): Payload column: Likely KKV. SWF describes the Nov. 2021 test as the first known Nudol intercept (p. 02-21), so no earlier intercept is recorded; no apogee reported. Not in Appendix Table 16-2.
 - **ru-2020-nudol-apr** (2020-04-15): Successful, nothing hit. US Space Command issued a public statement on the test (SWF p. 02-20, fn. 148).
@@ -310,7 +330,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **cn-2023-dn3** (2023-04-14): Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and 15 April 2023. 14 April used.
 - **mideast-2023-gnss** (2023-10-01): Actor set is mixed: SWF p. 10-02 says it is hard to tell from open sources whether Israel, Hamas or others conduct the EW. The IDF stated publicly it was jamming GPS 'in a proactive manner for various operational needs'; Lebanon blamed Israel (Mar. 2024). Coded at the level SWF supports for Israel; other actors not attributed. SWF (p. 10-01) also reports interference before the row's start, in spring 2023 (20% of regional aircraft in April 2023); the row starts at the Oct. 2023 escalation.
 - **ru-2023-baltic** (2023-12-01): SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). Terrestrial jamming of receivers, not attacks on satellites.
-- **ru-2024-eu-sats** (2024-03-01): SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'official_government' as in the original ledger.
+- **ru-2024-eu-sats** (2024-03-01): SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'official_government' because ITU, a governmental body, made the finding.
 
 ## Capability coding (Chart B)
 

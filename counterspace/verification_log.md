@@ -1,10 +1,33 @@
 # Counterspace Ledger: Verification Log
 
-**Verification date:** 2026-09-28 (second full pass; supersedes the earlier 03:41 log). Later same-day update: UN document mirrors used for PAROS 36/97 and the two PPWT documents.
-**Scope:** all 44 kinetic rows and 15 non-kinetic rows in `data/events.json` (59 in total), all 19 rows in `data/legal.json`, and the capability coding in `data/capabilities.json`. The 44 kinetic rows include four Nudol rows added late in this pass (see Discrepancy 28-30). The data were regenerated with `python3 tools/build_data.py` after the corrections below.
+| | |
+|---|---|
+| **Date** | 2026-09-28 (second full pass; supersedes the first log of the same day). Later the same day, UN document mirrors were used for PAROS 36/97 and the two PPWT documents. |
+| **Scope** | 83 items: 44 kinetic and 15 non-kinetic rows in `data/events.json`, 19 rows in `data/legal.json`, and 5 capability categories in `data/capabilities.json`. |
+| **Method** | Each row checked against the pinned SWF page or a fetched primary source (see [Method](#method)). |
+| **Result** | 74 items VERIFIED or CORRECTED, 9 PARTIAL, none UNCHECKED; 32 defects found and fixed ([Discrepancies](#discrepancies-found-and-fixed)). |
+| **Regenerate** | `python3 tools/build_data.py` rebuilds the data files and `ledger.md` after any correction. |
 
 ## Contents
-1. [Executive summary](#executive-summary) 2. [Summary](#summary) 3. [Remaining PARTIAL items](#remaining-partial-items) 4. [Method](#method) 5. [Closed items](#closed-items-from-the-earlier-log) 6. [Discrepancies](#discrepancies-found-in-this-pass-all-fixed-in-toolsbuild_datapy) 7. [Kinetic rows](#eventsjson-kinetic-rows) 8. [Non-kinetic rows](#eventsjson-non-kinetic-rows) 9. [Legal rows](#legaljson) 10. [Capabilities](#capabilitiesjson)
+
+1. [Executive summary](#executive-summary)
+2. [Method](#method)
+3. [Results by category](#results-by-category)
+4. [Open items and impact](#open-items-and-impact)
+5. [Closed items from the earlier log](#closed-items-from-the-earlier-log)
+6. [Discrepancies found and fixed](#discrepancies-found-and-fixed)
+7. [Kinetic rows](#eventsjson-kinetic-rows)
+8. [Non-kinetic rows](#eventsjson-non-kinetic-rows)
+9. [Legal rows](#legaljson)
+10. [Capability categories](#capabilitiesjson)
+
+## Executive summary
+
+- **Outcome:** every event, legal item and capability category was checked; none is UNCHECKED. 74 of 83 items are VERIFIED or CORRECTED (defect fixed, then verified); 9 are PARTIAL.
+- **Defects:** 32 discrepancies were found and fixed in `tools/build_data.py`. No factual error in a plotted value is known.
+- **Open items:** 9 PARTIAL items (`us-1985-solwind`, `ru-2019-nudol-jun`, `ru-2014-ukraine`, `itu-rrb-2024`, and the five capability categories) plus one wording item on the page lede. Each has an impact assessment under [Open items and impact](#open-items-and-impact); none changes a plotted value.
+- **This pass:** `ppwt-2008` and `ppwt-2014` moved from PARTIAL to VERIFIED against the primary documents, and `paros-1981` against the UN resolution text.
+- **Bot-blocked sources:** ICAO, UNOOSA and some ITU pages block scripts; facts were checked through search snippets or UN mirrors, as recorded per row.
 
 ## Method
 
@@ -15,15 +38,7 @@
 
 **Status vocabulary.** VERIFIED: the pinned page or fetched source shows the value (short quote given). VERIFIED (external): checked against a named non-SWF source. PARTIAL: core fields verified; the named field was not isolable or comes from outside the pin. CORRECTED: a defect was found in this pass and fixed in `build_data.py`. UNCHECKED: not re-checked in this pass (no row currently carries it).
 
-## Executive summary
-
-- **Coverage:** 83 items checked (44 kinetic, 15 non-kinetic, 19 legal, 5 capability categories). No item is UNCHECKED.
-- **This pass:** two former PARTIAL legal rows (`ppwt-2008`, `ppwt-2014`) are now VERIFIED against the primary documents, and `paros-1981` is VERIFIED against the UN resolution text. Their `source_url` fields now point to the documents themselves.
-- **Defects found and fixed:** 32 discrepancies (table below), all corrected in `tools/build_data.py`; no factual error in a plotted value remains known.
-- **Remaining PARTIAL (9 items):** `us-1985-solwind`, `ru-2019-nudol-jun`, `ru-2014-ukraine`, `itu-rrb-2024`, and the five capability categories. Each has an entry under "Remaining PARTIAL items" saying what is unverified and why no plotted value depends on it.
-- **Bot-blocked sources:** ICAO, UNOOSA and some ITU pages block scripts; these were checked through search snippets or alternative UN mirrors, as recorded per row.
-
-## Summary
+## Results by category
 
 | Set | Rows | VERIFIED | VERIFIED (external) | PARTIAL | CORRECTED (defect fixed, then verified) |
 |---|---|---|---|---|---|
@@ -31,17 +46,19 @@
 | Non-kinetic events | 15 | 5 | 1 | 1 | 8 |
 | Legal items | 19 | 6 | 7 | 1 | 5 |
 | Capability categories | 5 | 0 | 0 | 5 | 0 |
+| **Total** | **83** | **44** | **9** | **9** | **21** |
 
-Rows are counted once each, by their most significant status. (Non-kinetic PARTIAL is `ru-2014-ukraine`, whose 2014 start is external; see below.)
+Each row is counted once, under its most significant status. Status definitions are in [Method](#method). The non-kinetic PARTIAL is `ru-2014-ukraine`, whose 2014 start is external.
 
-## Remaining PARTIAL items
+## Open items and impact
 
-| Item | Exactly what is unverified | Why no plotted value depends on it |
+| Item | Exactly what is unverified | Impact assessment |
 |---|---|---|
 | `us-1985-solwind` | The "0 pieces still in orbit" cell of Table 5-1. The extraction scrambles columns, so the cell cannot be tied to its row by text. The 530 km vs 555 km altitude conflict is verified and disclosed. | Chart A plots intercept altitude (530 km) and cataloged fragments (285), both read from the row. In-orbit counts appear only in cards and tables. |
 | `ru-2019-nudol-jun` | The note "Potential KKV, no intercept" is paired to the 14 Jun 2019 row only by column order in Table 16-2. The date and "Nudol" are read directly. | The row has no altitude and no fragments; it is drawn in the no-altitude strip by its date alone. Low confidence is shown on the row. |
 | `ru-2014-ukraine` | The 2014 start of the campaign is not on the SWF pages cited; it comes from Breaking Defense and Foreign Policy. "Nearly 10,000 suspected incidents" is verified on p. 02-28. | Chart C draws a span starting 2014; the note names the external source. The count is not plotted. |
 | `itu-rrb-2024` (legal) | The ITU "summary of decisions" document itself. The 96th RRB meeting dates (24-28 June 2024) are confirmed on the ITU minutes page (Circular 507, `itu.int/md/R00-CR-CIR-0507`) and agenda; the summary is not retrievable (the meeting-document pages `R24-RRB24.2-SUM-0001` return an empty shell or 404 for scripts). The 1 July 2024 issue date rests on press reports. Quoted wording matches SWF p. 02-32. | The legal band plots the item at its start date, 1 Jul 2024. A date off by days would not move a mark at year scale, and the label and quote are SWF's. The ledger URL is the generic RRB page. |
+| Page lede wording (`src/template.html`, not a data row) | The lede says non-kinetic methods "are the only counterspace tools used in actual military operations". SWF 2026, Executive Summary, p. xxiii (PDF p. 21), says: "only non-destructive capabilities are actively being used against satellites in current military operations." SWF does not name EW and cyber as the only such methods, and "non-destructive" is broader. | Wording risk only; no data row or chart depends on it. Recommended text: attribute the finding to SWF and use its words (non-destructive capabilities, against satellites). Pin recorded in `methodology.md` section 9. |
 | `direct_ascent`, `co_orbital`, `electronic_warfare`, `directed_energy`, `cyber` (capabilities) | The 2020s D/P split follows SWF's graphical country matrix, which text extraction cannot read; P entries were not each read in the country chapters. | Chart B's 2020s counts inherit this. The chart labels pre-2020s cells as reconstruction, and the D entries rest on verified events (tables above). Only the split between D and P for P-entries is unchecked. |
 
 ## Closed items from the earlier log
@@ -52,7 +69,9 @@ Rows are counted once each, by their most significant status. (Non-kinetic PARTI
 | `us-1962-starfish-prime` dead `source_url` | **Closed.** `data/events.json` carries `https://nnss.gov/wp-content/uploads/2023/08/DOE_NV-209_Rev16.pdf` (HTTP 200). The PDF was downloaded and read: table row "Starfish Prime ... 250 miles ... 07/09/1962 ... Johnston Island area" and "250 miles ... 1.4 Mt" (PDF pp. 41-42). |
 | Earlier "VERIFIED by consistency" rows (cn-2005, cn-2006, cn-2010, DN series, Nudol series, capabilities, several legal rows) | **Reopened and re-verified below** with page pins and quotes, or downgraded. |
 
-## Discrepancies found in this pass (all fixed in `tools/build_data.py`)
+## Discrepancies found and fixed
+
+All 32 were corrected in `tools/build_data.py`.
 
 | # | Row | Defect | Fix |
 |---|---|---|---|
@@ -83,7 +102,6 @@ Rows are counted once each, by their most significant status. (Non-kinetic PARTI
 | 25 | Legal `us-moratorium-2022` | Note listed follower states not in the cited sources. | Removed; SWF's "38 countries total" retained. |
 | 26 | All SWF pins | Pins named page numbers only. | Each now names the table or passage. |
 | 27 | Earlier log | Claimed `us-1967-p437-mar` and `us-1968-p437-may` sit on p. 01-24. They are on **p. 01-23 (PDF 72)**, as the ledger pins them. | Log corrected. |
-
 | 28 | `ru-2014-nudol`, `ru-2015-nudol-apr` (added) | Omitted Nudol tests. SWF Table 2-4 (p. 02-21, PDF 134): "Aug. 12, 2014 ... Failed shortly after launch"; "Apr. 22, 2015 ... Failed at launch". Table 16-2 (p. 16-03, PDF 307) lists both dates with "Rocket test (unsuccessful)". | Rows added, medium confidence, no apogee; both tables pinned. |
 | 29 | `ru-2019-nudol-nov` (added) | Omitted; the first draft of the row said "no intercept (SWF Table 2-4)". Table 2-4 gives the date and payload "Likely KKV" but the notes cell is "-" (column-order reading), so "no intercept" was not shown by that table. | Row added; note now rests on p. 02-21, which calls Nov. 2021 the "first known intercept test of the Nudol". |
 | 30 | `ru-2019-nudol-jun` (added) | Omitted. Only Table 16-2 lists "June 14, 2019 ... Nudol"; the note "Potential KKV, no intercept" is paired to it by column order (two such notes follow the Dec. 2018 and June 2019 rows). | Row added, low confidence, PARTIAL. |

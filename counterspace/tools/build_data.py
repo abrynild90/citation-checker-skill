@@ -194,7 +194,7 @@ K = [
       300, "intercept", frag=130, orbit=0,
       notes="Indian officials said most debris would re-enter within days and all of it within 45 days at most "
             "(SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, "
-            "and some pieces were thrown up to 2,250 km. Seed '~400 estimated' pieces not found in SWF; not used.",
+            "and some pieces were thrown up to 2,250 km. An earlier estimate of about 400 pieces is not in SWF and is not used.",
       scene="shakti",
       src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 04-04 (PDF p. 204)")),
     k("ru-2021-cosmos1408", "2021-11-15", "Russia", "Nudol (PL-19)", "Cosmos 1408", "destructive",
@@ -284,7 +284,7 @@ NK = [
        "GNSS receivers in and around Syria and the eastern Mediterranean", "GNSS_MEO", True,
        "GNSS spoofing/jamming around Russian bases in Syria; reported effects on aircraft in the region.",
        "medium", swf("02-28", 141, "C4ADS passage"),
-       notes="SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The seed said 2017; builder uses 2016 "
+       notes="SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. An earlier draft said 2017; the ledger uses 2016 "
              "at medium confidence."),
     nk("ru-2018-trident", "2018-10-25", "2018-11-07", "Russia", "gnss_jamming", "official_government",
        "GPS receivers in northern Norway and Finland during NATO Trident Juncture", "GNSS_MEO", False,
@@ -347,7 +347,7 @@ NK = [
        notes="SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the "
              "interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It "
              "described origin locations but made no state-responsibility finding; coded 'official_government' "
-             "as in the original ledger."),
+             "because ITU, a governmental body, made the finding."),
 ]
 
 # ---------------------------------------------------------------- legal
@@ -592,20 +592,20 @@ ATTR_LEGEND = [
 CONF_LEGEND = [
     ("high", "Date and value match SWF tables or text with no unresolved internal conflict."),
     ("medium", "Source is hedged ('likely', 'possible'), a value is missing, or a date conflict was resolved by a builder rule."),
-    ("low", "SWF itself marks the value with '?' or the report is an anonymous-source press account."),
+    ("low", "SWF itself marks the value with '?', only one SWF table lists the row, or the report is an anonymous-source press account."),
 ]
 TYPE_LEGEND = [
-    ("destructive", "Intercept that created cataloged debris (SWF Table 5-1)."),
-    ("non_destructive", "Test with no debris reported, or no target; includes rocket-only tests."),
-    ("midcourse_intercept", "Suborbital intercept of a missile target; no orbital debris."),
-    ("apogee_only", "Launch to high altitude; not an intercept (DN-2, 2013)."),
-    ("flyby", "Pass within a kill radius of a satellite without a kill."),
-    ("nuclear", "High-altitude nuclear detonation (Starfish Prime only)."),
+    ("destructive", "Intercept that created cataloged debris (SWF Table 5-1)"),
+    ("non_destructive", "Test with no debris reported, or no target; includes rocket-only tests"),
+    ("midcourse_intercept", "Suborbital intercept of a missile target; no orbital debris"),
+    ("apogee_only", "Launch to high altitude; not an intercept (DN-2, 2013)"),
+    ("flyby", "Pass within a kill radius of a satellite without a kill"),
+    ("nuclear", "High-altitude nuclear detonation (Starfish Prime only)"),
 ]
 KIND_LEGEND = [
-    ("intercept", "Altitude of the intercept (SWF Table 5-1 for destructive tests)."),
-    ("apogee", "Maximum altitude of the missile or rocket (SWF Tables 1-4, 2-4, 3-3)."),
-    ("detonation", "Burst altitude of the nuclear test."),
+    ("intercept", "Altitude of the intercept (SWF Table 5-1 for destructive tests)"),
+    ("apogee", "Maximum altitude of the missile or rocket (SWF Tables 1-4, 2-4, 3-3)"),
+    ("detonation", "Burst altitude of the nuclear test"),
 ]
 
 
@@ -669,7 +669,8 @@ def ledger_md(events):
     a("")
     a("SWF pins give the table or passage, the printed section-page (for example `p. 05-01`) and the PDF page index "
       "(`PDF p. 212`). Non-SWF pins name the passage. Where a row cites several places, all are listed. "
-      "`[SWF]` links to the report PDF (URL under Sources).")
+      "For the few non-SWF rows the pin starts with the source key in brackets, for example `[iq-2003-gps]`; "
+      "the full cite is under Sources. `[SWF]` stands for the report PDF (URL under Sources).")
     a("")
     a("## Legend of fields")
     a("")
@@ -684,9 +685,15 @@ def ledger_md(events):
     a("| cataloged / in orbit | Tracked debris pieces created / still on orbit as of %s (destructive tests only). |" % DEBRIS_ASOF)
     a("| conf | Confidence in the row (below). |")
     a("")
-    a("Type: " + "; ".join("`%s` = %s" % x for x in TYPE_LEGEND))
+    a("| type | meaning |")
+    a("|---|---|")
+    for x in TYPE_LEGEND:
+        a("| `%s` | %s. |" % x)
     a("")
-    a("Altitude kind: " + "; ".join("`%s` = %s" % x for x in KIND_LEGEND))
+    a("| altitude kind | meaning |")
+    a("|---|---|")
+    for x in KIND_LEGEND:
+        a("| `%s` | %s. |" % x)
     a("")
     a("**Non-kinetic rows**")
     a("")
@@ -698,9 +705,15 @@ def ledger_md(events):
     a("| target regime | What the effect hit: `ISR_LEO`, `GEO_comms`, `GNSS_MEO`, `LEO_constellation` or `ground_segment`. GNSS jamming hits receivers, not satellites; the code names the signal. |")
     a("| operational | `True` if used in a real conflict or operation, `False` if a test, a dispute or a non-conflict interference case. |")
     a("")
-    a("Attribution levels: " + " ".join("**%s**: %s" % x for x in ATTR_LEGEND))
+    a("| attribution level | meaning |")
+    a("|---|---|")
+    for x in ATTR_LEGEND:
+        a("| `%s` | %s |" % x)
     a("")
-    a("Confidence: " + " ".join("**%s**: %s" % x for x in CONF_LEGEND))
+    a("| confidence | meaning |")
+    a("|---|---|")
+    for x in CONF_LEGEND:
+        a("| `%s` | %s |" % x)
     a("")
     a("**Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. "
       "Soft-law manuals are marked (soft law) and are not binding.")
@@ -769,7 +782,7 @@ def ledger_md(events):
     a("|---|---|---|---|---|---|")
     for r in leg:
         a("| %s | %s | %s | %s%s | %s | %s |" % (
-            r["start"], r["end"] or "", r["id"], r["kind"], " (soft law)" if r["soft_law"] else "",
+            r["start"], r["end"] or "-", r["id"], r["kind"], " (soft law)" if r["soft_law"] else "",
             r["label"], r["citation"]))
     a("")
     a("## Conflicts inside the sources")

@@ -14,6 +14,7 @@
 9. [What this page does not claim](#9-what-this-page-does-not-claim)
 10. [Limitations](#10-limitations)
 11. [Rebuild steps](#11-rebuild-steps)
+12. [Quality process](#12-quality-process)
 
 ## 1. Source editions
 - **Primary:** Victoria Samson & Kathleen Brett eds., *Global Counterspace Capabilities: An Open Source Assessment* (Secure World Foundation, 9th ed., Apr. 2026), "SWF 2026". Pins name the table or passage, the printed section-page (e.g., "p. 05-01") and the PDF page. Debris counts are as of February 2026 (Table 5-1).
@@ -53,7 +54,7 @@
 - DN-2's apogee is disputed (10,000 km claimed by China; nearly GEO per the US military; at least ~30,000 km per analysis cited by SWF).
 - Several non-kinetic start dates are approximate or come from outside SWF (Ukraine 2014, North Korea Aug. 2010, Trident Juncture window, MIRACL day); each row note says so. The Iran/Eutelsat span (2009-2012) understates the Oct. 2022 episode SWF reports.
 - The 2020s Chart B D/P split follows a graphical matrix in SWF that cannot be machine-checked; only the events behind the D entries are verified.
-- Bot-blocked sites (UN Digital Library, treaties.unoda.org, ICAO, OUP) could not be fetched by script; their facts were checked through other sources, as `verification_log.md` states per row. Four legal rows remain PARTIAL for that reason.
+- Bot-blocked sites (UN Digital Library, treaties.unoda.org, ICAO, OUP) could not be fetched by script; their facts were checked through other sources, as `verification_log.md` states per row. One legal row (`itu-rrb-2024`) remains PARTIAL for that reason.
 
 ## 5. Builder decisions
 1. **Table 5-1 used for all intercept altitudes and debris counts:** one consistent definition across tests. Other values are kept in notes and `conflicts`.
@@ -98,6 +99,7 @@
 - **No prediction and no ranking of capability.** Chart B counts states that have demonstrated (D) or are developing (P) a capability. It does not compare their strength, intent or readiness.
 - **No physical simulation.** The 3D scenes are illustrative: compressed radial scale, accelerated debris spread and simplified geometry. Only the numbers in the panels are data.
 - **No causal link between tests and law.** "Related law" chips show chronology or a stated multilateral response, not that one caused the other.
+- **No claim that EW and cyber are the only methods used in operations.** The page may say that destructive testing has paused and that jamming, spoofing, dazzling and cyber operations continue. It must not say those are the *only* counterspace tools used in operations, because SWF does not say so. The exact SWF passage is Executive Summary, p. xxiii (PDF p. 21): "only non-destructive capabilities are actively being used against satellites in current military operations." SWF's category is "non-destructive", not "EW and cyber", and it concerns use against satellites. Any page wording should attribute the finding to SWF and use its terms.
 - **No SWF-assessed pre-2020s capability coding.** Earlier decades in Chart B are the builder's reconstruction and are labeled so.
 
 ## 10. Limitations
@@ -114,3 +116,9 @@
 2. `python3 tools/build_data.py` writes `data/events.json`, `data/legal.json`, `data/capabilities.json`, `data/schema.json` and `ledger.md`.
 3. `python3 tools/build_page.py` rebuilds the page from `data/` and `src/`.
 4. `node tools/qa.mjs` runs the QA checks and regenerates the SVG exports in `exports/` (light mode).
+
+## 12. Quality process
+The dataset and page were checked in two independent ways, and the results are kept in the repository.
+1. **Independent verification (`verification_log.md`).** On 2026-09-28 every row (83 items) was re-checked against the pinned SWF page or a fetched primary source, not against the builder's own notes. The pass found and fixed 32 defects and leaves 9 items PARTIAL, each with an impact assessment. No row is marked VERIFIED on inference.
+2. **Four independent grading rounds.** A reviewer with no part in the build inspected the built page, data and docs from scratch each time and wrote a scored report: `grading_report.md` (round 1, 76/100), `grading_report_round2.md` (86), `grading_report_round3.md` (90) and `grading_report_round4.md` (92). Each report lists defects by portion of the page; these were fixed before the next round. Round 4 found no factual error in 10+ spot checks against the SWF text, and its one wording risk (the absolute claim on EW and cyber, section 9) is recorded above.
+3. **Automated checks.** `tools/qa.mjs` and the data checks in section 8 run on each rebuild; doc counts are generated from the data by `tools/build_data.py`, so `ledger.md` cannot drift from `events.json`.
