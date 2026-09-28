@@ -1,2 +1,4 @@
 node_modules/
 qa/
+tools/tmp_*.mjs
+tools/_*.mjs
