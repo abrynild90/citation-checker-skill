@@ -75,6 +75,14 @@ function drawA(el = document.getElementById('svgA')) {
     ann('cn-2013-dn2', 'DN-2 reach (apogee)', null, around(20, 24));
     ann('cn-2007-fy1c', 'Peak intercept: FY-1C', null, [[-20, -34, 'end'], [20, -34, 'start'], ...around(20, 30), ...sweep()]);
   }
+  // The empty stretch of the scatter is data, not a bug: say so in-chart (dates verified against events.json)
+  { const gx0 = x(parse('1971-01-01')), gx1 = x(parse('2004-12-31')), gy = y(5200), gm = (gx0 + gx1) / 2;
+    const l1 = phone ? 'No tests 1971–83, 1986–2004' : 'No tests in the ledger 1971–83 or 1986–2004', l2 = phone ? '' : 'Only the US ASM-135 program, 1984–85, falls between';
+    if (tw(l1, 11.5) < gx1 - gx0 + 40) {
+      svg.append('path').attr('d', `M${gx0},${gy - 16}V${gy - 11}H${gx1}V${gy - 16}`).style('fill', 'none').style('stroke', 'var(--faint)').attr('aria-hidden', 'true');
+      const t = svg.append('text').attr('class', 'ann-sub').attr('text-anchor', 'middle').attr('x', gm).attr('y', gy + 4);
+      t.append('tspan').attr('x', gm).text(l1); if (l2) t.append('tspan').attr('x', gm).attr('dy', 14).text(l2);
+    } }
   addGuide(svg, x, top, top + plotH + stripH);
   // legend
   if (EXPORTING) return;
@@ -93,7 +101,9 @@ function drawA(el = document.getElementById('svgA')) {
     KIN.map(e => [e.date, e.state, e.system, e.target, TYPE_LABEL[e.type], e.altitude_km ?? '—', e.altitude_kind, num(e.fragments_cataloged), num(e.fragments_in_orbit), e.confidence, srcCell(e)]));
 }
 const srcCell = r => `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}`;
-function table(id, head, rows) {
-  document.getElementById(id).innerHTML = `<table><thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+// Accessible data table. Each cell carries data-label so CSS can stack rows as cards on phones (no horizontal scroll).
+const CAPTIONS = { tableA: 'Chart A data: kinetic counterspace tests, one row per event', tableB: 'Chart B data: states holding each capability, by decade', tableC: 'Chart C data: non-kinetic operations, one row per event or campaign', tableL: 'The lag: capability and response dates for each pair', tableLegal: 'Law and policy items with abbreviations' };
+function table(id, head, rows, caption = CAPTIONS[id]) {
+  document.getElementById(id).innerHTML = `<table>${caption ? `<caption>${esc(caption)}</caption>` : ''}<thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 

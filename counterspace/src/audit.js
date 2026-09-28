@@ -16,6 +16,21 @@ function audit() {
       if (w > 1.5 && h > 3) out.push({ chart: id, kind: 'overlap', a: a.s, b: b.s, w: Math.round(w), h: Math.round(h) });
     }
   });
+  return out.concat(auditHtml());
+}
+// Overlap tests for HTML boxes: scene labels (.hlabel, only those on screen) and legend items. Same record shape as the SVG checks.
+function auditHtml() {
+  const out = [], vis = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
+  const groups = [['scene-labels', [...document.querySelectorAll('.hlabel')].filter(e => vis(e) && e.textContent.trim() && e.closest('.stage, .view') && e.closest('.overlay:not(.open)') === null)],
+    ...[...document.querySelectorAll('ul.legend')].map(u => ['legend:' + u.id, [...u.children].filter(li => vis(li) && !li.classList.contains('lsep'))])];
+  groups.forEach(([chart, els]) => {
+    const rs = els.map(e => ({ s: e.textContent.trim().slice(0, 28), r: e.getBoundingClientRect() }));
+    for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) {
+      const a = rs[i].r, b = rs[j].r, w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+      if (w > 1.5 && h > 3) out.push({ chart, kind: 'overlap', a: rs[i].s, b: rs[j].s, w: Math.round(w), h: Math.round(h) });
+    }
+    if (chart === 'scene-labels') els.forEach((e, i) => { const box = e.closest('.stage, .view').getBoundingClientRect(), r = rs[i].r;
+      if (r.left < box.left - 0.5 || r.right > box.right + 0.5 || r.top < box.top - 0.5 || r.bottom > box.bottom + 0.5) out.push({ chart, kind: 'clip', a: rs[i].s }); });
+  });
   return out;
 }
-

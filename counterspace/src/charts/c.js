@@ -27,7 +27,7 @@ const C_LINE = 12.5;
 function drawC(el = document.getElementById('svgC')) {
   const dom = stateC.focus ? C_FOCUS() : DOMAIN;
   const { W, M, x } = layout(el, dom), phone = isPhoneNow();
-  const FS = 10.5, laneHead = 24, lanePad = 10, top = 8, R = W - M.r, HX = x(parse(LAST_DA)), RIGHT = W - 8;
+  const FS = 10.5, laneHead = 24, lanePad = 10, top = phone ? 22 : 8, R = W - M.r, HX = x(parse(LAST_DA)), RIGHT = W - 8;
   const XS = e => Math.max(M.l, x(parse(e.start)));
   const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: 99999 });
   let yCur = top; const placed = [];
@@ -82,8 +82,9 @@ function drawC(el = document.getElementById('svgC')) {
   LANES.forEach(l => { const t = l.label.toUpperCase(); pl.add(pl.textRect(M.l + 6, l.y0 + 14, 'start', tw(t, 10.5, 600) + t.length * 0.85, 10.5)); });
   // handoff line + label placed where it collides with nothing
   const hg = svg.append('g').attr('class', 'handoff').attr('aria-hidden', 'true');
-  hg.append('line').attr('x1', HX).attr('x2', HX).attr('y1', top).attr('y2', yCur);
+  hg.append('line').attr('x1', HX).attr('x2', HX).attr('y1', phone ? 16 : top).attr('y2', yCur);
   { const t = phone ? 'last destructive test' : 'Last destructive DA-ASAT test (Nov 2021)', w = tw(t, 11, 600); let ok = false;
+    if (phone) { hg.append('text').attr('y', 13).attr('text-anchor', HX + 5 + w > W - 4 ? 'end' : 'start').attr('x', HX + 5 + w > W - 4 ? W - 4 : HX + 5).text(t); ok = true; }
     for (let yy = top + 12; yy < yCur - 4 && !ok; yy += 4) for (const [a, dx] of [['end', -5], ['start', 5]]) {
       const q = pl.textRect(HX + dx, yy, a, w, 11); if (pl.free(q)) { hg.append('text').attr('x', HX + dx).attr('y', yy).attr('text-anchor', a).text(t); pl.add(q); ok = true; break; } } 
     if (!ok) hg.append('text').attr('x', HX - 5).attr('y', yCur - 6).attr('text-anchor', 'end').text(t); }

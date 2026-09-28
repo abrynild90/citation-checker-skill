@@ -16,7 +16,11 @@ function legalGlyph(sel, l) {
 const ZOOM = [parse('2021-06-01'), parse('2026-07-01')];
 function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.innerHTML = '';
-  const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN), phone = isPhoneNow() && !zoom, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
+  // On phones the band becomes a horizontally scrollable, fully labelled strip (desktop layout at STRIP_W px), scrolled to the recent cluster.
+  const strip = isPhoneNow() && !zoom && !EXPORTING && el.id === 'legalSvg';
+  el.style.overflowX = strip ? 'auto' : ''; el.tabIndex = strip ? 0 : -1; if (!strip) el.removeAttribute('tabindex');
+  if (strip) { el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Law and policy timeline, scrolls sideways'); } else { el.removeAttribute('role'); el.removeAttribute('aria-label'); }
+  const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300), phone = isPhoneNow() && !zoom && !strip, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
   const FS = 10.5, PITCH = 13, TP = phone ? 12 : compact ? 10 : 12, GS = phone ? 0.85 : compact ? 0.75 : 1;
   const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981') && (!zoom || ((l.end ? parse(l.end) : DOMAIN[1]) > ZOOM[0] && parse(l.start) < ZOOM[1])));
   const pts = LEGAL.filter(l => !spans.includes(l) && (!zoom || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) => a.start < b.start ? -1 : 1);
@@ -102,6 +106,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   rove(svg.selectAll('.mark'));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(zoom ? 1 : phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
+  if (strip) el.scrollLeft = el.scrollWidth;
 }
 let legalCompact = false;
 function legalScroll() {

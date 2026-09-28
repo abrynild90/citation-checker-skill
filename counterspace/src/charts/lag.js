@@ -33,12 +33,16 @@ function drawL(el = document.getElementById('svgL')) {
     g.append('rect').attr('class', 'hit').attr('x', 6).attr('y', y0 - 2).attr('width', W - 12).attr('height', rowH - 6).attr('rx', 6);
     const tx = phone ? 12 : Math.max(12, Math.min(Math.min(xa, xb) - 6, W - 12 - w));
     lines.forEach((s, i) => g.append('text').attr('x', tx).attr('y', y0 + (i + 1) * (FS + 3) - 2).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`).text(s));
-    g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 9)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
-    g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${yy}) scale(1.45)`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
-    if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yy}) scale(1.7)`), l);
+    // Short lags (glyphs would overprint): lift the milestone and drop the response, joined by an elbow connector; x stays truthful to the dates.
+    const short = l && Math.abs(xb - xa) < 30, ya = short ? yy - 10 : yy, yb = short ? yy + 10 : yy;
+    if (short) g.append('path').attr('d', `M${xa},${ya}H${xb}V${yb}`).style('fill', 'none').style('stroke', col).style('stroke-width', 2.5);
+    else g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 9)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
+    g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${ya}) scale(1.45)`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
+    if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yb}) scale(1.7)`), l);
     else g.append('circle').attr('cx', xb - 9).attr('cy', yy).attr('r', 8).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
     const lw = tw(lagTxt, 12, 600), mid = Math.max(14 + lw / 2, Math.min(W - 14 - lw / 2, (xa + xb) / 2));
-    g.append('text').attr('x', mid).attr('y', yy + 27).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
+    if (short) { const left = Math.min(xa, xb) - 16 - lw >= 4; g.append('text').attr('x', left ? Math.min(xa, xb) - 16 : Math.max(xa, xb) + 16).attr('y', yy + 4).attr('text-anchor', left ? 'end' : 'start').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt); }
+    else g.append('text').attr('x', mid).attr('y', yy + 27).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
     rows.push([p.text, c.date || c.start, l ? l.start : '—', l ? `${l.kind.replace('_', ' ')}${l.soft_law ? ' (soft law)' : ''}` : '—', l ? years.toFixed(1) : 'open', `${c.id}${l ? ' → ' + l.id : ''}`]);
     y0 += rowH; return g;
   });

@@ -208,6 +208,9 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .btn[aria-pressed="true"]{background:#8cc8ff;color:#0a0f1e}
 .panel input[type=range]{flex:1;min-width:120px;accent-color:#8cc8ff}
 .panel .spacer{flex:1}
+.skip{position:absolute;left:8px;top:-60px;z-index:200;background:var(--surface);color:var(--text);border:2px solid var(--focus);border-radius:8px;padding:8px 12px;font:600 14px var(--sans)}
+.skip:focus{top:8px}
+#timeline:focus{outline:none}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .flash-hl{animation:flash 1.6s ease 2}
 @keyframes flash{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px var(--focus))}}
@@ -225,6 +228,19 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   .lede{font-size:16px}
   .chart-head p{font-size:14.5px}
 }
+#legalSvg[role="region"] svg{width:auto;max-width:none}
+#legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
+caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:var(--muted)}
+/* data tables become stacked cards on phones: no sideways scrolling */
+@media (max-width:640px){
+  .tscroll{overflow:visible;border:0}
+  .tscroll table,.tscroll tbody,.tscroll tr,.tscroll td,.tscroll caption{display:block;width:100%}
+  .tscroll thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tscroll tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:4px 0;background:var(--surface)}
+  .tscroll td{display:grid;grid-template-columns:38% 1fr;gap:8px;border-bottom:1px solid var(--grid);padding:5px 10px;overflow-wrap:anywhere}
+  .tscroll td:last-child{border-bottom:0}
+  .tscroll td::before{content:attr(data-label);color:var(--muted);font-weight:600}
+}
 @media (prefers-reduced-motion: reduce){
   *{transition:none!important;animation:none!important}
 }
@@ -235,7 +251,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 </style>
 </head>
 <body>
-<a class="sr" href="#timeline">Skip to timeline</a>
+<a class="skip" href="#timeline">Skip to timeline</a>
 <header class="top wrap">
   <div class="top-grid"><div>
   <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
@@ -265,8 +281,8 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   </section>
 </div>
 
-<div id="timeline">
-  <div class="legal-band" id="legalBand" aria-label="Legal and policy responses, on the shared year axis">
+<div id="timeline" tabindex="-1">
+  <div class="legal-band" id="legalBand" role="region" aria-label="Legal and policy responses, on the shared year axis">
     <div class="wrap">
       <div class="band-head"><b>Law &amp; policy</b><span class="tools"><button class="btn small" data-export="legal" type="button">Export SVG</button></span></div>
       <div id="legalSvg"></div>
@@ -351,7 +367,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   </section>
 </div>
 </main>
-<footer class="wrap">Built for teaching. SWF material is used for facts only under CC BY-NC 4.0; no SWF or CSIS figures, graphics or prose are reproduced. No data is stored in your browser.</footer>
+<footer class="wrap" aria-label="Page footer">Built for teaching. SWF material is used for facts only under CC BY-NC 4.0; no SWF or CSIS figures, graphics or prose are reproduced. No data is stored in your browser.</footer>
 
 <div class="card" id="card" role="tooltip" aria-hidden="true"></div>
 

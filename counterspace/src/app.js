@@ -34,8 +34,8 @@ const hasScene = r => r.scene_3d && SCENES.some(s => s.id === r.scene_3d);
 
 let FORCE_DESKTOP = false, EXPORTING = false;
 const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < 640;
-function layout(el, domain = DOMAIN) {
-  const W = Math.max(300, el.clientWidth), ph = isPhoneNow();
+function layout(el, domain = DOMAIN, minW = 300) {
+  const W = Math.max(minW, el.clientWidth), ph = isPhoneNow();
   const M = { l: ph ? 40 : 64, r: ph ? 12 : 68 };
   const x = d3.scaleUtc().domain(domain).range([M.l, W - M.r]);
   return { W, M, x };
