@@ -109,6 +109,8 @@ h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .legal-band .band-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);min-height:32px}
 .lbls-hidden{display:none}
 [hidden]{display:none!important}
+.break-line{stroke:var(--accent);stroke-opacity:.55;stroke-width:1.5;stroke-dasharray:2 3}.break-tick{stroke:var(--text);stroke-width:1.5;fill:none}
+.whisker{stroke:var(--text);stroke-width:1.4;fill:none}.range-label{fill:var(--text);font:600 10.5px var(--sans)}
 .zoombox{fill:var(--accent);fill-opacity:.06;stroke:var(--accent);stroke-opacity:.4;stroke-dasharray:3 3}
 .legal-zoom{margin:12px 0 0;padding:8px 10px 2px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .legal-zoom .zoom-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:12.5px;color:var(--muted)}
@@ -218,6 +220,8 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
 .panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .panel aside{border-left:1px solid #2a3558;display:flex;flex-direction:column;min-height:0;overflow:hidden;font-size:14px;color:#cdd5e8}
+.panel .steps{margin:0 0 10px;font-size:13.5px}.panel .steps summary{cursor:pointer;color:#fff;font-weight:600;min-height:24px}
+.panel .steps ol{margin:6px 0 0;padding-left:20px}.panel .steps li{margin:0 0 5px}.panel .steps .st{color:#a9b3cc;font-size:12px;white-space:nowrap}
 .panel .aside-body:focus-visible{outline-offset:-3px}
 .panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 6px}
 .panel .aside-body p:first-child{margin-top:0}
@@ -242,6 +246,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(260px,1fr) auto auto;height:100%;border-radius:0}
   .overlay{padding:0}
   .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:36vh}
+  .panel .aside-body{padding-bottom:28px;scroll-padding-bottom:28px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent)}
   .panel .aside-body{padding:10px 12px 4px}
   .panel .aside-law{padding:6px 12px}
   .panel header{padding:8px 10px}
@@ -314,7 +319,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 </div>
 
 <div id="timeline" tabindex="-1">
-  <div class="legal-band" id="legalBand" role="region" aria-label="Legal and policy responses, on the shared year axis">
+  <div class="legal-band" id="legalBand" role="region" aria-label="Legal and policy responses, on a year axis with a marked break: 2021 to 2026 is expanded">
     <div class="wrap">
       <div class="band-head"><b>Law &amp; policy</b><span class="tools"><button class="btn small" data-export="legal" type="button">Export SVG</button></span></div>
       <div id="legalSvg"></div>
@@ -415,10 +420,12 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
         <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕<span class="lbl"> Close</span></button>
       </div>
     </header>
-    <div class="view" id="sceneView"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
+    <div class="view" id="sceneView" role="group" aria-label="Scene visual (illustrative)" aria-describedby="sceneCaption sceneSteps"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
     <aside>
       <div class="aside-body" tabindex="0" role="region" aria-label="Scene description and source">
         <p id="sceneCaption"></p>
+        <details class="steps" id="sceneStepsBox"><summary>What happens in this scene</summary>
+          <ol id="sceneSteps"></ol></details>
         <p class="src" id="sceneSrc"></p>
         <p class="src" id="sceneScale"></p>
       </div>
@@ -438,6 +445,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 </div>
 
 <script id="cs-data" type="application/json">/*__DATA__*/</script>
+<script id="cs-land" type="application/json">/*__LAND__*/</script>
 <script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script type="module">
 /*__APP__*/

@@ -11,15 +11,30 @@ export function renderSVG(sim, el, t = sim.still) {
   const U = 'sf' + (++svgSeq);
   const W = el.clientWidth || 640, H = el.clientHeight || 420;
   const cam = sim.cams[0].pos, zoomed = !!(sim.items._arc && sim.cams[0].look), cl = toLL(sim.cfg.staticCenter ? ll(sim.cfg.staticCenter[0], sim.cfg.staticCenter[1]) : zoomed ? sim.items._arc.mid : cam);
-  const shellR = Math.max(...sim.items.filter(i => i.kind === 'shell').map(i => i.r), 1.4);
-  let R = Math.min(W, H * 0.94) / (2 * Math.max(2.2, shellR + 0.3)) * (sim.cfg.staticZoom ?? (zoomed ? 2.5 : 1));
-  // Zoomed close-ups keep the whole globe inside the panel (no spill past the frame).
-  if (zoomed && sim.cfg.staticZoom == null) R = Math.min(R, 0.47 * Math.min(W, H));
-  const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([W / 2, H / 2 - 4]).scale(R).clipAngle(90);
-  const rot = d3.geoRotation([-cl.lon, -cl.lat]), CY = H / 2 - 4;
-  // Project any 3D point: orthographic along the camera direction, scaled by radius.
-  const project = p => { const q = toLL(p); const [lo, la] = rot([q.lon, q.lat]); const x = Math.cos(la * DEG) * Math.sin(lo * DEG), y = Math.sin(la * DEG); const front = Math.cos(la * DEG) * Math.cos(lo * DEG);
-    return { x: W / 2 + x * q.r * R, y: CY - y * q.r * R, hidden: front < 0 && Math.hypot(x * q.r, y * q.r) < 1 }; };
+  const rot = d3.geoRotation([-cl.lon, -cl.lat]);
+  // Unit projection (globe radius 1, origin at the globe centre, y down); scaled and shifted below once the fit is known.
+  const unit = p => { const q = toLL(p); const [lo, la] = rot([q.lon, q.lat]); const x = Math.cos(la * DEG) * Math.sin(lo * DEG), y = Math.sin(la * DEG); const front = Math.cos(la * DEG) * Math.cos(lo * DEG);
+    return { x: x * q.r, y: -y * q.r, hidden: front < 0 && Math.hypot(x * q.r, y * q.r) < 1 }; };
+  // Status text is wrapped first: its height is part of the fit.
+  const st = sim.items.find(i => i.kind === 'status'), stTxt = st ? st.text(t, true) : '', maxCh = Math.floor((W - 40) / 6.6), stLines = [];
+  if (st) { let cur = ''; for (const wd of stTxt.split(' ')) { if ((cur + ' ' + wd).trim().length > maxCh && cur) { stLines.push(cur); cur = wd; } else cur = (cur + ' ' + wd).trim(); } if (cur) stLines.push(cur); }
+  const stH = stLines.length * 16 + 10, stY = H - 34 - stH, stW = Math.min(W - 16, Math.max(...stLines.map(l => l.length), 1) * 6.6 + 24);
+  // General fit rule (all scenes, all widths): the globe with its glow and every drawn subject (paths, points, debris, beams)
+  // must sit inside the free area: below the banner, above the status/caption band, inside the side margins. The globe is never cropped.
+  let x0 = -1.08, x1 = 1.08, y0 = -1.08, y1 = 1.08;
+  const grow = p => { if (!p || p.hidden) return; x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); };
+  { for (const it of sim.items) {
+      if (it.kind === 'curve') it.pts(t).forEach(q => grow(unit(q)));
+      else if (it.kind === 'point' && !it.liveOnly) { const q = it.pos(t); if (q) grow(unit(q)); }
+      else if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { grow(unit(A)); grow(unit(B)); } }
+      else if (it.kind === 'cloud') { const arr = new Float32Array(it.n * 3), col = it.colored ? new Float32Array(it.n * 3) : null; it.fill(t, arr, col);
+        for (let k = 0; k < it.n; k += Math.max(1, Math.floor(it.n / 400))) if (arr[3 * k] || arr[3 * k + 1] || arr[3 * k + 2]) grow(unit([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]])); }
+    } }
+  const fx = 14, fTop = (W < 520 ? 56 : 42), fBot = stY - 8;
+  const R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
+  const CX = W / 2 - (x0 + x1) / 2 * R, CY = (fTop + fBot) / 2 - (y0 + y1) / 2 * R;
+  const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([CX, CY]).scale(R).clipAngle(90);
+  const project = p => { const u = unit(p); return { x: CX + u.x * R, y: CY + u.y * R, hidden: u.hidden }; };
   const path = d3.geoPath(proj);
   const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: static diagram`);
   const defs = svg.append('defs');
@@ -29,7 +44,7 @@ export function renderSVG(sim, el, t = sim.still) {
   const oc = defs.append('radialGradient').attr('id', `${U}-ocean`).attr('cx', '38%').attr('cy', '35%').attr('r', '80%');
   oc.append('stop').attr('offset', 0).attr('stop-color', '#1a4a7c'); oc.append('stop').attr('offset', 1).attr('stop-color', '#0a2040');
   // Lit globe: soft sphere shading + a blurred night side, from the same sun direction as the live scene.
-  const sh = defs.append('radialGradient').attr('id', `${U}-shade`).attr('gradientUnits', 'userSpaceOnUse').attr('cx', W / 2 - 0.28 * R).attr('cy', H / 2 - 4 - 0.3 * R).attr('r', 1.55 * R);
+  const sh = defs.append('radialGradient').attr('id', `${U}-shade`).attr('gradientUnits', 'userSpaceOnUse').attr('cx', CX - 0.28 * R).attr('cy', CY - 0.3 * R).attr('r', 1.55 * R);
   sh.append('stop').attr('offset', 0).attr('stop-color', '#fff').attr('stop-opacity', 0.16); sh.append('stop').attr('offset', 0.45).attr('stop-color', '#fff').attr('stop-opacity', 0); sh.append('stop').attr('offset', 0.45).attr('stop-color', '#000').attr('stop-opacity', 0);
   sh.append('stop').attr('offset', 1).attr('stop-color', '#000').attr('stop-opacity', 0.5);
   defs.append('filter').attr('id', `${U}-blur`).attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%').append('feGaussianBlur').attr('stdDeviation', Math.max(4, R * 0.05));
@@ -37,8 +52,8 @@ export function renderSVG(sim, el, t = sim.still) {
   svg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-bg)`);
   { const rs = mulberry(99); for (let k = 0; k < 90; k++) { const x = rs() * W, y = rs() * H, b = 0.25 + rs() * 0.5; svg.append('circle').attr('cx', x).attr('cy', y).attr('r', rs() < 0.15 ? 1.1 : 0.7).attr('fill', '#dfe8ff').attr('fill-opacity', b); } }
   const shells = sim.items.filter(i => i.kind === 'shell'), cands = [];
-  shells.forEach(it => svg.append('circle').attr('cx', W / 2).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
-  svg.append('circle').attr('cx', W / 2).attr('cy', CY).attr('r', R * 1.08).attr('fill', `url(#${U}-glow)`);
+  shells.forEach(it => svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
+  svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', R * 1.08).attr('fill', `url(#${U}-glow)`);
   svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
   svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
   // Ring winding is data-dependent: any ring that d3 reads as "more than a hemisphere" is reversed so it fills land, not the complement.
@@ -46,7 +61,7 @@ export function renderSVG(sim, el, t = sim.still) {
   svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#3b7a5e').attr('stroke', '#5fae8a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.7);
   { // Sun direction in the view basis; the terminator crosses the view axis at a = -sz (units of R), night is on the far side.
     const sd = toLL(sunFor(sim.sunRef)), [slo, sla] = rot([sd.lon, sd.lat]), sx = Math.cos(sla * DEG) * Math.sin(slo * DEG), sy = Math.sin(sla * DEG), sz = Math.cos(sla * DEG) * Math.cos(slo * DEG), pm = Math.hypot(sx, sy) || 1e-6;
-    const ux = sx / pm, uy = -sy / pm, cx = W / 2, cyy = CY, at = a => [cx + ux * a * R, cyy + uy * a * R];
+    const ux = sx / pm, uy = -sy / pm, cx = CX, cyy = CY, at = a => [cx + ux * a * R, cyy + uy * a * R];
     const [x1, y1] = at(-sz - 0.55), [x2, y2] = at(-sz + 0.25);
     const ng = defs.append('linearGradient').attr('id', `${U}-night`).attr('gradientUnits', 'userSpaceOnUse').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
     ng.append('stop').attr('offset', 0).attr('stop-color', '#01030a').attr('stop-opacity', 0.78); ng.append('stop').attr('offset', 1).attr('stop-color', '#01030a').attr('stop-opacity', 0);
@@ -56,7 +71,7 @@ export function renderSVG(sim, el, t = sim.still) {
     svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', 'none').attr('stroke', '#8cc8ff').attr('stroke-opacity', 0.55).attr('stroke-width', 1.2); }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
-  shells.forEach((it, i) => { if (!it.label) return; const a = (it.ang ?? 35 + i * 14) * DEG, px = W / 2 + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a); cands.push({ x: px, y: py, px, py, w: labelW(it.label), h: 19, fixed: true, text: it.label, color: it.color }); });
+  shells.forEach((it, i) => { if (!it.label) return; const a = (it.ang ?? 35 + i * 14) * DEG, px = CX + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a); cands.push({ x: px, y: py, px, py, w: labelW(it.label), h: 19, fixed: true, text: it.label, color: it.color }); });
   const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null) => { if (!p || p.hidden || !text) return; cands.push({ x: at ? at[0] * W : p.x + dx, y: at ? at[1] * H : p.y - 14 + dy, px: p.x, py: p.y, w: labelW(text), h: 19, text, color }); };
   for (const it of sim.items) {
     if (it.kind === 'dome') g.append('path').datum(d3.geoCircle().center([it.at[1], it.at[0]]).radius(it.radius)()).attr('d', path).attr('fill', it.color).attr('fill-opacity', 0.32).attr('stroke', it.color).attr('stroke-width', 1.6);
@@ -85,12 +100,8 @@ export function renderSVG(sim, el, t = sim.still) {
     if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4', it.labelDx, it.labelDy); }
     if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + (it.span ?? 0.14)) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
   }
-  // Status line: wrapped to the frame width so nothing clips on phones.
-  const st = sim.items.find(i => i.kind === 'status'), stTxt = st ? st.text(t, true) : '', maxCh = Math.floor((W - 40) / 6.6), stLines = [];
-  if (st) { let cur = ''; for (const wd of stTxt.split(' ')) { if ((cur + ' ' + wd).trim().length > maxCh && cur) { stLines.push(cur); cur = wd; } else cur = (cur + ' ' + wd).trim(); } if (cur) stLines.push(cur); }
-  const stH = stLines.length * 16 + 10, stY = H - 34 - stH, stW = Math.min(W - 16, Math.max(...stLines.map(l => l.length), 1) * 6.6 + 24);
   const reserved = [[8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26], [(W - stW) / 2, stY, stW, stH]];
-  cands.forEach(c => { if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, W / 2, CY, R * 1.08); });
+  cands.forEach(c => { if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, CX, CY, R * 1.08); });
   const pl = placeLabels(cands, W, H, reserved);
   cands.forEach((c, i) => { const q = pl[i]; if (!q) return;
     if (q.leader) { g.append('line').attr('x1', q.ax).attr('y1', q.ay).attr('x2', q.qx).attr('y2', q.qy).attr('stroke', c.color).attr('stroke-opacity', 0.8); g.append('circle').attr('cx', q.ax).attr('cy', q.ay).attr('r', 2).attr('fill', c.color); }

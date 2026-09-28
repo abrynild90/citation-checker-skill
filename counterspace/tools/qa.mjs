@@ -2,7 +2,9 @@
 // Checks: console errors, horizontal scroll, audit() at 3 viewports x 2 themes, live and static scene audits, exports,
 // axe-core (fetched from jsdelivr for the test only, never shipped), performance marks, and a visual-regression hash file.
 // Visual regression: each chart section's rendered SVG markup is hashed into $OUT/hashes.json (screenshots are saved beside it); if
-// tools/qa-baseline.json exists, changed sections are listed (write a new baseline with BASELINE=1). WebGL canvases are not hashed.
+// tools/qa-baseline.json exists, changed sections are listed (write a new baseline with BASELINE=1).
+// WebGL scenes (paused at a fixed scene time) and PNG stills (live and static) get a perceptual hash instead: the image is downscaled to
+// 24x16 luminance and compared with the baseline by mean absolute difference (PH_TOL of 255), because software GL jitters slightly.
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path'; import crypto from 'crypto';
 
@@ -17,7 +19,7 @@ const srv = http.createServer((q, r) => {
   fs.readFile(f, (e, b) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'content-type': f.endsWith('.html') ? 'text/html' : 'application/octet-stream' }); r.end(b); } });
 }).listen(PORT);
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--ignore-certificate-errors'] });
-const report = {}, hashes = {};
+const report = {}, hashes = {}, PH_TOL = 14, PH_STILLS = ['starfish', 'fengyun', 'cosmos1408'];
 
 async function run(name, opts, fn) {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, ...opts }), page = await ctx.newPage(), errs = [];
@@ -41,6 +43,18 @@ async function sectionHashes(p, key) {
     fs.writeFileSync(`${out}/${key}-${id}.png`, await p.screenshot({ fullPage: true, clip: box }));
   }
 }
+// Perceptual hash: 24x16 luminance grid (two-step downscale) as hex, stored under 'phash:<key>'. Input: PNG buffer or data URL.
+async function phash(p, key, img) {
+  const url = typeof img === 'string' ? img : 'data:image/png;base64,' + img.toString('base64');
+  hashes['phash:' + key] = await p.evaluate(async u => {
+    const im = new Image(); im.src = u; await im.decode();
+    const step = (src, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d', { willReadFrequently: true }); g.imageSmoothingQuality = 'high'; g.drawImage(src, 0, 0, w, h); return c; };
+    const g = step(step(im, 192, 128), 24, 16).getContext('2d', { willReadFrequently: true }), d = g.getImageData(0, 0, 24, 16).data; let s = '';
+    for (let i = 0; i < d.length; i += 4) s += Math.round(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]).toString(16).padStart(2, '0');
+    return s;
+  }, url);
+}
+const phDiff = (a, b) => { let t = 0; for (let i = 0; i < a.length; i += 2) t += Math.abs(parseInt(a.slice(i, i + 2), 16) - parseInt(b.slice(i, i + 2), 16)); return +(t / (a.length / 2)).toFixed(1); };
 async function axe(p) {
   try {
     await p.addScriptTag({ url: AXE_URL });
@@ -84,6 +98,11 @@ await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorSchem
     await p.evaluate(id => window.__cs.openScene(id), id); await p.waitForTimeout(2600);
     await p.screenshot({ path: `${out}/scene-${id}.png` });
     for (const f of await audit(p)) res.sceneAudit.push({ scene: id, ...f });
+    // Visual regression for the WebGL scene: pause at a fixed scene time so the frame is comparable between runs.
+    await p.evaluate(() => { const h = window.__cs.host(); h.playing = false; h.update(0.6); }); await p.waitForTimeout(700);
+    await phash(p, `scene-${id}`, await p.locator('#sceneView').screenshot());
+    if (PH_STILLS.includes(id)) await phash(p, `still-live-${id}`, await p.evaluate(() => window.__cs.exportStill()));
+    (res.sceneText ??= {})[id] = await p.evaluate(() => ({ steps: document.querySelectorAll('#sceneSteps li').length, describedby: document.getElementById('sceneView').getAttribute('aria-describedby') }));
     if (id === 'fengyun') res.still = await p.evaluate(async () => { const u = await window.__cs.exportStill(); const img = new Image(); img.src = u; await img.decode(); return [img.width, img.height, Math.round(u.length / 1024)]; });
     res.mem.push([id, await p.evaluate(() => window.__cs.memory()), await p.evaluate(() => window.__cs.contexts())]);
     await p.evaluate(() => window.__cs.closeScene()); await p.waitForTimeout(300);
@@ -115,7 +134,12 @@ for (const [name, vp, mobile] of [['static-375', { width: 375, height: 800 }, tr
     for (const id of await p.evaluate(() => window.__cs.scenes)) {
       await p.evaluate(id => window.__cs.openScene(id), id); await p.waitForTimeout(400);
       for (const f of await audit(p)) res.sceneAudit.push({ scene: id, ...f });
-      if (name === 'static-1440') res.stills.push([id, await p.evaluate(async () => { const img = new Image(); img.src = await window.__cs.exportStill(); await img.decode(); return img.width + 'x' + img.height; })]);
+      if (name === 'static-1440') {
+        const url = await p.evaluate(() => window.__cs.exportStill());
+        res.stills.push([id, await p.evaluate(async u => { const img = new Image(); img.src = u; await img.decode(); return img.width + 'x' + img.height; }, url)]);
+        await phash(p, `still-static-${id}`, url);
+      }
+      if (name === 'static-1440' || name === 'static-375') await phash(p, `static-${name}-${id}`, await p.locator('#sceneView').screenshot());
       await p.evaluate(() => window.__cs.closeScene());
     }
     await p.evaluate(() => window.__cs.openScene('starfish')); await p.waitForTimeout(500);
@@ -128,7 +152,10 @@ for (const [name, vp, mobile] of [['static-375', { width: 375, height: 800 }, tr
 // 4. Visual regression against the saved baseline (hashes of SVG sections).
 fs.writeFileSync(`${out}/hashes.json`, JSON.stringify(hashes, null, 1));
 if (process.env.BASELINE) fs.writeFileSync(BASELINE, JSON.stringify(hashes, null, 1));
-if (fs.existsSync(BASELINE)) { const base = JSON.parse(fs.readFileSync(BASELINE, 'utf8')); report.visualRegression = { changed: Object.keys(hashes).filter(k => base[k] && base[k] !== hashes[k]), missing: Object.keys(hashes).filter(k => !base[k]) }; }
+if (fs.existsSync(BASELINE)) { const base = JSON.parse(fs.readFileSync(BASELINE, 'utf8')); 
+  const ks = Object.keys(hashes), isP = k => k.startsWith('phash:'), perceptual = {};
+  ks.filter(k => isP(k) && base[k]).forEach(k => { perceptual[k] = phDiff(hashes[k], base[k]); });
+  report.visualRegression = { changed: ks.filter(k => !isP(k) && base[k] && base[k] !== hashes[k]), perceptualChanged: Object.keys(perceptual).filter(k => perceptual[k] > PH_TOL), perceptualMaxDiff: Math.max(0, ...Object.values(perceptual)), perceptualChecked: Object.keys(perceptual).length, tolerance: PH_TOL, missing: ks.filter(k => !base[k]) }; }
 else report.visualRegression = 'no baseline (run with BASELINE=1 to create tools/qa-baseline.json)';
 
 console.log(JSON.stringify(report, null, 1));

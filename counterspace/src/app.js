@@ -12,7 +12,9 @@ import { setLand, loadEarth, earthReady, EARTH_URL } from './scenes/earth.js';
 
 performance.mark('cs:module-start');
 const D = JSON.parse(document.getElementById('cs-data').textContent);
-setLand(D.land);
+// Land polygons (~57 KB) sit in their own script tag and are parsed on first use (hero, scene or static diagram), see ensureLand().
+let landDone = false;
+function ensureLand() { if (landDone) return; landDone = true; performance.mark('cs:land-parse'); setLand(JSON.parse(document.getElementById('cs-land').textContent)); }
 const EVENTS = D.events, LEGAL = D.legal, CAPS = D.caps;
 const KIN = EVENTS.filter(e => e.domain === 'kinetic');
 const NK = EVENTS.filter(e => e.domain === 'non_kinetic');

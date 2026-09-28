@@ -4,6 +4,7 @@
 // ============================================================================
 let THREE = null, host = null, glOK = null;
 async function getHost() {
+  ensureLand();
   if (REDUCED) return null;
   if (glOK === false) return null;
   try {
@@ -31,6 +32,10 @@ async function openScene(id, originEl) {
   document.getElementById('sceneSrc').innerHTML = `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}`;
   document.getElementById('sceneScale').textContent = `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale. Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
   const rel = document.getElementById('scRelated'); rel.disabled = !cfg.related; rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
+  // Text alternative for the visual: the scene's own status lines, in order, as an ordered list (t is the fraction of scene time).
+  const steps = document.getElementById('sceneSteps'), dur = cfg.duration || 0;
+  steps.innerHTML = (cfg.status || []).map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`).join('');
+  document.getElementById('sceneStepsBox').open = !isPhoneNow(); document.getElementById('sceneStepsBox').hidden = !(cfg.status || []).length;
   const sim = buildSim(cfg); const cams = document.getElementById('scCams'); cams.innerHTML = '';
   const h = await getHost();
   view.querySelector(':scope > svg')?.remove();
@@ -43,7 +48,7 @@ async function openScene(id, originEl) {
     renderSVG(sim, view);
   }
   staticMode(!h);
-  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''}`.trim());
+  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim());
   document.getElementById('scClose').focus();
 }
 // While the dialog is open the page behind it is inert (no focus, not read out).

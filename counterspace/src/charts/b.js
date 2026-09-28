@@ -44,7 +44,7 @@ function drawB(el = document.getElementById('svgB')) {
     p.append('rect').attr('width', 6).attr('height', 6).style('fill', `var(${s.v})`).style('fill-opacity', 0.14); p.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 6).style('stroke', `var(${s.v})`).style('stroke-width', 2.2); });
   const X2020 = x(parse('2020-01-01'));
   svg.append('rect').attr('x', M.l).attr('width', X2020 - M.l).attr('y', top).attr('height', plotH).style('fill', 'var(--recon)');
-  svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', top + 12).text(phone ? 'RECONSTRUCTED' : 'RECONSTRUCTED (NOT SWF-ASSESSED)');
+  svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', top + 12).text(phone ? 'RECONSTRUCTED' : 'RECONSTRUCTED (FADED, NOT SWF-ASSESSED)');
   { const t = svg.append('text').attr('class', 'band-label').attr('text-anchor', 'end').attr('x', W - M.r - 4);
     t.append('tspan').attr('x', W - M.r - 4).attr('y', top + 12).text(phone ? 'SWF 2026' : 'SWF 2026');
     t.append('tspan').attr('x', W - M.r - 4).attr('dy', 12).text(phone ? '13 states' : '13 STATES ASSESSED'); }
@@ -52,21 +52,37 @@ function drawB(el = document.getElementById('svgB')) {
   svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(d3.format('d')));
   svg.append('text').attr('class', 'ann-sub').attr('transform', `translate(12,${top + plotH / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(stateB.group === 'cat' ? 'State-capability pairs' : 'Unique states per group');
   const area = d3.area().x(d => x(d.data.x)).y0(d => y(d[0])).y1(d => y(d[1])).curve(d3.curveStepAfter);
-  svg.append('g').selectAll('path').data(stack).join('path').attr('d', area)
-    .style('fill', (d, i) => series[i].dev ? `url(#hatch-${series[i].key.replace(':', '-')})` : `var(${series[i].v})`).style('fill-opacity', (d, i) => series[i].dev ? 1 : 0.85)
-    .style('stroke', 'var(--bg)').style('stroke-width', 0.8).append('title').text((d, i) => series[i].label);
+  // Reconstructed decades (before 2020) are drawn faded with a dashed outline; SWF-assessed 2020s at full strength.
+  defs.append('clipPath').attr('id', 'clipRecon').append('rect').attr('x', M.l).attr('y', top).attr('width', X2020 - M.l).attr('height', plotH);
+  defs.append('clipPath').attr('id', 'clipSwf').append('rect').attr('x', X2020).attr('y', top).attr('width', W - M.r - X2020 + 1).attr('height', plotH);
+  [['clipRecon', 0.5, '3 2'], ['clipSwf', 1, null]].forEach(([clip, op, dash]) => {
+    svg.append('g').attr('clip-path', `url(#${clip})`).attr('class', clip === 'clipRecon' ? 'recon-fill' : 'swf-fill').style('opacity', op).selectAll('path').data(stack).join('path').attr('d', area)
+      .style('fill', (d, i) => series[i].dev ? `url(#hatch-${series[i].key.replace(':', '-')})` : `var(${series[i].v})`).style('fill-opacity', (d, i) => series[i].dev ? 1 : 0.85)
+      .style('stroke', dash ? 'var(--muted)' : 'var(--bg)').style('stroke-width', dash ? 0.9 : 0.8).style('stroke-dasharray', dash).append('title').text((d, i) => series[i].label + (dash ? ' (reconstructed decades)' : ''));
+  });
+  // Range marks: per decade a whisker from the lower bound (demonstrated only) to the upper bound (demonstrated + developing), with the numbers.
+  const dem = decs.map((d, i) => series.filter(s => !s.dev).reduce((a, s) => a + s.vals[i], 0)), tot = decs.map((d, i) => series.reduce((a, s) => a + s.vals[i], 0));
+  const rg = svg.append('g').attr('class', 'rangemarks');
+  decs.forEach((d, i) => {
+    const xa = x(xs[i]), xb = x(xs[i + 1]), cx = (xa + xb) / 2, lo = dem[i], hi = tot[i], unc = hi > lo, w = xb - xa;
+    if (unc && w > 22) { rg.append('path').attr('d', `M${cx - 3},${y(lo)}h6M${cx},${y(lo)}V${y(hi)}M${cx - 3},${y(hi)}h6`).attr('class', 'whisker'); }
+    if (w >= 34) rg.append('text').attr('class', 'range-label').attr('x', cx).attr('y', y(hi) - 6).attr('text-anchor', 'middle').text(unc ? `${lo}–${hi}` : `${hi}`);
+  });
   xAxis(svg, x, top + plotH);
   addGuide(svg, x, top, top + plotH);
   { const t = svg.append('text').attr('x', 4).attr('y', 14); let n = 0;
     annL.forEach(l => t.append('tspan').attr('class', 'ann').attr('x', 4).attr('dy', n++ ? 15 : 0).text(l));
     annS.forEach(l => t.append('tspan').attr('class', 'ann-sub').attr('x', 4).attr('dy', n++ ? 15 : 0).text(l)); }
   if (EXPORTING) return;
-  document.getElementById('noteB').textContent = stateB.group === 'cat'
+  document.getElementById('noteB').innerHTML = (stateB.group === 'cat'
     ? 'Vertical axis: state-capability pairs. A state with two capabilities is counted twice.'
-    : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.';
+    : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.')
+    + ' Numbers above each decade give the range: demonstrated only to demonstrated plus developing (whisker). In the 2020s the states are SWF-assessed but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part. See the <a href="#codingRules">coding rules</a>.';
   // legend + chips
   legend('legendB', 18, 12)
     .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted)"/>', 'Demonstrated (tested or used)')
+    .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted);fill-opacity:.4;stroke:var(--muted);stroke-dasharray:3 2"/>', 'Faded, dashed: reconstructed decade (not SWF-assessed)')
+    .item('<path d="M-3,-6h6M0,-6V6M-3,6h6" style="stroke:var(--text);stroke-width:1.4;fill:none"/>', 'Range: demonstrated only (low) to demonstrated + developing (high)', 18)
     .item('<defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#lh)"/>', 'Developing or latent').done();
   table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P'); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}`; })]));
 }
