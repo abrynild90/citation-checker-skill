@@ -80,7 +80,7 @@ export function buildSim(cfg) {
       items._arc = { from, to, mid: bez(0.5) };
       // Faint predicted path (whole arc, always visible) under the bright growing trail.
       items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028 });
-      items.push({ kind: 'curve', dynamic: true, all, thick: 0.0065, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
+      items.push({ kind: 'curve', dynamic: true, avoid: true, all, thick: 0.0065, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
         pts: t => { const s = clamp01((t - a.t0) / (tgt.t - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
       items.push({ kind: 'point', shape: 'kv', color: a.color, pos: t => (t > a.t0 && t < tgt.t) ? bez(clamp01((t - a.t0) / (tgt.t - a.t0))) : null });
       items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, size: a.flash ?? 0.3, span: 0.16 });
@@ -88,7 +88,7 @@ export function buildSim(cfg) {
     if (a.type === 'debris' && tgt) {
       const n = Math.min(a.count, PARTICLE_BUDGET);
       const P = []; for (let k = 0; k < n; k++) P.push({ da: gauss(rnd) * a.spreadAlt, di: gauss(rnd) * a.spreadInc, dr: gauss(rnd) * 0.4, dw: 1 + gauss(rnd) * a.dv, du: gauss(rnd) * 0.02, dec: a.decay * (0.4 + rnd() * 1.4) });
-      const cloud = { kind: 'cloud', n, color: a.color, size: a.size ?? (n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03), label: a.label, vis: 0,
+      const cloud = { kind: 'cloud', n, color: a.color, halo: a.halo, size: a.size ?? (n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03), label: a.label, vis: 0,
         fill(t, out) {
           const dt = t - tgt.t; let vis = 0;
           for (let k = 0; k < n; k++) {
@@ -113,7 +113,7 @@ export function buildSim(cfg) {
         const d = om < 1e-3 ? g0 : norm(add(scl(g0, w0), scl(g1, w1)));
         all.push(scl(d, rAlt(a.apex * Math.sin(Math.PI * s))));
       }
-      items.push({ kind: 'curve', dynamic: true, all, thick: a.thick, color: a.color, width: 2, label: a.label, labelDx: a.dx, labelDy: a.dy, staticAt: a.staticAt, labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
+      items.push({ kind: 'curve', dynamic: true, avoid: true, short: a.short, all, thick: a.thick, color: a.color, width: 2, label: a.label, labelDx: a.dx, labelDy: a.dy, staticAt: a.staticAt, labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
         pts: t => { const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
       if (a.marks) { // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]), tApex = a.t0 + (a.t1 - a.t0) * (a.apexT ?? 0.5);
@@ -173,16 +173,19 @@ export function buildSim(cfg) {
       });
       if (a.hub) { // illustrative ground management network: links from a hub to regional nodes, with a malware pulse running along them
         const hub = a.hub, N = 40, pulse = a.pulse;
-        items.push({ kind: 'point', shape: 'site', pos: () => ll(hub[0], hub[1], 1.004), color: '#7fd6ff', label: a.hubLabel, labelDx: a.hubDx, labelDy: a.hubDy });
+        // Ground segment under attack (SWF 15-06/15-07): the hub is compromised first (turns red, repeated red rings), malicious commands then run
+        // out along every management link (three packets per link, red trail), and each regional node flashes and turns red when the commands arrive.
+        items.push({ kind: 'point', shape: 'site', pos: () => ll(hub[0], hub[1], 1.004), color: '#7fd6ff', statusColor: t => t >= pulse[0] ? '#ff6b6b' : '#7fd6ff', scale: 1.5, label: a.hubLabel, short: a.hubShort, labelDx: a.hubDx, labelDy: a.hubDy });
         a.beams.forEach((b, bi) => {
           const all = groundArc(hub, b, N), q = k => all[Math.max(0, Math.min(N, Math.round(k * N)))];
-          const st = t => clamp01((t - pulse[0] - bi * 0.012) / (pulse[1] - pulse[0]));
+          const t0 = pulse[0] + bi * 0.012, st = t => clamp01((t - t0) / (pulse[1] - pulse[0])), arr = t0 + (pulse[1] - pulse[0]);
           items.push({ kind: 'curve', pts: () => all, color: '#7fd6ff', opacity: 0.38, thick: 0.0022 });
-          items.push({ kind: 'curve', dynamic: true, all, thick: 0.0045, color: '#ff5d5d', width: 2, pts: t => { const s = st(t); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
-          items.push({ kind: 'point', shape: 'kv', color: '#ff8a8a', pos: t => { const s = st(t); return s > 0 && s < 1 ? q(s) : null; } });
-          items.push({ kind: 'point', shape: 'site', small: true, color: '#7fd6ff', pos: () => all[N] });
+          items.push({ kind: 'curve', dynamic: true, all, thick: 0.0065, color: '#ff5d5d', width: 2, pts: t => { const s = st(t); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
+          for (let k = 0; k < 3; k++) items.push({ kind: 'point', shape: 'kv', kvSize: 0.07, color: '#ff8a8a', pos: t => { const s = st(t) - k * 0.22; return s > 0 && s < 1 && t < arr + 0.02 ? q(s) : null; } });
+          items.push({ kind: 'point', shape: 'site', small: true, scale: 1.3, color: '#7fd6ff', statusColor: t => t >= arr ? '#ff5d5d' : '#7fd6ff', pos: () => all[N] });
+          items.push({ kind: 'flash', pos: all[N], t0: arr, color: '#ffc0c0', ringColor: '#ff6b6b', size: 0.16, span: 0.09 });
         });
-        items.push({ kind: 'flash', at: hub, pos: ll(hub[0], hub[1], 1.01), t0: pulse[0], color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 });
+        [0, 0.05, 0.1].forEach(dt => items.push({ kind: 'flash', pos: ll(hub[0], hub[1], 1.01), t0: pulse[0] + dt, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.34, span: 0.16 }));
       }
       focus = focus || [30, a.lon];
     }
@@ -192,10 +195,10 @@ export function buildSim(cfg) {
       const nw = Math.max(...a.boxes.map(b => (b[5] ?? 0) + 1));
       a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => { const m = Math.round(a.count * frac); for (let k = 0; k < m; k++) P.push({ p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004), off: wave == null ? lerp(a.t0, a.t1, bi === 0 ? rnd() * 0.6 : 0.3 + rnd() * 0.7) : lerp(a.t0, a.t1, (wave + rnd() * 0.8) / nw) }); });
       const n = P.length;
-      items.push({ kind: 'cloud', n, size: 0.03, label: a.label, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
+      items.push({ kind: 'cloud', n, size: 0.045, label: a.label, short: a.short, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
         fill(t, out, col) {
           for (let k = 0; k < n; k++) { const q = P[k].p; out[3 * k] = q[0]; out[3 * k + 1] = q[1]; out[3 * k + 2] = q[2];
-            const dark = t > P[k].off, blink = dark && t < P[k].off + 0.05; col[3 * k] = blink ? 1 : dark ? 0.9 : 0.35; col[3 * k + 1] = blink ? 0.9 : dark ? 0.2 : 1.0; col[3 * k + 2] = blink ? 0.8 : dark ? 0.2 : 0.62; }
+            const dark = t > P[k].off, blink = dark && t < P[k].off + 0.07; col[3 * k] = blink ? 1 : dark ? 0.9 : 0.35; col[3 * k + 1] = blink ? 0.9 : dark ? 0.2 : 1.0; col[3 * k + 2] = blink ? 0.8 : dark ? 0.2 : 0.62; }
           return n;
         } });
       const dark = t => { let d = 0; for (let k = 0; k < n; k++) if (t > P[k].off) d++; return d; };
@@ -204,7 +207,7 @@ export function buildSim(cfg) {
     if (a.type === 'beam' && tgt) {
       const from = ll(a.from[0], a.from[1], 1.004);
       const su = norm(from); // beam is on while the satellite is above the site's horizon, within the window
-      items.push({ kind: 'beam', a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
+      items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
     }
   }
   // GNSS links: aircraft <-> 4 highest GPS satellites; red when inside zone.
@@ -223,7 +226,7 @@ export function buildSim(cfg) {
   const dist = cfg.camDist || 4.2;
   const wide = { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) }, polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
   let cams;
-  if (cfg.cameras) cams = cfg.cameras.map(c => ({ name: c.name, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }));
+  if (cfg.cameras) cams = cfg.cameras.map(c0 => { const c = IS_PHONE && c0.phone ? { ...c0, ...c0.phone } : c0; return { name: c.name, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }; });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) { // launch site through the intercept: a side-on camera looking at the middle of the arc
     const { from, to, mid } = items._arc, md = norm(mid), e1 = norm(add(to, scl(from, -1))), nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);

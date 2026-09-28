@@ -14,7 +14,7 @@ Object.assign(GLHost.prototype, {
   },
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
-  _labelPositions(w, h, u = 1, noBanner = false) {
+  _labelPositions(w, h, u = 1, noBanner = false, statusBox = null) {
     const cam = this.camera.position, T = this.T, raw = [], k = h / (this.el.clientHeight || h);
     for (const L of this.labels) {
       if (L.cls === 'shell' && this.hideShell) { raw.push(null); continue; }
@@ -28,9 +28,14 @@ Object.assign(GLHost.prototype, {
       if (L.item?.offGlobe) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), lm = this._limb(1, 0), c1 = new T.Vector3(...lm).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h, gr = Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy); [lx, ly] = offDisc(px, py, lw, lh, gx, gy, gr * 1.05); }
       raw.push({ x: lx, y: ly, px, py, w: lw, h: lh, fixed: L.cls === 'shell', text, color, avoidDisc: !!L.item?.offGlobe });
     }
-    const banner = noBanner ? [] : [[8 * u, 8 * u, Math.min(w - 16 * u, 430 * u), 32 * u]], status = this.status ? (w < 520 * u ? [8 * u, h - 56 * u, w - 16 * u, 48 * u] : [(w - 470 * u) / 2, h - 40 * u, 470 * u, 30 * u]) : null;
+    // Reserved areas are the real DOM boxes in the live view (banner, status caption); stills pass their own caption box.
+    const er = this.el.getBoundingClientRect(), rel = e => { const b = e.getBoundingClientRect(); return [b.left - er.left - 3, b.top - er.top - 3, b.width + 6, b.height + 6]; }, bn = noBanner ? null : this.el.querySelector('.illus');
+    const banner = noBanner ? [] : [bn ? rel(bn) : [8, 8, Math.min(w - 16, 430), 32]], status = noBanner ? statusBox : (this.status && this.statusEl ? rel(this.statusEl) : null);
     let disc = null; if (raw.some(r => r && r.avoidDisc)) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), c1 = new T.Vector3(...this._limb(1, 0)).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h; disc = { cx: gx, cy: gy, r: Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy) * 1.05 }; }
-    const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc);
+    const obst = [], vp = p => { const v = new T.Vector3(...p).project(this.camera); return [(v.x + 1) / 2 * w, (1 - v.y) / 2 * h, occluded([cam.x, cam.y, cam.z], p) || v.z > 1]; };
+    for (const it of this.obst || []) { let pts = it.kind === 'beam' ? (it.on(this.t) && it.a(this.t) && it.b(this.t) ? [it.a(this.t), it.b(this.t)] : []) : it.pts(this.t), cur = [];
+      const st = Math.max(1, Math.ceil(pts.length / 40)); for (let k = 0; k < pts.length; k += st) { const q = vp(pts[k]); if (q[2]) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push(q); } if (cur.length > 1) obst.push(cur); }
+    const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst);
     return raw.map((r, i) => r && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   _label(text, posFn, cls, item, dy = 0, dx = 0, short = null) {

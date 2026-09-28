@@ -16,7 +16,7 @@ color-scheme: dark;
 --c-us:#56B4E9; --c-ru:#FF8C5A; --c-cn:#F0C24B; --c-in:#3FD0A0; --c-ir:#CFA3E6;
 --c-kp:#FF9ECF; --c-il:#C3CDDE; --c-iq:#D9C38A; --c-multi:#B9C2D6;
 --cat-da:#FF8C5A; --cat-co:#F0C24B; --cat-ew:#56B4E9; --cat-de:#CFA3E6; --cat-cy:#3FD0A0;
---shadow:0 10px 30px rgba(0,0,0,.45);
+--shadow:0 10px 30px rgba(0,0,0,.45); --edge:rgba(0,0,0,.6);
 --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
 --sans: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
@@ -31,7 +31,7 @@ color-scheme: light;
 --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
 --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
 --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
---shadow:0 10px 30px rgba(0,0,0,.15);
+--shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
 }
 }
 :root[data-theme="light"]{
@@ -44,7 +44,7 @@ color-scheme: light;
 --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
 --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
 --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
---shadow:0 10px 30px rgba(0,0,0,.15);
+--shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -99,7 +99,10 @@ pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
 #timeline{position:relative}
 .legal-band{position:relative;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 0 2px}
 @media (min-width:761px){.legal-band{position:sticky;top:0;background:var(--bg)}}
-.legal-band.compact{box-shadow:0 6px 14px -8px rgba(0,0,0,.5)}
+.legal-band.compact{padding-bottom:8px;border-bottom:1px solid var(--accent);box-shadow:0 8px 16px -6px var(--edge)}
+.legal-band::after{content:'';position:absolute;left:0;right:0;top:100%;height:18px;background:linear-gradient(var(--bg),transparent);pointer-events:none;opacity:0;transition:opacity .12s}
+.legal-band.compact::after{opacity:1}
+.mnum{font:700 10.5px var(--sans);fill:var(--accent);paint-order:stroke;stroke:var(--bg);stroke-width:2.5px;stroke-linejoin:round;pointer-events:none}
 .legal-band.compact .tools{visibility:hidden}
 .legal-band .band-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);min-height:32px}
 .lbls-hidden{display:none}
@@ -118,6 +121,9 @@ pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
 .legal-list .ls{display:block;margin-left:0}
 @media (min-width:641px){.legal-list .ls{display:inline;margin-left:8px}.legal-list .ls::before{content:'— '}}
 .lsep{flex-basis:100%;height:0;margin:0}
+.legend li.lhead{flex-basis:100%;font:600 11px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:4px}
+.legend li.lhead:first-child{margin-top:0}
+.legend li b{color:var(--text);font-weight:600}
 .legend li.wide{flex-basis:100%;align-items:flex-start}
 .only-phone{display:none}
 @media (max-width:640px){.hide-phone{display:none}}
@@ -131,7 +137,7 @@ pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
 .legal-tap b{color:var(--text)}
 .legal-tap .btn{margin-left:4px}
 section.chart{padding:26px 0 8px;border-bottom:1px solid var(--grid);scroll-margin-top:8px}
-@media (min-width:761px){section.chart{scroll-margin-top:120px}}
+@media (min-width:761px){section.chart{scroll-margin-top:var(--band-h,134px)}}
 .chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:flex-end}
 .chart-head p{margin:2px 0 0;color:var(--muted);max-width:760px;font-size:15px}
 .tools{display:flex;gap:6px;flex-wrap:wrap}
@@ -210,7 +216,7 @@ display:grid;grid-template-columns:1fr 320px;grid-template-rows:auto 1fr auto;ov
 .panel .steps{margin:0 0 10px;font-size:13.5px}.panel .steps summary{cursor:pointer;color:#fff;font-weight:600;min-height:24px}
 .panel .steps ol{margin:6px 0 0;padding-left:20px}.panel .steps li{margin:0 0 5px}.panel .steps .st{color:#a9b3cc;font-size:12px;white-space:nowrap}
 .panel .aside-body:focus-visible{outline-offset:-3px}
-.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 6px}
+.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 26px;scroll-padding-bottom:26px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent)}
 .panel .aside-body p:first-child{margin-top:0}
 .panel .aside-law{flex:none;padding:8px 14px;border-top:1px solid #2a3558}
 .panel .aside-law .btn{width:100%;justify-content:flex-start;text-align:left;line-height:1.25;height:auto;min-height:36px}
@@ -233,7 +239,7 @@ display:grid;grid-template-columns:1fr 320px;grid-template-rows:auto 1fr auto;ov
 .overlay{padding:0}
 .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:36vh}
 .panel .aside-body{padding-bottom:28px;scroll-padding-bottom:28px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent)}
-.panel .aside-body{padding:10px 12px 4px}
+.panel .aside-body{padding:10px 12px 28px}
 .panel .aside-law{padding:6px 12px}
 .panel header{padding:8px 10px}
 .panel header h2{font-size:15px;line-height:1.2}
@@ -313,7 +319,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div class="wrap">
     <ul class="legend" id="legendLegal" aria-label="Legal band key"></ul>
     <div class="legal-zoom" id="legalZoomBox">
-      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged so the crowded 2022–25 items can carry fuller labels. Marks on the main band are stacked in tracks; a thin leader runs from each to its true date. Tap or focus a mark for its citation.</span></div>
+      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged so the crowded 2022–25 items can carry fuller labels. On wide screens the main band numbers these marks and keys them beside the window; a thin stem runs from each down to its true date on the axis. Tap or focus a mark for its citation.</span></div>
       <div id="legalZoom"></div>
     </div>
     <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list" id="legalList"></ul></details>
@@ -466,45 +472,66 @@ return { raan: lon - dl / DEG, u };
 }
 function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const gauss = rnd => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
-function placeLabels(list, W, H, reserved = [], disc = null) {
-const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [];
+function placeLabels(list, W, H, reserved = [], disc = null, obst = []) {
+const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], M = 4;
 const out = new Array(list.length).fill(null);
-const order = list.map((_, i) => i).sort((a, b) => ((list[b] && list[b].fixed) ? 1 : 0) - ((list[a] && list[a].fixed) ? 1 : 0) || a - b);
-const inBox = (x, y, b, pad) => Math.abs(x - b.x) < b.w / 2 + pad && Math.abs(y - b.y) < b.h / 2 + pad;
-const crossings = (x1, y1, x2, y2, skip) => { let n = 0; for (const b of boxes) { if (b === skip) continue; for (let u = 0.05; u < 0.96; u += 0.05) if (inBox(x1 + (x2 - x1) * u, y1 + (y2 - y1) * u, b, 1)) { n++; break; } } return n; };
-const segHitsBox = (s, b) => { for (let u = 0; u <= 1; u += 0.05) if (inBox(s[0] + (s[2] - s[0]) * u, s[1] + (s[3] - s[1]) * u, b, 1)) return true; return false; };
+const order = list.map((_, i) => i).filter(i => list[i]).sort((a, b) => ((list[b] && list[b].fixed) ? 1 : 0) - ((list[a] && list[a].fixed) ? 1 : 0) || a - b);
+const segBox = (x1, y1, x2, y2, b) => {
+const l = b.x - b.w / 2 + 1, r = b.x + b.w / 2 - 1, t = b.y - b.h / 2 + 1, bt = b.y + b.h / 2 - 1; let u0 = 0, u1 = 1; const dx = x2 - x1, dy = y2 - y1;
+for (const [p, q] of [[-dx, x1 - l], [dx, r - x1], [-dy, y1 - t], [dy, bt - y1]]) { if (p === 0) { if (q < 0) return false; } else { const u = q / p; if (p < 0) { if (u > u1) return false; if (u > u0) u0 = u; } else { if (u < u0) return false; if (u < u1) u1 = u; } } }
+return u1 - u0 > 0.02;
+};
+const segSeg = (a, b) => { const d = (b[3] - b[1]) * (a[2] - a[0]) - (b[2] - b[0]) * (a[3] - a[1]); if (Math.abs(d) < 1e-9) return false; const ua = ((b[2] - b[0]) * (a[1] - b[1]) - (b[3] - b[1]) * (a[0] - b[0])) / d, ub = ((a[2] - a[0]) * (a[1] - b[1]) - (a[3] - a[1]) * (a[0] - b[0])) / d; return ua > 0.02 && ua < 0.98 && ub > 0.02 && ub < 0.98; };
+const polyCross = (a, pl) => { for (let k = 0; k + 1 < pl.length; k++) if (segSeg(a, [pl[k][0], pl[k][1], pl[k + 1][0], pl[k + 1][1]])) return true; return false; };
+const polyBox = (pl, b) => { for (let k = 0; k + 1 < pl.length; k++) if (segBox(pl[k][0], pl[k][1], pl[k + 1][0], pl[k + 1][1], b)) return true; return false; };
+const run = order => {
+const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], out = new Array(list.length).fill(null); let total = 0;
 for (const i of order) {
-const c = list[i]; if (!c) continue;
-const { w, h } = c, gap = 3;
-const cx = x => Math.max(w / 2 + 6, Math.min(W - w / 2 - 6, x)), cy = y => Math.max(h / 2 + 3, Math.min(H - h / 2 - 3, y));
-const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + gap && Math.abs(y - b.y) < (h + b.h) / 2 + 1 ? 1 : 0), 0);
+const c = list[i]; if (!c || !isFinite(c.x + c.y + c.px + c.py)) continue;
+if (reserved.some(r => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) continue;
+const { w, h } = c;
+const cx = x => Math.max(w / 2 + M, Math.min(W - w / 2 - M, x)), cy = y => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
+const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
+const cost = (x, y) => {
+const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), lead = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
+let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01;
+if (lead) { n += Math.hypot(qx - c.px, qy - c.py) * 0.04; for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600; for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500; }
+if (lead) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += 550;
+const me = { x, y, w, h }; for (let o = 0; o < list.length; o++) { const q = list[o]; if (q && q !== c && Math.abs(q.px - x) < w / 2 + 2 && Math.abs(q.py - y) < h / 2 + 2) n += 400; }
+for (const pl of obst) if (polyBox(pl, me)) n += 650;
+for (const s of segs) if (segBox(s[0], s[1], s[2], s[3], me)) n += 600;
+if (disc && c.avoidDisc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.35) { const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0), dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0); if (Math.hypot(dx0, dy0) < disc.r) n += 900; }
+return n;
+};
 const cand = [[0, 0]];
 for (let k = 1; k <= 8; k++) cand.push([0, -k * h * 1.12], [0, k * h * 1.12]);
 for (const j of [0, -1, 1, -2, 2, -3, 3]) { cand.push([w * 0.55 + 14, j * h * 1.12], [-(w * 0.55 + 14), j * h * 1.12]); }
 for (const m of [1.4, 2.2, 3.2]) for (let a = 0; a < 8; a++) cand.push([Math.cos(a * Math.PI / 4) * (w * 0.55 + 14) * m, Math.sin(a * Math.PI / 4) * (h * 1.6) * m]);
 let best = null, bestN = 1e9;
-for (const [dx, dy] of cand) {
-const x = cx(c.x + dx), y = cy(c.y + dy), me = { x, y, w, h };
-const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), lead = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
-let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01;
-if (lead) { n += crossings(c.px, c.py, qx, qy, null) * 600 + Math.hypot(qx - c.px, qy - c.py) * 0.04; }
-for (const s of segs) if (segHitsBox(s, me)) n += 600;
-if (disc && c.avoidDisc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.35) { const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0), dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0); if (Math.hypot(dx0, dy0) < disc.r) n += 900; }
-if (n < bestN) { best = [x, y]; bestN = n; if (n < 0.5) break; }
-}
-const [x, y] = best; boxes.push({ x, y, w, h });
+const tryAt = (x, y) => { const n = cost(x, y); if (n < bestN) { best = [x, y]; bestN = n; } return n; };
+for (const [dx, dy] of cand) if (tryAt(cx(c.x + dx), cy(c.y + dy)) < 0.5) break;
+if (bestN >= 500) for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += Math.max(4, h * 0.4)) for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += Math.max(6, w * 0.12)) tryAt(gx, gy);
+total += bestN; const [x, y] = best; boxes.push({ x, y, w, h });
 const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), leader = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
 if (leader) segs.push([c.px, c.py, qx, qy]);
 out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy };
 }
-return out;
+return { out, total };
+};
+const fx = order.filter(i => list[i] && list[i].fixed), rest = order.filter(i => !(list[i] && list[i].fixed)), tries = [order, fx.concat(rest.slice().reverse()), fx.concat(rest.slice().sort((p, q) => (list[p].py || 0) - (list[q].py || 0))), fx.concat(rest.slice().sort((p, q) => (list[q].py || 0) - (list[p].py || 0))), fx.concat(rest.slice().sort((p, q) => (list[p].px || 0) - (list[q].px || 0))), fx.concat(rest.slice().sort((p, q) => (list[q].px || 0) - (list[p].px || 0)))];
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+for (let k = 0; k < 12; k++) { const r = rest.slice(); for (let j = r.length - 1; j > 0; j--) { const m = Math.floor(rnd() * (j + 1)); [r[j], r[m]] = [r[m], r[j]]; } tries.push(fx.concat(r)); }
+let bestRun = null;
+for (const o of tries) { const r = run(o); if (!bestRun || r.total < bestRun.total) bestRun = r; if (bestRun.total < 300) break; }
+return bestRun.out;
 }
 function offDisc(x, y, w, h, cx, cy, r) {
 let dx = x - cx, dy = y - cy; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
 const need = r + Math.abs(dx) * w / 2 + Math.abs(dy) * h / 2 + 12;
 return d >= need ? [x, y] : [cx + dx * need, cy + dy * need];
 }
-const labelW = (text, u = 1) => (text.length * 6.9 + 16) * u;
+let _mctx; const _mw = {};
+const labelW = (text, u = 1) => { let w = _mw[text]; if (w == null) { try { _mctx ||= document.createElement('canvas').getContext('2d'); _mctx.font = '600 11px system-ui,sans-serif'; w = _mctx.measureText(text).width; } catch (e) { w = text.length * 6.6; } _mw[text] = w; } return (w + 16) * u; };
 const C = { tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', gps: '#9be7c4', jam: '#ff5d5d', ok: '#6ee7a8', laser: '#ff4fd8', geo: '#ffcf6e', belt: '#b28cff', ground: '#e9edf7' };
 const SCENES = [
 { id: 'starfish', date: '1962-07-09', title: 'Starfish Prime (1962)', shells: ['LEO'], duration: 14,
@@ -526,7 +553,7 @@ actors: [
 { type: 'aircraft', path: [[32.5, -114.0], [35.0, -124.0]], alt: 12, t0: 0.0, t1: 0.24, label: 'F-15 zoom climb', dx: -96, dy: 30 },
 { type: 'target', label: 'Solwind P78-1', color: C.tgt, big: 2.0, bright: true },
 { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42 },
-{ type: 'debris', count: 285, spreadAlt: 120, spreadInc: 0.9, dv: 0.6, decay: 0.9, color: '#ffc79a', size: 0.04 },
+{ type: 'debris', count: 285, spreadAlt: 150, spreadInc: 1.5, dv: 0.6, decay: 0.9, color: '#ffd2a6', size: 0.048, halo: true },
 ], still: 0.56, status: [[0, 'F-15 climbs over the Pacific'], [0.24, 'Missile released; homing vehicle rises to the satellite'], [0.5, 'Collision at ~530 km; fragments spread and decay'], [0.75, 'Time compressed: SWF counts 285 tracked fragments, all since decayed']] },
 { id: 'fengyun', date: '2007-01-11', title: 'Fengyun-1C (2007)', shells: ['LEO'], duration: 16,
 caption: 'China’s SC-19 interceptor strikes the Fengyun-1C weather satellite at about 880 km (SWF Table 5-1). At that altitude, fragments stay up for decades. They spread along the old orbit into a ring around the planet. It remains the largest debris-generating event on record.',
@@ -547,18 +574,18 @@ actors: [
 { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie' },
 { type: 'target', label: 'USA-193', color: C.tgt, big: 2.0, bright: true, fall: [{ k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 }, { k: 1.25, di: -0.3, dr: -0.012, dw: 1.05 }, { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 }] },
 { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42 },
-{ type: 'debris', count: 175, spreadAlt: 70, spreadInc: 1.0, dv: 0.6, decay: 4.5, color: '#ffc79a', size: 0.04 },
+{ type: 'debris', count: 175, spreadAlt: 90, spreadInc: 1.6, dv: 0.6, decay: 3.2, color: '#ffd2a6', size: 0.048, halo: true },
 ], still: 0.47, status: [[0, 'Interceptor rises toward the satellite'], [0.42, 'Collision at ~220 km; low-altitude fragments decay quickly'], [0.6, 'Time compressed: SWF reports ~20 months to de-orbit entirely']] },
 { id: 'dn2', date: '2013-05-13', title: 'DN-2 “high-altitude science” launch (2013)', shells: ['LEO', 'MEO', 'GEO'], duration: 14,
 caption: 'A rocket from Xichang climbs on a suborbital path toward the geostationary belt and falls back over the Indian Ocean. China said it reached 10,000 km. US officials said it went nearly to GEO. SWF cites an analysis putting the apogee at 30,000 km or more. There was no target. The launch showed reach, not an intercept.',
 cite: 'SWF 2026, pp. 03-20, 03-22.', related: null, event: 'cn-2013-dn2',
 actors: [
 { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-{ type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: '#ff7a7a', thick: 0.011, label: 'DN-2 path (no target: not an intercept)', labelIdx: 0.12, dx: -40, dy: -50, head: true, apexT: 0.47, staticAt: [0.6, 0.09],
-marks: [{ alt: 10000, label: '10,000 km: China’s stated figure', short: '10,000 km · China', color: '#ffd9a0', dx: -70, dy: 52, staticAt: [0.66, 0.78] }, { alt: 30000, label: 'Apogee ≥30,000 km (analysis cited by SWF)', short: '≥30,000 km · SWF-cited', color: '#ff9c9c', apex: true, dx: -96, dy: -58, staticAt: [0.6, 0.18] }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO · 35,786 km', color: C.geo, dx: 24, dy: 58, staticAt: [0.3, 0.7] }] },
+{ type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: '#ff7a7a', thick: 0.011, label: 'DN-2 path (no target: not an intercept)', short: 'DN-2 path · no target', labelIdx: 0.12, dx: -40, dy: -50, head: true, apexT: 0.47, staticAt: [0.6, 0.09],
+marks: [{ alt: 10000, label: '10,000 km · China’s stated figure', short: '10,000 km · China', color: '#ffd9a0', dx: -70, dy: 52, staticAt: [0.66, 0.78] }, { alt: 30000, label: 'Apogee ≥30,000 km (SWF-cited)', short: '≥30,000 km · SWF', color: '#ff9c9c', apex: true, dx: -96, dy: -58, staticAt: [0.6, 0.18] }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO · 35,786 km', color: C.geo, dx: 24, dy: 58, staticAt: [0.3, 0.7] }] },
 { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.012, opacity: 0.95, sats: 10 },
-], still: 0.62, camDist: 7.5, stillCam: { at: [26, 58, 6.5], look: [0, 62, 0.5] }, status: [[0, 'Rocket climbs from Xichang on a suborbital path'], [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)'], [0.8, 'Falls back over the Indian Ocean · no target: reach, not an intercept']], shellLabels: { MEO: null, GEO: null },
-cameras: [{ name: 'Profile', at: [22, 8, 6.7], look: [0, 62, 0.5] }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
+], still: 0.62, camDist: 7.5, stillCam: { at: [22, 8, 6.4], look: [0, 94, 0.6] }, status: [[0, 'Rocket climbs from Xichang on a suborbital path'], [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)'], [0.8, 'Falls back over the Indian Ocean · no target: reach, not an intercept']], shellLabels: { MEO: null, GEO: null },
+cameras: [{ name: 'Profile', at: [22, 8, 6.0], look: [0, 96, 0.6], phone: { at: [24, 24, 4.9], look: [0, 100, 0.7] } }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
 { id: 'shakti', date: '2019-03-27', title: 'Mission Shakti (2019)', shells: ['LEO'], duration: 12,
 caption: 'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
 cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-03.', related: 'unga-77-41', event: 'in-2019-shakti',
@@ -567,7 +594,7 @@ actors: [
 { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
 { type: 'target', label: 'Microsat-R', color: C.tgt, big: 1.9, bright: true },
 { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55 },
-{ type: 'debris', count: 130, spreadAlt: 110, spreadInc: 1.0, dv: 0.6, drift: 0.15, decay: 5, color: '#ffc79a', size: 0.04 },
+{ type: 'debris', count: 130, spreadAlt: 130, spreadInc: 1.6, dv: 0.6, drift: 0.15, decay: 3.5, color: '#ffd2a6', size: 0.048, halo: true },
 ], still: 0.43, status: [[0, 'PDV Mk-II rises from Abdul Kalam Island'], [0.38, 'Collision at ~300 km; fragments spread and decay quickly'], [0.65, 'Time compressed: SWF counts 130 cataloged pieces, none still in orbit']] },
 { id: 'cosmos1408', date: '2021-11-15', title: 'Nudol vs. Cosmos 1408 (2021)', shells: ['LEO'], duration: 16,
 caption: 'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 at about 470 km. The debris cloud spreads across altitudes that cross the International Space Station’s orbit (about 420 km), and the ISS crew sheltered in their docked spacecraft. SWF counts 1,807 cataloged fragments, 5 still in orbit as of February 2026.',
@@ -594,14 +621,14 @@ actors: [
 caption: 'Within hours of Russian troops crossing into Ukraine in February 2022, attackers pushed destructive “AcidRain” malware through KA-SAT’s ground management network. Tens of thousands of user modems in Ukraine and across Europe went dark. The satellite itself kept working: the attack hit the ground segment.',
 cite: 'SWF 2026, pp. 15-06 to 15-07 (attributed to Russia by the US, UK and EU, May 2022).', related: 'tallinn-2017', event: 'ru-2022-viasat',
 actors: [
-{ type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', color: C.geo, dimT0: 0.4, dimT1: 0.7, hub: [46, 8], hubLabel: 'Ground management network (illustrative)', hubDx: -60, hubDy: 40, pulse: [0.1, 0.3], beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
-{ type: 'terminals', boxes: [[44, 52, 22, 40, 0.34, 0], [47, 55, 6, 22, 0.28, 1], [43, 50, -6, 8, 0.2, 2], [54, 60, 6, 26, 0.18, 3]], count: 900, pulse0: 0.1, t0: 0.3, t1: 0.62, label: 'Ground terminals (modems)' },
+{ type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', color: C.geo, dimT0: 0.4, dimT1: 0.7, hub: [46, 8], hubLabel: 'Ground management network (illustrative)', hubShort: 'Ground network', hubDx: -60, hubDy: 40, pulse: [0.1, 0.3], beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
+{ type: 'terminals', boxes: [[44, 52, 22, 40, 0.34, 0], [47, 55, 6, 22, 0.28, 1], [43, 50, -6, 8, 0.2, 2], [54, 60, 6, 26, 0.18, 3]], count: 900, pulse0: 0.1, t0: 0.3, t1: 0.62, label: 'Ground terminals (modems)', short: 'Terminals' },
 { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
 { type: 'flash', at: [51, 14, 0], t0: 0.38, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
 { type: 'flash', at: [46, 1, 0], t0: 0.46, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
 { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
 ], still: 0.75, camDist: 4.9, focus: [33, 12], shellLabels: { GEO: null }, staticZoom: 1.5,
-cameras: [{ name: 'Europe + GEO', at: [22, -12, 5.0], look: [16, 10, 1.7] }, { name: 'Ground network', at: [42, -2, 2.3], look: [46, 14, 1.0] }, { name: 'Wide', at: [30, -6, 6.5] }] },
+cameras: [{ name: 'Europe + GEO', at: [26, -10, 5.0], look: [20, 9, 1.8], phone: { at: [24, -10, 5.8], look: [14, 8, 2.0] } }, { name: 'Ground network', at: [42, -2, 2.3], look: [46, 14, 1.0] }, { name: 'Wide', at: [30, -6, 6.5] }] },
 { id: 'laser', date: '1997-10-17', title: 'MIRACL laser test on MSTI-3 (1997)', shells: ['LEO'], duration: 12,
 caption: 'In October 1997 the US fired the MIRACL chemical laser at MSTI-3, a retired US Air Force experimental satellite that carried infrared sensors. MIRACL is now part of a test facility at White Sands Missile Range, New Mexico, where this diagram places the site. A low-power beam can dazzle a satellite’s optical sensor; a high-power beam could damage it. SWF describes Russia’s Peresvet as a mobile laser dazzler; the animated view has a Russia camera marking the shelter sites SWF names (Teykovo, Yoshkar-Ola, Novosibirsk). No beam is drawn for Peresvet.',
 cite: 'SWF 2026, p. 01-35 (MIRACL); pp. 02-35 to 02-36 (Peresvet shelter sites; site markers approximate).', related: null, event: 'us-1997-miracl',
@@ -696,7 +723,7 @@ const bez = s => add(add(scl(from, (1 - s) * (1 - s)), scl(ctrl, 2 * (1 - s) * s
 const N = 60, all = []; for (let k = 0; k <= N; k++) all.push(bez(k / N));
 items._arc = { from, to, mid: bez(0.5) };
 items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028 });
-items.push({ kind: 'curve', dynamic: true, all, thick: 0.0065, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
+items.push({ kind: 'curve', dynamic: true, avoid: true, all, thick: 0.0065, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
 pts: t => { const s = clamp01((t - a.t0) / (tgt.t - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
 items.push({ kind: 'point', shape: 'kv', color: a.color, pos: t => (t > a.t0 && t < tgt.t) ? bez(clamp01((t - a.t0) / (tgt.t - a.t0))) : null });
 items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, size: a.flash ?? 0.3, span: 0.16 });
@@ -704,7 +731,7 @@ items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, siz
 if (a.type === 'debris' && tgt) {
 const n = Math.min(a.count, PARTICLE_BUDGET);
 const P = []; for (let k = 0; k < n; k++) P.push({ da: gauss(rnd) * a.spreadAlt, di: gauss(rnd) * a.spreadInc, dr: gauss(rnd) * 0.4, dw: 1 + gauss(rnd) * a.dv, du: gauss(rnd) * 0.02, dec: a.decay * (0.4 + rnd() * 1.4) });
-const cloud = { kind: 'cloud', n, color: a.color, size: a.size ?? (n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03), label: a.label, vis: 0,
+const cloud = { kind: 'cloud', n, color: a.color, halo: a.halo, size: a.size ?? (n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03), label: a.label, vis: 0,
 fill(t, out) {
 const dt = t - tgt.t; let vis = 0;
 for (let k = 0; k < n; k++) {
@@ -729,7 +756,7 @@ const s = k / N; const w0 = Math.sin((1 - s) * om) / Math.sin(om || 1), w1 = Mat
 const d = om < 1e-3 ? g0 : norm(add(scl(g0, w0), scl(g1, w1)));
 all.push(scl(d, rAlt(a.apex * Math.sin(Math.PI * s))));
 }
-items.push({ kind: 'curve', dynamic: true, all, thick: a.thick, color: a.color, width: 2, label: a.label, labelDx: a.dx, labelDy: a.dy, staticAt: a.staticAt, labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
+items.push({ kind: 'curve', dynamic: true, avoid: true, short: a.short, all, thick: a.thick, color: a.color, width: 2, label: a.label, labelDx: a.dx, labelDy: a.dy, staticAt: a.staticAt, labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
 pts: t => { const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
 if (a.marks) { // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
 const d = norm(all[N >> 1]), tApex = a.t0 + (a.t1 - a.t0) * (a.apexT ?? 0.5);
@@ -788,16 +815,17 @@ items.push({ kind: 'beam', a: () => m, b: () => e, on: () => true, color: a.colo
 });
 if (a.hub) { // illustrative ground management network: links from a hub to regional nodes, with a malware pulse running along them
 const hub = a.hub, N = 40, pulse = a.pulse;
-items.push({ kind: 'point', shape: 'site', pos: () => ll(hub[0], hub[1], 1.004), color: '#7fd6ff', label: a.hubLabel, labelDx: a.hubDx, labelDy: a.hubDy });
+items.push({ kind: 'point', shape: 'site', pos: () => ll(hub[0], hub[1], 1.004), color: '#7fd6ff', statusColor: t => t >= pulse[0] ? '#ff6b6b' : '#7fd6ff', scale: 1.5, label: a.hubLabel, short: a.hubShort, labelDx: a.hubDx, labelDy: a.hubDy });
 a.beams.forEach((b, bi) => {
 const all = groundArc(hub, b, N), q = k => all[Math.max(0, Math.min(N, Math.round(k * N)))];
-const st = t => clamp01((t - pulse[0] - bi * 0.012) / (pulse[1] - pulse[0]));
+const t0 = pulse[0] + bi * 0.012, st = t => clamp01((t - t0) / (pulse[1] - pulse[0])), arr = t0 + (pulse[1] - pulse[0]);
 items.push({ kind: 'curve', pts: () => all, color: '#7fd6ff', opacity: 0.38, thick: 0.0022 });
-items.push({ kind: 'curve', dynamic: true, all, thick: 0.0045, color: '#ff5d5d', width: 2, pts: t => { const s = st(t); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
-items.push({ kind: 'point', shape: 'kv', color: '#ff8a8a', pos: t => { const s = st(t); return s > 0 && s < 1 ? q(s) : null; } });
-items.push({ kind: 'point', shape: 'site', small: true, color: '#7fd6ff', pos: () => all[N] });
+items.push({ kind: 'curve', dynamic: true, all, thick: 0.0065, color: '#ff5d5d', width: 2, pts: t => { const s = st(t); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
+for (let k = 0; k < 3; k++) items.push({ kind: 'point', shape: 'kv', kvSize: 0.07, color: '#ff8a8a', pos: t => { const s = st(t) - k * 0.22; return s > 0 && s < 1 && t < arr + 0.02 ? q(s) : null; } });
+items.push({ kind: 'point', shape: 'site', small: true, scale: 1.3, color: '#7fd6ff', statusColor: t => t >= arr ? '#ff5d5d' : '#7fd6ff', pos: () => all[N] });
+items.push({ kind: 'flash', pos: all[N], t0: arr, color: '#ffc0c0', ringColor: '#ff6b6b', size: 0.16, span: 0.09 });
 });
-items.push({ kind: 'flash', at: hub, pos: ll(hub[0], hub[1], 1.01), t0: pulse[0], color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 });
+[0, 0.05, 0.1].forEach(dt => items.push({ kind: 'flash', pos: ll(hub[0], hub[1], 1.01), t0: pulse[0] + dt, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.34, span: 0.16 }));
 }
 focus = focus || [30, a.lon];
 }
@@ -806,10 +834,10 @@ const P = [];
 const nw = Math.max(...a.boxes.map(b => (b[5] ?? 0) + 1));
 a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => { const m = Math.round(a.count * frac); for (let k = 0; k < m; k++) P.push({ p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004), off: wave == null ? lerp(a.t0, a.t1, bi === 0 ? rnd() * 0.6 : 0.3 + rnd() * 0.7) : lerp(a.t0, a.t1, (wave + rnd() * 0.8) / nw) }); });
 const n = P.length;
-items.push({ kind: 'cloud', n, size: 0.03, label: a.label, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
+items.push({ kind: 'cloud', n, size: 0.045, label: a.label, short: a.short, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
 fill(t, out, col) {
 for (let k = 0; k < n; k++) { const q = P[k].p; out[3 * k] = q[0]; out[3 * k + 1] = q[1]; out[3 * k + 2] = q[2];
-const dark = t > P[k].off, blink = dark && t < P[k].off + 0.05; col[3 * k] = blink ? 1 : dark ? 0.9 : 0.35; col[3 * k + 1] = blink ? 0.9 : dark ? 0.2 : 1.0; col[3 * k + 2] = blink ? 0.8 : dark ? 0.2 : 0.62; }
+const dark = t > P[k].off, blink = dark && t < P[k].off + 0.07; col[3 * k] = blink ? 1 : dark ? 0.9 : 0.35; col[3 * k + 1] = blink ? 0.9 : dark ? 0.2 : 1.0; col[3 * k + 2] = blink ? 0.8 : dark ? 0.2 : 0.62; }
 return n;
 } });
 const dark = t => { let d = 0; for (let k = 0; k < n; k++) if (t > P[k].off) d++; return d; };
@@ -818,7 +846,7 @@ items.push({ kind: 'status', text: t => { const tx = t < a.pulse0 ? 'Before the 
 if (a.type === 'beam' && tgt) {
 const from = ll(a.from[0], a.from[1], 1.004);
 const su = norm(from); // beam is on while the satellite is above the site's horizon, within the window
-items.push({ kind: 'beam', a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
+items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
 }
 }
 if (items._gps && items._zone) {
@@ -836,7 +864,7 @@ const f = focus || [20, 0];
 const dist = cfg.camDist || 4.2;
 const wide = { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) }, polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
 let cams;
-if (cfg.cameras) cams = cfg.cameras.map(c => ({ name: c.name, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }));
+if (cfg.cameras) cams = cfg.cameras.map(c0 => { const c = IS_PHONE && c0.phone ? { ...c0, ...c0.phone } : c0; return { name: c.name, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }; });
 else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
 else if (items._arc) { // launch site through the intercept: a side-on camera looking at the middle of the arc
 const { from, to, mid } = items._arc, md = norm(mid), e1 = norm(add(to, scl(from, -1))), nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);
@@ -941,7 +969,7 @@ this.camera.updateProjectionMatrix();
 }
 load(sim) {
 this.unload();
-const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = [];
+const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = [];
 const sunDir = sunFor(sim.sunRef);
 this.sunDir = sunDir;
 S.add(new T.AmbientLight(0x9fb4ff, 0.22));
@@ -1103,7 +1131,8 @@ const segs = it.dynamic ? src.length - 1 : Math.max(60, vp.length), geo = new T.
 const tube = new T.Mesh(geo, new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: it.dynamic ? 0.9 : (it.opacity ?? 1), depthWrite: false, blending: it.dynamic ? T.AdditiveBlending : T.NormalBlending }));
 root.add(tube); if (it.dynamic) this.dyn.push({ it: { kind: 'tube', ref: it, segs }, obj: tube });
 line.visible = !it.dynamic ? false : line.visible; if (!it.dynamic) line.material.opacity = 0; }
-if (it.label) this._label(it.label, t => it.dynamic ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt, null, null, it.labelDy ?? 0, it.labelDx ?? 0);
+if (it.avoid) this.obst.push(it);
+if (it.label) this._label(it.label, t => it.dynamic ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short);
 } else if (it.kind === 'point') {
 let m;
 if (it.shape === 'kv') { // glowing interceptor head
@@ -1137,13 +1166,14 @@ let mat;
 if (it.colored) { g.setAttribute('color', new T.BufferAttribute(new Float32Array(it.n * 3), 3)); mat = new T.PointsMaterial({ size: it.size * 2.4, vertexColors: true, map: this.spriteTex, transparent: true, alphaTest: 0.05, depthWrite: false }); }
 else mat = new T.PointsMaterial({ size: it.size * 2.1, color: col(it.color), map: this.spriteTex, transparent: true, opacity: 0.95, depthWrite: false, blending: T.AdditiveBlending });
 const pts = new T.Points(g, mat); pts.frustumCulled = false; root.add(pts); this.dyn.push({ it, obj: pts });
-if (it.label) this._label(it.label, t => it.labelAt || (it.fill(t, arr) > 0 ? [arr[0], arr[1], arr[2]] : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0);
+if (it.halo) { const hp = new T.Points(g, new T.PointsMaterial({ size: it.size * 4.2, color: col(it.color), map: this.spriteTex, transparent: true, opacity: 0.1, depthWrite: false, blending: T.AdditiveBlending })); hp.frustumCulled = false; root.add(hp); }
+if (it.label) this._label(it.label, t => it.labelAt || (it.fill(t, arr) > 0 ? [arr[0], arr[1], arr[2]] : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short);
 } else if (it.kind === 'beam') {
 const w = it.width || it.width0 || 0.004, m = new T.Group();
 const mk = (r, op) => new T.Mesh(new T.CylinderGeometry(r, r, 1, 10, 1, true), new T.MeshBasicMaterial({ color: col(it.color || '#fff'), transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending }));
 const core = mk(w * (it.width ? 0.5 : 1), it.opacity ?? 0.8); m.add(core); m.userData.core = core;
 if (it.width) { const halo = mk(w * 2.2, 0.22); m.add(halo); m.userData.halo = halo; }
-root.add(m); this.dyn.push({ it, obj: m });
+root.add(m); this.dyn.push({ it, obj: m }); if (it.avoid) this.obst.push(it);
 if (it.label) this._label(it.label, t => { const A = it.a(t), B = it.b(t); return A && B && it.on(t) ? scl(add(A, B), 0.5) : null; }, null, null, it.labelDy ?? 0, it.labelDx ?? 0);
 } else if (it.kind === 'dome') {
 const c = ll(it.at[0], it.at[1]);
@@ -1168,7 +1198,7 @@ const L = cam.position.length(), rr = r * Math.sqrt(Math.max(0, 1 - (r / L) ** 2
 const p = right.multiplyScalar(Math.cos(deg * DEG) * rr).add(up.multiplyScalar(Math.sin(deg * DEG) * rr)).add(d.multiplyScalar(r * r / L));
 return [p.x, p.y, p.z];
 },
-_labelPositions(w, h, u = 1, noBanner = false) {
+_labelPositions(w, h, u = 1, noBanner = false, statusBox = null) {
 const cam = this.camera.position, T = this.T, raw = [], k = h / (this.el.clientHeight || h);
 for (const L of this.labels) {
 if (L.cls === 'shell' && this.hideShell) { raw.push(null); continue; }
@@ -1182,9 +1212,13 @@ const lw = labelW(text, u * (noBanner ? 1.1 : 1)), lh = 19 * u;
 if (L.item?.offGlobe) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), lm = this._limb(1, 0), c1 = new T.Vector3(...lm).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h, gr = Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy); [lx, ly] = offDisc(px, py, lw, lh, gx, gy, gr * 1.05); }
 raw.push({ x: lx, y: ly, px, py, w: lw, h: lh, fixed: L.cls === 'shell', text, color, avoidDisc: !!L.item?.offGlobe });
 }
-const banner = noBanner ? [] : [[8 * u, 8 * u, Math.min(w - 16 * u, 430 * u), 32 * u]], status = this.status ? (w < 520 * u ? [8 * u, h - 56 * u, w - 16 * u, 48 * u] : [(w - 470 * u) / 2, h - 40 * u, 470 * u, 30 * u]) : null;
+const er = this.el.getBoundingClientRect(), rel = e => { const b = e.getBoundingClientRect(); return [b.left - er.left - 3, b.top - er.top - 3, b.width + 6, b.height + 6]; }, bn = noBanner ? null : this.el.querySelector('.illus');
+const banner = noBanner ? [] : [bn ? rel(bn) : [8, 8, Math.min(w - 16, 430), 32]], status = noBanner ? statusBox : (this.status && this.statusEl ? rel(this.statusEl) : null);
 let disc = null; if (raw.some(r => r && r.avoidDisc)) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), c1 = new T.Vector3(...this._limb(1, 0)).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h; disc = { cx: gx, cy: gy, r: Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy) * 1.05 }; }
-const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc);
+const obst = [], vp = p => { const v = new T.Vector3(...p).project(this.camera); return [(v.x + 1) / 2 * w, (1 - v.y) / 2 * h, occluded([cam.x, cam.y, cam.z], p) || v.z > 1]; };
+for (const it of this.obst || []) { let pts = it.kind === 'beam' ? (it.on(this.t) && it.a(this.t) && it.b(this.t) ? [it.a(this.t), it.b(this.t)] : []) : it.pts(this.t), cur = [];
+const st = Math.max(1, Math.ceil(pts.length / 40)); for (let k = 0; k < pts.length; k += st) { const q = vp(pts[k]); if (q[2]) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push(q); } if (cur.length > 1) obst.push(cur); }
+const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst);
 return raw.map((r, i) => r && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
 },
 _label(text, posFn, cls, item, dy = 0, dx = 0, short = null) {
@@ -1221,15 +1255,19 @@ this.renderer.setPixelRatio(1); this.renderer.setSize(W, H, false); this.rendere
 const s = W / 1000, hb = Math.round(40 * s), fb = Math.round(92 * s);
 const c = document.createElement('canvas'); c.width = W; c.height = H + hb + fb;
 const g = c.getContext('2d'); g.fillStyle = '#070b17'; g.fillRect(0, 0, W, c.height); g.drawImage(this.canvas, 0, hb);
+const status = this.status?.text(Math.min(this.t, 1)), lay = { W, H, boxes: [], segs: [] }; this.stillLayout = lay;
+let sLines = [], sBox = null; g.font = `${Math.round(12 * s)}px system-ui,sans-serif`;
+if (status) { const maxW = Math.min(W - 40 * s, 640 * s); let cur = ''; for (const wd of status.split(' ')) { const nx = cur ? cur + ' ' + wd : wd; if (cur && g.measureText(nx).width > maxW) { sLines.push(cur); cur = wd; } else cur = nx; } if (cur) sLines.push(cur);
+const tw = Math.max(...sLines.map(l => g.measureText(l).width)) + 24 * s, th = sLines.length * 16 * s + 10 * s; sBox = [W / 2 - tw / 2, H - 12 * s - th, tw, th]; lay.boxes.push({ n: 'STATUS', x: sBox[0], y: sBox[1], w: sBox[2], h: sBox[3] }); }
+const lp = this._labelPositions(W, H, s, true, sBox ? [sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s] : null);
 g.textAlign = 'center'; g.lineJoin = 'round';
-const lp = this._labelPositions(W, H, s, true);
-for (const q of lp) { if (!q || !q.leader) continue; g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay + hb); g.lineTo(q.qx, q.qy + hb); g.stroke(); g.globalAlpha = 1; }
+for (const q of lp) { if (!q || !q.leader) continue; lay.segs.push({ x1: q.ax, y1: q.ay, x2: q.qx, y2: q.qy, own: q.text }); g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay + hb); g.lineTo(q.qx, q.qy + hb); g.stroke(); g.globalAlpha = 1; }
 for (const q of lp) { if (!q) continue;
-g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; const tw = g.measureText(q.text).width + 12 * s; g.fillStyle = 'rgba(5,8,18,0.8)'; g.beginPath(); g.roundRect(q.x - tw / 2, q.y + hb - 9 * s, tw, 18 * s, 4 * s); g.fill(); g.textBaseline = 'middle';
+g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; const tw = g.measureText(q.text).width + 12 * s; lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * s, w: tw, h: 18 * s });
+g.fillStyle = 'rgba(5,8,18,0.8)'; g.beginPath(); g.roundRect(q.x - tw / 2, q.y + hb - 9 * s, tw, 18 * s, 4 * s); g.fill(); g.textBaseline = 'middle';
 g.fillStyle = q.color || '#dfe6f7'; g.fillText(q.text, q.x, q.y + hb); g.textBaseline = 'alphabetic'; }
-const status = this.status?.text(Math.min(this.t, 1));
-if (status) { g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; const tw = g.measureText(status).width + 24 * s;
-g.fillStyle = 'rgba(5,8,18,0.78)'; g.fillRect(W / 2 - tw / 2, hb + H - 36 * s, tw, 26 * s); g.fillStyle = '#ffe08a'; g.textBaseline = 'middle'; g.fillText(status, W / 2, hb + H - 23 * s); g.textBaseline = 'alphabetic'; }
+if (sBox) { g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; g.fillStyle = 'rgba(5,8,18,0.78)'; g.fillRect(sBox[0], hb + sBox[1], sBox[2], sBox[3]); g.fillStyle = '#ffe08a'; g.textBaseline = 'middle';
+sLines.forEach((l, k) => g.fillText(l, W / 2, hb + sBox[1] + 5 * s + 8 * s + k * 16 * s)); g.textBaseline = 'alphabetic'; }
 g.textAlign = 'left';
 g.fillStyle = '#0b1120'; g.fillRect(0, 0, W, hb); g.fillRect(0, hb + H, W, fb);
 g.strokeStyle = 'rgba(255,224,138,0.28)'; g.lineWidth = Math.max(1, s); g.beginPath(); g.moveTo(0, hb - 0.5); g.lineTo(W, hb - 0.5); g.moveTo(0, hb + H + 0.5); g.lineTo(W, hb + H + 0.5); g.stroke();
@@ -1266,7 +1304,9 @@ else if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.
 else if (it.kind === 'cloud') { const arr = new Float32Array(it.n * 3), col = it.colored ? new Float32Array(it.n * 3) : null; it.fill(t, arr, col);
 for (let k = 0; k < it.n; k += Math.max(1, Math.floor(it.n / 400))) if (arr[3 * k] || arr[3 * k + 1] || arr[3 * k + 2]) grow(unit([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]])); }
 } }
-const fx = 14, fTop = (W < 520 ? 56 : 42), fBot = stY - 8;
+let bRes = [8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26]; { const bn = el.querySelector(':scope > .illus'), er = el.getBoundingClientRect(), br = bn?.getBoundingClientRect(); if (br && br.width && er.width) bRes = [br.left - er.left - 3, br.top - er.top - 3, br.width + 6, br.height + 6]; }
+const ftxt = `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`, fw = Math.min(W - 12, ftxt.length * 5.6 + 16);
+const fx = 14, fTop = Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4), fBot = stY - 8;
 const R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
 const CX = W / 2 - (x0 + x1) / 2 * R, CY = (fTop + fBot) / 2 - (y0 + y1) / 2 * R;
 const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([CX, CY]).scale(R).clipAngle(90);
@@ -1286,7 +1326,7 @@ defs.append('filter').attr('id', `${U}-blur`).attr('x', '-20%').attr('y', '-20%'
 defs.append('clipPath').attr('id', `${U}-clip`).append('path').datum({ type: 'Sphere' }).attr('d', path);
 svg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-bg)`);
 { const rs = mulberry(99); for (let k = 0; k < 90; k++) { const x = rs() * W, y = rs() * H, b = 0.25 + rs() * 0.5; svg.append('circle').attr('cx', x).attr('cy', y).attr('r', rs() < 0.15 ? 1.1 : 0.7).attr('fill', '#dfe8ff').attr('fill-opacity', b); } }
-const shells = sim.items.filter(i => i.kind === 'shell'), cands = [];
+const shells = sim.items.filter(i => i.kind === 'shell'), cands = [], obst = [];
 shells.forEach(it => svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
 svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', R * 1.08).attr('fill', `url(#${U}-glow)`);
 svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
@@ -1311,17 +1351,18 @@ if (it.kind === 'dome') g.append('path').datum(d3.geoCircle().center([it.at[1], 
 if (it.kind === 'curve') {
 const pts = it.pts(t).map(project); let seg = [];
 const flush = () => { if (seg.length > 1) g.append('path').attr('d', d3.line()(seg)).attr('fill', 'none').attr('stroke', it.color).attr('stroke-linecap', 'round').attr('stroke-opacity', it.thick ? Math.max(0.85, it.opacity ?? 1) : (it.opacity ?? 1)).attr('stroke-width', it.thick ? Math.max(2.2, it.thick * R * 1.8) : (it.width || 1.2)); seg = []; };
+if (it.avoid) { let cur = []; pts.forEach(p => { if (p.hidden) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push([p.x, p.y]); }); if (cur.length > 1) obst.push(cur); }
 pts.forEach(p => { if (p.hidden) flush(); else seg.push([p.x, p.y]); }); flush();
-if (it.label && it.labelAt && pts.length > 2) label(project(it.labelAt), it.label, it.color, it.labelDx, it.labelDy, it.staticAt);
+if (it.label && it.labelAt && pts.length > 2) label(project(it.labelAt), (it.short && W < 520) ? it.short : it.label, it.color, it.labelDx, it.labelDy, it.staticAt);
 }
 if (it.kind === 'cloud') {
 const arr = new Float32Array(it.n * 3), col = it.colored ? new Float32Array(it.n * 3) : null; it.fill(t, arr, col);
 const step = Math.max(1, Math.floor(it.n / 900));
 for (let k = 0; k < it.n; k += step) { if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue; const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]); if (p.hidden) continue;
-g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 1.4).attr('fill', col ? d3.rgb(col[3 * k] * 255, col[3 * k + 1] * 255, col[3 * k + 2] * 255) : it.color).attr('fill-opacity', 0.85); }
-if (it.label) label(project(it.labelAt || [arr[0], arr[1], arr[2]]), it.label, it.color || '#dfe6f7');
+g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', it.halo ? 2.6 : 1.4).attr('fill', col ? d3.rgb(col[3 * k] * 255, col[3 * k + 1] * 255, col[3 * k + 2] * 255) : it.color).attr('fill-opacity', 0.85); }
+if (it.label && (it.labelAt || arr[0] || arr[1] || arr[2])) label(project(it.labelAt || [arr[0], arr[1], arr[2]]), (it.short && W < 520) ? it.short : it.label, it.color || '#dfe6f7');
 }
-if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8)).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 5 : 1.2); if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color); } }
+if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (it.avoid && !a.hidden && !b.hidden) obst.push([[a.x, a.y], [b.x, b.y]]); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8)).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 5 : 1.2); if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color); } }
 if (it.kind === 'point') { const q = it.liveOnly ? null : it.pos(t); if (!q) continue; const p = project(q); if (p.hidden) continue;
 const c = it.statusColor ? it.statusColor(t) : it.color;
 if (it.shape === 'sat') { const q = it.small ? (it.scale ? Math.min(10, 2 + it.scale * 1.3) : 4) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1); g.append('rect').attr('x', p.x - q / 2).attr('y', p.y - q / 2).attr('width', q).attr('height', q).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8); }
@@ -1333,10 +1374,10 @@ if (it.label) { const n0 = cands.length; label(p, it.labelFn ? it.labelFn(t) : (
 if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4', it.labelDx, it.labelDy); }
 if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + (it.span ?? 0.14)) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
 }
-const reserved = [[8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26], [(W - stW) / 2, stY, stW, stH]];
+const reserved = [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22]];
 cands.forEach(c => { if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, CX, CY, R * 1.08); });
 cands.forEach(c => { c.avoidDisc = !!c.off; });
-const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.08 });
+const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.08 }, obst);
 cands.forEach((c, i) => { const q = pl[i]; if (!q) return;
 if (q.leader) { g.append('line').attr('x1', q.ax).attr('y1', q.ay).attr('x2', q.qx).attr('y2', q.qy).attr('stroke', c.color).attr('stroke-opacity', 0.8); g.append('circle').attr('cx', q.ax).attr('cy', q.ay).attr('r', 2).attr('fill', c.color); }
 g.append('rect').attr('x', q.x - c.w / 2).attr('y', q.y - c.h / 2).attr('width', c.w).attr('height', c.h).attr('rx', 4).attr('fill', 'rgba(5,8,18,0.78)').attr('stroke', c.color).attr('stroke-opacity', 0.35);
@@ -1344,7 +1385,7 @@ g.append('text').attr('x', q.x).attr('y', q.y + 4).attr('text-anchor', 'middle')
 if (st) {
 g.append('rect').attr('x', (W - stW) / 2).attr('y', stY).attr('width', stW).attr('height', stH).attr('rx', 5).attr('fill', 'rgba(5,8,18,0.85)');
 stLines.forEach((l, k) => g.append('text').attr('x', W / 2).attr('y', stY + 17 + k * 16).attr('text-anchor', 'middle').attr('fill', '#ffe08a').attr('font-size', 12).text(l)); }
-{ const ft = `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`, fw = Math.min(W - 16, ft.length * 5.6 + 16);
+{ const ft = ftxt;
 svg.append('rect').attr('x', 6).attr('y', H - 26).attr('width', fw).attr('height', 20).attr('rx', 4).attr('fill', 'rgba(5,8,18,0.82)');
 svg.append('text').attr('x', 14).attr('y', H - 12).attr('fill', '#a9b3cc').attr('font-size', Math.min(10.5, (W - 32) / (ft.length * 0.56))).attr('font-family', 'system-ui').text(ft); }
 el.querySelector(':scope > svg')?.remove();
@@ -1455,7 +1496,19 @@ drawRest();
 const out = [];
 document.querySelectorAll(CHART_SVGS).forEach(svg => out.push(...auditSvg(svg, svg.parentElement.id)));
 document.querySelectorAll(SCENE_SVGS).forEach(svg => { if (svg.getClientRects().length) out.push(...auditSvg(svg, 'scene-svg:' + (svg.parentElement.id || 'view'))); });
-return out.concat(auditHtml());
+return out.concat(auditHtml(), auditSticky());
+}
+function auditSticky() {
+const band = document.getElementById('legalBand'); if (!band || !band.classList.contains('compact')) return [];
+const edge = band.getBoundingClientRect().bottom, out = [], root = document.querySelector('main') || document.body, rg = document.createRange();
+const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+for (let n = w.nextNode(); n; n = w.nextNode()) {
+const el = n.parentElement, s = n.nodeValue.trim();
+if (!s || !el || band.contains(el) || el.closest('.card, .overlay, [hidden], script, style, details:not([open]) > :not(summary)') || getComputedStyle(el).visibility === 'hidden') continue;
+rg.selectNodeContents(n);
+for (const r of rg.getClientRects()) if (r.width > 0 && r.top < edge - 1 && r.bottom > edge + 1) { out.push({ chart: 'sticky-band', kind: 'sticky-clip', a: s.slice(0, 28), h: Math.round(Math.min(r.bottom, edge + 99) - r.top) }); break; }
+}
+return out;
 }
 function auditHtml() {
 const vis = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
@@ -1544,7 +1597,7 @@ const written = new Map();
 function setOnce(id, html) { if (written.get(id) === html) return; written.set(id, html); document.getElementById(id).innerHTML = html; }
 function legend(id, w = 22, h = 16) {
 const parts = [], api = {
-item: (inner, text, iw = w) => (parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg>${text}</li>`), api),
+item: (inner, text, iw = w) => (parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg><span>${text}</span></li>`), api),
 raw: html => (parts.push(html), api),
 done: () => setOnce(id, parts.join('')),
 };
@@ -1578,9 +1631,28 @@ const pts = LEGAL.filter(l => !spans.includes(l) && (!zoom || (x(parse(l.start))
 const last = []; let maxT = 0;
 pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < SEP) t++; last[t] = cx + (hasScene(d) ? 6 : 0); d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
 const pl = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 }), top0 = 16 + TP * maxT, labels = []; let maxUp = -1, maxDn = -1;
+const zx0 = x(ZOOM[0]); let key = null; pts.forEach(d => { d._n = d._num = null; });
+if (!small && !zoom && !strip) {
+const cand = pts.filter(d => d._cx >= zx0 - 2), rows = Math.ceil(cand.length / 2), cw = [0, 0];
+const ents = cand.map((d, i) => ({ d, n: i + 1, col: Math.floor(i / rows), row: i % rows, t: ABBR[d.id] || d.label, when: fmtMY(parse(d.start)) }));
+ents.forEach(e => { e.w = 17 + tw(e.t, FS, 600) + 8 + tw(e.when, FS - 1); cw[e.col] = Math.max(cw[e.col], e.w); });
+const total = cw[0] + (cw[1] ? cw[1] + 20 : 0), hgt = 16 + rows * PITCH;
+if (cand.length >= 3 && zx0 - M.l - 20 >= total) key = { ents, cw, total, hgt, x0: zx0 - 14 - total, rel: -34 - hgt };
+}
 if (!small) {
 pts.forEach(d => { const bw = hasScene(d) ? 15 : 8; pl.add([d._cx - 8, -d._t * TP - 9 - (hasScene(d) ? 8 : 0), d._cx + bw, -d._t * TP + 8], 'G'); });
-const clusters = []; pts.forEach(d => { const c = clusters.at(-1); if (c && d._cx - c.at(-1)._cx < 200) c.push(d); else clusters.push([d]); });
+if (key) {
+const base = pl.r.length; let ok = true;
+pts.filter(d => d._t).forEach(d => pl.add([d._cx - 1.5, -d._t * TP, d._cx + 1.5, 0], 'S'));
+pl.add([key.x0 - 4, key.rel - 2, key.x0 + key.total + 4, key.rel + key.hgt + 2], 'K');
+key.ents.forEach(({ d, n }) => {
+const w = tw(String(n), FS, 700), bw = hasScene(d) ? 18 : 11; let hit = null;
+for (const [anchor, dx, dy] of [['end', -10.5, 3.7], ['start', bw, 3.7], ['end', -10.5, 12], ['start', bw, 12], ['middle', 0, -12], ['end', -10.5, -8], ['middle', 0, 18]]) { const q = pl.textRect(d._cx + dx, -d._t * TP + dy, anchor, w, FS); if (pl.free(q, [], 0.5)) { pl.add(q, 'N'); hit = { anchor, dx, dy }; break; } }
+if (!hit) { ok = false; console.warn('num fail', d.id, d._t, d._cx); } d._num = hit; d._n = n;
+});
+if (!ok) { console.warn('legal numbering fell back to labels'); pl.r.length = base; pts.forEach(d => { d._n = d._num = null; }); key = null; }
+}
+const clusters = []; pts.filter(d => !d._n).forEach(d => { const c = clusters.at(-1); if (c && d._cx - c.at(-1)._cx < 200) c.push(d); else clusters.push([d]); });
 const anchorsOf = { end: [['end', -2]], start: [['start', 2]], middle: [['middle', 0], ['end', -2], ['start', 2]] };
 const run = (order, prim, commit) => {
 const base = pl.r.length, out = []; let mu = -1, md = -1, ok = true;
@@ -1608,7 +1680,7 @@ if (!best) { console.warn('legal labels unplaced', list.map(d => d.id)); return;
 const r = run(best.c.order, best.c.prim, true); labels.push(...r.out); maxUp = Math.max(maxUp, r.mu); maxDn = Math.max(maxDn, r.md);
 });
 }
-const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 14);
+const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 24, key ? -key.rel + 8 : 0);
 const dnSpace = !small && maxDn >= 0 ? 20 + maxDn * PITCH + 8 : 0;
 const lanes = [];
 spans.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => { const a = Math.max(M.l, x(parse(d.start))), b = Math.min(W - M.r, d.end ? x(parse(d.end)) : x(DOMAIN[1])); let i = lanes.findIndex(e => a > e + 6); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = b; d._lane = i; d._a = a; d._b = b; });
@@ -1625,6 +1697,16 @@ if (dir === 'up') lg.append('line').attr('x1', d._cx).attr('x2', d._cx).attr('y1
 else lg.append('line').attr('x1', d._cx).attr('x2', d._cx).attr('y1', yMark + 9).attr('y2', yMark + off - FS).style('stroke', 'var(--line)');
 lg.append('text').attr('x', tx).attr('y', yMark + off).attr('text-anchor', anchor).style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)').style('font', `600 ${FS}px var(--sans)`).text(t);
 });
+if (key) {
+const ky = yMark + key.rel;
+lg.append('text').attr('class', 'band-label').attr('x', key.x0).attr('y', ky + 8).text('2021–26 MARKS, NUMBERED');
+key.ents.forEach(e => {
+const cx0 = key.x0 + (e.col ? key.cw[0] + 20 : 0), yy = ky + 16 + (e.row + 1) * PITCH - 3, soft = e.d.soft_law;
+lg.append('text').attr('x', cx0).attr('y', yy).style('fill', 'var(--accent)').style('font', `700 ${FS}px var(--sans)`).text(e.n);
+lg.append('text').attr('x', cx0 + 17).attr('y', yy).style('fill', soft ? 'var(--accent-2)' : 'var(--text)').style('font', `600 ${FS}px var(--sans)`).text(e.t);
+lg.append('text').attr('x', cx0 + e.w).attr('y', yy).attr('text-anchor', 'end').style('fill', 'var(--muted)').style('font', `${FS - 0.5}px var(--sans)`).text(e.when);
+});
+}
 const sg = svg.append('g').selectAll('g').data(spans).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
 .attr('aria-label', d => `${d.label}, ${fmtY(parse(d.start))} to ${d.end ? fmtY(parse(d.end)) : 'present'}. ${d.short_note}`);
 sg.append('rect').attr('x', d => d._a).attr('width', d => Math.max(3, d._b - d._a)).attr('y', d => lane0 + d._lane * laneP + 2).attr('height', compact ? 3 : 4).attr('rx', 2).style('fill', 'var(--accent)').style('opacity', 0.55);
@@ -1641,7 +1723,8 @@ svg.append('g').selectAll('circle').data(pts.filter(d => d._t)).join('circle').a
 const pg = svg.append('g').selectAll('g').data(pts).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
 .attr('transform', d => `translate(${d._cx},${d._y})${GS < 1 ? ` scale(${GS})` : ''}`)
 .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
-pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10); });
+pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10);
+if (d._n && d._num) d3.select(this).append('text').attr('class', 'mnum').attr('x', d._num.dx).attr('y', d._num.dy).attr('text-anchor', d._num.anchor).attr('aria-hidden', 'true').text(d._n); });
 pg.append('circle').attr('class', 'hit').attr('r', 12 / GS);
 bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
 pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
@@ -1665,6 +1748,7 @@ if (stuck === legalCompact) return;
 if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused mark
 const h0 = band.offsetHeight; legalCompact = stuck;
 drawLegal(); band.classList.toggle('compact', stuck);
+if (stuck) document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
 band.style.marginBottom = stuck ? Math.max(0, h0 - band.offsetHeight) + 'px' : '0px';
 }
 let scrollTick = false; // at most one legalScroll per frame
@@ -1816,14 +1900,14 @@ const plan = e => {
 const point = e.end === e.start, X0 = XS(e), X1 = point ? X0 : e.end ? x(parse(e.end)) : R - 8;
 const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
 const full = `${short}: ${e.target_system.split(' (')[0]}`;
-let lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
+let lx = Math.max(M.l + 8, X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0)); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
 if (phone) { // phones: the label sits above its bar, full width (at most 2-3 lines), shifted left just enough to fit
-const lines = wrap(full, W - 12, FS), w = Math.max(...lines.map(s => tw(s, FS))), tx = Math.max(6, Math.min(lx, RIGHT - w));
-return { e, point, X0, X1, mode: 'above', anchor: 'start', tx, limit: W - 12, lines, w, bad: false, cost: lines.length, lx0: tx, ext: [Math.min(tx, X0 - 16) - 6, Math.max(tx + w, X1 + (e.end ? 6 : 12)) + 6] };
+const lim = RIGHT - M.l - 8, lines = wrap(full, lim, FS), w = Math.max(...lines.map(s => tw(s, FS))), tx = Math.max(M.l + 8, Math.min(lx, RIGHT - w));
+return { e, point, X0, X1, mode: 'above', anchor: 'start', tx, limit: lim, lines, w, bad: false, cost: lines.length, lx0: tx, ext: [Math.min(tx, X0 - 16) - 6, Math.max(tx + w, X1 + (e.end ? 6 : 12)) + 6] };
 }
 const cands = [{ mode: 'above', anchor: 'start', tx: lx, limit: (lx < HX - 8 ? HX - 8 : RIGHT) - lx }];
-{ const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 2) }); }
-if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 4) });
+{ const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 10) }); }
+if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 10) });
 const opts = cands.map((c, i) => { const lines = wrap(full, Math.max(60, c.limit), FS); const w = Math.max(...lines.map(s => tw(s, FS)));
 return { ...c, lines, w, bad: c.limit < 70 || w > c.limit + 0.5, cost: lines.length + (lines.length > 3 ? 10 : 0) + i * 0.1 }; });
 opts.forEach(o => { if (o.bad) o.cost += 50; });
@@ -1986,7 +2070,7 @@ const rg = svg.append('g').attr('class', 'rangemarks');
 decs.forEach((d, i) => {
 const xa = x(xs[i]), xb = x(xs[i + 1]), cx = (xa + xb) / 2, lo = dem[i], hi = tot[i], unc = hi > lo, w = xb - xa;
 if (unc && w > 22) { rg.append('path').attr('d', `M${cx - 3},${y(lo)}h6M${cx},${y(lo)}V${y(hi)}M${cx - 3},${y(hi)}h6`).attr('class', 'whisker'); }
-if (w >= 34) rg.append('text').attr('class', 'range-label').attr('x', cx).attr('y', y(hi) - 6).attr('text-anchor', 'middle').text(unc ? `${lo}–${hi}` : `${hi}`);
+if (w >= 34) rg.append('text').attr('class', 'range-label').attr('x', cx).attr('y', y(hi) - 6).attr('text-anchor', 'middle').text(unc ? `${w >= 84 && !phone ? 'range ' : ''}${lo}–${hi}` : `${hi}`);
 });
 xAxis(svg, x, top + plotH);
 addGuide(svg, x, top, top + plotH);
@@ -1998,12 +2082,14 @@ document.getElementById('noteB').innerHTML = (stateB.group === 'cat'
 ? 'Vertical axis: state-capability pairs. A state with two capabilities is counted twice.'
 : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.')
 + ' Numbers above each decade give the range: demonstrated only to demonstrated plus developing (whisker). In the 2020s the states are SWF-assessed but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part; dotted bands are developing entries where SWF’s country matrix shows no data. See the <a href="#codingRules">coding rules</a>.';
-legend('legendB', 18, 12)
-.item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted)"/>', 'Demonstrated (tested or used)')
-.item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted);fill-opacity:.4;stroke:var(--muted);stroke-dasharray:3 2"/>', 'Faded, dashed: reconstructed decade (not SWF-assessed)')
-.item('<path d="M-3,-6h6M0,-6V6M-3,6h6" style="stroke:var(--text);stroke-width:1.4;fill:none"/>', 'Range: demonstrated only (low) to demonstrated + developing (high)', 18)
-.item('<defs><pattern id="ln" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1" style="fill:var(--muted)"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#ln)" style="stroke:var(--muted);stroke-width:.8"/>', 'Developing, builder-assessed (2020s, SWF matrix shows no data)')
-.item('<defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#lh)"/>', 'Developing or latent').done();
+{ const L = legend('legendB', 26, 16), C = 'var(--cat-ew)', sw = (inner, extra = '') => `<rect x="-12" y="-7" width="24" height="14" rx="1.5" ${extra}/>${inner}`;
+L.raw('<li class="lhead" aria-hidden="true">Fill style = strength of evidence (colour = capability category)</li>')
+.item(sw('', `style="fill:${C};fill-opacity:.85"`), '<b>Solid</b>: demonstrated, tested or used (verified against SWF)')
+.item(`<defs><pattern id="lgH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${C};fill-opacity:.14"/><line y2="6" style="stroke:${C};stroke-width:2.2"/></pattern></defs>` + sw('', 'fill="url(#lgH)"'), '<b>Hatched</b>: developing or latent')
+.item(`<defs><pattern id="lgD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${C};fill-opacity:.06"/><circle cx="2.5" cy="2.5" r="1" style="fill:${C}"/></pattern></defs>` + sw('', 'fill="url(#lgD)"'), '<b>Dotted</b>: developing, builder-assessed (2020s; SWF matrix: no data)')
+.item(sw('', `style="fill:${C};fill-opacity:.42;stroke:var(--muted);stroke-dasharray:3 2"`), '<b>Faded, dashed edge</b>: reconstructed decades (before 2020, not SWF-assessed)')
+.raw('<li class="lhead" aria-hidden="true">Range whisker above each decade</li>')
+.item('<path d="M-4,-8h8M0,-8V8M-4,8h8" style="stroke:var(--text);stroke-width:1.5;fill:none"/>', '<b>Low end</b> = demonstrated only; <b>high end</b> = demonstrated + developing. The label reads low–high, e.g. 13–25.', 26).done(); }
 table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P' && !isNoData(c.key, d, k)), N_ = Object.keys(o).filter(k => o[k] === 'P' && isNoData(c.key, d, k)); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}${N_.length ? `; ${N_.length} developing, builder-assessed, SWF matrix: no data (${N_.join(', ')})` : ''}`; })]));
 }
 function chipsB() {

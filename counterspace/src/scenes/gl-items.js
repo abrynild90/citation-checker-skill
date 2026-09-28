@@ -43,7 +43,8 @@ Object.assign(GLHost.prototype, {
         const tube = new T.Mesh(geo, new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: it.dynamic ? 0.9 : (it.opacity ?? 1), depthWrite: false, blending: it.dynamic ? T.AdditiveBlending : T.NormalBlending }));
         root.add(tube); if (it.dynamic) this.dyn.push({ it: { kind: 'tube', ref: it, segs }, obj: tube });
         line.visible = !it.dynamic ? false : line.visible; if (!it.dynamic) line.material.opacity = 0; }
-      if (it.label) this._label(it.label, t => it.dynamic ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt, null, null, it.labelDy ?? 0, it.labelDx ?? 0);
+      if (it.avoid) this.obst.push(it);
+      if (it.label) this._label(it.label, t => it.dynamic ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short);
     } else if (it.kind === 'point') {
       let m;
       if (it.shape === 'kv') { // glowing interceptor head
@@ -78,14 +79,15 @@ Object.assign(GLHost.prototype, {
       if (it.colored) { g.setAttribute('color', new T.BufferAttribute(new Float32Array(it.n * 3), 3)); mat = new T.PointsMaterial({ size: it.size * 2.4, vertexColors: true, map: this.spriteTex, transparent: true, alphaTest: 0.05, depthWrite: false }); }
       else mat = new T.PointsMaterial({ size: it.size * 2.1, color: col(it.color), map: this.spriteTex, transparent: true, opacity: 0.95, depthWrite: false, blending: T.AdditiveBlending });
       const pts = new T.Points(g, mat); pts.frustumCulled = false; root.add(pts); this.dyn.push({ it, obj: pts });
-      if (it.label) this._label(it.label, t => it.labelAt || (it.fill(t, arr) > 0 ? [arr[0], arr[1], arr[2]] : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0);
+      if (it.halo) { const hp = new T.Points(g, new T.PointsMaterial({ size: it.size * 4.2, color: col(it.color), map: this.spriteTex, transparent: true, opacity: 0.1, depthWrite: false, blending: T.AdditiveBlending })); hp.frustumCulled = false; root.add(hp); }
+      if (it.label) this._label(it.label, t => it.labelAt || (it.fill(t, arr) > 0 ? [arr[0], arr[1], arr[2]] : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short);
     } else if (it.kind === 'beam') {
       // Beam = bright core + wide soft halo; unit-height cylinders scaled along the beam each frame.
       const w = it.width || it.width0 || 0.004, m = new T.Group();
       const mk = (r, op) => new T.Mesh(new T.CylinderGeometry(r, r, 1, 10, 1, true), new T.MeshBasicMaterial({ color: col(it.color || '#fff'), transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending }));
       const core = mk(w * (it.width ? 0.5 : 1), it.opacity ?? 0.8); m.add(core); m.userData.core = core;
       if (it.width) { const halo = mk(w * 2.2, 0.22); m.add(halo); m.userData.halo = halo; }
-      root.add(m); this.dyn.push({ it, obj: m });
+      root.add(m); this.dyn.push({ it, obj: m }); if (it.avoid) this.obst.push(it);
       if (it.label) this._label(it.label, t => { const A = it.a(t), B = it.b(t); return A && B && it.on(t) ? scl(add(A, B), 0.5) : null; }, null, null, it.labelDy ?? 0, it.labelDx ?? 0);
     } else if (it.kind === 'dome') {
       const c = ll(it.at[0], it.at[1]);

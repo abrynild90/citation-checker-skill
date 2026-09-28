@@ -17,15 +17,20 @@ Object.assign(GLHost.prototype, {
     const s = W / 1000, hb = Math.round(40 * s), fb = Math.round(92 * s);
     const c = document.createElement('canvas'); c.width = W; c.height = H + hb + fb;
     const g = c.getContext('2d'); g.fillStyle = '#070b17'; g.fillRect(0, 0, W, c.height); g.drawImage(this.canvas, 0, hb);
+    // Status caption: wrapped to the frame first, so its box can be reserved before labels are placed.
+    const status = this.status?.text(Math.min(this.t, 1)), lay = { W, H, boxes: [], segs: [] }; this.stillLayout = lay;
+    let sLines = [], sBox = null; g.font = `${Math.round(12 * s)}px system-ui,sans-serif`;
+    if (status) { const maxW = Math.min(W - 40 * s, 640 * s); let cur = ''; for (const wd of status.split(' ')) { const nx = cur ? cur + ' ' + wd : wd; if (cur && g.measureText(nx).width > maxW) { sLines.push(cur); cur = wd; } else cur = nx; } if (cur) sLines.push(cur);
+      const tw = Math.max(...sLines.map(l => g.measureText(l).width)) + 24 * s, th = sLines.length * 16 * s + 10 * s; sBox = [W / 2 - tw / 2, H - 12 * s - th, tw, th]; lay.boxes.push({ n: 'STATUS', x: sBox[0], y: sBox[1], w: sBox[2], h: sBox[3] }); }
+    const lp = this._labelPositions(W, H, s, true, sBox ? [sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s] : null);
     g.textAlign = 'center'; g.lineJoin = 'round';
-    const lp = this._labelPositions(W, H, s, true);
-    for (const q of lp) { if (!q || !q.leader) continue; g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay + hb); g.lineTo(q.qx, q.qy + hb); g.stroke(); g.globalAlpha = 1; }
+    for (const q of lp) { if (!q || !q.leader) continue; lay.segs.push({ x1: q.ax, y1: q.ay, x2: q.qx, y2: q.qy, own: q.text }); g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay + hb); g.lineTo(q.qx, q.qy + hb); g.stroke(); g.globalAlpha = 1; }
     for (const q of lp) { if (!q) continue;
-      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; const tw = g.measureText(q.text).width + 12 * s; g.fillStyle = 'rgba(5,8,18,0.8)'; g.beginPath(); g.roundRect(q.x - tw / 2, q.y + hb - 9 * s, tw, 18 * s, 4 * s); g.fill(); g.textBaseline = 'middle';
+      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; const tw = g.measureText(q.text).width + 12 * s; lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * s, w: tw, h: 18 * s });
+      g.fillStyle = 'rgba(5,8,18,0.8)'; g.beginPath(); g.roundRect(q.x - tw / 2, q.y + hb - 9 * s, tw, 18 * s, 4 * s); g.fill(); g.textBaseline = 'middle';
       g.fillStyle = q.color || '#dfe6f7'; g.fillText(q.text, q.x, q.y + hb); g.textBaseline = 'alphabetic'; }
-    const status = this.status?.text(Math.min(this.t, 1));
-    if (status) { g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; const tw = g.measureText(status).width + 24 * s;
-      g.fillStyle = 'rgba(5,8,18,0.78)'; g.fillRect(W / 2 - tw / 2, hb + H - 36 * s, tw, 26 * s); g.fillStyle = '#ffe08a'; g.textBaseline = 'middle'; g.fillText(status, W / 2, hb + H - 23 * s); g.textBaseline = 'alphabetic'; }
+    if (sBox) { g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; g.fillStyle = 'rgba(5,8,18,0.78)'; g.fillRect(sBox[0], hb + sBox[1], sBox[2], sBox[3]); g.fillStyle = '#ffe08a'; g.textBaseline = 'middle';
+      sLines.forEach((l, k) => g.fillText(l, W / 2, hb + sBox[1] + 5 * s + 8 * s + k * 16 * s)); g.textBaseline = 'alphabetic'; }
     g.textAlign = 'left';
     g.fillStyle = '#0b1120'; g.fillRect(0, 0, W, hb); g.fillRect(0, hb + H, W, fb);
     g.strokeStyle = 'rgba(255,224,138,0.28)'; g.lineWidth = Math.max(1, s); g.beginPath(); g.moveTo(0, hb - 0.5); g.lineTo(W, hb - 0.5); g.moveTo(0, hb + H + 0.5); g.lineTo(W, hb + H + 0.5); g.stroke();
