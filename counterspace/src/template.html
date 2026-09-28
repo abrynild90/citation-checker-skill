@@ -53,13 +53,20 @@ a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
 header.top{padding:28px 0 8px}
+.top-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:8px 32px;align-items:start}
+.toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.glance{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:grid;gap:8px}
+.glance div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--muted)}
+.glance dt{margin:0}.glance dd{margin:0;color:var(--text);font:600 15px var(--sans);text-align:right}
+.glance h2{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-2);margin:0}
+@media (max-width:860px){.top-grid{grid-template-columns:1fr}.toolbar{justify-content:flex-start;order:-1}}
 .kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
 h1{font:600 clamp(28px,4.4vw,46px)/1.1 var(--serif);margin:10px 0 10px;letter-spacing:-.01em}
 h2{font:600 clamp(21px,2.6vw,28px)/1.2 var(--serif);margin:0 0 6px}
 h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .lede{max-width:760px;color:var(--muted);font-size:17px;margin:0}
 .meta{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
-.meta #asof{flex-basis:100%}
+.meta #asof{flex-basis:100%;max-width:760px}
 .btn{font:500 13px/1 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line);
   border-radius:8px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:34px}
 .btn:hover{border-color:var(--accent)}
@@ -84,11 +91,23 @@ h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 /* timeline */
 #timeline{position:relative}
 .legal-band{position:relative;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 0 2px}
-@media (min-width:761px){.legal-band{position:sticky;top:0;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(6px)}}
+@media (min-width:761px){.legal-band{position:sticky;top:0;background:var(--bg)}}
 .legal-band.compact{box-shadow:0 6px 14px -8px rgba(0,0,0,.5)}
 .legal-band.compact .tools{visibility:hidden}
 .legal-band .band-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);min-height:32px}
 .lbls-hidden{display:none}
+[hidden]{display:none!important}
+.zoombox{fill:var(--accent);fill-opacity:.06;stroke:var(--accent);stroke-opacity:.4;stroke-dasharray:3 3}
+.legal-zoom{margin:12px 0 0;padding:8px 10px 2px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.legal-zoom .zoom-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:12.5px;color:var(--muted)}
+.legal-zoom .zoom-head b{color:var(--text);font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.legal-zoom svg{display:block;width:100%}
+.legal-list{list-style:none;margin:6px 0 0;padding:0;font-size:13.5px}
+.legal-list li{padding:7px 0;border-bottom:1px solid var(--grid);color:var(--muted)}
+.legal-list .ld{display:inline-block;min-width:64px;color:var(--accent-2);font-weight:600}
+.legal-list b{color:var(--text)}
+.legal-list .ls{display:block;margin-left:0}
+@media (min-width:641px){.legal-list .ls{display:inline;margin-left:8px}.legal-list .ls::before{content:'— '}}
 .lsep{flex-basis:100%;height:0;margin:0}
 .legend li.wide{flex-basis:100%;align-items:flex-start}
 .only-phone{display:none}
@@ -172,7 +191,13 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel{width:min(1120px,100%);height:min(760px,100%);background:#0b1122;color:#e9edf7;border:1px solid #2a3558;border-radius:16px;
   display:grid;grid-template-columns:1fr 320px;grid-template-rows:auto 1fr auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .panel header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #2a3558}
-.panel header h2{font-size:20px;margin:0}
+.panel header h2{font-size:20px;margin:0;min-width:0}
+.panel header .hd{min-width:0;flex:1}
+.panel header .nav{display:flex;gap:6px;align-items:center;flex:none}
+.panel .count{font:12px var(--sans);color:#a9b3cc;min-width:38px;text-align:center}
+.panel .kicker{display:none}
+.panel .tm{font:12px var(--sans);color:#a9b3cc;min-width:70px;text-align:right}
+.panel .static-note{font-size:12.5px;color:#a9b3cc}
 .panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
 .panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .panel aside{padding:14px;border-left:1px solid #2a3558;overflow:auto;font-size:14px;color:#cdd5e8}
@@ -191,6 +216,11 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(260px,1fr) auto auto;height:100%;border-radius:0}
   .overlay{padding:0}
   .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:34vh}
+  .panel header{padding:8px 10px}
+  .panel header h2{font-size:15px;line-height:1.2}
+  .panel header .lbl{display:none}
+  .panel header .btn{min-width:38px;justify-content:center}
+  .panel .ctrl{padding:8px 10px}
   .hero .stage{height:340px;min-height:0}
   .lede{font-size:16px}
   .chart-head p{font-size:14.5px}
@@ -207,15 +237,20 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 <body>
 <a class="sr" href="#timeline">Skip to timeline</a>
 <header class="top wrap">
+  <div class="top-grid"><div>
   <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
   <h1>Counterspace, 1957–2026: the weapons and the law that trailed them</h1>
   <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. Those non-kinetic methods are the only counterspace tools used in actual military operations. This page puts the technology and the legal response on one year axis.</p>
   <p class="howto"><b>How to read this page.</b> On wide screens the <b>law band</b> stays pinned as you scroll. <b>A</b> shows kinetic tests by altitude, <b>C</b> non-kinetic operations, <b>B</b> how many states hold each capability, and <b>The lag</b> measures the years between a capability and the legal response. Items with a cube badge open a 3D scene. Each chart has a data table.</p>
-  <div class="meta">
-    <span id="asof"></span>
-    <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
-    <button class="btn small" id="tourBtn" type="button">▶ Start scene tour</button>
+  <div class="meta"><span id="asof"></span></div>
   </div>
+  <div>
+    <div class="toolbar" role="toolbar" aria-label="Page controls">
+      <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
+      <button class="btn small" id="tourBtn" type="button">▶ Start scene tour</button>
+    </div>
+    <dl class="glance" aria-label="The ledger at a glance" id="glance"></dl>
+  </div></div>
 </header>
 
 <main>
@@ -239,7 +274,11 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   </div>
   <div class="wrap">
     <ul class="legend" id="legendLegal" aria-label="Legal band key"></ul>
-    <p class="note block only-phone">Tap a marker for its details. On a phone the band shows marks only; the table below lists every item with its full name.</p>
+    <div class="legal-zoom" id="legalZoomBox">
+      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged. Five items land within about three years (2022 to 2025), so they are labelled here rather than on the band above. Tap or focus a mark for its citation.</span></div>
+      <div id="legalZoom"></div>
+    </div>
+    <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list" id="legalList"></ul></details>
     <p class="note block hide-phone" id="abbrLegal"></p>
     <details class="table" id="legalKey"><summary>Legal items and abbreviations (table)</summary><p class="note block" id="abbrLegal2"></p><div class="tscroll" id="tableLegal"></div></details>
   </div>
@@ -285,6 +324,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
           <button class="btn small" data-export="B" type="button">Export SVG</button>
         </div>
       </div>
+      <p class="note block" id="noteB" aria-live="polite"></p>
       <div class="chips" id="chipsB" role="group" aria-label="Filter categories"></div>
       <div class="svgbox" id="svgB"></div>
       <ul class="legend" id="legendB"></ul>
@@ -318,11 +358,12 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 <div class="overlay" id="overlay" aria-hidden="true">
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
     <header>
-      <div><div class="kicker" id="sceneDate"></div><h2 id="sceneTitle">Scene</h2></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn small" id="scPrev" type="button">◀ Previous</button>
-        <button class="btn small" id="scNext" type="button">Next ▶</button>
-        <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕ Close</button>
+      <div class="hd"><h2 id="sceneTitle">Scene</h2></div>
+      <div class="nav">
+        <button class="btn small" id="scPrev" type="button" aria-label="Previous scene">◀<span class="lbl"> Previous</span></button>
+        <span class="count" id="sceneDate" role="status" aria-label="Scene number"></span>
+        <button class="btn small" id="scNext" type="button" aria-label="Next scene"><span class="lbl">Next </span>▶</button>
+        <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕<span class="lbl"> Close</span></button>
       </div>
     </header>
     <div class="view" id="sceneView"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
@@ -336,6 +377,8 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
       <button class="btn small" id="scPlay" type="button" aria-pressed="true">❚❚ Pause</button>
       <label class="sr" for="scScrub">Scene time</label>
       <input type="range" id="scScrub" min="0" max="1000" value="0">
+      <span class="tm" id="scTime" aria-hidden="true"></span>
+      <span class="static-note" id="scStatic" hidden>Static diagram: no timeline (reduced motion or no WebGL).</span>
       <span id="scCams" style="display:flex;gap:6px"></span>
       <button class="btn small" id="scExport" type="button">Export still (PNG)</button>
     </div>

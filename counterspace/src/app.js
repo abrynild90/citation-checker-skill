@@ -18,6 +18,8 @@ const LAST_DA = KIN.filter(e => e.type === 'destructive').map(e => e.date).sort(
 
 document.getElementById('asof').innerHTML = `Data as of: <b>${AS_OF}</b> (debris counts as of Feb. 2026) · CSIS <i>Space Threat Assessment 2025</i> (2026 ed. not yet published) · Page built Sept. 2026`;
 
+{ const nDest = KIN.filter(e => e.type === 'destructive').length;
+  document.getElementById('glance').innerHTML = `<h2>The ledger at a glance</h2><div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
 // ---------------------------------------------------------------- palette & helpers
 const STATE_VAR = { 'United States': '--c-us', 'Russia': '--c-ru', 'China': '--c-cn', 'India': '--c-in', 'Iran': '--c-ir', 'North Korea': '--c-kp', 'Israel': '--c-il', 'Iraq': '--c-iq' };
 const actorKey = a => Object.keys(STATE_VAR).find(k => a.startsWith(k) || (k === 'Iran' && a.startsWith('Iran'))) || (a.startsWith('Israel') ? 'Israel' : null);
@@ -88,8 +90,9 @@ function rove(sel) {
 }
 // Programmatic audit: overlapping or clipped text in any chart SVG (bounding-box test).
 function audit() {
+  drawRest();
   const out = [];
-  document.querySelectorAll('#legalSvg svg, #svgA svg, #svgB svg, #svgC svg, #svgL svg').forEach(svg => {
+  document.querySelectorAll('#legalSvg svg, #legalZoom svg, #svgA svg, #svgB svg, #svgC svg, #svgL svg').forEach(svg => {
     const sr = svg.getBoundingClientRect(), id = svg.parentElement.id;
     const ts = [...svg.querySelectorAll('text')].filter(t => t.textContent.trim() && !t.closest('[display="none"]') && t.getClientRects().length && getComputedStyle(t).display !== 'none' && !t.closest('.lbls-hidden')).map(t => { const r = t.getBoundingClientRect(); return { s: t.textContent.trim().slice(0, 28), x0: r.left, x1: r.right, y0: r.top, y1: r.bottom }; });
     const shapes = [...svg.querySelectorAll('.mark circle:not(.hit), .mark path, .mark rect:not(.hit), .mark polygon')].map(n => ({ n, r: n.getBoundingClientRect(), m: n.closest('.mark') })).filter(o => o.r.width > 0 && !o.n.closest('.badge3d'));
@@ -166,7 +169,8 @@ function addGuide(svg, x, y0, y1, key) {
   if (EXPORTING) return;
   const line = svg.append('line').attr('class', 'guide').attr('y1', y0).attr('y2', y1).style('display', 'none');
   const at = key ? guides.findIndex(g => g.key === key) : -1, fn = key ? (f => (f.key = key, f)) : (f => f);
-  guides[at < 0 ? guides.length : at] = fn(date => date ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'));
+  const [r0, r1] = x.range();
+  guides[at < 0 ? guides.length : at] = fn(date => date && x(date) >= r0 - 1 && x(date) <= r1 + 1 ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'));
 }
 function handoff(svg, x, y0, y1, label, anchorTop) {
   const X = x(parse(LAST_DA));
@@ -189,12 +193,13 @@ function legalGlyph(sel, l) {
   else if (l.kind === 'veto') sel.append('path').attr('d', 'M-5,-5L5,5M5,-5L-5,5').style('stroke', 'var(--warn)').style('stroke-width', 2.8);
   else sel.append('path').attr('d', 'M0,-5.5L5.5,0L0,5.5L-5.5,0Z').style('fill', 'var(--muted)').style('stroke', 'var(--bg)').style('stroke-width', 1).attr('transform', 'scale(0.9)');
 }
-function drawLegal(el = document.getElementById('legalSvg')) {
+const ZOOM = [parse('2021-06-01'), parse('2026-07-01')];
+function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhoneNow(), compact = legalCompact && !phone && !EXPORTING, small = phone || compact;
+  const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN), phone = isPhoneNow() && !zoom, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
   const FS = 10.5, PITCH = 13, TP = phone ? 12 : compact ? 10 : 12, GS = phone ? 0.85 : compact ? 0.75 : 1;
-  const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981'));
-  const pts = LEGAL.filter(l => !spans.includes(l)).sort((a, b) => a.start < b.start ? -1 : 1);
+  const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981') && (!zoom || ((l.end ? parse(l.end) : DOMAIN[1]) > ZOOM[0] && parse(l.start) < ZOOM[1])));
+  const pts = LEGAL.filter(l => !spans.includes(l) && (!zoom || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) => a.start < b.start ? -1 : 1);
   // 1. dodge marks that would collide into tracks (the true date stays on the axis)
   const last = []; let maxT = 0;
   pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < TP) t++; last[t] = cx; d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
@@ -210,7 +215,7 @@ function drawLegal(el = document.getElementById('legalSvg')) {
     const run = (order, prim, commit) => {
       const base = pl.r.length, out = []; let mu = -1, md = -1, ok = true;
       for (const d of order) {
-        const t = SHORT[d.id] || ABBR[d.id] || d.label, w = tw(t, FS, 600); let hit = null;
+        const t = zoom ? (isPhoneNow() ? SHORT[d.id] || ABBR[d.id] : ABBR[d.id]) || d.label : SHORT[d.id] || ABBR[d.id] || d.label, w = tw(t, FS, 600); let hit = null;
         for (let k = 0; k < 12 && !hit; k++) for (const dir of ['dn', 'up']) { if (hit) break; for (const [anchor, dx] of anchorsOf[prim(d)]) {
           const off = dir === 'up' ? -(top0 + k * PITCH) : 20 + k * PITCH, q = pl.textRect(d._cx + dx, off, anchor, w, FS);
           const ld = dir === 'up' ? [d._cx - 0.75, off + 3, d._cx + 0.75, -d._t * TP - 8] : [d._cx - 0.75, 9, d._cx + 0.75, off - FS];
@@ -237,11 +242,12 @@ function drawLegal(el = document.getElementById('legalSvg')) {
   const dnSpace = !small && maxDn >= 0 ? 20 + maxDn * PITCH + 8 : 0;
   // spans: lanes below the mark line (and below any labels hanging under it)
   const lanes = [];
-  spans.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => { const a = x(parse(d.start)), b = d.end ? x(parse(d.end)) : x(DOMAIN[1]); let i = lanes.findIndex(e => a > e + 6); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = b; d._lane = i; d._a = a; d._b = b; });
+  spans.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => { const a = Math.max(M.l, x(parse(d.start))), b = Math.min(W - M.r, d.end ? x(parse(d.end)) : x(DOMAIN[1])); let i = lanes.findIndex(e => a > e + 6); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = b; d._lane = i; d._a = a; d._b = b; });
   const laneP = phone ? 9 : compact ? 6 : 18, lane0 = yMark + (small ? (compact ? 12 : 14) : Math.max(28, dnSpace + 18));
   const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10), H = yAx + 22;
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', 'Legal and policy timeline');
-  svg.append('title').text('Law and policy responses, 1957–2026');
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', zoom ? 'Legal and policy timeline, zoom on 2021 to 2026' : 'Legal and policy timeline');
+  svg.append('title').text(zoom ? 'Law and policy responses, zoom 2021–2026' : 'Law and policy responses, 1957–2026');
+  if (!zoom) { const zx0 = x(ZOOM[0]), zx1 = W - M.r; svg.append('rect').attr('class', 'zoombox').attr('x', zx0).attr('width', zx1 - zx0).attr('y', 0).attr('height', yAx).attr('rx', 3).attr('aria-hidden', 'true'); }
   svg.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', yMark).attr('y2', yMark).style('stroke', 'var(--line)');
   if (compact) svg.append('text').attr('class', 'band-label').attr('x', 4).attr('y', yMark + 4).text('LAW');
   // labels + leaders
@@ -274,8 +280,8 @@ function drawLegal(el = document.getElementById('legalSvg')) {
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   sg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   rove(svg.selectAll('.mark'));
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
-  addGuide(svg, x, 0, yAx, 'legal');
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(zoom ? 1 : phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
+  addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
 }
 let legalCompact = false;
 function legalScroll() {
@@ -288,7 +294,12 @@ function legalScroll() {
   band.style.marginBottom = stuck ? Math.max(0, h0 - band.offsetHeight) + 'px' : '0px';
 }
 addEventListener('scroll', () => requestAnimationFrame(legalScroll), { passive: true });
+function drawLegalList() {
+  const ul = document.getElementById('legalList');
+  ul.innerHTML = LEGAL.slice().sort((a, b) => a.start < b.start ? -1 : 1).map(l => `<li><span class="ld">${l.end ? fmtY(parse(l.start)) + '–' + fmtY(parse(l.end)) : fmtMY(parse(l.start))}</span> <b>${esc(l.label)}</b>${l.soft_law ? ' <i>(soft law)</i>' : ''}<span class="ls">${esc(l.short_note)}</span></li>`).join('');
+}
 function drawLegalKey() {
+  drawLegalList();
   const L = document.getElementById('legendLegal'); L.innerHTML = '';
   const li = (inner, text) => L.insertAdjacentHTML('beforeend', `<li><svg width="20" height="16" viewBox="-10 -8 20 16" aria-hidden="true">${inner}</svg>${text}</li>`);
   li('<circle r="5.5" style="fill:var(--accent)"/>', 'Treaty');
@@ -423,31 +434,52 @@ function attrStyle(sel, d) {
 }
 const stateC = { focus: true };
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
+const C_LINE = 12.5;
 function drawC(el = document.getElementById('svgC')) {
   const dom = stateC.focus ? C_FOCUS() : DOMAIN;
   const { W, M, x } = layout(el, dom), phone = isPhoneNow();
-  const FS = 10.5, rowH = phone ? 30 : 32, laneHead = 24, lanePad = 10, top = 8, R = W - M.r, maxLabel = phone ? 170 : 380;
+  const FS = 10.5, laneHead = 24, lanePad = 10, top = 8, R = W - M.r, HX = x(parse(LAST_DA)), RIGHT = W - 8;
   const XS = e => Math.max(M.l, x(parse(e.start)));
   const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: 99999 });
   let yCur = top; const placed = [];
-  LANES.forEach(l => {
-    const evs = NK.filter(e => l.cats.includes(e.category)).sort((a, b) => a.start < b.start ? -1 : 1), rows = [];
-    evs.forEach(e => {
-      const point = e.end === e.start, X0 = XS(e), X1 = point ? X0 : e.end ? x(parse(e.end)) : R - 8;
-      const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
-      const txt = fit(`${short}: ${e.target_system.split(' (')[0]}`, maxLabel, FS), w = tw(txt, FS);
-      const lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0), fits = lx + w <= R + 4;
-      // label above the bar starting at its left end; if that would run off the plot, put it to the LEFT of the mark instead
-      let anchor = 'start', tx = lx, dyT = -8;
-      if (!fits) { if (X0 - 22 - w >= M.l) { anchor = 'end'; tx = X0 - 22; dyT = 4; } else { anchor = 'end'; tx = R + 4; } }
-      const lx0 = anchor === 'start' ? tx : tx - w, lx1 = lx0 + w;
-      const e0 = Math.min(lx0, X0 - 16) - 6, e1 = Math.max(lx1, X1 + (e.end ? 6 : 12)) + 6;
-      let r = rows.findIndex(end => e0 > end); if (r < 0) { r = rows.length; rows.push(0); } rows[r] = e1;
-      const y = yCur + laneHead + r * rowH + rowH / 2;
-      placed.push({ e, lane: l.key, y, X0, X1, txt, tx, anchor, w, point, dyT });
-      pl.add(pl.textRect(tx, y + dyT, anchor, w, FS)); pl.add([Math.min(X0 - 16, lx0) , y - 7, Math.max(X1 + 12, 0), y + 8], 'B');
+  // Labels are never truncated: each one is wrapped (up to 3 lines when it fits, more only as a last resort) and is kept clear of the 2021 hand-off line.
+  // Candidates: (A) above the bar, starting at its left end; (B) to the left of the mark; (G) in the gutter left of the hand-off line, joined to the mark by a dotted leader.
+  const plan = e => {
+    const point = e.end === e.start, X0 = XS(e), X1 = point ? X0 : e.end ? x(parse(e.end)) : R - 8;
+    const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
+    const full = `${short}: ${e.target_system.split(' (')[0]}`;
+    let lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
+    const cands = [{ mode: 'above', anchor: 'start', tx: lx, limit: (lx < HX - 8 ? HX - 8 : RIGHT) - lx }];
+    { const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 2) }); }
+    if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 4) });
+    const opts = cands.map((c, i) => { const lines = wrap(full, Math.max(60, c.limit), FS); const w = Math.max(...lines.map(s => tw(s, FS)));
+      return { ...c, lines, w, bad: c.limit < 70 || w > c.limit + 0.5, cost: lines.length + (lines.length > 3 ? 10 : 0) + i * 0.1 }; });
+    opts.forEach(o => { if (o.bad) o.cost += 50; });
+    const best = opts.reduce((a, b) => b.cost < a.cost ? b : a);
+    const lx0 = best.anchor === 'start' ? best.tx : best.tx - best.w;
+    const ext = [Math.min(lx0, X0 - 16) - 6, Math.max(lx0 + best.w, X1 + (e.end ? 6 : 12), best.mode === 'gutter' ? X0 : 0) + 6];
+    return { e, point, X0, X1, ...best, lx0, ext };
+  };
+  const laneRows = LANES.map(l => {
+    const rows = [];
+    NK.filter(e => l.cats.includes(e.category)).sort((a, b) => a.start < b.start ? -1 : 1).forEach(e => {
+      const p = plan(e); let r = rows.findIndex(row => row.items.every(q => p.ext[0] > q.ext[1] || p.ext[1] < q.ext[0]));
+      if (r < 0) { r = rows.length; rows.push({ items: [] }); } rows[r].items.push(p);
     });
-    l.y0 = yCur; l.y1 = yCur + laneHead + Math.max(1, rows.length) * rowH + lanePad; yCur = l.y1;
+    return rows;
+  });
+  LANES.forEach((l, li) => {
+    const rows = laneRows[li]; let yy = yCur + laneHead;
+    rows.forEach(row => {
+      const nA = Math.max(0, ...row.items.filter(p => p.mode === 'above').map(p => p.lines.length)), nC = Math.max(0, ...row.items.filter(p => p.mode !== 'above').map(p => p.lines.length));
+      const off = Math.max(16, nA ? (nA - 1) * C_LINE + 22 : 0, nC ? nC * C_LINE / 2 + 9 : 0);
+      row.y = yy + off; yy += off + 14;
+      row.items.forEach(p => {
+        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - 8 - (p.lines.length - 1) * C_LINE : p.y + 4 - (p.lines.length - 1) * C_LINE / 2; placed.push(p);
+        pl.add([p.lx0, p.base - FS * 0.95, p.lx0 + p.w, p.base + (p.lines.length - 1) * C_LINE + FS * 0.25]); pl.add([Math.min(p.X0 - 16, p.lx0), p.y - 7, Math.max(p.X1 + 12, 0), p.y + 8], 'B');
+      });
+    });
+    l.y0 = yCur; l.y1 = Math.max(yy, yCur + laneHead + 32) + lanePad; yCur = l.y1;
   });
   const H = yCur + 28;
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hC').attr('id', 'svgC-root');
@@ -460,7 +492,7 @@ function drawC(el = document.getElementById('svgC')) {
   xAxis(svg, x, yCur, stateC.focus ? (phone ? 10 : 5) : undefined);
   LANES.forEach(l => { const t = l.label.toUpperCase(); pl.add(pl.textRect(M.l + 6, l.y0 + 14, 'start', tw(t, 10.5, 600) + t.length * 0.85, 10.5)); });
   // handoff line + label placed where it collides with nothing
-  const HX = x(parse(LAST_DA)), hg = svg.append('g').attr('class', 'handoff').attr('aria-hidden', 'true');
+  const hg = svg.append('g').attr('class', 'handoff').attr('aria-hidden', 'true');
   hg.append('line').attr('x1', HX).attr('x2', HX).attr('y1', top).attr('y2', yCur);
   { const t = phone ? 'last destructive test' : 'Last destructive DA-ASAT test (Nov 2021)', w = tw(t, 11, 600); let ok = false;
     for (let yy = top + 12; yy < yCur - 4 && !ok; yy += 4) for (const [a, dx] of [['end', -5], ['start', 5]]) {
@@ -481,7 +513,9 @@ function drawC(el = document.getElementById('svgC')) {
     }
     regimeIcon(s, e.target_regime).attr('transform', `translate(${X0 - 11},${d.y})`);
     if (hasScene(e)) badge(s, X0 + (d.point ? 12 : 9), d.y - 8);
-    s.append('text').attr('x', d.tx).attr('y', d.y + d.dyT).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`).text(d.txt);
+    if (d.mode === 'gutter') s.append('line').attr('x1', d.tx + 4).attr('x2', X0 - 16).attr('y1', d.y).attr('y2', d.y).style('stroke', 'var(--faint)').style('stroke-dasharray', '1 3');
+    const t = s.append('text').attr('x', d.tx).attr('y', d.base).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`);
+    d.lines.forEach((ln, i) => t.append('tspan').attr('x', d.tx).attr('dy', i ? C_LINE : 0).text(ln));
     s.append('rect').attr('class', 'hit').attr('x', X0 - 18).attr('y', d.y - 12).attr('width', d.point ? 36 : Math.max(36, d.X1 - X0 + 30)).attr('height', 24);
   });
   bindMark(g, d => nkCard(d.e), (d, el, ev) => activate(d.e, el, ev));
@@ -532,7 +566,13 @@ function countsB() {
 function drawB(el = document.getElementById('svgB')) {
   el.innerHTML = '';
   const { W, M, x } = layout(el), phone = isPhone();
-  const top = 16, plotH = phone ? 230 : 290, H = top + plotH + 30;
+  // annotation lives in its own band ABOVE the plot, so it never sits on the data
+  const ew20 = Object.keys(CAPS.coding.electronic_warfare['2020s']).length;
+  const da20 = Object.entries(CAPS.coding.direct_ascent['2020s']).filter(([, v]) => v === 'D').map(([k]) => k);
+  const annHead = `Electronic warfare drives most of the crowding: ${ew20} states in the 2020s.`;
+  const annSub = `Demonstrated destructive DA-ASAT capability has stayed at four states: ${da20.map(s => s === 'Russia' ? 'USSR/Russia' : s === 'United States' ? 'US' : s).join(', ')}.`;
+  const annW = W - 24, annL = wrap(annHead, annW, 12, 600), annS = wrap(annSub, annW, 11.5), annH = (annL.length + annS.length) * 15 + 10;
+  const top = annH + 8, plotH = phone ? 230 : 290, H = top + plotH + 30;
   const decs = CAPS.decades, starts = decs.map(d => +d.slice(0, 4));
   const xs = starts.map(s => parse(`${Math.max(1957, s)}-01-01`)).concat([DOMAIN[1]]);
   const { series } = countsB();
@@ -553,24 +593,20 @@ function drawB(el = document.getElementById('svgB')) {
     t.append('tspan').attr('x', W - M.r - 4).attr('dy', 12).text(phone ? '13 states' : '13 STATES ASSESSED'); }
   svg.append('g').attr('class', 'gridline').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickSize(-(W - M.l - M.r)).tickFormat(''));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(d3.format('d')));
-  svg.append('text').attr('class', 'ann-sub').attr('transform', `translate(12,${top + plotH / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(stateB.group === 'cat' ? 'State-capability pairs' : 'States');
+  svg.append('text').attr('class', 'ann-sub').attr('transform', `translate(12,${top + plotH / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(stateB.group === 'cat' ? 'State-capability pairs' : 'Unique states per group');
   const area = d3.area().x(d => x(d.data.x)).y0(d => y(d[0])).y1(d => y(d[1])).curve(d3.curveStepAfter);
   svg.append('g').selectAll('path').data(stack).join('path').attr('d', area)
     .style('fill', (d, i) => series[i].dev ? `url(#hatch-${series[i].key.replace(':', '-')})` : `var(${series[i].v})`).style('fill-opacity', (d, i) => series[i].dev ? 1 : 0.85)
     .style('stroke', 'var(--bg)').style('stroke-width', 0.8).append('title').text((d, i) => series[i].label);
   xAxis(svg, x, top + plotH);
   addGuide(svg, x, top, top + plotH);
-  // annotation (computed from data)
-  const ew20 = Object.keys(CAPS.coding.electronic_warfare['2020s']).length;
-  const da20 = Object.entries(CAPS.coding.direct_ascent['2020s']).filter(([, v]) => v === 'D').map(([k]) => k);
-  if (!phone) {
-    const t = svg.append('text').attr('x', x(parse('1960-01-01'))).attr('y', top + 44);
-    t.append('tspan').attr('class', 'ann').text(`Electronic warfare drives most of the crowding: ${ew20} states in the 2020s.`);
-    t.append('tspan').attr('class', 'ann-sub').attr('x', x(parse('1960-01-01'))).attr('dy', 16).text(`Demonstrated destructive DA-ASAT capability has stayed at four states: ${da20.map(s => s === 'Russia' ? 'USSR/Russia' : s === 'United States' ? 'US' : s).join(', ')}.`);
-  } else {
-    svg.append('text').attr('class', 'ann-sub').attr('x', M.l + 6).attr('y', top + 46).text(`EW: ${ew20} states in 2020s. DA-ASAT: 4.`);
-  }
+  { const t = svg.append('text').attr('x', 4).attr('y', 14); let n = 0;
+    annL.forEach(l => t.append('tspan').attr('class', 'ann').attr('x', 4).attr('dy', n++ ? 15 : 0).text(l));
+    annS.forEach(l => t.append('tspan').attr('class', 'ann-sub').attr('x', 4).attr('dy', n++ ? 15 : 0).text(l)); }
   if (EXPORTING) return;
+  document.getElementById('noteB').textContent = stateB.group === 'cat'
+    ? 'Vertical axis: state-capability pairs. A state with two capabilities is counted twice.'
+    : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.';
   // legend + chips
   const L = document.getElementById('legendB'); L.innerHTML = '';
   L.insertAdjacentHTML('beforeend', `<li><svg width="18" height="12" aria-hidden="true"><rect width="18" height="12" style="fill:var(--muted)"/></svg>Demonstrated (tested or used)</li><li><svg width="18" height="12" aria-hidden="true"><defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect width="18" height="12" fill="url(#lh)"/></svg>Developing or latent</li>`);
@@ -605,7 +641,7 @@ function drawL(el = document.getElementById('svgL')) {
   el.innerHTML = '';
   const { W, M, x } = layout(el), phone = isPhoneNow();
   const FS = phone ? 11 : 12, top = 10, maxW = W - 24;
-  const rowsInfo = LAG.map(p => { const lines = wrap(p.text, maxW, FS); return { p, lines, w: Math.max(...lines.map(s => tw(s, FS))), rowH: lines.length * (FS + 3) + 34 }; });
+  const rowsInfo = LAG.map(p => { const lines = wrap(p.text, maxW, FS); return { p, lines, w: Math.max(...lines.map(s => tw(s, FS))), rowH: lines.length * (FS + 3) + 52 }; });
   const H = top + rowsInfo.reduce((s, r) => s + r.rowH, 0) + 30, yAx = H - 28;
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hL').attr('id', 'svgL-root');
   svg.append('desc').text('Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the legal or policy response (circle for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the lag in years. An open ring means no binding rule yet.');
@@ -613,7 +649,7 @@ function drawL(el = document.getElementById('svgL')) {
   xAxis(svg, x, yAx);
   const rows = []; let y0 = top;
   const gs = rowsInfo.map(({ p, lines, w, rowH }) => {
-    const c = byId[p.cap], l = p.law ? byId[p.law] : null, yy = y0 + lines.length * (FS + 3) + 10;
+    const c = byId[p.cap], l = p.law ? byId[p.law] : null, yy = y0 + lines.length * (FS + 3) + 18;
     const a = capDate(c), b = l ? parse(l.start) : DOMAIN[1], xa = x(a), xb = x(b);
     const years = l ? ((b - a) / (365.25 * 864e5)) : null;
     const col = c.domain === 'kinetic' ? 'var(--cat-da)' : 'var(--cat-ew)';
@@ -622,12 +658,12 @@ function drawL(el = document.getElementById('svgL')) {
     g.append('rect').attr('class', 'hit').attr('x', 6).attr('y', y0 - 2).attr('width', W - 12).attr('height', rowH - 6).attr('rx', 6);
     const tx = phone ? 12 : Math.max(12, Math.min(Math.min(xa, xb) - 6, W - 12 - w));
     lines.forEach((s, i) => g.append('text').attr('x', tx).attr('y', y0 + (i + 1) * (FS + 3) - 2).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`).text(s));
-    g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 7)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
-    g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${yy})`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
-    if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yy}) scale(1.2)`), l);
-    else g.append('circle').attr('cx', xb - 7).attr('cy', yy).attr('r', 5.5).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
+    g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 9)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
+    g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${yy}) scale(1.45)`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
+    if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yy}) scale(1.7)`), l);
+    else g.append('circle').attr('cx', xb - 9).attr('cy', yy).attr('r', 8).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
     const lw = tw(lagTxt, 12, 600), mid = Math.max(14 + lw / 2, Math.min(W - 14 - lw / 2, (xa + xb) / 2));
-    g.append('text').attr('x', mid).attr('y', yy + 19).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
+    g.append('text').attr('x', mid).attr('y', yy + 27).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
     rows.push([p.text, c.date || c.start, l ? l.start : '—', l ? `${l.kind.replace('_', ' ')}${l.soft_law ? ' (soft law)' : ''}` : '—', l ? years.toFixed(1) : 'open', `${c.id}${l ? ' → ' + l.id : ''}`]);
     y0 += rowH; return g;
   });
@@ -648,7 +684,15 @@ function drawL(el = document.getElementById('svgL')) {
 
 // ---------------------------------------------------------------- methodology section
 function drawMethod() {
-  const cites = [...new Map(EVENTS.concat(LEGAL).map(r => [r.source_url, r])).values()];
+  // one entry per distinct source URL: a full citation (legal rows carry their own; event sources are expanded below) plus the pin(s)
+  const FULL = { 'SWF 2026': 'Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Brian Weeden &amp; Victoria Samson eds., 9th ed., Apr. 2026)',
+    'DOE/NV-209 Rev. 16 (2015)': 'U.S. Dep’t of Energy, Nevada Field Office, <i>United States Nuclear Tests: July 1945 through September 1992</i>, DOE/NV-209 Rev. 16 (Sept. 2015)' };
+  const groups = new Map(); EVENTS.concat(LEGAL).forEach(r => { if (!groups.has(r.source_url)) groups.set(r.source_url, []); groups.get(r.source_url).push(r); });
+  const cites = [...groups.values()].map(rs => { const r = rs[0], url = esc(r.source_url);
+    if (r.citation) return `<li><a href="${url}" target="_blank" rel="noopener">${esc(r.citation)}</a></li>`;
+    const head = FULL[r.source] || esc(r.source);
+    const pins = rs.length > 1 ? `; ${rs.length} ledger rows, each pinned to its table or page (see the card, the data table or <code>ledger.md</code>)` : `, ${esc(r.pin)}`;
+    return `<li><a href="${url}" target="_blank" rel="noopener">${head}</a>${pins}.</li>`; });
   document.getElementById('methodBody').innerHTML = `
   <h3>Editions and “as of” dates</h3>
   <ul><li><b>Primary:</b> Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Brian Weeden &amp; Victoria Samson eds., 9th ed., Apr. 2026). 13 countries, five categories. The 13-country count is a 2026 figure, not a historical constant. Debris counts as of Feb. 2026 (SWF Table 5-1).</li>
@@ -663,7 +707,7 @@ function drawMethod() {
   <h3>Licensing</h3>
   <p>SWF material is licensed CC BY-NC 4.0. This page uses facts only. Every chart, graphic and sentence here is original; no SWF or CSIS figures, graphics or prose are reproduced. Earth imagery in the 3D scenes is NASA’s Blue Marble (a U.S. government work, public domain), loaded from a pinned copy on jsDelivr only after the page has rendered and never with reduced motion. Vector coastlines (static diagrams and fallback) come from Natural Earth (public domain) via world-atlas.</p>
   <h3>All cited sources (${cites.length})</h3>
-  <ol class="cites">${cites.map(r => `<li><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source || r.citation)}</a>${r.source ? '' : ''}</li>`).join('')}</ol>
+  <ol class="cites">${cites.join('')}</ol>
   <p class="note">The full ledger (every row with its pin), the verification log and the builder decisions are in <code>ledger.md</code>, <code>verification_log.md</code> and <code>methodology.md</code>.</p>`;
 }
 
@@ -677,6 +721,7 @@ const EXPORT_SPEC = {
   legal: { id: 'legalSvg', draw: () => drawLegal, title: 'Law and policy responses, 1957–2026', key: 'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond: soft law (expert manual, not binding). Cross: veto. Bars: negotiation spans. Marks that would collide are stacked vertically; each stays at its true date on the axis. ' + ABBR_NOTE },
 };
 function exportSVG(which) {
+  drawRest();
   const spec = EXPORT_SPEC[which]; if (!spec) return '';
   const ns = 'http://www.w3.org/2000/svg', savedGuides = guides.length, EW = 1200;
   FORCE_DESKTOP = true; EXPORTING = true;
@@ -713,7 +758,11 @@ async function getHost() {
   if (glOK === false) return null;
   try {
     if (!THREE) THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
-    if (!host) host = new GLHost(THREE);
+    if (!host) {
+      host = new GLHost(THREE);
+      // The scrubber mirrors scene time however it changes: playback ticks, scrubbing or programmatic host.update() calls.
+      const upd = host.update.bind(host); host.update = t => { upd(t); syncScrub(t); };
+    }
     glOK = true; return host;
   } catch (e) { console.warn('WebGL unavailable, using static diagrams', e); glOK = false; return null; }
 }
@@ -726,7 +775,7 @@ async function openScene(id, originEl) {
   cur = cfg;
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
   document.getElementById('sceneTitle').textContent = cfg.title;
-  document.getElementById('sceneDate').textContent = `Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}`;
+  document.getElementById('sceneDate').textContent = `${ORDER.indexOf(cfg) + 1} / ${ORDER.length}`;
   document.getElementById('sceneCaption').textContent = cfg.caption;
   const ev = byId[cfg.event];
   document.getElementById('sceneSrc').innerHTML = `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}`;
@@ -739,12 +788,12 @@ async function openScene(id, originEl) {
     unloadHero();
     h.mount(view); h.load(sim); h.playing = true; setPlayBtn(true);
     sim.cams.forEach((c, i) => { const b = document.createElement('button'); b.className = 'btn small'; b.type = 'button'; b.textContent = c.name; b.onclick = () => h.setCam(i); cams.appendChild(b); });
-    h.play(t => { scrub.value = Math.round(t * 1000); });
+    h.play(); syncScrub(h.t);
   } else {
-    renderSVG(sim, view); setPlayBtn(false);
-    document.getElementById('scPlay').disabled = true;
+    renderSVG(sim, view);
   }
-  scrub.disabled = !h; document.getElementById('scClose').focus();
+  staticMode(!h);
+  document.getElementById('scClose').focus();
 }
 function closeScene() {
   if (!cur) return;
@@ -754,10 +803,22 @@ function closeScene() {
   startHero();
   if (returnFocus && document.contains(returnFocus)) returnFocus.focus(); else { const m = document.querySelector(`[data-id="${returnFocus?.dataset?.id}"]`); m?.focus(); }
 }
-const scrub = document.getElementById('scScrub');
-scrub.oninput = () => { if (host && cur) { host.playing = false; setPlayBtn(false); host.update(scrub.value / 1000); } };
+const scrub = document.getElementById('scScrub'), scTime = document.getElementById('scTime');
+function syncScrub(t) {
+  if (!cur) return;
+  const v = Math.max(0, Math.min(1, t)), dur = cur?.duration || 0;
+  scrub.value = Math.round(v * 1000); scrub.setAttribute('aria-valuetext', `${(v * dur).toFixed(1)} of ${dur} seconds`);
+  scTime.textContent = `${(v * dur).toFixed(1)} / ${dur} s`;
+}
+// Static diagrams (reduced motion, no WebGL) have no timeline: hide Play, the scrubber and the camera presets.
+function staticMode(on) {
+  ['scPlay', 'scScrub', 'scTime', 'scCams'].forEach(id => { document.getElementById(id).hidden = on; });
+  document.getElementById('scStatic').hidden = !on;
+  if (!on) setPlayBtn(true);
+}
+scrub.oninput = () => { if (host && cur && !scrub.hidden) { host.playing = false; setPlayBtn(false); host.update(scrub.value / 1000); } };
 function setPlayBtn(on) { const b = document.getElementById('scPlay'); b.setAttribute('aria-pressed', on); b.textContent = on ? '❚❚ Pause' : '▶ Play'; b.disabled = false; }
-document.getElementById('scPlay').onclick = () => { if (!host || !cur) return; host.playing = !host.playing; if (host.playing && host.t >= 1) host.t = 0; setPlayBtn(host.playing); };
+document.getElementById('scPlay').onclick = () => { if (!host || !cur || scrub.hidden) return; host.playing = !host.playing; if (host.playing && host.t >= 1) host.t = 0; setPlayBtn(host.playing); };
 document.getElementById('scClose').onclick = closeScene;
 document.getElementById('scPrev').onclick = () => { const i = ORDER.indexOf(cur); openScene(ORDER[(i - 1 + ORDER.length) % ORDER.length].id); };
 document.getElementById('scNext').onclick = () => { const i = ORDER.indexOf(cur); openScene(ORDER[(i + 1) % ORDER.length].id); };
@@ -795,13 +856,19 @@ function unloadHero() { if (host && host.el === heroStage) host.unload(); }
 // ---------------------------------------------------------------- theme toggle (in memory only)
 document.getElementById('themeBtn').onclick = () => {
   const root = document.documentElement; const now = root.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  root.dataset.theme = now === 'light' ? 'dark' : 'light'; drawAll();
+  root.dataset.theme = now === 'light' ? 'dark' : 'light'; // every chart colour is a CSS variable, so no redraw is needed
 };
 
 // ---------------------------------------------------------------- boot
-function drawAll() { guides.length = 0; drawLegal(); drawA(); drawC(); drawB(); drawL(); legalScroll(); }
+// Above-the-fold pieces draw first; the rest is drawn on the next task (or on demand by audit/export).
+let pendingDraw = null;
+function drawRest() { if (!pendingDraw) return; clearTimeout(pendingDraw); pendingDraw = null; drawC(); drawB(); drawL(); legalScroll(); }
+function drawAll(lazy = false) {
+  guides.length = 0; drawLegal(); drawLegal(document.getElementById('legalZoom'), true); drawA();
+  clearTimeout(pendingDraw); pendingDraw = setTimeout(drawRest, lazy ? 30 : 0); if (!lazy) drawRest();
+}
 if (innerWidth < 640) document.querySelector('#chartB details.table')?.setAttribute('open', '');
-chipsB(); drawLegalKey(); drawAll(); drawMethod(); startHero();
+chipsB(); drawLegalKey(); drawAll(true); drawMethod(); startHero();
 // Earth imagery (~1.5 MB) is not part of the page: it is prefetched once the page has
 // loaded and the browser is idle, and skipped entirely without WebGL or with reduced motion.
 function prefetchEarth() { getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
