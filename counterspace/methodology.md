@@ -11,7 +11,9 @@
 6. [3D scene rules](#6-3d-scene-rules)
 7. [Image and data credits](#7-image-and-data-credits)
 8. [Testing](#8-testing)
-9. [Rebuild steps](#9-rebuild-steps)
+9. [What this page does not claim](#9-what-this-page-does-not-claim)
+10. [Limitations](#10-limitations)
+11. [Rebuild steps](#11-rebuild-steps)
 
 ## 1. Source editions
 - **Primary:** Victoria Samson & Kathleen Brett eds., *Global Counterspace Capabilities: An Open Source Assessment* (Secure World Foundation, 9th ed., Apr. 2026), "SWF 2026". Pins name the table or passage, the printed section-page (e.g., "p. 05-01") and the PDF page. Debris counts are as of February 2026 (Table 5-1).
@@ -34,6 +36,7 @@
 
 ## 3. Coding rules
 - **Chart A:** intercept altitude comes from SWF Table 5-1 for destructive tests. Apogee comes from Tables 1-4, 2-4 and 3-3 for other tests. Tests with no reported altitude (including the four added Nudol rows) go in a separate strip. Soviet IS co-orbital tests are excluded from the scatter (Chart B only). Starfish Prime is the only nuclear test plotted. Co-orbital events such as Cosmos 2521 (Table 16-2) are out of scope for the kinetic ledger.
+  - **Context for the gaps in Chart A.** The ledger (`data/events.json`) has no US or Soviet direct-ascent test between the US Program 437 shot of 28 Mar 1970 and the ASM-135 non-destructive test of 21 Jan 1984, and the first destructive test after 1985 (Solwind, 13 Sep 1985) is followed by no destructive test until FY-1C on 11 Jan 2007 (the 2005-06 SC-19 rows are non-destructive). Soviet IS co-orbital tests are excluded from Chart A by rule. The empty stretches reflect SWF's tables and this scope rule; the page does not claim that no other activity occurred.
 - **Debris:** bubble area is proportional to *cataloged* fragments. In-orbit counts appear only in cards and tables.
 - **Chart C:** an event appears only when a named source documents it. Attribution follows the source's wording and is never upgraded. Campaigns are drawn as spans. Ground GNSS jamming affects receivers, not satellites. It is tagged `GNSS_MEO` for the signal it targets, and this is explained on the page.
 - **Chart B:** the 2020s follow SWF 2026 chapter sections. Earlier decades are the builder's reconstruction and are labeled on the chart. A state counts as "demonstrated" (D) once it has tested or used the capability, and stays counted in later decades. "Developing" (P) covers programs and latent capability.
@@ -89,7 +92,24 @@
 - Data checks: every event has `source_full`; every id in `related_events` exists; counts in the docs match `events.json` (44 kinetic, 15 non-kinetic, 19 legal).
 - Source checks are logged in `verification_log.md`.
 
-## 9. Rebuild steps
+## 9. What this page does not claim
+- **No completeness claim.** It is a ledger of events named in SWF 2026 (and a few named external sources), not a census of all counterspace activity. Classified, unreported and unattributed events are absent by construction.
+- **No attribution beyond the source.** Jamming, spoofing and cyber rows carry the source's attribution level. A row is not a finding of state responsibility, and no legal item is a court judgment.
+- **No prediction and no ranking of capability.** Chart B counts states that have demonstrated (D) or are developing (P) a capability. It does not compare their strength, intent or readiness.
+- **No physical simulation.** The 3D scenes are illustrative: compressed radial scale, accelerated debris spread and simplified geometry. Only the numbers in the panels are data.
+- **No causal link between tests and law.** "Related law" chips show chronology or a stated multilateral response, not that one caused the other.
+- **No SWF-assessed pre-2020s capability coding.** Earlier decades in Chart B are the builder's reconstruction and are labeled so.
+
+## 10. Limitations
+- **Single primary source.** Most rows rest on SWF 2026. Where SWF contradicts itself (section 4) the ledger states its rule and shows both values.
+- **Scrambled table extraction.** Table 1-4 and Table 5-1 extract with mixed columns. Two cells are paired by column order and are marked PARTIAL in `verification_log.md` (the Solwind in-orbit cell and the 14 Jun 2019 Nudol note). Neither is a plotted value: bubble area uses cataloged fragments, and the Nudol row is plotted in the no-altitude strip.
+- **Graphical capability matrix.** The 2020s D/P split in Chart B follows an SWF graphic that cannot be machine-checked. Only the events behind the D entries are verified.
+- **Approximate dates and spans.** Some non-kinetic start dates are approximate or external (section 4). Year-only sources use 1 Jan or 31 Dec.
+- **Bot-blocked primary pages.** Some URLs (ICAO, UNOOSA, ITU summary of decisions) cannot be fetched by script; the facts were checked through other sources, as listed in `verification_log.md`.
+- **Snapshot in time.** As of 2026-09-28. Debris counts are as of Feb. 2026 and change as pieces decay. CSIS 2026 was not yet available.
+- **Small numbers.** With 44 kinetic rows and 15 non-kinetic rows, decade counts are sensitive to single events; read the charts as illustration, not statistics.
+
+## 11. Rebuild steps
 1. Edit rows in `tools/build_data.py` (never the generated files).
 2. `python3 tools/build_data.py` writes `data/events.json`, `data/legal.json`, `data/capabilities.json`, `data/schema.json` and `ledger.md`.
 3. `python3 tools/build_page.py` rebuilds the page from `data/` and `src/`.

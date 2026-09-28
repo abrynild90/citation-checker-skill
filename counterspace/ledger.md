@@ -8,13 +8,17 @@ The reference dataset behind the Counterspace Timeline. It lists 44 kinetic even
 - [Summary counts](#summary-counts)
 - [How to read the pins](#how-to-read-the-pins)
 - [Legend of fields](#legend-of-fields)
-- [Kinetic events (chronological)](#kinetic-events-chronological)
-- [Non-kinetic events (by start date)](#non-kinetic-events-by-start-date)
-- [Legal items (by start date)](#legal-items-by-start-date)
-- [Conflicts inside the sources](#conflicts-inside-the-sources)
-- [Notes by row](#notes-by-row)
-- [Capability coding (Chart B)](#capability-coding-chart-b)
+- [Quick lookup by state or actor](#quick-lookup-by-state-or-actor)
+- [Quick lookup by year](#quick-lookup-by-year)
+- [Kinetic events (chronological)](#kinetic-events-chronological) (44 rows)
+- [Non-kinetic events (by start date)](#non-kinetic-events-by-start-date) (15 rows)
+- [Legal items (by start date)](#legal-items-by-start-date) (19 rows)
+- [Conflicts inside the sources](#conflicts-inside-the-sources) (7 rows)
+- [Notes by row](#notes-by-row) (59 notes)
+- [Capability coding (Chart B)](#capability-coding-chart-b) (5 categories)
 - [Sources](#sources)
+
+Each table section opens with its row count. Section order: reference material first, lookups second, data tables third, then conflicts, notes, capability coding and sources.
 
 ## As-of dates
 
@@ -71,7 +75,67 @@ Confidence: **high**: Date and value match SWF tables or text with no unresolved
 
 **Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. Soft-law manuals are marked (soft law) and are not binding.
 
+## Quick lookup by state or actor
+
+Row ids grouped by acting state (kinetic tests) or actor (non-kinetic operations). Counts are in brackets; ids match the tables below.
+
+| state or actor | kinetic | non-kinetic |
+|---|---|---|
+| China | [13] cn-2005-sc19, cn-2006-sc19, cn-2007-fy1c, cn-2010-midcourse, cn-2013-midcourse, cn-2013-dn2, cn-2014-dn2, cn-2015-dn3, cn-2017-dn3, cn-2018-dn3, cn-2021-dn3, cn-2022-dn3, cn-2023-dn3 | [1] cn-2006-laser |
+| India | [1] in-2019-shakti | - |
+| Iran | - | [1] ir-2009-eutelsat |
+| Iran (jamming from Cuba; later Bulgaria, Libya) | - | [1] ir-2003-telstar12 |
+| Iraq | - | [1] iq-2003-gps |
+| Israel and others (multiple actors) | - | [1] mideast-2023-gnss |
+| North Korea | - | [1] kp-2010-gps |
+| Russia | [12] ru-2014-nudol, ru-2015-nudol-apr, ru-2015-nudol, ru-2016-nudol-may, ru-2016-nudol-dec, ru-2018-nudol-mar, ru-2018-nudol-dec, ru-2019-nudol-jun, ru-2019-nudol-nov, ru-2020-nudol-apr, ru-2020-nudol-dec, ru-2021-cosmos1408 | [7] ru-2014-ukraine, ru-2016-syria, ru-2018-peresvet, ru-2018-trident, ru-2022-viasat, ru-2022-starlink, ru-2023-baltic |
+| Russia (origin locations cited by ITU RRB) | - | [1] ru-2024-eu-sats |
+| United States | [18] us-1959-bold-orion, us-1962-starfish-prime, us-1962-nike-zeus-wsmr, us-1963-nike-zeus-feb, us-1964-nike-zeus-jan, us-1964-p437-feb, us-1964-p437-mar, us-1964-p437-apr, us-1964-p437-may, us-1964-p437-nov, us-1965-p437-apr, us-1967-p437-mar, us-1968-p437-may, us-1968-p437-nov, us-1970-p437-mar, us-1984-asm135-jan, us-1985-solwind, us-2008-burnt-frost | [1] us-1997-miracl |
+
+## Quick lookup by year
+
+Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; see the gap note in `methodology.md` for 1970-1984 and 1985-2005.
+
+| year | kinetic | non-kinetic | legal |
+|---|---|---|---|
+| 1959 | 1 | - | - |
+| 1962 | 2 | - | - |
+| 1963 | 1 | - | 1 |
+| 1964 | 6 | - | - |
+| 1965 | 1 | - | - |
+| 1967 | 1 | - | 1 |
+| 1968 | 2 | - | - |
+| 1970 | 1 | - | - |
+| 1972 | - | - | 1 |
+| 1981 | - | - | 1 |
+| 1984 | 1 | - | - |
+| 1985 | 1 | - | 1 |
+| 1992 | - | - | 1 |
+| 1997 | - | 1 | - |
+| 2003 | - | 2 | - |
+| 2005 | 1 | - | - |
+| 2006 | 1 | 1 | - |
+| 2007 | 1 | - | - |
+| 2008 | 1 | - | 1 |
+| 2009 | - | 1 | - |
+| 2010 | 1 | 1 | - |
+| 2013 | 2 | - | - |
+| 2014 | 2 | 1 | 1 |
+| 2015 | 3 | - | - |
+| 2016 | 2 | 1 | - |
+| 2017 | 1 | - | 1 |
+| 2018 | 3 | 2 | - |
+| 2019 | 3 | - | - |
+| 2020 | 2 | - | 1 |
+| 2021 | 2 | - | - |
+| 2022 | 1 | 2 | 4 |
+| 2023 | 1 | 2 | - |
+| 2024 | - | 1 | 3 |
+| 2025 | - | - | 2 |
+
 ## Kinetic events (chronological)
+
+**44 rows.**
 
 | date | id | state | system | target | type | alt (km) | kind | cataloged | in orbit | conf | pin |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -122,6 +186,8 @@ Confidence: **high**: Date and value match SWF tables or text with no unresolved
 
 ## Non-kinetic events (by start date)
 
+**15 rows.**
+
 | start | end | id | actor | category | attribution | target regime | operational | conf | pin |
 |---|---|---|---|---|---|---|---|---|---|
 | 1997-10-17 | 1997-10-17 | us-1997-miracl | United States | directed_energy | official_government | ISR_LEO | False | high | MIRACL passage, p. 01-35 (PDF p. 84) |
@@ -141,6 +207,8 @@ Confidence: **high**: Date and value match SWF tables or text with no unresolved
 | 2024-03-01 | ongoing | ru-2024-eu-sats | Russia (origin locations cited by ITU RRB) | ew_uplink | official_government | GEO_comms | True | high | ITU RRB passage, fn. 272, p. 02-32 (PDF p. 145) |
 
 ## Legal items (by start date)
+
+**19 rows.**
 
 | start | end | id | kind | label | citation |
 |---|---|---|---|---|---|
@@ -166,6 +234,8 @@ Confidence: **high**: Date and value match SWF tables or text with no unresolved
 
 ## Conflicts inside the sources
 
+**7 rows.**
+
 Where SWF (or a source) disagrees with itself, the row keeps one value under a stated rule and records the other here and in the row's `conflicts` field. Rule: Table 5-1 for intercept altitude and debris counts; the appendix or announcement date where two SWF places outvote a table.
 
 | id | conflict |
@@ -179,6 +249,8 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 | cn-2022-dn3 | Date: 21 June (prose p. 03-21; Table 16-3 p. 16-04) vs 19 June (Table 3-3, p. 03-22) |
 
 ## Notes by row
+
+**59 notes.** One bullet per row that carries a note.
 
 - **us-1959-bold-orion** (1959-10-13): SWF Table 1-4: "Success (passed within kill radius)" alongside "Unknown results due to loss of telemetry"; launch site listed as Unknown.
 - **us-1962-starfish-prime** (1962-07-09): 1.4 Mt at ~250 miles (~400 km) near Johnston Island. SWF p. 12-05 (PDF p. 269): such tests are known to have damaged or destroyed satellites in orbit. Not in SWF DA-ASAT tables; included only as the nuclear marker the legal band references.

@@ -1,16 +1,27 @@
 # Counterspace Ledger: Verification Log
 
-**Verification date:** 2026-09-28 (second full pass; supersedes the earlier 03:41 log).
+**Verification date:** 2026-09-28 (second full pass; supersedes the earlier 03:41 log). Later same-day update: UN document mirrors used for PAROS 36/97 and the two PPWT documents.
 **Scope:** all 44 kinetic rows and 15 non-kinetic rows in `data/events.json` (59 in total), all 19 rows in `data/legal.json`, and the capability coding in `data/capabilities.json`. The 44 kinetic rows include four Nudol rows added late in this pass (see Discrepancy 28-30). The data were regenerated with `python3 tools/build_data.py` after the corrections below.
+
+## Contents
+1. [Executive summary](#executive-summary) 2. [Summary](#summary) 3. [Remaining PARTIAL items](#remaining-partial-items) 4. [Method](#method) 5. [Closed items](#closed-items-from-the-earlier-log) 6. [Discrepancies](#discrepancies-found-in-this-pass-all-fixed-in-toolsbuild_datapy) 7. [Kinetic rows](#eventsjson-kinetic-rows) 8. [Non-kinetic rows](#eventsjson-non-kinetic-rows) 9. [Legal rows](#legaljson) 10. [Capabilities](#capabilitiesjson)
 
 ## Method
 
 1. **SWF rows.** The SWF 2026 text extraction (`swf_2026.txt`, split by `=====PAGE N=====`) was searched programmatically and read by hand. Each row's date, value and pin was checked against the text of the pinned PDF page. The printed section-page (for example `02-36`) was mapped to the PDF page by reading the page-footer label, and every pinned pair was confirmed (e.g. PDF 72 = 01-23, PDF 149 = 02-36).
 2. **Table 1-4 and Table 5-1 extract with scrambled columns.** Row membership was confirmed by the date and value strings on the page. Where a cell could not be tied to its row by the text alone, the row is marked PARTIAL and the cell is named.
-3. **Non-SWF rows and legal rows.** Sources were fetched with WebFetch or curl, or located with WebSearch. Where a site blocks bots (HTTP 202 challenge, 403), the URL is listed as *bot-blocked* and the fact was checked through a search-index snippet or another source instead. No row is marked VERIFIED on inference, on "consistent with" reasoning, or on a neighboring row.
+3. **Non-SWF rows and legal rows.** Sources were fetched with WebFetch or curl, or located with WebSearch. Where a site blocks bots (HTTP 202 challenge, 403), alternative mirrors were tried (`documents.un.org` symbol access, `undocs.org`); if none worked the URL is listed as *bot-blocked* and the fact was checked through a search-index snippet or another source instead. No row is marked VERIFIED on inference, on "consistent with" reasoning, or on a neighboring row.
 4. **URL checks.** Every distinct `source_url` was requested with curl (follow redirects, browser user agent) and its landing page inspected, not just its status code.
 
 **Status vocabulary.** VERIFIED: the pinned page or fetched source shows the value (short quote given). VERIFIED (external): checked against a named non-SWF source. PARTIAL: core fields verified; the named field was not isolable or comes from outside the pin. CORRECTED: a defect was found in this pass and fixed in `build_data.py`. UNCHECKED: not re-checked in this pass (no row currently carries it).
+
+## Executive summary
+
+- **Coverage:** 83 items checked (44 kinetic, 15 non-kinetic, 19 legal, 5 capability categories). No item is UNCHECKED.
+- **This pass:** two former PARTIAL legal rows (`ppwt-2008`, `ppwt-2014`) are now VERIFIED against the primary documents, and `paros-1981` is VERIFIED against the UN resolution text. Their `source_url` fields now point to the documents themselves.
+- **Defects found and fixed:** 32 discrepancies (table below), all corrected in `tools/build_data.py`; no factual error in a plotted value remains known.
+- **Remaining PARTIAL (9 items):** `us-1985-solwind`, `ru-2019-nudol-jun`, `ru-2014-ukraine`, `itu-rrb-2024`, and the five capability categories. Each has an entry under "Remaining PARTIAL items" saying what is unverified and why no plotted value depends on it.
+- **Bot-blocked sources:** ICAO, UNOOSA and some ITU pages block scripts; these were checked through search snippets or alternative UN mirrors, as recorded per row.
 
 ## Summary
 
@@ -18,12 +29,20 @@
 |---|---|---|---|---|---|
 | Kinetic events | 44 | 33 | 1 | 2 | 8 |
 | Non-kinetic events | 15 | 5 | 1 | 1 | 8 |
-| Legal items | 19 | 3 | 7 | 4 | 5 |
+| Legal items | 19 | 6 | 7 | 1 | 5 |
 | Capability categories | 5 | 0 | 0 | 5 | 0 |
 
-No row or sub-detail is left UNCHECKED. The former UNCHECKED legal sub-details (entry-into-force dates of the LTBT and OST, the 2002 US ABM withdrawal, the date of Res. 76/231) were checked in this pass and are recorded in the legal table below. The remaining PARTIAL items are: `us-1985-solwind` (zero in-orbit cell), `ru-2019-nudol-jun` (note cell paired by column order), four legal rows (`paros-1981`, `ppwt-2008`, `ppwt-2014`, `itu-rrb-2024`) whose primary document could not be fetched or tied to the citation, and the five capability categories, whose D/P split rests on a graphical SWF matrix.
+Rows are counted once each, by their most significant status. (Non-kinetic PARTIAL is `ru-2014-ukraine`, whose 2014 start is external; see below.)
 
-Rows are counted once each, by their most significant status.
+## Remaining PARTIAL items
+
+| Item | Exactly what is unverified | Why no plotted value depends on it |
+|---|---|---|
+| `us-1985-solwind` | The "0 pieces still in orbit" cell of Table 5-1. The extraction scrambles columns, so the cell cannot be tied to its row by text. The 530 km vs 555 km altitude conflict is verified and disclosed. | Chart A plots intercept altitude (530 km) and cataloged fragments (285), both read from the row. In-orbit counts appear only in cards and tables. |
+| `ru-2019-nudol-jun` | The note "Potential KKV, no intercept" is paired to the 14 Jun 2019 row only by column order in Table 16-2. The date and "Nudol" are read directly. | The row has no altitude and no fragments; it is drawn in the no-altitude strip by its date alone. Low confidence is shown on the row. |
+| `ru-2014-ukraine` | The 2014 start of the campaign is not on the SWF pages cited; it comes from Breaking Defense and Foreign Policy. "Nearly 10,000 suspected incidents" is verified on p. 02-28. | Chart C draws a span starting 2014; the note names the external source. The count is not plotted. |
+| `itu-rrb-2024` (legal) | The ITU "summary of decisions" document itself. The 96th RRB meeting dates (24-28 June 2024) are confirmed on the ITU minutes page (Circular 507, `itu.int/md/R00-CR-CIR-0507`) and agenda; the summary is not retrievable (the meeting-document pages `R24-RRB24.2-SUM-0001` return an empty shell or 404 for scripts). The 1 July 2024 issue date rests on press reports. Quoted wording matches SWF p. 02-32. | The legal band plots the item at its start date, 1 Jul 2024. A date off by days would not move a mark at year scale, and the label and quote are SWF's. The ledger URL is the generic RRB page. |
+| `direct_ascent`, `co_orbital`, `electronic_warfare`, `directed_energy`, `cyber` (capabilities) | The 2020s D/P split follows SWF's graphical country matrix, which text extraction cannot read; P entries were not each read in the country chapters. | Chart B's 2020s counts inherit this. The chart labels pre-2020s cells as reconstruction, and the D entries rest on verified events (tables above). Only the split between D and P for P-entries is unchecked. |
 
 ## Closed items from the earlier log
 
@@ -59,7 +78,7 @@ Rows are counted once each, by their most significant status.
 | 20 | Legal `itu-1992` | Quote "complete freedom" is wrong. Art. 48 reads "entire freedom". | Fixed; UNTS pin 361-62. |
 | 21 | Legal `icao-2025` | Cited only through SWF; also condemned the DPRK. Date 2025-10-01 was loose. | Primary ICAO release cited (dated 3 Oct 2025; SWF pp. 02-30, 12-06). |
 | 22 | Legal `itu-rrb-2025` | Generic RRB URL; date 2025-11-01. | 100th meeting 10-14 Nov 2025 (SWF fn. 245); dated 2025-11-10; ITU RNSS page. |
-| 23 | Legal `paros-1981`, `ppwt-2008` | DL records 28200 and 622364 could not be tied to the documents (bot-blocked). | UNOOSA text of 36/97 C; DL record 633470 (letter of 12 Feb 2008 transmitting CD/1839). |
+| 23 | Legal `paros-1981`, `ppwt-2008` | DL records 28200 and 622364 could not be tied to the documents (bot-blocked). | UNOOSA text of 36/97 C; DL record 633470 (letter of 12 Feb 2008 transmitting CD/1839). Later replaced by direct `documents.un.org` links for CD/1839 and CD/1985. |
 | 24 | Legal `milamos-2022` | Year-only date. | Published July 2022; start 2022-07-01. |
 | 25 | Legal `us-moratorium-2022` | Note listed follower states not in the cited sources. | Removed; SWF's "38 countries total" retained. |
 | 26 | All SWF pins | Pins named page numbers only. | Each now names the table or passage. |
@@ -151,11 +170,11 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | ltbt-1963 | VERIFIED (external) | Cite "14 U.S.T. 1313, 480 U.N.T.S. 43"; signed Moscow 5 Aug 1963 and in force 10 Oct 1963 (JFK Library, EBSCO, Arms Control Association; Senate consent 24 Sept. 1963, 80-19). "Followed Starfish Prime" is chronological only (July 1962). URL bot-blocked (202). |
 | ost-1967 | VERIFIED (external) | Cite "18 U.S.T. 2410, 610 U.N.T.S. 205" confirmed. UNOOSA: adopted by res. 2222 (XXI), opened for signature 27 Jan 1967, in force 10 Oct 1967. URL bot-blocked. |
 | abm-1972 | CORRECTED | Cite "23 U.S.T. 3435" confirmed. Art. XII: "Each Party undertakes not to interfere with the national technical means" (ACA / State text via search). US notice of withdrawal 13 Dec 2001, effective 13 June 2002 (ACA, CRS RS21088). |
-| paros-1981 | PARTIAL | UNOOSA page (200) is "RES 36/97C". Both 36/97 C and 36/99 confirmed as 9 Dec 1981 by search. |
+| paros-1981 | VERIFIED | Alternative mirror: `documents.un.org/api/symbol/access?s=A/RES/36/97` (PDF read). Resolution 36/97 part **C**, "Prevention of an arms race in outer space", adopted at the 91st plenary meeting, 9 December 1981; operative para. 3 requests the Committee on Disarmament to consider the question "as from the beginning of its session in 1982". Same source for 36/99, "Conclusion of a treaty on the prohibition of the stationing of weapons of any kind in outer space", 9 December 1981. The UNOOSA page remains the ledger URL. |
 | cd-paros-committee | VERIFIED (external) | UNIDIR text read: "On 29 March 1985 the CD agreed to establish an Ad Hoc Committee"; "final meeting on 23 August 1994"; "has not been re-established". |
 | itu-1992 | VERIFIED (external) | UNTS vol. 1825 read: Art. 45 at p. 361; Art. 48 at p. 362 "Members retain their entire freedom with regard to military radio installations". Adopted 22 Dec 1992, in force 1 July 1994 (search). |
-| ppwt-2008 | PARTIAL | Letter of 12 Feb 2008 transmitting the draft (DL record 633470 title); CD/1839 issued 29 Feb 2008 (search). URL bot-blocked. |
-| ppwt-2014 | PARTIAL | Tabled at the CD on 10 June 2014 (Reaching Critical Will); designated CD/1985 (search). DL record 774287 is bot-blocked (403) and could not be tied to CD/1985; date 12 June 2014 rests on search. |
+| ppwt-2008 | VERIFIED | `documents.un.org/api/symbol/access?s=CD/1839&l=en&t=pdf` (PDF read, 5 pp.): header "CD/1839, 29 February 2008"; "Letter dated 12 February 2008 ... transmitting the Russian and Chinese texts of the draft Treaty ... (PPWT) introduced by the Russian Federation and China"; signed by Loshchinin and Wang Qun. Ledger URL now this document. |
+| ppwt-2014 | VERIFIED | `documents.un.org/api/symbol/access?s=CD/1985&l=en&t=pdf` (PDF read, 6 pp.): "CD/1985, Conference on Disarmament, 12 June 2014"; "Letter dated 10 June 2014 ... transmitting the updated Russian and Chinese texts of the draft treaty ... (PPWT)"; signed by Borodavkin and Wu Haitao. The earlier DL record 774287 (403) was dropped as the ledger URL. |
 | unga-75-36 | VERIFIED (external) | DL record 3895440 title "Reducing space threats through norms, rules and principles of responsible behaviours"; adopted 7 Dec 2020 (search). |
 | oewg-2022 | VERIFIED (external) | Res. 76/231 adopted 24 Dec 2021, 150-8-7 (DL record 3952870; UN doc A/RES/76/231, distributed 30 Dec 2021); it convenes the OEWG from 2022 and asks for a report to the 78th session. First session 9-13 May 2022; final session ended 1 Sept 2023 with no consensus report (search; SWF fact sheet). |
 | us-moratorium-2022 | VERIFIED | URL 200. SWF p. 01-50 (PDF 99): "The United States did indeed formally announce in April 2022"; "38 countries total have made that commitment." |
@@ -164,7 +183,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | tallinn-2017 | VERIFIED | DOI URL resolves to the Cambridge Tallinn Manual 2.0 page (HTTP 200). Year 2017 per that page. |
 | woomera-2024 | CORRECTED | OUP page: published 2024, editors Jack Beard and Dale Stephens. |
 | unsc-veto-2024 | VERIFIED | UN press SC/15678: "9616th Meeting", Apr. 24, 2024; 13 in favor, Russia against, China abstained. Draft S/2024/302 confirmed (documents.un.org). |
-| itu-rrb-2024 | PARTIAL | 96th RRB meeting 24-28 June 2024 (ITU agenda and minutes pages); summary issued 1 July 2024 (press reports); quotes match SWF p. 02-32. The ledger URL is the generic RRB page, not the summary document. |
+| itu-rrb-2024 | PARTIAL | 96th RRB meeting 24-28 June 2024 (ITU Circular 507 minutes page and agenda); summary issued 1 July 2024 (press reports); quotes match SWF p. 02-32. Summary document not retrievable; see "Remaining PARTIAL items". |
 | icao-2025 | CORRECTED | SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention ... condemned it for doing so, and called for it to fulfill its obligations"; p. 12-06 says the same for North Korea; fn. 243 gives the ICAO release of 3 Oct 2025. ICAO release (search snippet, page bot-blocked 403; Uniting Aviation repeat): the Assembly (23 Sept.-3 Oct. 2025) "endorsed the determination of its governing Council" that the interference "constitute[s] infractions" of the Convention, through two resolutions. Label changed (Discrepancy 31). Resolution numbers not verified and not used. |
 | itu-rrb-2025 | CORRECTED | SWF p. 02-30, fn. 245: "held November 10-14, 2025"; quote "again urge[d] the Administration of the Russian Federation". The ITU page (200) now also carries later meeting content. |
 

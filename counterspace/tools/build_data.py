@@ -411,11 +411,11 @@ L = [
        "cover ground-based (direct-ascent) ASATs.",
        "Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) "
        "(tabled at the CD Feb. 12, 2008).",
-       "https://digitallibrary.un.org/record/633470"),
+       "https://documents.un.org/api/symbol/access?s=CD/1839&l=en&t=pdf"),
     lg("ppwt-2014", "2014-06-10", None, "negotiation_span", "PPWT updated draft",
        "Revised draft; still silent on ground-based ASATs and testing.",
        "Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014).",
-       "https://digitallibrary.un.org/record/774287"),
+       "https://documents.un.org/api/symbol/access?s=CD/1985&l=en&t=pdf"),
     lg("unga-75-36", "2020-12-07", None, "resolution", "UNGA 75/36",
        "Reducing space threats through norms, rules and principles of responsible behaviour.",
        "G.A. Res. 75/36 (Dec. 7, 2020).", "https://digitallibrary.un.org/record/3895440"),
@@ -628,10 +628,21 @@ def ledger_md(events):
     a("")
     a("## Contents")
     a("")
-    for t in ["As-of dates", "Summary counts", "How to read the pins", "Legend of fields", "Kinetic events (chronological)",
-              "Non-kinetic events (by start date)", "Legal items (by start date)", "Conflicts inside the sources",
-              "Notes by row", "Capability coding (Chart B)", "Sources"]:
-        a("- [%s](#%s)" % (t, "".join(ch for ch in t.lower().replace(" ", "-") if ch.isalnum() or ch == "-")))
+    nconf_ = sum(len(r.get("conflicts", [])) for r in events)
+    toc = [("As-of dates", ""), ("Summary counts", ""), ("How to read the pins", ""), ("Legend of fields", ""),
+           ("Quick lookup by state or actor", ""), ("Quick lookup by year", ""),
+           ("Kinetic events (chronological)", "%d rows" % len(kin)),
+           ("Non-kinetic events (by start date)", "%d rows" % len(nk_)),
+           ("Legal items (by start date)", "%d rows" % len(leg)),
+           ("Conflicts inside the sources", "%d rows" % nconf_),
+           ("Notes by row", "%d notes" % sum(1 for r in events if r.get("notes"))),
+           ("Capability coding (Chart B)", "%d categories" % len(CAP)), ("Sources", "")]
+    for t, n in toc:
+        a("- [%s](#%s)%s" % (t, "".join(ch for ch in t.lower().replace(" ", "-") if ch.isalnum() or ch == "-"),
+                             " (%s)" % n if n else ""))
+    a("")
+    a("Each table section opens with its row count. Section order: reference material first, lookups second, data tables third, "
+      "then conflicts, notes, capability coding and sources.")
     a("")
     a("## As-of dates")
     a("")
@@ -694,8 +705,36 @@ def ledger_md(events):
     a("**Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. "
       "Soft-law manuals are marked (soft law) and are not binding.")
     a("")
+    a("## Quick lookup by state or actor")
+    a("")
+    a("Row ids grouped by acting state (kinetic tests) or actor (non-kinetic operations). Counts are in brackets; ids match the tables below.")
+    a("")
+    a("| state or actor | kinetic | non-kinetic |")
+    a("|---|---|---|")
+    actors = sorted({r["state"] for r in kin} | {r["actor"] for r in nk_})
+    for ac in actors:
+        ks = [r["id"] for r in kin if r["state"] == ac]
+        ns = [r["id"] for r in nk_ if r["actor"] == ac]
+        a("| %s | %s | %s |" % (ac, ("[%d] " % len(ks) + ", ".join(ks)) if ks else "-",
+                                ("[%d] " % len(ns) + ", ".join(ns)) if ns else "-"))
+    a("")
+    a("## Quick lookup by year")
+    a("")
+    a("Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; "
+      "see the gap note in `methodology.md` for 1970-1984 and 1985-2005.")
+    a("")
+    a("| year | kinetic | non-kinetic | legal |")
+    a("|---|---|---|---|")
+    yrs = sorted({r["date"][:4] for r in kin} | {r["start"][:4] for r in nk_} | {r["start"][:4] for r in leg})
+    for y in yrs:
+        a("| %s | %s | %s | %s |" % (y, sum(r["date"][:4] == y for r in kin) or "-",
+                                    sum(r["start"][:4] == y for r in nk_) or "-",
+                                    sum(r["start"][:4] == y for r in leg) or "-"))
+    a("")
     # kinetic
     a("## Kinetic events (chronological)")
+    a("")
+    a("**%d rows.**" % len(kin))
     a("")
     a("| date | id | state | system | target | type | alt (km) | kind | cataloged | in orbit | conf | pin |")
     a("|---|---|---|---|---|---|---|---|---|---|---|---|")
@@ -711,6 +750,8 @@ def ledger_md(events):
     a("")
     a("## Non-kinetic events (by start date)")
     a("")
+    a("**%d rows.**" % len(nk_))
+    a("")
     a("| start | end | id | actor | category | attribution | target regime | operational | conf | pin |")
     a("|---|---|---|---|---|---|---|---|---|---|")
     for r in nk_:
@@ -722,6 +763,8 @@ def ledger_md(events):
     a("")
     a("## Legal items (by start date)")
     a("")
+    a("**%d rows.**" % len(leg))
+    a("")
     a("| start | end | id | kind | label | citation |")
     a("|---|---|---|---|---|---|")
     for r in leg:
@@ -730,6 +773,8 @@ def ledger_md(events):
             r["label"], r["citation"]))
     a("")
     a("## Conflicts inside the sources")
+    a("")
+    a("**%d rows.**" % nconf)
     a("")
     a("Where SWF (or a source) disagrees with itself, the row keeps one value under a stated rule and records the other here "
       "and in the row's `conflicts` field. Rule: Table 5-1 for intercept altitude and debris counts; the appendix or "
@@ -743,6 +788,7 @@ def ledger_md(events):
     a("")
     a("## Notes by row")
     a("")
+    a("**%d notes.** One bullet per row that carries a note.\n" % sum(1 for r in events if r.get("notes")))
     for r in events:
         if r.get("notes"):
             a("- **%s** (%s): %s" % (r["id"], r.get("date") or r.get("start"), r["notes"]))
