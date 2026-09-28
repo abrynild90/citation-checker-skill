@@ -1,6 +1,6 @@
 // ============================================================================
 // audit.js: overlapping or clipped text in every chart SVG, static scene diagrams and live scene labels (bounding-box tests).
-// Provides: audit(). Each finding is { chart, kind: overlap | clip | text-on-mark, a, b?, w?, h? }; [] means clean.
+// Provides: audit(). Each finding is { chart, kind: overlap | clip | text-on-mark | sticky-clip, a, b?, w?, h? }; [] means clean.
 // ============================================================================
 const CHART_SVGS = '#legalSvg svg, #legalZoom svg, #svgA svg, #svgB svg, #svgC svg, #svgL svg';
 const SCENE_SVGS = '#sceneView > svg, #heroStage > svg';
@@ -38,7 +38,21 @@ function audit() {
   const out = [];
   document.querySelectorAll(CHART_SVGS).forEach(svg => out.push(...auditSvg(svg, svg.parentElement.id)));
   document.querySelectorAll(SCENE_SVGS).forEach(svg => { if (svg.getClientRects().length) out.push(...auditSvg(svg, 'scene-svg:' + (svg.parentElement.id || 'view'))); });
-  return out.concat(auditHtml());
+  return out.concat(auditHtml(), auditSticky());
+}
+// Sticky legal band: while it is stuck (compact), no text below it may straddle its lower edge (that reads as clipped text). Checks every
+// text node in <main> (HTML and SVG) against the band's bottom edge; only meaningful at the current scroll position.
+function auditSticky() {
+  const band = document.getElementById('legalBand'); if (!band || !band.classList.contains('compact')) return [];
+  const edge = band.getBoundingClientRect().bottom, out = [], root = document.querySelector('main') || document.body, rg = document.createRange();
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    const el = n.parentElement, s = n.nodeValue.trim();
+    if (!s || !el || band.contains(el) || el.closest('.card, .overlay, [hidden], script, style, details:not([open]) > :not(summary)') || getComputedStyle(el).visibility === 'hidden') continue;
+    rg.selectNodeContents(n);
+    for (const r of rg.getClientRects()) if (r.width > 0 && r.top < edge - 1 && r.bottom > edge + 1) { out.push({ chart: 'sticky-band', kind: 'sticky-clip', a: s.slice(0, 28), h: Math.round(Math.min(r.bottom, edge + 99) - r.top) }); break; }
+  }
+  return out;
 }
 // Overlap tests for HTML boxes: live scene labels (.hlabel, only those on screen) and legend items. Same record shape as the SVG checks.
 function auditHtml() {

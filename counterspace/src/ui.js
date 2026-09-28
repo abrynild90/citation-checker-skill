@@ -88,7 +88,7 @@ function setOnce(id, html) { if (written.get(id) === html) return; written.set(i
 // Legend builder: legend('legendA', 22, 18).item(svgInner, text[, w]).raw(html).done()
 function legend(id, w = 22, h = 16) {
   const parts = [], api = {
-    item: (inner, text, iw = w) => (parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg>${text}</li>`), api),
+    item: (inner, text, iw = w) => (parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg><span>${text}</span></li>`), api),
     raw: html => (parts.push(html), api),
     done: () => setOnce(id, parts.join('')),
   };

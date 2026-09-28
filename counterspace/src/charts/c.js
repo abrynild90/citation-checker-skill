@@ -39,14 +39,14 @@ function drawC(el = document.getElementById('svgC')) {
     const point = e.end === e.start, X0 = XS(e), X1 = point ? X0 : e.end ? x(parse(e.end)) : R - 8;
     const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
     const full = `${short}: ${e.target_system.split(' (')[0]}`;
-    let lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
+    let lx = Math.max(M.l + 8, X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0)); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
     if (phone) { // phones: the label sits above its bar, full width (at most 2-3 lines), shifted left just enough to fit
-      const lines = wrap(full, W - 12, FS), w = Math.max(...lines.map(s => tw(s, FS))), tx = Math.max(6, Math.min(lx, RIGHT - w));
-      return { e, point, X0, X1, mode: 'above', anchor: 'start', tx, limit: W - 12, lines, w, bad: false, cost: lines.length, lx0: tx, ext: [Math.min(tx, X0 - 16) - 6, Math.max(tx + w, X1 + (e.end ? 6 : 12)) + 6] };
+      const lim = RIGHT - M.l - 8, lines = wrap(full, lim, FS), w = Math.max(...lines.map(s => tw(s, FS))), tx = Math.max(M.l + 8, Math.min(lx, RIGHT - w));
+      return { e, point, X0, X1, mode: 'above', anchor: 'start', tx, limit: lim, lines, w, bad: false, cost: lines.length, lx0: tx, ext: [Math.min(tx, X0 - 16) - 6, Math.max(tx + w, X1 + (e.end ? 6 : 12)) + 6] };
     }
     const cands = [{ mode: 'above', anchor: 'start', tx: lx, limit: (lx < HX - 8 ? HX - 8 : RIGHT) - lx }];
-    { const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 2) }); }
-    if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 4) });
+    { const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 10) }); }
+    if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 10) });
     const opts = cands.map((c, i) => { const lines = wrap(full, Math.max(60, c.limit), FS); const w = Math.max(...lines.map(s => tw(s, FS)));
       return { ...c, lines, w, bad: c.limit < 70 || w > c.limit + 0.5, cost: lines.length + (lines.length > 3 ? 10 : 0) + i * 0.1 }; });
     opts.forEach(o => { if (o.bad) o.cost += 50; });

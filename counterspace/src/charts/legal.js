@@ -33,12 +33,33 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < SEP) t++; last[t] = cx + (hasScene(d) ? 6 : 0); d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
   // 2. label placement, coordinates relative to the mark line (up is negative, down positive)
   const pl = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 }), top0 = 16 + TP * maxT, labels = []; let maxUp = -1, maxDn = -1;
+  // The 2021-26 crowd is NUMBERED on the main band (marks keep their true dates on the shared scale) and keyed in a two-column list in the empty
+  // band area left of the dashed window; full labels live in the zoom inset below. Falls back to plain labels if the list or a number does not fit.
+  const zx0 = x(ZOOM[0]); let key = null; pts.forEach(d => { d._n = d._num = null; });
+  if (!small && !zoom && !strip) {
+    const cand = pts.filter(d => d._cx >= zx0 - 2), rows = Math.ceil(cand.length / 2), cw = [0, 0];
+    const ents = cand.map((d, i) => ({ d, n: i + 1, col: Math.floor(i / rows), row: i % rows, t: ABBR[d.id] || d.label, when: fmtMY(parse(d.start)) }));
+    ents.forEach(e => { e.w = 17 + tw(e.t, FS, 600) + 8 + tw(e.when, FS - 1); cw[e.col] = Math.max(cw[e.col], e.w); });
+    const total = cw[0] + (cw[1] ? cw[1] + 20 : 0), hgt = 16 + rows * PITCH;
+    if (cand.length >= 3 && zx0 - M.l - 20 >= total) key = { ents, cw, total, hgt, x0: zx0 - 14 - total, rel: -34 - hgt };
+  }
   if (!small) {
     pts.forEach(d => { const bw = hasScene(d) ? 15 : 8; pl.add([d._cx - 8, -d._t * TP - 9 - (hasScene(d) ? 8 : 0), d._cx + bw, -d._t * TP + 8], 'G'); });
+    if (key) {
+      const base = pl.r.length; let ok = true;
+      pts.filter(d => d._t).forEach(d => pl.add([d._cx - 1.5, -d._t * TP, d._cx + 1.5, 0], 'S'));
+      pl.add([key.x0 - 4, key.rel - 2, key.x0 + key.total + 4, key.rel + key.hgt + 2], 'K');
+      key.ents.forEach(({ d, n }) => {
+        const w = tw(String(n), FS, 700), bw = hasScene(d) ? 18 : 11; let hit = null;
+        for (const [anchor, dx, dy] of [['end', -10.5, 3.7], ['start', bw, 3.7], ['end', -10.5, 12], ['start', bw, 12], ['middle', 0, -12], ['end', -10.5, -8], ['middle', 0, 18]]) { const q = pl.textRect(d._cx + dx, -d._t * TP + dy, anchor, w, FS); if (pl.free(q, [], 0.5)) { pl.add(q, 'N'); hit = { anchor, dx, dy }; break; } }
+        if (!hit) { ok = false; console.warn('num fail', d.id, d._t, d._cx); } d._num = hit; d._n = n;
+      });
+      if (!ok) { console.warn('legal numbering fell back to labels'); pl.r.length = base; pts.forEach(d => { d._n = d._num = null; }); key = null; }
+    }
     // Clusters of nearby marks are solved together. Several deterministic strategies (labels ending at their mark, starting at it,
     // V-shaped splits) run on rows above AND below the mark line; the one needing the fewest rows wins. Every label and leader is
     // tested against all other labels, marks, leaders and the edges.
-    const clusters = []; pts.forEach(d => { const c = clusters.at(-1); if (c && d._cx - c.at(-1)._cx < 200) c.push(d); else clusters.push([d]); });
+    const clusters = []; pts.filter(d => !d._n).forEach(d => { const c = clusters.at(-1); if (c && d._cx - c.at(-1)._cx < 200) c.push(d); else clusters.push([d]); });
     const anchorsOf = { end: [['end', -2]], start: [['start', 2]], middle: [['middle', 0], ['end', -2], ['start', 2]] };
     const run = (order, prim, commit) => {
       const base = pl.r.length, out = []; let mu = -1, md = -1, ok = true;
@@ -66,7 +87,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
       const r = run(best.c.order, best.c.prim, true); labels.push(...r.out); maxUp = Math.max(maxUp, r.mu); maxDn = Math.max(maxDn, r.md);
     });
   }
-  const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 14);
+  const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 24, key ? -key.rel + 8 : 0);
   const dnSpace = !small && maxDn >= 0 ? 20 + maxDn * PITCH + 8 : 0;
   // spans: lanes below the mark line (and below any labels hanging under it)
   const lanes = [];
@@ -85,6 +106,16 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
     else lg.append('line').attr('x1', d._cx).attr('x2', d._cx).attr('y1', yMark + 9).attr('y2', yMark + off - FS).style('stroke', 'var(--line)');
     lg.append('text').attr('x', tx).attr('y', yMark + off).attr('text-anchor', anchor).style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)').style('font', `600 ${FS}px var(--sans)`).text(t);
   });
+  if (key) {
+    const ky = yMark + key.rel;
+    lg.append('text').attr('class', 'band-label').attr('x', key.x0).attr('y', ky + 8).text('2021–26 MARKS, NUMBERED');
+    key.ents.forEach(e => {
+      const cx0 = key.x0 + (e.col ? key.cw[0] + 20 : 0), yy = ky + 16 + (e.row + 1) * PITCH - 3, soft = e.d.soft_law;
+      lg.append('text').attr('x', cx0).attr('y', yy).style('fill', 'var(--accent)').style('font', `700 ${FS}px var(--sans)`).text(e.n);
+      lg.append('text').attr('x', cx0 + 17).attr('y', yy).style('fill', soft ? 'var(--accent-2)' : 'var(--text)').style('font', `600 ${FS}px var(--sans)`).text(e.t);
+      lg.append('text').attr('x', cx0 + e.w).attr('y', yy).attr('text-anchor', 'end').style('fill', 'var(--muted)').style('font', `${FS - 0.5}px var(--sans)`).text(e.when);
+    });
+  }
   // spans
   const sg = svg.append('g').selectAll('g').data(spans).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
     .attr('aria-label', d => `${d.label}, ${fmtY(parse(d.start))} to ${d.end ? fmtY(parse(d.end)) : 'present'}. ${d.short_note}`);
@@ -103,7 +134,8 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   const pg = svg.append('g').selectAll('g').data(pts).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
     .attr('transform', d => `translate(${d._cx},${d._y})${GS < 1 ? ` scale(${GS})` : ''}`)
     .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
-  pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10); });
+  pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10);
+    if (d._n && d._num) d3.select(this).append('text').attr('class', 'mnum').attr('x', d._num.dx).attr('y', d._num.dy).attr('text-anchor', d._num.anchor).attr('aria-hidden', 'true').text(d._n); });
   pg.append('circle').attr('class', 'hit').attr('r', 12 / GS);
   bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
@@ -128,6 +160,7 @@ function legalScroll() {
   if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused mark
   const h0 = band.offsetHeight; legalCompact = stuck;
   drawLegal(); band.classList.toggle('compact', stuck);
+  if (stuck) document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
   band.style.marginBottom = stuck ? Math.max(0, h0 - band.offsetHeight) + 'px' : '0px';
 }
 let scrollTick = false; // at most one legalScroll per frame

@@ -68,6 +68,15 @@ for (const [vname, w, h] of VIEWPORTS) for (const scheme of ['dark', 'light']) {
   const key = `${vname}-${scheme}`;
   await run(`matrix-${key}`, { viewport: { width: w, height: h }, colorScheme: scheme, reducedMotion: 'reduce', isMobile: w < 640, hasTouch: w < 640 }, async p => {
     const res = { audit: await audit(p), hscroll: await hscroll(p) };
+    if (w >= 761) { // sticky legal band: at each section anchor nothing below it may straddle its lower edge
+      res.stickyClips = [];
+      for (const id of SECTIONS.slice(1)) {
+        await p.evaluate(id => document.getElementById(id).scrollIntoView(), id); await p.waitForTimeout(350);
+        await p.evaluate(() => dispatchEvent(new Event('scroll'))); await p.waitForTimeout(350);
+        for (const f of await audit(p)) if (f.kind === 'sticky-clip') res.stickyClips.push({ at: id, ...f });
+      }
+      await p.screenshot({ path: `${out}/${key}-sticky.png` });
+    }
     await p.waitForTimeout(300); await sectionHashes(p, key);
     if (vname === '1440') res.axe = await axe(p);
     if (vname === '375' && scheme === 'dark') {

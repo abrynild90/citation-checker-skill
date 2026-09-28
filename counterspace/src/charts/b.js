@@ -79,7 +79,7 @@ function drawB(el = document.getElementById('svgB')) {
   decs.forEach((d, i) => {
     const xa = x(xs[i]), xb = x(xs[i + 1]), cx = (xa + xb) / 2, lo = dem[i], hi = tot[i], unc = hi > lo, w = xb - xa;
     if (unc && w > 22) { rg.append('path').attr('d', `M${cx - 3},${y(lo)}h6M${cx},${y(lo)}V${y(hi)}M${cx - 3},${y(hi)}h6`).attr('class', 'whisker'); }
-    if (w >= 34) rg.append('text').attr('class', 'range-label').attr('x', cx).attr('y', y(hi) - 6).attr('text-anchor', 'middle').text(unc ? `${lo}–${hi}` : `${hi}`);
+    if (w >= 34) rg.append('text').attr('class', 'range-label').attr('x', cx).attr('y', y(hi) - 6).attr('text-anchor', 'middle').text(unc ? `${w >= 84 && !phone ? 'range ' : ''}${lo}–${hi}` : `${hi}`);
   });
   xAxis(svg, x, top + plotH);
   addGuide(svg, x, top, top + plotH);
@@ -92,12 +92,14 @@ function drawB(el = document.getElementById('svgB')) {
     : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.')
     + ' Numbers above each decade give the range: demonstrated only to demonstrated plus developing (whisker). In the 2020s the states are SWF-assessed but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part; dotted bands are developing entries where SWF’s country matrix shows no data. See the <a href="#codingRules">coding rules</a>.';
   // legend + chips
-  legend('legendB', 18, 12)
-    .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted)"/>', 'Demonstrated (tested or used)')
-    .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted);fill-opacity:.4;stroke:var(--muted);stroke-dasharray:3 2"/>', 'Faded, dashed: reconstructed decade (not SWF-assessed)')
-    .item('<path d="M-3,-6h6M0,-6V6M-3,6h6" style="stroke:var(--text);stroke-width:1.4;fill:none"/>', 'Range: demonstrated only (low) to demonstrated + developing (high)', 18)
-    .item('<defs><pattern id="ln" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1" style="fill:var(--muted)"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#ln)" style="stroke:var(--muted);stroke-width:.8"/>', 'Developing, builder-assessed (2020s, SWF matrix shows no data)')
-    .item('<defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#lh)"/>', 'Developing or latent').done();
+  { const L = legend('legendB', 26, 16), C = 'var(--cat-ew)', sw = (inner, extra = '') => `<rect x="-12" y="-7" width="24" height="14" rx="1.5" ${extra}/>${inner}`;
+    L.raw('<li class="lhead" aria-hidden="true">Fill style = strength of evidence (colour = capability category)</li>')
+      .item(sw('', `style="fill:${C};fill-opacity:.85"`), '<b>Solid</b>: demonstrated, tested or used (verified against SWF)')
+      .item(`<defs><pattern id="lgH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${C};fill-opacity:.14"/><line y2="6" style="stroke:${C};stroke-width:2.2"/></pattern></defs>` + sw('', 'fill="url(#lgH)"'), '<b>Hatched</b>: developing or latent')
+      .item(`<defs><pattern id="lgD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${C};fill-opacity:.06"/><circle cx="2.5" cy="2.5" r="1" style="fill:${C}"/></pattern></defs>` + sw('', 'fill="url(#lgD)"'), '<b>Dotted</b>: developing, builder-assessed (2020s; SWF matrix: no data)')
+      .item(sw('', `style="fill:${C};fill-opacity:.42;stroke:var(--muted);stroke-dasharray:3 2"`), '<b>Faded, dashed edge</b>: reconstructed decades (before 2020, not SWF-assessed)')
+      .raw('<li class="lhead" aria-hidden="true">Range whisker above each decade</li>')
+      .item('<path d="M-4,-8h8M0,-8V8M-4,8h8" style="stroke:var(--text);stroke-width:1.5;fill:none"/>', '<b>Low end</b> = demonstrated only; <b>high end</b> = demonstrated + developing. The label reads low–high, e.g. 13–25.', 26).done(); }
   table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P' && !isNoData(c.key, d, k)), N_ = Object.keys(o).filter(k => o[k] === 'P' && isNoData(c.key, d, k)); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}${N_.length ? `; ${N_.length} developing, builder-assessed, SWF matrix: no data (${N_.join(', ')})` : ''}`; })]));
 }
 // Chips are built once and updated in place, so a toggle never drops keyboard focus.
