@@ -88,7 +88,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   const sg = svg.append('g').selectAll('g').data(spans).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
     .attr('aria-label', d => `${d.label}, ${fmtY(parse(d.start))} to ${d.end ? fmtY(parse(d.end)) : 'present'}. ${d.short_note}`);
   sg.append('rect').attr('x', d => d._a).attr('width', d => Math.max(3, d._b - d._a)).attr('y', d => lane0 + d._lane * laneP + 2).attr('height', compact ? 3 : 4).attr('rx', 2).style('fill', 'var(--accent)').style('opacity', 0.55);
-  sg.append('rect').attr('class', 'hit').attr('x', d => d._a - 2).attr('width', d => Math.max(10, d._b - d._a + 4)).attr('y', d => lane0 + d._lane * laneP - (compact ? 2 : 6)).attr('height', compact ? 10 : 16);
+  sg.append('rect').attr('class', 'hit').attr('x', d => d._a - 2).attr('width', d => Math.max(10, d._b - d._a + 4)).attr('y', d => lane0 + d._lane * laneP - (compact ? 2 : 10)).attr('height', compact ? 10 : 24);
   if (!small) spans.forEach(d => {
     const t = SPAN_LABEL[d.id] || d.label, w = tw(t, FS, 600), y = lane0 + d._lane * laneP - 2;
     const anchor = d._a + w <= W - 6 ? 'start' : 'end', tx = anchor === 'start' ? d._a : Math.min(W - 6, d._b);
@@ -103,7 +103,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
     .attr('transform', d => `translate(${d._cx},${d._y})${GS < 1 ? ` scale(${GS})` : ''}`)
     .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
   pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10); });
-  pg.append('circle').attr('class', 'hit').attr('r', 8);
+  pg.append('circle').attr('class', 'hit').attr('r', 12 / GS);
   bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   sg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));

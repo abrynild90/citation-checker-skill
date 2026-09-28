@@ -92,8 +92,8 @@ K = [
       "destructive", 530, "intercept", frag=285, orbit=0,
       notes="Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and "
             "Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept "
-            "altitudes. Tracked-debris count (285) is from Table 5-1; the zero 'still on orbit' figure "
-            "could not be isolated from the jumbled Table 5-1 text extraction and reflects the debris having decayed.",
+            "altitudes. Tracked-debris count (285) is from Table 5-1. The zero 'still on orbit' figure could not "
+            "be tied to this row in the jumbled Table 5-1 text extraction, so it is shown in tables only and is not plotted.",
       conflicts=["Intercept altitude: 530 km (Table 5-1, p. 05-01) vs 555 km (prose p. 01-22; Table 1-4 p. 01-24)"],
       scene="solwind", src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-22 (PDF p. 71); Table 1-4, p. 01-24 (PDF p. 73)")),
     k("us-2008-burnt-frost", "2008-02-20", "United States", "SM-3 (USS Lake Erie)", "USA-193",
@@ -132,7 +132,7 @@ K = [
       notes="Not an intercept. Chinese Academy of Sciences said 10,000 km; the US military said 'nearly "
             "to GEO' (36,000 km); technical analysis cited by SWF (p. 03-20) puts apogee at least ~30,000 km. "
             "Builder plots ~30,000 km (SWF Table 3-3 value).",
-      conflicts=["Apogee: 10,000 km (CAS) vs ~36,000 km (US military) vs at least ~30,000 km (analysis cited by SWF)"],
+      conflicts=["Apogee: 10,000 km (CAS) vs 'nearly to GEO' (US military; GEO is 35,786 km) vs at least ~30,000 km (analysis cited by SWF)"],
       scene="dn2", src=swfx("Prose p. 03-20 (PDF p. 181); Table 3-3, p. 03-22 (PDF p. 183)")),
     k("cn-2014-dn2", "2014-07-23", "China", "Possible DN-2", "Likely ballistic missile", "non_destructive",
       None, "apogee", conf="medium",
@@ -156,7 +156,8 @@ K = [
     k("cn-2023-dn3", "2023-04-14", "China", "Possible DN-3", "Likely ballistic missile", "midcourse_intercept",
       None, "intercept", conf="medium",
       notes="Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and "
-            "15 April 2023. 14 April used.", src=T33()),
+            "15 April 2023. 14 April used.",
+      conflicts=["Date: 14 April 2023 (Table 3-3, p. 03-22; prose p. 03-21) vs 14 and 15 April both listed (Table 16-3, p. 16-04)"], src=T33()),
     k("ru-2014-nudol", "2014-08-12", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
       notes="Failed shortly after launch (SWF Table 2-4 note). Appendix Table 16-2 lists the date as a rocket test (unsuccessful). "
             "No apogee reported.",
@@ -194,7 +195,7 @@ K = [
       300, "intercept", frag=130, orbit=0,
       notes="Indian officials said most debris would re-enter within days and all of it within 45 days at most "
             "(SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, "
-            "and some pieces were thrown up to 2,250 km. An earlier estimate of about 400 pieces is not in SWF and is not used.",
+            "and some pieces were thrown up to 2,250 km.",
       scene="shakti",
       src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 04-04 (PDF p. 204)")),
     k("ru-2021-cosmos1408", "2021-11-15", "Russia", "Nudol (PL-19)", "Cosmos 1408", "destructive",
@@ -284,7 +285,7 @@ NK = [
        "GNSS receivers in and around Syria and the eastern Mediterranean", "GNSS_MEO", True,
        "GNSS spoofing/jamming around Russian bases in Syria; reported effects on aircraft in the region.",
        "medium", swf("02-28", 141, "C4ADS passage"),
-       notes="SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. An earlier draft said 2017; the ledger uses 2016 "
+       notes="SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The ledger uses 2016 "
              "at medium confidence."),
     nk("ru-2018-trident", "2018-10-25", "2018-11-07", "Russia", "gnss_jamming", "official_government",
        "GPS receivers in northern Norway and Finland during NATO Trident Juncture", "GNSS_MEO", False,
@@ -340,14 +341,14 @@ NK = [
              "actors not attributed. SWF (p. 10-01) also reports interference before the row's start, in spring 2023 "
              "(20% of regional aircraft in April 2023); the row starts at the Oct. 2023 escalation."),
     nk("ru-2024-eu-sats", "2024-03-01", None, "Russia (origin locations cited by ITU RRB)", "ew_uplink",
-       "official_government", "Swedish and French broadcasting satellites", "GEO_comms", True,
+       "multi_government", "Swedish and French broadcasting satellites", "GEO_comms", True,
        "Hijacked/jammed broadcasts over Ukrainian channels; European states complained; RRB (July 2024) "
        "said interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka.",
        "high", swf("02-32", 145, "ITU RRB passage, fn. 272"),
        notes="SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the "
              "interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It "
-             "described origin locations but made no state-responsibility finding; coded 'official_government' "
-             "because ITU, a governmental body, made the finding."),
+             "described origin locations but made no state-responsibility finding; coded 'multi_government' "
+             "because the ITU, an intergovernmental body, located the source."),
 ]
 
 # ---------------------------------------------------------------- legal
@@ -734,7 +735,7 @@ def ledger_md(events):
     a("## Quick lookup by year")
     a("")
     a("Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; "
-      "see the gap note in `methodology.md` for 1970-1984 and 1985-2005.")
+      "see the Chart A gap note in `methodology.md` (section 3) for the quiet stretches after 1970 and 1985.")
     a("")
     a("| year | kinetic | non-kinetic | legal |")
     a("|---|---|---|---|")

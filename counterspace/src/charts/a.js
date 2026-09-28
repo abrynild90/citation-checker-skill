@@ -46,7 +46,7 @@ function drawA(el = document.getElementById('svgA')) {
     else if (d.type === 'midcourse_intercept') s.append('path').attr('d', `M0,${-r - 1}L${r + 1},${r}L${-r - 1},${r}Z`).style('fill', c);
     else s.append('circle').attr('r', r).style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2);
     if (hasScene(d)) badge(s, 10, -10);
-    s.append('circle').attr('class', 'hit').attr('r', 10);
+    s.append('circle').attr('class', 'hit').attr('r', 12);
   });
   bindMark(g, kinCard, activate); g.attr('data-t', d => +parse(d.date)); rove(g);
   // annotations: each tries several offsets and takes the first that clears band labels, the handoff label, all marks and earlier notes

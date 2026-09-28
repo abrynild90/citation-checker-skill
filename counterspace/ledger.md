@@ -13,7 +13,7 @@ The reference dataset behind the Counterspace Timeline. It lists 44 kinetic even
 - [Kinetic events (chronological)](#kinetic-events-chronological) (44 rows)
 - [Non-kinetic events (by start date)](#non-kinetic-events-by-start-date) (15 rows)
 - [Legal items (by start date)](#legal-items-by-start-date) (19 rows)
-- [Conflicts inside the sources](#conflicts-inside-the-sources) (7 rows)
+- [Conflicts inside the sources](#conflicts-inside-the-sources) (8 rows)
 - [Notes by row](#notes-by-row) (59 notes)
 - [Capability coding (Chart B)](#capability-coding-chart-b) (5 categories)
 - [Sources](#sources)
@@ -35,7 +35,7 @@ Each table section opens with its row count. Section order: reference material f
 | Kinetic events | 44 (5 destructive, 21 high confidence) |
 | Non-kinetic events | 15 |
 | Legal items | 19 (3 soft law) |
-| Documented source conflicts | 7 |
+| Documented source conflicts | 8 |
 | Schema version | 1.0.0 (`data/schema.json`) |
 
 ## How to read the pins
@@ -114,7 +114,7 @@ Row ids grouped by acting state (kinetic tests) or actor (non-kinetic operations
 
 ## Quick lookup by year
 
-Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; see the gap note in `methodology.md` for 1970-1984 and 1985-2005.
+Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; see the Chart A gap note in `methodology.md` (section 3) for the quiet stretches after 1970 and 1985.
 
 | year | kinetic | non-kinetic | legal |
 |---|---|---|---|
@@ -224,7 +224,7 @@ Counts per calendar year (kinetic by test date; non-kinetic and legal by start d
 | 2022-03-01 | ongoing | ru-2022-starlink | Russia | ew_downlink | alleged | LEO_constellation | True | medium | Starlink passage, fns. 259-261, p. 02-32 (PDF p. 145) |
 | 2023-10-01 | ongoing | mideast-2023-gnss | Israel and others (multiple actors) | gnss_spoofing | official_government | GNSS_MEO | True | medium | Section 10.3, p. 10-01 to 10-02 (PDF p. 254-255) |
 | 2023-12-01 | ongoing | ru-2023-baltic | Russia | gnss_jamming | multi_government | GNSS_MEO | True | high | Baltic GNSS passages, p. 02-29 to 02-30 (PDF p. 142-143) |
-| 2024-03-01 | ongoing | ru-2024-eu-sats | Russia (origin locations cited by ITU RRB) | ew_uplink | official_government | GEO_comms | True | high | ITU RRB passage, fn. 272, p. 02-32 (PDF p. 145) |
+| 2024-03-01 | ongoing | ru-2024-eu-sats | Russia (origin locations cited by ITU RRB) | ew_uplink | multi_government | GEO_comms | True | high | ITU RRB passage, fn. 272, p. 02-32 (PDF p. 145) |
 
 ## Legal items (by start date)
 
@@ -254,7 +254,7 @@ Counts per calendar year (kinetic by test date; non-kinetic and legal by start d
 
 ## Conflicts inside the sources
 
-**7 rows.**
+**8 rows.**
 
 Where SWF (or a source) disagrees with itself, the row keeps one value under a stated rule and records the other here and in the row's `conflicts` field. Rule: Table 5-1 for intercept altitude and debris counts; the appendix or announcement date where two SWF places outvote a table.
 
@@ -264,9 +264,10 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 | cn-2005-sc19 | Date: 5 July (Table 16-3, p. 16-04) vs 7 July (Table 3-3, p. 03-22) |
 | cn-2007-fy1c | Altitude/pieces: 880 km, 3,532 (Table 5-1, p. 05-01) vs 865 km apogee, 3,533 (Table 3-3, p. 03-22) |
 | us-2008-burnt-frost | Intercept altitude: 220 km (Table 5-1, p. 05-01) vs 240 km (prose p. 01-24) vs 2,700 km apogee column (Table 1-4, p. 01-24) |
-| cn-2013-dn2 | Apogee: 10,000 km (CAS) vs ~36,000 km (US military) vs at least ~30,000 km (analysis cited by SWF) |
+| cn-2013-dn2 | Apogee: 10,000 km (CAS) vs 'nearly to GEO' (US military; GEO is 35,786 km) vs at least ~30,000 km (analysis cited by SWF) |
 | ru-2015-nudol | Date: 18 Nov 2015 (Table 2-4, p. 02-21) vs 18 Oct 2015 (Table 16-2, p. 16-03) |
 | cn-2022-dn3 | Date: 21 June (prose p. 03-21; Table 16-3 p. 16-04) vs 19 June (Table 3-3, p. 03-22) |
+| cn-2023-dn3 | Date: 14 April 2023 (Table 3-3, p. 03-22; prose p. 03-21) vs 14 and 15 April both listed (Table 16-3, p. 16-04) |
 
 ## Notes by row
 
@@ -288,7 +289,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **us-1968-p437-nov** (1968-11-21): Combat evaluation launch.
 - **us-1970-p437-mar** (1970-03-28): Passed within kill radius.
 - **us-1984-asm135-jan** (1984-01-21): Missile test, no target.
-- **us-1985-solwind** (1985-09-13): Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept altitudes. Tracked-debris count (285) is from Table 5-1; the zero 'still on orbit' figure could not be isolated from the jumbled Table 5-1 text extraction and reflects the debris having decayed.
+- **us-1985-solwind** (1985-09-13): Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept altitudes. Tracked-debris count (285) is from Table 5-1. The zero 'still on orbit' figure could not be tied to this row in the jumbled Table 5-1 text extraction, so it is shown in tables only and is not plotted.
 - **us-1997-miracl** (1997-10-17): SWF gives October 1997 only. The exact day (17 Oct) is from FlightGlobal (Oct. 1997) and Arms Control Association reporting. The laser was fired at White Sands Missile Range, NM (SWF fn. 259 cites the WSMR High Energy Laser Systems Test Facility); MSTI-3 was a USAF experimental satellite that had completed its mission.
 - **ir-2003-telstar12** (2003-01-01): SWF: Iran 'has been accused'; the Telstar 12 jamming from Havana 'started in 2003' and similar jamming occurred from Bulgaria and Libya in 2005/2006. Attribution kept at 'alleged'. Day/month not given; span uses whole years (2006 end year = last year SWF dates for these third-country sites).
 - **iq-2003-gps** (2003-03-20): Not covered in SWF 2026 (Iraq is not one of SWF's 13 countries). Excluded from Chart B.
@@ -308,7 +309,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **ru-2015-nudol-apr** (2015-04-22): Failed at launch (SWF Table 2-4 note). Appendix Table 16-2 lists the date as a rocket test (unsuccessful). No apogee reported.
 - **cn-2015-dn3** (2015-10-30): Likely rocket test.
 - **ru-2015-nudol** (2015-11-18): First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 (p. 16-03) dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015 (used).
-- **ru-2016-syria** (2016-02-01): SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. An earlier draft said 2017; the ledger uses 2016 at medium confidence.
+- **ru-2016-syria** (2016-02-01): SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The ledger uses 2016 at medium confidence.
 - **ru-2016-nudol-may** (2016-05-25): Likely rocket test. SWF marks the 100 km apogee with '?'.
 - **ru-2016-nudol-dec** (2016-12-16): Likely rocket test. SWF marks the 100 km apogee with '?'.
 - **cn-2017-dn3** (2017-07-23): Likely intercept test; reportedly malfunctioned.
@@ -317,7 +318,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **ru-2018-nudol-mar** (2018-03-26): First test from a mobile launcher.
 - **ru-2018-trident** (2018-10-25): SWF does not name the exercise or give dates: it says (Nov. 2018) media reported jamming in Norway and Finland during a major NATO exercise, and that Norway's government claimed in March 2019 it had proof of Russian interference. Dates 25 Oct - 7 Nov 2018 are the Trident Juncture exercise window (NATO; Norway's ministry put the jamming at 16 Oct - 7 Nov). Coded 'official_government' on Norway's claim; Finland only expressed concern (external reporting).
 - **ru-2018-nudol-dec** (2018-12-23): Payload column: Likely KKV. Appendix Table 16-2 (p. 16-03): potential KKV, no intercept.
-- **in-2019-shakti** (2019-03-27): Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km. An earlier estimate of about 400 pieces is not in SWF and is not used.
+- **in-2019-shakti** (2019-03-27): Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km.
 - **ru-2019-nudol-jun** (2019-06-14): Listed only in Appendix Table 16-2 (not in Table 2-4), with the note 'Potential KKV, no intercept' (note paired to the row by column order in the text extraction). No apogee reported. Coded low confidence because a single table lists it.
 - **ru-2019-nudol-nov** (2019-11-15): Payload column: Likely KKV. SWF describes the Nov. 2021 test as the first known Nudol intercept (p. 02-21), so no earlier intercept is recorded; no apogee reported. Not in Appendix Table 16-2.
 - **ru-2020-nudol-apr** (2020-04-15): Successful, nothing hit. US Space Command issued a public statement on the test (SWF p. 02-20, fn. 148).
@@ -330,7 +331,7 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 - **cn-2023-dn3** (2023-04-14): Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and 15 April 2023. 14 April used.
 - **mideast-2023-gnss** (2023-10-01): Actor set is mixed: SWF p. 10-02 says it is hard to tell from open sources whether Israel, Hamas or others conduct the EW. The IDF stated publicly it was jamming GPS 'in a proactive manner for various operational needs'; Lebanon blamed Israel (Mar. 2024). Coded at the level SWF supports for Israel; other actors not attributed. SWF (p. 10-01) also reports interference before the row's start, in spring 2023 (20% of regional aircraft in April 2023); the row starts at the Oct. 2023 escalation.
 - **ru-2023-baltic** (2023-12-01): SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). Terrestrial jamming of receivers, not attacks on satellites.
-- **ru-2024-eu-sats** (2024-03-01): SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'official_government' because ITU, a governmental body, made the finding.
+- **ru-2024-eu-sats** (2024-03-01): SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'multi_government' because the ITU, an intergovernmental body, located the source.
 
 ## Capability coding (Chart B)
 

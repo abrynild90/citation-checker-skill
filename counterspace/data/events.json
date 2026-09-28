@@ -334,7 +334,7 @@
   "fragments_in_orbit": 0,
   "fragments_as_of": "2026-02",
   "confidence": "high",
-  "notes": "Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept altitudes. Tracked-debris count (285) is from Table 5-1; the zero 'still on orbit' figure could not be isolated from the jumbled Table 5-1 text extraction and reflects the debris having decayed.",
+  "notes": "Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept altitudes. Tracked-debris count (285) is from Table 5-1. The zero 'still on orbit' figure could not be tied to this row in the jumbled Table 5-1 text extraction, so it is shown in tables only and is not plotted.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
   "pin": "Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-22 (PDF p. 71); Table 1-4, p. 01-24 (PDF p. 73)",
@@ -609,7 +609,7 @@
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
   "pin": "Prose p. 03-20 (PDF p. 181); Table 3-3, p. 03-22 (PDF p. 183)",
   "conflicts": [
-   "Apogee: 10,000 km (CAS) vs ~36,000 km (US military) vs at least ~30,000 km (analysis cited by SWF)"
+   "Apogee: 10,000 km (CAS) vs 'nearly to GEO' (US military; GEO is 35,786 km) vs at least ~30,000 km (analysis cited by SWF)"
   ],
   "scene_3d": "dn2",
   "source_full": "Victoria Samson & Kathleen Brett eds., Global Counterspace Capabilities: An Open Source Assessment (Secure World Foundation, 9th ed., Apr. 2026), https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf"
@@ -749,7 +749,7 @@
   "operational_use": true,
   "effect": "GNSS spoofing/jamming around Russian bases in Syria; reported effects on aircraft in the region.",
   "confidence": "medium",
-  "notes": "SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. An earlier draft said 2017; the ledger uses 2016 at medium confidence.",
+  "notes": "SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The ledger uses 2016 at medium confidence.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
   "pin": "C4ADS passage, p. 02-28 (PDF p. 141)",
@@ -928,7 +928,7 @@
   "fragments_in_orbit": 0,
   "fragments_as_of": "2026-02",
   "confidence": "high",
-  "notes": "Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km. An earlier estimate of about 400 pieces is not in SWF and is not used.",
+  "notes": "Indian officials said most debris would re-enter within days and all of it within 45 days at most (SWF p. 04-04); per SWF the final trackable piece re-entered in June 2022, 3.2 years after the test, and some pieces were thrown up to 2,250 km.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
   "pin": "Table 5-1, p. 05-01 (PDF p. 212); prose p. 04-04 (PDF p. 204)",
@@ -1136,6 +1136,9 @@
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
   "pin": "Table 3-3, p. 03-22 (PDF p. 183)",
+  "conflicts": [
+   "Date: 14 April 2023 (Table 3-3, p. 03-22; prose p. 03-21) vs 14 and 15 April both listed (Table 16-3, p. 16-04)"
+  ],
   "source_full": "Victoria Samson & Kathleen Brett eds., Global Counterspace Capabilities: An Open Source Assessment (Secure World Foundation, 9th ed., Apr. 2026), https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf"
  },
  {
@@ -1184,13 +1187,13 @@
   "start": "2024-03-01",
   "end": null,
   "actor": "Russia (origin locations cited by ITU RRB)",
-  "attribution": "official_government",
+  "attribution": "multi_government",
   "target_system": "Swedish and French broadcasting satellites",
   "target_regime": "GEO_comms",
   "operational_use": true,
   "effect": "Hijacked/jammed broadcasts over Ukrainian channels; European states complained; RRB (July 2024) said interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka.",
   "confidence": "high",
-  "notes": "SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'official_government' because ITU, a governmental body, made the finding.",
+  "notes": "SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'multi_government' because the ITU, an intergovernmental body, located the source.",
   "source": "SWF 2026",
   "source_url": "https://cdn.prod.website-files.com/66dcc6872f6ed23bce1db235/69d5402700ec843d95073a1e_SWF_Global_Counterspace_Capabilities_2026.pdf",
   "pin": "ITU RRB passage, fn. 272, p. 02-32 (PDF p. 145)",

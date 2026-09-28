@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Date** | 2026-09-28 (second full pass; supersedes the first log of the same day). Later the same day, UN document mirrors were used for PAROS 36/97 and the two PPWT documents. |
+| **Date** | 2026-09-28 (second full pass; supersedes the first log of the same day). Later the same day, UN document mirrors were used for PAROS 36/97 and the two PPWT documents, and a follow-up review after grading round 5 corrected three more items (Discrepancies 33-35). |
 | **Scope** | 83 items: 44 kinetic and 15 non-kinetic rows in `data/events.json`, 19 rows in `data/legal.json`, and 5 capability categories in `data/capabilities.json`. |
 | **Method** | Each row checked against the pinned SWF page or a fetched primary source (see [Method](#method)). |
-| **Result** | 74 items VERIFIED or CORRECTED, 9 PARTIAL, none UNCHECKED; 32 defects found and fixed ([Discrepancies](#discrepancies-found-and-fixed)). |
+| **Result** | 74 items VERIFIED or CORRECTED, 9 PARTIAL, none UNCHECKED; 35 defects found and fixed ([Discrepancies](#discrepancies-found-and-fixed)). |
 | **Regenerate** | `python3 tools/build_data.py` rebuilds the data files and `ledger.md` after any correction. |
 
 ## Contents
@@ -24,9 +24,9 @@
 ## Executive summary
 
 - **Outcome:** every event, legal item and capability category was checked; none is UNCHECKED. 74 of 83 items are VERIFIED or CORRECTED (defect fixed, then verified); 9 are PARTIAL.
-- **Defects:** 32 discrepancies were found and fixed in `tools/build_data.py`. No factual error in a plotted value is known.
-- **Open items:** 9 PARTIAL items (`us-1985-solwind`, `ru-2019-nudol-jun`, `ru-2014-ukraine`, `itu-rrb-2024`, and the five capability categories) plus one wording item on the page lede. Each has an impact assessment under [Open items and impact](#open-items-and-impact); none changes a plotted value.
-- **This pass:** `ppwt-2008` and `ppwt-2014` moved from PARTIAL to VERIFIED against the primary documents, and `paros-1981` against the UN resolution text.
+- **Defects:** 35 discrepancies were found and fixed in `tools/build_data.py`. No factual error in a plotted value is known.
+- **Open items:** the 9 PARTIAL items (`us-1985-solwind`, `ru-2019-nudol-jun`, `ru-2014-ukraine`, `itu-rrb-2024`, and the five capability categories). Each has an impact assessment under [Open items and impact](#open-items-and-impact); none changes a plotted value.
+- **This pass:** `ppwt-2008` and `ppwt-2014` moved from PARTIAL to VERIFIED against the primary documents, and `paros-1981` against the UN resolution text. The page lede, formerly an open wording item, now quotes SWF p. xxiii verbatim and is closed ([Closed items](#closed-items-from-the-earlier-log)).
 - **Bot-blocked sources:** ICAO, UNOOSA and some ITU pages block scripts; facts were checked through search snippets or UN mirrors, as recorded per row.
 
 ## Method
@@ -43,10 +43,10 @@
 | Set | Rows | VERIFIED | VERIFIED (external) | PARTIAL | CORRECTED (defect fixed, then verified) |
 |---|---|---|---|---|---|
 | Kinetic events | 44 | 33 | 1 | 2 | 8 |
-| Non-kinetic events | 15 | 5 | 1 | 1 | 8 |
+| Non-kinetic events | 15 | 4 | 1 | 1 | 9 |
 | Legal items | 19 | 6 | 7 | 1 | 5 |
 | Capability categories | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **83** | **44** | **9** | **9** | **21** |
+| **Total** | **83** | **43** | **9** | **9** | **22** |
 
 Each row is counted once, under its most significant status. Status definitions are in [Method](#method). The non-kinetic PARTIAL is `ru-2014-ukraine`, whose 2014 start is external.
 
@@ -58,7 +58,6 @@ Each row is counted once, under its most significant status. Status definitions 
 | `ru-2019-nudol-jun` | The note "Potential KKV, no intercept" is paired to the 14 Jun 2019 row only by column order in Table 16-2. The date and "Nudol" are read directly. | The row has no altitude and no fragments; it is drawn in the no-altitude strip by its date alone. Low confidence is shown on the row. |
 | `ru-2014-ukraine` | The 2014 start of the campaign is not on the SWF pages cited; it comes from Breaking Defense and Foreign Policy. "Nearly 10,000 suspected incidents" is verified on p. 02-28. | Chart C draws a span starting 2014; the note names the external source. The count is not plotted. |
 | `itu-rrb-2024` (legal) | The ITU "summary of decisions" document itself. The 96th RRB meeting dates (24-28 June 2024) are confirmed on the ITU minutes page (Circular 507, `itu.int/md/R00-CR-CIR-0507`) and agenda; the summary is not retrievable (the meeting-document pages `R24-RRB24.2-SUM-0001` return an empty shell or 404 for scripts). The 1 July 2024 issue date rests on press reports. Quoted wording matches SWF p. 02-32. | The legal band plots the item at its start date, 1 Jul 2024. A date off by days would not move a mark at year scale, and the label and quote are SWF's. The ledger URL is the generic RRB page. |
-| Page lede wording (`src/template.html`, not a data row) | The lede says non-kinetic methods "are the only counterspace tools used in actual military operations". SWF 2026, Executive Summary, p. xxiii (PDF p. 21), says: "only non-destructive capabilities are actively being used against satellites in current military operations." SWF does not name EW and cyber as the only such methods, and "non-destructive" is broader. | Wording risk only; no data row or chart depends on it. Recommended text: attribute the finding to SWF and use its words (non-destructive capabilities, against satellites). Pin recorded in `methodology.md` section 9. |
 | `direct_ascent`, `co_orbital`, `electronic_warfare`, `directed_energy`, `cyber` (capabilities) | The 2020s D/P split follows SWF's graphical country matrix, which text extraction cannot read; P entries were not each read in the country chapters. | Chart B's 2020s counts inherit this. The chart labels pre-2020s cells as reconstruction, and the D entries rest on verified events (tables above). Only the split between D and P for P-entries is unchecked. |
 
 ## Closed items from the earlier log
@@ -67,11 +66,12 @@ Each row is counted once, under its most significant status. Status definitions 
 |---|---|
 | `iq-2003-gps` wrong `source_url` (Rumsfeld/Myers page) | **Closed.** `data/events.json` now carries `https://www.globalsecurity.org/wmd/library/news/iraq/2003/iraq-030325-afps03.htm`. Re-fetched: Maj. Gen. Renuart, Mar. 25, 2003: "We have destroyed all six of those jammers." |
 | `us-1962-starfish-prime` dead `source_url` | **Closed.** `data/events.json` carries `https://nnss.gov/wp-content/uploads/2023/08/DOE_NV-209_Rev16.pdf` (HTTP 200). The PDF was downloaded and read: table row "Starfish Prime ... 250 miles ... 07/09/1962 ... Johnston Island area" and "250 miles ... 1.4 Mt" (PDF pp. 41-42). |
+| Page lede wording (`src/template.html`): an earlier lede said non-kinetic methods "are the only counterspace tools used in actual military operations", which SWF does not say | **Closed.** The lede now quotes SWF 2026, Executive Summary, p. xxiii (PDF p. 21) verbatim: "only non-destructive capabilities are actively being used against satellites in current military operations." The examples of non-destructive methods (jamming, spoofing, dazzling, cyber) sit in the page's own sentence before the quotation and are not attributed to SWF. Rule recorded in `methodology.md` section 9. |
 | Earlier "VERIFIED by consistency" rows (cn-2005, cn-2006, cn-2010, DN series, Nudol series, capabilities, several legal rows) | **Reopened and re-verified below** with page pins and quotes, or downgraded. |
 
 ## Discrepancies found and fixed
 
-All 32 were corrected in `tools/build_data.py`.
+All 35 were corrected in `tools/build_data.py`.
 
 | # | Row | Defect | Fix |
 |---|---|---|---|
@@ -107,6 +107,9 @@ All 32 were corrected in `tools/build_data.py`.
 | 30 | `ru-2019-nudol-jun` (added) | Omitted. Only Table 16-2 lists "June 14, 2019 ... Nudol"; the note "Potential KKV, no intercept" is paired to it by column order (two such notes follow the Dec. 2018 and June 2019 rows). | Row added, low confidence, PARTIAL. |
 | 31 | Legal `icao-2025` | Label "breaches Chicago Convention" overstated the finding. SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention on International Civil Aviation, condemned it ... and called for it to fulfill its obligations" (p. 12-06 says the same for North Korea). The ICAO release (through a search snippet; the page is bot-blocked) says the Assembly "endorsed the determination of its governing Council that recurring incidents of GNSS RFI originating from the DPRK and the territory of the Russian Federation constitute infractions" of the Convention, and condemned both. | Label is now "ICAO: GNSS interference an 'infraction' of the Chicago Convention" (ICAO's own word, in quotes; not "breach", not merely "findings"). The note says it is an intergovernmental finding, not a court judgment. Recorded as decision 14 in `methodology.md`. |
 | 32 | Legal `itu-rrb-2024` | Citation gave only the issue date. | The 96th RRB meeting was 24-28 June 2024 (ITU agenda and minutes pages); the summary was issued 1 July 2024. Citation now gives both. |
+| 33 | `ru-2024-eu-sats` | Coded `official_government` on the ground that the ITU RRB "is a governmental body". The ledger's own rule gives intergovernmental findings (ITU, ICAO) `multi_government`, as for `ir-2009-eutelsat`. The RRB located earth stations; it made no state-responsibility finding. | Recoded `multi_government`; note reworded. Chart C fill is unchanged (both levels draw solid). |
+| 34 | `cn-2023-dn3` | The 14 vs 14-and-15 April 2023 discrepancy (Discrepancy 9) was in the note but not in the row's `conflicts` field, so `ledger.md` listed 7 conflicts, not 8. | `conflicts` entry added; the ledger's conflicts table now has 8 rows. |
+| 35 | `us-1985-solwind`, `ru-2016-syria`, `in-2019-shakti`, `cn-2013-dn2` (notes) | Solwind: the note said the zero in-orbit figure "reflects the debris having decayed", an inference. Syria: the note referred to "an earlier draft". Shakti: the note discussed an unsourced 400-piece estimate. DN-2: the conflict entry gave "~36,000 km" for the US military, whose words were "nearly to GEO". | Solwind note now says the cell is not tied to its row and is not plotted; the process language and the unsourced estimate are removed; the DN-2 entry quotes "nearly to GEO" (GEO is 35,786 km). |
 
 **Scope disclosure.** SWF Appendix Table 16-2 also lists Cosmos 2521 (Burevestnik?) on 30 Oct 2017 and a "September 2019?" co-orbital entry. These are co-orbital or RPO events, not direct-ascent tests, and are outside the ledger's kinetic scope (see `methodology.md`, coding rules). After the additions, every Nudol row in Tables 2-4 and 16-2 is in the ledger (Aug 2014, Apr 2015, Nov 2015, May 2016, Dec 2016, Mar 2018, Dec 2018, Jun 2019, Nov 2019, Apr 2020, Dec 2020, Nov 2021).
 
@@ -179,7 +182,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | ru-2022-starlink | CORRECTED | p. 02-32 (PDF 145) | "no independent or public validation"; "Ukrainian government official" on May 2024 |
 | ru-2023-baltic | VERIFIED | pp. 02-29, 02-30 | "picked up in late 2023 and early 2024"; Kaliningrad and St. Petersburg; ICAO Oct. 2025; RRB Nov. 2025 |
 | mideast-2023-gnss | CORRECTED | pp. 10-01, 10-02 | "hard to distinguish ... Israel, Hamas"; IDF "in a proactive manner"; RRB Addendum 6, Israel |
-| ru-2024-eu-sats | VERIFIED | p. 02-32 | RRB July 2024: "seemed to originate from earth station(s) located in the areas of Moscow, Kaliningrad and Pavlovka" |
+| ru-2024-eu-sats | CORRECTED | p. 02-32 (PDF 145) | RRB July 2024: "seemed to originate from earth station(s) located in the areas of Moscow, Kaliningrad and Pavlovka". Attribution level recoded `multi_government` (Discrepancy 33). |
 
 ## legal.json
 
@@ -201,7 +204,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | tallinn-2017 | VERIFIED | DOI URL resolves to the Cambridge Tallinn Manual 2.0 page (HTTP 200). Year 2017 per that page. |
 | woomera-2024 | CORRECTED | OUP page: published 2024, editors Jack Beard and Dale Stephens. |
 | unsc-veto-2024 | VERIFIED | UN press SC/15678: "9616th Meeting", Apr. 24, 2024; 13 in favor, Russia against, China abstained. Draft S/2024/302 confirmed (documents.un.org). |
-| itu-rrb-2024 | PARTIAL | 96th RRB meeting 24-28 June 2024 (ITU Circular 507 minutes page and agenda); summary issued 1 July 2024 (press reports); quotes match SWF p. 02-32. Summary document not retrievable; see "Remaining PARTIAL items". |
+| itu-rrb-2024 | PARTIAL | 96th RRB meeting 24-28 June 2024 (ITU Circular 507 minutes page and agenda); summary issued 1 July 2024 (press reports); quotes match SWF p. 02-32. Summary document not retrievable; see [Open items and impact](#open-items-and-impact). |
 | icao-2025 | CORRECTED | SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention ... condemned it for doing so, and called for it to fulfill its obligations"; p. 12-06 says the same for North Korea; fn. 243 gives the ICAO release of 3 Oct 2025. ICAO release (search snippet, page bot-blocked 403; Uniting Aviation repeat): the Assembly (23 Sept.-3 Oct. 2025) "endorsed the determination of its governing Council" that the interference "constitute[s] infractions" of the Convention, through two resolutions. Label changed (Discrepancy 31). Resolution numbers not verified and not used. |
 | itu-rrb-2025 | CORRECTED | SWF p. 02-30, fn. 245: "held November 10-14, 2025"; quote "again urge[d] the Administration of the Russian Federation". The ITU page (200) now also carries later meeting content. |
 
