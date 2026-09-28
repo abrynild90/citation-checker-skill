@@ -51,7 +51,7 @@ export function placeLabels(list, W, H, reserved = []) {
   for (const i of order) {
     const c = list[i]; if (!c) continue;
     const { w, h } = c, gap = 3;
-    const cx = x => Math.max(w / 2 + 3, Math.min(W - w / 2 - 3, x)), cy = y => Math.max(h / 2 + 3, Math.min(H - h / 2 - 3, y));
+    const cx = x => Math.max(w / 2 + 6, Math.min(W - w / 2 - 6, x)), cy = y => Math.max(h / 2 + 3, Math.min(H - h / 2 - 3, y));
     const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + gap && Math.abs(y - b.y) < (h + b.h) / 2 + 1 ? 1 : 0), 0);
     const cand = [[0, 0]];
     for (let k = 1; k <= 8; k++) cand.push([0, -k * h * 1.12], [0, k * h * 1.12]);
@@ -64,7 +64,7 @@ export function placeLabels(list, W, H, reserved = []) {
   }
   return out;
 }
-const labelW = (text, u = 1) => (text.length * 6.3 + 14) * u;
+const labelW = (text, u = 1) => (text.length * 6.9 + 16) * u;
 
 // ---------------------------------------------------------------- configs
 const C = { tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', gps: '#9be7c4', jam: '#ff5d5d', ok: '#6ee7a8', laser: '#ff4fd8', geo: '#ffcf6e', belt: '#b28cff', ground: '#e9edf7' };
