@@ -5,7 +5,7 @@
 | **Date** | 2026-09-28 (second full pass; supersedes the first log of the same day). Later the same day, UN document mirrors were used for PAROS 36/97 and the two PPWT documents, and a follow-up review after grading round 5 corrected three more items (Discrepancies 33-35). |
 | **Scope** | 83 items: 44 kinetic and 15 non-kinetic rows in `data/events.json`, 19 rows in `data/legal.json`, and 5 capability categories in `data/capabilities.json`. |
 | **Method** | Each row checked against the pinned SWF page or a fetched primary source (see [Method](#method)). |
-| **Result** | 74 items VERIFIED or CORRECTED, 9 PARTIAL, none UNCHECKED; 35 defects found and fixed ([Discrepancies](#discrepancies-found-and-fixed)). |
+| **Result** | 81 items VERIFIED or CORRECTED, 2 PARTIAL, none UNCHECKED; 35 defects found and fixed ([Discrepancies](#discrepancies-found-and-fixed)). |
 | **Regenerate** | `python3 tools/build_data.py` rebuilds the data files and `ledger.md` after any correction. |
 
 ## Contents
@@ -23,16 +23,16 @@
 
 ## Executive summary
 
-- **Outcome:** every event, legal item and capability category was checked; none is UNCHECKED. 74 of 83 items are VERIFIED or CORRECTED (defect fixed, then verified); 9 are PARTIAL.
+- **Outcome:** every event, legal item and capability category was checked; none is UNCHECKED. 81 of 83 items are VERIFIED or CORRECTED (defect fixed, then verified); 2 are PARTIAL.
 - **Defects:** 35 discrepancies were found and fixed in `tools/build_data.py`. No factual error in a plotted value is known.
-- **Open items:** the 9 PARTIAL items (`us-1985-solwind`, `ru-2019-nudol-jun`, `ru-2014-ukraine`, `itu-rrb-2024`, and the five capability categories). Each has an impact assessment under [Open items and impact](#open-items-and-impact); none changes a plotted value.
-- **This pass:** `ppwt-2008` and `ppwt-2014` moved from PARTIAL to VERIFIED against the primary documents, and `paros-1981` against the UN resolution text. The page lede, formerly an open wording item, now quotes SWF p. xxiii verbatim and is closed ([Closed items](#closed-items-from-the-earlier-log)).
+- **Open items:** 2 PARTIAL items remain, the `direct_ascent` and `co_orbital` capability categories, where the builder's 2020s "developing" (P) entries go beyond what SWF's country matrix shows (details under [Open items and impact](#open-items-and-impact)). Neither changes an event, a date or a plotted altitude or fragment count.
+- **Final pass (grading round 6 follow-up):** seven of the nine earlier PARTIAL items were resolved. The SWF PDF was re-read with a layout-aware extractor (pdfplumber 0.11), which recovers Table 5-1 and Table 16-2 cell by cell and reads the capability matrix (Executive Summary, PDF pp. 22-32) from its vector shapes. The ITU summary of decisions was found at `itu.int/dms_pub/itu-r/md/24/rrb24.2/c/R24-RRB24.2-C-0012!!PDF-E.pdf`. Earlier the same day, `ppwt-2008`, `ppwt-2014` and `paros-1981` had moved from PARTIAL to VERIFIED against the UN documents, and the page lede was closed ([Closed items](#closed-items-from-the-earlier-log)).
 - **Bot-blocked sources:** ICAO, UNOOSA and some ITU pages block scripts; facts were checked through search snippets or UN mirrors, as recorded per row.
 
 ## Method
 
 1. **SWF rows.** The SWF 2026 text extraction (`swf_2026.txt`, split by `=====PAGE N=====`) was searched programmatically and read by hand. Each row's date, value and pin was checked against the text of the pinned PDF page. The printed section-page (for example `02-36`) was mapped to the PDF page by reading the page-footer label, and every pinned pair was confirmed (e.g. PDF 72 = 01-23, PDF 149 = 02-36).
-2. **Table 1-4 and Table 5-1 extract with scrambled columns.** Row membership was confirmed by the date and value strings on the page. Where a cell could not be tied to its row by the text alone, the row is marked PARTIAL and the cell is named.
+2. **Table 1-4 and Table 5-1 extract with scrambled columns.** Row membership was confirmed by the date and value strings on the page. The cells that plain-text extraction could not pair (Solwind and Burnt Frost "still on orbit", the 14 Jun 2019 Nudol note) were re-read with pdfplumber, which returns the table as rows and columns; both are now resolved.
 3. **Non-SWF rows and legal rows.** Sources were fetched with WebFetch or curl, or located with WebSearch. Where a site blocks bots (HTTP 202 challenge, 403), alternative mirrors were tried (`documents.un.org` symbol access, `undocs.org`); if none worked the URL is listed as *bot-blocked* and the fact was checked through a search-index snippet or another source instead. No row is marked VERIFIED on inference, on "consistent with" reasoning, or on a neighboring row.
 4. **URL checks.** Every distinct `source_url` was requested with curl (follow redirects, browser user agent) and its landing page inspected, not just its status code.
 
@@ -42,23 +42,24 @@
 
 | Set | Rows | VERIFIED | VERIFIED (external) | PARTIAL | CORRECTED (defect fixed, then verified) |
 |---|---|---|---|---|---|
-| Kinetic events | 44 | 33 | 1 | 2 | 8 |
-| Non-kinetic events | 15 | 4 | 1 | 1 | 9 |
-| Legal items | 19 | 6 | 7 | 1 | 5 |
-| Capability categories | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **83** | **43** | **9** | **9** | **22** |
+| Kinetic events | 44 | 35 | 1 | 0 | 8 |
+| Non-kinetic events | 15 | 4 | 2 | 0 | 9 |
+| Legal items | 19 | 7 | 7 | 0 | 5 |
+| Capability categories | 5 | 3 | 0 | 2 | 0 |
+| **Total** | **83** | **49** | **10** | **2** | **22** |
 
-Each row is counted once, under its most significant status. Status definitions are in [Method](#method). The non-kinetic PARTIAL is `ru-2014-ukraine`, whose 2014 start is external.
+Each row is counted once, under its most significant status. Status definitions are in [Method](#method). The two PARTIAL items are the `direct_ascent` and `co_orbital` capability categories.
 
 ## Open items and impact
 
+Two items remain PARTIAL. Both concern the 2020s "developing" (P) coding in Chart B, checked this pass against SWF's own country matrix (Executive Summary, PDF pp. 22-32, read from the PDF's vector shapes). The matrix has seven rows (LEO and MEO/GEO direct-ascent, LEO and MEO/GEO co-orbital, directed energy, electronic warfare, space situational awareness) and four columns (R&D, testing, operational, use in conflict). It has no cyber row.
+
 | Item | Exactly what is unverified | Impact assessment |
 |---|---|---|
-| `us-1985-solwind` | The "0 pieces still in orbit" cell of Table 5-1. The extraction scrambles columns, so the cell cannot be tied to its row by text. The 530 km vs 555 km altitude conflict is verified and disclosed. | Chart A plots intercept altitude (530 km) and cataloged fragments (285), both read from the row. In-orbit counts appear only in cards and tables. |
-| `ru-2019-nudol-jun` | The note "Potential KKV, no intercept" is paired to the 14 Jun 2019 row only by column order in Table 16-2. The date and "Nudol" are read directly. | The row has no altitude and no fragments; it is drawn in the no-altitude strip by its date alone. Low confidence is shown on the row. |
-| `ru-2014-ukraine` | The 2014 start of the campaign is not on the SWF pages cited; it comes from Breaking Defense and Foreign Policy. "Nearly 10,000 suspected incidents" is verified on p. 02-28. | Chart C draws a span starting 2014; the note names the external source. The count is not plotted. |
-| `itu-rrb-2024` (legal) | The ITU "summary of decisions" document itself. The 96th RRB meeting dates (24-28 June 2024) are confirmed on the ITU minutes page (Circular 507, `itu.int/md/R00-CR-CIR-0507`) and agenda; the summary is not retrievable (the meeting-document pages `R24-RRB24.2-SUM-0001` return an empty shell or 404 for scripts). The 1 July 2024 issue date rests on press reports. Quoted wording matches SWF p. 02-32. | The legal band plots the item at its start date, 1 Jul 2024. A date off by days would not move a mark at year scale, and the label and quote are SWF's. The ledger URL is the generic RRB page. |
-| `direct_ascent`, `co_orbital`, `electronic_warfare`, `directed_energy`, `cyber` (capabilities) | The 2020s D/P split follows SWF's graphical country matrix, which text extraction cannot read; P entries were not each read in the country chapters. | Chart B's 2020s counts inherit this. The chart labels pre-2020s cells as reconstruction, and the D entries rest on verified events (tables above). Only the split between D and P for P-entries is unchecked. |
+| `direct_ascent` | Demonstrated (D) entries for the US, China, Russia and India match the matrix (testing "significant" or "some"). Of the 2020s P entries, Israel, Japan and Germany match ("uncertain" R&D). South Korea, Iran, North Korea and France show "no data" in the matrix, so their P entries rest on the builder's reading of the country chapters, not on the matrix. | Chart B's 2020s direct-ascent count includes those four P states. No event, date or altitude depends on them. The chart already labels earlier decades as reconstruction; the 2020s P entries above are the builder's judgment and should be read that way. |
+| `co_orbital` | D entries for Russia, the US and China match the matrix. Of the P entries, France ("some" R&D) and Germany ("uncertain") match; India, Iran, Israel, Japan, North Korea and the UK show "no data" in the matrix. | Same as above: six P states in the 2020s co-orbital count are the builder's judgment. No plotted event depends on them. |
+
+Recommended follow-up for the page owner: either drop the unsupported P states from `CAP` in `tools/build_data.py` (then rebuild the data and the page), or label them on the chart as builder-assessed. This log does not change the data, because the page must be rebuilt together with it.
 
 ## Closed items from the earlier log
 
@@ -84,7 +85,7 @@ All 35 were corrected in `tools/build_data.py`.
 | 7 | `in-2019-shakti` | Note said pieces "were tracked above the ISS". Not in SWF. SWF p. 04-04: final trackable piece re-entered June 2022 (3.2 years); some pieces thrown to 2,250 km. | Replaced; pin now includes p. 04-04. |
 | 8 | `cn-2022-dn3` | Date used 19 June (Table 3-3). SWF prose p. 03-21 and Table 16-3 both give 21 June. | Date set to 2022-06-21; conflict recorded. |
 | 9 | `cn-2023-dn3` | Appendix Table 16-3 lists both 14 and 15 April 2023. Not disclosed. | Added to note. |
-| 10 | `us-1985-solwind` | Prose (p. 01-22) also says 555 km; only Table 1-4 was cited. Zero "still on orbit" cell not isolable. | Pin and note extended; PARTIAL. |
+| 10 | `us-1985-solwind` | Prose (p. 01-22) also says 555 km; only Table 1-4 was cited. Zero "still on orbit" cell not isolable by plain-text extraction. | Pin and note extended; cell later read with pdfplumber (VERIFIED). |
 | 11 | `ru-2018-trident` | Note said "Norway and Finland both raised it". SWF names no exercise and no dates; only Norway's government made a claim. | Note rewritten; dates marked external. |
 | 12 | `ir-2009-eutelsat` | Note said ITU "asked" Iran; SWF says "ordered". Span (2009-2012) understates the Oct. 2022 episode SWF reports. | Wording and note corrected; span left, disclosed. |
 | 13 | `kp-2010-gps` | Start 1 Aug 2010 was not sourced. First public incident: 23 Aug 2010 (GPS World, Inside GNSS). | Start set to 2010-08-23. |
@@ -104,7 +105,7 @@ All 35 were corrected in `tools/build_data.py`.
 | 27 | Earlier log | Claimed `us-1967-p437-mar` and `us-1968-p437-may` sit on p. 01-24. They are on **p. 01-23 (PDF 72)**, as the ledger pins them. | Log corrected. |
 | 28 | `ru-2014-nudol`, `ru-2015-nudol-apr` (added) | Omitted Nudol tests. SWF Table 2-4 (p. 02-21, PDF 134): "Aug. 12, 2014 ... Failed shortly after launch"; "Apr. 22, 2015 ... Failed at launch". Table 16-2 (p. 16-03, PDF 307) lists both dates with "Rocket test (unsuccessful)". | Rows added, medium confidence, no apogee; both tables pinned. |
 | 29 | `ru-2019-nudol-nov` (added) | Omitted; the first draft of the row said "no intercept (SWF Table 2-4)". Table 2-4 gives the date and payload "Likely KKV" but the notes cell is "-" (column-order reading), so "no intercept" was not shown by that table. | Row added; note now rests on p. 02-21, which calls Nov. 2021 the "first known intercept test of the Nudol". |
-| 30 | `ru-2019-nudol-jun` (added) | Omitted. Only Table 16-2 lists "June 14, 2019 ... Nudol"; the note "Potential KKV, no intercept" is paired to it by column order (two such notes follow the Dec. 2018 and June 2019 rows). | Row added, low confidence, PARTIAL. |
+| 30 | `ru-2019-nudol-jun` (added) | Omitted. Only Table 16-2 lists "June 14, 2019 ... Nudol"; the note "Potential KKV, no intercept" could not be paired to it by plain-text extraction (two such notes follow the Dec. 2018 and June 2019 rows). | Row added, low confidence; pairing later confirmed with pdfplumber (VERIFIED). |
 | 31 | Legal `icao-2025` | Label "breaches Chicago Convention" overstated the finding. SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention on International Civil Aviation, condemned it ... and called for it to fulfill its obligations" (p. 12-06 says the same for North Korea). The ICAO release (through a search snippet; the page is bot-blocked) says the Assembly "endorsed the determination of its governing Council that recurring incidents of GNSS RFI originating from the DPRK and the territory of the Russian Federation constitute infractions" of the Convention, and condemned both. | Label is now "ICAO: GNSS interference an 'infraction' of the Chicago Convention" (ICAO's own word, in quotes; not "breach", not merely "findings"). The note says it is an intergovernmental finding, not a court judgment. Recorded as decision 14 in `methodology.md`. |
 | 32 | Legal `itu-rrb-2024` | Citation gave only the issue date. | The 96th RRB meeting was 24-28 June 2024 (ITU agenda and minutes pages); the summary was issued 1 July 2024. Citation now gives both. |
 | 33 | `ru-2024-eu-sats` | Coded `official_government` on the ground that the ITU RRB "is a governmental body". The ledger's own rule gives intergovernmental findings (ITU, ICAO) `multi_government`, as for `ir-2009-eutelsat`. The RRB located earth stations; it made no state-responsibility finding. | Recoded `multi_government`; note reworded. Chart C fill is unchanged (both levels draw solid). |
@@ -135,7 +136,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | us-1968-p437-nov | VERIFIED | T1-4, p. 01-24 (PDF 73) | "Nov. 21, 1968 ... 1,158 km" |
 | us-1970-p437-mar | VERIFIED | T1-4, p. 01-24 | "Mar. 28, 1970 ... Unknown satellite 1,074 km" |
 | us-1984-asm135-jan | VERIFIED | T1-4, p. 01-24 | "Jan. 21, 1984 ASM-135 Aircraft None 1,000 km" |
-| us-1985-solwind | PARTIAL | T5-1 p. 05-01; prose p. 01-22; T1-4 p. 01-24 | T5-1 "Solwind 530 km 285"; prose and T1-4 "555 km". The 0-in-orbit cell is not isolable in the scrambled table. |
+| us-1985-solwind | VERIFIED | T5-1 p. 05-01 (PDF 212); prose p. 01-22; T1-4 p. 01-24 | pdfplumber row: "Sep. 13, 1985 / US / ASM-135 / Direct-Ascent / Solwind / 530 km / 285 / 0 / 18.7 years" (tracked 285, still on orbit 0). Prose and T1-4 say 555 km. The same table gives USA 193: "220 km / 175 / 0 / 1.7 years", so Burnt Frost's zero in-orbit count is also confirmed. |
 | us-2008-burnt-frost | CORRECTED | T5-1; prose and T1-4 p. 01-24 | T5-1 "USA 193 220 km 175"; prose "at an altitude of 240 km"; "took about 20 months to de-orbit entirely"; T1-4 "2,700 km". T5-1 "0 0 ... 1.7 years" supports 0 in orbit (cell pairing inferred from column order, so treat as strong but not certain). |
 | cn-2005-sc19 | VERIFIED | Table 16-3, p. 16-04 (PDF 308); T3-3 p. 03-22 | T16-3 "July 5, 2005 SC-19 ... Likely rocket test"; T3-3 "July 7, 2005" |
 | cn-2006-sc19 | VERIFIED | Table 16-3, p. 16-04; T3-3 p. 03-22 | "Feb. 6, 2006 SC-19 ... Likely near-miss of orbital target" |
@@ -155,7 +156,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | ru-2015-nudol | VERIFIED | Table 2-4, p. 02-21 (PDF 134); T16-2 p. 16-03 | T2-4 "Nov. 18, 2015 ... 200 km? First successful test of missile"; T16-2 "Oct. 18, 2015" |
 | ru-2016-nudol-may | VERIFIED | T2-4, p. 02-21 | "May 25, 2016 ... 100 km? ... likely rocket test" |
 | ru-2016-nudol-dec | VERIFIED | T2-4, p. 02-21 | "Dec. 16, 2016 ... 100 km?" |
-| ru-2019-nudol-jun | PARTIAL | T16-2, p. 16-03 (PDF 307) | "June 14, 2019 ... Nudol"; note "Potential KKV, no intercept" paired by column order. Not in T2-4. Coded low confidence. |
+| ru-2019-nudol-jun | VERIFIED | T16-2, p. 16-03 (PDF 307) | pdfplumber row: "June 14, 2019 / Nudol / Direct-Ascent / Plesetsk / None / Potential KKV, no intercept". Not in T2-4. Coded low confidence because only one SWF table lists it. |
 | ru-2019-nudol-nov | CORRECTED | T2-4, p. 02-21; prose p. 02-21 | "Nov. 15, 2019 ... Nudol ... Plesetsk ... Likely KKV"; "first known intercept test of the Nudol" (Nov. 2021). "No intercept" removed from the T2-4 attribution (Discrepancy 29). Not in T16-2. |
 | ru-2018-nudol-mar | VERIFIED | T2-4, p. 02-21 | "Mar. 26, 2018 ... Likely KKV"; "First test from a mobile launcher" |
 | ru-2018-nudol-dec | VERIFIED | T2-4; T16-2 | "Dec. 23, 2018 ... Likely KKV"; T16-2 "Potential KKV, no intercept" |
@@ -174,7 +175,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | cn-2006-laser | VERIFIED | p. 03-26 (PDF 187) | "cited anonymous US defense officials"; "no US satellites were materially" damaged |
 | ir-2009-eutelsat | CORRECTED | p. 09-06 (PDF 248) | "ITU ordered Iran to assist in stopping the jamming"; "Eutelsat stated in October 2022". Start 2009 external (Eutelsat/HRW). |
 | kp-2010-gps | CORRECTED | pp. 12-05 to 12-06 | "no impact on the GPS satellites themselves"; ITU/ICAO/IMO concerns; Nov. 2024. Start date external (GPS World). |
-| ru-2014-ukraine | PARTIAL | p. 02-28 (PDF 141) | "nearly 10,000 suspected incidents"; the 2014 start is external (Breaking Defense; Foreign Policy). |
+| ru-2014-ukraine | VERIFIED (external) | p. 02-28 (PDF 141) | "nearly 10,000 suspected incidents" (SWF). The 2014 start: Breaking Defense, 1 Mar 2022 (fetched): "The Russian military has routinely jammed GPS receivers in eastern Ukraine since the Crimean conflict in 2014". The Foreign Policy (Oct. 2015) piece named in the row note could not be fetched. The month (March) is the builder's coding of the Crimea conflict start; the year is sourced. |
 | ru-2016-syria | VERIFIED | p. 02-28 | "The spoofing began in 2016, peaked in 2017" |
 | ru-2018-trident | CORRECTED | p. 02-28 | "In November 2018 ... NATO exercise"; Norway "had proof" (Mar. 2019). Dates external (NATO). |
 | ru-2018-peresvet | CORRECTED | p. 02-36 (PDF 149) | "formally named ... speech ... on March 1, 2018" |
@@ -204,7 +205,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | tallinn-2017 | VERIFIED | DOI URL resolves to the Cambridge Tallinn Manual 2.0 page (HTTP 200). Year 2017 per that page. |
 | woomera-2024 | CORRECTED | OUP page: published 2024, editors Jack Beard and Dale Stephens. |
 | unsc-veto-2024 | VERIFIED | UN press SC/15678: "9616th Meeting", Apr. 24, 2024; 13 in favor, Russia against, China abstained. Draft S/2024/302 confirmed (documents.un.org). |
-| itu-rrb-2024 | PARTIAL | 96th RRB meeting 24-28 June 2024 (ITU Circular 507 minutes page and agenda); summary issued 1 July 2024 (press reports); quotes match SWF p. 02-32. Summary document not retrievable; see [Open items and impact](#open-items-and-impact). |
+| itu-rrb-2024 | VERIFIED | ITU document RRB24-2/12-E, "Summary of Decisions of the 96th Meeting of the Radio Regulations Board, 24-28 June 2024", dated 1 July 2024, pp. 11-12 | Fetched from `itu.int/dms_pub/itu-r/md/24/rrb24.2/c/R24-RRB24.2-C-0012!!PDF-E.pdf` (17 pp.). "The Board expressed its grave concern regarding the use of signals to cause intentional harmful interference ... and condemned such actions in the strictest terms"; interference to French and Swedish satellite networks in the 13/14 GHz and 18 GHz ranges "seemed to originate from earth station(s) located in the areas of Moscow, Kaliningrad and Pavlovka". Matches SWF p. 02-32. The row's `source_url` now points to this document. |
 | icao-2025 | CORRECTED | SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention ... condemned it for doing so, and called for it to fulfill its obligations"; p. 12-06 says the same for North Korea; fn. 243 gives the ICAO release of 3 Oct 2025. ICAO release (search snippet, page bot-blocked 403; Uniting Aviation repeat): the Assembly (23 Sept.-3 Oct. 2025) "endorsed the determination of its governing Council" that the interference "constitute[s] infractions" of the Convention, through two resolutions. Label changed (Discrepancy 31). Resolution numbers not verified and not used. |
 | itu-rrb-2025 | CORRECTED | SWF p. 02-30, fn. 245: "held November 10-14, 2025"; quote "again urge[d] the Administration of the Russian Federation". The ITU page (200) now also carries later meeting content. |
 
@@ -212,10 +213,12 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 
 | category | status | check |
 |---|---|---|
-| direct_ascent | PARTIAL | 2020s D for US, China, Russia, India follows Tables 1-4, 3-3, 2-4, 5-1 (all verified above). P entries rest on SWF country chapters (Israel Arrow 3 "most viable platform", p. 10-01) and were not each read. Earlier decades: reconstruction. |
-| co_orbital | PARTIAL | D/P split rests on SWF's graphical country matrix (p. 01-01 ff.), which the text extraction cannot read. |
-| electronic_warfare | PARTIAL | D events verified (Iran, North Korea, Russia, Israel, China rows above); P entries unread. |
-| directed_energy | PARTIAL | US D (MIRACL) and Russia D (Peresvet) verified above; China P per p. 03-26 (allegation only). |
-| cyber | PARTIAL | Russia D (Viasat) verified; the other P entries follow SWF ch. 15 and were not individually checked. |
+| direct_ascent | PARTIAL | D entries (US, China, Russia, India) match SWF matrix (PDF pp. 22, 24, 26, 27) and Tables 1-4, 3-3, 2-4, 5-1. P entries: Israel, Japan, Germany match ("uncertain"); South Korea, Iran, North Korea, France show "no data" in the matrix. See [Open items and impact](#open-items-and-impact). |
+| co_orbital | PARTIAL | D entries (Russia, US, China) match the matrix. P: France, Germany match; India, Iran, Israel, Japan, North Korea, UK show "no data". See [Open items and impact](#open-items-and-impact). |
+| electronic_warfare | VERIFIED | 2020s D (US, Russia, China, Iran, North Korea, Israel) all "significant" in the matrix's operational column. P entries (India, France, Australia, Germany, Japan, South Korea) each show "some" or "uncertain". |
+| directed_energy | VERIFIED | US and Russia D (MIRACL, Peresvet) verified above. P entries (China, India, France, Germany, Israel) each show R&D "significant", "some" or "uncertain" in the matrix. The matrix also shows "some" or "uncertain" R&D for Australia, Japan and South Korea, which the coding omits (a minor undercount). |
+| cyber | VERIFIED | The matrix has no cyber row. SWF ch. 15 (p. 15-02) and the Executive Summary name the US, Russia, China, France, Iran, Israel and North Korea as demonstrating offensive cyber capability against non-space targets; Russia D rests on Viasat (pp. 15-06, 15-07). |
+
+Matrix reading method: pdfplumber returns each country's table as coloured shapes (green none, yellow some, red significant, dark "?" uncertain, dash no data), matched to the row labels by position. It was run over all 12 country tables (PDF pp. 22-32). Because the matrix is graphical, the reading is by position and colour, not by text.
 
 Pre-2020s cells are the builder's reconstruction, not SWF-assessed, and are labeled so on the chart.

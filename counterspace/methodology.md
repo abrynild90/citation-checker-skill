@@ -53,8 +53,8 @@
 - The Nudol apogees for 2015-16 carry a "?" in SWF, so those rows are low confidence. The 14 Jun 2019 Nudol row appears only in Table 16-2 and is also low confidence.
 - DN-2's apogee is disputed (10,000 km claimed by China; nearly GEO per the US military; at least ~30,000 km per analysis cited by SWF).
 - Several non-kinetic start dates are approximate or come from outside SWF (Ukraine 2014, North Korea Aug. 2010, Trident Juncture window, MIRACL day); each row note says so. The Iran/Eutelsat span (2009-2012) understates the Oct. 2022 episode SWF reports.
-- The 2020s Chart B D/P split follows a graphical matrix in SWF that cannot be machine-checked; only the events behind the D entries are verified.
-- Bot-blocked sites (UN Digital Library, treaties.unoda.org, ICAO, OUP) could not be fetched by script; their facts were checked through other sources, as `verification_log.md` states per row. One legal row (`itu-rrb-2024`) remains PARTIAL for that reason.
+- The 2020s Chart B D/P split was checked against SWF's country matrix, read from the PDF's graphics. All D entries match. Some P entries for direct-ascent (South Korea, Iran, North Korea, France) and co-orbital (India, Iran, Israel, Japan, North Korea, UK) are the builder's reading of the country chapters: SWF's matrix shows "no data" for them. The matrix has no cyber row; cyber follows SWF chapter 15. These two categories remain PARTIAL in `verification_log.md`.
+- Bot-blocked sites (UN Digital Library, treaties.unoda.org, ICAO, OUP) could not be fetched by script; their facts were checked through other sources, as `verification_log.md` states per row. The ITU summary of decisions (`itu-rrb-2024`) was located and read in full in the final pass, so no legal row is PARTIAL.
 
 ## 5. Builder decisions
 1. **Table 5-1 used for all intercept altitudes and debris counts:** one consistent definition across tests. Other values are kept in notes and `conflicts`.
@@ -106,10 +106,10 @@
 
 ## 10. Limitations
 - **Single primary source.** Most rows rest on SWF 2026. Where SWF contradicts itself (section 4) the ledger states its rule and shows both values.
-- **Scrambled table extraction.** Table 1-4 and Table 5-1 extract with mixed columns. Two cells are paired by column order and are marked PARTIAL in `verification_log.md` (the Solwind in-orbit cell and the 14 Jun 2019 Nudol note). Neither is a plotted value: bubble area uses cataloged fragments, and the Nudol row is plotted in the no-altitude strip.
-- **Graphical capability matrix.** The 2020s D/P split in Chart B follows an SWF graphic that cannot be machine-checked. Only the events behind the D entries are verified.
+- **Table extraction.** Table 1-4 and Table 5-1 extract with mixed columns under plain-text extraction. The two cells that could not be paired that way (the Solwind in-orbit count, the 14 Jun 2019 Nudol note) were re-read with a layout-aware extractor (pdfplumber) and are verified. Neither is a plotted value.
+- **Graphical capability matrix.** SWF's country matrix was read from vector shapes by position and colour, not from text. Two Chart B categories (direct-ascent, co-orbital) stay PARTIAL because their 2020s P entries go beyond it (section 4).
 - **Approximate dates and spans.** Some non-kinetic start dates are approximate or external (section 4). Year-only sources use 1 Jan or 31 Dec.
-- **Bot-blocked primary pages.** Some URLs (ICAO, UNOOSA, ITU summary of decisions) cannot be fetched by script; the facts were checked through other sources, as listed in `verification_log.md`.
+- **Bot-blocked primary pages.** Some URLs (ICAO, UNOOSA) cannot be fetched by script; the facts were checked through other sources, as listed in `verification_log.md`.
 - **Snapshot in time.** As of 2026-09-28. Debris counts are as of Feb. 2026 and change as pieces decay. CSIS 2026 was not yet available.
 - **Small numbers.** With 44 kinetic rows and 15 non-kinetic rows, decade counts are sensitive to single events; read the charts as illustration, not statistics.
 
@@ -121,6 +121,6 @@
 
 ## 12. Quality process
 The dataset and page were checked in two independent ways, and the results are kept in the repository.
-1. **Independent verification (`verification_log.md`).** On 2026-09-28 every row (83 items) was re-checked against the pinned SWF page or a fetched primary source, not against the builder's own notes. The pass found and fixed 35 defects and leaves 9 items PARTIAL, each with an impact assessment. No row is marked VERIFIED on inference.
-2. **Five independent grading rounds.** A reviewer with no part in the build inspected the built page, data and docs from scratch each time and wrote a scored report: `grading_report.md` (round 1, 76/100), `grading_report_round2.md` (86), `grading_report_round3.md` (90), `grading_report_round4.md` (92) and `grading_report_round5.md` (93). Each report lists defects by portion of the page; these were fixed before the next round. Rounds 4 and 5 found no factual error in a plotted value in their spot checks against the SWF text. The one wording risk they raised, the lede's claim about EW and cyber (section 9), is closed: the lede now quotes SWF verbatim.
+1. **Independent verification (`verification_log.md`).** On 2026-09-28 every row (83 items) was re-checked against the pinned SWF page or a fetched primary source, not against the builder's own notes. The pass found and fixed 35 defects; a final pass resolved seven of nine PARTIAL items and leaves 2 (the direct-ascent and co-orbital capability categories), each with an impact assessment. No row is marked VERIFIED on inference.
+2. **Six independent grading rounds.** A reviewer with no part in the build inspected the built page, data and docs from scratch each time and wrote a scored report: `grading_report.md` (round 1, 76/100), `grading_report_round2.md` (86), `grading_report_round3.md` (90), `grading_report_round4.md` (92), `grading_report_round5.md` (93) and `grading_report_round6.md` (93). Each report lists defects by portion of the page; these were fixed before the next round. Rounds 4 to 6 found no factual error in a plotted value in their spot checks against the SWF text. The one wording risk they raised, the lede's claim about EW and cyber (section 9), is closed: the lede now quotes SWF verbatim.
 3. **Automated checks.** `tools/qa.mjs` and the data checks in section 8 run on each rebuild; doc counts are generated from the data by `tools/build_data.py`, so `ledger.md` cannot drift from `events.json`.
