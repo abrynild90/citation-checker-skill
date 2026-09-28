@@ -35,12 +35,13 @@ function legalCard(l) {
 function bindMark(sel, cardFn, onActivate) {
   if (EXPORTING) return;
   sel.attr('tabindex', 0)
-    .on('mouseenter', function (ev, d) { showCard(cardFn(d), ev, this); })
-    .on('mouseleave', () => { if (!touchMode) hideCard(); })
-    .on('focus', function (ev, d) { showCard(cardFn(d), ev, this); })
-    .on('blur', () => { if (!touchMode) hideCard(); })
     .on('click', function (ev, d) { onActivate(d, this, ev); })
     .on('keydown', function (ev, d) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onActivate(d, this, ev); } if (ev.key === 'Escape') hideCard(); });
+  if (!cardFn) return; // cardless marks (phone strip) label themselves inline instead
+  sel.on('mouseenter', function (ev, d) { showCard(cardFn(d), ev, this); })
+    .on('mouseleave', () => { if (!touchMode) hideCard(); })
+    .on('focus', function (ev, d) { showCard(cardFn(d), ev, this); })
+    .on('blur', () => { if (!touchMode) hideCard(); });
 }
 const activate = (d, el, ev) => { if (hasScene(d)) { hideCard(); openScene(d.scene_3d, el); } else showCard(d.domain ? (d.domain === 'kinetic' ? kinCard(d) : nkCard(d)) : legalCard(d), ev, el); };
 

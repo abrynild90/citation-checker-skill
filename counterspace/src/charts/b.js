@@ -27,7 +27,7 @@ function drawB(el = document.getElementById('svgB')) {
   const annHead = `Electronic warfare drives most of the crowding: ${ew20} states in the 2020s.`;
   const annSub = `Demonstrated destructive DA-ASAT capability has stayed at four states: ${da20.map(s => s === 'Russia' ? 'USSR/Russia' : s === 'United States' ? 'US' : s).join(', ')}.`;
   const annW = W - 24, annL = wrap(annHead, annW, 12, 600), annS = wrap(annSub, annW, 11.5), annH = (annL.length + annS.length) * 15 + 10;
-  const top = annH + 8, plotH = phone ? 230 : 290, H = top + plotH + 30;
+  const top = annH + 8, plotH = phone ? 330 : 290, H = top + plotH + 30;
   const decs = CAPS.decades, starts = decs.map(d => +d.slice(0, 4));
   const xs = starts.map(s => parse(`${Math.max(1957, s)}-01-01`)).concat([DOMAIN[1]]);
   const { series } = countsB();

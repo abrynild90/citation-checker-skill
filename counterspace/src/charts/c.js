@@ -23,11 +23,11 @@ function attrStyle(sel, d) {
 }
 const stateC = { focus: true };
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
-const C_LINE = 12.5;
+const LINE_H = 12.5, LINE_H_PHONE = 14.5;
 function drawC(el = document.getElementById('svgC')) {
   const dom = stateC.focus ? C_FOCUS() : DOMAIN;
   const { W, M, x } = layout(el, dom), phone = isPhoneNow();
-  const FS = 10.5, laneHead = 24, lanePad = 10, top = phone ? 22 : 8, R = W - M.r, HX = x(parse(LAST_DA)), RIGHT = W - 8;
+  const FS = phone ? 11.5 : 10.5, LH = phone ? LINE_H_PHONE : LINE_H, rowGap = phone ? 24 : 14, markK = phone ? 1.3 : 1, laneHead = phone ? 30 : 24, lanePad = phone ? 16 : 10, top = phone ? 22 : 8, R = W - M.r, HX = x(parse(LAST_DA)), RIGHT = W - 8;
   const XS = e => Math.max(M.l, x(parse(e.start)));
   const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: 99999 });
   let yCur = top; const placed = [];
@@ -61,11 +61,11 @@ function drawC(el = document.getElementById('svgC')) {
     const rows = laneRows[li]; let yy = yCur + laneHead;
     rows.forEach(row => {
       const nA = Math.max(0, ...row.items.filter(p => p.mode === 'above').map(p => p.lines.length)), nC = Math.max(0, ...row.items.filter(p => p.mode !== 'above').map(p => p.lines.length));
-      const off = Math.max(16, nA ? (nA - 1) * C_LINE + 22 : 0, nC ? nC * C_LINE / 2 + 9 : 0);
-      row.y = yy + off; yy += off + 14;
+      const off = Math.max(16, nA ? (nA - 1) * LH + 22 : 0, nC ? nC * LH / 2 + 9 : 0);
+      row.y = yy + off; yy += off + rowGap;
       row.items.forEach(p => {
-        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - 8 - (p.lines.length - 1) * C_LINE : p.y + 4 - (p.lines.length - 1) * C_LINE / 2; placed.push(p);
-        pl.add([p.lx0, p.base - FS * 0.95, p.lx0 + p.w, p.base + (p.lines.length - 1) * C_LINE + FS * 0.25]); pl.add([Math.min(p.X0 - 16, p.lx0), p.y - 7, Math.max(p.X1 + 12, 0), p.y + 8], 'B');
+        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - 8 - (p.lines.length - 1) * LH : p.y + 4 - (p.lines.length - 1) * LH / 2; placed.push(p);
+        pl.add([p.lx0, p.base - FS * 0.95, p.lx0 + p.w, p.base + (p.lines.length - 1) * LH + FS * 0.25]); pl.add([Math.min(p.X0 - 16, p.lx0), p.y - 7, Math.max(p.X1 + 12, 0), p.y + 8], 'B');
       });
     });
     l.y0 = yCur; l.y1 = Math.max(yy, yCur + laneHead + 32) + lanePad; yCur = l.y1;
@@ -96,16 +96,16 @@ function drawC(el = document.getElementById('svgC')) {
     .attr('aria-label', d => { const e = d.e; return `${e.actor}: ${e.target_system}. ${e.end === e.start ? fmt(parse(e.start)) : `${fmtY(parse(e.start))} to ${e.end ? fmtY(parse(e.end)) : 'ongoing'}`}. Attribution: ${ATTR_LABEL[e.attribution]}.${hasScene(e) ? ' Opens 3D scene.' : ''}`; });
   g.each(function (d) {
     const e = d.e, s = d3.select(this), X0 = d.X0;
-    if (d.point) attrStyle(s.append('circle').attr('cx', X0).attr('cy', d.y).attr('r', 6), e);
+    if (d.point) attrStyle(s.append('circle').attr('cx', X0).attr('cy', d.y).attr('r', 6 * markK), e);
     else {
-      attrStyle(s.append('rect').attr('x', X0).attr('y', d.y - 5).attr('width', Math.max(4, d.X1 - X0)).attr('height', 10).attr('rx', 2), e);
+      attrStyle(s.append('rect').attr('x', X0).attr('y', d.y - 5 * markK).attr('width', Math.max(4, d.X1 - X0)).attr('height', 10 * markK).attr('rx', 2), e);
       if (!e.end) s.append('path').attr('d', `M${d.X1},${d.y - 7}L${d.X1 + 8},${d.y}L${d.X1},${d.y + 7}Z`).style('fill', colorOf(e.actor));
     }
     regimeIcon(s, e.target_regime).attr('transform', `translate(${X0 - 11},${d.y})`);
     if (hasScene(e)) badge(s, X0 + (d.point ? 12 : 9), d.y - 8);
     if (d.mode === 'gutter') s.append('line').attr('x1', d.tx + 4).attr('x2', X0 - 16).attr('y1', d.y).attr('y2', d.y).style('stroke', 'var(--faint)').style('stroke-dasharray', '1 3');
     const t = s.append('text').attr('x', d.tx).attr('y', d.base).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`);
-    d.lines.forEach((ln, i) => t.append('tspan').attr('x', d.tx).attr('dy', i ? C_LINE : 0).text(ln));
+    d.lines.forEach((ln, i) => t.append('tspan').attr('x', d.tx).attr('dy', i ? LH : 0).text(ln));
     s.append('rect').attr('class', 'hit').attr('x', X0 - 18).attr('y', d.y - 12).attr('width', d.point ? 36 : Math.max(36, d.X1 - X0 + 30)).attr('height', 24);
   });
   bindMark(g, d => nkCard(d.e), (d, el, ev) => activate(d.e, el, ev));

@@ -18,6 +18,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.innerHTML = '';
   // On phones the band becomes a horizontally scrollable, fully labelled strip (desktop layout at STRIP_W px), scrolled to the recent cluster.
   const strip = isPhoneNow() && !zoom && !EXPORTING && el.id === 'legalSvg';
+  { const tap = document.getElementById('legalTap'); tap.hidden = !strip; if (strip && !tap.dataset.on) tap.textContent = 'Tap a mark on the strip for its label.'; }
   el.style.overflowX = strip ? 'auto' : ''; el.tabIndex = strip ? 0 : -1; if (!strip) el.removeAttribute('tabindex');
   if (strip) { el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Law and policy timeline, scrolls sideways'); } else { el.removeAttribute('role'); el.removeAttribute('aria-label'); }
   const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300), phone = isPhoneNow() && !zoom && !strip, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
@@ -91,7 +92,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
     const anchor = d._a + w <= W - 6 ? 'start' : 'end', tx = anchor === 'start' ? d._a : Math.min(W - 6, d._b);
     lg.append('text').attr('x', tx).attr('y', y).attr('text-anchor', anchor).style('fill', 'var(--muted)').style('font', `600 ${FS}px var(--sans)`).text(t);
   });
-  bindMark(sg, legalCard, activate);
+  bindMark(sg, strip ? null : legalCard, strip ? tapLegal : activate);
   // points
   pts.forEach(d => { d._y = yMark - d._t * TP; });
   svg.append('g').selectAll('line').data(pts.filter(d => d._t)).join('line').attr('x1', d => d._cx).attr('x2', d => d._cx).attr('y1', d => d._y).attr('y2', yMark).style('stroke', 'var(--faint)').style('stroke-width', 1);
@@ -100,13 +101,20 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
     .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
   pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10); });
   pg.append('circle').attr('class', 'hit').attr('r', 8);
-  bindMark(pg, legalCard, activate);
+  bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   sg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   rove(svg.selectAll('.mark'));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(zoom ? 1 : phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
   if (strip) el.scrollLeft = el.scrollWidth;
+}
+// Phone strip: tapping a mark labels it inline under the strip (card text plus a button for the 3D scene, if any).
+function tapLegal(d, el) {
+  const box = document.getElementById('legalTap'), when = d.end ? `${fmtY(parse(d.start))}–${fmtY(parse(d.end))}` : fmt(parse(d.start));
+  box.innerHTML = `<b>${esc(d.label)}</b> · ${when}${d.soft_law ? ' · soft law' : ''}<br>${esc(d.short_note)}${hasScene(d) ? ' <button class="btn small" type="button">Open 3D scene</button>' : ''}`;
+  box.dataset.on = '1'; box.hidden = false; box.querySelector('button')?.addEventListener('click', () => openScene(d.scene_3d, el));
+  document.querySelectorAll('#legalSvg .mark.hl').forEach(m => m.classList.remove('hl')); el.classList.add('hl'); setGuide(parse(d.start));
 }
 let legalCompact = false;
 function legalScroll() {
