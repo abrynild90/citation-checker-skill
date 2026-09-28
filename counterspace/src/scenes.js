@@ -84,13 +84,13 @@ export const SCENES = [
   { id: 'solwind', date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
     caption: 'An F-15 climbs over the Pacific and releases an ASM-135 missile. The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km and destroys it by collision. SWF counts 285 tracked fragments; all have since decayed.',
     cite: 'SWF 2026, Table 5-1, p. 05-01; Table 1-4, p. 01-24.', related: null, event: 'us-1985-solwind',
-    hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.45, wf: 0.5 },
+    hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
     actors: [
       { type: 'aircraft', path: [[32.5, -114.0], [35.0, -124.0]], alt: 12, t0: 0.0, t1: 0.24, label: 'F-15 zoom climb' },
       { type: 'target', label: 'Solwind P78-1', color: C.tgt, big: true },
       { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135' },
-      { type: 'debris', count: 285, spreadAlt: 120, spreadInc: 0.9, dv: 0.6, decay: 0.15, color: C.debris },
-    ], still: 0.62, status: [[0, 'F-15 climbs over the Pacific'], [0.24, 'Missile released; homing vehicle rises to the satellite'], [0.5, 'Collision at ~530 km; fragments spread and decay (SWF: 285 tracked, none left)']] },
+      { type: 'debris', count: 285, spreadAlt: 120, spreadInc: 0.9, dv: 0.6, decay: 0.9, color: C.debris },
+    ], still: 0.62, status: [[0, 'F-15 climbs over the Pacific'], [0.24, 'Missile released; homing vehicle rises to the satellite'], [0.5, 'Collision at ~530 km; fragments spread and decay'], [0.75, 'Time compressed: SWF counts 285 tracked fragments, all since decayed']] },
   { id: 'fengyun', date: '2007-01-11', title: 'Fengyun-1C (2007)', shells: ['LEO'], duration: 16,
     caption: 'China’s SC-19 interceptor strikes the Fengyun-1C weather satellite at about 880 km (SWF Table 5-1). At that altitude, fragments stay up for decades. They spread along the old orbit into a ring around the planet. It remains the largest debris-generating event on record.',
     cite: 'SWF 2026, Table 5-1, p. 05-01 (3,532 cataloged; 2,351 in orbit as of Feb. 2026).', related: 'unga-77-41', event: 'cn-2007-fy1c',
@@ -105,7 +105,7 @@ export const SCENES = [
   { id: 'burnt-frost', date: '2008-02-20', title: 'Burnt Frost: SM-3 vs. USA-193 (2008)', shells: ['LEO'], duration: 12,
     caption: 'A US Navy cruiser fires a modified SM-3 missile-defense interceptor at the failing USA-193 satellite at about 220 km. The low altitude sped up decay: SWF says the 175 trackable pieces took about 20 months to de-orbit entirely (the animation compresses that time). SWF’s text gives the intercept altitude as 240 km, while its Table 5-1 lists 220 km. The event shows the overlap between missile defense and anti-satellite capability.',
     cite: 'SWF 2026, Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); decay time and 240 km in text, p. 01-24.', related: null, event: 'us-2008-burnt-frost',
-    hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.45, wf: 0.5 },
+    hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
     actors: [
       { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie' },
       { type: 'target', label: 'USA-193', color: C.tgt, big: true },
@@ -118,19 +118,19 @@ export const SCENES = [
     actors: [
       { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
       { type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: '#ff7a7a', thick: 0.011, label: 'DN-2 path (no target: not an intercept)', labelIdx: 0.22, head: true, apexT: 0.47,
-        marks: [{ alt: 10000, label: '10,000 km: China’s stated figure', short: '10,000 km · China', color: '#ffd9a0', dx: 30, dy: 0 }, { alt: 30000, label: 'Apogee ≥30,000 km (analysis cited by SWF)', short: '≥30,000 km · SWF-cited', color: '#ff9c9c', apex: true, dx: -30, dy: 0 }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO · 35,786 km', color: C.geo, dx: 30, dy: 0 }] },
+        marks: [{ alt: 10000, label: '10,000 km: China’s stated figure', short: '10,000 km · China', color: '#ffd9a0', dx: 60, dy: 44 }, { alt: 30000, label: 'Apogee ≥30,000 km (analysis cited by SWF)', short: '≥30,000 km · SWF-cited', color: '#ff9c9c', apex: true, dx: 70, dy: 12 }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO · 35,786 km', color: C.geo, dx: 60, dy: -34 }] },
       { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.012, opacity: 0.95, sats: 10 },
     ], still: 0.62, camDist: 7.5, shellLabels: { MEO: null, GEO: null },
     cameras: [{ name: 'Profile', at: [24, 18, 6.6] }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
   { id: 'shakti', date: '2019-03-27', title: 'Mission Shakti (2019)', shells: ['LEO'], duration: 12,
     caption: 'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
     cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-03.', related: 'unga-77-41', event: 'in-2019-shakti',
-    hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.45, wf: 0.5 },
+    hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
     actors: [
       { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
       { type: 'target', label: 'Microsat-R', color: C.tgt, big: true },
       { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II' },
-      { type: 'debris', count: 130, spreadAlt: 110, spreadInc: 1.0, dv: 0.6, decay: 1.2, color: C.debris },
+      { type: 'debris', count: 130, spreadAlt: 110, spreadInc: 1.0, dv: 0.6, decay: 2.4, color: C.debris },
     ], still: 0.5, status: [[0, 'PDV Mk-II rises from Abdul Kalam Island'], [0.38, 'Collision at ~300 km; fragments spread and decay quickly'], [0.65, 'Time compressed: SWF counts 130 cataloged pieces, none still in orbit']] },
   { id: 'cosmos1408', date: '2021-11-15', title: 'Nudol vs. Cosmos 1408 (2021)', shells: ['LEO'], duration: 16,
     caption: 'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 at about 470 km. The debris cloud spreads across altitudes that cross the International Space Station’s orbit (about 420 km), and the ISS crew sheltered in their docked spacecraft. SWF counts 1,807 cataloged fragments, 5 still in orbit as of February 2026.',
@@ -138,7 +138,7 @@ export const SCENES = [
     hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 }, launchCam: 'second', noSimCount: true,
     actors: [
       { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground },
-      { type: 'ring', alt: 420, inc: 51.6, color: C.iss, crossHit: 0.55, thick: 0.0032, opacity: 0.85, sat: { speed: 0.16, label: 'ISS (~420 km)', big: 2.6 } },
+      { type: 'ring', alt: 420, inc: 51.6, color: C.iss, crossHit: 0.55, thick: 0.0032, opacity: 0.85, sat: { speed: 0.16, label: 'ISS (~420 km)', big: 1.7 } },
       { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true },
       { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol' },
       { type: 'debris', count: 1807, spreadAlt: 150, spreadInc: 1.0, dv: 0.6, decay: 0.25, color: C.debris },
@@ -169,7 +169,7 @@ export const SCENES = [
       { type: 'target', label: 'MSTI-3 (US test target)', color: C.tgt, noHit: true, big: true },
       { type: 'beam', from: [32.4, -106.4], window: 0.42, color: C.laser, label: 'Laser beam' },
     ], still: 0.5,
-    status: [[0, 'MSTI-3 rises over White Sands'], [0.15, 'MIRACL beam tracks the satellite while it is above the horizon'], [0.8, 'Same principle: SWF describes Russia’s Peresvet (named in 2018) as a mobile laser dazzler']], cameras: [{ name: 'Side view', at: [8, -108, 3.0] }, { name: 'Zoom', at: [30, -122, 2.5] }, { name: 'Overhead', at: [60, -106, 3.0] }] },
+    status: [[0, 'MSTI-3 rises over White Sands'], [0.15, 'MIRACL beam tracks the satellite while it is above the horizon'], [0.8, 'Same principle: SWF describes Russia’s Peresvet (named in 2018) as a mobile laser dazzler']], cameras: [{ name: 'Side view', at: [33, -158, 2.7], look: [33, -110, 1.12] }, { name: 'Zoom', at: [36, -146, 1.9], look: [33, -108, 1.15] }, { name: 'Overhead', at: [60, -106, 3.0] }] },
 ];
 export const HERO = { id: 'hero', title: 'Overview', shells: ['LEO', 'MEO', 'GEO'], duration: 40, spin: true,
   shellLabels: { LEO: 'LEO ≤2,000 km', MEO: 'MEO · GPS ~20,200 km', GEO: 'GEO ~35,786 km' }, shellAng: { LEO: 158, MEO: 20, GEO: 52 },
@@ -217,15 +217,15 @@ export function buildSim(cfg) {
     if (a.type === 'target' && tgt) {
       const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, k / 180 * 2 * Math.PI));
       items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35 });
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, scale: a.big ? 2.4 : null,
-        pos: t => (a.noHit || t < tgt.t) ? tgt.pos(t) : null,
+      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, scale: a.big ? 1.3 : null,
+        pos: t => (a.noHit || t <= tgt.t) ? tgt.pos(t) : null,
         glow: a.noHit ? (t => Math.abs(t - tgt.t) < 0.08) : null });
     }
     if (a.type === 'aircraft') {
       const r = 1.012 + a.alt / 6371;
       const P = s => { const la = lerp(a.path[0][0], a.path[1][0], s), lo = lerp(a.path[0][1], a.path[1][1], s); return ll(la, lo, r); };
       const pos = t => (t >= a.t0 - 1e-6 && t <= a.t1 + 1e-6) ? P(clamp01((t - a.t0) / (a.t1 - a.t0))) : (t > a.t1 && !a.gnss ? null : null);
-      const item = { kind: 'point', shape: 'aircraft', color: '#e9edf7', label: a.label, labelDy: a.labelDy, pos: t => pos(Math.min(t, a.t1)) };
+      const item = { kind: 'point', shape: 'aircraft', scale: a.gnss ? null : 0.6, color: '#e9edf7', label: a.label, labelDy: a.labelDy, pos: t => pos(Math.min(t, a.t1)) };
       if (!a.gnss) {
         aircraftPos = t => P(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         // Climb: altitude rises along the path (exaggerated) and a trail shows where the F-15 has been.
@@ -369,11 +369,11 @@ export function buildSim(cfg) {
   const dist = cfg.camDist || 4.2;
   const wide = { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) }, polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
   let cams;
-  if (cfg.cameras) cams = cfg.cameras.map(c => ({ name: c.name, pos: ll(...c.at) }));
+  if (cfg.cameras) cams = cfg.cameras.map(c => ({ name: c.name, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }));
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) { // launch site through the intercept: a side-on camera looking at the middle of the arc
     const { from, to, mid } = items._arc, md = norm(mid), e1 = norm(add(to, scl(from, -1))), nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);
-    const look = add(mid, scl(md, -0.03)), launch = { name: 'Launch', pos: add(look, add(scl(nrm, 0.78), scl(md, 0.34))), look, hideShell: true };
+    const look = add(mid, scl(md, -0.03)), launch = { name: 'Launch', pos: add(look, add(scl(nrm, 0.78 * (IS_PHONE ? 0.8 : 1)), scl(md, 0.34 * (IS_PHONE ? 0.8 : 1)))), look, hideShell: true };
     const orbit = { name: 'Orbit', pos: ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)) };
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
@@ -595,7 +595,7 @@ export class GLHost {
         if (it.label) this._label(it.label, t => t > it.t0 ? it.pos : null);
       } else if (it.kind === 'status') { this.status = it; }
     }
-    this.statusEl = document.createElement('div'); this.statusEl.className = 'hlabel'; this.statusEl.style.cssText += ';left:50%;bottom:14px;top:auto;transform:translateX(-50%);font-size:12px;color:#ffe08a';
+    this.statusEl = document.createElement('div'); this.statusEl.className = 'hlabel'; this.statusEl.style.cssText += ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);font-size:12px;color:#ffe08a;white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px);line-height:1.3';
     this.labelLayer.appendChild(this.statusEl);
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); this.leaders.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;overflow:visible'); this.leaders.setAttribute('aria-hidden', 'true');
     this.labelLayer.prepend(this.leaders);
@@ -624,7 +624,7 @@ export class GLHost {
   }
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
-  _labelPositions(w, h, u = 1) {
+  _labelPositions(w, h, u = 1, noBanner = false) {
     const cam = this.camera.position, T = this.T, raw = [], k = h / (this.el.clientHeight || h);
     for (const L of this.labels) {
       let p = L.posFn(this.t); if (p && this.sim.cfg.spin && L.cls !== 'shell') { const v = new T.Vector3(...p).applyMatrix4(this.root.matrixWorld); p = [v.x, v.y, v.z]; }
@@ -635,7 +635,7 @@ export class GLHost {
       const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h;
       raw.push({ x: px + L.dx * k, y: py + (L.dy - 12) * k, px, py, w: labelW(text, u), h: 19 * u, fixed: L.cls === 'shell', text, color });
     }
-    const banner = [[8 * u, 8 * u, Math.min(w - 16 * u, 430 * u), 32 * u]], status = this.status ? [(w - 470 * u) / 2, h - 40 * u, 470 * u, 30 * u] : null;
+    const banner = noBanner ? [] : [[8 * u, 8 * u, Math.min(w - 16 * u, 430 * u), 32 * u]], status = this.status ? (w < 520 * u ? [8 * u, h - 56 * u, w - 16 * u, 48 * u] : [(w - 470 * u) / 2, h - 40 * u, 470 * u, 30 * u]) : null;
     const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner);
     return raw.map((r, i) => r && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   }
@@ -731,23 +731,30 @@ export class GLHost {
     const vw = this.el.clientWidth, vh = this.el.clientHeight, pr = this.renderer.getPixelRatio();
     const maxDim = Math.min(this.maxTex, 4096), W = Math.min(targetW, maxDim, Math.floor(maxDim * vw / vh)), H = Math.round(W * vh / vw);
     this.renderer.setPixelRatio(1); this.renderer.setSize(W, H, false); this.renderer.render(this.scene, this.camera);
-    const c = document.createElement('canvas'); c.width = W; c.height = H;
-    const g = c.getContext('2d'); g.fillStyle = '#070b17'; g.fillRect(0, 0, W, H); g.drawImage(this.canvas, 0, 0);
-    const s = W / 1000;
+    // Layout: header band (banner) | render | footer band (title, source, imagery credit). Nothing is drawn over the globe.
+    const s = W / 1000, hb = Math.round(40 * s), fb = Math.round(64 * s);
+    const c = document.createElement('canvas'); c.width = W; c.height = H + hb + fb;
+    const g = c.getContext('2d'); g.fillStyle = '#070b17'; g.fillRect(0, 0, W, c.height); g.drawImage(this.canvas, 0, hb);
     g.textAlign = 'center'; g.lineJoin = 'round';
-    const lp = this._labelPositions(W, H, s);
-    for (const q of lp) { if (!q || !q.leader) continue; g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay); g.lineTo(q.qx, q.qy); g.stroke(); g.globalAlpha = 1; }
+    const lp = this._labelPositions(W, H, s, true);
+    for (const q of lp) { if (!q || !q.leader) continue; g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay + hb); g.lineTo(q.qx, q.qy + hb); g.stroke(); g.globalAlpha = 1; }
     for (const q of lp) { if (!q) continue;
-      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; g.lineWidth = 4 * s; g.strokeStyle = 'rgba(5,8,18,0.85)'; g.textBaseline = 'middle'; g.strokeText(q.text, q.x, q.y);
-      g.fillStyle = q.color || '#dfe6f7'; g.fillText(q.text, q.x, q.y); g.textBaseline = 'alphabetic'; }
+      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; g.lineWidth = 4 * s; g.strokeStyle = 'rgba(5,8,18,0.85)'; g.textBaseline = 'middle'; g.strokeText(q.text, q.x, q.y + hb);
+      g.fillStyle = q.color || '#dfe6f7'; g.fillText(q.text, q.x, q.y + hb); g.textBaseline = 'alphabetic'; }
+    const status = this.status?.text(Math.min(this.t, 1));
+    if (status) { g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; const tw = g.measureText(status).width + 24 * s;
+      g.fillStyle = 'rgba(5,8,18,0.78)'; g.fillRect(W / 2 - tw / 2, hb + H - 36 * s, tw, 26 * s); g.fillStyle = '#ffe08a'; g.textBaseline = 'middle'; g.fillText(status, W / 2, hb + H - 23 * s); g.textBaseline = 'alphabetic'; }
     g.textAlign = 'left';
-    const status = this.status?.text(Math.min(this.t, 1)); if (status) { g.textAlign = 'center'; g.fillStyle = '#ffe08a'; g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; g.fillText(status, W / 2, H - 60 * s); g.textAlign = 'left'; }
-    g.fillStyle = 'rgba(5,8,18,0.7)'; g.fillRect(0, H - 52 * s, W, 52 * s);
-    g.fillStyle = '#ffe08a'; g.font = `600 ${Math.round(14 * s)}px system-ui,sans-serif`;
-    g.fillText('Illustrative, not orbit-propagated · compressed radial scale', 14 * s, 24 * s);
-    g.fillStyle = '#e9edf7'; g.font = `600 ${Math.round(18 * s)}px system-ui,sans-serif`; g.fillText(title, 14 * s, H - 28 * s);
-    g.fillStyle = '#a9b3cc'; g.font = `${Math.round(11 * s)}px system-ui,sans-serif`;
-    g.fillText(`${cite}${earthImg ? ' Earth imagery: NASA Blue Marble (public domain).' : ''}`, 14 * s, H - 10 * s);
+    g.fillStyle = '#0b1120'; g.fillRect(0, 0, W, hb); g.fillRect(0, hb + H, W, fb);
+    g.strokeStyle = 'rgba(255,224,138,0.28)'; g.lineWidth = Math.max(1, s); g.beginPath(); g.moveTo(0, hb - 0.5); g.lineTo(W, hb - 0.5); g.moveTo(0, hb + H + 0.5); g.lineTo(W, hb + H + 0.5); g.stroke();
+    g.textBaseline = 'middle'; g.fillStyle = '#ffe08a'; g.font = `600 ${Math.round(14 * s)}px system-ui,sans-serif`;
+    g.fillText('Illustrative, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
+    g.fillStyle = '#e9edf7'; g.font = `600 ${Math.round(19 * s)}px system-ui,sans-serif`; g.fillText(title, 16 * s, hb + H + 21 * s);
+    // Source line: cite, then the imagery credit as its own sentence (single separator).
+    const credit = earthImg ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
+    const src = `${String(cite || '').trim().replace(/[.;,\s]+$/, '')}. ${credit}`;
+    let fs = Math.round(11.5 * s); g.font = `${fs}px system-ui,sans-serif`; while (g.measureText(src).width > W - 32 * s && fs > 7 * s) { fs -= 0.5 * s; g.font = `${fs}px system-ui,sans-serif`; }
+    g.fillStyle = '#a9b3cc'; g.fillText(src, 16 * s, hb + H + 46 * s); g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
     this.renderer.setPixelRatio(pr); this.resize();
     return url;
@@ -796,7 +803,14 @@ export function renderSVG(sim, el, t = sim.still) {
   const gl = defs.append('radialGradient').attr('id', 'sf-glow'); gl.append('stop').attr('offset', 0.9).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0.5); gl.append('stop').attr('offset', 1).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0);
   const oc = defs.append('radialGradient').attr('id', 'sf-ocean').attr('cx', '38%').attr('cy', '35%').attr('r', '80%');
   oc.append('stop').attr('offset', 0).attr('stop-color', '#1a4a7c'); oc.append('stop').attr('offset', 1).attr('stop-color', '#0a2040');
+  // Lit globe: soft sphere shading + a blurred night side, from the same sun direction as the live scene.
+  const sh = defs.append('radialGradient').attr('id', 'sf-shade').attr('cx', '36%').attr('cy', '32%').attr('r', '78%');
+  sh.append('stop').attr('offset', 0).attr('stop-color', '#fff').attr('stop-opacity', 0.16); sh.append('stop').attr('offset', 0.45).attr('stop-color', '#fff').attr('stop-opacity', 0);
+  sh.append('stop').attr('offset', 1).attr('stop-color', '#000').attr('stop-opacity', 0.5);
+  defs.append('filter').attr('id', 'sf-blur').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%').append('feGaussianBlur').attr('stdDeviation', Math.max(4, R * 0.05));
+  defs.append('clipPath').attr('id', 'sf-clip').append('path').datum({ type: 'Sphere' }).attr('d', path);
   svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'url(#sf-bg)');
+  { const rs = mulberry(99); for (let k = 0; k < 90; k++) { const x = rs() * W, y = rs() * H, b = 0.25 + rs() * 0.5; svg.append('circle').attr('cx', x).attr('cy', y).attr('r', rs() < 0.15 ? 1.1 : 0.7).attr('fill', '#dfe8ff').attr('fill-opacity', b); } }
   const shells = sim.items.filter(i => i.kind === 'shell'), cands = [];
   shells.forEach(it => svg.append('circle').attr('cx', W / 2).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
   svg.append('circle').attr('cx', W / 2).attr('cy', CY).attr('r', R * 1.08).attr('fill', 'url(#sf-glow)');
@@ -804,9 +818,14 @@ export function renderSVG(sim, el, t = sim.still) {
   svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
   const landGeo = { type: 'MultiPolygon', coordinates: (LAND || []).map(r => { const c = []; for (let k = 0; k < r.length; k += 2) c.push([r[k], r[k + 1]]); return [c.reverse()]; }) };
   svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#3b7a5e').attr('stroke', '#5fae8a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.7);
+  { const sd = toLL(sunFor(cam)), night = d3.geoCircle().center([sd.lon + 180, -sd.lat]).radius(90)();
+    const cg = svg.append('g').attr('clip-path', 'url(#sf-clip)');
+    cg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', 'url(#sf-shade)');
+    cg.append('path').datum(night).attr('d', path).attr('fill', '#02050d').attr('fill-opacity', 0.62).attr('filter', 'url(#sf-blur)');
+    svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', 'none').attr('stroke', '#8cc8ff').attr('stroke-opacity', 0.55).attr('stroke-width', 1.2); }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
-  shells.forEach((it, i) => { const a = (35 + i * 14) * DEG, px = W / 2 + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a); cands.push({ x: px, y: py, px, py, w: labelW(it.label), h: 19, fixed: true, text: it.label, color: it.color }); });
+  shells.forEach((it, i) => { const a = (it.ang ?? 35 + i * 14) * DEG, px = W / 2 + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a); cands.push({ x: px, y: py, px, py, w: labelW(it.label), h: 19, fixed: true, text: it.label, color: it.color }); });
   const label = (p, text, color = '#dfe6f7') => { if (!p || p.hidden || !text) return; cands.push({ x: p.x, y: p.y - 14, px: p.x, py: p.y, w: labelW(text), h: 19, text, color }); };
   for (const it of sim.items) {
     if (it.kind === 'dome') g.append('path').datum(d3.geoCircle().center([it.at[1], it.at[0]]).radius(it.radius)()).attr('d', path).attr('fill', it.color).attr('fill-opacity', 0.32).attr('stroke', it.color).attr('stroke-width', 1.6);
@@ -826,14 +845,14 @@ export function renderSVG(sim, el, t = sim.still) {
     if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opacity ?? 0.8).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 3.5 : 1.2); } }
     if (it.kind === 'point') { const q = it.pos(t); if (!q) continue; const p = project(q); if (p.hidden) continue;
       const c = it.statusColor ? it.statusColor(t) : it.color;
-      if (it.shape === 'sat') g.append('rect').attr('x', p.x - (it.small ? 2 : 4.5)).attr('y', p.y - (it.small ? 2 : 4.5)).attr('width', it.small ? 4 : 9).attr('height', it.small ? 4 : 9).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
+      if (it.shape === 'sat') { const q = it.small ? 4 : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1); g.append('rect').attr('x', p.x - q / 2).attr('y', p.y - q / 2).attr('width', q).attr('height', q).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8); }
       else if (it.shape === 'tick') g.append('path').attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`).attr('fill', c).attr('stroke', '#070b17');
       else if (it.shape === 'aircraft') g.append('path').attr('d', `M${p.x},${p.y - 7}L${p.x + 5},${p.y + 5}L${p.x - 5},${p.y + 5}Z`).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
       else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
       else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
       if (it.label) label(p, it.labelFn ? it.labelFn(t) : it.label, c); }
-    if (it.kind === 'flash' && it.big) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4'); }
-    if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + 0.14) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
+    if (it.kind === 'flash' && it.big && t >= it.t0) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4'); }
+    if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + (it.span ?? 0.14)) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
   }
   const reserved = [[8, 8, Math.min(W - 16, 380), 26], [(W - 470) / 2, H - 60, 470, 26]];
   const pl = placeLabels(cands, W, H, reserved);
