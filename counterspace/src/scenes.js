@@ -38,6 +38,32 @@ function orbitThrough(lat, lon, inc) {
 function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const gauss = rnd => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
 
+// Screen-space label de-confliction shared by the live HTML labels, the PNG still and the SVG fallback.
+// list[i] = {x, y (preferred centre), px, py (object point), w, h, fixed} or null.
+// Returns placements {x, y, leader, ax, ay, qx, qy}. Fixed labels are placed first; others are nudged
+// up/down/sideways to the nearest free slot, clamped inside the frame, and given a leader line to the object.
+export function placeLabels(list, W, H, reserved = []) {
+  const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] }));
+  const out = new Array(list.length).fill(null);
+  const order = list.map((_, i) => i).sort((a, b) => ((list[b] && list[b].fixed) ? 1 : 0) - ((list[a] && list[a].fixed) ? 1 : 0) || a - b);
+  for (const i of order) {
+    const c = list[i]; if (!c) continue;
+    const { w, h } = c, gap = 3;
+    const cx = x => Math.max(w / 2 + 3, Math.min(W - w / 2 - 3, x)), cy = y => Math.max(h / 2 + 3, Math.min(H - h / 2 - 3, y));
+    const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + gap && Math.abs(y - b.y) < (h + b.h) / 2 + 1 ? 1 : 0), 0);
+    const cand = [[0, 0]];
+    for (let k = 1; k <= 8; k++) cand.push([0, -k * h * 1.12], [0, k * h * 1.12]);
+    for (const j of [0, -1, 1, -2, 2, -3, 3]) { cand.push([w * 0.55 + 14, j * h * 1.12], [-(w * 0.55 + 14), j * h * 1.12]); }
+    let best = null, bestN = 1e9;
+    for (const [dx, dy] of cand) { const x = cx(c.x + dx), y = cy(c.y + dy), n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01; if (n < bestN) { best = [x, y]; bestN = n; if (n < 1) break; } }
+    const [x, y] = best; boxes.push({ x, y, w, h });
+    const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py));
+    out[i] = { x, y, leader: Math.hypot(qx - c.px, qy - c.py) > h * 0.9, ax: c.px, ay: c.py, qx, qy };
+  }
+  return out;
+}
+const labelW = (text, u = 1) => (text.length * 6.3 + 14) * u;
+
 // ---------------------------------------------------------------- configs
 const C = { tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', gps: '#9be7c4', jam: '#ff5d5d', ok: '#6ee7a8', laser: '#ff4fd8', geo: '#ffcf6e', belt: '#b28cff', ground: '#e9edf7' };
 
@@ -49,19 +75,20 @@ export const SCENES = [
       { type: 'site', at: [16.7, -169.5], label: 'Johnston Island', color: C.ground },
       { type: 'suborbital', from: [16.7, -169.5], to: [16.5, -169.0], apex: 400, t0: 0.02, t1: 0.14, color: C.int, label: 'Thor launch' },
       { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, color: '#fff3c4', label: 'Detonation ~400 km' },
+      { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14 },
       { type: 'belt', at: [16.5, -169.2], L: [1.12, 1.7], t0: 0.18, t1: 0.9, count: 2600, color: C.belt, label: 'Artificial radiation belt' },
       { type: 'ring', alt: 800, inc: 44.8, raan: 40, color: '#8cc8ff', sat: { phase: 0, speed: 2.2, label: 'Satellite in belt' } },
-    ], still: 0.7 },
+    ], still: 0.7, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.14, 'Detonation: electrons trapped on Earth’s field lines'], [0.3, 'Trapped electrons spread in longitude and latitude along field lines'], [0.75, 'Belt has drifted around Earth (illustrative spread)']] },
   { id: 'solwind', date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
     caption: 'An F-15 climbs over the Pacific and releases an ASM-135 missile. The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km and destroys it by collision. SWF counts 285 tracked fragments; all have since decayed.',
     cite: 'SWF 2026, Table 5-1, p. 05-01; Table 1-4, p. 01-24.', related: null, event: 'us-1985-solwind',
     hit: { lat: 36.0, lon: -126.0, alt: 530, inc: 97.6, t: 0.45 },
     actors: [
-      { type: 'aircraft', path: [[34.0, -119.0], [35.4, -124.0]], alt: 12, t0: 0.0, t1: 0.28, label: 'F-15' },
+      { type: 'aircraft', path: [[32.5, -114.0], [35.4, -124.0]], alt: 12, t0: 0.0, t1: 0.28, label: 'F-15 zoom climb' },
       { type: 'target', label: 'Solwind P78-1', color: C.tgt },
       { type: 'intercept', from: 'aircraft', t0: 0.28, color: C.int, label: 'ASM-135' },
       { type: 'debris', count: 285, spreadAlt: 120, spreadInc: 0.6, dv: 0.35, decay: 0.15, color: C.debris },
-    ], still: 0.62 },
+    ], still: 0.62, status: [[0, 'F-15 climbs over the Pacific'], [0.28, 'Missile released; homing vehicle rises to the satellite'], [0.45, 'Collision at ~530 km; fragments spread and decay']] },
   { id: 'fengyun', date: '2007-01-11', title: 'Fengyun-1C (2007)', shells: ['LEO'], duration: 16,
     caption: 'China’s SC-19 interceptor strikes the Fengyun-1C weather satellite at about 880 km (SWF Table 5-1). At that altitude, fragments stay up for decades. They spread along the old orbit into a ring around the planet. It remains the largest debris-generating event on record.',
     cite: 'SWF 2026, Table 5-1, p. 05-01 (3,532 cataloged; 2,351 in orbit as of Feb. 2026).', related: 'unga-77-41', event: 'cn-2007-fy1c',
@@ -73,26 +100,28 @@ export const SCENES = [
       { type: 'debris', count: 3532, spreadAlt: 260, spreadInc: 1.1, dv: 0.9, decay: 0, color: C.debris, label: 'Debris ring' },
     ], still: 0.85 },
   { id: 'burnt-frost', date: '2008-02-20', title: 'Burnt Frost: SM-3 vs. USA-193 (2008)', shells: ['LEO'], duration: 12,
-    caption: 'A US Navy cruiser fires a modified SM-3 missile-defense interceptor at the failing USA-193 satellite at about 220 km. The low altitude meant most fragments re-entered within weeks. The event shows the overlap between missile defense and anti-satellite capability.',
-    cite: 'SWF 2026, Table 5-1, p. 05-01 (175 cataloged; 0 in orbit).', related: null, event: 'us-2008-burnt-frost',
+    caption: 'A US Navy cruiser fires a modified SM-3 missile-defense interceptor at the failing USA-193 satellite at about 220 km. The low altitude sped up decay: SWF says the 175 trackable pieces took about 20 months to de-orbit entirely (the animation compresses that time). SWF’s text gives the intercept altitude as 240 km, while its Table 5-1 lists 220 km. The event shows the overlap between missile defense and anti-satellite capability.',
+    cite: 'SWF 2026, Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); decay time and 240 km in text, p. 01-24.', related: null, event: 'us-2008-burnt-frost',
     hit: { lat: 25.0, lon: -166.0, alt: 220, inc: 58.5, t: 0.35 },
     actors: [
       { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie' },
       { type: 'target', label: 'USA-193', color: C.tgt },
       { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3' },
-      { type: 'debris', count: 175, spreadAlt: 70, spreadInc: 0.8, dv: 0.3, decay: 1.6, color: C.debris },
-    ], still: 0.5 },
+      { type: 'debris', count: 175, spreadAlt: 70, spreadInc: 0.8, dv: 0.3, decay: 4.5, color: C.debris },
+    ], still: 0.5, status: [[0, 'Interceptor rises toward the satellite'], [0.35, 'Collision at ~220 km; low-altitude fragments decay quickly'], [0.6, 'Time compressed: SWF reports ~20 months to de-orbit entirely']] },
   { id: 'dn2', date: '2013-05-13', title: 'DN-2 “high-altitude science” launch (2013)', shells: ['LEO', 'MEO', 'GEO'], duration: 14,
     caption: 'A rocket from Xichang climbs on a suborbital path toward the geostationary belt and falls back over the Indian Ocean. China said it reached 10,000 km. US officials said it went nearly to GEO. SWF cites an analysis putting the apogee at 30,000 km or more. There was no target. The launch showed reach, not an intercept.',
     cite: 'SWF 2026, pp. 03-20, 03-22.', related: null, event: 'cn-2013-dn2',
     actors: [
       { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-      { type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: C.int, label: '~30,000 km apogee (not an intercept)', head: true },
-      { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, label: 'GEO belt', sats: 10 },
-    ], still: 0.5, camDist: 7.5 },
+      { type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: '#ff7a7a', thick: 0.011, label: 'DN-2 path (no target: not an intercept)', labelIdx: 0.22, head: true, apexT: 0.47,
+        marks: [{ alt: 10000, label: '10,000 km: China’s stated figure', color: '#ffd9a0' }, { alt: 30000, label: 'Apogee ≥30,000 km (analysis cited by SWF)', color: '#ff9c9c', apex: true }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', color: C.geo }] },
+      { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.012, opacity: 0.95, sats: 10 },
+    ], still: 0.62, camDist: 7.5,
+    cameras: [{ name: 'Profile', at: [24, 18, 6.6] }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Close', at: [20, 45, 5.6] }] },
   { id: 'shakti', date: '2019-03-27', title: 'Mission Shakti (2019)', shells: ['LEO'], duration: 12,
     caption: 'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
-    cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-03.', related: 'us-moratorium-2022', event: 'in-2019-shakti',
+    cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-03.', related: 'unga-77-41', event: 'in-2019-shakti',
     hit: { lat: 23.0, lon: 89.0, alt: 300, inc: 96.6, t: 0.3 },
     actors: [
       { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
@@ -115,27 +144,27 @@ export const SCENES = [
     caption: 'GPS satellites orbit about 20,200 km up. A jammer on the ground swamps their weak signals only inside its local effect zone. Aircraft crossing the zone lose their position fix, while aircraft outside it and the satellites themselves are unaffected. This is interference with receivers, not an attack on a satellite.',
     cite: 'SWF 2026, pp. 02-29 to 02-30; p. 12-05 (downlink jamming has no effect on the satellites).', related: 'icao-2025', event: 'ru-2023-baltic',
     actors: [
-      { type: 'constellation', alt: 20200, inc: 55, planes: 6, per: 4, color: C.gps, speed: 0.25, label: 'GPS satellites' },
+      { type: 'constellation', alt: 20200, inc: 55, planes: 6, per: 3, color: C.gps, speed: 0.25, label: 'GPS satellites' },
       { type: 'zone', at: [57.5, 21.0], radius: 5, color: C.jam, label: 'Jammer effect zone' },
-      { type: 'aircraft', path: [[53.0, 8.0], [61.0, 32.0]], alt: 11, t0: 0, t1: 1, label: 'Airliner', gnss: true },
-      { type: 'aircraft', path: [[44.0, 0.0], [46.5, 30.0]], alt: 11, t0: 0, t1: 1, label: 'Airliner (outside zone)', gnss: true, labelDy: 30 },
-    ], still: 0.45, camDist: 5.6, focus: [55, 18] },
+      { type: 'aircraft', path: [[53.0, 8.0], [61.0, 32.0]], alt: 11, t0: 0, t1: 1, label: 'Airliner A', gnss: true },
+      { type: 'aircraft', path: [[44.0, 0.0], [46.5, 30.0]], alt: 11, t0: 0, t1: 1, label: 'Airliner B', gnss: true, labelDy: 30 },
+    ], still: 0.45, camDist: 4.4, focus: [55, 18], status: [[0, 'Red = inside jammer zone (GNSS lost) · green = outside (GNSS OK) · satellites unaffected']] },
   { id: 'viasat', date: '2022-02-24', title: 'Viasat KA-SAT cyberattack (2022)', shells: ['GEO'], duration: 14,
-    caption: 'About an hour before Russia’s invasion of Ukraine, attackers pushed destructive “AcidRain” malware through KA-SAT’s ground management network. Tens of thousands of user modems in Ukraine and across Europe went dark. The satellite itself kept working: the attack hit the ground segment.',
+    caption: 'Within hours of Russian troops crossing into Ukraine in February 2022, attackers pushed destructive “AcidRain” malware through KA-SAT’s ground management network. Tens of thousands of user modems in Ukraine and across Europe went dark. The satellite itself kept working: the attack hit the ground segment.',
     cite: 'SWF 2026, pp. 15-06 to 15-07 (attributed to Russia by the US, UK and EU, May 2022).', related: 'tallinn-2017', event: 'ru-2022-viasat',
     actors: [
       { type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', color: C.geo, beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
       { type: 'terminals', boxes: [[44, 52, 22, 40, 0.55], [43, 56, -5, 22, 0.45]], count: 700, t0: 0.3, t1: 0.62, label: 'User terminals (ground segment)' },
     ], still: 0.75, camDist: 6.2, focus: [35, 15] },
-  { id: 'laser', date: '1997-10-17', title: 'Laser dazzling of an imaging satellite', shells: ['LEO'], duration: 12,
-    caption: 'A ground-based laser tracks an imaging satellite as it passes overhead. A low-power beam can dazzle or blind the satellite’s optical sensor; a high-power beam could damage it. The US fired the MIRACL laser at its own MSTI-3 satellite in 1997, and Russia says its Peresvet system is built to dazzle satellites.',
+  { id: 'laser', date: '1997-10-17', title: 'MIRACL laser test on MSTI-3 (1997)', shells: ['LEO'], duration: 12,
+    caption: 'In October 1997 the US fired the MIRACL chemical laser at MSTI-3, a retired US Air Force experimental satellite that carried infrared sensors. MIRACL is now part of a test facility at White Sands Missile Range, New Mexico, where this diagram places the site. A low-power beam can dazzle a satellite’s optical sensor; a high-power beam could damage it. Russia says its Peresvet system is built to dazzle satellites.',
     cite: 'SWF 2026, p. 01-35 (MIRACL); p. 02-35 (Peresvet).', related: null, event: 'us-1997-miracl',
     hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5 },
     actors: [
-      { type: 'site', at: [32.4, -106.4], label: 'Ground laser site', color: C.ground },
-      { type: 'target', label: 'Imaging satellite', color: C.tgt, noHit: true },
+      { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', color: C.ground },
+      { type: 'target', label: 'MSTI-3 (US test target)', color: C.tgt, noHit: true },
       { type: 'beam', from: [32.4, -106.4], window: 0.16, color: C.laser, label: 'Beam' },
-    ], still: 0.5, focus: [28, -140] },
+    ], still: 0.5, cameras: [{ name: 'Side view', at: [8, -108, 3.0] }, { name: 'Close', at: [30, -122, 2.5] }, { name: 'Overhead', at: [60, -106, 3.0] }] },
 ];
 export const HERO = { id: 'hero', title: 'Overview', shells: ['LEO', 'MEO', 'GEO'], duration: 40, spin: true,
   actors: [
@@ -161,12 +190,13 @@ export function buildSim(cfg) {
     focus = focus || [H.lat, H.lon];
   }
   let aircraftPos = null;
+  if (cfg.status) items.push({ kind: 'status', text: t => { let s = cfg.status[0][1]; for (const [t0, tx] of cfg.status) if (t >= t0) s = tx; const c = items._decayCloud; return c && tgt && t >= tgt.t ? `${s} · ${c.vis} of ${c.n} simulated pieces aloft` : s; } });
   for (const a of cfg.actors) {
     if (a.type === 'site') items.push({ kind: 'point', shape: 'site', pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label });
     if (a.type === 'ship') items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label });
     if (a.type === 'ring') {
       const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(a.alt, a.inc, a.raan, k / 180 * 2 * Math.PI));
-      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.55, label: a.label, labelAt: pts[a.sat ? 118 : 45] });
+      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: a.opacity ?? 0.55, thick: a.thick, label: a.label, labelAt: pts[a.sat ? 118 : 45] });
       if (a.sat) items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.sat.label, pos: t => orbitPos(a.alt, a.inc, a.raan, a.sat.phase + t * 2 * Math.PI * a.sat.speed) });
       if (a.sats) for (let s = 0; s < a.sats; s++) { const ph = s / a.sats * 2 * Math.PI; items.push({ kind: 'point', shape: 'sat', small: true, color: a.color, pos: () => orbitPos(a.alt, a.inc, a.raan, ph) }); }
     }
@@ -182,7 +212,16 @@ export function buildSim(cfg) {
       const P = s => { const la = lerp(a.path[0][0], a.path[1][0], s), lo = lerp(a.path[0][1], a.path[1][1], s); return ll(la, lo, r); };
       const pos = t => (t >= a.t0 - 1e-6 && t <= a.t1 + 1e-6) ? P(clamp01((t - a.t0) / (a.t1 - a.t0))) : (t > a.t1 && !a.gnss ? null : null);
       const item = { kind: 'point', shape: 'aircraft', color: '#e9edf7', label: a.label, labelDy: a.labelDy, pos: t => pos(Math.min(t, a.t1)) };
-      if (!a.gnss) aircraftPos = t => P(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
+      if (!a.gnss) {
+        aircraftPos = t => P(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
+        // Climb: altitude rises along the path (exaggerated) and a trail shows where the F-15 has been.
+        const Pc = s => { const la = lerp(a.path[0][0], a.path[1][0], s), lo = lerp(a.path[0][1], a.path[1][1], s); return ll(la, lo, r + 0.03 * s); };
+        aircraftPos = t => Pc(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
+        item.pos = t => t >= a.t0 - 1e-6 ? aircraftPos(t) : null;
+        const all = []; for (let k = 0; k <= 30; k++) all.push(Pc(k / 30));
+        items.push({ kind: 'curve', dynamic: true, all, thick: 0.004, color: '#e9edf7', width: 2, pts: t => { const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * 30) + 1)); } });
+      }
+      if (a.gnss) items.push({ kind: 'curve', pts: () => { const q = []; for (let k = 0; k <= 30; k++) q.push(P(k / 30)); return q; }, color: '#cfd8ea', opacity: 0.4 });
       if (a.gnss) { item.gnss = true; item.path = a.path; }
       items.push(item);
     }
@@ -192,7 +231,7 @@ export function buildSim(cfg) {
       const mid = norm(add(from, to)); const ctrl = scl(mid, Math.max(len(from), len(to)) + 0.12);
       const bez = s => add(add(scl(from, (1 - s) * (1 - s)), scl(ctrl, 2 * (1 - s) * s)), scl(to, s * s));
       const N = 60, all = []; for (let k = 0; k <= N; k++) all.push(bez(k / N));
-      items.push({ kind: 'curve', dynamic: true, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
+      items.push({ kind: 'curve', dynamic: true, all, thick: 0.005, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
         pts: t => { const s = clamp01((t - a.t0) / (tgt.t - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
       items.push({ kind: 'point', shape: 'kv', color: a.color, pos: t => (t > a.t0 && t < tgt.t) ? bez(clamp01((t - a.t0) / (tgt.t - a.t0))) : null });
       items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1' });
@@ -200,7 +239,7 @@ export function buildSim(cfg) {
     if (a.type === 'debris' && tgt) {
       const n = Math.min(a.count, PARTICLE_BUDGET);
       const P = []; for (let k = 0; k < n; k++) P.push({ da: gauss(rnd) * a.spreadAlt, di: gauss(rnd) * a.spreadInc, dr: gauss(rnd) * 0.4, dw: 1 + gauss(rnd) * a.dv, du: gauss(rnd) * 0.02, dec: a.decay * (0.4 + rnd() * 1.4) });
-      items.push({ kind: 'cloud', n, color: a.color, size: n > 2000 ? 0.012 : 0.018, label: a.label,
+      const cloud = { kind: 'cloud', n, color: a.color, size: n > 2000 ? 0.012 : 0.018, label: a.label, vis: 0,
         fill(t, out) {
           const dt = t - tgt.t; let vis = 0;
           for (let k = 0; k < n; k++) {
@@ -211,8 +250,10 @@ export function buildSim(cfg) {
             }
             out[3 * k] = x; out[3 * k + 1] = y; out[3 * k + 2] = z;
           }
-          return vis;
-        } });
+          cloud.vis = vis; return vis;
+        } };
+      items.push(cloud); if (a.decay > 0) items._decayCloud = cloud;
+      if (a.decay > 0 && !cfg.status) items.push({ kind: 'status', text: t => t < tgt.t ? 'Approaching intercept' : `Illustrative fragments still aloft: ${cloud.vis} of ${n} (decay time-compressed)` });
     }
     if (a.type === 'suborbital') {
       const N = 120, all = [];
@@ -223,8 +264,13 @@ export function buildSim(cfg) {
         const d = om < 1e-3 ? g0 : norm(add(scl(g0, w0), scl(g1, w1)));
         all.push(scl(d, rAlt(a.apex * Math.sin(Math.PI * s))));
       }
-      items.push({ kind: 'curve', dynamic: true, color: a.color, width: 2, label: a.label, labelAt: all[N >> 1],
+      items.push({ kind: 'curve', dynamic: true, all, thick: a.thick, color: a.color, width: 2, label: a.label, labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
         pts: t => { const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
+      if (a.marks) { // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
+        const d = norm(all[N >> 1]), tApex = a.t0 + (a.t1 - a.t0) * (a.apexT ?? 0.5);
+        items.push({ kind: 'curve', pts: () => [scl(d, 1), scl(d, rAlt(GEO_ALT) * 1.02)], color: '#dfe6f7', opacity: 0.5 });
+        a.marks.forEach(m => items.push({ kind: 'point', shape: 'tick', color: m.color, label: m.label, labelDx: m.apex ? -1 : 1, pos: t => (m.apex && t < tApex) ? null : scl(d, rAlt(m.alt)) }));
+      }
       if (a.head) items.push({ kind: 'point', shape: 'kv', color: a.color, pos: t => { const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s > 0 && s < 1 ? all[Math.round(s * N)] : null; } });
       focus = focus || a.from;
     }
@@ -247,17 +293,25 @@ export function buildSim(cfg) {
         } });
       focus = focus || a.at;
     }
+    if (a.type === 'field') {
+      a.Ls.forEach(L => { const pts = [], lm = Math.acos(Math.sqrt(1 / L)) * 0.98;
+        for (let k = 0; k <= 60; k++) { const la = -lm + 2 * lm * k / 60, rr = L * Math.cos(la) ** 2; pts.push(ll(la / DEG, a.lon, rAlt((rr - 1) * 6371))); }
+        items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.6, thick: 0.0035 }); });
+    }
     if (a.type === 'constellation') {
       const sats = [];
       for (let p = 0; p < a.planes; p++) {
         const raan = p * 360 / a.planes, pts = [];
         for (let k = 0; k <= 120; k++) pts.push(orbitPos(a.alt, a.inc, raan, k / 120 * 2 * Math.PI));
-        items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.22, label: p === 0 ? a.label : null, labelAt: pts[20] });
+        items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.13, label: p === 0 ? a.label : null, labelAt: pts[20] });
         for (let s = 0; s < a.per; s++) { const ph = s / a.per * 2 * Math.PI + p * 0.5; const pos = t => orbitPos(a.alt, a.inc, raan, ph + t * a.speed * 2 * Math.PI); sats.push(pos); items.push({ kind: 'point', shape: 'sat', small: true, color: a.color, pos }); }
       }
       items._gps = sats;
     }
-    if (a.type === 'zone') { items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label }); items._zone = a; }
+    if (a.type === 'zone') { items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label }); items._zone = a;
+      const c = ll(a.at[0], a.at[1]), e1 = norm([c[2], 0, -c[0]]), e2 = [c[1] * e1[2] - c[2] * e1[1], c[2] * e1[0] - c[0] * e1[2], c[0] * e1[1] - c[1] * e1[0]], q = [], rho = a.radius * DEG;
+      for (let k = 0; k <= 72; k++) { const th = k / 72 * 2 * Math.PI; q.push(add(scl(c, Math.cos(rho) * 1.006), scl(add(scl(e1, Math.cos(th)), scl(e2, Math.sin(th))), Math.sin(rho) * 1.006))); }
+      items.push({ kind: 'curve', pts: () => q, color: '#ff8080', opacity: 1, thick: 0.004 }); }
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
       items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, pos: () => g });
@@ -278,7 +332,7 @@ export function buildSim(cfg) {
     }
     if (a.type === 'beam' && tgt) {
       const from = ll(a.from[0], a.from[1], 1.004);
-      items.push({ kind: 'beam', a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window, color: a.color, opacity: 0.95, width: 0.012, label: a.label });
+      items.push({ kind: 'beam', a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
     }
   }
   // GNSS links: aircraft <-> 4 highest GPS satellites; red when inside zone.
@@ -288,14 +342,18 @@ export function buildSim(cfg) {
       const inZone = t => { const p = ac.pos(t); return p && Math.acos(Math.min(1, dot(norm(p), zc))) / DEG < z.radius; };
       ac.statusColor = t => inZone(t) ? C.jam : C.ok;
       ac.labelFn = t => inZone(t) ? ac.label + ' · GNSS lost' : ac.label + ' · GNSS OK';
-      for (let k = 0; k < 4; k++) items.push({ kind: 'beam', link: true, opacity: 0.7,
+      for (let k = 0; k < 2; k++) items.push({ kind: 'beam', link: true, opacity: 0.7, width0: 0.0018,
         a: t => ac.pos(t), b: t => { const p = ac.pos(t); if (!p) return null; const s = items._gps.map(f => f(t)).map(q => [q, dot(norm(q), norm(p))]).sort((x, y) => y[1] - x[1]); return s[k][0]; },
         on: t => !!ac.pos(t), colorFn: t => inZone(t) ? C.jam : C.ok, dashFn: inZone });
     });
   }
   const f = focus || [20, 0];
   const dist = cfg.camDist || 4.2;
-  const cams = cfg.cameras || [
+  const cams = cfg.cameras ? cfg.cameras.map(c => ({ name: c.name, pos: ll(...c.at) })) : H ? [
+    { name: 'Close', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) },
+    { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) },
+    { name: 'Polar', pos: ll(80, f[1], dist * 1.05) },
+  ] : [
     { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) },
     { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) },
     { name: 'Polar', pos: ll(80, f[1], dist * 1.05) },
@@ -411,7 +469,7 @@ export class GLHost {
     const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = [];
     // Sun fixed in world space, set ~50 deg east of the opening camera so the event region
     // is in daylight and the terminator shows on the limb. Orbiting reveals the night side.
-    const c0 = norm(sim.cams[0].pos), cy = Math.cos(50 * DEG), sy = Math.sin(50 * DEG);
+    const c0 = norm(sim.cams[0].pos), cy = Math.cos(22 * DEG), sy = Math.sin(22 * DEG);
     const sunDir = norm([c0[0] * cy + c0[2] * sy, c0[1] + 0.35, -c0[0] * sy + c0[2] * cy]);
     this.sunDir = sunDir;
     S.add(new T.AmbientLight(0x9fb4ff, 0.22));
@@ -454,6 +512,13 @@ export class GLHost {
           line.userData.rgb = col(it.color);
         } else line = new T.Line(g, new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: it.opacity ?? 1 }));
         root.add(line); if (it.dynamic) this.dyn.push({ it, obj: line });
+        if (it.thick) { // bright tube so the path reads at any zoom; dynamic ones are revealed with drawRange
+          const src = it.dynamic ? it.all : pts, closed = !it.dynamic && src.length > 3 && Math.hypot(src[0][0] - src[src.length - 1][0], src[0][1] - src[src.length - 1][1], src[0][2] - src[src.length - 1][2]) < 1e-6;
+          const vp = (closed ? src.slice(0, -1) : src).map(q => new T.Vector3(...q)), curve = new T.CatmullRomCurve3(vp, closed);
+          const segs = it.dynamic ? src.length - 1 : Math.max(60, vp.length), geo = new T.TubeGeometry(curve, segs, it.thick, 5, closed);
+          const tube = new T.Mesh(geo, new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: it.dynamic ? 0.9 : (it.opacity ?? 1), depthWrite: false, blending: it.dynamic ? T.AdditiveBlending : T.NormalBlending }));
+          root.add(tube); if (it.dynamic) this.dyn.push({ it: { kind: 'tube', ref: it, segs }, obj: tube });
+          line.visible = !it.dynamic ? false : line.visible; if (!it.dynamic) line.material.opacity = 0; }
         if (it.label) this._label(it.label, t => it.dynamic ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt);
       } else if (it.kind === 'point') {
         let m;
@@ -471,8 +536,9 @@ export class GLHost {
         } else {
           let geo;
           if (it.shape === 'sat') geo = new T.OctahedronGeometry(0.018);
-          else if (it.shape === 'aircraft') geo = new T.ConeGeometry(0.014, 0.05, 8);
-          else if (it.shape === 'ship') geo = new T.BoxGeometry(0.05, 0.015, 0.02);
+          else if (it.shape === 'tick') geo = new T.OctahedronGeometry(0.03);
+          else if (it.shape === 'aircraft') geo = new T.ConeGeometry(0.022, 0.075, 8);
+          else if (it.shape === 'ship') geo = new T.BoxGeometry(0.09, 0.025, 0.035);
           else geo = new T.CylinderGeometry(0.012, 0.012, 0.03, 10);
           m = new T.Mesh(geo, new T.MeshBasicMaterial({ color: col(it.color) }));
         }
@@ -490,14 +556,14 @@ export class GLHost {
         if (it.label) this._label(it.label, t => it.labelAt || (it.fill(t, arr) > 0 ? [arr[0], arr[1], arr[2]] : null));
       } else if (it.kind === 'beam') {
         // Beam = bright core + wide soft halo; unit-height cylinders scaled along the beam each frame.
-        const w = it.width || 0.004, m = new T.Group();
+        const w = it.width || it.width0 || 0.004, m = new T.Group();
         const mk = (r, op) => new T.Mesh(new T.CylinderGeometry(r, r, 1, 10, 1, true), new T.MeshBasicMaterial({ color: col(it.color || '#fff'), transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending }));
         const core = mk(w * (it.width ? 0.5 : 1), it.opacity ?? 0.8); m.add(core); m.userData.core = core;
         if (it.width) { const halo = mk(w * 2.2, 0.22); m.add(halo); m.userData.halo = halo; }
         root.add(m); this.dyn.push({ it, obj: m });
       } else if (it.kind === 'dome') {
         const c = ll(it.at[0], it.at[1]);
-        const m = new T.Mesh(new T.SphereGeometry(it.radius * DEG * 1.1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.28, depthWrite: false, side: T.DoubleSide }));
+        const m = new T.Mesh(new T.SphereGeometry(it.radius * DEG * 1.0, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.28, depthWrite: false, side: T.DoubleSide }));
         m.position.set(...c); m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...c)); root.add(m);
         this._label(it.label, () => scl(c, 1.12));
       } else if (it.kind === 'flash') {
@@ -511,6 +577,8 @@ export class GLHost {
     }
     this.statusEl = document.createElement('div'); this.statusEl.className = 'hlabel'; this.statusEl.style.cssText += ';left:50%;bottom:14px;top:auto;transform:translateX(-50%);font-size:12px;color:#ffe08a';
     this.labelLayer.appendChild(this.statusEl);
+    this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); this.leaders.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;overflow:visible'); this.leaders.setAttribute('aria-hidden', 'true');
+    this.labelLayer.prepend(this.leaders);
     this.setCam(0, true); this.t = 0; this.update(0);
   }
   refreshEarth() { if (this.earthMat && earthImg && this.earthMat.map?.image !== earthImg) { this._applyEarth(this.earthMat); this.render(); } }
@@ -534,18 +602,21 @@ export class GLHost {
     old.forEach(t => t?.dispose());
   }
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
-  _labelPositions(w, h) {
-    const cam = this.camera.position, T = this.T, out = [];
+  // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
+  _labelPositions(w, h, u = 1) {
+    const cam = this.camera.position, T = this.T, raw = [], k = h / (this.el.clientHeight || h);
     for (const L of this.labels) {
       let p = L.posFn(this.t); if (p && this.sim.cfg.spin && L.cls !== 'shell') { const v = new T.Vector3(...p).applyMatrix4(this.root.matrixWorld); p = [v.x, v.y, v.z]; }
-      if (!p) { out.push(null); continue; }
+      if (!p) { raw.push(null); continue; }
       const v = new T.Vector3(...p).project(this.camera);
-      if (occluded([cam.x, cam.y, cam.z], p) || v.z > 1) { out.push(null); continue; }
+      if (occluded([cam.x, cam.y, cam.z], p) || v.z > 1) { raw.push(null); continue; }
       const text = L.item?.labelFn ? L.item.labelFn(this.t) : L.text, color = L.item?.labelFn ? L.item.statusColor(this.t) : null;
-      const k = h / (this.el.clientHeight || h);
-      out.push({ x: (v.x + 1) / 2 * w, y: (1 - v.y) / 2 * h + (L.dy - 12) * k, text, color });
+      const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h;
+      raw.push({ x: px, y: py + (L.dy - 12) * k, px, py, w: labelW(text, u), h: 19 * u, fixed: L.cls === 'shell', text, color });
     }
-    return out;
+    const banner = [[8 * u, 8 * u, Math.min(w - 16 * u, 430 * u), 32 * u]], status = this.status ? [(w - 470 * u) / 2, h - 40 * u, 470 * u, 30 * u] : null;
+    const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner);
+    return raw.map((r, i) => r && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   }
   _label(text, posFn, cls, item, dy = 0) {
     const d = document.createElement('div'); d.className = 'hlabel'; d.textContent = text; this.labelLayer.appendChild(d);
@@ -561,6 +632,8 @@ export class GLHost {
         a.needsUpdate = true; obj.geometry.setDrawRange(0, n);
         const c = obj.geometry.attributes.color, rgb = obj.userData.rgb;
         if (c && rgb) { for (let k = 0; k < n; k++) { const f = n > 1 ? k / (n - 1) : 1; c.array.set([rgb.r, rgb.g, rgb.b, 0.12 + 0.88 * f * f], 4 * k); } c.needsUpdate = true; }
+      } else if (it.kind === 'tube') {
+        const n = it.ref.pts(t).length; obj.geometry.setDrawRange(0, n < 2 ? 0 : Math.round(Math.min(1, (n - 1) / it.segs) * it.segs) * 30);
       } else if (it.kind === 'point') {
         const p = it.pos(t); obj.visible = !!p; if (p) obj.position.set(...p);
         if (it.shape === 'aircraft' && p) { obj.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(p))); }
@@ -602,7 +675,11 @@ export class GLHost {
     this.labels.forEach((L, i) => { const q = pos[i];
       if (!q) { L.d.style.display = 'none'; return; }
       L.d.style.display = ''; L.d.style.left = q.x + 'px'; L.d.style.top = q.y + 'px';
-      if (L.item?.labelFn) { L.d.textContent = q.text; L.d.style.color = q.color; } });
+      if (L.item?.labelFn) { L.d.textContent = q.text; L.d.style.color = q.color; }
+      if (!L.ln && this.leaders) { L.ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); L.ln.setAttribute('stroke-width', '1'); this.leaders.appendChild(L.ln); L.dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); L.dot.setAttribute('r', '2'); this.leaders.appendChild(L.dot); }
+      if (L.ln) { const c = q.color || '#dfe6f7'; L.ln.style.display = L.dot.style.display = q.leader ? '' : 'none';
+        if (q.leader) { L.ln.setAttribute('x1', q.ax); L.ln.setAttribute('y1', q.ay); L.ln.setAttribute('x2', q.qx); L.ln.setAttribute('y2', q.qy); L.ln.setAttribute('stroke', c); L.ln.setAttribute('stroke-opacity', '0.75');
+          L.dot.setAttribute('cx', q.ax); L.dot.setAttribute('cy', q.ay); L.dot.setAttribute('fill', c); } } });
   }
   play(onTick) {
     cancelAnimationFrame(this.raf); this.onTick = onTick; let last = performance.now();
@@ -636,9 +713,11 @@ export class GLHost {
     const g = c.getContext('2d'); g.fillStyle = '#070b17'; g.fillRect(0, 0, W, H); g.drawImage(this.canvas, 0, 0);
     const s = W / 1000;
     g.textAlign = 'center'; g.lineJoin = 'round';
-    for (const q of this._labelPositions(W, H)) { if (!q) continue;
-      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; g.lineWidth = 4 * s; g.strokeStyle = 'rgba(5,8,18,0.85)'; g.strokeText(q.text, q.x, q.y);
-      g.fillStyle = q.color || '#dfe6f7'; g.fillText(q.text, q.x, q.y); }
+    const lp = this._labelPositions(W, H, s);
+    for (const q of lp) { if (!q || !q.leader) continue; g.strokeStyle = q.color || '#dfe6f7'; g.globalAlpha = 0.75; g.lineWidth = 1.2 * s; g.beginPath(); g.moveTo(q.ax, q.ay); g.lineTo(q.qx, q.qy); g.stroke(); g.globalAlpha = 1; }
+    for (const q of lp) { if (!q) continue;
+      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`; g.lineWidth = 4 * s; g.strokeStyle = 'rgba(5,8,18,0.85)'; g.textBaseline = 'middle'; g.strokeText(q.text, q.x, q.y);
+      g.fillStyle = q.color || '#dfe6f7'; g.fillText(q.text, q.x, q.y); g.textBaseline = 'alphabetic'; }
     g.textAlign = 'left';
     const status = this.status?.text(Math.min(this.t, 1)); if (status) { g.textAlign = 'center'; g.fillStyle = '#ffe08a'; g.font = `${Math.round(12 * s)}px system-ui,sans-serif`; g.fillText(status, W / 2, H - 60 * s); g.textAlign = 'left'; }
     g.fillStyle = 'rgba(5,8,18,0.7)'; g.fillRect(0, H - 52 * s, W, 52 * s);
@@ -675,34 +754,43 @@ function occluded(cam, p) {
 }
 
 // ---------------------------------------------------------------- SVG fallback (static)
+// A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,
+// with the same screen-space label de-confliction (pills + leader lines) as the live scene.
 export function renderSVG(sim, el, t = sim.still) {
   const W = el.clientWidth || 640, H = el.clientHeight || 420;
   const cam = sim.cams[0].pos, cl = toLL(cam);
-  const R = Math.min(W, H) / (2 * Math.max(2.2, Math.max(...sim.items.filter(i => i.kind === 'shell').map(i => i.r), 1.4) + 0.25));
-  const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([W / 2, H / 2]).scale(R).clipAngle(90);
-  const dcam = norm(cam);
-  // Project any 3D point: orthographic along camera dir, scaled by radius.
-  const rot = d3.geoRotation([-cl.lon, -cl.lat]);
+  const shellR = Math.max(...sim.items.filter(i => i.kind === 'shell').map(i => i.r), 1.4);
+  const R = Math.min(W, H * 0.94) / (2 * Math.max(2.2, shellR + 0.3));
+  const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([W / 2, H / 2 - 4]).scale(R).clipAngle(90);
+  const rot = d3.geoRotation([-cl.lon, -cl.lat]), CY = H / 2 - 4;
+  // Project any 3D point: orthographic along the camera direction, scaled by radius.
   const project = p => { const q = toLL(p); const [lo, la] = rot([q.lon, q.lat]); const x = Math.cos(la * DEG) * Math.sin(lo * DEG), y = Math.sin(la * DEG); const front = Math.cos(la * DEG) * Math.cos(lo * DEG);
-    const sx = W / 2 + x * q.r * R, sy = H / 2 - y * q.r * R; const hidden = front < 0 && Math.hypot(x * q.r, y * q.r) < 1; return { x: sx, y: sy, hidden }; };
+    return { x: W / 2 + x * q.r * R, y: CY - y * q.r * R, hidden: front < 0 && Math.hypot(x * q.r, y * q.r) < 1 }; };
   const path = d3.geoPath(proj);
   const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: static diagram`);
-  svg.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b17');
-  for (const it of sim.items.filter(i => i.kind === 'shell')) {
-    svg.append('circle').attr('cx', W / 2).attr('cy', H / 2).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.45).attr('stroke-dasharray', '3 4');
-    svg.append('text').attr('x', W / 2 + it.r * R * 0.71 + 4).attr('y', H / 2 - it.r * R * 0.71).attr('fill', '#dfe6f7').attr('font-size', 11).attr('font-family', 'system-ui').text(it.label);
-  }
-  svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', '#0d2a4d').attr('stroke', '#5aa0ff').attr('stroke-opacity', 0.4);
-  svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.18)');
+  const defs = svg.append('defs');
+  const bg = defs.append('radialGradient').attr('id', 'sf-bg').attr('cx', '50%').attr('cy', '50%').attr('r', '75%');
+  bg.append('stop').attr('offset', 0).attr('stop-color', '#0f1a33'); bg.append('stop').attr('offset', 1).attr('stop-color', '#05070f');
+  const gl = defs.append('radialGradient').attr('id', 'sf-glow'); gl.append('stop').attr('offset', 0.9).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0.5); gl.append('stop').attr('offset', 1).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0);
+  const oc = defs.append('radialGradient').attr('id', 'sf-ocean').attr('cx', '38%').attr('cy', '35%').attr('r', '80%');
+  oc.append('stop').attr('offset', 0).attr('stop-color', '#1a4a7c'); oc.append('stop').attr('offset', 1).attr('stop-color', '#0a2040');
+  svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'url(#sf-bg)');
+  const shells = sim.items.filter(i => i.kind === 'shell'), cands = [];
+  shells.forEach(it => svg.append('circle').attr('cx', W / 2).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
+  svg.append('circle').attr('cx', W / 2).attr('cy', CY).attr('r', R * 1.08).attr('fill', 'url(#sf-glow)');
+  svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', 'url(#sf-ocean)').attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
+  svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
   const landGeo = { type: 'MultiPolygon', coordinates: (LAND || []).map(r => { const c = []; for (let k = 0; k < r.length; k += 2) c.push([r[k], r[k + 1]]); return [c.reverse()]; }) };
-  svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#2c5a4a');
+  svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#3b7a5e').attr('stroke', '#5fae8a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.7);
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
-  const label = (p, text, color = '#dfe6f7') => { if (!p || p.hidden) return; g.append('text').attr('x', p.x + 6).attr('y', p.y - 6).attr('fill', color).attr('paint-order', 'stroke').attr('stroke', '#070b17').attr('stroke-width', 3).text(text); };
+  // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
+  shells.forEach((it, i) => { const a = (35 + i * 14) * DEG, px = W / 2 + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a); cands.push({ x: px, y: py, px, py, w: labelW(it.label), h: 19, fixed: true, text: it.label, color: it.color }); });
+  const label = (p, text, color = '#dfe6f7') => { if (!p || p.hidden || !text) return; cands.push({ x: p.x, y: p.y - 14, px: p.x, py: p.y, w: labelW(text), h: 19, text, color }); };
   for (const it of sim.items) {
-    if (it.kind === 'dome') g.append('path').datum(d3.geoCircle().center([it.at[1], it.at[0]]).radius(it.radius)()).attr('d', path).attr('fill', it.color).attr('fill-opacity', 0.35).attr('stroke', it.color);
+    if (it.kind === 'dome') g.append('path').datum(d3.geoCircle().center([it.at[1], it.at[0]]).radius(it.radius)()).attr('d', path).attr('fill', it.color).attr('fill-opacity', 0.32).attr('stroke', it.color).attr('stroke-width', 1.6);
     if (it.kind === 'curve') {
       const pts = it.pts(t).map(project); let seg = [];
-      const flush = () => { if (seg.length > 1) g.append('path').attr('d', d3.line()(seg)).attr('fill', 'none').attr('stroke', it.color).attr('stroke-opacity', it.opacity ?? 1).attr('stroke-width', it.width || 1.2); seg = []; };
+      const flush = () => { if (seg.length > 1) g.append('path').attr('d', d3.line()(seg)).attr('fill', 'none').attr('stroke', it.color).attr('stroke-linecap', 'round').attr('stroke-opacity', it.thick ? Math.max(0.85, it.opacity ?? 1) : (it.opacity ?? 1)).attr('stroke-width', it.thick ? Math.max(2.2, it.thick * R * 1.8) : (it.width || 1.2)); seg = []; };
       pts.forEach(p => { if (p.hidden) flush(); else seg.push([p.x, p.y]); }); flush();
       if (it.label && it.labelAt && pts.length > 2) label(project(it.labelAt), it.label, it.color);
     }
@@ -710,20 +798,32 @@ export function renderSVG(sim, el, t = sim.still) {
       const arr = new Float32Array(it.n * 3), col = it.colored ? new Float32Array(it.n * 3) : null; it.fill(t, arr, col);
       const step = Math.max(1, Math.floor(it.n / 900));
       for (let k = 0; k < it.n; k += step) { if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue; const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]); if (p.hidden) continue;
-        g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 1.3).attr('fill', col ? d3.rgb(col[3 * k] * 255, col[3 * k + 1] * 255, col[3 * k + 2] * 255) : it.color).attr('fill-opacity', 0.85); }
+        g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 1.4).attr('fill', col ? d3.rgb(col[3 * k] * 255, col[3 * k + 1] * 255, col[3 * k + 2] * 255) : it.color).attr('fill-opacity', 0.85); }
       if (it.label) label(project(it.labelAt || [arr[0], arr[1], arr[2]]), it.label, it.color || '#dfe6f7');
     }
-    if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opacity ?? 0.8).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 3 : 1.2); } }
+    if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opacity ?? 0.8).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 3.5 : 1.2); } }
     if (it.kind === 'point') { const q = it.pos(t); if (!q) continue; const p = project(q); if (p.hidden) continue;
       const c = it.statusColor ? it.statusColor(t) : it.color;
-      if (it.shape === 'sat') g.append('rect').attr('x', p.x - (it.small ? 2 : 4)).attr('y', p.y - (it.small ? 2 : 4)).attr('width', it.small ? 4 : 8).attr('height', it.small ? 4 : 8).attr('fill', c);
-      else if (it.shape === 'aircraft') g.append('path').attr('d', `M${p.x},${p.y - 6}L${p.x + 4},${p.y + 4}L${p.x - 4},${p.y + 4}Z`).attr('fill', c);
-      else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 3.5).attr('fill', c);
+      if (it.shape === 'sat') g.append('rect').attr('x', p.x - (it.small ? 2 : 4.5)).attr('y', p.y - (it.small ? 2 : 4.5)).attr('width', it.small ? 4 : 9).attr('height', it.small ? 4 : 9).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
+      else if (it.shape === 'tick') g.append('path').attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`).attr('fill', c).attr('stroke', '#070b17');
+      else if (it.shape === 'aircraft') g.append('path').attr('d', `M${p.x},${p.y - 7}L${p.x + 5},${p.y + 5}L${p.x - 5},${p.y + 5}Z`).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
+      else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
+      else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
       if (it.label) label(p, it.labelFn ? it.labelFn(t) : it.label, c); }
-    if (it.kind === 'flash' && it.big) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 9).attr('fill', '#fff3c4').attr('fill-opacity', 0.8); label(p, it.label, '#fff3c4'); }
-    if (it.kind === 'status') g.append('text').attr('x', W / 2).attr('y', H - 14).attr('text-anchor', 'middle').attr('fill', '#ffe08a').text(it.text(t));
+    if (it.kind === 'flash' && it.big) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4'); }
+    if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + 0.14) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
   }
-  svg.append('text').attr('x', 12).attr('y', H - 12).attr('fill', '#a9b3cc').attr('font-size', 10.5).attr('font-family', 'system-ui').text('Static diagram · illustrative, not orbit-propagated · compressed radial scale');
+  const reserved = [[8, 8, Math.min(W - 16, 380), 26], [(W - 470) / 2, H - 60, 470, 26]];
+  const pl = placeLabels(cands, W, H, reserved);
+  cands.forEach((c, i) => { const q = pl[i]; if (!q) return;
+    if (q.leader) { g.append('line').attr('x1', q.ax).attr('y1', q.ay).attr('x2', q.qx).attr('y2', q.qy).attr('stroke', c.color).attr('stroke-opacity', 0.8); g.append('circle').attr('cx', q.ax).attr('cy', q.ay).attr('r', 2).attr('fill', c.color); }
+    g.append('rect').attr('x', q.x - c.w / 2).attr('y', q.y - c.h / 2).attr('width', c.w).attr('height', c.h).attr('rx', 4).attr('fill', 'rgba(5,8,18,0.78)').attr('stroke', c.color).attr('stroke-opacity', 0.35);
+    g.append('text').attr('x', q.x).attr('y', q.y + 4).attr('text-anchor', 'middle').attr('font-weight', 600).attr('fill', c.color).text(c.text); });
+  const st = sim.items.find(i => i.kind === 'status');
+  if (st) { const txt = st.text(t), w = labelW(txt, 1.05);
+    g.append('rect').attr('x', W / 2 - w / 2).attr('y', H - 58).attr('width', w).attr('height', 24).attr('rx', 5).attr('fill', 'rgba(5,8,18,0.8)');
+    g.append('text').attr('x', W / 2).attr('y', H - 42).attr('text-anchor', 'middle').attr('fill', '#ffe08a').attr('font-size', 12).text(txt); }
+  svg.append('text').attr('x', 12).attr('y', H - 12).attr('fill', '#a9b3cc').attr('font-size', 10.5).attr('font-family', 'system-ui').text(`${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`);
   el.querySelector(':scope > svg')?.remove();
   el.prepend(svg.node());
   return svg.node();
