@@ -117,6 +117,10 @@ await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorSchem
   res.focusBack = await p.evaluate(() => document.activeElement?.dataset?.id);
   await p.hover('#legalSvg [data-id="itu-1992"]'); await p.waitForTimeout(200);
   await p.screenshot({ path: `${out}/desktop-hover-legal.png`, clip: { x: 0, y: 0, width: 1440, height: 900 } });
+  // Shared time scale: the guide line for a legal item must sit at the same screen x in the legal band and in Chart A.
+  res.guideX = await p.evaluate(() => { const x = sel => { const l = document.querySelector(sel + ' line.guide'); return l && l.style.display !== 'none' ? l.getBoundingClientRect().left : null; }; return { legal: x('#legalSvg'), chartA: x('#svgA') }; });
+  res.guideEqual = res.guideX.legal != null && Math.abs(res.guideX.legal - res.guideX.chartA) < 0.6;
+  await p.screenshot({ path: `${out}/legal-band-1440.png`, clip: { x: 0, y: 0, width: 1440, height: 400 } });
   res.svgExports = await p.evaluate(() => ['A', 'B', 'C', 'L', 'legal'].map(k => window.__cs.exportSVG(k).length));
   res.perf = await p.evaluate(() => window.__cs.perf());
   return res;

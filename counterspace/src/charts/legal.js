@@ -23,16 +23,9 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   { const tap = document.getElementById('legalTap'); tap.hidden = !strip; if (strip && !tap.dataset.on) tap.textContent = 'Tap a mark on the strip for its label.'; }
   el.style.overflowX = strip ? 'auto' : ''; el.tabIndex = strip ? 0 : -1; if (!strip) el.removeAttribute('tabindex');
   if (strip) { el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Law and policy timeline, scrolls sideways'); } else { el.removeAttribute('role'); el.removeAttribute('aria-label'); }
-  let { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300);
-  // Desktop main band: a clearly marked broken axis. 1957 to mid-2021 share the left part; mid-2021 to 2027 gets EXPAND_F of the track,
-  // so the 2022-26 marks separate on the band itself. Ticks stay true dates; the break and the scale ratio are drawn on the axis.
-  const broken = !zoom && !strip && !isPhoneNow(), EXPAND_F = 0.36; let ratio = 1, xBreak = 0;
-  if (broken) {
-    xBreak = M.l + (W - M.r - M.l) * (1 - EXPAND_F); x = d3.scaleUtc().domain([DOMAIN[0], ZOOM[0], DOMAIN[1]]).range([M.l, xBreak, W - M.r]);
-    ratio = ((W - M.r - xBreak) / (DOMAIN[1] - ZOOM[0])) / ((xBreak - M.l) / (ZOOM[0] - DOMAIN[0]));
-  }
+  const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300);
   const phone = isPhoneNow() && !zoom && !strip, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
-  const FS = 10.5, PITCH = 13, TP = phone ? 16 : compact ? 14 : 19, SEP = phone ? 20 : compact ? 16 : 22, GS = phone ? 0.85 : compact ? 0.75 : 1;
+  const FS = 10.5, PITCH = 13, TP = phone ? 16 : compact ? 14 : 25, SEP = phone ? 20 : compact ? 16 : 32, GS = phone ? 0.85 : compact ? 0.75 : 1;
   const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981') && (!zoom || ((l.end ? parse(l.end) : DOMAIN[1]) > ZOOM[0] && parse(l.start) < ZOOM[1])));
   const pts = LEGAL.filter(l => !spans.includes(l) && (!zoom || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) => a.start < b.start ? -1 : 1);
   // 1. dodge marks that would collide into tracks (the true date stays on the axis)
@@ -79,7 +72,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   const lanes = [];
   spans.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => { const a = Math.max(M.l, x(parse(d.start))), b = Math.min(W - M.r, d.end ? x(parse(d.end)) : x(DOMAIN[1])); let i = lanes.findIndex(e => a > e + 6); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = b; d._lane = i; d._a = a; d._b = b; });
   const laneP = phone ? 9 : compact ? 6 : 18, lane0 = yMark + (small ? (compact ? 12 : 14) : Math.max(28, dnSpace + 18));
-  const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10), H = yAx + 22 + (broken ? 22 : 0);
+  const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10), H = yAx + 22;
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', zoom ? 'Legal and policy timeline, zoom on 2021 to 2026' : 'Legal and policy timeline');
   svg.append('title').text(zoom ? 'Law and policy responses, zoom 2021–2026' : 'Law and policy responses, 1957–2026');
   if (!zoom) { const zx0 = x(ZOOM[0]), zx1 = W - M.r; svg.append('rect').attr('class', 'zoombox').attr('x', zx0).attr('width', zx1 - zx0).attr('y', 0).attr('height', yAx).attr('rx', 3).attr('aria-hidden', 'true'); }
@@ -116,16 +109,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   sg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   rove(svg.selectAll('.mark'));
-  const axis = d3.axisBottom(x).tickFormat(fmtY).tickSizeOuter(0);
-  if (broken) axis.tickValues([...d3.range(1960, 2021, 10), ...d3.range(2022, 2027)].map(y => parse(`${y}-01-01`))); else axis.ticks(d3.utcYear.every(zoom ? 1 : phone ? 20 : 10));
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(axis);
-  if (broken) {
-    const bg = svg.append('g').attr('class', 'axis-break');
-    bg.append('line').attr('x1', xBreak).attr('x2', xBreak).attr('y1', 0).attr('y2', yAx).attr('class', 'break-line');
-    [-2.5, 2.5].forEach(dx => bg.append('path').attr('d', `M${xBreak + dx - 3},${yAx + 5}l6,-10`).attr('class', 'break-tick'));
-    bg.append('text').attr('class', 'band-label').attr('text-anchor', 'end').attr('x', W - M.r).attr('y', yAx + 38)
-      .text(`AXIS BREAK: 2021–26 drawn ${ratio.toFixed(1).replace(/\.0$/, '')}× wider than 1957–2021 (tick labels are true dates)`);
-  }
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(zoom ? 1 : phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
   if (strip) el.scrollLeft = el.scrollWidth;
 }

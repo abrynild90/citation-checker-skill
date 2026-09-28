@@ -54,7 +54,7 @@ function addGuide(svg, x, y0, y1, key) {
   if (EXPORTING) return;
   const line = svg.append('line').attr('class', 'guide').attr('y1', y0).attr('y2', y1).style('display', 'none');
   const at = key ? guides.findIndex(g => g.key === key) : -1, fn = key ? (f => (f.key = key, f)) : (f => f);
-  const rg = x.range(), r0 = rg[0], r1 = rg.at(-1);
+  const [r0, r1] = x.range();
   guides[at < 0 ? guides.length : at] = fn(date => date && x(date) >= r0 - 1 && x(date) <= r1 + 1 ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'));
 }
 function handoff(svg, x, y0, y1, label, anchorTop) {
