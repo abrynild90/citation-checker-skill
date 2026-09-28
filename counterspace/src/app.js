@@ -27,19 +27,80 @@ const ATTR_LABEL = { official_government: 'Official (single government)', multi_
 const REGIME_LABEL = { GNSS_MEO: 'GNSS receivers (MEO signals)', GEO_comms: 'GEO communications', LEO_constellation: 'LEO constellation', ground_segment: 'Ground segment', ISR_LEO: 'LEO imaging / ISR' };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const num = n => n == null ? '—' : d3.format(',')(n);
-const isPhone = () => innerWidth < 640;
+const isPhone = () => isPhoneNow();
 const hasScene = r => r.scene_3d && SCENES.some(s => s.id === r.scene_3d);
 
-function layout(el) {
-  const W = Math.max(300, el.clientWidth);
-  const M = { l: isPhone() ? 40 : 64, r: isPhone() ? 12 : 22 };
-  const x = d3.scaleUtc().domain(DOMAIN).range([M.l, W - M.r]);
+let FORCE_DESKTOP = false, EXPORTING = false;
+const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < 640;
+function layout(el, domain = DOMAIN) {
+  const W = Math.max(300, el.clientWidth), ph = isPhoneNow();
+  const M = { l: ph ? 40 : 64, r: ph ? 12 : 68 };
+  const x = d3.scaleUtc().domain(domain).range([M.l, W - M.r]);
   return { W, M, x };
 }
-function xAxis(g, x, y, ticks = true) {
-  const ax = d3.axisBottom(x).ticks(d3.utcYear.every(isPhone() ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0);
+function xAxis(g, x, y, every) {
+  const ax = d3.axisBottom(x).ticks(d3.utcYear.every(every || (isPhoneNow() ? 20 : 10))).tickFormat(fmtY).tickSizeOuter(0);
   g.append('g').attr('class', 'axis').attr('transform', `translate(0,${y})`).call(ax);
 }
+// ---- shared text measurement + label placement (greedy, collision-aware)
+const mctx = document.createElement('canvas').getContext('2d');
+let sansCache = null;
+function tw(text, size, weight = 400) {
+  sansCache ??= getComputedStyle(document.documentElement).getPropertyValue('--sans').trim() || 'sans-serif';
+  mctx.font = `${weight} ${size}px ${sansCache}`;
+  return mctx.measureText(text).width * 1.04 + 1;
+}
+function fit(text, maxW, size, weight) {
+  if (tw(text, size, weight) <= maxW) return text;
+  let t = text; while (t.length > 3 && tw(t + '…', size, weight) > maxW) t = t.slice(0, -1);
+  return t.trimEnd() + '…';
+}
+function wrap(text, maxW, size, weight) {
+  const words = text.split(' '), lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (cur && tw(t, size, weight) > maxW) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur); return lines;
+}
+// Rectangles of already-placed things. free() tests a candidate rectangle against them.
+class Placer {
+  constructor(b) { this.b = b; this.r = []; }
+  textRect(x, y, anchor, w, size) { const x0 = anchor === 'middle' ? x - w / 2 : anchor === 'end' ? x - w : x; return [x0, y - size * 0.95, x0 + w, y + size * 0.25]; }
+  free(q, ignore = [], pad = 1.5) {
+    const b = this.b; if (q[0] < b.x0 || q[2] > b.x1 || q[1] < b.y0 || q[3] > b.y1) return false;
+    return this.r.every(o => ignore.includes(o[4]) || q[2] + pad <= o[0] || q[0] - pad >= o[2] || q[3] + pad <= o[1] || q[1] - pad >= o[3]);
+  }
+  add(q, kind = 'T') { this.r.push([q[0], q[1], q[2], q[3], kind]); return q; }
+}
+// Roving tabindex: a chart's marks become ONE tab stop; arrow keys move in chronological order.
+function rove(sel) {
+  if (EXPORTING) return;
+  const nodes = sel.nodes().sort((a, b) => (+a.dataset.t || 0) - (+b.dataset.t || 0));
+  nodes.forEach((n, i) => n.setAttribute('tabindex', i ? -1 : 0));
+  nodes.forEach((n, i) => {
+    n.addEventListener('keydown', ev => {
+      const k = ev.key; let j = null;
+      if (k === 'ArrowRight' || k === 'ArrowDown') j = Math.min(nodes.length - 1, i + 1);
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') j = Math.max(0, i - 1);
+      else if (k === 'Home') j = 0; else if (k === 'End') j = nodes.length - 1;
+      if (j != null) { ev.preventDefault(); nodes[j].focus(); }
+    });
+    n.addEventListener('focus', () => nodes.forEach(m => m.setAttribute('tabindex', m === n ? 0 : -1)));
+  });
+}
+// Programmatic audit: overlapping or clipped text in any chart SVG (bounding-box test).
+function audit() {
+  const out = [];
+  document.querySelectorAll('#legalSvg svg, #svgA svg, #svgB svg, #svgC svg, #svgL svg').forEach(svg => {
+    const sr = svg.getBoundingClientRect(), id = svg.parentElement.id;
+    const ts = [...svg.querySelectorAll('text')].filter(t => t.textContent.trim() && !t.closest('[display="none"]') && t.getClientRects().length && getComputedStyle(t).display !== 'none' && !t.closest('.lbls-hidden')).map(t => { const r = t.getBoundingClientRect(); return { s: t.textContent.trim().slice(0, 28), x0: r.left, x1: r.right, y0: r.top, y1: r.bottom }; });
+    ts.forEach(a => { if (a.x0 < sr.left - 0.5 || a.x1 > sr.right + 0.5 || a.y0 < sr.top - 0.5 || a.y1 > sr.bottom + 0.5) out.push({ chart: id, kind: 'clip', a: a.s }); });
+    for (let i = 0; i < ts.length; i++) for (let j = i + 1; j < ts.length; j++) {
+      const a = ts[i], b = ts[j], w = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), h = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+      if (w > 1.5 && h > 3) out.push({ chart: id, kind: 'overlap', a: a.s, b: b.s, w: Math.round(w), h: Math.round(h) });
+    }
+  });
+  return out;
+}
+
 function badge(g, x, y) { // 3D badge: an isometric cube (shape, not color)
   const b = g.append('g').attr('class', 'badge3d').attr('transform', `translate(${x},${y}) scale(0.9)`).attr('aria-hidden', 'true');
   b.append('path').attr('class', 'top').attr('d', 'M0,-6 L5.2,-3 L0,0 L-5.2,-3Z');
@@ -52,6 +113,8 @@ const star = (r) => { const p = []; for (let i = 0; i < 16; i++) { const a = i *
 const card = document.getElementById('card');
 function showCard(html, evt, el) {
   card.innerHTML = html; card.classList.add('on'); card.setAttribute('aria-hidden', 'false');
+  card.classList.toggle('dock', innerWidth < 640);
+  if (innerWidth < 640) { card.style.left = ''; card.style.top = ''; return; }
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth, ch = card.offsetHeight;
   let left = r.right + 12, top = r.top - 8;
@@ -59,6 +122,7 @@ function showCard(html, evt, el) {
   if (top + ch > innerHeight - 8) top = Math.max(8, innerHeight - ch - 8);
   card.style.left = left + 'px'; card.style.top = top + 'px';
 }
+document.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !e.target.closest('.mark')) hideCard(); });
 function hideCard() { card.classList.remove('on'); card.setAttribute('aria-hidden', 'true'); }
 const srcLine = r => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
 function kinCard(e) {
@@ -76,6 +140,7 @@ function legalCard(l) {
   return `<h4>${esc(l.label)}</h4><dl><dt>Date</dt><dd>${when}</dd><dt>Kind</dt><dd>${l.soft_law ? 'Soft law (expert manual, not binding)' : l.kind.replace('_', ' ')}</dd></dl><div>${esc(l.short_note)}</div><div class="src">${esc(l.citation)}</div>${hasScene(l) ? '<div class="hint">▣ Click, tap or press Enter to open the related 3D scene</div>' : ''}`;
 }
 function bindMark(sel, cardFn, onActivate) {
+  if (EXPORTING) return;
   sel.attr('tabindex', 0)
     .on('mouseenter', function (ev, d) { showCard(cardFn(d), ev, this); })
     .on('mouseleave', hideCard)
@@ -89,98 +154,170 @@ const activate = (d, el, ev) => { if (hasScene(d)) { hideCard(); openScene(d.sce
 // ---------------------------------------------------------------- shared guide line
 const guides = [];
 function setGuide(date) { guides.forEach(g => g(date)); }
-function addGuide(svg, x, y0, y1) {
+function addGuide(svg, x, y0, y1, key) {
+  if (EXPORTING) return;
   const line = svg.append('line').attr('class', 'guide').attr('y1', y0).attr('y2', y1).style('display', 'none');
-  guides.push(date => date ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'));
+  const at = key ? guides.findIndex(g => g.key === key) : -1, fn = key ? (f => (f.key = key, f)) : (f => f);
+  guides[at < 0 ? guides.length : at] = fn(date => date ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'));
 }
 function handoff(svg, x, y0, y1, label, anchorTop) {
   const X = x(parse(LAST_DA));
   const g = svg.append('g').attr('class', 'handoff').attr('aria-hidden', 'true');
   g.append('line').attr('x1', X).attr('x2', X).attr('y1', y0).attr('y2', y1);
-  if (label) g.append('text').attr('x', X - 5).attr('y', anchorTop ? y0 + 30 : y1 - 6).attr('text-anchor', 'end').text(label);
+  if (label) g.append('text').attr('x', X - 5).attr('y', anchorTop ? y0 + 10 : y1 - 6).attr('text-anchor', 'end').text(label);
 }
 
 // ---------------------------------------------------------------- legal band
-const ABBR = { 'ltbt-1963': 'LTBT', 'ost-1967': 'OST', 'abm-1972': 'ABM XII', 'paros-1981': 'PAROS', 'cd-paros-committee': 'CD PAROS cttee', 'itu-1992': 'ITU Arts 45/48', 'ppwt-2008': 'PPWT', 'ppwt-2014': 'PPWT II', 'tallinn-2017': 'Tallinn 2.0*', 'unga-75-36': '75/36', 'oewg-2022': 'OEWG', 'us-moratorium-2022': 'US moratorium', 'milamos-2022': 'MILAMOS*', 'unga-77-41': '77/41', 'unsc-veto-2024': 'UNSC veto (nukes)', 'woomera-2024': 'Woomera*', 'itu-rrb-2024': 'RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'RRB ’25' };
+const ABBR = { 'ltbt-1963': 'LTBT', 'ost-1967': 'OST', 'abm-1972': 'ABM Art. XII', 'paros-1981': 'PAROS', 'cd-paros-committee': 'CD PAROS cttee', 'itu-1992': 'ITU Arts. 45/48', 'ppwt-2008': 'PPWT', 'ppwt-2014': 'PPWT II', 'tallinn-2017': 'Tallinn 2.0*', 'unga-75-36': 'UNGA 75/36', 'oewg-2022': 'OEWG', 'us-moratorium-2022': 'US moratorium', 'milamos-2022': 'MILAMOS*', 'unga-77-41': 'UNGA 77/41', 'unsc-veto-2024': 'UNSC veto (nukes)', 'woomera-2024': 'Woomera*', 'itu-rrb-2024': 'ITU RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'ITU RRB ’25' };
+const SHORT = { 'tallinn-2017': 'Tallinn*', 'unga-75-36': '75/36', 'milamos-2022': 'MILAMOS*', 'us-moratorium-2022': 'US pledge', 'unga-77-41': '77/41', 'woomera-2024': 'Woomera*', 'unsc-veto-2024': 'Veto', 'itu-rrb-2024': 'RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'RRB ’25' };
+const SPAN_LABEL = { 'paros-1981': 'PAROS: UNGA agenda item since 1981', 'cd-paros-committee': 'CD Ad Hoc Cttee on PAROS, 1985–94', 'oewg-2022': 'OEWG, 2022–23' };
+const KIND_LABEL = { treaty: 'Treaty', resolution: 'Resolution / body finding', unilateral: 'Unilateral pledge or soft law', veto: 'Veto', negotiation_span: 'Negotiation' };
 function legalGlyph(sel, l) {
-  if (l.soft_law) sel.append('path').attr('d', 'M0,-6L6,0L0,6L-6,0Z').style('fill', 'var(--bg)').style('stroke', 'var(--accent-2)').style('stroke-width', 1.6);
-  else if (l.kind === 'treaty') sel.append('circle').attr('r', 5.5).style('fill', 'var(--accent)');
-  else if (l.kind === 'resolution') sel.append('rect').attr('x', -5).attr('y', -5).attr('width', 10).attr('height', 10).style('fill', 'var(--accent)');
-  else if (l.kind === 'unilateral') sel.append('path').attr('d', 'M0,-6L6,5L-6,5Z').style('fill', 'var(--accent)');
-  else if (l.kind === 'veto') sel.append('path').attr('d', 'M-5,-5L5,5M5,-5L-5,5').style('stroke', 'var(--warn)').style('stroke-width', 2.6);
-  else sel.append('circle').attr('r', 4).style('fill', 'var(--accent)');
+  if (l.soft_law) sel.append('path').attr('d', 'M0,-6.5L6.5,0L0,6.5L-6.5,0Z').style('fill', 'var(--bg)').style('stroke', 'var(--accent-2)').style('stroke-width', 1.8);
+  else if (l.kind === 'treaty') sel.append('circle').attr('r', 5.5).style('fill', 'var(--accent)').style('stroke', 'var(--bg)').style('stroke-width', 1);
+  else if (l.kind === 'resolution') sel.append('rect').attr('x', -5).attr('y', -5).attr('width', 10).attr('height', 10).style('fill', 'var(--accent)').style('stroke', 'var(--bg)').style('stroke-width', 1);
+  else if (l.kind === 'unilateral') sel.append('path').attr('d', 'M0,-6.5L6.5,5L-6.5,5Z').style('fill', 'var(--accent)').style('stroke', 'var(--bg)').style('stroke-width', 1);
+  else if (l.kind === 'veto') sel.append('path').attr('d', 'M-5,-5L5,5M5,-5L-5,5').style('stroke', 'var(--warn)').style('stroke-width', 2.8);
+  else sel.append('path').attr('d', 'M0,-5.5L5.5,0L0,5.5L-5.5,0Z').style('fill', 'var(--muted)').style('stroke', 'var(--bg)').style('stroke-width', 1).attr('transform', 'scale(0.9)');
 }
-function drawLegal() {
-  const el = document.getElementById('legalSvg'); el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhone();
-  const H = phone ? 40 : 82, yMark = phone ? 16 : 52, spanY = phone ? 30 : 68;
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).attr('role', 'group').attr('aria-label', 'Legal and policy timeline');
+function drawLegal(el = document.getElementById('legalSvg')) {
+  el.innerHTML = '';
+  const { W, M, x } = layout(el), phone = isPhoneNow(), compact = legalCompact && !phone && !EXPORTING, small = phone || compact;
+  const FS = 10.5, PITCH = 13, TP = phone ? 12 : compact ? 10 : 12, GS = phone ? 0.85 : compact ? 0.75 : 1;
+  const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981'));
+  const pts = LEGAL.filter(l => !spans.includes(l)).sort((a, b) => a.start < b.start ? -1 : 1);
+  // 1. dodge marks that would collide into tracks (the true date stays on the axis)
+  const last = []; let maxT = 0;
+  pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < TP) t++; last[t] = cx; d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
+  // 2. label placement, coordinates relative to the mark line (up is negative, down positive)
+  const pl = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 }), top0 = 16 + TP * maxT, labels = []; let maxUp = -1, maxDn = -1;
+  if (!small) {
+    pts.forEach(d => { const bw = hasScene(d) ? 15 : 8; pl.add([d._cx - 8, -d._t * TP - 9 - (hasScene(d) ? 8 : 0), d._cx + bw, -d._t * TP + 8], 'G'); });
+    // Clusters of nearby marks are solved together. Several deterministic strategies (labels ending at their mark, starting at it,
+    // V-shaped splits) run on rows above AND below the mark line; the one needing the fewest rows wins. Every label and leader is
+    // tested against all other labels, marks, leaders and the edges.
+    const clusters = []; pts.forEach(d => { const c = clusters.at(-1); if (c && d._cx - c.at(-1)._cx < 200) c.push(d); else clusters.push([d]); });
+    const anchorsOf = { end: [['end', -2]], start: [['start', 2]], middle: [['middle', 0], ['end', -2], ['start', 2]] };
+    const run = (order, prim, commit) => {
+      const base = pl.r.length, out = []; let mu = -1, md = -1, ok = true;
+      for (const d of order) {
+        const t = SHORT[d.id] || ABBR[d.id] || d.label, w = tw(t, FS, 600); let hit = null;
+        for (let k = 0; k < 12 && !hit; k++) for (const dir of ['dn', 'up']) { if (hit) break; for (const [anchor, dx] of anchorsOf[prim(d)]) {
+          const off = dir === 'up' ? -(top0 + k * PITCH) : 20 + k * PITCH, q = pl.textRect(d._cx + dx, off, anchor, w, FS);
+          const ld = dir === 'up' ? [d._cx - 0.75, off + 3, d._cx + 0.75, -d._t * TP - 8] : [d._cx - 0.75, 9, d._cx + 0.75, off - FS];
+          if (pl.free(q) && pl.free(ld, ['G', 'L'])) { pl.r.push([...q, 'T'], [...ld, 'L']); hit = { d, t, tx: d._cx + dx, off, anchor, dir }; if (dir === 'up') mu = Math.max(mu, k); else md = Math.max(md, k); break; }
+        } }
+        if (!hit) { ok = false; break; } out.push(hit);
+      }
+      if (!commit || !ok) pl.r.length = base;
+      return ok ? { out, mu, md, cost: (mu + 1) + (md + 1) } : null;
+    };
+    clusters.forEach(list => {
+      const cands = [];
+      for (let m = 0; m <= list.length; m++) {
+        const L = list.slice(0, m), Rt = list.slice(m).reverse(), prim = d => list.indexOf(d) < m ? 'end' : 'start';
+        cands.push({ order: [...L, ...Rt], prim }, { order: [...Rt, ...L], prim });
+      }
+      if (list.length === 1) cands.unshift({ order: list, prim: () => 'middle' });
+      let best = null; cands.forEach(c => { const r = run(c.order, c.prim, false); if (r && (!best || r.cost < best.r.cost)) best = { c, r }; });
+      if (!best) { console.warn('legal labels unplaced', list.map(d => d.id)); return; }
+      const r = run(best.c.order, best.c.prim, true); labels.push(...r.out); maxUp = Math.max(maxUp, r.mu); maxDn = Math.max(maxDn, r.md);
+    });
+  }
+  const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 14);
+  const dnSpace = !small && maxDn >= 0 ? 20 + maxDn * PITCH + 8 : 0;
+  // spans: lanes below the mark line (and below any labels hanging under it)
+  const lanes = [];
+  spans.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => { const a = x(parse(d.start)), b = d.end ? x(parse(d.end)) : x(DOMAIN[1]); let i = lanes.findIndex(e => a > e + 6); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = b; d._lane = i; d._a = a; d._b = b; });
+  const laneP = phone ? 9 : compact ? 6 : 18, lane0 = yMark + (small ? (compact ? 12 : 14) : Math.max(28, dnSpace + 18));
+  const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10), H = yAx + 22;
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', 'Legal and policy timeline');
   svg.append('title').text('Law and policy responses, 1957–2026');
   svg.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', yMark).attr('y2', yMark).style('stroke', 'var(--line)');
+  if (compact) svg.append('text').attr('class', 'band-label').attr('x', 4).attr('y', yMark + 4).text('LAW');
+  // labels + leaders
+  const lg = svg.append('g').attr('class', 'lbls').attr('aria-hidden', 'true');
+  labels.forEach(({ d, t, tx, off, anchor, dir }) => {
+    if (dir === 'up') lg.append('line').attr('x1', d._cx).attr('x2', d._cx).attr('y1', yMark + off + 3).attr('y2', yMark - d._t * TP - 8).style('stroke', 'var(--line)');
+    else lg.append('line').attr('x1', d._cx).attr('x2', d._cx).attr('y1', yMark + 9).attr('y2', yMark + off - FS).style('stroke', 'var(--line)');
+    lg.append('text').attr('x', tx).attr('y', yMark + off).attr('text-anchor', anchor).style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)').style('font', `600 ${FS}px var(--sans)`).text(t);
+  });
   // spans
-  const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981'));
-  const sg = svg.append('g').selectAll('g').data(spans).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id)
+  const sg = svg.append('g').selectAll('g').data(spans).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
     .attr('aria-label', d => `${d.label}, ${fmtY(parse(d.start))} to ${d.end ? fmtY(parse(d.end)) : 'present'}. ${d.short_note}`);
-  sg.append('rect').attr('x', d => x(parse(d.start))).attr('width', d => Math.max(3, x(d.end ? parse(d.end) : DOMAIN[1]) - x(parse(d.start)))).attr('y', (d, i) => spanY - 3 + (i % 2) * 5 - 2).attr('height', 4).attr('rx', 2)
-    .style('fill', 'var(--accent)').style('opacity', 0.45);
-  sg.append('rect').attr('class', 'hit').attr('x', d => x(parse(d.start))).attr('width', d => Math.max(8, x(d.end ? parse(d.end) : DOMAIN[1]) - x(parse(d.start)))).attr('y', spanY - 8).attr('height', 14);
+  sg.append('rect').attr('x', d => d._a).attr('width', d => Math.max(3, d._b - d._a)).attr('y', d => lane0 + d._lane * laneP + 2).attr('height', compact ? 3 : 4).attr('rx', 2).style('fill', 'var(--accent)').style('opacity', 0.55);
+  sg.append('rect').attr('class', 'hit').attr('x', d => d._a - 2).attr('width', d => Math.max(10, d._b - d._a + 4)).attr('y', d => lane0 + d._lane * laneP - (compact ? 2 : 6)).attr('height', compact ? 10 : 16);
+  if (!small) spans.forEach(d => {
+    const t = SPAN_LABEL[d.id] || d.label, w = tw(t, FS, 600), y = lane0 + d._lane * laneP - 2;
+    const anchor = d._a + w <= W - 6 ? 'start' : 'end', tx = anchor === 'start' ? d._a : Math.min(W - 6, d._b);
+    lg.append('text').attr('x', tx).attr('y', y).attr('text-anchor', anchor).style('fill', 'var(--muted)').style('font', `600 ${FS}px var(--sans)`).text(t);
+  });
   bindMark(sg, legalCard, activate);
   // points
-  const pts = LEGAL.filter(l => !spans.includes(l));
-  const pg = svg.append('g').selectAll('g').data(pts).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id)
-    .attr('transform', d => `translate(${x(parse(d.start))},${yMark})`)
+  pts.forEach(d => { d._y = yMark - d._t * TP; });
+  svg.append('g').selectAll('line').data(pts.filter(d => d._t)).join('line').attr('x1', d => d._cx).attr('x2', d => d._cx).attr('y1', d => d._y).attr('y2', yMark).style('stroke', 'var(--faint)').style('stroke-width', 1);
+  const pg = svg.append('g').selectAll('g').data(pts).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
+    .attr('transform', d => `translate(${d._cx},${d._y})${GS < 1 ? ` scale(${GS})` : ''}`)
     .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
-  pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 8, -9); });
-  pg.append('circle').attr('class', 'hit').attr('r', 9);
+  pg.each(function (d) { legalGlyph(d3.select(this), d); if (hasScene(d)) badge(d3.select(this), 9, -10); });
+  pg.append('circle').attr('class', 'hit').attr('r', 8);
   bindMark(pg, legalCard, activate);
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
   sg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
-  // labels: greedy placement in 3 rows above marks (desktop only)
-  if (!phone) {
-    const rows = [[], [], []], rowY = [14, 26, 38];
-    pts.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => {
-      const t = ABBR[d.id] || d.label, w = t.length * 6.1 + 6, cx = x(parse(d.start));
-      for (let r = 0; r < 3; r++) {
-        const x0 = cx - w / 2; if (rows[r].every(([a, b]) => x0 > b || x0 + w < a)) {
-          rows[r].push([x0, x0 + w]);
-          svg.append('line').attr('x1', cx).attr('x2', cx).attr('y1', rowY[r] + 3).attr('y2', yMark - 7).style('stroke', 'var(--line)');
-          svg.append('text').attr('x', Math.max(M.l - 10, Math.min(W - w / 2, cx))).attr('y', rowY[r]).attr('text-anchor', 'middle').style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--muted)').style('font', '600 10.5px var(--sans)').text(t);
-          break;
-        }
-      }
-    });
-    svg.append('text').attr('x', W - M.r).attr('y', H - 1).attr('text-anchor', 'end').style('fill', 'var(--faint)').style('font', '10px var(--sans)').text('* soft law (expert manual) · bars = negotiation spans');
-  }
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yMark})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(10)).tickFormat('').tickSize(3));
-  addGuide(svg, x, 0, H);
+  rove(svg.selectAll('.mark'));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
+  addGuide(svg, x, 0, yAx, 'legal');
+}
+let legalCompact = false;
+function legalScroll() {
+  const band = document.getElementById('legalBand'), tr = document.getElementById('timeline').getBoundingClientRect();
+  const stuck = !isPhoneNow() && band.getBoundingClientRect().top <= 0.5 && tr.top < -1 && tr.bottom > 200;
+  if (stuck === legalCompact) return;
+  if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused mark
+  const h0 = band.offsetHeight; legalCompact = stuck;
+  drawLegal(); band.classList.toggle('compact', stuck);
+  band.style.marginBottom = stuck ? Math.max(0, h0 - band.offsetHeight) + 'px' : '0px';
+}
+addEventListener('scroll', () => requestAnimationFrame(legalScroll), { passive: true });
+function drawLegalKey() {
+  const L = document.getElementById('legendLegal'); L.innerHTML = '';
+  const li = (inner, text) => L.insertAdjacentHTML('beforeend', `<li><svg width="20" height="16" viewBox="-10 -8 20 16" aria-hidden="true">${inner}</svg>${text}</li>`);
+  li('<circle r="5.5" style="fill:var(--accent)"/>', 'Treaty');
+  li('<rect x="-5" y="-5" width="10" height="10" style="fill:var(--accent)"/>', 'Resolution or body finding');
+  li('<path d="M0,-6.5L6.5,5L-6.5,5Z" style="fill:var(--accent)"/>', 'Unilateral pledge');
+  li('<path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" style="fill:var(--bg);stroke:var(--accent-2);stroke-width:1.8"/>', '* Soft law (expert manual, not binding)');
+  li('<path d="M-5,-5L5,5M5,-5L-5,5" style="stroke:var(--warn);stroke-width:2.8"/>', 'Veto');
+  li('<rect x="-9" y="-2" width="18" height="4" rx="2" style="fill:var(--accent);opacity:.55"/>', 'Negotiation span');
+  table('tableLegal', ['Label', 'Full name', 'Date', 'Kind', 'What it is'], LEGAL.map(l => [ABBR[l.id] || SPAN_LABEL[l.id] || l.label, l.label, l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : l.start, l.soft_law ? 'Soft law' : KIND_LABEL[l.kind] || l.kind, l.short_note]));
 }
 
 // ---------------------------------------------------------------- Chart A
-function drawA() {
-  const el = document.getElementById('svgA'); el.innerHTML = '';
+function drawA(el = document.getElementById('svgA')) {
+  el.innerHTML = '';
   const { W, M, x } = layout(el), phone = isPhone();
   const top = 18, plotH = phone ? 300 : 380, stripH = 30, H = top + plotH + stripH + 30;
   const y = d3.scaleLog().domain([90, 48000]).range([top + plotH, top]);
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hA').attr('id', 'svgA-root');
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hA').attr('id', 'svgA-root');
   svg.append('desc').text('Scatter of kinetic counterspace tests: year on the x axis, altitude on a log scale on the y axis, with LEO, MEO and GEO bands. Destructive tests have debris bubbles sized by cataloged fragments. A table view follows the chart.');
   // bands
-  const band = (a, b, fill, label) => { svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', y(b)).attr('height', y(a) - y(b)).style('fill', fill);
-    svg.append('text').attr('class', 'band-label').attr('x', W - M.r - 6).attr('y', y(b) + 13).attr('text-anchor', 'end').text(label); };
-  band(90, 2000, 'var(--leo)', 'LEO');
-  band(2000, 35000, 'var(--meo)', 'MEO');
-  band(35000, 37000, 'var(--geo)', 'GEO 35,786 km');
+  const bandLabels = [], handoffText = phone ? 'Last destructive test' : `Last destructive DA-ASAT test (as of ${AS_OF})`;
+  const band = (a, b, fill, label, above) => { const ly = above ? y(b) - 4 : y(b) + 13; bandLabels.push({ x: M.l + 6, y: ly, w: tw(label, 10.5, 600) + label.length * 0.85 }); svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', y(b)).attr('height', y(a) - y(b)).style('fill', fill);
+    svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', ly).text(label); };
+  band(90, 2000, 'var(--leo)', phone ? 'LEO' : 'LEO (to ~2,000 km)');
+  band(2000, 35000, 'var(--meo)', phone ? 'MEO' : 'MEO (GNSS ~20,200 km)');
+  band(35000, 37000, 'var(--geo)', 'GEO 35,786 km', true);
   svg.append('g').attr('class', 'gridline').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).tickValues([100, 300, 1000, 3000, 10000, 30000]).tickSize(-(W - M.l - M.r)).tickFormat(''));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).tickValues([100, 300, 1000, 3000, 10000, 30000]).tickFormat(d => d >= 1000 ? d / 1000 + 'k' : d));
   svg.append('text').attr('class', 'ann-sub').attr('transform', `translate(12,${top + plotH / 2}) rotate(-90)`).attr('text-anchor', 'middle').text('Altitude, km (log)');
   // strip for unreported altitudes
   const sy = top + plotH + 6;
   svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', sy).attr('height', stripH - 6).style('fill', 'var(--surface-2)');
-  svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', sy + 15).text(phone ? 'ALT. N/R' : 'ALTITUDE NOT REPORTED');
+  svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', sy + 15).text(phone ? 'ALT. N/R' : 'ALTITUDE NOT REPORTED (no point on the scale)');
   xAxis(svg, x, top + plotH + stripH);
   // debris scale
   const rD = d3.scaleSqrt().domain([0, 3600]).range([0, phone ? 22 : 30]);
   // handoff marker
-  handoff(svg, x, top, top + plotH + stripH, phone ? 'Last destructive test' : `Last destructive DA-ASAT test (as of ${AS_OF})`, true);
+  handoff(svg, x, top, top + plotH + stripH, handoffText, true);
   // bubbles first (behind)
   const dest = KIN.filter(e => e.type === 'destructive');
   svg.append('g').selectAll('circle').data(dest).join('circle').attr('cx', d => x(parse(d.date))).attr('cy', d => y(d.altitude_km)).attr('r', d => rD(d.fragments_cataloged))
@@ -201,22 +338,38 @@ function drawA() {
     if (hasScene(d)) badge(s, 10, -10);
     s.append('circle').attr('class', 'hit').attr('r', 10);
   });
-  bindMark(g, kinCard, activate);
-  // annotations
-  const ann = (id, dx, dy, t1, t2, anchor = 'start') => { const e = byId[id]; const X = x(parse(e.date)), Y = y(e.altitude_km);
-    svg.append('line').attr('x1', X).attr('y1', Y).attr('x2', X + dx * 0.85).attr('y2', Y + dy * 0.85).style('stroke', 'var(--muted)');
-    const t = svg.append('text').attr('x', X + dx).attr('y', Y + dy).attr('text-anchor', anchor);
-    t.append('tspan').attr('class', 'ann').text(t1); if (t2) t.append('tspan').attr('class', 'ann-sub').attr('x', X + dx).attr('dy', 14).text(t2); };
+  bindMark(g, kinCard, activate); g.attr('data-t', d => +parse(d.date)); rove(g);
+  // annotations: each tries several offsets and takes the first that clears band labels, the handoff label, all marks and earlier notes
+  const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: H });
+  bandLabels.forEach(b => pl.add(pl.textRect(b.x, b.y, 'start', b.w, 10.5)));
+  pl.add(pl.textRect(x(parse(LAST_DA)) - 5, top + 10, 'end', tw(handoffText, 11, 600), 11));
+  KIN.forEach(d => { const X = x(parse(d.date)), Y = d.altitude_km == null ? sy + 12 : y(d.altitude_km); pl.add([X - 11, Y - 19, X + 17, Y + 11], 'M'); });
+  const ann = (id, t1, t2, prefs) => {
+    const e = byId[id], X = x(parse(e.date)), Y = y(e.altitude_km), w = Math.max(tw(t1, 12, 600), t2 ? tw(t2, 11.5) : 0);
+    for (const [dx, dy, anchor] of prefs) {
+      const tx = X + dx, ty = Y + dy, x0 = anchor === 'end' ? tx - w : tx, q = [x0, ty - 12, x0 + w, ty + (t2 ? 18 : 5)];
+      if (!pl.free(q, [], 3)) continue;
+      pl.add(q);
+      svg.append('line').attr('x1', X).attr('y1', Y).attr('x2', X + dx * 0.85).attr('y2', Y + dy * 0.85 - (dy > 0 ? 0 : -4)).style('stroke', 'var(--muted)');
+      const t = svg.append('text').attr('x', tx).attr('y', ty).attr('text-anchor', anchor);
+      t.append('tspan').attr('class', 'ann').text(t1); if (t2) t.append('tspan').attr('class', 'ann-sub').attr('x', tx).attr('dy', 14).text(t2);
+      return;
+    }
+    console.warn('annotation unplaced', id);
+  };
+  const sweep = () => { const o = []; for (let dy = -30; dy >= -200; dy -= 14) o.push([-34, dy, 'end'], [34, dy, 'start']); for (let dy = 30; dy <= 200; dy += 14) o.push([-34, dy, 'end'], [34, dy, 'start']); return o; };
+  const around = (a, b) => [[-a, b, 'end'], [a, b, 'start'], [-a, -b, 'end'], [a, -b, 'start'], [-a - 30, b + 20, 'end'], [a + 30, b + 20, 'start'], [-a - 30, -b - 20, 'end'], [a + 30, -b - 20, 'start']];
   if (!phone) {
-    ann('cn-2013-dn2', -40, 28, 'Demonstrated reach toward GEO: DN-2 (2013)', '~30,000 km apogee. Not an intercept (hollow mark).', 'end');
-    ann('cn-2007-fy1c', -34, -42, 'Peak intercept is still Fengyun-1C (2007): 880 km', 'Intercept altitudes have not climbed since.', 'end');
-    ann('us-1962-starfish-prime', 18, -26, 'Starfish Prime (nuclear, 1962)');
+    ann('cn-2013-dn2', 'Demonstrated reach toward GEO: DN-2 (2013)', '~30,000 km apogee. Not an intercept (hollow mark).', [...around(40, 28), ...sweep()]);
+    ann('cn-2007-fy1c', 'Peak intercept is still Fengyun-1C (2007): 880 km', 'Intercept altitudes have not climbed since.', [[-34, -42, 'end'], [-34, -60, 'end'], ...around(34, 42), ...sweep()]);
+    ann('us-1962-starfish-prime', 'Starfish Prime (nuclear, 1962)', null, [[18, -40, 'start'], [18, -60, 'start'], ...around(18, 30), ...sweep()]);
   } else {
-    ann('cn-2013-dn2', -20, 24, 'DN-2 reach (apogee)', null, 'end');
-    ann('cn-2007-fy1c', -20, -30, 'Peak intercept: FY-1C', null, 'end');
+    ann('cn-2013-dn2', 'DN-2 reach (apogee)', null, around(20, 24));
+    ann('cn-2007-fy1c', 'Peak intercept: FY-1C', null, [[-20, -34, 'end'], [20, -34, 'start'], ...around(20, 30), ...sweep()]);
   }
   addGuide(svg, x, top, top + plotH + stripH);
   // legend
+  if (EXPORTING) return;
   const L = document.getElementById('legendA'); L.innerHTML = '';
   const li = (svgInner, text, w = 22, h = 18) => { L.insertAdjacentHTML('beforeend', `<li><svg width="${w}" height="${h}" viewBox="${-w / 2} ${-h / 2} ${w} ${h}" aria-hidden="true">${svgInner}</svg>${text}</li>`); };
   li('<circle r="5" style="fill:var(--text)"/>', 'Intercept altitude (destructive)');
@@ -225,8 +378,8 @@ function drawA() {
   li(`<path d="${star(8)}" style="fill:var(--text)"/>`, 'Nuclear detonation');
   li('<g class="badge3d"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>', 'Has a 3D scene');
   ['United States', 'Russia', 'China', 'India'].forEach(s => li(`<rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:${colorOf(s)}"/>`, s === 'Russia' ? 'USSR / Russia' : s));
-  const sizes = [100, 1000, 3500], mx = rD(3500);
-  L.insertAdjacentHTML('beforeend', `<li><svg width="${mx * 2 + 70}" height="${mx * 2 + 4}" aria-hidden="true">${sizes.map((s, i) => `<circle cx="${mx}" cy="${mx * 2 + 2 - rD(s)}" r="${rD(s)}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/><text x="${mx * 2 + 6}" y="${mx * 2 + 4 - rD(s) * 2 + 8}" style="fill:var(--muted);font:10px var(--sans)">${d3.format(',')(s)}</text>`).join('')}</svg>Debris bubble area = cataloged fragments (as of Feb. 2026). Still-in-orbit counts appear in cards and the table, never on this scale.</li>`);
+  const sizes = [100, 1000, 3500], mx = rD(3500), bw = mx * 2 + 46;
+  L.insertAdjacentHTML('beforeend', `<li class="wide"><svg width="${bw}" height="${mx * 2 + 6}" viewBox="0 0 ${bw} ${mx * 2 + 6}" aria-hidden="true">${sizes.map(sz => `<circle cx="${mx + 2}" cy="${mx * 2 + 3 - rD(sz)}" r="${rD(sz)}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/><text x="${mx * 2 + 8}" y="${mx * 2 + 3 - rD(sz) * 2 + 9}" style="fill:var(--muted);font:10px var(--sans)">${d3.format(',')(sz)}</text>`).join('')}</svg><span>Debris bubble area = cataloged fragments (as of Feb. 2026). Still-in-orbit counts appear in cards and the table, never on this scale.</span></li>`);
   // table
   table('tableA', ['Date', 'State', 'System', 'Target', 'Type', 'Altitude (km)', 'Kind', 'Cataloged', 'In orbit', 'Conf.', 'Source'],
     KIN.map(e => [e.date, e.state, e.system, e.target, TYPE_LABEL[e.type], e.altitude_km ?? '—', e.altitude_kind, num(e.fragments_cataloged), num(e.fragments_in_orbit), e.confidence, srcCell(e)]));
@@ -258,66 +411,90 @@ function attrStyle(sel, d) {
   else if (d.attribution === 'researcher_osint') sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2);
   else sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2).style('stroke-dasharray', '4 2.5');
 }
-function drawC() {
-  const el = document.getElementById('svgC'); el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhone();
-  const rowH = phone ? 24 : 26, laneHead = 18, lanePad = 10, top = 8;
+const stateC = { focus: true };
+const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
+function drawC(el = document.getElementById('svgC')) {
+  const dom = stateC.focus ? C_FOCUS() : DOMAIN;
+  const { W, M, x } = layout(el, dom), phone = isPhoneNow();
+  const FS = 10.5, rowH = phone ? 30 : 32, laneHead = 24, lanePad = 10, top = 8, R = W - M.r, maxLabel = phone ? 170 : 380;
+  const XS = e => Math.max(M.l, x(parse(e.start)));
+  const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: 99999 });
   let yCur = top; const placed = [];
   LANES.forEach(l => {
-    const evs = NK.filter(e => l.cats.includes(e.category)).sort((a, b) => a.start < b.start ? -1 : 1);
-    const rows = [];
+    const evs = NK.filter(e => l.cats.includes(e.category)).sort((a, b) => a.start < b.start ? -1 : 1), rows = [];
     evs.forEach(e => {
-      const x0 = x(parse(e.start)) - 12, x1 = (e.end === e.start ? x(parse(e.start)) + 8 : x(e.end ? parse(e.end) : DOMAIN[1])) + (phone ? 40 : 190);
-      let r = rows.findIndex(end => x0 > end); if (r < 0) { r = rows.length; rows.push(0); } rows[r] = x1;
-      placed.push({ e, lane: l.key, y: yCur + laneHead + r * rowH + rowH / 2 });
+      const point = e.end === e.start, X0 = XS(e), X1 = point ? X0 : e.end ? x(parse(e.end)) : R - 8;
+      const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
+      const txt = fit(`${short}: ${e.target_system.split(' (')[0]}`, maxLabel, FS), w = tw(txt, FS);
+      const lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0), fits = lx + w <= R + 4;
+      // label above the bar starting at its left end; if that would run off the plot, put it to the LEFT of the mark instead
+      let anchor = 'start', tx = lx, dyT = -8;
+      if (!fits) { if (X0 - 22 - w >= M.l) { anchor = 'end'; tx = X0 - 22; dyT = 4; } else { anchor = 'end'; tx = R + 4; } }
+      const lx0 = anchor === 'start' ? tx : tx - w, lx1 = lx0 + w;
+      const e0 = Math.min(lx0, X0 - 16) - 6, e1 = Math.max(lx1, X1 + (e.end ? 6 : 12)) + 6;
+      let r = rows.findIndex(end => e0 > end); if (r < 0) { r = rows.length; rows.push(0); } rows[r] = e1;
+      const y = yCur + laneHead + r * rowH + rowH / 2;
+      placed.push({ e, lane: l.key, y, X0, X1, txt, tx, anchor, w, point, dyT });
+      pl.add(pl.textRect(tx, y + dyT, anchor, w, FS)); pl.add([Math.min(X0 - 16, lx0) , y - 7, Math.max(X1 + 12, 0), y + 8], 'B');
     });
     l.y0 = yCur; l.y1 = yCur + laneHead + Math.max(1, rows.length) * rowH + lanePad; yCur = l.y1;
   });
   const H = yCur + 28;
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hC').attr('id', 'svgC-root');
-  svg.append('desc').text('Swimlane chart of non-kinetic counterspace operations by category. Bars are sustained campaigns; points are discrete events; arrowheads mark ongoing campaigns. Solid fill means official or multi-government attribution, outline means researcher or open-source attribution, dashed outline means alleged.');
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hC').attr('id', 'svgC-root');
+  svg.append('desc').text('Swimlane chart of non-kinetic counterspace operations by category. Bars are sustained campaigns; points are discrete events; arrowheads mark ongoing campaigns. Solid fill means official or multi-government attribution, outline means researcher or open-source attribution, dashed outline means alleged. A data table follows the chart.');
   LANES.forEach((l, i) => {
     svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', l.y0).attr('height', l.y1 - l.y0).style('fill', i % 2 ? 'transparent' : 'var(--recon)');
-    svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', l.y0 + 13).text(l.label.toUpperCase());
+    svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', l.y0 + 14).text(l.label.toUpperCase());
   });
-  svg.append('g').attr('class', 'gridline').attr('transform', `translate(0,${yCur})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(10)).tickSize(-(yCur - top)).tickFormat(''));
-  xAxis(svg, x, yCur);
-  handoff(svg, x, top, yCur, phone ? '↑ last destructive test' : '↑ last destructive DA-ASAT test (Nov 2021)', false);
-  // required annotation in the empty early decades
-  if (!phone) {
-    const ax = x(parse('1959-01-01')), t = svg.append('text').attr('x', ax).attr('y', LANES[0].y0 + 34);
-    ['Non-kinetic effects are reversible, deniable, and used', 'repeatedly in real conflicts. The rules that govern them', 'are soft law (expert manuals) or carry military', 'exemptions (ITU Constitution Art. 48). See legal band.'].forEach((s, i) => t.append('tspan').attr('x', ax).attr('dy', i ? 15 : 0).attr('class', i ? 'ann-sub' : 'ann-sub').style('font-weight', i === 0 ? 600 : null).style('fill', 'var(--text)').text(s));
+  svg.append('g').attr('class', 'gridline').attr('transform', `translate(0,${yCur})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(stateC.focus ? (phone ? 10 : 5) : 10)).tickSize(-(yCur - top)).tickFormat(''));
+  xAxis(svg, x, yCur, stateC.focus ? (phone ? 10 : 5) : undefined);
+  LANES.forEach(l => { const t = l.label.toUpperCase(); pl.add(pl.textRect(M.l + 6, l.y0 + 14, 'start', tw(t, 10.5, 600) + t.length * 0.85, 10.5)); });
+  // handoff line + label placed where it collides with nothing
+  const HX = x(parse(LAST_DA)), hg = svg.append('g').attr('class', 'handoff').attr('aria-hidden', 'true');
+  hg.append('line').attr('x1', HX).attr('x2', HX).attr('y1', top).attr('y2', yCur);
+  { const t = phone ? 'last destructive test' : 'Last destructive DA-ASAT test (Nov 2021)', w = tw(t, 11, 600); let ok = false;
+    for (let yy = top + 12; yy < yCur - 4 && !ok; yy += 4) for (const [a, dx] of [['end', -5], ['start', 5]]) {
+      const q = pl.textRect(HX + dx, yy, a, w, 11); if (pl.free(q)) { hg.append('text').attr('x', HX + dx).attr('y', yy).attr('text-anchor', a).text(t); pl.add(q); ok = true; break; } } 
+    if (!ok) hg.append('text').attr('x', HX - 5).attr('y', yCur - 6).attr('text-anchor', 'end').text(t); }
+  if (!phone && !stateC.focus) {
+    const ax = x(parse('1959-01-01')), t = svg.append('text').attr('x', ax).attr('y', LANES[0].y0 + 40);
+    ['Non-kinetic effects are reversible, deniable, and used', 'repeatedly in real conflicts. The rules that govern them', 'are soft law (expert manuals) or carry military', 'exemptions (ITU Constitution Art. 48). See legal band.'].forEach((s, i) => t.append('tspan').attr('x', ax).attr('dy', i ? 15 : 0).attr('class', 'ann-sub').style('font-weight', i === 0 ? 600 : null).style('fill', 'var(--text)').text(s));
   }
-  const g = svg.append('g').selectAll('g').data(placed).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.e.id)
+  const g = svg.append('g').selectAll('g').data(placed).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.e.id).attr('data-t', d => +parse(d.e.start))
     .attr('aria-label', d => { const e = d.e; return `${e.actor}: ${e.target_system}. ${e.end === e.start ? fmt(parse(e.start)) : `${fmtY(parse(e.start))} to ${e.end ? fmtY(parse(e.end)) : 'ongoing'}`}. Attribution: ${ATTR_LABEL[e.attribution]}.${hasScene(e) ? ' Opens 3D scene.' : ''}`; });
   g.each(function (d) {
-    const e = d.e, s = d3.select(this), X0 = x(parse(e.start));
-    const point = e.end === e.start;
-    if (point) { attrStyle(s.append('circle').attr('cx', X0).attr('cy', d.y).attr('r', 6), e); }
+    const e = d.e, s = d3.select(this), X0 = d.X0;
+    if (d.point) attrStyle(s.append('circle').attr('cx', X0).attr('cy', d.y).attr('r', 6), e);
     else {
-      const X1 = e.end ? x(parse(e.end)) : x(DOMAIN[1]) - 8;
-      attrStyle(s.append('rect').attr('x', X0).attr('y', d.y - 5).attr('width', Math.max(4, X1 - X0)).attr('height', 10).attr('rx', 2), e);
-      if (!e.end) s.append('path').attr('d', `M${X1},${d.y - 7}L${X1 + 8},${d.y}L${X1},${d.y + 7}Z`).style('fill', colorOf(e.actor));
+      attrStyle(s.append('rect').attr('x', X0).attr('y', d.y - 5).attr('width', Math.max(4, d.X1 - X0)).attr('height', 10).attr('rx', 2), e);
+      if (!e.end) s.append('path').attr('d', `M${d.X1},${d.y - 7}L${d.X1 + 8},${d.y}L${d.X1},${d.y + 7}Z`).style('fill', colorOf(e.actor));
     }
     regimeIcon(s, e.target_regime).attr('transform', `translate(${X0 - 11},${d.y})`);
-    if (hasScene(e)) badge(s, X0 + (point ? 10 : 8), d.y - 11);
-    const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
-    s.append('text').attr('x', X0 + (point ? 18 : 14)).attr('y', d.y - 7).style('fill', 'var(--muted)').style('font', '10.5px var(--sans)').text(phone ? short : `${short}: ${e.target_system.split(' (')[0].slice(0, 30)}`);
-    s.append('rect').attr('class', 'hit').attr('x', X0 - 16).attr('y', d.y - 12).attr('width', point ? 32 : Math.max(32, (e.end ? x(parse(e.end)) : x(DOMAIN[1])) - X0 + 24)).attr('height', 24);
+    if (hasScene(e)) badge(s, X0 + (d.point ? 12 : 9), d.y - 8);
+    s.append('text').attr('x', d.tx).attr('y', d.y + d.dyT).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`).text(d.txt);
+    s.append('rect').attr('class', 'hit').attr('x', X0 - 18).attr('y', d.y - 12).attr('width', d.point ? 36 : Math.max(36, d.X1 - X0 + 30)).attr('height', 24);
   });
   bindMark(g, d => nkCard(d.e), (d, el, ev) => activate(d.e, el, ev));
+  rove(g);
   addGuide(svg, x, top, yCur);
+  if (EXPORTING) return;
+  document.getElementById('noteC').textContent = stateC.focus
+    ? 'This chart’s axis starts in 1995, not 1957: the ledger’s earliest non-kinetic entry is the 1997 MIRACL laser test, so 1957–1994 would be blank and would squeeze every label. Guide lines still follow the shared year axis. Choose “Full span” to align the axis with Charts A and B.'
+    : 'Full span 1957–2026, on the same axis as Charts A and B. Until the late 1990s the ledger records no non-kinetic operations.';
+  document.getElementById('cFocus').setAttribute('aria-pressed', stateC.focus); document.getElementById('cFull').setAttribute('aria-pressed', !stateC.focus);
   const L = document.getElementById('legendC'); L.innerHTML = '';
   const li = (inner, text, w = 26) => L.insertAdjacentHTML('beforeend', `<li><svg width="${w}" height="16" viewBox="${-w / 2} -8 ${w} 16" aria-hidden="true">${inner}</svg>${text}</li>`);
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:var(--text)"/>', 'Official or multi-government attribution');
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:none;stroke:var(--text);stroke-width:2"/>', 'Researcher / OSINT attribution');
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:none;stroke:var(--text);stroke-width:2;stroke-dasharray:4 2.5"/>', 'Alleged');
   li('<path d="M-8,-6L2,0L-8,6Z" style="fill:var(--text)"/>', 'Ongoing');
+  L.insertAdjacentHTML('beforeend', '<li class="lsep" aria-hidden="true"></li>');
   li('<path d="M0,-4.5L4.5,3.5L-4.5,3.5Z" style="fill:var(--muted)"/>', 'GNSS (MEO signals)', 14);
   li('<circle r="4" style="fill:none;stroke:var(--muted);stroke-width:1.5"/><circle r="1.3" style="fill:var(--muted)"/>', 'GEO comms', 14);
   li('<circle cx="-3.5" r="1.5" style="fill:var(--muted)"/><circle r="1.5" style="fill:var(--muted)"/><circle cx="3.5" r="1.5" style="fill:var(--muted)"/>', 'LEO constellation', 14);
   li('<rect x="-4" y="0" width="8" height="4" style="fill:var(--muted)"/><path d="M0,0V-5M-3,-3L0,-5L3,-3" style="fill:none;stroke:var(--muted)"/>', 'Ground segment', 14);
   li('<path d="M0,-4.5L4.5,0L0,4.5L-4.5,0Z" style="fill:var(--muted)"/>', 'LEO imaging / ISR', 14);
+  L.insertAdjacentHTML('beforeend', '<li class="lsep" aria-hidden="true"></li>');
   ['Russia', 'China', 'United States', 'Iran', 'North Korea', 'Israel', 'Iraq'].forEach(s => li(`<rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:${colorOf(s)}"/>`, s, 14));
   table('tableC', ['Start', 'End', 'Actor', 'Category', 'Attribution (as source states)', 'Target', 'Operational', 'Conf.', 'Source'],
     NK.map(e => [e.start, e.end === e.start ? '(discrete)' : e.end || 'ongoing', e.actor, e.category, ATTR_LABEL[e.attribution], `${e.target_system} [${REGIME_LABEL[e.target_regime]}]`, e.operational_use ? 'yes' : 'no', e.confidence, srcCell(e)]));
@@ -342,8 +519,8 @@ function countsB() {
   return { series: grp.flatMap(gr => ['D', 'P'].map(s => ({ key: gr.key + ':' + s, label: `${gr.label} (${s === 'D' ? 'demonstrated' : 'developing'})`, v: gr.v, dev: s === 'P',
     vals: decs.map(d => { const st = {}; gr.cats.forEach(c => Object.entries(CAPS.coding[c][d] || {}).forEach(([k, v]) => { st[k] = st[k] === 'D' || v === 'D' ? 'D' : 'P'; })); return Object.values(st).filter(x => x === s).length; }) }))) };
 }
-function drawB() {
-  const el = document.getElementById('svgB'); el.innerHTML = '';
+function drawB(el = document.getElementById('svgB')) {
+  el.innerHTML = '';
   const { W, M, x } = layout(el), phone = isPhone();
   const top = 16, plotH = phone ? 230 : 290, H = top + plotH + 30;
   const decs = CAPS.decades, starts = decs.map(d => +d.slice(0, 4));
@@ -352,8 +529,8 @@ function drawB() {
   const stackData = xs.map((xd, i) => { const o = { x: xd }; series.forEach(s => o[s.key] = s.vals[Math.min(i, decs.length - 1)]); return o; });
   const stack = d3.stack().keys(series.map(s => s.key)).offset(d3.stackOffsetNone)(stackData);
   const maxY = Math.max(4, d3.max(stack.at(-1) || [[0, 0]], d => d[1]) || 0);
-  const y = d3.scaleLinear().domain([0, Math.ceil(maxY / 4) * 4 + 2]).range([top + plotH, top]);
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).attr('role', 'img').attr('aria-labelledby', 'hB').attr('id', 'svgB-root');
+  const y = d3.scaleLinear().domain([0, Math.ceil(maxY / (1 - 44 / plotH) / 2) * 2]).range([top + plotH, top]);
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'img').attr('aria-labelledby', 'hB').attr('id', 'svgB-root');
   svg.append('desc').text('Stacked step area of the number of states holding each counterspace capability per decade, zero baseline. See the data table for exact counts.');
   const defs = svg.append('defs');
   series.forEach(s => { const p = defs.append('pattern').attr('id', 'hatch-' + s.key.replace(':', '-')).attr('width', 6).attr('height', 6).attr('patternUnits', 'userSpaceOnUse').attr('patternTransform', 'rotate(45)');
@@ -361,7 +538,9 @@ function drawB() {
   const X2020 = x(parse('2020-01-01'));
   svg.append('rect').attr('x', M.l).attr('width', X2020 - M.l).attr('y', top).attr('height', plotH).style('fill', 'var(--recon)');
   svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', top + 12).text(phone ? 'RECONSTRUCTED' : 'RECONSTRUCTED (NOT SWF-ASSESSED)');
-  svg.append('text').attr('class', 'band-label').attr('x', X2020 + 4).attr('y', top + 12).text(phone ? 'SWF' : 'SWF 2026 (13 STATES)');
+  { const t = svg.append('text').attr('class', 'band-label').attr('text-anchor', 'end').attr('x', W - M.r - 4);
+    t.append('tspan').attr('x', W - M.r - 4).attr('y', top + 12).text(phone ? 'SWF 2026' : 'SWF 2026');
+    t.append('tspan').attr('x', W - M.r - 4).attr('dy', 12).text(phone ? '13 states' : '13 STATES ASSESSED'); }
   svg.append('g').attr('class', 'gridline').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickSize(-(W - M.l - M.r)).tickFormat(''));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(d3.format('d')));
   svg.append('text').attr('class', 'ann-sub').attr('transform', `translate(12,${top + plotH / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(stateB.group === 'cat' ? 'State-capability pairs' : 'States');
@@ -379,8 +558,9 @@ function drawB() {
     t.append('tspan').attr('class', 'ann').text(`Electronic warfare drives most of the crowding: ${ew20} states in the 2020s.`);
     t.append('tspan').attr('class', 'ann-sub').attr('x', x(parse('1960-01-01'))).attr('dy', 16).text(`Demonstrated destructive DA-ASAT capability has stayed at four states: ${da20.map(s => s === 'Russia' ? 'USSR/Russia' : s === 'United States' ? 'US' : s).join(', ')}.`);
   } else {
-    svg.append('text').attr('class', 'ann-sub').attr('x', M.l + 6).attr('y', top + 28).text(`EW drives crowding (${ew20} states); DA-ASAT: 4.`);
+    svg.append('text').attr('class', 'ann-sub').attr('x', M.l + 6).attr('y', top + 46).text(`EW: ${ew20} states in 2020s. DA-ASAT: 4.`);
   }
+  if (EXPORTING) return;
   // legend + chips
   const L = document.getElementById('legendB'); L.innerHTML = '';
   L.insertAdjacentHTML('beforeend', `<li><svg width="18" height="12" aria-hidden="true"><rect width="18" height="12" style="fill:var(--muted)"/></svg>Demonstrated (tested or used)</li><li><svg width="18" height="12" aria-hidden="true"><defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect width="18" height="12" fill="url(#lh)"/></svg>Developing or latent</li>`);
@@ -392,6 +572,8 @@ function chipsB() {
     b.disabled = stateB.group !== 'cat';
     b.onclick = () => { stateB.on.has(c.key) ? stateB.on.delete(c.key) : stateB.on.add(c.key); if (!stateB.on.size) stateB.on.add(c.key); chipsB(); drawB(); }; el.appendChild(b); });
 }
+document.getElementById('cFocus').onclick = () => { stateC.focus = true; drawC(); };
+document.getElementById('cFull').onclick = () => { stateC.focus = false; drawC(); };
 document.getElementById('grpCat').onclick = () => { stateB.group = 'cat'; grpBtns(); chipsB(); drawB(); };
 document.getElementById('grpKin').onclick = () => { stateB.group = 'kin'; grpBtns(); chipsB(); drawB(); };
 function grpBtns() { document.getElementById('grpCat').setAttribute('aria-pressed', stateB.group === 'cat'); document.getElementById('grpKin').setAttribute('aria-pressed', stateB.group === 'kin'); }
@@ -400,41 +582,58 @@ function grpBtns() { document.getElementById('grpCat').setAttribute('aria-presse
 const LAG = [
   { cap: 'us-1959-bold-orion', law: 'ost-1967', text: 'First DA-ASAT flyby → Outer Space Treaty (silent on conventional ASATs)' },
   { cap: 'us-1962-starfish-prime', law: 'ltbt-1963', text: 'Starfish Prime → Limited Test Ban Treaty (followed it)' },
-  { cap: 'cn-2007-fy1c', law: 'unga-77-41', text: 'Fengyun-1C debris → UNGA 77/41 call to stop destructive tests' },
-  { cap: 'ru-2021-cosmos1408', law: 'us-moratorium-2022', text: 'Cosmos 1408 → US test moratorium' },
+  { cap: 'cn-2007-fy1c', law: 'unga-77-41', text: 'Fengyun-1C debris → UNGA 77/41 call to stop destructive tests (non-binding)' },
+  { cap: 'ru-2021-cosmos1408', law: 'us-moratorium-2022', text: 'Cosmos 1408 → US test moratorium (unilateral pledge)' },
   { cap: 'ru-2014-ukraine', law: 'icao-2025', text: 'Russian GNSS interference (from 2014) → first ICAO finding against Russia' },
   { cap: 'ru-2024-eu-sats', law: 'itu-rrb-2024', text: 'Jamming of European satellites → ITU RRB “grave concern”' },
   { cap: 'us-1997-miracl', law: null, text: 'Laser fired at a satellite → no specific rule on lasers against satellites' },
   { cap: 'ru-2022-viasat', law: null, text: 'Viasat cyberattack → attributions only; Tallinn 2.0 is soft law' },
 ];
 const capDate = r => parse(r.date || r.start);
-function drawL() {
-  const el = document.getElementById('svgL'); el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhone();
-  const rowH = phone ? 44 : 38, top = 10, H = top + LAG.length * rowH + 28;
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hL').attr('id', 'svgL-root');
-  svg.append('desc').text('Dumbbell chart: for each pair, a filled circle marks the capability milestone and a square marks the legal or policy response; the gap is the lag in years.');
-  svg.append('g').attr('class', 'gridline').attr('transform', `translate(0,${H - 28})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(10)).tickSize(-(H - 28 - top)).tickFormat(''));
-  xAxis(svg, x, H - 28);
-  const rows = [];
-  LAG.forEach((p, i) => {
-    const c = byId[p.cap], l = p.law ? byId[p.law] : null, yy = top + i * rowH + rowH - 12;
-    const a = capDate(c), b = l ? parse(l.start) : DOMAIN[1];
+const HEX = 'M0,-6.5L5.6,-3.25L5.6,3.25L0,6.5L-5.6,3.25L-5.6,-3.25Z';
+function drawL(el = document.getElementById('svgL')) {
+  el.innerHTML = '';
+  const { W, M, x } = layout(el), phone = isPhoneNow();
+  const FS = phone ? 11 : 12, top = 10, maxW = W - 24;
+  const rowsInfo = LAG.map(p => { const lines = wrap(p.text, maxW, FS); return { p, lines, w: Math.max(...lines.map(s => tw(s, FS))), rowH: lines.length * (FS + 3) + 34 }; });
+  const H = top + rowsInfo.reduce((s, r) => s + r.rowH, 0) + 30, yAx = H - 28;
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hL').attr('id', 'svgL-root');
+  svg.append('desc').text('Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the legal or policy response (circle for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the lag in years. An open ring means no binding rule yet.');
+  svg.append('g').attr('class', 'gridline').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(phone ? 20 : 10)).tickSize(-(yAx - top)).tickFormat(''));
+  xAxis(svg, x, yAx);
+  const rows = []; let y0 = top;
+  const gs = rowsInfo.map(({ p, lines, w, rowH }) => {
+    const c = byId[p.cap], l = p.law ? byId[p.law] : null, yy = y0 + lines.length * (FS + 3) + 10;
+    const a = capDate(c), b = l ? parse(l.start) : DOMAIN[1], xa = x(a), xb = x(b);
     const years = l ? ((b - a) / (365.25 * 864e5)) : null;
     const col = c.domain === 'kinetic' ? 'var(--cat-da)' : 'var(--cat-ew)';
-    const g = svg.append('g').attr('class', 'mark').attr('tabindex', 0).attr('role', 'img').attr('aria-label', `${p.text}. ${l ? years.toFixed(1) + ' years' : 'no binding response yet'}.`);
-    g.append('line').attr('x1', x(a)).attr('x2', x(b) - (l ? 0 : 6)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
-    g.append('circle').attr('cx', x(a)).attr('cy', yy).attr('r', 5.5).style('fill', col);
-    if (l) g.append('rect').attr('x', x(b) - 5).attr('y', yy - 5).attr('width', 10).attr('height', 10).style('fill', 'var(--accent)');
-    else g.append('circle').attr('cx', x(b) - 6).attr('cy', yy).attr('r', 5).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
-    const lx = x(a) > W * 0.55 ? Math.min(x(a), x(b)) - 8 : Math.min(x(a), x(b));
-    g.append('text').attr('x', lx).attr('y', yy - 10).attr('text-anchor', x(a) > W * 0.55 ? 'end' : 'start').style('fill', 'var(--text)').style('font', `${phone ? 11 : 12}px var(--sans)`).text(p.text);
-    g.append('text').attr('x', l ? Math.max(x(a), x(b)) + 10 : x(b) - 16).attr('y', yy + 4).attr('text-anchor', l ? 'start' : 'end').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)')
-      .text(l ? (years < 1 ? `${Math.round(years * 12)} mo` : `${years.toFixed(1)} yr`) : (phone ? '' : 'no binding rule'));
-    rows.push([p.text, c.date || c.start, l ? l.start : '—', l ? years.toFixed(1) : 'open', `${c.id}${l ? ' → ' + l.id : ''}`]);
+    const lagTxt = l ? (years < 1 ? `${Math.round(years * 12)} months` : `${years.toFixed(1)} years`) : 'no binding rule yet';
+    const g = svg.append('g').attr('class', 'mark').attr('tabindex', 0).attr('role', 'img').attr('data-t', +a).attr('aria-label', `${p.text}. ${l ? lagTxt : 'No binding response yet'}.`);
+    g.append('rect').attr('class', 'hit').attr('x', 6).attr('y', y0 - 2).attr('width', W - 12).attr('height', rowH - 6).attr('rx', 6);
+    const tx = Math.max(12, Math.min(Math.min(xa, xb) - 6, W - 12 - w));
+    lines.forEach((s, i) => g.append('text').attr('x', tx).attr('y', y0 + (i + 1) * (FS + 3) - 2).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`).text(s));
+    g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 7)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
+    g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${yy})`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
+    if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yy}) scale(1.2)`), l);
+    else g.append('circle').attr('cx', xb - 7).attr('cy', yy).attr('r', 5.5).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
+    const lw = tw(lagTxt, 12, 600), mid = Math.max(14 + lw / 2, Math.min(W - 14 - lw / 2, (xa + xb) / 2));
+    g.append('text').attr('x', mid).attr('y', yy + 19).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
+    rows.push([p.text, c.date || c.start, l ? l.start : '—', l ? `${l.kind.replace('_', ' ')}${l.soft_law ? ' (soft law)' : ''}` : '—', l ? years.toFixed(1) : 'open', `${c.id}${l ? ' → ' + l.id : ''}`]);
+    y0 += rowH; return g;
   });
-  addGuide(svg, x, top, H - 28);
-  table('tableL', ['Pair', 'Capability date', 'Response date', 'Lag (years)', 'Ledger rows'], rows);
+  addGuide(svg, x, top, yAx);
+  rove(svg.selectAll('.mark'));
+  gs.forEach(g => g.on('mouseenter', null));
+  if (EXPORTING) return;
+  const L = document.getElementById('legendL'); L.innerHTML = '';
+  const li = (inner, text) => L.insertAdjacentHTML('beforeend', `<li><svg width="20" height="16" viewBox="-10 -8 20 16" aria-hidden="true">${inner}</svg>${text}</li>`);
+  li(`<path d="${HEX}" style="fill:var(--cat-da)"/>`, 'Kinetic capability milestone');
+  li(`<path d="${HEX}" style="fill:var(--cat-ew)"/>`, 'Non-kinetic milestone');
+  li('<circle r="5.5" style="fill:var(--accent)"/>', 'Response: treaty (binding)');
+  li('<rect x="-5" y="-5" width="10" height="10" style="fill:var(--accent)"/>', 'Response: resolution or body finding (non-binding)');
+  li('<path d="M0,-6.5L6.5,5L-6.5,5Z" style="fill:var(--accent)"/>', 'Response: unilateral pledge');
+  li('<circle r="5" style="fill:none;stroke:var(--accent);stroke-width:2"/>', 'No binding rule yet');
+  table('tableL', ['Pair', 'Capability date', 'Response date', 'Response kind', 'Lag (years)', 'Ledger rows'], rows);
 }
 
 // ---------------------------------------------------------------- methodology section
@@ -458,23 +657,41 @@ function drawMethod() {
   <p class="note">The full ledger (every row with its pin), the verification log and the builder decisions are in <code>ledger.md</code>, <code>verification_log.md</code> and <code>methodology.md</code>.</p>`;
 }
 
-// ---------------------------------------------------------------- SVG export
+// ---------------------------------------------------------------- SVG export (rendered fresh at a fixed 1200 px desktop layout, light or dark as displayed)
 const STYLE_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-opacity', 'opacity', 'font-family', 'font-size', 'font-weight', 'letter-spacing', 'text-anchor', 'display', 'paint-order'];
+const EXPORT_SPEC = {
+  A: { id: 'svgA', draw: () => drawA, title: 'Chart A · Kinetic tests: altitude over time', key: 'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. 2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.' },
+  B: { id: 'svgB', draw: () => drawB, title: 'Chart B · Capability diffusion', key: 'Solid: capability demonstrated (tested or used). Hatched: developing or latent. Stack height counts state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, not assessed by SWF.' },
+  C: { id: 'svgC', draw: () => drawC, title: 'Chart C · Non-kinetic operations', key: 'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.' },
+  L: { id: 'svgL', draw: () => drawL, title: 'The lag between capability and legal response', key: 'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. Open ring: no binding rule yet.' },
+  legal: { id: 'legalSvg', draw: () => drawLegal, title: 'Law and policy responses, 1957–2026', key: 'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond with * : soft law (expert manual, not binding). Cross: veto. Bars: negotiation spans.' },
+};
 function exportSVG(which) {
-  const map = { A: 'svgA', B: 'svgB', C: 'svgC', L: 'svgL', legal: 'legalSvg' };
-  const src = document.querySelector(`#${map[which]} svg`); if (!src) return '';
-  const clone = src.cloneNode(true); const a = src.querySelectorAll('*'), b = clone.querySelectorAll('*');
-  a.forEach((n, i) => { const cs = getComputedStyle(n); b[i].setAttribute('style', STYLE_PROPS.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';')); b[i].removeAttribute('class'); b[i].removeAttribute('tabindex'); });
-  clone.querySelectorAll('.hit, [class="hit"]').forEach(n => n.remove());
-  const vb = clone.getAttribute('viewBox').split(' ').map(Number);
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); clone.setAttribute('width', vb[2]); clone.setAttribute('height', vb[3] + 22);
-  clone.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3] + 22}`);
-  const title = { A: 'Chart A · Kinetic tests: altitude over time', B: 'Chart B · Capability diffusion', C: 'Chart C · Non-kinetic operations', L: 'The lag', legal: 'Legal band' }[which];
-  const ns = 'http://www.w3.org/2000/svg', t = document.createElementNS(ns, 'text');
-  t.setAttribute('x', 4); t.setAttribute('y', vb[3] + 16); t.setAttribute('style', `fill:${getComputedStyle(document.body).color};font:10px sans-serif`);
-  t.textContent = `${title}. Data: ledger built from SWF Global Counterspace Capabilities (9th ed., Apr. 2026) and cited sources. Companion to Space Security Law.`;
-  clone.appendChild(t);
-  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
+  const spec = EXPORT_SPEC[which]; if (!spec) return '';
+  const ns = 'http://www.w3.org/2000/svg', savedGuides = guides.length, EW = 1200;
+  FORCE_DESKTOP = true; EXPORTING = true;
+  const box = document.createElement('div'); box.className = 'xbox'; box.style.cssText = `position:absolute;left:-99999px;top:0;width:${EW}px`; document.body.appendChild(box);
+  try {
+    spec.draw()(box);
+    const src = box.querySelector('svg'), clone = src.cloneNode(true), a = src.querySelectorAll('*'), b = clone.querySelectorAll('*');
+    a.forEach((n, i) => { const cs = getComputedStyle(n); b[i].setAttribute('style', STYLE_PROPS.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';')); b[i].removeAttribute('class'); b[i].removeAttribute('tabindex'); b[i].removeAttribute('role'); });
+    clone.querySelectorAll('.hit, [class="hit"]').forEach(n => n.remove());
+    clone.querySelectorAll('title').forEach(n => { if (n.parentNode === clone) n.remove(); });
+    const vb = clone.getAttribute('viewBox').split(' ').map(Number), bodyCS = getComputedStyle(document.body), fg = bodyCS.color, bg = bodyCS.backgroundColor, muted = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || fg;
+    const sans = 'system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
+    const foot = wrap(spec.key, EW - 32, 10.5).concat(wrap(`Source: Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment (9th ed., Apr. 2026) and the primary sources cited in the ledger. Data as of ${AS_OF}. Companion to Space Security Law: Governance Beyond the Atmosphere.`, EW - 32, 10.5));
+    const HDR = 40, FT = foot.length * 14 + 16, HT = HDR + vb[3] + FT;
+    const out = document.createElementNS(ns, 'svg');
+    out.setAttribute('xmlns', ns); out.setAttribute('width', EW); out.setAttribute('height', HT); out.setAttribute('viewBox', `0 0 ${EW} ${HT}`); out.setAttribute('role', 'img'); out.setAttribute('aria-label', spec.title);
+    const mk = (tag, at, txt) => { const e = document.createElementNS(ns, tag); Object.entries(at).forEach(([k, v]) => e.setAttribute(k, v)); if (txt != null) e.textContent = txt; out.appendChild(e); return e; };
+    mk('title', {}, spec.title); mk('desc', {}, spec.key);
+    mk('rect', { width: EW, height: HT, style: `fill:${bg}` });
+    mk('text', { x: 16, y: 26, style: `fill:${fg};font:600 17px ${sans}` }, spec.title);
+    clone.setAttribute('x', 0); clone.setAttribute('y', HDR); clone.setAttribute('width', EW); clone.setAttribute('height', vb[3]); clone.removeAttribute('id');
+    out.appendChild(clone);
+    foot.forEach((s, i) => mk('text', { x: 16, y: HDR + vb[3] + 18 + i * 14, style: `fill:${muted};font:10.5px ${sans}` }, s));
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(out);
+  } finally { EXPORTING = false; FORCE_DESKTOP = false; box.remove(); guides.length = savedGuides; }
 }
 function download(name, data, type) { const a = document.createElement('a'); a.href = data.startsWith('data:') ? data : URL.createObjectURL(new Blob([data], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
 document.querySelectorAll('[data-export]').forEach(b => b.onclick = () => download(`counterspace-${b.dataset.export}.svg`, exportSVG(b.dataset.export), 'image/svg+xml'));
@@ -572,8 +789,9 @@ document.getElementById('themeBtn').onclick = () => {
 };
 
 // ---------------------------------------------------------------- boot
-function drawAll() { guides.length = 0; drawLegal(); drawA(); drawC(); drawB(); drawL(); }
-chipsB(); drawAll(); drawMethod(); startHero();
+function drawAll() { guides.length = 0; drawLegal(); drawA(); drawC(); drawB(); drawL(); legalScroll(); }
+if (innerWidth < 640) document.querySelector('#chartB details.table')?.setAttribute('open', '');
+chipsB(); drawLegalKey(); drawAll(); drawMethod(); startHero();
 // Earth imagery (~1.5 MB) is not part of the page: it is prefetched once the page has
 // loaded and the browser is idle, and skipped entirely without WebGL or with reduced motion.
 function prefetchEarth() { getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
@@ -582,4 +800,4 @@ let rz = 0, lastW = innerWidth; addEventListener('resize', () => { if (innerWidt
 document.addEventListener('keydown', e => { if (e.key === 'Escape') hideCard(); });
 
 // Test / export hooks (no storage).
-window.__cs = { earthReady, EARTH_URL, exportSVG, openScene, closeScene, memory: () => host?.memory(), contexts: () => document.querySelectorAll('canvas').length, scenes: ORDER.map(s => s.id), host: () => host };
+window.__cs = { earthReady, EARTH_URL, exportSVG, audit, openScene, closeScene, memory: () => host?.memory(), contexts: () => document.querySelectorAll('canvas').length, scenes: ORDER.map(s => s.id), host: () => host };
