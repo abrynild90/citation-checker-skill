@@ -1,8 +1,10 @@
-// Chart A: kinetic tests, altitude on a log axis, with debris bubbles.
-// ---------------------------------------------------------------- Chart A
+// ============================================================================
+// charts/a.js: Chart A, kinetic tests by altitude (log axis) with debris bubbles.
+// Provides: drawA(), table().
+// ============================================================================
 function drawA(el = document.getElementById('svgA')) {
   el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhone();
+  const { W, M, x } = layout(el), phone = isPhoneNow();
   const top = 18, plotH = phone ? 300 : 380, stripH = 30, H = top + plotH + stripH + 30;
   const y = d3.scaleLog().domain([90, 48000]).range([top + plotH, top]);
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hA').attr('id', 'svgA-root');
@@ -86,8 +88,7 @@ function drawA(el = document.getElementById('svgA')) {
   addGuide(svg, x, top, top + plotH + stripH);
   // legend
   if (EXPORTING) return;
-  const L = document.getElementById('legendA'); L.innerHTML = '';
-  const li = (svgInner, text, w = 22, h = 18) => { L.insertAdjacentHTML('beforeend', `<li><svg width="${w}" height="${h}" viewBox="${-w / 2} ${-h / 2} ${w} ${h}" aria-hidden="true">${svgInner}</svg>${text}</li>`); };
+  const L = legend('legendA', 22, 18), li = L.item;
   li('<circle r="5" style="fill:var(--text)"/>', 'Intercept altitude (destructive)');
   li('<path d="M0,-6L6,5L-6,5Z" style="fill:var(--text)"/>', 'Intercept of a missile (suborbital) target');
   li('<circle r="5" style="fill:none;stroke:var(--text);stroke-width:2"/>', 'Apogee, flyby or non-intercept test');
@@ -95,7 +96,8 @@ function drawA(el = document.getElementById('svgA')) {
   li('<g class="badge3d"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>', 'Has a 3D scene');
   ['United States', 'Russia', 'China', 'India'].forEach(s => li(`<rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:${colorOf(s)}"/>`, s === 'Russia' ? 'USSR / Russia' : s));
   const sizes = [100, 1000, 3500], mx = rD(3500), bw = mx * 2 + 46;
-  L.insertAdjacentHTML('beforeend', `<li class="wide"><svg width="${bw}" height="${mx * 2 + 6}" viewBox="0 0 ${bw} ${mx * 2 + 6}" aria-hidden="true">${sizes.map(sz => `<circle cx="${mx + 2}" cy="${mx * 2 + 3 - rD(sz)}" r="${rD(sz)}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/><text x="${mx * 2 + 8}" y="${mx * 2 + 3 - rD(sz) * 2 + 9}" style="fill:var(--muted);font:10px var(--sans)">${d3.format(',')(sz)}</text>`).join('')}</svg><span>Debris bubble area = cataloged fragments (as of Feb. 2026). Still-in-orbit counts appear in cards and the table, never on this scale.</span></li>`);
+  L.raw(`<li class="wide"><svg width="${bw}" height="${mx * 2 + 6}" viewBox="0 0 ${bw} ${mx * 2 + 6}" aria-hidden="true">${sizes.map(sz => `<circle cx="${mx + 2}" cy="${mx * 2 + 3 - rD(sz)}" r="${rD(sz)}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/><text x="${mx * 2 + 8}" y="${mx * 2 + 3 - rD(sz) * 2 + 9}" style="fill:var(--muted);font:10px var(--sans)">${d3.format(',')(sz)}</text>`).join('')}</svg><span>Debris bubble area = cataloged fragments (as of Feb. 2026). Still-in-orbit counts appear in cards and the table, never on this scale.</span></li>`);
+  L.done();
   // table
   table('tableA', ['Date', 'State', 'System', 'Target', 'Type', 'Altitude (km)', 'Kind', 'Cataloged', 'In orbit', 'Conf.', 'Source'],
     KIN.map(e => [e.date, e.state, e.system, e.target, TYPE_LABEL[e.type], e.altitude_km ?? '—', e.altitude_kind, num(e.fragments_cataloged), num(e.fragments_in_orbit), e.confidence, srcCell(e)]));
@@ -104,6 +106,6 @@ const srcCell = r => `<a href="${esc(r.source_url)}" target="_blank" rel="noopen
 // Accessible data table. Each cell carries data-label so CSS can stack rows as cards on phones (no horizontal scroll).
 const CAPTIONS = { tableA: 'Chart A data: kinetic counterspace tests, one row per event', tableB: 'Chart B data: states holding each capability, by decade', tableC: 'Chart C data: non-kinetic operations, one row per event or campaign', tableL: 'The lag: capability and response dates for each pair', tableLegal: 'Law and policy items with abbreviations' };
 function table(id, head, rows, caption = CAPTIONS[id]) {
-  document.getElementById(id).innerHTML = `<table>${caption ? `<caption>${esc(caption)}</caption>` : ''}<thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  setOnce(id, `<table>${caption ? `<caption>${esc(caption)}</caption>` : ''}<thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
 }
 

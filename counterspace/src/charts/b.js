@@ -1,5 +1,7 @@
-// Chart B: capability diffusion, stacked step area by decade.
-// ---------------------------------------------------------------- Chart B
+// ============================================================================
+// charts/b.js: Chart B, capability diffusion (stacked step area by decade).
+// Provides: drawB(), chipsB().
+// ============================================================================
 const CATS = [
   { key: 'direct_ascent', label: 'Direct-ascent ASAT', v: '--cat-da', kin: true },
   { key: 'co_orbital', label: 'Co-orbital', v: '--cat-co', kin: true },
@@ -20,7 +22,7 @@ function countsB() {
 }
 function drawB(el = document.getElementById('svgB')) {
   el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhone();
+  const { W, M, x } = layout(el), phone = isPhoneNow();
   // annotation lives in its own band ABOVE the plot, so it never sits on the data
   const ew20 = Object.keys(CAPS.coding.electronic_warfare['2020s']).length;
   const da20 = Object.entries(CAPS.coding.direct_ascent['2020s']).filter(([, v]) => v === 'D').map(([k]) => k);
@@ -63,15 +65,20 @@ function drawB(el = document.getElementById('svgB')) {
     ? 'Vertical axis: state-capability pairs. A state with two capabilities is counted twice.'
     : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.';
   // legend + chips
-  const L = document.getElementById('legendB'); L.innerHTML = '';
-  L.insertAdjacentHTML('beforeend', `<li><svg width="18" height="12" aria-hidden="true"><rect width="18" height="12" style="fill:var(--muted)"/></svg>Demonstrated (tested or used)</li><li><svg width="18" height="12" aria-hidden="true"><defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect width="18" height="12" fill="url(#lh)"/></svg>Developing or latent</li>`);
+  legend('legendB', 18, 12)
+    .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted)"/>', 'Demonstrated (tested or used)')
+    .item('<defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#lh)"/>', 'Developing or latent').done();
   table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P'); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}`; })]));
 }
+// Chips are built once and updated in place, so a toggle never drops keyboard focus.
 function chipsB() {
-  const el = document.getElementById('chipsB'); el.innerHTML = '';
-  CATS.forEach(c => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', stateB.on.has(c.key)); b.innerHTML = `<i style="background:var(${c.v})"></i>${c.label}`;
-    b.disabled = stateB.group !== 'cat';
-    b.onclick = () => { stateB.on.has(c.key) ? stateB.on.delete(c.key) : stateB.on.add(c.key); if (!stateB.on.size) stateB.on.add(c.key); chipsB(); drawB(); }; el.appendChild(b); });
+  const el = document.getElementById('chipsB');
+  if (!el.children.length) CATS.forEach(c => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.key = c.key; b.innerHTML = `<i style="background:var(${c.v})"></i>${c.label}`;
+    b.onclick = () => { stateB.on.has(c.key) ? stateB.on.delete(c.key) : stateB.on.add(c.key); if (!stateB.on.size) stateB.on.add(c.key); chipsB(); drawB(); };
+    el.appendChild(b);
+  });
+  [...el.children].forEach(b => { b.setAttribute('aria-pressed', stateB.on.has(b.dataset.key)); b.disabled = stateB.group !== 'cat'; });
 }
 document.getElementById('cFocus').onclick = () => { stateC.focus = true; drawC(); };
 document.getElementById('cFull').onclick = () => { stateC.focus = false; drawC(); };

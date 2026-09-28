@@ -1,11 +1,13 @@
-// Hover/focus card, roving tabindex, shared guide line.
-// ---------------------------------------------------------------- card (hover / focus)
+// ============================================================================
+// ui.js: hover/focus card, roving tabindex, shared guide line, write-once DOM helpers.
+// Provides: bindMark(), showCard(), rove(), addGuide(), setOnce(), legend().
+// ============================================================================
 const card = document.getElementById('card');
 function showCard(html, evt, el) {
   card.innerHTML = html; card.classList.add('on'); card.setAttribute('aria-hidden', 'false');
-  card.classList.toggle('dock', innerWidth < 640);
+  card.classList.toggle('dock', innerWidth < PHONE_MAX);
   card.dataset.touch = touchMode ? '1' : '';
-  if (innerWidth < 640) { card.style.left = ''; card.style.top = ''; return; }
+  if (innerWidth < PHONE_MAX) { card.style.left = ''; card.style.top = ''; return; }
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth, ch = card.offsetHeight;
   let left = r.right + 12, top = r.top - 8;
@@ -78,4 +80,17 @@ function rove(sel) {
     });
     n.addEventListener('focus', () => nodes.forEach(m => m.setAttribute('tabindex', m === n ? 0 : -1)));
   });
+}
+
+// ---------------------------------------------------------------- write-once DOM (legends and tables do not depend on layout)
+const written = new Map();
+function setOnce(id, html) { if (written.get(id) === html) return; written.set(id, html); document.getElementById(id).innerHTML = html; }
+// Legend builder: legend('legendA', 22, 18).item(svgInner, text[, w]).raw(html).done()
+function legend(id, w = 22, h = 16) {
+  const parts = [], api = {
+    item: (inner, text, iw = w) => (parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg>${text}</li>`), api),
+    raw: html => (parts.push(html), api),
+    done: () => setOnce(id, parts.join('')),
+  };
+  return api;
 }

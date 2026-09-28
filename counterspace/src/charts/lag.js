@@ -1,5 +1,7 @@
-// The lag panel: capability milestone to legal response.
-// ---------------------------------------------------------------- Lag panel
+// ============================================================================
+// charts/lag.js: the lag panel, capability milestone to legal response.
+// Provides: drawL().
+// ============================================================================
 const LAG = [
   { cap: 'us-1959-bold-orion', law: 'ost-1967', text: 'First DA-ASAT flyby → Outer Space Treaty (silent on conventional ASATs)' },
   { cap: 'us-1962-starfish-prime', law: 'ltbt-1963', text: 'Starfish Prime → Limited Test Ban Treaty (followed it)' },
@@ -15,7 +17,7 @@ const HEX = 'M0,-6.5L5.6,-3.25L5.6,3.25L0,6.5L-5.6,3.25L-5.6,-3.25Z';
 const ELBOW = 17, SHORT_PX = 40;
 // Geometry of one pair. Short lags (glyphs would overprint) get a taller row so the milestone can sit well above the response.
 function lagRow(p, lines, x, FS) {
-  const c = byId[p.cap], l = p.law ? byId[p.law] : null, xa = x(capDate(c)), xb = x(l ? parse(l.start) : DOMAIN[1]);
+  const c = byId[p.cap], l = p.law ? byId[p.law] : null, xa = x(capDate(c)), xb = l ? x(parse(l.start)) : x(DOMAIN[1]) - 9; // open ring sits just inside the axis end
   const short = !!l && Math.abs(xb - xa) < SHORT_PX, w = Math.max(...lines.map(s => tw(s, FS)));
   return { p, c, l, lines, w, xa, xb, short, rowH: lines.length * (FS + 3) + 64 + (short ? 2 * ELBOW - 8 : 0) };
 }
@@ -42,10 +44,10 @@ function drawL(el = document.getElementById('svgL')) {
     // Short lags: lift the milestone and drop the response, joined by an elbow connector; x stays truthful to the dates.
     const ya = short ? yy - ELBOW : yy, yb = short ? yy + ELBOW : yy;
     if (short) g.append('path').attr('d', `M${xa},${ya}H${xb}V${yb}`).style('fill', 'none').style('stroke', col).style('stroke-width', 2.5);
-    else g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 9)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
+    else g.append('line').attr('x1', xa).attr('x2', xb).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
     g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${ya}) scale(1.45)`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
     if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yb}) scale(1.7)`), l);
-    else g.append('circle').attr('cx', xb - 9).attr('cy', yy).attr('r', 8).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
+    else g.append('circle').attr('cx', xb).attr('cy', yb).attr('r', 8).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
     const lw = tw(lagTxt, 12, 600), mid = Math.max(14 + lw / 2, Math.min(W - 14 - lw / 2, (xa + xb) / 2));
     if (short) { const lagTxtS = years < 1 ? `${Math.round(years * 12)} mo` : lagTxt, lw = tw(lagTxtS, 12, 600); const left = Math.min(xa, xb) - 18 - lw >= 4; g.append('text').attr('x', left ? Math.min(xa, xb) - 18 : Math.max(xa, xb) + 18).attr('y', yy + 4).attr('text-anchor', left ? 'end' : 'start').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxtS); }
     else g.append('text').attr('x', mid).attr('y', yy + 27).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
@@ -55,14 +57,14 @@ function drawL(el = document.getElementById('svgL')) {
   addGuide(svg, x, top, yAx);
   rove(svg.selectAll('.mark'));
   if (EXPORTING) return;
-  const L = document.getElementById('legendL'); L.innerHTML = '';
-  const li = (inner, text) => L.insertAdjacentHTML('beforeend', `<li><svg width="20" height="16" viewBox="-10 -8 20 16" aria-hidden="true">${inner}</svg>${text}</li>`);
+  const L = legend('legendL', 20, 16), li = L.item;
   li(`<path d="${HEX}" style="fill:var(--cat-da)"/>`, 'Kinetic capability milestone');
   li(`<path d="${HEX}" style="fill:var(--cat-ew)"/>`, 'Non-kinetic milestone');
   li('<circle r="5.5" style="fill:var(--accent)"/>', 'Response: treaty (binding)');
   li('<rect x="-5" y="-5" width="10" height="10" style="fill:var(--accent)"/>', 'Response: resolution or body finding (non-binding)');
   li('<path d="M0,-6.5L6.5,5L-6.5,5Z" style="fill:var(--accent)"/>', 'Response: unilateral pledge');
   li('<circle r="5" style="fill:none;stroke:var(--accent);stroke-width:2"/>', 'No binding rule yet');
+  L.done();
   table('tableL', ['Pair', 'Capability date', 'Response date', 'Response kind', 'Lag (years)', 'Ledger rows'], rows);
 }
 

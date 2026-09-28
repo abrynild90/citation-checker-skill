@@ -1,5 +1,7 @@
-// Sources and methodology section.
-// ---------------------------------------------------------------- methodology section
+// ============================================================================
+// method.js: sources and methodology section.
+// Provides: drawMethod().
+// ============================================================================
 function drawMethod() {
   // one entry per distinct source URL: a full citation (legal rows carry their own; event sources are expanded below) plus the pin(s)
   const bare = t => esc(t).replace(/,\s*https?:\/\/\S+$/, '');
@@ -13,6 +15,7 @@ function drawMethod() {
   <h3>Editions and “as of” dates</h3>
   <ul><li><b>Primary:</b> Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen Brett eds., 9th ed., Apr. 2026). 13 countries, five categories. The 13-country count is a 2026 figure, not a historical constant. Debris counts as of Feb. 2026 (SWF Table 5-1).</li>
   <li><b>Secondary:</b> CSIS Aerospace Security Project, <i>Space Threat Assessment 2025</i>. The 2026 edition was not published when this page was built (Sept. 2026).</li>
+  <li><b>Framing claim:</b> the intro’s statement that only non-destructive capabilities are in active use is SWF’s finding, not this page’s: SWF 2026, Executive Summary, p. xxiii (PDF p. 21): “only non-destructive capabilities are actively being used against satellites in current military operations.”</li>
   <li><b>Baseline check:</b> no destructive DA-ASAT test appears after ${fmt(parse(LAST_DA))} in SWF 2026 (Table 5-1 ends with Cosmos 1408).</li></ul>
   <h3>Coding rules</h3>
   <ul><li><b>Chart A:</b> altitude is the intercept altitude from SWF Table 5-1 for destructive tests, and the apogee from Tables 1-4, 2-4 and 3-3 for other tests. Tests without a reported altitude sit in a separate strip and are not placed on the scale. Soviet co-orbital (IS) tests are excluded from the scatter and counted only in Chart B. Starfish Prime is the only nuclear test shown.</li>

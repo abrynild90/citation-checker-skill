@@ -1,5 +1,7 @@
-// Scene overlay (dialog, scrubber, camera presets) and hero.
-// ---------------------------------------------------------------- scenes: host, overlay, hero
+// ============================================================================
+// scene-ui.js: scene overlay (dialog, scrubber, camera presets, still export) and the hero.
+// Provides: openScene(), closeScene(), exportStill(), startHero(); owns the single WebGL host.
+// ============================================================================
 let THREE = null, host = null, glOK = null;
 async function getHost() {
   if (REDUCED) return null;
@@ -41,11 +43,14 @@ async function openScene(id, originEl) {
     renderSVG(sim, view);
   }
   staticMode(!h);
+  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : 'Static diagram.'}`);
   document.getElementById('scClose').focus();
 }
+// While the dialog is open the page behind it is inert (no focus, not read out).
+function setInert(on) { document.querySelectorAll('header.top, main, footer, #card').forEach(n => { n.inert = on; }); }
 function closeScene() {
   if (!cur) return;
-  cur = null; overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); document.body.style.overflow = '';
+  cur = null; setInert(false); setStatus(''); overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); document.body.style.overflow = '';
   if (host) { host.unload(); }
   view.querySelector(':scope > svg')?.remove();
   startHero();
@@ -77,10 +82,33 @@ document.getElementById('scRelated').onclick = () => {
   m.classList.add('hl', 'flash-hl'); m.focus(); setGuide(parse(byId[id].start));
   setTimeout(() => { m.classList.remove('hl', 'flash-hl'); }, 3500);
 };
-document.getElementById('scExport').onclick = () => {
-  if (!cur) return;
-  if (host && glOK) download(`scene-${cur.id}.png`, host.stillPNG(cur.title, cur.cite), 'image/png');
-  else { const s = view.querySelector('svg'); const xml = new XMLSerializer().serializeToString(s); const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = s.viewBox.baseVal.width * 2; c.height = s.viewBox.baseVal.height * 2; const g = c.getContext('2d'); g.drawImage(img, 0, 0, c.width, c.height); download(`scene-${cur.id}.png`, c.toDataURL('image/png')); }; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml); }
+// Still export. WebGL scenes use the host's renderer; static diagrams are rasterised from their SVG at print width (3000 px) with a caption band.
+const PRINT_W = 3000, BAND = 84;
+function svgToPNG(svg, title, cite) {
+  return new Promise((resolve, reject) => {
+    const vb = svg.viewBox.baseVal, k = PRINT_W / vb.width, xml = new XMLSerializer().serializeToString(svg), img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'), g = c.getContext('2d'); c.width = PRINT_W; c.height = Math.round(vb.height * k) + BAND;
+      g.fillStyle = '#060912'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, PRINT_W, Math.round(vb.height * k));
+      g.fillStyle = '#e9edf7'; g.font = '600 30px system-ui,sans-serif'; g.fillText(title, 24, vb.height * k + 34);
+      g.fillStyle = '#a9b3cc'; g.font = '22px system-ui,sans-serif'; g.fillText(`Static diagram, not orbit-propagated. ${cite}`, 24, vb.height * k + 68);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('The diagram could not be rasterised'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  });
+}
+async function exportStill() {
+  if (!cur) return null;
+  if (host && glOK) return host.stillPNG(cur.title, cur.cite);
+  const svg = view.querySelector(':scope > svg'); if (!svg) throw new Error('No diagram to export');
+  return svgToPNG(svg, cur.title, cur.cite);
+}
+function setStatus(msg) { document.getElementById('scStatus').textContent = msg; }
+document.getElementById('scExport').onclick = async () => {
+  const c = cur; if (!c) return;
+  try { setStatus('Preparing PNG…'); const url = await exportStill(); download(`scene-${c.id}.png`, url, 'image/png'); setStatus('Saved scene-' + c.id + '.png'); }
+  catch (e) { setStatus('Export failed: ' + e.message + '. Use your browser’s screenshot tool instead.'); }
 };
 document.getElementById('tourBtn').onclick = e => openScene(ORDER[0].id, e.currentTarget);
 overlay.addEventListener('keydown', e => {

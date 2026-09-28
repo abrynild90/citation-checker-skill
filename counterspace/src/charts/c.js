@@ -1,5 +1,7 @@
-// Chart C: non-kinetic operations as swimlanes.
-// ---------------------------------------------------------------- Chart C
+// ============================================================================
+// charts/c.js: Chart C, non-kinetic operations as swimlanes.
+// Provides: drawC(), stateC.
+// ============================================================================
 const LANES = [
   { key: 'ew', label: 'EW: uplink / downlink jamming', cats: ['ew_uplink', 'ew_downlink'] },
   { key: 'gnss', label: 'GNSS jamming & spoofing', cats: ['gnss_jamming', 'gnss_spoofing'] },
@@ -90,7 +92,7 @@ function drawC(el = document.getElementById('svgC')) {
     if (!ok) hg.append('text').attr('x', HX - 5).attr('y', yCur - 6).attr('text-anchor', 'end').text(t); }
   if (!phone && !stateC.focus) {
     const ax = x(parse('1959-01-01')), t = svg.append('text').attr('x', ax).attr('y', LANES[0].y0 + 40);
-    ['Non-kinetic effects are reversible, deniable, and used', 'repeatedly in real conflicts. The rules that govern them', 'are soft law (expert manuals) or carry military', 'exemptions (ITU Constitution Art. 48). See legal band.'].forEach((s, i) => t.append('tspan').attr('x', ax).attr('dy', i ? 15 : 0).attr('class', 'ann-sub').style('font-weight', i === 0 ? 600 : null).style('fill', 'var(--text)').text(s));
+    ['SWF 2026: only non-destructive capabilities are actively', 'used against satellites in current military operations.', 'The rules that govern them are soft law (expert manuals)', 'or carry military exemptions (ITU Constitution Art. 48).'].forEach((s, i) => t.append('tspan').attr('x', ax).attr('dy', i ? 15 : 0).attr('class', 'ann-sub').style('font-weight', i === 0 ? 600 : null).style('fill', 'var(--text)').text(s));
   }
   const g = svg.append('g').selectAll('g').data(placed).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.e.id).attr('data-t', d => +parse(d.e.start))
     .attr('aria-label', d => { const e = d.e; return `${e.actor}: ${e.target_system}. ${e.end === e.start ? fmt(parse(e.start)) : `${fmtY(parse(e.start))} to ${e.end ? fmtY(parse(e.end)) : 'ongoing'}`}. Attribution: ${ATTR_LABEL[e.attribution]}.${hasScene(e) ? ' Opens 3D scene.' : ''}`; });
@@ -116,20 +118,20 @@ function drawC(el = document.getElementById('svgC')) {
     ? 'This chart’s axis starts in 1995, not 1957: the ledger’s earliest non-kinetic entry is the 1997 MIRACL laser test, so 1957–1994 would be blank and would squeeze every label. Guide lines still follow the shared year axis. Choose “Full span” to align the axis with Charts A and B.'
     : 'Full span 1957–2026, on the same axis as Charts A and B. Until the late 1990s the ledger records no non-kinetic operations.';
   document.getElementById('cFocus').setAttribute('aria-pressed', stateC.focus); document.getElementById('cFull').setAttribute('aria-pressed', !stateC.focus);
-  const L = document.getElementById('legendC'); L.innerHTML = '';
-  const li = (inner, text, w = 26) => L.insertAdjacentHTML('beforeend', `<li><svg width="${w}" height="16" viewBox="${-w / 2} -8 ${w} 16" aria-hidden="true">${inner}</svg>${text}</li>`);
+  const L = legend('legendC', 26, 16), li = L.item;
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:var(--text)"/>', 'Official or multi-government attribution');
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:none;stroke:var(--text);stroke-width:2"/>', 'Researcher / OSINT attribution');
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:none;stroke:var(--text);stroke-width:2;stroke-dasharray:4 2.5"/>', 'Alleged');
   li('<path d="M-8,-6L2,0L-8,6Z" style="fill:var(--text)"/>', 'Ongoing');
-  L.insertAdjacentHTML('beforeend', '<li class="lsep" aria-hidden="true"></li>');
+  L.raw('<li class="lsep" aria-hidden="true"></li>');
   li('<path d="M0,-4.5L4.5,3.5L-4.5,3.5Z" style="fill:var(--muted)"/>', 'GNSS (MEO signals)', 14);
   li('<circle r="4" style="fill:none;stroke:var(--muted);stroke-width:1.5"/><circle r="1.3" style="fill:var(--muted)"/>', 'GEO comms', 14);
   li('<circle cx="-3.5" r="1.5" style="fill:var(--muted)"/><circle r="1.5" style="fill:var(--muted)"/><circle cx="3.5" r="1.5" style="fill:var(--muted)"/>', 'LEO constellation', 14);
   li('<rect x="-4" y="0" width="8" height="4" style="fill:var(--muted)"/><path d="M0,0V-5M-3,-3L0,-5L3,-3" style="fill:none;stroke:var(--muted)"/>', 'Ground segment', 14);
   li('<path d="M0,-4.5L4.5,0L0,4.5L-4.5,0Z" style="fill:var(--muted)"/>', 'LEO imaging / ISR', 14);
-  L.insertAdjacentHTML('beforeend', '<li class="lsep" aria-hidden="true"></li>');
+  L.raw('<li class="lsep" aria-hidden="true"></li>');
   ['Russia', 'China', 'United States', 'Iran', 'North Korea', 'Israel', 'Iraq'].forEach(s => li(`<rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:${colorOf(s)}"/>`, s, 14));
+  L.done();
   table('tableC', ['Start', 'End', 'Actor', 'Category', 'Attribution (as source states)', 'Target', 'Operational', 'Conf.', 'Source'],
     NK.map(e => [e.start, e.end === e.start ? '(discrete)' : e.end || 'ongoing', e.actor, e.category, ATTR_LABEL[e.attribution], `${e.target_system} [${REGIME_LABEL[e.target_regime]}]`, e.operational_use ? 'yes' : 'no', e.confidence, srcCell(e)]));
 }

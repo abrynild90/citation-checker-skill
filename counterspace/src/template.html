@@ -55,7 +55,8 @@ a{color:var(--accent)}
 header.top{padding:28px 0 8px}
 .top-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:8px 32px;align-items:start}
 .toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-.glance{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:grid;gap:8px}
+.glance{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.glance dl{display:grid;gap:8px;margin:10px 0 0}
 .glance div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--muted)}
 .glance dt{margin:0}.glance dd{margin:0;color:var(--text);font:600 15px var(--sans);text-align:right}
 .glance h2{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-2);margin:0}
@@ -178,6 +179,7 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
   background:var(--surface-2);color:var(--text);cursor:pointer;min-height:30px}
 .chip[aria-pressed="false"]{opacity:.72;text-decoration:line-through;color:var(--muted);border-style:dashed}
 .chip:disabled{opacity:.55;cursor:not-allowed}
+@media (max-width:640px){.chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}.chip{flex:none;font-size:12px;padding:4px 8px}}
 .chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
 
 /* lag + sources */
@@ -204,6 +206,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
 .panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .panel aside{padding:14px;border-left:1px solid #2a3558;overflow:auto;font-size:14px;color:#cdd5e8}
+.panel a{color:#8cc8ff}
 .panel aside h3{color:#fff;margin-top:6px}
 .panel aside .src{font-size:12.5px;color:#a9b3cc}
 .panel .ctrl{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid #2a3558}
@@ -268,7 +271,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
       <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
       <button class="btn small" id="tourBtn" type="button">▶ Start scene tour</button>
     </div>
-    <dl class="glance" aria-label="The ledger at a glance" id="glance"></dl>
+    <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
   </div></div>
 </header>
 
@@ -381,7 +384,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
       <div class="hd"><h2 id="sceneTitle">Scene</h2></div>
       <div class="nav">
         <button class="btn small" id="scPrev" type="button" aria-label="Previous scene">◀<span class="lbl"> Previous</span></button>
-        <span class="count" id="sceneDate" role="status" aria-label="Scene number"></span>
+        <span class="count" id="sceneDate" aria-label="Scene number"></span>
         <button class="btn small" id="scNext" type="button" aria-label="Next scene"><span class="lbl">Next </span>▶</button>
         <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕<span class="lbl"> Close</span></button>
       </div>
@@ -400,13 +403,14 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
       <span class="tm" id="scTime" aria-hidden="true"></span>
       <span class="static-note" id="scStatic" hidden>Static diagram: no timeline (reduced motion or no WebGL).</span>
       <span id="scCams" style="display:flex;gap:6px"></span>
+      <span class="static-note" id="scStatus" role="status" aria-live="polite"></span>
       <button class="btn small" id="scExport" type="button">Export still (PNG)</button>
     </div>
   </div>
 </div>
 
 <script id="cs-data" type="application/json">/*__DATA__*/</script>
-<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script type="module">
 /*__APP__*/
 </script>

@@ -1,8 +1,10 @@
 // ============================================================================
-// Counterspace Timeline: charts, legal band, lag panel, scene overlay.
+// app.js: shared state, constants and helpers.
+// Provides: data (EVENTS, LEGAL, CAPS), layout(), tw()/wrap() text measurement, Placer (label collision), badge(), timed().
 // ============================================================================
 import { SCENES, HERO, buildSim, GLHost, renderSVG, setLand, PARTICLE_BUDGET, loadEarth, earthReady, EARTH_URL } from './scenes.js';
 
+performance.mark('cs:module-start');
 const D = JSON.parse(document.getElementById('cs-data').textContent);
 setLand(D.land);
 const EVENTS = D.events, LEGAL = D.legal, CAPS = D.caps;
@@ -11,6 +13,8 @@ const NK = EVENTS.filter(e => e.domain === 'non_kinetic');
 const byId = Object.fromEntries([...EVENTS, ...LEGAL].map(r => [r.id, r]));
 const parse = d3.utcParse('%Y-%m-%d');
 const fmt = d3.utcFormat('%b %-d, %Y'), fmtY = d3.utcFormat('%Y'), fmtMY = d3.utcFormat('%b %Y');
+// Timing: performance marks/measures named cs:* (read with __cs.perf()).
+const timed = (name, fn) => { const t0 = performance.now(), r = fn(); performance.measure('cs:' + name, { start: t0, end: performance.now() }); return r; };
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const DOMAIN = [parse('1957-01-01'), parse('2027-01-01')];
 const AS_OF = 'SWF 9th ed., Apr. 2026';
@@ -19,7 +23,7 @@ const LAST_DA = KIN.filter(e => e.type === 'destructive').map(e => e.date).sort(
 document.getElementById('asof').innerHTML = `Data as of: <b>${AS_OF}</b> (debris counts as of Feb. 2026) · CSIS <i>Space Threat Assessment 2025</i> (2026 ed. not yet published) · Page built Sept. 2026`;
 
 { const nDest = KIN.filter(e => e.type === 'destructive').length;
-  document.getElementById('glance').innerHTML = `<h2>The ledger at a glance</h2><div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
+  document.getElementById('glance').innerHTML = `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
 // ---------------------------------------------------------------- palette & helpers
 const STATE_VAR = { 'United States': '--c-us', 'Russia': '--c-ru', 'China': '--c-cn', 'India': '--c-in', 'Iran': '--c-ir', 'North Korea': '--c-kp', 'Israel': '--c-il', 'Iraq': '--c-iq' };
 const actorKey = a => Object.keys(STATE_VAR).find(k => a.startsWith(k) || (k === 'Iran' && a.startsWith('Iran'))) || (a.startsWith('Israel') ? 'Israel' : null);
@@ -29,11 +33,11 @@ const ATTR_LABEL = { official_government: 'Official (single government)', multi_
 const REGIME_LABEL = { GNSS_MEO: 'GNSS receivers (MEO signals)', GEO_comms: 'GEO communications', LEO_constellation: 'LEO constellation', ground_segment: 'Ground segment', ISR_LEO: 'LEO imaging / ISR' };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const num = n => n == null ? '—' : d3.format(',')(n);
-const isPhone = () => isPhoneNow();
 const hasScene = r => r.scene_3d && SCENES.some(s => s.id === r.scene_3d);
 
 let FORCE_DESKTOP = false, EXPORTING = false;
-const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < 640;
+const PHONE_MAX = 640; // px: below this width the page uses its phone layouts
+const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < PHONE_MAX;
 function layout(el, domain = DOMAIN, minW = 300) {
   const W = Math.max(minW, el.clientWidth), ph = isPhoneNow();
   const M = { l: ph ? 40 : 64, r: ph ? 12 : 68 };
@@ -51,11 +55,6 @@ function tw(text, size, weight = 400) {
   sansCache ??= getComputedStyle(document.documentElement).getPropertyValue('--sans').trim() || 'sans-serif';
   mctx.font = `${weight} ${size}px ${sansCache}`;
   return mctx.measureText(text).width * 1.04 + 1;
-}
-function fit(text, maxW, size, weight) {
-  if (tw(text, size, weight) <= maxW) return text;
-  let t = text; while (t.length > 3 && tw(t + '…', size, weight) > maxW) t = t.slice(0, -1);
-  return t.trimEnd() + '…';
 }
 function wrap(text, maxW, size, weight) {
   const words = text.split(' '), lines = []; let cur = '';
