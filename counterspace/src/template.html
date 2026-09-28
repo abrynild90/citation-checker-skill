@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counterspace Timeline</title>
+<meta name="description" content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere.">
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0a0f1e; --surface:#10172c; --surface-2:#172040; --line:#2a3558; --grid:#212b4a;
+  --text:#e9edf7; --muted:#a9b3cc; --faint:#7d88a6; --accent:#8cc8ff; --accent-2:#ffcf6e;
+  --warn:#ff9b7a; --focus:#ffd24d;
+  --leo:rgba(120,170,255,.10); --meo:rgba(160,130,255,.08); --geo:rgba(255,200,110,.13);
+  --recon:rgba(255,255,255,.035);
+  --c-us:#56B4E9; --c-ru:#FF8C5A; --c-cn:#F0C24B; --c-in:#3FD0A0; --c-ir:#CFA3E6;
+  --c-kp:#FF9ECF; --c-il:#C3CDDE; --c-iq:#D9C38A; --c-multi:#B9C2D6;
+  --cat-da:#FF8C5A; --cat-co:#F0C24B; --cat-ew:#56B4E9; --cat-de:#CFA3E6; --cat-cy:#3FD0A0;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
+    --text:#1b1f2a; --muted:#4a5162; --faint:#6b7282; --accent:#1f5fa8; --accent-2:#8a5a00;
+    --warn:#b2401c; --focus:#b36b00;
+    --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
+    --recon:rgba(0,0,0,.035);
+    --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#8F6400; --c-in:#007A5A; --c-ir:#8E44AD;
+    --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
+    --cat-da:#C4501A; --cat-co:#8F6400; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
+    --shadow:0 10px 30px rgba(0,0,0,.15);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
+  --text:#1b1f2a; --muted:#4a5162; --faint:#6b7282; --accent:#1f5fa8; --accent-2:#8a5a00;
+  --warn:#b2401c; --focus:#b36b00;
+  --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
+  --recon:rgba(0,0,0,.035);
+  --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#8F6400; --c-in:#007A5A; --c-ir:#8E44AD;
+  --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
+  --cat-da:#C4501A; --cat-co:#8F6400; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
+  --shadow:0 10px 30px rgba(0,0,0,.15);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);overflow-x:hidden}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{padding:28px 0 8px}
+.kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
+h1{font:600 clamp(28px,4.4vw,46px)/1.1 var(--serif);margin:10px 0 10px;letter-spacing:-.01em}
+h2{font:600 clamp(21px,2.6vw,28px)/1.2 var(--serif);margin:0 0 6px}
+h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
+.lede{max-width:760px;color:var(--muted);font-size:17px;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:14px;font-size:13px;color:var(--faint)}
+.btn{font:500 13px/1 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:34px}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn.small{padding:6px 9px;font-size:12px;min-height:30px}
+
+/* hero */
+.hero{position:relative;margin:18px 0 8px;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  background:radial-gradient(120% 90% at 70% 40%,#16224a 0%,#070b17 70%);height:min(62vh,520px);min-height:340px}
+.hero .stage{position:absolute;inset:0}
+.hero .stage canvas,.hero .stage svg{width:100%;height:100%;display:block}
+.hero .copy{position:absolute;left:0;bottom:0;right:0;padding:18px 20px;background:linear-gradient(transparent,rgba(5,8,18,.88));color:#e9edf7}
+.hero .copy p{margin:0;max-width:640px;font-size:15px;color:#cfd6e8}
+.hero .prompt{display:inline-flex;gap:8px;align-items:center;font-weight:600;color:#ffe08a;margin-bottom:6px}
+.illus{position:absolute;top:10px;left:10px;font:600 11px/1.2 var(--sans);letter-spacing:.04em;background:rgba(5,8,18,.75);
+  color:#ffe08a;border:1px solid rgba(255,224,138,.45);border-radius:6px;padding:5px 8px;z-index:2;max-width:70%}
+.hlabel{position:absolute;font:600 11px/1 var(--sans);color:#dfe6f7;background:rgba(5,8,18,.6);padding:3px 6px;border-radius:4px;
+  pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
+
+/* timeline */
+#timeline{position:relative}
+.legal-band{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 94%,transparent);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:6px 0 2px}
+.legal-band .band-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--faint)}
+.legal-band .band-head b{color:var(--text);font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.legal-band svg{display:block;width:100%}
+section.chart{padding:26px 0 8px;border-bottom:1px solid var(--grid)}
+.chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:flex-end}
+.chart-head p{margin:2px 0 0;color:var(--muted);max-width:760px;font-size:15px}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.svgbox{position:relative;margin-top:10px}
+.svgbox svg{display:block;width:100%;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin:10px 0 0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:6px}
+.legend svg{flex:none}
+.note{font-size:13px;color:var(--faint)}
+details.table{margin:10px 0 4px}
+details.table summary{cursor:pointer;font-size:13px;color:var(--accent);padding:6px 0}
+.tscroll{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
+th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
+.axis text{fill:var(--muted);font:11px var(--sans)}
+.axis path,.axis line{stroke:var(--line)}
+.gridline line{stroke:var(--grid)}
+.gridline path{display:none}
+.ann{fill:var(--text);font:600 12px var(--sans)}
+.ann-sub{fill:var(--muted);font:11.5px var(--sans)}
+.band-label{fill:var(--faint);font:600 10.5px var(--sans);letter-spacing:.08em}
+.mark{cursor:pointer}
+.mark:focus{outline:none}
+.mark:focus-visible .hit,.mark.hl .hit{stroke:var(--focus);stroke-width:3px;fill:transparent}
+.hit{fill:transparent;stroke:none}
+.guide{stroke:var(--accent-2);stroke-width:1.5;stroke-dasharray:4 3;pointer-events:none}
+.handoff line{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:2 3}
+.handoff text{fill:var(--warn);font:600 11px var(--sans)}
+.badge3d path{fill:var(--bg);stroke:var(--text);stroke-width:1.1}
+.badge3d path.top{fill:var(--text)}
+
+/* tooltip card */
+.card{position:fixed;z-index:60;max-width:320px;background:var(--surface);color:var(--text);border:1px solid var(--line);
+  border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;font-size:13px;pointer-events:none;opacity:0;transition:opacity .12s}
+.card.on{opacity:1}
+.card h4{margin:0 0 4px;font:600 14px/1.3 var(--sans)}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:6px 0}
+.card dt{color:var(--faint)}
+.card dd{margin:0}
+.card .src{color:var(--muted);font-size:12px;border-top:1px solid var(--grid);padding-top:6px;margin-top:6px}
+.card .hint{color:var(--accent-2);font-size:12px;margin-top:4px}
+
+/* chart B controls */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface-2);color:var(--text);cursor:pointer;min-height:30px}
+.chip[aria-pressed="false"]{opacity:.5;text-decoration:line-through}
+.chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+/* lag + sources */
+.lag-list{display:grid;gap:10px;margin-top:14px}
+.prose{max-width:820px}
+.prose p,.prose li{color:var(--muted)}
+.cites{font-size:13.5px}
+.cites li{margin-bottom:6px;word-break:break-word}
+footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
+
+/* scene overlay */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(3,5,12,.72);display:none;align-items:center;justify-content:center;padding:24px}
+.overlay.open{display:flex}
+.panel{width:min(1120px,100%);height:min(760px,100%);background:#0b1122;color:#e9edf7;border:1px solid #2a3558;border-radius:16px;
+  display:grid;grid-template-columns:1fr 320px;grid-template-rows:auto 1fr auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.panel header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #2a3558}
+.panel header h2{font-size:20px;margin:0}
+.panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
+.panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.panel aside{padding:14px;border-left:1px solid #2a3558;overflow:auto;font-size:14px;color:#cdd5e8}
+.panel aside h3{color:#fff;margin-top:6px}
+.panel aside .src{font-size:12.5px;color:#a9b3cc}
+.panel .ctrl{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid #2a3558}
+.panel .btn{background:#172040;color:#e9edf7;border-color:#2e3a63}
+.panel .btn[aria-pressed="true"]{background:#8cc8ff;color:#0a0f1e}
+.panel input[type=range]{flex:1;min-width:120px;accent-color:#8cc8ff}
+.panel .spacer{flex:1}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.flash-hl{animation:flash 1.6s ease 2}
+@keyframes flash{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px var(--focus))}}
+
+@media (max-width:760px){
+  .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(260px,1fr) auto auto;height:100%;border-radius:0}
+  .overlay{padding:0}
+  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:34vh}
+  .hero{height:380px}
+  .lede{font-size:16px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+@media print{
+  .legal-band{position:static}
+  .tools,.overlay,.hero .copy .prompt{display:none}
+}
+</style>
+</head>
+<body>
+<a class="sr" href="#timeline">Skip to timeline</a>
+<header class="top wrap">
+  <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
+  <h1>Counterspace, 1957–2026: the weapons and the law that trailed them</h1>
+  <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. Those non-kinetic methods are the only counterspace tools used in actual military operations. This page puts the technology and the legal response on one year axis.</p>
+  <div class="meta">
+    <span id="asof"></span>
+    <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
+    <button class="btn small" id="tourBtn" type="button">▶ Start scene tour</button>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <section class="hero" aria-label="Overview scene: Earth with LEO, MEO and GEO shells">
+    <div class="stage" id="heroStage"></div>
+    <div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div>
+    <div class="copy">
+      <div class="prompt"><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><g class="badge3d" style="--x:0"><path d="M0,-7 L6,-3.5 L0,0 L-6,-3.5Z" class="top" fill="#ffe08a"/><path d="M-6,-3.5 L0,0 L0,7 L-6,3.5Z" fill="none" stroke="#ffe08a"/><path d="M6,-3.5 L0,0 L0,7 L6,3.5Z" fill="none" stroke="#ffe08a"/></g></svg>Select any event with a 3D badge to explore it</div>
+      <p>Low Earth orbit (to ~2,000 km) holds imaging satellites, the ISS and broadband constellations. GPS sits in medium Earth orbit (~20,200 km). Broadcast and communications satellites sit in the geostationary belt (~35,786 km). Every destructive intercept so far has been in LEO.</p>
+    </div>
+  </section>
+</div>
+
+<div id="timeline">
+  <div class="legal-band" id="legalBand" aria-label="Legal and policy responses, on the shared year axis">
+    <div class="wrap">
+      <div class="band-head"><b>Law &amp; policy</b><span class="tools"><button class="btn small" data-export="legal" type="button">Export SVG</button></span></div>
+      <div id="legalSvg"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="chart" id="chartA" aria-labelledby="hA">
+      <div class="chart-head">
+        <div><h2 id="hA">A · Kinetic tests: altitude over time</h2>
+        <p>Direct-ascent anti-satellite (DA-ASAT) tests and one high-altitude nuclear test. The log scale runs from 100 km to beyond GEO. For destructive tests, bubble <em>area</em> is proportional to the number of cataloged fragments.</p></div>
+        <div class="tools"><button class="btn small" data-export="A" type="button">Export SVG</button></div>
+      </div>
+      <div class="svgbox" id="svgA"></div>
+      <ul class="legend" id="legendA"></ul>
+      <details class="table"><summary>Data table: Chart A</summary><div class="tscroll" id="tableA"></div></details>
+    </section>
+
+    <section class="chart" id="chartC" aria-labelledby="hC">
+      <div class="chart-head">
+        <div><h2 id="hC">C · Non-kinetic operations</h2>
+        <p>Jamming, spoofing, lasers and cyber operations, drawn as sustained campaigns (bars) or discrete events (points). Fill style shows how strongly the source attributes the activity.</p></div>
+        <div class="tools"><button class="btn small" data-export="C" type="button">Export SVG</button></div>
+      </div>
+      <div class="svgbox" id="svgC"></div>
+      <ul class="legend" id="legendC"></ul>
+      <details class="table"><summary>Data table: Chart C</summary><div class="tscroll" id="tableC"></div></details>
+    </section>
+
+    <section class="chart" id="chartB" aria-labelledby="hB">
+      <div class="chart-head">
+        <div><h2 id="hB">B · Capability diffusion</h2>
+        <p>Number of states holding each counterspace capability, by decade, on a zero baseline. Solid bands mean demonstrated; hatched bands mean developing or latent.</p></div>
+        <div class="tools">
+          <span class="seg" role="group" aria-label="Grouping">
+            <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
+            <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic vs non-kinetic</button>
+          </span>
+          <button class="btn small" data-export="B" type="button">Export SVG</button>
+        </div>
+      </div>
+      <div class="chips" id="chipsB" role="group" aria-label="Filter categories"></div>
+      <div class="svgbox" id="svgB"></div>
+      <ul class="legend" id="legendB"></ul>
+      <details class="table"><summary>Data table: Chart B</summary><div class="tscroll" id="tableB"></div></details>
+    </section>
+
+    <section class="chart" id="lag" aria-labelledby="hL">
+      <div class="chart-head">
+        <div><h2 id="hL">The lag</h2>
+        <p>Years between a capability milestone and the legal or policy response that addressed it. An open ring means no binding rule has followed yet.</p></div>
+        <div class="tools"><button class="btn small" data-export="L" type="button">Export SVG</button></div>
+      </div>
+      <div class="svgbox" id="svgL"></div>
+      <details class="table"><summary>Data table: lag pairs</summary><div class="tscroll" id="tableL"></div></details>
+    </section>
+  </div>
+</div>
+
+<div class="wrap prose" id="sources">
+  <section class="chart" aria-labelledby="hS" style="border:0">
+    <h2 id="hS">Sources and methodology</h2>
+    <div id="methodBody"></div>
+  </section>
+</div>
+</main>
+<footer class="wrap">Built for teaching. SWF material is used for facts only under CC BY-NC 4.0; no SWF or CSIS figures, graphics or prose are reproduced. No data is stored in your browser.</footer>
+
+<div class="card" id="card" role="tooltip" aria-hidden="true"></div>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
+    <header>
+      <div><div class="kicker" id="sceneDate"></div><h2 id="sceneTitle">Scene</h2></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn small" id="scPrev" type="button">◀ Previous</button>
+        <button class="btn small" id="scNext" type="button">Next ▶</button>
+        <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕ Close</button>
+      </div>
+    </header>
+    <div class="view" id="sceneView"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
+    <aside>
+      <p id="sceneCaption"></p>
+      <p class="src" id="sceneSrc"></p>
+      <p><button class="btn small" id="scRelated" type="button">⚖ Related law</button></p>
+      <p class="src" id="sceneScale"></p>
+    </aside>
+    <div class="ctrl">
+      <button class="btn small" id="scPlay" type="button" aria-pressed="true">❚❚ Pause</button>
+      <label class="sr" for="scScrub">Scene time</label>
+      <input type="range" id="scScrub" min="0" max="1000" value="0">
+      <span id="scCams" style="display:flex;gap:6px"></span>
+      <button class="btn small" id="scExport" type="button">Export still (PNG)</button>
+    </div>
+  </div>
+</div>
+
+<script id="cs-data" type="application/json">/*__DATA__*/</script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script type="module">
+/*__APP__*/
+</script>
+</body>
+</html>

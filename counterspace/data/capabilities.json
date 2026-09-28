@@ -1,0 +1,202 @@
+{
+ "decades": [
+  "1950s",
+  "1960s",
+  "1970s",
+  "1980s",
+  "1990s",
+  "2000s",
+  "2010s",
+  "2020s"
+ ],
+ "reconstructed_before": "2020s",
+ "coding": {
+  "direct_ascent": {
+   "1950s": {
+    "United States": "D"
+   },
+   "1960s": {
+    "United States": "D"
+   },
+   "1970s": {
+    "United States": "D"
+   },
+   "1980s": {
+    "United States": "D"
+   },
+   "1990s": {
+    "United States": "D"
+   },
+   "2000s": {
+    "United States": "D",
+    "China": "D",
+    "Russia": "P"
+   },
+   "2010s": {
+    "United States": "D",
+    "China": "D",
+    "Russia": "D",
+    "India": "D"
+   },
+   "2020s": {
+    "United States": "D",
+    "China": "D",
+    "Russia": "D",
+    "India": "D",
+    "Israel": "P",
+    "Japan": "P",
+    "South Korea": "P",
+    "Iran": "P",
+    "North Korea": "P",
+    "France": "P",
+    "Germany": "P"
+   }
+  },
+  "co_orbital": {
+   "1960s": {
+    "USSR/Russia": "D",
+    "United States": "P"
+   },
+   "1970s": {
+    "USSR/Russia": "D"
+   },
+   "1980s": {
+    "USSR/Russia": "D",
+    "United States": "D"
+   },
+   "1990s": {
+    "USSR/Russia": "D",
+    "United States": "P"
+   },
+   "2000s": {
+    "USSR/Russia": "D",
+    "United States": "D",
+    "China": "P"
+   },
+   "2010s": {
+    "USSR/Russia": "D",
+    "United States": "D",
+    "China": "D"
+   },
+   "2020s": {
+    "USSR/Russia": "D",
+    "United States": "D",
+    "China": "D",
+    "India": "P",
+    "France": "P",
+    "Germany": "P",
+    "Iran": "P",
+    "Israel": "P",
+    "Japan": "P",
+    "North Korea": "P",
+    "United Kingdom": "P"
+   }
+  },
+  "electronic_warfare": {
+   "1980s": {
+    "United States": "P",
+    "USSR/Russia": "P"
+   },
+   "1990s": {
+    "United States": "D",
+    "USSR/Russia": "P"
+   },
+   "2000s": {
+    "United States": "D",
+    "USSR/Russia": "D",
+    "China": "P",
+    "Iran": "D"
+   },
+   "2010s": {
+    "United States": "D",
+    "USSR/Russia": "D",
+    "China": "P",
+    "Iran": "D",
+    "North Korea": "D",
+    "Israel": "P",
+    "India": "P",
+    "France": "P"
+   },
+   "2020s": {
+    "United States": "D",
+    "USSR/Russia": "D",
+    "China": "D",
+    "Iran": "D",
+    "North Korea": "D",
+    "Israel": "D",
+    "India": "P",
+    "France": "P",
+    "Australia": "P",
+    "Germany": "P",
+    "Japan": "P",
+    "South Korea": "P"
+   }
+  },
+  "directed_energy": {
+   "1970s": {
+    "United States": "P",
+    "USSR/Russia": "P"
+   },
+   "1980s": {
+    "United States": "P",
+    "USSR/Russia": "P"
+   },
+   "1990s": {
+    "United States": "D",
+    "USSR/Russia": "P"
+   },
+   "2000s": {
+    "United States": "D",
+    "USSR/Russia": "P",
+    "China": "P"
+   },
+   "2010s": {
+    "United States": "D",
+    "USSR/Russia": "D",
+    "China": "P"
+   },
+   "2020s": {
+    "United States": "D",
+    "USSR/Russia": "D",
+    "China": "P",
+    "India": "P",
+    "France": "P",
+    "Germany": "P",
+    "Israel": "P"
+   }
+  },
+  "cyber": {
+   "2000s": {
+    "United States": "P",
+    "USSR/Russia": "P",
+    "China": "P"
+   },
+   "2010s": {
+    "United States": "P",
+    "USSR/Russia": "P",
+    "China": "P",
+    "Iran": "P",
+    "North Korea": "P",
+    "Israel": "P",
+    "France": "P"
+   },
+   "2020s": {
+    "United States": "P",
+    "USSR/Russia": "D",
+    "China": "P",
+    "Iran": "P",
+    "North Korea": "P",
+    "Israel": "P",
+    "France": "P"
+   }
+  }
+ },
+ "sources": {
+  "direct_ascent": "SWF 2026 Tables 1-4, 2-4, 3-3, 4-1 and Appendix 16; chapter sections x.2 (pp. 06-01 to 14-01).",
+  "co_orbital": "SWF 2026 Table 2-1, Appendix Table 16-1/16-2 (Delta 180, IS, Naryad), chapter sections x.1.",
+  "electronic_warfare": "SWF 2026 chapter sections x.3 (e.g., pp. 01-26, 02-25, 09-05, 10-02, 12-05); Telstar 12 (09-05).",
+  "directed_energy": "SWF 2026 chapter sections x.4 (pp. 01-33 MIRACL, 02-34 Terra-3/Peresvet, 03-26).",
+  "cyber": "SWF 2026 ch. 15, p. 15-02 (US, Russia, China, France, Iran, Israel, North Korea); Viasat p. 15-07."
+ },
+ "note": "2020s = SWF 2026 assessment (13 countries). Earlier decades reconstructed by builder; 'D' = demonstrated (tested or used), 'P' = developing or latent."
+}
