@@ -18,7 +18,7 @@ const ELBOW = 17, SHORT_PX = 40;
 // Geometry of one pair. Short lags (glyphs would overprint) get a taller row so the milestone can sit well above the response.
 function lagRow(p, lines, x, FS) {
   const c = byId[p.cap], l = p.law ? byId[p.law] : null, xa = x(capDate(c)), xb = l ? x(parse(l.start)) : x(DOMAIN[1]) - 9; // open ring sits just inside the axis end
-  const short = !!l && Math.abs(xb - xa) < SHORT_PX, w = Math.max(...lines.map(s => tw(s, FS)));
+  const short = Math.abs(xb - xa) < SHORT_PX, w = Math.max(...lines.map(s => tw(s, FS)));
   return { p, c, l, lines, w, xa, xb, short, rowH: lines.length * (FS + 3) + 64 + (short ? 2 * ELBOW - 8 : 0) };
 }
 function drawL(el = document.getElementById('svgL')) {
@@ -49,7 +49,7 @@ function drawL(el = document.getElementById('svgL')) {
     if (l) legalGlyph(g.append('g').attr('transform', `translate(${xb},${yb}) scale(1.7)`), l);
     else g.append('circle').attr('cx', xb).attr('cy', yb).attr('r', 8).style('fill', 'var(--bg)').style('stroke', 'var(--accent)').style('stroke-width', 2);
     const lw = tw(lagTxt, 12, 600), mid = Math.max(14 + lw / 2, Math.min(W - 14 - lw / 2, (xa + xb) / 2));
-    if (short) { const lagTxtS = years < 1 ? `${Math.round(years * 12)} mo` : lagTxt, lw = tw(lagTxtS, 12, 600); const left = Math.min(xa, xb) - 18 - lw >= 4; g.append('text').attr('x', left ? Math.min(xa, xb) - 18 : Math.max(xa, xb) + 18).attr('y', yy + 4).attr('text-anchor', left ? 'end' : 'start').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxtS); }
+    if (short) { const lagTxtS = l && years < 1 ? `${Math.round(years * 12)} mo` : lagTxt, lw = tw(lagTxtS, 12, 600); const left = Math.min(xa, xb) - 18 - lw >= 4; g.append('text').attr('x', left ? Math.min(xa, xb) - 18 : Math.max(xa, xb) + 18).attr('y', yy + 4).attr('text-anchor', left ? 'end' : 'start').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxtS); }
     else g.append('text').attr('x', mid).attr('y', yy + 27).attr('text-anchor', 'middle').style('fill', 'var(--accent-2)').style('font', '600 12px var(--sans)').text(lagTxt);
     rows.push([p.text, c.date || c.start, l ? l.start : '—', l ? `${l.kind.replace('_', ' ')}${l.soft_law ? ' (soft law)' : ''}` : '—', l ? years.toFixed(1) : 'open', `${c.id}${l ? ' → ' + l.id : ''}`]);
     y0 += rowH;

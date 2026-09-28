@@ -1,8 +1,8 @@
 // QA: NODE_PATH=tools/node_modules OUT=<dir> node tools/qa.mjs   (serves ./ on PORT, default 8881)
 // Checks: console errors, horizontal scroll, audit() at 3 viewports x 2 themes, live and static scene audits, exports,
 // axe-core (fetched from jsdelivr for the test only, never shipped), performance marks, and a visual-regression hash file.
-// Visual regression: section screenshots are hashed into $OUT/hashes.json; if tools/qa-baseline.json exists, changed sections are listed
-// (write a new baseline with BASELINE=1). Hashes cover the SVG chart sections only (deterministic), not WebGL canvases.
+// Visual regression: each chart section's rendered SVG markup is hashed into $OUT/hashes.json (screenshots are saved beside it); if
+// tools/qa-baseline.json exists, changed sections are listed (write a new baseline with BASELINE=1). WebGL canvases are not hashed.
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path'; import crypto from 'crypto';
 
@@ -28,13 +28,18 @@ async function run(name, opts, fn) {
 }
 const hscroll = p => p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 const audit = p => p.evaluate(() => window.__cs.audit());
-const png = async (loc) => (await loc.screenshot());
 const sha = buf => crypto.createHash('sha256').update(buf).digest('hex').slice(0, 16);
+// Hash of each section's rendered geometry (its serialised SVG plus legend/table text) and a saved screenshot per section.
+// Pixel hashes are not used: software rasterisation jitters between runs, while the SVG markup is fully deterministic.
 async function sectionHashes(p, key) {
-  // The sticky legal band would overlay whichever chart is scrolled under it, and the guide line follows the pointer: neutralise both.
-  await p.addStyleTag({ content: '.legal-band{position:static!important;box-shadow:none!important} .guide{display:none!important} *{animation:none!important;transition:none!important;caret-color:transparent!important}' });
-  await p.mouse.move(0, 0); await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(300);
-  for (const id of SECTIONS) { const buf = await png(p.locator('#' + id)); hashes[`${key}/${id}`] = sha(buf); fs.writeFileSync(`${out}/${key}-${id}.png`, buf); }
+  await p.addStyleTag({ content: '.legal-band{position:static!important;box-shadow:none!important}' });
+  await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(300);
+  for (const id of SECTIONS) {
+    const markup = await p.evaluate(id => [...document.querySelectorAll(`#${id} svg, #${id} ul.legend, #${id} table`)].map(n => n.outerHTML).join('\n'), id);
+    hashes[`${key}/${id}`] = sha(Buffer.from(markup));
+    const box = await p.evaluate(id => { const r = document.getElementById(id).getBoundingClientRect(); return { x: r.left, y: r.top + scrollY, width: r.width, height: r.height }; }, id);
+    fs.writeFileSync(`${out}/${key}-${id}.png`, await p.screenshot({ fullPage: true, clip: box }));
+  }
 }
 async function axe(p) {
   try {
@@ -44,10 +49,10 @@ async function axe(p) {
   } catch (e) { return 'axe unavailable: ' + e.message.slice(0, 80); }
 }
 
-// 1. Matrix: audit + hscroll + section hashes at three viewports, light and dark.
+// 1. Matrix: audit + hscroll + section hashes at three viewports, light and dark. Reduced motion keeps WebGL out of the way, so hashes are deterministic.
 for (const [vname, w, h] of VIEWPORTS) for (const scheme of ['dark', 'light']) {
   const key = `${vname}-${scheme}`;
-  await run(`matrix-${key}`, { viewport: { width: w, height: h }, colorScheme: scheme, isMobile: w < 640, hasTouch: w < 640 }, async p => {
+  await run(`matrix-${key}`, { viewport: { width: w, height: h }, colorScheme: scheme, reducedMotion: 'reduce', isMobile: w < 640, hasTouch: w < 640 }, async p => {
     const res = { audit: await audit(p), hscroll: await hscroll(p) };
     await p.waitForTimeout(300); await sectionHashes(p, key);
     if (vname === '1440') res.axe = await axe(p);
@@ -74,6 +79,7 @@ await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorSchem
   res.earthAfterLoad = await p.evaluate(u => { const e = performance.getEntriesByName(u)[0], n = performance.getEntriesByType('navigation')[0]; return e ? { start: Math.round(e.startTime), loadEvent: Math.round(n.loadEventEnd), kb: Math.round((e.transferSize || e.encodedBodySize) / 1024) } : null; }, await p.evaluate(() => window.__cs.EARTH_URL));
   await p.waitForTimeout(500); await p.screenshot({ path: `${out}/hero.png`, clip: { x: 0, y: 0, width: 1440, height: 900 } });
   res.baseMem = await p.evaluate(() => window.__cs.memory());
+  res.heroAudit = await audit(p);
   for (const id of await p.evaluate(() => window.__cs.scenes)) {
     await p.evaluate(id => window.__cs.openScene(id), id); await p.waitForTimeout(2600);
     await p.screenshot({ path: `${out}/scene-${id}.png` });

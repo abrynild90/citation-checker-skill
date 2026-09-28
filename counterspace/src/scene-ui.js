@@ -43,7 +43,7 @@ async function openScene(id, originEl) {
     renderSVG(sim, view);
   }
   staticMode(!h);
-  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : 'Static diagram.'}`);
+  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''}`.trim());
   document.getElementById('scClose').focus();
 }
 // While the dialog is open the page behind it is inert (no focus, not read out).
