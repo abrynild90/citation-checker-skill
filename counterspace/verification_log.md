@@ -1,7 +1,7 @@
 # Counterspace Ledger: Verification Log
 
 **Verification date:** 2026-09-28 (second full pass; supersedes the earlier 03:41 log).
-**Scope:** all 40 kinetic rows and 15 non-kinetic rows in `data/events.json`, all 19 rows in `data/legal.json`, and the capability coding in `data/capabilities.json`. The data were regenerated with `python3 tools/build_data.py` after the corrections below.
+**Scope:** all 44 kinetic rows and 15 non-kinetic rows in `data/events.json` (59 in total), all 19 rows in `data/legal.json`, and the capability coding in `data/capabilities.json`. The 44 kinetic rows include four Nudol rows added late in this pass (see Discrepancy 28-30). The data were regenerated with `python3 tools/build_data.py` after the corrections below.
 
 ## Method
 
@@ -10,18 +10,18 @@
 3. **Non-SWF rows and legal rows.** Sources were fetched with WebFetch or curl, or located with WebSearch. Where a site blocks bots (HTTP 202 challenge, 403), the URL is listed as *bot-blocked* and the fact was checked through a search-index snippet or another source instead. No row is marked VERIFIED on inference, on "consistent with" reasoning, or on a neighboring row.
 4. **URL checks.** Every distinct `source_url` was requested with curl (follow redirects, browser user agent) and its landing page inspected, not just its status code.
 
-**Status vocabulary.** VERIFIED: the pinned page or fetched source shows the value (short quote given). VERIFIED (external): checked against a named non-SWF source. PARTIAL: core fields verified; the named field was not isolable or comes from outside the pin. CORRECTED: a defect was found in this pass and fixed in `build_data.py`. UNCHECKED: not re-checked in this pass.
+**Status vocabulary.** VERIFIED: the pinned page or fetched source shows the value (short quote given). VERIFIED (external): checked against a named non-SWF source. PARTIAL: core fields verified; the named field was not isolable or comes from outside the pin. CORRECTED: a defect was found in this pass and fixed in `build_data.py`. UNCHECKED: not re-checked in this pass (no row currently carries it).
 
 ## Summary
 
 | Set | Rows | VERIFIED | VERIFIED (external) | PARTIAL | CORRECTED (defect fixed, then verified) |
 |---|---|---|---|---|---|
-| Kinetic events | 40 | 31 | 1 | 1 | 7 |
+| Kinetic events | 44 | 33 | 1 | 2 | 8 |
 | Non-kinetic events | 15 | 5 | 1 | 1 | 8 |
-| Legal items | 19 | 3 | 6 | 5 | 5 |
+| Legal items | 19 | 3 | 7 | 4 | 5 |
 | Capability categories | 5 | 0 | 0 | 5 | 0 |
 
-Four legal rows (`ltbt-1963`, `ost-1967`, `abm-1972`, `oewg-2022`) carry named sub-details marked UNCHECKED (entry-into-force dates, the 2002 US ABM withdrawal, the date of Res. 76/231). Those details were left as they were and not re-checked.
+No row or sub-detail is left UNCHECKED. The former UNCHECKED legal sub-details (entry-into-force dates of the LTBT and OST, the 2002 US ABM withdrawal, the date of Res. 76/231) were checked in this pass and are recorded in the legal table below. The remaining PARTIAL items are: `us-1985-solwind` (zero in-orbit cell), `ru-2019-nudol-jun` (note cell paired by column order), four legal rows (`paros-1981`, `ppwt-2008`, `ppwt-2014`, `itu-rrb-2024`) whose primary document could not be fetched or tied to the citation, and the five capability categories, whose D/P split rests on a graphical SWF matrix.
 
 Rows are counted once each, by their most significant status.
 
@@ -65,7 +65,13 @@ Rows are counted once each, by their most significant status.
 | 26 | All SWF pins | Pins named page numbers only. | Each now names the table or passage. |
 | 27 | Earlier log | Claimed `us-1967-p437-mar` and `us-1968-p437-may` sit on p. 01-24. They are on **p. 01-23 (PDF 72)**, as the ledger pins them. | Log corrected. |
 
-**Scope disclosure (no data change).** SWF Table 2-4 also lists Nudol tests on 12 Aug 2014 and 22 Apr 2015 (both failures) and 15 Nov 2019; Appendix Table 16-2 lists 14 June 2019 and Cosmos 2521 on 30 Oct 2017. None is in the ledger (see `methodology.md`).
+| 28 | `ru-2014-nudol`, `ru-2015-nudol-apr` (added) | Omitted Nudol tests. SWF Table 2-4 (p. 02-21, PDF 134): "Aug. 12, 2014 ... Failed shortly after launch"; "Apr. 22, 2015 ... Failed at launch". Table 16-2 (p. 16-03, PDF 307) lists both dates with "Rocket test (unsuccessful)". | Rows added, medium confidence, no apogee; both tables pinned. |
+| 29 | `ru-2019-nudol-nov` (added) | Omitted; the first draft of the row said "no intercept (SWF Table 2-4)". Table 2-4 gives the date and payload "Likely KKV" but the notes cell is "-" (column-order reading), so "no intercept" was not shown by that table. | Row added; note now rests on p. 02-21, which calls Nov. 2021 the "first known intercept test of the Nudol". |
+| 30 | `ru-2019-nudol-jun` (added) | Omitted. Only Table 16-2 lists "June 14, 2019 ... Nudol"; the note "Potential KKV, no intercept" is paired to it by column order (two such notes follow the Dec. 2018 and June 2019 rows). | Row added, low confidence, PARTIAL. |
+| 31 | Legal `icao-2025` | Label "breaches Chicago Convention" overstated the finding. SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention on International Civil Aviation, condemned it ... and called for it to fulfill its obligations" (p. 12-06 says the same for North Korea). The ICAO release (through a search snippet; the page is bot-blocked) says the Assembly "endorsed the determination of its governing Council that recurring incidents of GNSS RFI originating from the DPRK and the territory of the Russian Federation constitute infractions" of the Convention, and condemned both. | Label is now "ICAO: GNSS interference an 'infraction' of the Chicago Convention" (ICAO's own word, in quotes; not "breach", not merely "findings"). The note says it is an intergovernmental finding, not a court judgment. Recorded as decision 14 in `methodology.md`. |
+| 32 | Legal `itu-rrb-2024` | Citation gave only the issue date. | The 96th RRB meeting was 24-28 June 2024 (ITU agenda and minutes pages); the summary was issued 1 July 2024. Citation now gives both. |
+
+**Scope disclosure.** SWF Appendix Table 16-2 also lists Cosmos 2521 (Burevestnik?) on 30 Oct 2017 and a "September 2019?" co-orbital entry. These are co-orbital or RPO events, not direct-ascent tests, and are outside the ledger's kinetic scope (see `methodology.md`, coding rules). After the additions, every Nudol row in Tables 2-4 and 16-2 is in the ledger (Aug 2014, Apr 2015, Nov 2015, May 2016, Dec 2016, Mar 2018, Dec 2018, Jun 2019, Nov 2019, Apr 2020, Dec 2020, Nov 2021).
 
 ## events.json: kinetic rows
 
@@ -104,9 +110,13 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | cn-2021-dn3 | CORRECTED | T3-3 p. 03-22; prose p. 03-21 | Prose: announced "land-based midcourse missile intercept technology test" on Feb. 4, 2021 |
 | cn-2022-dn3 | CORRECTED | prose p. 03-21; T16-3 p. 16-04; T3-3 | Prose and T16-3 "21 June 2022"; T3-3 "Jun. 19, 2022" |
 | cn-2023-dn3 | CORRECTED | prose p. 03-21; T3-3 | "April 14, 2023"; T16-3 also lists Apr. 15 |
+| ru-2014-nudol | VERIFIED | T2-4, p. 02-21 (PDF 134); T16-2 p. 16-03 (PDF 307) | T2-4 "Aug. 12, 2014 ... Failed shortly after launch."; T16-2 "Aug. 12, 2014 ... Rocket test (unsuccessful)" |
+| ru-2015-nudol-apr | VERIFIED | T2-4, p. 02-21; T16-2 p. 16-03 | T2-4 "Apr. 22, 2015 ... Failed at launch."; T16-2 "Apr. 22, 2015 ... Rocket test (unsuccessful)" |
 | ru-2015-nudol | VERIFIED | Table 2-4, p. 02-21 (PDF 134); T16-2 p. 16-03 | T2-4 "Nov. 18, 2015 ... 200 km? First successful test of missile"; T16-2 "Oct. 18, 2015" |
 | ru-2016-nudol-may | VERIFIED | T2-4, p. 02-21 | "May 25, 2016 ... 100 km? ... likely rocket test" |
 | ru-2016-nudol-dec | VERIFIED | T2-4, p. 02-21 | "Dec. 16, 2016 ... 100 km?" |
+| ru-2019-nudol-jun | PARTIAL | T16-2, p. 16-03 (PDF 307) | "June 14, 2019 ... Nudol"; note "Potential KKV, no intercept" paired by column order. Not in T2-4. Coded low confidence. |
+| ru-2019-nudol-nov | CORRECTED | T2-4, p. 02-21; prose p. 02-21 | "Nov. 15, 2019 ... Nudol ... Plesetsk ... Likely KKV"; "first known intercept test of the Nudol" (Nov. 2021). "No intercept" removed from the T2-4 attribution (Discrepancy 29). Not in T16-2. |
 | ru-2018-nudol-mar | VERIFIED | T2-4, p. 02-21 | "Mar. 26, 2018 ... Likely KKV"; "First test from a mobile launcher" |
 | ru-2018-nudol-dec | VERIFIED | T2-4; T16-2 | "Dec. 23, 2018 ... Likely KKV"; T16-2 "Potential KKV, no intercept" |
 | ru-2020-nudol-apr | VERIFIED | T2-4; fn. 148 p. 02-20 | "Apr. 15, 2020 ... Likely KKV"; "Successful, nothing hit"; USSPACECOM release cited |
@@ -138,24 +148,24 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 
 | id | status | check |
 |---|---|---|
-| ltbt-1963 | VERIFIED (external), UNCHECKED: in-force date | Cite "14 U.S.T. 1313, 480 U.N.T.S. 43" and signature at Moscow, 5 Aug 1963 confirmed through State Dept and treaty-guide search results. Oct. 10, 1963 entry into force and "followed Starfish Prime" framing not re-checked. URL bot-blocked (202). |
-| ost-1967 | VERIFIED (external), UNCHECKED: dates | Cite "18 U.S.T. 2410, 610 U.N.T.S. 205" confirmed. Jan. 27 / Oct. 10, 1967 dates not re-checked. URL bot-blocked. |
-| abm-1972 | CORRECTED, UNCHECKED: 2002 withdrawal | Cite "23 U.S.T. 3435" confirmed. Art. XII: "Each Party undertakes not to interfere with the national technical means" (ACA / State text via search). Withdrawal year not re-checked. |
+| ltbt-1963 | VERIFIED (external) | Cite "14 U.S.T. 1313, 480 U.N.T.S. 43"; signed Moscow 5 Aug 1963 and in force 10 Oct 1963 (JFK Library, EBSCO, Arms Control Association; Senate consent 24 Sept. 1963, 80-19). "Followed Starfish Prime" is chronological only (July 1962). URL bot-blocked (202). |
+| ost-1967 | VERIFIED (external) | Cite "18 U.S.T. 2410, 610 U.N.T.S. 205" confirmed. UNOOSA: adopted by res. 2222 (XXI), opened for signature 27 Jan 1967, in force 10 Oct 1967. URL bot-blocked. |
+| abm-1972 | CORRECTED | Cite "23 U.S.T. 3435" confirmed. Art. XII: "Each Party undertakes not to interfere with the national technical means" (ACA / State text via search). US notice of withdrawal 13 Dec 2001, effective 13 June 2002 (ACA, CRS RS21088). |
 | paros-1981 | PARTIAL | UNOOSA page (200) is "RES 36/97C". Both 36/97 C and 36/99 confirmed as 9 Dec 1981 by search. |
 | cd-paros-committee | VERIFIED (external) | UNIDIR text read: "On 29 March 1985 the CD agreed to establish an Ad Hoc Committee"; "final meeting on 23 August 1994"; "has not been re-established". |
 | itu-1992 | VERIFIED (external) | UNTS vol. 1825 read: Art. 45 at p. 361; Art. 48 at p. 362 "Members retain their entire freedom with regard to military radio installations". Adopted 22 Dec 1992, in force 1 July 1994 (search). |
 | ppwt-2008 | PARTIAL | Letter of 12 Feb 2008 transmitting the draft (DL record 633470 title); CD/1839 issued 29 Feb 2008 (search). URL bot-blocked. |
-| ppwt-2014 | PARTIAL | Tabled 10 June 2014; CD/1985 dated 12 June 2014 (search). DL record 774287 is bot-blocked and could not be tied to CD/1985. |
+| ppwt-2014 | PARTIAL | Tabled at the CD on 10 June 2014 (Reaching Critical Will); designated CD/1985 (search). DL record 774287 is bot-blocked (403) and could not be tied to CD/1985; date 12 June 2014 rests on search. |
 | unga-75-36 | VERIFIED (external) | DL record 3895440 title "Reducing space threats through norms, rules and principles of responsible behaviours"; adopted 7 Dec 2020 (search). |
-| oewg-2022 | PARTIAL, UNCHECKED: 76/231 date | First session 9-13 May 2022; final session ended 1 Sept 2023; no consensus report (search; SWF fact sheet). Res. 76/231 date (Dec. 24, 2021) not re-checked. |
+| oewg-2022 | VERIFIED (external) | Res. 76/231 adopted 24 Dec 2021, 150-8-7 (DL record 3952870; UN doc A/RES/76/231, distributed 30 Dec 2021); it convenes the OEWG from 2022 and asks for a report to the 78th session. First session 9-13 May 2022; final session ended 1 Sept 2023 with no consensus report (search; SWF fact sheet). |
 | us-moratorium-2022 | VERIFIED | URL 200. SWF p. 01-50 (PDF 99): "The United States did indeed formally announce in April 2022"; "38 countries total have made that commitment." |
 | milamos-2022 | VERIFIED (external) | "Volume I - Rules was published in July 2022"; editors Jakhu and Freeland (McGill, spacewatch.global). |
 | unga-77-41 | CORRECTED | Adopted 7 Dec 2022, 155 in favor, 9 against, 9 abstentions (DL record 3997622 via search; SpacePolicyOnline). |
 | tallinn-2017 | VERIFIED | DOI URL resolves to the Cambridge Tallinn Manual 2.0 page (HTTP 200). Year 2017 per that page. |
 | woomera-2024 | CORRECTED | OUP page: published 2024, editors Jack Beard and Dale Stephens. |
 | unsc-veto-2024 | VERIFIED | UN press SC/15678: "9616th Meeting", Apr. 24, 2024; 13 in favor, Russia against, China abstained. Draft S/2024/302 confirmed (documents.un.org). |
-| itu-rrb-2024 | PARTIAL | The Register: "96th meeting"; summary issued 1 July 2024; quotes match SWF p. 02-32. The ledger URL is the generic RRB page, not the summary document. |
-| icao-2025 | CORRECTED | SWF p. 02-30: "In October 2025, the ICAO passed a resolution"; fn. 243 gives the ICAO release of 3 Oct 2025; p. 12-06 covers the DPRK. ICAO URL blocks bots (403). |
+| itu-rrb-2024 | PARTIAL | 96th RRB meeting 24-28 June 2024 (ITU agenda and minutes pages); summary issued 1 July 2024 (press reports); quotes match SWF p. 02-32. The ledger URL is the generic RRB page, not the summary document. |
+| icao-2025 | CORRECTED | SWF p. 02-30: the ICAO "passed a resolution determining that the GNSS interference originating in Russia was indeed an infraction of the 1944 Convention ... condemned it for doing so, and called for it to fulfill its obligations"; p. 12-06 says the same for North Korea; fn. 243 gives the ICAO release of 3 Oct 2025. ICAO release (search snippet, page bot-blocked 403; Uniting Aviation repeat): the Assembly (23 Sept.-3 Oct. 2025) "endorsed the determination of its governing Council" that the interference "constitute[s] infractions" of the Convention, through two resolutions. Label changed (Discrepancy 31). Resolution numbers not verified and not used. |
 | itu-rrb-2025 | CORRECTED | SWF p. 02-30, fn. 245: "held November 10-14, 2025"; quote "again urge[d] the Administration of the Russian Federation". The ITU page (200) now also carries later meeting content. |
 
 ## capabilities.json
@@ -169,6 +179,3 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | cyber | PARTIAL | Russia D (Viasat) verified; the other P entries follow SWF ch. 15 and were not individually checked. |
 
 Pre-2020s cells are the builder's reconstruction, not SWF-assessed, and are labeled so on the chart.
-
-## Addendum (builder, 2026-09-28): Nudol rows added
-Four Nudol tests the verifier flagged as omitted are now in the ledger: 12 Aug 2014 (failed shortly after launch), 22 Apr 2015 (failed at launch) and 15 Nov 2019 (likely KKV, no intercept), all from SWF Table 2-4, p. 02-21 (PDF 134); and 14 Jun 2019, from Appendix Table 16-2, p. 16-03 (PDF 307) only, so it is coded low confidence. None has a reported apogee; all plot in Chart A's "altitude not reported" strip.

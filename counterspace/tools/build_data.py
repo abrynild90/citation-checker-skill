@@ -158,13 +158,21 @@ K = [
       notes="Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and "
             "15 April 2023. 14 April used.", src=T33()),
     k("ru-2014-nudol", "2014-08-12", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
-      notes="Failed shortly after launch (SWF Table 2-4).", src=T24()),
+      notes="Failed shortly after launch (SWF Table 2-4 note). Appendix Table 16-2 lists the date as a rocket test (unsuccessful). "
+            "No apogee reported.",
+      src=swfx("Table 2-4, p. 02-21 (PDF p. 134); Table 16-2, p. 16-03 (PDF p. 307)")),
     k("ru-2015-nudol-apr", "2015-04-22", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
-      notes="Failed at launch (SWF Table 2-4).", src=T24()),
+      notes="Failed at launch (SWF Table 2-4 note). Appendix Table 16-2 lists the date as a rocket test (unsuccessful). "
+            "No apogee reported.",
+      src=swfx("Table 2-4, p. 02-21 (PDF p. 134); Table 16-2, p. 16-03 (PDF p. 307)")),
     k("ru-2019-nudol-jun", "2019-06-14", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="low",
-      notes="Listed only in Appendix Table 16-2 (not in Table 2-4); coded low confidence.", src=T163()),
+      notes="Listed only in Appendix Table 16-2 (not in Table 2-4), with the note 'Potential KKV, no intercept' "
+            "(note paired to the row by column order in the text extraction). No apogee reported. Coded low confidence "
+            "because a single table lists it.", src=T163()),
     k("ru-2019-nudol-nov", "2019-11-15", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
-      notes="Likely KKV; no intercept (SWF Table 2-4).", src=T24()),
+      notes="Payload column: Likely KKV. SWF describes the Nov. 2021 test as the first known Nudol intercept "
+            "(p. 02-21), so no earlier intercept is recorded; no apogee reported. Not in Appendix Table 16-2.",
+      src=swfx("Table 2-4, p. 02-21 (PDF p. 134); prose p. 02-21 (PDF p. 134)")),
     k("ru-2015-nudol", "2015-11-18", "Russia", "Nudol", "None", "non_destructive", 200, "apogee", conf="low",
       notes="First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 "
             "(p. 16-03) dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015 (used).",
@@ -446,12 +454,14 @@ L = [
     lg("itu-rrb-2024", "2024-07-01", None, "resolution", "ITU RRB: 'grave concern' (Sweden, France)",
        "Radio Regulations Board expressed grave concern about intentional harmful interference to "
        "Swedish and French satellites that seemed to originate from earth stations near Moscow, Kaliningrad and Pavlovka.",
-       "ITU Radio Regulations Board, 96th Meeting, Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145).",
+       "ITU Radio Regulations Board, 96th Meeting (June 24-28, 2024), Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145).",
        "https://www.itu.int/en/ITU-R/conferences/RRB/Pages/default.aspx",
        scene="gnss", related=["ru-2024-eu-sats"]),
-    lg("icao-2025", "2025-10-03", None, "resolution", "ICAO: GNSS interference breaches Chicago Convention",
-       "The ICAO Assembly determined that GNSS interference originating in Russia (and in North Korea) infringed "
-       "the 1944 Chicago Convention, condemned it, and called on both to fulfill their obligations.",
+    lg("icao-2025", "2025-10-03", None, "resolution", "ICAO: GNSS interference an 'infraction' of the Chicago Convention",
+       "ICAO's Assembly (23 Sept.-3 Oct. 2025) endorsed its Council's determination that recurring GNSS interference "
+       "originating in the DPRK and in Russian territory constitutes 'infractions' of the 1944 Chicago Convention, "
+       "condemned both states and urged them to comply with their obligations. This is a finding by an "
+       "intergovernmental body; it is not a judgment of a court and carries no enforcement.",
        "ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian "
        "Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06.",
        "https://www.icao.int/news/icao-assembly-condemns-gnss-radio-frequency-interference-originating-dprk-and-russian",
@@ -529,6 +539,50 @@ CAP_SOURCES = {
 
 
 LEDGER_ASOF = "2026-09-28"
+SCHEMA_VERSION = "1.0.0"
+SOURCE_FULL = {
+    "SWF 2026": "Victoria Samson & Kathleen Brett eds., Global Counterspace Capabilities: An Open Source Assessment "
+                "(Secure World Foundation, 9th ed., Apr. 2026), " + SWF_URL,
+    "DOE/NV-209 Rev. 16 (2015)": "U.S. Dep't of Energy, Nat'l Nuclear Sec. Admin. Nevada Field Office, United States "
+                "Nuclear Tests, July 1945 through September 1992, DOE/NV-209 Rev. 16 (Sept. 2015), "
+                "https://nnss.gov/wp-content/uploads/2023/08/DOE_NV-209_Rev16.pdf",
+    "CENTCOM briefing (Maj. Gen. Renuart), 25 Mar 2003 (AFPS report)": "American Forces Press Service, CENTCOM Charts "
+                "Operation Iraqi Freedom Progress (Mar. 25, 2003) (briefing by Maj. Gen. Victor Renuart), "
+                "https://www.globalsecurity.org/wmd/library/news/iraq/2003/iraq-030325-afps03.htm",
+}
+SCHEMA = {
+    "schema_version": SCHEMA_VERSION,
+    "generated_by": "tools/build_data.py",
+    "ledger_as_of": LEDGER_ASOF,
+    "description": "Data files for the Counterspace Timeline. events.json and legal.json are top-level arrays "
+                   "(unchanged shape); capabilities.json is an object. Version bumps: patch = new rows or "
+                   "corrected values; minor = new optional fields; major = shape change.",
+    "files": {
+        "events.json": {"shape": "array of event rows, sorted by date/start; domain is 'kinetic' or 'non_kinetic'",
+            "common_fields": {"id": "stable key", "domain": "kinetic | non_kinetic", "confidence": "high | medium | low",
+                "notes": "free-text caveats", "source": "short source label", "source_full": "full citation string for a sources list",
+                "source_url": "link to the source", "pin": "table/passage plus printed page and PDF page",
+                "conflicts": "optional list of disagreements inside the sources", "scene_3d": "optional 3D scene key"},
+            "kinetic_fields": {"date": "YYYY-MM-DD", "state": "acting state", "system": "weapon system", "target": "target object",
+                "type": "destructive | non_destructive | midcourse_intercept | apogee_only | flyby | nuclear",
+                "altitude_km": "number or null", "altitude_kind": "intercept | apogee | detonation",
+                "fragments_cataloged": "int or null", "fragments_in_orbit": "int or null", "fragments_as_of": "YYYY-MM or null"},
+            "non_kinetic_fields": {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD or null (ongoing)", "actor": "string",
+                "category": "directed_energy | ew_uplink | ew_downlink | gnss_jamming | gnss_spoofing | cyber",
+                "attribution": "official_government | multi_government | researcher_osint | alleged",
+                "target_system": "string", "target_regime": "ISR_LEO | GEO_comms | GNSS_MEO | LEO_constellation | ground_segment",
+                "operational_use": "bool", "effect": "string"}},
+        "legal.json": {"shape": "array of legal items, sorted by start",
+            "fields": {"id": "stable key", "start": "YYYY-MM-DD", "end": "YYYY-MM-DD or null",
+                "kind": "treaty | resolution | negotiation_span | unilateral | veto", "label": "short display label",
+                "short_note": "one-paragraph description", "citation": "full (Bluebook-style) citation string",
+                "source_url": "link", "soft_law": "bool", "scene_3d": "optional", "related_events": "optional list of event ids"}},
+        "capabilities.json": {"shape": "object", "fields": {"decades": "list", "reconstructed_before": "decade label",
+            "coding": "category -> decade -> state -> 'D' (demonstrated) | 'P' (developing/latent)",
+            "sources": "category -> source text", "note": "string"}},
+    },
+}
+
 ATTR_LEGEND = [
     ("official_government", "A government (or its military) has said so itself, or a government has publicly made the claim."),
     ("multi_government", "Several governments or an intergovernmental body (ITU, ICAO) made or located the attribution; not a finding of state responsibility."),
@@ -572,6 +626,13 @@ def ledger_md(events):
       "`tools/build_data.py` from the same rows that produce `data/events.json`, `data/legal.json` and "
       "`data/capabilities.json`; edit the script, not this file." % (len(kin), len(nk_), len(leg)))
     a("")
+    a("## Contents")
+    a("")
+    for t in ["As-of dates", "Summary counts", "How to read the pins", "Legend of fields", "Kinetic events (chronological)",
+              "Non-kinetic events (by start date)", "Legal items (by start date)", "Conflicts inside the sources",
+              "Notes by row", "Capability coding (Chart B)", "Sources"]:
+        a("- [%s](#%s)" % (t, "".join(ch for ch in t.lower().replace(" ", "-") if ch.isalnum() or ch == "-")))
+    a("")
     a("## As-of dates")
     a("")
     a("- **Ledger as of:** %s." % LEDGER_ASOF)
@@ -580,6 +641,18 @@ def ledger_md(events):
     a("- **Debris counts** are as of %s (SWF Table 5-1 and Nudol text)." % DEBRIS_ASOF)
     a("- **Not used:** CSIS *Space Threat Assessment 2026* had not been published when this was checked.")
     a("- **Verification:** see `verification_log.md`; design decisions are in `methodology.md`.")
+    a("")
+    a("## Summary counts")
+    a("")
+    nconf = sum(len(r.get("conflicts", [])) for r in events)
+    a("| set | rows |")
+    a("|---|---|")
+    a("| Kinetic events | %d (%d destructive, %d high confidence) |" % (
+        len(kin), sum(r["type"] == "destructive" for r in kin), sum(r["confidence"] == "high" for r in kin)))
+    a("| Non-kinetic events | %d |" % len(nk_))
+    a("| Legal items | %d (%d soft law) |" % (len(leg), sum(r["soft_law"] for r in leg)))
+    a("| Documented source conflicts | %d |" % nconf)
+    a("| Schema version | %s (`data/schema.json`) |" % SCHEMA_VERSION)
     a("")
     a("## How to read the pins")
     a("")
@@ -711,9 +784,11 @@ def ledger_md(events):
     a("")
     a("## Sources")
     a("")
-    a("- [SWF]: " + SWF_URL)
+    a("- [SWF]: " + SOURCE_FULL[SWF])
     for i, (src, url) in sorted(refs.items()):
-        a("- [%s]: %s <%s>" % (i, src, url))
+        a("- [%s]: %s" % (i, SOURCE_FULL[src]))
+    a("")
+    a("Legal items carry their own full citation in the table above (`citation` field in `data/legal.json`).")
     a("")
     return "\n".join(o)
 
@@ -721,6 +796,9 @@ def ledger_md(events):
 def main():
     OUT.mkdir(exist_ok=True)
     events = sorted(K + NK, key=lambda r: r.get("date") or r.get("start"))
+    for r in events:
+        r["source_full"] = SOURCE_FULL[r["source"]]
+    (OUT / "schema.json").write_text(json.dumps(SCHEMA, indent=1, ensure_ascii=False))
     (OUT / "events.json").write_text(json.dumps(events, indent=1, ensure_ascii=False))
     (OUT / "legal.json").write_text(json.dumps(sorted(L, key=lambda r: r["start"]), indent=1, ensure_ascii=False))
     caps = dict(decades=DEC, reconstructed_before="2020s", coding=CAP, sources=CAP_SOURCES,

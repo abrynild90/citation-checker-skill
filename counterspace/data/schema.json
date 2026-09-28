@@ -1,0 +1,72 @@
+{
+ "schema_version": "1.0.0",
+ "generated_by": "tools/build_data.py",
+ "ledger_as_of": "2026-09-28",
+ "description": "Data files for the Counterspace Timeline. events.json and legal.json are top-level arrays (unchanged shape); capabilities.json is an object. Version bumps: patch = new rows or corrected values; minor = new optional fields; major = shape change.",
+ "files": {
+  "events.json": {
+   "shape": "array of event rows, sorted by date/start; domain is 'kinetic' or 'non_kinetic'",
+   "common_fields": {
+    "id": "stable key",
+    "domain": "kinetic | non_kinetic",
+    "confidence": "high | medium | low",
+    "notes": "free-text caveats",
+    "source": "short source label",
+    "source_full": "full citation string for a sources list",
+    "source_url": "link to the source",
+    "pin": "table/passage plus printed page and PDF page",
+    "conflicts": "optional list of disagreements inside the sources",
+    "scene_3d": "optional 3D scene key"
+   },
+   "kinetic_fields": {
+    "date": "YYYY-MM-DD",
+    "state": "acting state",
+    "system": "weapon system",
+    "target": "target object",
+    "type": "destructive | non_destructive | midcourse_intercept | apogee_only | flyby | nuclear",
+    "altitude_km": "number or null",
+    "altitude_kind": "intercept | apogee | detonation",
+    "fragments_cataloged": "int or null",
+    "fragments_in_orbit": "int or null",
+    "fragments_as_of": "YYYY-MM or null"
+   },
+   "non_kinetic_fields": {
+    "start": "YYYY-MM-DD",
+    "end": "YYYY-MM-DD or null (ongoing)",
+    "actor": "string",
+    "category": "directed_energy | ew_uplink | ew_downlink | gnss_jamming | gnss_spoofing | cyber",
+    "attribution": "official_government | multi_government | researcher_osint | alleged",
+    "target_system": "string",
+    "target_regime": "ISR_LEO | GEO_comms | GNSS_MEO | LEO_constellation | ground_segment",
+    "operational_use": "bool",
+    "effect": "string"
+   }
+  },
+  "legal.json": {
+   "shape": "array of legal items, sorted by start",
+   "fields": {
+    "id": "stable key",
+    "start": "YYYY-MM-DD",
+    "end": "YYYY-MM-DD or null",
+    "kind": "treaty | resolution | negotiation_span | unilateral | veto",
+    "label": "short display label",
+    "short_note": "one-paragraph description",
+    "citation": "full (Bluebook-style) citation string",
+    "source_url": "link",
+    "soft_law": "bool",
+    "scene_3d": "optional",
+    "related_events": "optional list of event ids"
+   }
+  },
+  "capabilities.json": {
+   "shape": "object",
+   "fields": {
+    "decades": "list",
+    "reconstructed_before": "decade label",
+    "coding": "category -> decade -> state -> 'D' (demonstrated) | 'P' (developing/latent)",
+    "sources": "category -> source text",
+    "note": "string"
+   }
+  }
+ }
+}
