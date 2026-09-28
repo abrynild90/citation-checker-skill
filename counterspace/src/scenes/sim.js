@@ -88,7 +88,7 @@ export function buildSim(cfg) {
     if (a.type === 'debris' && tgt) {
       const n = Math.min(a.count, PARTICLE_BUDGET);
       const P = []; for (let k = 0; k < n; k++) P.push({ da: gauss(rnd) * a.spreadAlt, di: gauss(rnd) * a.spreadInc, dr: gauss(rnd) * 0.4, dw: 1 + gauss(rnd) * a.dv, du: gauss(rnd) * 0.02, dec: a.decay * (0.4 + rnd() * 1.4) });
-      const cloud = { kind: 'cloud', n, color: a.color, size: n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03, label: a.label, vis: 0,
+      const cloud = { kind: 'cloud', n, color: a.color, size: a.size ?? (n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03), label: a.label, vis: 0,
         fill(t, out) {
           const dt = t - tgt.t; let vis = 0;
           for (let k = 0; k < n; k++) {
@@ -118,7 +118,7 @@ export function buildSim(cfg) {
       if (a.marks) { // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]), tApex = a.t0 + (a.t1 - a.t0) * (a.apexT ?? 0.5);
         items.push({ kind: 'curve', pts: () => [scl(d, 1), scl(d, rAlt(GEO_ALT) * 1.02)], color: '#dfe6f7', opacity: 0.5 });
-        a.marks.forEach(m => items.push({ kind: 'point', shape: 'tick', color: m.color, label: m.label, short: m.short, staticAt: m.staticAt, labelDx: m.dx ?? 0, labelDy: m.dy ?? 0, pos: t => (m.apex && t < tApex) ? null : scl(d, rAlt(m.alt)) }));
+        a.marks.forEach(m => items.push({ kind: 'point', shape: 'tick', offGlobe: true, color: m.color, label: m.label, short: m.short, staticAt: m.staticAt, labelDx: m.dx ?? 0, labelDy: m.dy ?? 0, pos: t => (m.apex && t < tApex) ? null : scl(d, rAlt(m.alt)) }));
       }
       if (a.head) items.push({ kind: 'point', shape: 'kv', color: a.color, pos: t => { const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s > 0 && s < 1 ? all[Math.round(s * N)] : null; } });
       focus = focus || a.from;
@@ -163,10 +163,12 @@ export function buildSim(cfg) {
       items.push({ kind: 'curve', pts: () => q, color: '#ff8080', opacity: 1, thick: 0.004 }); }
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, labelDy: -30, pos: () => g });
+      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, labelDy: -30, scale: 2.2, bright: true, pos: () => g });
       a.beams.forEach((b, bi) => { // space side stays bright; only the ground-side segment dims once the ground network is hit
         const e = ll(b[0], b[1], 1.003), m = add(scl(g, 0.4), scl(e, 0.6));
         items.push({ kind: 'beam', a: () => g, b: () => m, on: () => true, color: a.color, opacity: 0.5, width: 0.006 });
+        // Service traffic: small packets ride the downlink from the satellite to the ground; they stop once the ground side goes dark (illustrative).
+        for (let k = 0; k < 3; k++) items.push({ kind: 'point', shape: 'kv', kvSize: 0.045, color: '#ffe6a8', pos: t => { if (t > a.dimT1 + 0.05) return null; const s = (t * 2.2 + k / 3 + bi * 0.17) % 1; return add(scl(g, 1 - s), scl(e, s)); } });
         items.push({ kind: 'beam', a: () => m, b: () => e, on: () => true, color: a.color, opacity: 0.5, width: 0.006, colorFn: t => t > a.dimT0 + bi * 0.03 ? '#d98a7a' : a.color, opFn: t => 0.5 - 0.42 * smooth((t - a.dimT0 - bi * 0.03) / (a.dimT1 - a.dimT0)) });
       });
       if (a.hub) { // illustrative ground management network: links from a hub to regional nodes, with a malware pulse running along them
@@ -226,7 +228,7 @@ export function buildSim(cfg) {
   else if (items._arc) { // launch site through the intercept: a side-on camera looking at the middle of the arc
     const { from, to, mid } = items._arc, md = norm(mid), e1 = norm(add(to, scl(from, -1))), nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);
     const look = add(mid, scl(md, -0.03 - (cfg.lookMix ?? 0) * len(mid))), launch = { name: 'Launch', pos: add(look, add(scl(nrm, 0.78 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)), scl(md, 0.34 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)))), look, hideShell: true };
-    if (cfg.wideLaunch) { const D = cfg.wideLaunch * (IS_PHONE ? 1.15 : 1); launch.pos = add(scl(md, D * 0.86), scl(nrm, D * 0.5)); launch.look = scl(md, 0.3); }
+    if (cfg.wideLaunch) { const D = cfg.wideLaunch * (IS_PHONE ? 1.05 : 1); launch.pos = add(scl(md, D * 0.86), scl(nrm, D * 0.5)); launch.look = scl(md, cfg.lookK ?? 0.3); }
     const orbit = { name: 'Orbit', pos: ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)) };
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];

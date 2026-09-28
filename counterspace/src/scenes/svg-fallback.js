@@ -102,7 +102,8 @@ export function renderSVG(sim, el, t = sim.still) {
   }
   const reserved = [[8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26], [(W - stW) / 2, stY, stW, stH]];
   cands.forEach(c => { if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, CX, CY, R * 1.08); });
-  const pl = placeLabels(cands, W, H, reserved);
+  cands.forEach(c => { c.avoidDisc = !!c.off; });
+  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.08 });
   cands.forEach((c, i) => { const q = pl[i]; if (!q) return;
     if (q.leader) { g.append('line').attr('x1', q.ax).attr('y1', q.ay).attr('x2', q.qx).attr('y2', q.qy).attr('stroke', c.color).attr('stroke-opacity', 0.8); g.append('circle').attr('cx', q.ax).attr('cy', q.ay).attr('r', 2).attr('fill', c.color); }
     g.append('rect').attr('x', q.x - c.w / 2).attr('y', q.y - c.h / 2).attr('width', c.w).attr('height', c.h).attr('rx', 4).attr('fill', 'rgba(5,8,18,0.78)').attr('stroke', c.color).attr('stroke-opacity', 0.35);

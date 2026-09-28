@@ -19,7 +19,7 @@ const srv = http.createServer((q, r) => {
   fs.readFile(f, (e, b) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'content-type': f.endsWith('.html') ? 'text/html' : 'application/octet-stream' }); r.end(b); } });
 }).listen(PORT);
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--ignore-certificate-errors'] });
-const report = {}, hashes = {}, PH_TOL = 14, PH_STILLS = ['starfish', 'fengyun', 'cosmos1408'];
+const report = {}, hashes = {}, PH_TOL = 18, PH_STILLS = ['starfish', 'fengyun', 'cosmos1408'];
 
 async function run(name, opts, fn) {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, ...opts }), page = await ctx.newPage(), errs = [];

@@ -10,15 +10,26 @@ const CATS = [
   { key: 'cyber', label: 'Cyber', v: '--cat-cy', kin: false },
 ];
 const stateB = { group: 'cat', on: new Set(CATS.map(c => c.key)) };
+// 2020s "developing" (P) entries for which SWF's country matrix (Executive Summary, PDF pp. 22-32) shows "no data": the builder's reading of the
+// country chapters, not the matrix. Source: verification_log.md, "Open items and impact" (direct_ascent and co_orbital, both PARTIAL).
+// Hard-coded here on purpose: data/ and build_data.py are not changed by the page.
+const NO_DATA_2020S = { direct_ascent: ['South Korea', 'Iran', 'North Korea', 'France'], co_orbital: ['India', 'Iran', 'Israel', 'Japan', 'North Korea', 'United Kingdom'] };
+const isNoData = (cat, dec, state) => dec === '2020s' && (NO_DATA_2020S[cat] || []).includes(state);
+// Status of one state in one category and decade: 'D', 'P' (developing, matrix-supported) or 'N' (developing, builder-assessed, matrix: no data).
+const statusOf = (cat, dec, state, v) => v === 'D' ? 'D' : isNoData(cat, dec, state) ? 'N' : 'P';
+const STATUS_LABEL = { D: 'demonstrated', P: 'developing', N: 'developing, builder-assessed (SWF matrix: no data)' };
 function countsB() {
-  const decs = CAPS.decades;
-  if (stateB.group === 'cat') {
-    return { series: CATS.filter(c => stateB.on.has(c.key)).flatMap(c => ['D', 'P'].map(s => ({ key: c.key + ':' + s, label: `${c.label} (${s === 'D' ? 'demonstrated' : 'developing'})`, v: c.v, dev: s === 'P',
-      vals: decs.map(d => Object.values(CAPS.coding[c.key][d] || {}).filter(x => x === s).length) }))) };
-  }
-  const grp = [{ key: 'kin', label: 'Kinetic (direct-ascent, co-orbital)', v: '--cat-da', cats: ['direct_ascent', 'co_orbital'] }, { key: 'non', label: 'Non-kinetic (EW, directed energy, cyber)', v: '--cat-ew', cats: ['electronic_warfare', 'directed_energy', 'cyber'] }];
-  return { series: grp.flatMap(gr => ['D', 'P'].map(s => ({ key: gr.key + ':' + s, label: `${gr.label} (${s === 'D' ? 'demonstrated' : 'developing'})`, v: gr.v, dev: s === 'P',
-    vals: decs.map(d => { const st = {}; gr.cats.forEach(c => Object.entries(CAPS.coding[c][d] || {}).forEach(([k, v]) => { st[k] = st[k] === 'D' || v === 'D' ? 'D' : 'P'; })); return Object.values(st).filter(x => x === s).length; }) }))) };
+  const decs = CAPS.decades, RANK = { D: 3, P: 2, N: 1 };
+  const mk = (key, label, v, s, vals) => ({ key: key + ':' + s, label: `${label} (${STATUS_LABEL[s]})`, v, dev: s !== 'D', nd: s === 'N', vals });
+  const units = stateB.group === 'cat'
+    ? CATS.filter(c => stateB.on.has(c.key)).map(c => ({ key: c.key, label: c.label, v: c.v, cats: [c.key] }))
+    : [{ key: 'kin', label: 'Kinetic (direct-ascent, co-orbital)', v: '--cat-da', cats: ['direct_ascent', 'co_orbital'] }, { key: 'non', label: 'Non-kinetic (EW, directed energy, cyber)', v: '--cat-ew', cats: ['electronic_warfare', 'directed_energy', 'cyber'] }];
+  const series = units.flatMap(u => ['D', 'P', 'N'].map(s => mk(u.key, u.label, u.v, s, decs.map(d => {
+    const st = {}; // strongest status per state across the unit's categories
+    u.cats.forEach(c => Object.entries(CAPS.coding[c][d] || {}).forEach(([k, v]) => { const t = statusOf(c, d, k, v); if (!st[k] || RANK[t] > RANK[st[k]]) st[k] = t; }));
+    return Object.values(st).filter(x => x === s).length;
+  })))).filter(sr => sr.key.endsWith(':D') || sr.key.endsWith(':P') || sr.vals.some(n => n));
+  return { series };
 }
 function drawB(el = document.getElementById('svgB')) {
   el.innerHTML = '';
@@ -41,7 +52,9 @@ function drawB(el = document.getElementById('svgB')) {
   svg.append('desc').text('Stacked step area of the number of states holding each counterspace capability per decade, zero baseline. See the data table for exact counts.');
   const defs = svg.append('defs');
   series.forEach(s => { const p = defs.append('pattern').attr('id', 'hatch-' + s.key.replace(':', '-')).attr('width', 6).attr('height', 6).attr('patternUnits', 'userSpaceOnUse').attr('patternTransform', 'rotate(45)');
-    p.append('rect').attr('width', 6).attr('height', 6).style('fill', `var(${s.v})`).style('fill-opacity', 0.14); p.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 6).style('stroke', `var(${s.v})`).style('stroke-width', 2.2); });
+    p.append('rect').attr('width', 6).attr('height', 6).style('fill', `var(${s.v})`).style('fill-opacity', s.nd ? 0.06 : 0.14);
+    if (s.nd) { p.attr('width', 5).attr('height', 5).attr('patternTransform', null); p.select('rect').attr('width', 5).attr('height', 5); p.append('circle').attr('cx', 2.5).attr('cy', 2.5).attr('r', 1).style('fill', `var(${s.v})`); }
+    else p.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 6).style('stroke', `var(${s.v})`).style('stroke-width', 2.2); });
   const X2020 = x(parse('2020-01-01'));
   svg.append('rect').attr('x', M.l).attr('width', X2020 - M.l).attr('y', top).attr('height', plotH).style('fill', 'var(--recon)');
   svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', top + 12).text(phone ? 'RECONSTRUCTED' : 'RECONSTRUCTED (FADED, NOT SWF-ASSESSED)');
@@ -77,14 +90,15 @@ function drawB(el = document.getElementById('svgB')) {
   document.getElementById('noteB').innerHTML = (stateB.group === 'cat'
     ? 'Vertical axis: state-capability pairs. A state with two capabilities is counted twice.'
     : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.')
-    + ' Numbers above each decade give the range: demonstrated only to demonstrated plus developing (whisker). In the 2020s the states are SWF-assessed but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part. See the <a href="#codingRules">coding rules</a>.';
+    + ' Numbers above each decade give the range: demonstrated only to demonstrated plus developing (whisker). In the 2020s the states are SWF-assessed but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part; dotted bands are developing entries where SWF’s country matrix shows no data. See the <a href="#codingRules">coding rules</a>.';
   // legend + chips
   legend('legendB', 18, 12)
     .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted)"/>', 'Demonstrated (tested or used)')
     .item('<rect x="-9" y="-6" width="18" height="12" style="fill:var(--muted);fill-opacity:.4;stroke:var(--muted);stroke-dasharray:3 2"/>', 'Faded, dashed: reconstructed decade (not SWF-assessed)')
     .item('<path d="M-3,-6h6M0,-6V6M-3,6h6" style="stroke:var(--text);stroke-width:1.4;fill:none"/>', 'Range: demonstrated only (low) to demonstrated + developing (high)', 18)
+    .item('<defs><pattern id="ln" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1" style="fill:var(--muted)"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#ln)" style="stroke:var(--muted);stroke-width:.8"/>', 'Developing, builder-assessed (2020s, SWF matrix shows no data)')
     .item('<defs><pattern id="lh" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line y2="5" style="stroke:var(--muted);stroke-width:2"/></pattern></defs><rect x="-9" y="-6" width="18" height="12" fill="url(#lh)"/>', 'Developing or latent').done();
-  table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P'); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}`; })]));
+  table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P' && !isNoData(c.key, d, k)), N_ = Object.keys(o).filter(k => o[k] === 'P' && isNoData(c.key, d, k)); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}${N_.length ? `; ${N_.length} developing, builder-assessed, SWF matrix: no data (${N_.join(', ')})` : ''}`; })]));
 }
 // Chips are built once and updated in place, so a toggle never drops keyboard focus.
 function chipsB() {
