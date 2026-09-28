@@ -169,3 +169,6 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | cyber | PARTIAL | Russia D (Viasat) verified; the other P entries follow SWF ch. 15 and were not individually checked. |
 
 Pre-2020s cells are the builder's reconstruction, not SWF-assessed, and are labeled so on the chart.
+
+## Addendum (builder, 2026-09-28): Nudol rows added
+Four Nudol tests the verifier flagged as omitted are now in the ledger: 12 Aug 2014 (failed shortly after launch), 22 Apr 2015 (failed at launch) and 15 Nov 2019 (likely KKV, no intercept), all from SWF Table 2-4, p. 02-21 (PDF 134); and 14 Jun 2019, from Appendix Table 16-2, p. 16-03 (PDF 307) only, so it is coded low confidence. None has a reported apogee; all plot in Chart A's "altitude not reported" strip.

@@ -157,6 +157,14 @@ K = [
       None, "intercept", conf="medium",
       notes="Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and "
             "15 April 2023. 14 April used.", src=T33()),
+    k("ru-2014-nudol", "2014-08-12", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
+      notes="Failed shortly after launch (SWF Table 2-4).", src=T24()),
+    k("ru-2015-nudol-apr", "2015-04-22", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
+      notes="Failed at launch (SWF Table 2-4).", src=T24()),
+    k("ru-2019-nudol-jun", "2019-06-14", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="low",
+      notes="Listed only in Appendix Table 16-2 (not in Table 2-4); coded low confidence.", src=T163()),
+    k("ru-2019-nudol-nov", "2019-11-15", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="medium",
+      notes="Likely KKV; no intercept (SWF Table 2-4).", src=T24()),
     k("ru-2015-nudol", "2015-11-18", "Russia", "Nudol", "None", "non_destructive", 200, "apogee", conf="low",
       notes="First successful missile test. SWF marks the 200 km apogee with '?'. Appendix Table 16-2 "
             "(p. 16-03) dates this test 18 Oct 2015; Table 2-4 gives 18 Nov 2015 (used).",

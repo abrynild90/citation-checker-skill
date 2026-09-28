@@ -92,6 +92,11 @@ function audit() {
   document.querySelectorAll('#legalSvg svg, #svgA svg, #svgB svg, #svgC svg, #svgL svg').forEach(svg => {
     const sr = svg.getBoundingClientRect(), id = svg.parentElement.id;
     const ts = [...svg.querySelectorAll('text')].filter(t => t.textContent.trim() && !t.closest('[display="none"]') && t.getClientRects().length && getComputedStyle(t).display !== 'none' && !t.closest('.lbls-hidden')).map(t => { const r = t.getBoundingClientRect(); return { s: t.textContent.trim().slice(0, 28), x0: r.left, x1: r.right, y0: r.top, y1: r.bottom }; });
+    const shapes = [...svg.querySelectorAll('.mark circle:not(.hit), .mark path, .mark rect:not(.hit), .mark polygon')].map(n => ({ n, r: n.getBoundingClientRect(), m: n.closest('.mark') })).filter(o => o.r.width > 0 && !o.n.closest('.badge3d'));
+    [...svg.querySelectorAll('text')].filter(t => t.textContent.trim() && getComputedStyle(t).display !== 'none' && t.getClientRects().length).forEach(t => {
+      const r = t.getBoundingClientRect(), own = t.closest('.mark');
+      shapes.forEach(o => { if (o.m === own && own) return; const w = Math.min(r.right, o.r.right) - Math.max(r.left, o.r.left), h = Math.min(r.bottom, o.r.bottom) - Math.max(r.top, o.r.top); if (w > 2 && h > 3.5) out.push({ chart: id, kind: 'text-on-mark', a: t.textContent.trim().slice(0, 28), b: o.m?.dataset?.id, w: Math.round(w), h: Math.round(h) }); });
+    });
     ts.forEach(a => { if (a.x0 < sr.left - 0.5 || a.x1 > sr.right + 0.5 || a.y0 < sr.top - 0.5 || a.y1 > sr.bottom + 0.5) out.push({ chart: id, kind: 'clip', a: a.s }); });
     for (let i = 0; i < ts.length; i++) for (let j = i + 1; j < ts.length; j++) {
       const a = ts[i], b = ts[j], w = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), h = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
@@ -114,6 +119,7 @@ const card = document.getElementById('card');
 function showCard(html, evt, el) {
   card.innerHTML = html; card.classList.add('on'); card.setAttribute('aria-hidden', 'false');
   card.classList.toggle('dock', innerWidth < 640);
+  card.dataset.touch = touchMode ? '1' : '';
   if (innerWidth < 640) { card.style.left = ''; card.style.top = ''; return; }
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth, ch = card.offsetHeight;
@@ -122,7 +128,9 @@ function showCard(html, evt, el) {
   if (top + ch > innerHeight - 8) top = Math.max(8, innerHeight - ch - 8);
   card.style.left = left + 'px'; card.style.top = top + 'px';
 }
-document.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !e.target.closest('.mark')) hideCard(); });
+let touchMode = false;
+document.addEventListener('pointerdown', e => { touchMode = e.pointerType === 'touch'; if (touchMode && !e.target.closest('.mark') && !e.target.closest('#card')) hideCard(); }, true);
+card.addEventListener('click', () => { if (card.classList.contains('dock')) hideCard(); });
 function hideCard() { card.classList.remove('on'); card.setAttribute('aria-hidden', 'true'); }
 const srcLine = r => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
 function kinCard(e) {
@@ -143,9 +151,9 @@ function bindMark(sel, cardFn, onActivate) {
   if (EXPORTING) return;
   sel.attr('tabindex', 0)
     .on('mouseenter', function (ev, d) { showCard(cardFn(d), ev, this); })
-    .on('mouseleave', hideCard)
+    .on('mouseleave', () => { if (!touchMode) hideCard(); })
     .on('focus', function (ev, d) { showCard(cardFn(d), ev, this); })
-    .on('blur', hideCard)
+    .on('blur', () => { if (!touchMode) hideCard(); })
     .on('click', function (ev, d) { onActivate(d, this, ev); })
     .on('keydown', function (ev, d) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onActivate(d, this, ev); } if (ev.key === 'Escape') hideCard(); });
 }
@@ -170,6 +178,7 @@ function handoff(svg, x, y0, y1, label, anchorTop) {
 // ---------------------------------------------------------------- legal band
 const ABBR = { 'ltbt-1963': 'LTBT', 'ost-1967': 'OST', 'abm-1972': 'ABM Art. XII', 'paros-1981': 'PAROS', 'cd-paros-committee': 'CD PAROS cttee', 'itu-1992': 'ITU Arts. 45/48', 'ppwt-2008': 'PPWT', 'ppwt-2014': 'PPWT II', 'tallinn-2017': 'Tallinn 2.0*', 'unga-75-36': 'UNGA 75/36', 'oewg-2022': 'OEWG', 'us-moratorium-2022': 'US moratorium', 'milamos-2022': 'MILAMOS*', 'unga-77-41': 'UNGA 77/41', 'unsc-veto-2024': 'UNSC veto (nukes)', 'woomera-2024': 'Woomera*', 'itu-rrb-2024': 'ITU RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'ITU RRB ’25' };
 const SHORT = { 'tallinn-2017': 'Tallinn*', 'unga-75-36': '75/36', 'milamos-2022': 'MILAMOS*', 'us-moratorium-2022': 'US pledge', 'unga-77-41': '77/41', 'woomera-2024': 'Woomera*', 'unsc-veto-2024': 'Veto', 'itu-rrb-2024': 'RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'RRB ’25' };
+const ABBR_NOTE = 'LTBT: Limited Test Ban Treaty. OST: Outer Space Treaty. ABM Art. XII: ABM Treaty (non-interference with national technical means). PAROS: Prevention of an Arms Race in Outer Space. CD: Conference on Disarmament. ITU Arts. 45/48: ITU Constitution (harmful interference; military radio services). PPWT: Russia-China draft treaty on the placement of weapons in outer space. UNGA 75/36 and 77/41: UN General Assembly resolutions. OEWG: Open-ended Working Group. US pledge: 2022 US DA-ASAT test moratorium. Veto: Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit (it did not concern DA-ASAT testing). RRB: ITU Radio Regulations Board. ICAO: International Civil Aviation Organization. An asterisk marks soft law (expert manuals, not binding).';
 const SPAN_LABEL = { 'paros-1981': 'PAROS: UNGA agenda item since 1981', 'cd-paros-committee': 'CD Ad Hoc Cttee on PAROS, 1985–94', 'oewg-2022': 'OEWG, 2022–23' };
 const KIND_LABEL = { treaty: 'Treaty', resolution: 'Resolution / body finding', unilateral: 'Unilateral pledge or soft law', veto: 'Veto', negotiation_span: 'Negotiation' };
 function legalGlyph(sel, l) {
@@ -288,6 +297,7 @@ function drawLegalKey() {
   li('<path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" style="fill:var(--bg);stroke:var(--accent-2);stroke-width:1.8"/>', '* Soft law (expert manual, not binding)');
   li('<path d="M-5,-5L5,5M5,-5L-5,5" style="stroke:var(--warn);stroke-width:2.8"/>', 'Veto');
   li('<rect x="-9" y="-2" width="18" height="4" rx="2" style="fill:var(--accent);opacity:.55"/>', 'Negotiation span');
+  document.getElementById('abbrLegal').textContent = ABBR_NOTE; document.getElementById('abbrLegal2').textContent = ABBR_NOTE;
   table('tableLegal', ['Label', 'Full name', 'Date', 'Kind', 'What it is'], LEGAL.map(l => [ABBR[l.id] || SPAN_LABEL[l.id] || l.label, l.label, l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : l.start, l.soft_law ? 'Soft law' : KIND_LABEL[l.kind] || l.kind, l.short_note]));
 }
 
@@ -301,7 +311,7 @@ function drawA(el = document.getElementById('svgA')) {
   svg.append('desc').text('Scatter of kinetic counterspace tests: year on the x axis, altitude on a log scale on the y axis, with LEO, MEO and GEO bands. Destructive tests have debris bubbles sized by cataloged fragments. A table view follows the chart.');
   // bands
   const bandLabels = [], handoffText = phone ? 'Last destructive test' : `Last destructive DA-ASAT test (as of ${AS_OF})`;
-  const band = (a, b, fill, label, above) => { const ly = above ? y(b) - 4 : y(b) + 13; bandLabels.push({ x: M.l + 6, y: ly, w: tw(label, 10.5, 600) + label.length * 0.85 }); svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', y(b)).attr('height', y(a) - y(b)).style('fill', fill);
+  const band = (a, b, fill, label, above) => { const ly = above ? y(b) - 4 : y(b) + (b === 35000 ? 24 : 13); bandLabels.push({ x: M.l + 6, y: ly, w: tw(label, 10.5, 600) + label.length * 0.85 }); svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', y(b)).attr('height', y(a) - y(b)).style('fill', fill);
     svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', ly).text(label); };
   band(90, 2000, 'var(--leo)', phone ? 'LEO' : 'LEO (to ~2,000 km)');
   band(2000, 35000, 'var(--meo)', phone ? 'MEO' : 'MEO (GNSS ~20,200 km)');
@@ -610,7 +620,7 @@ function drawL(el = document.getElementById('svgL')) {
     const lagTxt = l ? (years < 1 ? `${Math.round(years * 12)} months` : `${years.toFixed(1)} years`) : 'no binding rule yet';
     const g = svg.append('g').attr('class', 'mark').attr('tabindex', 0).attr('role', 'img').attr('data-t', +a).attr('aria-label', `${p.text}. ${l ? lagTxt : 'No binding response yet'}.`);
     g.append('rect').attr('class', 'hit').attr('x', 6).attr('y', y0 - 2).attr('width', W - 12).attr('height', rowH - 6).attr('rx', 6);
-    const tx = Math.max(12, Math.min(Math.min(xa, xb) - 6, W - 12 - w));
+    const tx = phone ? 12 : Math.max(12, Math.min(Math.min(xa, xb) - 6, W - 12 - w));
     lines.forEach((s, i) => g.append('text').attr('x', tx).attr('y', y0 + (i + 1) * (FS + 3) - 2).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`).text(s));
     g.append('line').attr('x1', xa).attr('x2', xb - (l ? 0 : 7)).attr('y1', yy).attr('y2', yy).style('stroke', col).style('stroke-width', 2.5).style('stroke-dasharray', l ? null : '3 3');
     g.append('path').attr('d', HEX).attr('transform', `translate(${xa},${yy})`).style('fill', col).style('stroke', 'var(--bg)').style('stroke-width', 1);
@@ -662,9 +672,9 @@ const STYLE_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-d
 const EXPORT_SPEC = {
   A: { id: 'svgA', draw: () => drawA, title: 'Chart A · Kinetic tests: altitude over time', key: 'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. 2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.' },
   B: { id: 'svgB', draw: () => drawB, title: 'Chart B · Capability diffusion', key: 'Solid: capability demonstrated (tested or used). Hatched: developing or latent. Stack height counts state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, not assessed by SWF.' },
-  C: { id: 'svgC', draw: () => drawC, title: 'Chart C · Non-kinetic operations', key: 'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.' },
+  C: { id: 'svgC', draw: () => drawC, title: 'Chart C · Non-kinetic operations', get key() { return (stateC.focus ? 'Axis starts in 1995 because the ledger has no earlier non-kinetic entry (earliest: 1997 MIRACL laser test). ' : '') + 'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.'; } },
   L: { id: 'svgL', draw: () => drawL, title: 'The lag between capability and legal response', key: 'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. Open ring: no binding rule yet.' },
-  legal: { id: 'legalSvg', draw: () => drawLegal, title: 'Law and policy responses, 1957–2026', key: 'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond with * : soft law (expert manual, not binding). Cross: veto. Bars: negotiation spans.' },
+  legal: { id: 'legalSvg', draw: () => drawLegal, title: 'Law and policy responses, 1957–2026', key: 'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond: soft law (expert manual, not binding). Cross: veto. Bars: negotiation spans. Marks that would collide are stacked vertically; each stays at its true date on the axis. ' + ABBR_NOTE },
 };
 function exportSVG(which) {
   const spec = EXPORT_SPEC[which]; if (!spec) return '';

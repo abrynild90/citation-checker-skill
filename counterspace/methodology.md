@@ -33,7 +33,6 @@
 4. **Iran/Eutelsat coded `multi_government`:** the ITU located the source in Iranian territory. The row note says this is not a finding of state responsibility.
 5. **Attribution is never upgraded.** Levels follow the source's wording: `official_government`, `multi_government`, `researcher_osint`, `alleged`.
 6. **Russia-Syria campaign starts in 2016, not 2017:** SWF p. 02-28 says the spoofing "began in 2016, peaked in 2017".
-7. **Nudol scope:** the ledger plots the Nudol tests with a reported or estimated apogee that SWF dates consistently. SWF Table 2-4 also lists two failed launches (12 Aug 2014, 22 Apr 2015) and a 15 Nov 2019 test, and Appendix Table 16-2 lists 14 June 2019 and Cosmos 2521 (30 Oct 2017). They are left out because dates or purposes conflict between tables; this is a scope choice, not a claim that they did not happen.
 8. **Related-law chips:** Shakti (2019) is linked to UNGA 77/41 (`related_events` in `legal.json`), because that resolution is the multilateral response to DA-ASAT tests generally. The US moratorium (Apr. 2022) is a US pledge that post-dates the Indian test and is linked to Cosmos 1408.
 9. **No co-orbital shadowing scene:** it was optional, and no co-orbital event is in the ledger (co-orbital appears in Chart B only).
 10. **Laser scene shared:** one laser scene serves MIRACL (1997, fired at White Sands, NM, against the US satellite MSTI-3) and Peresvet (2018).
