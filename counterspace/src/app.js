@@ -641,7 +641,7 @@ function drawL(el = document.getElementById('svgL')) {
   el.innerHTML = '';
   const { W, M, x } = layout(el), phone = isPhoneNow();
   const FS = phone ? 11 : 12, top = 10, maxW = W - 24;
-  const rowsInfo = LAG.map(p => { const lines = wrap(p.text, maxW, FS); return { p, lines, w: Math.max(...lines.map(s => tw(s, FS))), rowH: lines.length * (FS + 3) + 52 }; });
+  const rowsInfo = LAG.map(p => { const lines = wrap(p.text, maxW, FS); return { p, lines, w: Math.max(...lines.map(s => tw(s, FS))), rowH: lines.length * (FS + 3) + 64 }; });
   const H = top + rowsInfo.reduce((s, r) => s + r.rowH, 0) + 30, yAx = H - 28;
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hL').attr('id', 'svgL-root');
   svg.append('desc').text('Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the legal or policy response (circle for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the lag in years. An open ring means no binding rule yet.');
@@ -685,17 +685,16 @@ function drawL(el = document.getElementById('svgL')) {
 // ---------------------------------------------------------------- methodology section
 function drawMethod() {
   // one entry per distinct source URL: a full citation (legal rows carry their own; event sources are expanded below) plus the pin(s)
-  const FULL = { 'SWF 2026': 'Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Brian Weeden &amp; Victoria Samson eds., 9th ed., Apr. 2026)',
-    'DOE/NV-209 Rev. 16 (2015)': 'U.S. Dep’t of Energy, Nevada Field Office, <i>United States Nuclear Tests: July 1945 through September 1992</i>, DOE/NV-209 Rev. 16 (Sept. 2015)' };
+  const bare = t => esc(t).replace(/,\s*https?:\/\/\S+$/, '');
   const groups = new Map(); EVENTS.concat(LEGAL).forEach(r => { if (!groups.has(r.source_url)) groups.set(r.source_url, []); groups.get(r.source_url).push(r); });
   const cites = [...groups.values()].map(rs => { const r = rs[0], url = esc(r.source_url);
-    if (r.citation) return `<li><a href="${url}" target="_blank" rel="noopener">${esc(r.citation)}</a></li>`;
-    const head = FULL[r.source] || esc(r.source);
+    if (!r.source_full && r.citation) return `<li><a href="${url}" target="_blank" rel="noopener">${esc(r.citation)}</a></li>`;
+    const head = bare(r.source_full || r.source);
     const pins = rs.length > 1 ? `; ${rs.length} ledger rows, each pinned to its table or page (see the card, the data table or <code>ledger.md</code>)` : `, ${esc(r.pin)}`;
     return `<li><a href="${url}" target="_blank" rel="noopener">${head}</a>${pins}.</li>`; });
   document.getElementById('methodBody').innerHTML = `
   <h3>Editions and “as of” dates</h3>
-  <ul><li><b>Primary:</b> Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Brian Weeden &amp; Victoria Samson eds., 9th ed., Apr. 2026). 13 countries, five categories. The 13-country count is a 2026 figure, not a historical constant. Debris counts as of Feb. 2026 (SWF Table 5-1).</li>
+  <ul><li><b>Primary:</b> Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen Brett eds., 9th ed., Apr. 2026). 13 countries, five categories. The 13-country count is a 2026 figure, not a historical constant. Debris counts as of Feb. 2026 (SWF Table 5-1).</li>
   <li><b>Secondary:</b> CSIS Aerospace Security Project, <i>Space Threat Assessment 2025</i>. The 2026 edition was not published when this page was built (Sept. 2026).</li>
   <li><b>Baseline check:</b> no destructive DA-ASAT test appears after ${fmt(parse(LAST_DA))} in SWF 2026 (Table 5-1 ends with Cosmos 1408).</li></ul>
   <h3>Coding rules</h3>
