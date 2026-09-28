@@ -41,7 +41,7 @@
 - **Debris:** bubble area is proportional to *cataloged* fragments. In-orbit counts appear only in cards and tables.
 - **Chart C:** an event appears only when a named source documents it. Attribution follows the source's wording and is never upgraded. Campaigns are drawn as spans. Ground GNSS jamming affects receivers, not satellites. It is tagged `GNSS_MEO` for the signal it targets, and this is explained on the page.
 - **Chart B:** the 2020s follow SWF 2026 chapter sections. Earlier decades are the builder's reconstruction and are labeled on the chart. A state counts as "demonstrated" (D) once it has tested or used the capability, and stays counted in later decades. "Developing" (P) covers programs and latent capability.
-- **Confidence:** `high` = date and value match SWF with no unresolved conflict; `medium` = hedged source, a missing value, or a date conflict resolved by rule; `low` = SWF itself marks the value with "?" or a single table lists the row.
+- **Confidence:** `high` = date and value match SWF with no unresolved conflict; `medium` = hedged source, a missing value, or a date conflict resolved by rule; `low` = SWF itself marks the value with "?", a single SWF table lists the row, or the report is an anonymous-source press account.
 - **Pins:** every row names the table or passage, printed page and PDF page.
 
 ## 4. Known uncertainties
@@ -49,7 +49,7 @@
   - Fengyun-1C: 880 km / 3,532 pieces (Table 5-1) vs 865 km / 3,533 (Table 3-3).
   - Solwind: 530 km (Table 5-1) vs 555 km (prose p. 01-22 and Table 1-4).
   - Burnt Frost (USA-193): 220 km (Table 5-1) vs 240 km (prose, p. 01-24) vs 2,700 km (Table 1-4 apogee column, interceptor reach). The same prose says the 175 pieces "took about 20 months to de-orbit entirely" (Table 5-1 lifespan: 1.7 years), so the page must not say the debris re-entered within weeks.
-  - SC-19 (5 vs 7 July 2005), Nudol (18 Nov vs 18 Oct 2015), DN-3 (19 vs 21 June 2022; the appendix also lists 15 April 2023).
+  - SC-19 (5 vs 7 July 2005), Nudol (18 Nov vs 18 Oct 2015), DN-3 (19 vs 21 June 2022; the appendix lists both 14 and 15 April 2023), and DN-2's apogee (see below). `ledger.md` lists all eight conflicts.
 - The Nudol apogees for 2015-16 carry a "?" in SWF, so those rows are low confidence. The 14 Jun 2019 Nudol row appears only in Table 16-2 and is also low confidence.
 - DN-2's apogee is disputed (10,000 km claimed by China; nearly GEO per the US military; at least ~30,000 km per analysis cited by SWF).
 - Several non-kinetic start dates are approximate or come from outside SWF (Ukraine 2014, North Korea Aug. 2010, Trident Juncture window, MIRACL day); each row note says so. The Iran/Eutelsat span (2009-2012) understates the Oct. 2022 episode SWF reports.
@@ -74,7 +74,7 @@
 15. **Full cites:** every event has `source_full` and every legal item has `citation` in Bluebook-style form, for use in the page's sources list. SWF is cited with its editors (Samson and Brett), edition and URL.
 16. **Coastlines** come from Natural Earth via world-atlas (public domain), simplified and inlined (~48 KB). They are used in the static diagrams and as the globe's fallback.
 17. **Rendering upgrades (code only):** atmosphere glow, fixed sun with terminator, starfield, soft particles, trails, explosions, pulsing laser beam, flickering jammed GNSS links.
-18. **Scene PNG export** renders at 3000 px wide (capped by the GPU) and bakes in the labels, the "illustrative" banner, the caption and the source cite.
+18. **Scene PNG export** renders at 3000 px wide (capped by the GPU) with a header band ("illustrative" banner), the scene with its labels, and a footer band with the title, the source and the imagery credit on separate lines. Nothing is drawn over the globe. Static diagrams export in the same layout.
 
 ## 6. 3D scene rules
 - Scenes are illustrative only. Radial scale is compressed (altitude^0.45) and Earth is to scale.
@@ -90,6 +90,8 @@
 
 ## 8. Testing
 - `tools/qa.mjs` (Playwright) checks console errors, horizontal scroll at 375 and 1440 px in light, dark and reduced-motion modes, keyboard open and focus return, and WebGL memory returning to baseline after cycling all scenes.
+- `audit()` (in `src/audit.js`, also run by `qa.mjs`) tests every chart SVG, static scene diagram and live scene label for overlapping or clipped text, and the page for HTML overflow; it returns `[]` at 1440, 900 and 375 px in light and dark.
+- `qa.mjs` also runs axe-core (page and scene dialog), checks the exported SVGs and stills, and compares a hash of each chart section's rendered SVG with `tools/qa-baseline.json` to flag unintended visual changes. Refresh the baseline with `BASELINE=1` after a deliberate change.
 - Data checks: every event has `source_full`; every id in `related_events` exists; counts in the docs match `events.json` (44 kinetic, 15 non-kinetic, 19 legal).
 - Source checks are logged in `verification_log.md`.
 
@@ -99,7 +101,7 @@
 - **No prediction and no ranking of capability.** Chart B counts states that have demonstrated (D) or are developing (P) a capability. It does not compare their strength, intent or readiness.
 - **No physical simulation.** The 3D scenes are illustrative: compressed radial scale, accelerated debris spread and simplified geometry. Only the numbers in the panels are data.
 - **No causal link between tests and law.** "Related law" chips show chronology or a stated multilateral response, not that one caused the other.
-- **No claim that EW and cyber are the only methods used in operations.** The page may say that destructive testing has paused and that jamming, spoofing, dazzling and cyber operations continue. It must not say those are the *only* counterspace tools used in operations, because SWF does not say so. The exact SWF passage is Executive Summary, p. xxiii (PDF p. 21): "only non-destructive capabilities are actively being used against satellites in current military operations." SWF's category is "non-destructive", not "EW and cyber", and it concerns use against satellites. Any page wording should attribute the finding to SWF and use its terms.
+- **No claim that EW and cyber are the only methods used in operations.** The page's lede quotes SWF verbatim, Executive Summary, p. xxiii (PDF p. 21): "only non-destructive capabilities are actively being used against satellites in current military operations." SWF's category is "non-destructive", not "EW and cyber", and it concerns use against satellites. Any examples of non-destructive methods (jamming, spoofing, dazzling, cyber) stay outside the quotation, in the page's own sentence, and are not attributed to SWF. The page must not say those methods are the *only* counterspace tools used in operations.
 - **No SWF-assessed pre-2020s capability coding.** Earlier decades in Chart B are the builder's reconstruction and are labeled so.
 
 ## 10. Limitations
@@ -119,6 +121,6 @@
 
 ## 12. Quality process
 The dataset and page were checked in two independent ways, and the results are kept in the repository.
-1. **Independent verification (`verification_log.md`).** On 2026-09-28 every row (83 items) was re-checked against the pinned SWF page or a fetched primary source, not against the builder's own notes. The pass found and fixed 32 defects and leaves 9 items PARTIAL, each with an impact assessment. No row is marked VERIFIED on inference.
-2. **Four independent grading rounds.** A reviewer with no part in the build inspected the built page, data and docs from scratch each time and wrote a scored report: `grading_report.md` (round 1, 76/100), `grading_report_round2.md` (86), `grading_report_round3.md` (90) and `grading_report_round4.md` (92). Each report lists defects by portion of the page; these were fixed before the next round. Round 4 found no factual error in 10+ spot checks against the SWF text, and its one wording risk (the absolute claim on EW and cyber, section 9) is recorded above.
+1. **Independent verification (`verification_log.md`).** On 2026-09-28 every row (83 items) was re-checked against the pinned SWF page or a fetched primary source, not against the builder's own notes. The pass found and fixed 35 defects and leaves 9 items PARTIAL, each with an impact assessment. No row is marked VERIFIED on inference.
+2. **Five independent grading rounds.** A reviewer with no part in the build inspected the built page, data and docs from scratch each time and wrote a scored report: `grading_report.md` (round 1, 76/100), `grading_report_round2.md` (86), `grading_report_round3.md` (90), `grading_report_round4.md` (92) and `grading_report_round5.md` (93). Each report lists defects by portion of the page; these were fixed before the next round. Rounds 4 and 5 found no factual error in a plotted value in their spot checks against the SWF text. The one wording risk they raised, the lede's claim about EW and cyber (section 9), is closed: the lede now quotes SWF verbatim.
 3. **Automated checks.** `tools/qa.mjs` and the data checks in section 8 run on each rebuild; doc counts are generated from the data by `tools/build_data.py`, so `ledger.md` cannot drift from `events.json`.

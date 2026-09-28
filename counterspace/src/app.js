@@ -2,7 +2,13 @@
 // app.js: shared state, constants and helpers.
 // Provides: data (EVENTS, LEGAL, CAPS), layout(), tw()/wrap() text measurement, Placer (label collision), badge(), timed().
 // ============================================================================
-import { SCENES, HERO, buildSim, GLHost, renderSVG, setLand, PARTICLE_BUDGET, loadEarth, earthReady, EARTH_URL } from './scenes.js';
+// Scene modules (see the map in scenes.js). tools/build_page.py concatenates them in dependency order and strips these imports.
+import { SCENES, HERO } from './scenes/config.js';
+import { buildSim } from './scenes/sim.js';
+import { GLHost } from './scenes/gl-host.js';
+import { renderSVG } from './scenes/svg-fallback.js';
+import { PARTICLE_BUDGET } from './scenes/core.js';
+import { setLand, loadEarth, earthReady, EARTH_URL } from './scenes/earth.js';
 
 performance.mark('cs:module-start');
 const D = JSON.parse(document.getElementById('cs-data').textContent);

@@ -82,16 +82,25 @@ document.getElementById('scRelated').onclick = () => {
   m.classList.add('hl', 'flash-hl'); m.focus(); setGuide(parse(byId[id].start));
   setTimeout(() => { m.classList.remove('hl', 'flash-hl'); }, 3500);
 };
-// Still export. WebGL scenes use the host's renderer; static diagrams are rasterised from their SVG at print width (3000 px) with a caption band.
-const PRINT_W = 3000, BAND = 84;
+// Still export. WebGL scenes use the host's renderer; static diagrams are rasterised from their SVG at print width (3000 px) with header and footer bands.
+const PRINT_W = 3000;
+// Same layout as the live still (GLHost.stillPNG): header band with the "illustrative" banner, the diagram, then a footer band with
+// the title, the source and the imagery credit on separate lines. Sizes are in units of PRINT_W / 1000.
 function svgToPNG(svg, title, cite) {
   return new Promise((resolve, reject) => {
     const vb = svg.viewBox.baseVal, k = PRINT_W / vb.width, xml = new XMLSerializer().serializeToString(svg), img = new Image();
     img.onload = () => {
-      const c = document.createElement('canvas'), g = c.getContext('2d'); c.width = PRINT_W; c.height = Math.round(vb.height * k) + BAND;
-      g.fillStyle = '#060912'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, PRINT_W, Math.round(vb.height * k));
-      g.fillStyle = '#e9edf7'; g.font = '600 30px system-ui,sans-serif'; g.fillText(title, 24, vb.height * k + 34);
-      g.fillStyle = '#a9b3cc'; g.font = '22px system-ui,sans-serif'; g.fillText(`Static diagram, not orbit-propagated. ${cite}`, 24, vb.height * k + 68);
+      const s = PRINT_W / 1000, hb = Math.round(40 * s), fb = Math.round(92 * s), H = Math.round(vb.height * k);
+      const c = document.createElement('canvas'), g = c.getContext('2d'); c.width = PRINT_W; c.height = H + hb + fb;
+      g.fillStyle = '#060912'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, hb, PRINT_W, H);
+      g.fillStyle = '#0b1120'; g.fillRect(0, 0, PRINT_W, hb); g.fillRect(0, hb + H, PRINT_W, fb);
+      g.strokeStyle = 'rgba(255,224,138,0.28)'; g.lineWidth = Math.max(1, s); g.beginPath(); g.moveTo(0, hb - 0.5); g.lineTo(PRINT_W, hb - 0.5); g.moveTo(0, hb + H + 0.5); g.lineTo(PRINT_W, hb + H + 0.5); g.stroke();
+      g.textBaseline = 'middle'; g.fillStyle = '#ffe08a'; g.font = `600 ${Math.round(14 * s)}px system-ui,sans-serif`;
+      g.fillText('Illustrative static diagram, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
+      g.fillStyle = '#e9edf7'; g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`; g.fillText(title, 16 * s, hb + H + 24 * s);
+      const fit = (txt, px, y) => { let f = Math.round(px * s); g.font = `${f}px system-ui,sans-serif`; while (g.measureText(txt).width > PRINT_W - 32 * s && f > 10 * s) { f -= 0.5 * s; g.font = `${f}px system-ui,sans-serif`; } g.fillStyle = '#c3cbe0'; g.fillText(txt, 16 * s, y); };
+      fit(`Source: ${String(cite || '').trim().replace(/[.;,\s]+$/, '')}.`, 15, hb + H + 54 * s);
+      fit('Vector land map: Natural Earth (public domain).', 15, hb + H + 77 * s);
       resolve(c.toDataURL('image/png'));
     };
     img.onerror = () => reject(new Error('The diagram could not be rasterised'));
