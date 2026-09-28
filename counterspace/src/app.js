@@ -20,7 +20,7 @@ const DOMAIN = [parse('1957-01-01'), parse('2027-01-01')];
 const AS_OF = 'SWF 9th ed., Apr. 2026';
 const LAST_DA = KIN.filter(e => e.type === 'destructive').map(e => e.date).sort().at(-1);
 
-document.getElementById('asof').innerHTML = `Data as of: <b>${AS_OF}</b> (debris counts as of Feb. 2026) · CSIS <i>Space Threat Assessment 2025</i> (2026 ed. not yet published) · Page built Sept. 2026`;
+document.getElementById('asof').innerHTML = `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of 28 Sept. 2026; debris counts as of Feb. 2026. Secondary: CSIS <i>Space Threat Assessment 2025</i>.`;
 
 { const nDest = KIN.filter(e => e.type === 'destructive').length;
   document.getElementById('glance').innerHTML = `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }

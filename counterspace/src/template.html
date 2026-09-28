@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Counterspace Timeline</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <meta name="description" content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere.">
 <style>
 :root{
@@ -66,8 +67,18 @@ h1{font:600 clamp(28px,4.4vw,46px)/1.1 var(--serif);margin:10px 0 10px;letter-sp
 h2{font:600 clamp(21px,2.6vw,28px)/1.2 var(--serif);margin:0 0 6px}
 h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .lede{max-width:760px;color:var(--muted);font-size:17px;margin:0}
-.meta{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
-.meta #asof{flex-basis:100%;max-width:760px}
+.cta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:16px 0 0}
+.cta-note{font-size:13px;color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding:10px 16px}
+.btn.primary:hover{filter:brightness(1.08)}
+.jump{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0 0;max-width:780px}
+.jump a{display:flex;flex-direction:column;gap:2px;padding:9px 11px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);text-decoration:none}
+.jump a:hover{border-color:var(--accent)}
+.jump b{font:600 13.5px/1.25 var(--sans)}
+.jump span{font-size:12px;line-height:1.3;color:var(--muted)}
+@media (max-width:640px){.jump{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta{margin:14px 0 0;font-size:13px;color:var(--muted)}
+.meta{max-width:760px;line-height:1.45}
 .btn{font:500 13px/1 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line);
   border-radius:8px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:34px}
 .btn:hover{border-color:var(--accent)}
@@ -179,7 +190,7 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
   background:var(--surface-2);color:var(--text);cursor:pointer;min-height:30px}
 .chip[aria-pressed="false"]{opacity:.72;text-decoration:line-through;color:var(--muted);border-style:dashed}
 .chip:disabled{opacity:.55;cursor:not-allowed}
-@media (max-width:640px){.chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}.chip{flex:none;font-size:12px;padding:4px 8px}}
+@media (max-width:640px){.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.chip{font-size:12.5px;padding:5px 9px;min-height:36px;border-radius:10px}}
 .chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
 
 /* lag + sources */
@@ -205,7 +216,12 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .static-note{font-size:12.5px;color:#a9b3cc}
 .panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
 .panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.panel aside{padding:14px;border-left:1px solid #2a3558;overflow:auto;font-size:14px;color:#cdd5e8}
+.panel aside{border-left:1px solid #2a3558;display:flex;flex-direction:column;min-height:0;overflow:hidden;font-size:14px;color:#cdd5e8}
+.panel .aside-body:focus-visible{outline-offset:-3px}
+.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 6px}
+.panel .aside-body p:first-child{margin-top:0}
+.panel .aside-law{flex:none;padding:8px 14px;border-top:1px solid #2a3558}
+.panel .aside-law .btn{width:100%;justify-content:flex-start;text-align:left;line-height:1.25;height:auto;min-height:36px}
 .panel a{color:#8cc8ff}
 .panel aside h3{color:#fff;margin-top:6px}
 .panel aside .src{font-size:12.5px;color:#a9b3cc}
@@ -224,7 +240,9 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 @media (max-width:760px){
   .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(260px,1fr) auto auto;height:100%;border-radius:0}
   .overlay{padding:0}
-  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:34vh}
+  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:36vh}
+  .panel .aside-body{padding:10px 12px 4px}
+  .panel .aside-law{padding:6px 12px}
   .panel header{padding:8px 10px}
   .panel header h2{font-size:15px;line-height:1.2}
   .panel header .lbl{display:none}
@@ -263,13 +281,20 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
   <h1>Counterspace, 1957–2026: the weapons and the law that trailed them</h1>
   <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military operations” (Executive Summary, p. xxiii). This page puts the technology and the legal response on one year axis.</p>
-  <p class="howto"><b>How to read this page.</b> On wide screens the <b>law band</b> stays pinned as you scroll. <b>A</b> shows kinetic tests by altitude, <b>C</b> non-kinetic operations, <b>B</b> how many states hold each capability, and <b>The lag</b> measures the years between a capability and the legal response. Items with a cube badge open a 3D scene. Each chart has a data table.</p>
-  <div class="meta"><span id="asof"></span></div>
+  <div class="cta"><button class="btn primary" id="tourBtn" type="button">▶ Start the 3D scene tour</button><span class="cta-note">10 short scenes, or select any cube badge on a chart.</span></div>
+  <nav class="jump" aria-label="Jump to a section">
+    <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
+    <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
+    <a href="#chartC"><b>C · Non-kinetic</b><span>Jamming, lasers and cyber</span></a>
+    <a href="#chartB"><b>B · Capabilities</b><span>States holding each, by decade</span></a>
+    <a href="#lag"><b>The lag</b><span>Years from capability to law</span></a>
+    <a href="#sources"><b>Sources</b><span>Citations and method</span></a>
+  </nav>
+  <p class="meta" id="asof"></p>
   </div>
   <div>
     <div class="toolbar" role="toolbar" aria-label="Page controls">
       <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
-      <button class="btn small" id="tourBtn" type="button">▶ Start scene tour</button>
     </div>
     <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
   </div></div>
@@ -298,7 +323,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div class="wrap">
     <ul class="legend" id="legendLegal" aria-label="Legal band key"></ul>
     <div class="legal-zoom" id="legalZoomBox">
-      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged. The items from 2022 to 2025 overprint at the full-width scale, so they are labelled here instead. Tap or focus a mark for its citation.</span></div>
+      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged so the crowded 2022–25 items can carry fuller labels. Marks on the main band are stacked in tracks; a thin leader runs from each to its true date. Tap or focus a mark for its citation.</span></div>
       <div id="legalZoom"></div>
     </div>
     <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list" id="legalList"></ul></details>
@@ -391,10 +416,12 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
     </header>
     <div class="view" id="sceneView"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
     <aside>
-      <p id="sceneCaption"></p>
-      <p class="src" id="sceneSrc"></p>
-      <p><button class="btn small" id="scRelated" type="button">⚖ Related law</button></p>
-      <p class="src" id="sceneScale"></p>
+      <div class="aside-body" tabindex="0" role="region" aria-label="Scene description and source">
+        <p id="sceneCaption"></p>
+        <p class="src" id="sceneSrc"></p>
+        <p class="src" id="sceneScale"></p>
+      </div>
+      <div class="aside-law"><button class="btn small" id="scRelated" type="button">⚖ Related law</button></div>
     </aside>
     <div class="ctrl">
       <button class="btn small" id="scPlay" type="button" aria-pressed="true">❚❚ Pause</button>

@@ -40,6 +40,10 @@ function drawC(el = document.getElementById('svgC')) {
     const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
     const full = `${short}: ${e.target_system.split(' (')[0]}`;
     let lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
+    if (phone) { // phones: the label sits above its bar, full width (at most 2-3 lines), shifted left just enough to fit
+      const lines = wrap(full, W - 12, FS), w = Math.max(...lines.map(s => tw(s, FS))), tx = Math.max(6, Math.min(lx, RIGHT - w));
+      return { e, point, X0, X1, mode: 'above', anchor: 'start', tx, limit: W - 12, lines, w, bad: false, cost: lines.length, lx0: tx, ext: [Math.min(tx, X0 - 16) - 6, Math.max(tx + w, X1 + (e.end ? 6 : 12)) + 6] };
+    }
     const cands = [{ mode: 'above', anchor: 'start', tx: lx, limit: (lx < HX - 8 ? HX - 8 : RIGHT) - lx }];
     { const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 2) }); }
     if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 4) });
@@ -63,10 +67,10 @@ function drawC(el = document.getElementById('svgC')) {
     const rows = laneRows[li]; let yy = yCur + laneHead;
     rows.forEach(row => {
       const nA = Math.max(0, ...row.items.filter(p => p.mode === 'above').map(p => p.lines.length)), nC = Math.max(0, ...row.items.filter(p => p.mode !== 'above').map(p => p.lines.length));
-      const off = Math.max(16, nA ? (nA - 1) * LH + 22 : 0, nC ? nC * LH / 2 + 9 : 0);
+      const off = Math.max(16, nA ? (nA - 1) * LH + (phone ? 30 : 22) : 0, nC ? nC * LH / 2 + 9 : 0);
       row.y = yy + off; yy += off + rowGap;
       row.items.forEach(p => {
-        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - 8 - (p.lines.length - 1) * LH : p.y + 4 - (p.lines.length - 1) * LH / 2; placed.push(p);
+        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - (phone ? 16 : 8) - (p.lines.length - 1) * LH : p.y + 4 - (p.lines.length - 1) * LH / 2; placed.push(p);
         pl.add([p.lx0, p.base - FS * 0.95, p.lx0 + p.w, p.base + (p.lines.length - 1) * LH + FS * 0.25]); pl.add([Math.min(p.X0 - 16, p.lx0), p.y - 7, Math.max(p.X1 + 12, 0), p.y + 8], 'B');
       });
     });
@@ -106,7 +110,8 @@ function drawC(el = document.getElementById('svgC')) {
     regimeIcon(s, e.target_regime).attr('transform', `translate(${X0 - 11},${d.y})`);
     if (hasScene(e)) badge(s, X0 + (d.point ? 12 : 9), d.y - 8);
     if (d.mode === 'gutter') s.append('line').attr('x1', d.tx + 4).attr('x2', X0 - 16).attr('y1', d.y).attr('y2', d.y).style('stroke', 'var(--faint)').style('stroke-dasharray', '1 3');
-    const t = s.append('text').attr('x', d.tx).attr('y', d.base).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`);
+    const t = s.append('text').attr('x', d.tx).attr('y', d.base).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`)
+    if (phone) t.style('paint-order', 'stroke').style('stroke', 'var(--bg)').style('stroke-width', 3).style('stroke-linejoin', 'round');
     d.lines.forEach((ln, i) => t.append('tspan').attr('x', d.tx).attr('dy', i ? LH : 0).text(ln));
     s.append('rect').attr('class', 'hit').attr('x', X0 - 18).attr('y', d.y - 12).attr('width', d.point ? 36 : Math.max(36, d.X1 - X0 + 30)).attr('height', 24);
   });

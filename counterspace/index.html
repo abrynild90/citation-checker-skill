@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Counterspace Timeline</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <meta name="description" content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere.">
 <style>
 :root{
@@ -66,8 +67,18 @@ h1{font:600 clamp(28px,4.4vw,46px)/1.1 var(--serif);margin:10px 0 10px;letter-sp
 h2{font:600 clamp(21px,2.6vw,28px)/1.2 var(--serif);margin:0 0 6px}
 h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .lede{max-width:760px;color:var(--muted);font-size:17px;margin:0}
-.meta{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
-.meta #asof{flex-basis:100%;max-width:760px}
+.cta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:16px 0 0}
+.cta-note{font-size:13px;color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding:10px 16px}
+.btn.primary:hover{filter:brightness(1.08)}
+.jump{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0 0;max-width:780px}
+.jump a{display:flex;flex-direction:column;gap:2px;padding:9px 11px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);text-decoration:none}
+.jump a:hover{border-color:var(--accent)}
+.jump b{font:600 13.5px/1.25 var(--sans)}
+.jump span{font-size:12px;line-height:1.3;color:var(--muted)}
+@media (max-width:640px){.jump{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta{margin:14px 0 0;font-size:13px;color:var(--muted)}
+.meta{max-width:760px;line-height:1.45}
 .btn{font:500 13px/1 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line);
   border-radius:8px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:34px}
 .btn:hover{border-color:var(--accent)}
@@ -179,7 +190,7 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
   background:var(--surface-2);color:var(--text);cursor:pointer;min-height:30px}
 .chip[aria-pressed="false"]{opacity:.72;text-decoration:line-through;color:var(--muted);border-style:dashed}
 .chip:disabled{opacity:.55;cursor:not-allowed}
-@media (max-width:640px){.chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}.chip{flex:none;font-size:12px;padding:4px 8px}}
+@media (max-width:640px){.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.chip{font-size:12.5px;padding:5px 9px;min-height:36px;border-radius:10px}}
 .chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
 
 /* lag + sources */
@@ -205,7 +216,11 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .static-note{font-size:12.5px;color:#a9b3cc}
 .panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
 .panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.panel aside{padding:14px;border-left:1px solid #2a3558;overflow:auto;font-size:14px;color:#cdd5e8}
+.panel aside{border-left:1px solid #2a3558;display:flex;flex-direction:column;min-height:0;overflow:hidden;font-size:14px;color:#cdd5e8}
+.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 6px}
+.panel .aside-body p:first-child{margin-top:0}
+.panel .aside-law{flex:none;padding:8px 14px;border-top:1px solid #2a3558}
+.panel .aside-law .btn{width:100%;justify-content:flex-start;text-align:left;line-height:1.25;height:auto;min-height:36px}
 .panel a{color:#8cc8ff}
 .panel aside h3{color:#fff;margin-top:6px}
 .panel aside .src{font-size:12.5px;color:#a9b3cc}
@@ -224,7 +239,9 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 @media (max-width:760px){
   .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(260px,1fr) auto auto;height:100%;border-radius:0}
   .overlay{padding:0}
-  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:34vh}
+  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:36vh}
+  .panel .aside-body{padding:10px 12px 4px}
+  .panel .aside-law{padding:6px 12px}
   .panel header{padding:8px 10px}
   .panel header h2{font-size:15px;line-height:1.2}
   .panel header .lbl{display:none}
@@ -263,13 +280,20 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
   <h1>Counterspace, 1957–2026: the weapons and the law that trailed them</h1>
   <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military operations” (Executive Summary, p. xxiii). This page puts the technology and the legal response on one year axis.</p>
-  <p class="howto"><b>How to read this page.</b> On wide screens the <b>law band</b> stays pinned as you scroll. <b>A</b> shows kinetic tests by altitude, <b>C</b> non-kinetic operations, <b>B</b> how many states hold each capability, and <b>The lag</b> measures the years between a capability and the legal response. Items with a cube badge open a 3D scene. Each chart has a data table.</p>
-  <div class="meta"><span id="asof"></span></div>
+  <div class="cta"><button class="btn primary" id="tourBtn" type="button">▶ Start the 3D scene tour</button><span class="cta-note">10 short scenes, or select any cube badge on a chart.</span></div>
+  <nav class="jump" aria-label="Jump to a section">
+    <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
+    <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
+    <a href="#chartC"><b>C · Non-kinetic</b><span>Jamming, lasers and cyber</span></a>
+    <a href="#chartB"><b>B · Capabilities</b><span>States holding each, by decade</span></a>
+    <a href="#lag"><b>The lag</b><span>Years from capability to law</span></a>
+    <a href="#sources"><b>Sources</b><span>Citations and method</span></a>
+  </nav>
+  <p class="meta" id="asof"></p>
   </div>
   <div>
     <div class="toolbar" role="toolbar" aria-label="Page controls">
       <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
-      <button class="btn small" id="tourBtn" type="button">▶ Start scene tour</button>
     </div>
     <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
   </div></div>
@@ -298,7 +322,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div class="wrap">
     <ul class="legend" id="legendLegal" aria-label="Legal band key"></ul>
     <div class="legal-zoom" id="legalZoomBox">
-      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged. The items from 2022 to 2025 overprint at the full-width scale, so they are labelled here instead. Tap or focus a mark for its citation.</span></div>
+      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged so the crowded 2022–25 items can carry fuller labels. Marks on the main band are stacked in tracks; a thin leader runs from each to its true date. Tap or focus a mark for its citation.</span></div>
       <div id="legalZoom"></div>
     </div>
     <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list" id="legalList"></ul></details>
@@ -391,10 +415,12 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
     </header>
     <div class="view" id="sceneView"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
     <aside>
-      <p id="sceneCaption"></p>
-      <p class="src" id="sceneSrc"></p>
-      <p><button class="btn small" id="scRelated" type="button">⚖ Related law</button></p>
-      <p class="src" id="sceneScale"></p>
+      <div class="aside-body">
+        <p id="sceneCaption"></p>
+        <p class="src" id="sceneSrc"></p>
+        <p class="src" id="sceneScale"></p>
+      </div>
+      <div class="aside-law"><button class="btn small" id="scRelated" type="button">⚖ Related law</button></div>
     </aside>
     <div class="ctrl">
       <button class="btn small" id="scPlay" type="button" aria-pressed="true">❚❚ Pause</button>
@@ -413,9 +439,25 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 <script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script type="module">
 // ============================================================================
-// Scene library. Scenes are data (SCENES configs) interpreted by one simulator
-// (buildSim) that feeds two renderers: a single shared WebGL host (three.js)
-// and a static SVG fallback (reduced motion / no WebGL). Illustrative only.
+// Scene library (module map). Scenes are data (config.js) interpreted by one simulator (sim.js)
+// that feeds two renderers: a single shared WebGL host (gl-host.js, three.js) and a static SVG
+// fallback (svg-fallback.js) used for reduced motion / no WebGL. Illustrative only.
+//
+//   scenes/core.js         constants, vector/orbit math, seeded RNG, compressed radial scale rAlt()
+//   scenes/labels.js       placeLabels(): label de-confliction shared by all renderers
+//   scenes/config.js       SCENES + HERO data (per-scene framing, actors, captions)
+//   scenes/sim.js          buildSim(cfg): items + cameras
+//   scenes/earth.js        land canvas, Blue Marble loader, sprites
+//   scenes/gl-host.js      GLHost class (live render, labels, stillPNG)
+//   scenes/svg-fallback.js renderSVG(): static diagram
+//
+// app.js and scene-ui.js use these names from a single scope: tools/build_page.py concatenates the
+// modules above (in that order) and strips import/export keywords. This file holds no code.
+// ============================================================================
+
+// ============================================================================
+// scenes/core.js: shared constants and math (vectors, orbits, seeded RNG, compressed radial scale)
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
 const DEG = Math.PI / 180;
 const GEO_ALT = 35786;
@@ -461,6 +503,11 @@ function orbitThrough(lat, lon, inc) {
 function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const gauss = rnd => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
 
+
+// ============================================================================
+// scenes/labels.js: screen-space label placement shared by live HTML labels, the PNG still and the SVG fallback
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// ============================================================================
 // Screen-space label de-confliction shared by the live HTML labels, the PNG still and the SVG fallback.
 // list[i] = {x, y (preferred centre), px, py (object point), w, h, fixed} or null.
 // Returns placements {x, y, leader, ax, ay, qx, qy}. Fixed labels are placed first; others are nudged
@@ -493,6 +540,11 @@ function offDisc(x, y, w, h, cx, cy, r) {
 }
 const labelW = (text, u = 1) => (text.length * 6.9 + 16) * u;
 
+
+// ============================================================================
+// scenes/config.js: scene configuration data: palette, the ten SCENES and the HERO overview
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// ============================================================================
 // ---------------------------------------------------------------- configs
 const C = { tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', gps: '#9be7c4', jam: '#ff5d5d', ok: '#6ee7a8', laser: '#ff4fd8', geo: '#ffcf6e', belt: '#b28cff', ground: '#e9edf7' };
 
@@ -513,8 +565,8 @@ const SCENES = [
     cite: 'SWF 2026, Table 5-1, p. 05-01; Table 1-4, p. 01-24.', related: null, event: 'us-1985-solwind',
     wideLaunch: 3.6, hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
     actors: [
-      { type: 'aircraft', path: [[32.5, -114.0], [35.0, -124.0]], alt: 12, t0: 0.0, t1: 0.24, label: 'F-15 zoom climb' },
-      { type: 'target', label: 'Solwind P78-1', color: C.tgt, big: true },
+      { type: 'aircraft', path: [[32.5, -114.0], [35.0, -124.0]], alt: 12, t0: 0.0, t1: 0.24, label: 'F-15 zoom climb', dx: -96, dy: 30 },
+      { type: 'target', label: 'Solwind P78-1', color: C.tgt, big: 1.6, bright: true },
       { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42 },
       { type: 'debris', count: 285, spreadAlt: 120, spreadInc: 0.9, dv: 0.6, decay: 0.9, color: C.debris },
     ], still: 0.56, status: [[0, 'F-15 climbs over the Pacific'], [0.24, 'Missile released; homing vehicle rises to the satellite'], [0.5, 'Collision at ~530 km; fragments spread and decay'], [0.75, 'Time compressed: SWF counts 285 tracked fragments, all since decayed']] },
@@ -535,7 +587,7 @@ const SCENES = [
     wideLaunch: 3.6, hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
     actors: [
       { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie' },
-      { type: 'target', label: 'USA-193', color: C.tgt, big: true, fall: [{ k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 }, { k: 1.25, di: -0.3, dr: -0.012, dw: 1.05 }, { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 }] },
+      { type: 'target', label: 'USA-193', color: C.tgt, big: 1.6, bright: true, fall: [{ k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 }, { k: 1.25, di: -0.3, dr: -0.012, dw: 1.05 }, { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 }] },
       { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42 },
       { type: 'debris', count: 175, spreadAlt: 70, spreadInc: 1.0, dv: 0.6, decay: 4.5, color: C.debris },
     ], still: 0.47, status: [[0, 'Interceptor rises toward the satellite'], [0.42, 'Collision at ~220 km; low-altitude fragments decay quickly'], [0.6, 'Time compressed: SWF reports ~20 months to de-orbit entirely']] },
@@ -547,8 +599,8 @@ const SCENES = [
       { type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: '#ff7a7a', thick: 0.011, label: 'DN-2 path (no target: not an intercept)', labelIdx: 0.12, dx: -40, dy: -50, head: true, apexT: 0.47, staticAt: [0.6, 0.09],
         marks: [{ alt: 10000, label: '10,000 km: China’s stated figure', short: '10,000 km · China', color: '#ffd9a0', dx: -70, dy: 52, staticAt: [0.66, 0.78] }, { alt: 30000, label: 'Apogee ≥30,000 km (analysis cited by SWF)', short: '≥30,000 km · SWF-cited', color: '#ff9c9c', apex: true, dx: -96, dy: -58, staticAt: [0.6, 0.18] }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO · 35,786 km', color: C.geo, dx: 24, dy: 58, staticAt: [0.3, 0.7] }] },
       { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.012, opacity: 0.95, sats: 10 },
-    ], still: 0.62, camDist: 7.5, status: [[0, 'Rocket climbs from Xichang on a suborbital path'], [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)'], [0.8, 'Falls back over the Indian Ocean · no target: reach, not an intercept']], shellLabels: { MEO: null, GEO: null },
-    cameras: [{ name: 'Profile', at: [9, 2, 5.7], look: [4, 91, 1.15] }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
+    ], still: 0.62, camDist: 7.5, stillCam: { at: [24, 58, 8.2], look: [0, 62, 0.4] }, status: [[0, 'Rocket climbs from Xichang on a suborbital path'], [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)'], [0.8, 'Falls back over the Indian Ocean · no target: reach, not an intercept']], shellLabels: { MEO: null, GEO: null },
+    cameras: [{ name: 'Profile', at: [10, 4, 7.4], look: [0, 62, 0.55] }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
   { id: 'shakti', date: '2019-03-27', title: 'Mission Shakti (2019)', shells: ['LEO'], duration: 12,
     caption: 'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
     cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-03.', related: 'unga-77-41', event: 'in-2019-shakti',
@@ -557,7 +609,7 @@ const SCENES = [
       { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
       { type: 'target', label: 'Microsat-R', color: C.tgt, big: true },
       { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55 },
-      { type: 'debris', count: 130, spreadAlt: 110, spreadInc: 1.0, dv: 0.6, decay: 2.4, color: C.debris },
+      { type: 'debris', count: 130, spreadAlt: 110, spreadInc: 1.0, dv: 0.6, drift: 0.15, decay: 5, color: C.debris },
     ], still: 0.43, status: [[0, 'PDV Mk-II rises from Abdul Kalam Island'], [0.38, 'Collision at ~300 km; fragments spread and decay quickly'], [0.65, 'Time compressed: SWF counts 130 cataloged pieces, none still in orbit']] },
   { id: 'cosmos1408', date: '2021-11-15', title: 'Nudol vs. Cosmos 1408 (2021)', shells: ['LEO'], duration: 16,
     caption: 'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 at about 470 km. The debris cloud spreads across altitudes that cross the International Space Station’s orbit (about 420 km), and the ISS crew sheltered in their docked spacecraft. SWF counts 1,807 cataloged fragments, 5 still in orbit as of February 2026.',
@@ -585,8 +637,12 @@ const SCENES = [
     cite: 'SWF 2026, pp. 15-06 to 15-07 (attributed to Russia by the US, UK and EU, May 2022).', related: 'tallinn-2017', event: 'ru-2022-viasat',
     actors: [
       { type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', color: C.geo, dimT0: 0.4, dimT1: 0.7, hub: [46, 8], hubLabel: 'Ground management network (illustrative)', hubDx: -60, hubDy: 40, pulse: [0.1, 0.3], beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
-      { type: 'terminals', boxes: [[44, 52, 22, 40, 0.55], [43, 56, -5, 22, 0.45]], count: 900, pulse0: 0.1, t0: 0.3, t1: 0.62, label: 'Ground terminals (modems)' },
-          { type: 'flash', at: [49, 20, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.42, span: 0.3 },
+      { type: 'terminals', boxes: [[44, 52, 22, 40, 0.34, 0], [47, 55, 6, 22, 0.28, 1], [43, 50, -6, 8, 0.2, 2], [54, 60, 6, 26, 0.18, 3]], count: 900, pulse0: 0.1, t0: 0.3, t1: 0.62, label: 'Ground terminals (modems)' },
+      // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
+      { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
+      { type: 'flash', at: [51, 14, 0], t0: 0.38, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
+      { type: 'flash', at: [46, 1, 0], t0: 0.46, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
+      { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
     ], still: 0.75, camDist: 4.9, focus: [33, 12], shellLabels: { GEO: null }, staticZoom: 1.5,
     cameras: [{ name: 'Europe + GEO', at: [22, -18, 4.3], look: [30, 6, 1.5] }, { name: 'Ground network', at: [42, -2, 2.3], look: [46, 14, 1.0] }, { name: 'Wide', at: [30, -6, 6.5] }] },
   { id: 'laser', date: '1997-10-17', title: 'MIRACL laser test on MSTI-3 (1997)', shells: ['LEO'], duration: 12,
@@ -611,6 +667,11 @@ const HERO = { id: 'hero', title: 'Overview', shells: ['LEO', 'MEO', 'GEO'], dur
     { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, sats: 14 },
   ], still: 0.2, camDist: 7.2, focus: [22, -30] };
 
+
+// ============================================================================
+// scenes/sim.js: simulator: interprets a scene config into time-parameterised items and cameras (renderer-independent)
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// ============================================================================
 // ---------------------------------------------------------------- simulator
 // Items: {kind, ...} with time functions. Kinds: shell, curve, point, cloud, beam, dome, flash.
 function buildSim(cfg) {
@@ -649,7 +710,7 @@ function buildSim(cfg) {
     if (a.type === 'target' && tgt) {
       const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, k / 180 * 2 * Math.PI));
       items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35 });
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null,
+      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
         pos: t => (a.noHit || t <= tgt.t) ? tgt.pos(t) : null,
         glow: a.noHit ? (t => Math.abs(t - tgt.t) < 0.08) : null });
     }
@@ -657,8 +718,8 @@ function buildSim(cfg) {
       a.fall.forEach((f, i) => {
         const pos = t => { const dt = t - tgt.t; if (dt < 0) return null; const alt = tgt.alt * (1 - f.k * dt) - 6 * dt; return alt > 70 ? orbitPos(alt, tgt.inc + f.di, tgt.raan + f.dr, tgt.uHit + tgt.w * dt * f.dw) : null; };
         const tEnd = tgt.t + (1 - 75 / tgt.alt) / f.k, N = 36, all = []; for (let k = 0; k <= N; k++) all.push(pos(tgt.t + (tEnd - tgt.t) * k / N) || pos(tgt.t + (tEnd - tgt.t) * (k - 1) / N));
-        items.push({ kind: 'curve', dynamic: true, all, thick: 0.006, color: '#ffb066', width: 2, pts: t => { const s = clamp01((t - tgt.t) / (tEnd - tgt.t)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
-        items.push({ kind: 'point', shape: 'sat', small: true, scale: 3.4, color: '#ffd19a', label: i === 0 ? 'Larger pieces falling (illustrative)' : null, labelDx: 60, labelDy: 16, pos });
+        items.push({ kind: 'curve', dynamic: true, all, thick: 0.009, color: '#ffb066', width: 2, pts: t => { const s = clamp01((t - tgt.t) / (tEnd - tgt.t)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
+        items.push({ kind: 'point', shape: 'sat', small: true, scale: 3.2, color: '#ffd19a', label: i === 0 ? 'Larger pieces falling (illustrative)' : null, labelDx: 60, labelDy: 16, pos });
         items.push({ kind: 'flash', pos: all[N], t0: Math.min(0.98, tEnd), color: '#ffd9a0', size: 0.12, span: 0.1 });
       });
     }
@@ -704,7 +765,7 @@ function buildSim(cfg) {
             const p = P[k]; let x = 0, y = 0, z = 0;
             if (dt > 0) {
               const alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
-              if (alt > 60) { const q = orbitPos(alt, tgt.inc + p.di, tgt.raan + p.dr, tgt.uHit + p.du + tgt.w * dt * p.dw); x = q[0]; y = q[1]; z = q[2]; vis++; }
+              if (alt > 60) { const q = orbitPos(alt, tgt.inc + p.di, tgt.raan + p.dr, tgt.uHit + p.du + tgt.w * (a.drift ?? 1) * dt * p.dw); x = q[0]; y = q[1]; z = q[2]; vis++; }
             }
             out[3 * k] = x; out[3 * k + 1] = y; out[3 * k + 2] = z;
           }
@@ -773,10 +834,10 @@ function buildSim(cfg) {
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
       items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, labelDy: -30, pos: () => g });
-      a.beams.forEach(b => { // space side stays bright; only the ground-side segment dims once the ground network is hit
+      a.beams.forEach((b, bi) => { // space side stays bright; only the ground-side segment dims once the ground network is hit
         const e = ll(b[0], b[1], 1.003), m = add(scl(g, 0.4), scl(e, 0.6));
         items.push({ kind: 'beam', a: () => g, b: () => m, on: () => true, color: a.color, opacity: 0.5, width: 0.006 });
-        items.push({ kind: 'beam', a: () => m, b: () => e, on: () => true, color: a.color, opacity: 0.5, width: 0.006, colorFn: t => t > a.dimT0 ? '#d98a7a' : a.color, opFn: t => 0.5 - 0.36 * smooth((t - a.dimT0) / (a.dimT1 - a.dimT0)) });
+        items.push({ kind: 'beam', a: () => m, b: () => e, on: () => true, color: a.color, opacity: 0.5, width: 0.006, colorFn: t => t > a.dimT0 + bi * 0.03 ? '#d98a7a' : a.color, opFn: t => 0.5 - 0.42 * smooth((t - a.dimT0 - bi * 0.03) / (a.dimT1 - a.dimT0)) });
       });
       if (a.hub) { // illustrative ground management network: links from a hub to regional nodes, with a malware pulse running along them
         const hub = a.hub, N = 40, pulse = a.pulse;
@@ -795,7 +856,9 @@ function buildSim(cfg) {
     }
     if (a.type === 'terminals') {
       const P = [];
-      a.boxes.forEach(([la0, la1, lo0, lo1, frac], bi) => { const m = Math.round(a.count * frac); for (let k = 0; k < m; k++) P.push({ p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004), off: lerp(a.t0, a.t1, bi === 0 ? rnd() * 0.6 : 0.3 + rnd() * 0.7) }); });
+      // Each box is a region [lat0, lat1, lon0, lon1, share, wave]: regions go dark one after another (wave order), terminals within a region over its own window.
+      const nw = Math.max(...a.boxes.map(b => (b[5] ?? 0) + 1));
+      a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => { const m = Math.round(a.count * frac); for (let k = 0; k < m; k++) P.push({ p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004), off: wave == null ? lerp(a.t0, a.t1, bi === 0 ? rnd() * 0.6 : 0.3 + rnd() * 0.7) : lerp(a.t0, a.t1, (wave + rnd() * 0.8) / nw) }); });
       const n = P.length;
       items.push({ kind: 'cloud', n, size: 0.03, label: a.label, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
         fill(t, out, col) {
@@ -803,7 +866,8 @@ function buildSim(cfg) {
             const dark = t > P[k].off, blink = dark && t < P[k].off + 0.05; col[3 * k] = blink ? 1 : dark ? 0.9 : 0.35; col[3 * k + 1] = blink ? 0.9 : dark ? 0.2 : 1.0; col[3 * k + 2] = blink ? 0.8 : dark ? 0.2 : 0.62; }
           return n;
         } });
-      items.push({ kind: 'status', text: t => t < a.pulse0 ? 'Before the attack: user modems online (green), KA-SAT serving Europe' : t < a.t0 ? 'Attackers reach the ground management network and push malicious commands (illustrative network)' : t < a.t1 ? 'Malware overwrites modems (SWF: about 45 minutes): they go dark (red)' : 'Modems offline (red) · the satellite kept working: the attack hit the ground segment (ground-side links dimmed)' });
+      const dark = t => { let d = 0; for (let k = 0; k < n; k++) if (t > P[k].off) d++; return d; };
+      items.push({ kind: 'status', text: t => { const tx = t < a.pulse0 ? 'Before the attack: user modems online (green), KA-SAT serving Europe' : t < a.t0 ? 'Attackers reach the ground management network and push malicious commands (illustrative network)' : t < a.t1 ? 'Malware overwrites modems (SWF: ~45 min): red = offline' : 'Modems offline (red) · satellite kept working: the attack hit the ground segment'; return t >= a.t0 ? `${tx} · ${dark(t)} of ${n} simulated terminals offline` : tx; } });
     }
     if (a.type === 'beam' && tgt) {
       const from = ll(a.from[0], a.from[1], 1.004);
@@ -840,6 +904,11 @@ function buildSim(cfg) {
 }
 
 // ---------------------------------------------------------------- land texture
+
+// ============================================================================
+// scenes/earth.js: Earth textures: vector land canvas, NASA Blue Marble loader, sprite canvases
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// ============================================================================
 let LAND = null, landCanvas = null;
 function setLand(l) { LAND = l; }
 function drawLand(ctx, W, H, ocean, land, grat) {
@@ -904,6 +973,11 @@ function ringCanvas() {
   const r = g.createRadialGradient(64, 64, 40, 64, 64, 64); r.addColorStop(0, 'rgba(255,255,255,0)'); r.addColorStop(0.7, 'rgba(255,255,255,0.9)'); r.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = r; g.fillRect(0, 0, 128, 128); return ringCv;
 }
+
+// ============================================================================
+// scenes/gl-host.js: single shared WebGL host (three.js): scene building, labels, cameras, playback and the PNG still
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// ============================================================================
 
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz; vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
@@ -1010,7 +1084,7 @@ class GLHost {
           [-1, 1].forEach(s => { const p = new T.Mesh(new T.BoxGeometry(0.055, 0.003, 0.026), panelMat); p.position.x = s * 0.045; m.add(p);
             const f = new T.Mesh(new T.BoxGeometry(0.012, 0.004, 0.004), frameMat); f.position.x = s * 0.018; m.add(f); });
           const halo = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: col(it.color), transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
-          halo.scale.setScalar(0.09); m.add(halo); m.userData.halo = halo;
+          halo.scale.setScalar(it.bright ? 0.13 : 0.09); if (it.bright) halo.material.opacity = 0.85; m.add(halo); m.userData.halo = halo;
         } else {
           let geo;
           if (it.shape === 'sat') geo = new T.OctahedronGeometry(0.018);
@@ -1194,9 +1268,12 @@ class GLHost {
   stillPNG(title, cite, targetW = 3000) {
     const vw = this.el.clientWidth, vh = this.el.clientHeight, pr = this.renderer.getPixelRatio();
     const maxDim = Math.min(this.maxTex, 4096), W = Math.min(targetW, maxDim, Math.floor(maxDim * vw / vh)), H = Math.round(W * vh / vw);
+    // A scene may define its own still framing (cfg.stillCam) so the print image shows the whole subject and its labels, whatever the live camera shows.
+    const cam = this.camera, keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell }, sc = this.sim.cfg.stillCam;
+    if (sc) { this.hideShell = !!sc.hideShell; this.target.set(...(sc.look ? ll(...sc.look) : [0, 0, 0])); cam.position.set(...ll(...sc.at)); cam.up.set(0, 1, 0); cam.lookAt(this.target); cam.updateMatrixWorld(); }
     this.renderer.setPixelRatio(1); this.renderer.setSize(W, H, false); this.renderer.render(this.scene, this.camera);
     // Layout: header band (banner) | render | footer band (title, source, imagery credit). Nothing is drawn over the globe.
-    const s = W / 1000, hb = Math.round(40 * s), fb = Math.round(64 * s);
+    const s = W / 1000, hb = Math.round(40 * s), fb = Math.round(92 * s);
     const c = document.createElement('canvas'); c.width = W; c.height = H + hb + fb;
     const g = c.getContext('2d'); g.fillStyle = '#070b17'; g.fillRect(0, 0, W, c.height); g.drawImage(this.canvas, 0, hb);
     g.textAlign = 'center'; g.lineJoin = 'round';
@@ -1213,13 +1290,14 @@ class GLHost {
     g.strokeStyle = 'rgba(255,224,138,0.28)'; g.lineWidth = Math.max(1, s); g.beginPath(); g.moveTo(0, hb - 0.5); g.lineTo(W, hb - 0.5); g.moveTo(0, hb + H + 0.5); g.lineTo(W, hb + H + 0.5); g.stroke();
     g.textBaseline = 'middle'; g.fillStyle = '#ffe08a'; g.font = `600 ${Math.round(14 * s)}px system-ui,sans-serif`;
     g.fillText('Illustrative, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
-    g.fillStyle = '#e9edf7'; g.font = `600 ${Math.round(19 * s)}px system-ui,sans-serif`; g.fillText(title, 16 * s, hb + H + 21 * s);
-    // Source line: cite, then the imagery credit as its own sentence (single separator).
+    g.fillStyle = '#e9edf7'; g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`; g.fillText(title, 16 * s, hb + H + 24 * s);
+    // Source line (cite) and imagery credit each on their own line, at a readable size (shrunk only if a line would overflow).
     const credit = earthImg ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
-    const src = `${String(cite || '').trim().replace(/[.;,\s]+$/, '')}. ${credit}`;
-    let fs = Math.round(11.5 * s); g.font = `${fs}px system-ui,sans-serif`; while (g.measureText(src).width > W - 32 * s && fs > 7 * s) { fs -= 0.5 * s; g.font = `${fs}px system-ui,sans-serif`; }
-    g.fillStyle = '#a9b3cc'; g.fillText(src, 16 * s, hb + H + 46 * s); g.textBaseline = 'alphabetic';
+    const fit = (txt, px, y, col) => { let f = Math.round(px * s); g.font = `${f}px system-ui,sans-serif`; while (g.measureText(txt).width > W - 32 * s && f > 10 * s) { f -= 0.5 * s; g.font = `${f}px system-ui,sans-serif`; } g.fillStyle = col; g.fillText(txt, 16 * s, y); };
+    fit(`Source: ${String(cite || '').trim().replace(/[.;,\s]+$/, '')}.`, 15, hb + H + 54 * s, '#c3cbe0');
+    fit(credit, 15, hb + H + 77 * s, '#c3cbe0'); g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
+    if (sc) { cam.position.copy(keep.pos); this.target.copy(keep.tgt); this.hideShell = keep.hide; cam.lookAt(this.target); }
     this.renderer.setPixelRatio(pr); this.resize();
     return url;
   }
@@ -1246,6 +1324,11 @@ function occluded(cam, p) {
   return t0 > 0 && t0 < L - 1e-3;
 }
 
+// ============================================================================
+// scenes/svg-fallback.js: static SVG renderer for reduced motion / no WebGL
+// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// ============================================================================
+
 // ---------------------------------------------------------------- SVG fallback (static)
 // A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,
 // with the same screen-space label de-confliction (pills + leader lines) as the live scene.
@@ -1255,7 +1338,9 @@ function renderSVG(sim, el, t = sim.still) {
   const W = el.clientWidth || 640, H = el.clientHeight || 420;
   const cam = sim.cams[0].pos, zoomed = !!(sim.items._arc && sim.cams[0].look), cl = toLL(sim.cfg.staticCenter ? ll(sim.cfg.staticCenter[0], sim.cfg.staticCenter[1]) : zoomed ? sim.items._arc.mid : cam);
   const shellR = Math.max(...sim.items.filter(i => i.kind === 'shell').map(i => i.r), 1.4);
-  const R = Math.min(W, H * 0.94) / (2 * Math.max(2.2, shellR + 0.3)) * (sim.cfg.staticZoom ?? (zoomed ? 2.5 : 1));
+  let R = Math.min(W, H * 0.94) / (2 * Math.max(2.2, shellR + 0.3)) * (sim.cfg.staticZoom ?? (zoomed ? 2.5 : 1));
+  // Zoomed close-ups keep the whole globe inside the panel (no spill past the frame).
+  if (zoomed && sim.cfg.staticZoom == null) R = Math.min(R, 0.47 * Math.min(W, H));
   const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([W / 2, H / 2 - 4]).scale(R).clipAngle(90);
   const rot = d3.geoRotation([-cl.lon, -cl.lat]), CY = H / 2 - 4;
   // Project any 3D point: orthographic along the camera direction, scaled by radius.
@@ -1317,7 +1402,7 @@ function renderSVG(sim, el, t = sim.still) {
     if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8)).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 5 : 1.2); if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color); } }
     if (it.kind === 'point') { const q = it.liveOnly ? null : it.pos(t); if (!q) continue; const p = project(q); if (p.hidden) continue;
       const c = it.statusColor ? it.statusColor(t) : it.color;
-      if (it.shape === 'sat') { const q = it.small ? 4 : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1); g.append('rect').attr('x', p.x - q / 2).attr('y', p.y - q / 2).attr('width', q).attr('height', q).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8); }
+      if (it.shape === 'sat') { const q = it.small ? (it.scale ? Math.min(10, 2 + it.scale * 1.3) : 4) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1); g.append('rect').attr('x', p.x - q / 2).attr('y', p.y - q / 2).attr('width', q).attr('height', q).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8); }
       else if (it.shape === 'tick') g.append('path').attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`).attr('fill', c).attr('stroke', '#070b17');
       else if (it.shape === 'aircraft') g.append('path').attr('d', `M${p.x},${p.y - 7}L${p.x + 5},${p.y + 5}L${p.x - 5},${p.y + 5}Z`).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
       else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
@@ -1348,6 +1433,7 @@ function renderSVG(sim, el, t = sim.still) {
   return svg.node();
 }
 
+
 // ============================================================================
 // app.js: shared state, constants and helpers.
 // Provides: data (EVENTS, LEGAL, CAPS), layout(), tw()/wrap() text measurement, Placer (label collision), badge(), timed().
@@ -1369,7 +1455,7 @@ const DOMAIN = [parse('1957-01-01'), parse('2027-01-01')];
 const AS_OF = 'SWF 9th ed., Apr. 2026';
 const LAST_DA = KIN.filter(e => e.type === 'destructive').map(e => e.date).sort().at(-1);
 
-document.getElementById('asof').innerHTML = `Data as of: <b>${AS_OF}</b> (debris counts as of Feb. 2026) · CSIS <i>Space Threat Assessment 2025</i> (2026 ed. not yet published) · Page built Sept. 2026`;
+document.getElementById('asof').innerHTML = `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of 28 Sept. 2026; debris counts as of Feb. 2026. Secondary: CSIS <i>Space Threat Assessment 2025</i>.`;
 
 { const nDest = KIN.filter(e => e.type === 'destructive').length;
   document.getElementById('glance').innerHTML = `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
@@ -1605,12 +1691,12 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.style.overflowX = strip ? 'auto' : ''; el.tabIndex = strip ? 0 : -1; if (!strip) el.removeAttribute('tabindex');
   if (strip) { el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Law and policy timeline, scrolls sideways'); } else { el.removeAttribute('role'); el.removeAttribute('aria-label'); }
   const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300), phone = isPhoneNow() && !zoom && !strip, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
-  const FS = 10.5, PITCH = 13, TP = phone ? 12 : compact ? 10 : 12, GS = phone ? 0.85 : compact ? 0.75 : 1;
+  const FS = 10.5, PITCH = 13, TP = phone ? 16 : compact ? 14 : 19, SEP = phone ? 20 : compact ? 16 : 22, GS = phone ? 0.85 : compact ? 0.75 : 1;
   const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981') && (!zoom || ((l.end ? parse(l.end) : DOMAIN[1]) > ZOOM[0] && parse(l.start) < ZOOM[1])));
   const pts = LEGAL.filter(l => !spans.includes(l) && (!zoom || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) => a.start < b.start ? -1 : 1);
   // 1. dodge marks that would collide into tracks (the true date stays on the axis)
   const last = []; let maxT = 0;
-  pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < TP) t++; last[t] = cx; d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
+  pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < SEP) t++; last[t] = cx + (hasScene(d) ? 6 : 0); d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
   // 2. label placement, coordinates relative to the mark line (up is negative, down positive)
   const pl = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 }), top0 = 16 + TP * maxT, labels = []; let maxUp = -1, maxDn = -1;
   if (!small) {
@@ -1678,7 +1764,8 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   bindMark(sg, strip ? null : legalCard, strip ? tapLegal : activate);
   // points
   pts.forEach(d => { d._y = yMark - d._t * TP; });
-  svg.append('g').selectAll('line').data(pts.filter(d => d._t)).join('line').attr('x1', d => d._cx).attr('x2', d => d._cx).attr('y1', d => d._y).attr('y2', yMark).style('stroke', 'var(--faint)').style('stroke-width', 1);
+  svg.append('g').selectAll('line').data(pts.filter(d => d._t)).join('line').attr('x1', d => d._cx).attr('x2', d => d._cx).attr('y1', d => d._y).attr('y2', yMark).style('stroke', 'var(--faint)').style('stroke-width', 1.25);
+  svg.append('g').selectAll('circle').data(pts.filter(d => d._t)).join('circle').attr('cx', d => d._cx).attr('cy', yMark).attr('r', 2).style('fill', 'var(--faint)');
   const pg = svg.append('g').selectAll('g').data(pts).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
     .attr('transform', d => `translate(${d._cx},${d._y})${GS < 1 ? ` scale(${GS})` : ''}`)
     .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
@@ -1884,6 +1971,10 @@ function drawC(el = document.getElementById('svgC')) {
     const short = actorKey(e.actor) ? (actorKey(e.actor) === 'United States' ? 'US' : actorKey(e.actor)) : e.actor.split(' ')[0];
     const full = `${short}: ${e.target_system.split(' (')[0]}`;
     let lx = X0 + (point ? 12 : 4) + (hasScene(e) ? 12 : 0); if (lx >= HX - 8 && lx < HX + 6) lx = HX + 6;
+    if (phone) { // phones: the label sits above its bar, full width (at most 2-3 lines), shifted left just enough to fit
+      const lines = wrap(full, W - 12, FS), w = Math.max(...lines.map(s => tw(s, FS))), tx = Math.max(6, Math.min(lx, RIGHT - w));
+      return { e, point, X0, X1, mode: 'above', anchor: 'start', tx, limit: W - 12, lines, w, bad: false, cost: lines.length, lx0: tx, ext: [Math.min(tx, X0 - 16) - 6, Math.max(tx + w, X1 + (e.end ? 6 : 12)) + 6] };
+    }
     const cands = [{ mode: 'above', anchor: 'start', tx: lx, limit: (lx < HX - 8 ? HX - 8 : RIGHT) - lx }];
     { const tx = X0 - 22; cands.push({ mode: 'left', anchor: 'end', tx, limit: tx - (tx > HX + 8 ? HX + 8 : M.l + 2) }); }
     if (X0 > HX + 8) cands.push({ mode: 'gutter', anchor: 'end', tx: HX - 8, limit: HX - 8 - (M.l + 4) });
@@ -1907,10 +1998,10 @@ function drawC(el = document.getElementById('svgC')) {
     const rows = laneRows[li]; let yy = yCur + laneHead;
     rows.forEach(row => {
       const nA = Math.max(0, ...row.items.filter(p => p.mode === 'above').map(p => p.lines.length)), nC = Math.max(0, ...row.items.filter(p => p.mode !== 'above').map(p => p.lines.length));
-      const off = Math.max(16, nA ? (nA - 1) * LH + 22 : 0, nC ? nC * LH / 2 + 9 : 0);
+      const off = Math.max(16, nA ? (nA - 1) * LH + (phone ? 30 : 22) : 0, nC ? nC * LH / 2 + 9 : 0);
       row.y = yy + off; yy += off + rowGap;
       row.items.forEach(p => {
-        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - 8 - (p.lines.length - 1) * LH : p.y + 4 - (p.lines.length - 1) * LH / 2; placed.push(p);
+        p.y = row.y; p.lane = l.key; p.base = p.mode === 'above' ? p.y - (phone ? 16 : 8) - (p.lines.length - 1) * LH : p.y + 4 - (p.lines.length - 1) * LH / 2; placed.push(p);
         pl.add([p.lx0, p.base - FS * 0.95, p.lx0 + p.w, p.base + (p.lines.length - 1) * LH + FS * 0.25]); pl.add([Math.min(p.X0 - 16, p.lx0), p.y - 7, Math.max(p.X1 + 12, 0), p.y + 8], 'B');
       });
     });
@@ -1950,7 +2041,8 @@ function drawC(el = document.getElementById('svgC')) {
     regimeIcon(s, e.target_regime).attr('transform', `translate(${X0 - 11},${d.y})`);
     if (hasScene(e)) badge(s, X0 + (d.point ? 12 : 9), d.y - 8);
     if (d.mode === 'gutter') s.append('line').attr('x1', d.tx + 4).attr('x2', X0 - 16).attr('y1', d.y).attr('y2', d.y).style('stroke', 'var(--faint)').style('stroke-dasharray', '1 3');
-    const t = s.append('text').attr('x', d.tx).attr('y', d.base).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`);
+    const t = s.append('text').attr('x', d.tx).attr('y', d.base).attr('text-anchor', d.anchor).style('fill', 'var(--text)').style('font', `${FS}px var(--sans)`)
+    if (phone) t.style('paint-order', 'stroke').style('stroke', 'var(--bg)').style('stroke-width', 3).style('stroke-linejoin', 'round');
     d.lines.forEach((ln, i) => t.append('tspan').attr('x', d.tx).attr('dy', i ? LH : 0).text(ln));
     s.append('rect').attr('class', 'hit').attr('x', X0 - 18).attr('y', d.y - 12).attr('width', d.point ? 36 : Math.max(36, d.X1 - X0 + 30)).attr('height', 24);
   });

@@ -113,7 +113,7 @@ document.getElementById('scExport').onclick = async () => {
 document.getElementById('tourBtn').onclick = e => openScene(ORDER[0].id, e.currentTarget);
 overlay.addEventListener('keydown', e => {
   if (e.key === 'Escape') { e.preventDefault(); closeScene(); }
-  if (e.key === 'Tab') { const f = [...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),a[href]')]; const i = f.indexOf(document.activeElement);
+  if (e.key === 'Tab') { const f = [...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),a[href],[tabindex="0"]')]; const i = f.indexOf(document.activeElement);
     if (e.shiftKey && i <= 0) { e.preventDefault(); f.at(-1).focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } }
 });
 overlay.addEventListener('click', e => { if (e.target === overlay) closeScene(); });

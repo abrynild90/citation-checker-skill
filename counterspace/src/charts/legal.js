@@ -24,12 +24,12 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.style.overflowX = strip ? 'auto' : ''; el.tabIndex = strip ? 0 : -1; if (!strip) el.removeAttribute('tabindex');
   if (strip) { el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Law and policy timeline, scrolls sideways'); } else { el.removeAttribute('role'); el.removeAttribute('aria-label'); }
   const { W, M, x } = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300), phone = isPhoneNow() && !zoom && !strip, compact = legalCompact && !phone && !EXPORTING && !zoom, small = phone || compact;
-  const FS = 10.5, PITCH = 13, TP = phone ? 12 : compact ? 10 : 12, GS = phone ? 0.85 : compact ? 0.75 : 1;
+  const FS = 10.5, PITCH = 13, TP = phone ? 16 : compact ? 14 : 19, SEP = phone ? 20 : compact ? 16 : 22, GS = phone ? 0.85 : compact ? 0.75 : 1;
   const spans = LEGAL.filter(l => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981') && (!zoom || ((l.end ? parse(l.end) : DOMAIN[1]) > ZOOM[0] && parse(l.start) < ZOOM[1])));
   const pts = LEGAL.filter(l => !spans.includes(l) && (!zoom || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) => a.start < b.start ? -1 : 1);
   // 1. dodge marks that would collide into tracks (the true date stays on the axis)
   const last = []; let maxT = 0;
-  pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < TP) t++; last[t] = cx; d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
+  pts.forEach(d => { const cx = x(parse(d.start)); let t = 0; while (last[t] != null && cx - last[t] < SEP) t++; last[t] = cx + (hasScene(d) ? 6 : 0); d._t = t; d._cx = cx; maxT = Math.max(maxT, t); });
   // 2. label placement, coordinates relative to the mark line (up is negative, down positive)
   const pl = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 }), top0 = 16 + TP * maxT, labels = []; let maxUp = -1, maxDn = -1;
   if (!small) {
@@ -97,7 +97,8 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   bindMark(sg, strip ? null : legalCard, strip ? tapLegal : activate);
   // points
   pts.forEach(d => { d._y = yMark - d._t * TP; });
-  svg.append('g').selectAll('line').data(pts.filter(d => d._t)).join('line').attr('x1', d => d._cx).attr('x2', d => d._cx).attr('y1', d => d._y).attr('y2', yMark).style('stroke', 'var(--faint)').style('stroke-width', 1);
+  svg.append('g').selectAll('line').data(pts.filter(d => d._t)).join('line').attr('x1', d => d._cx).attr('x2', d => d._cx).attr('y1', d => d._y).attr('y2', yMark).style('stroke', 'var(--faint)').style('stroke-width', 1.25);
+  svg.append('g').selectAll('circle').data(pts.filter(d => d._t)).join('circle').attr('cx', d => d._cx).attr('cy', yMark).attr('r', 2).style('fill', 'var(--faint)');
   const pg = svg.append('g').selectAll('g').data(pts).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id).attr('data-t', d => +parse(d.start))
     .attr('transform', d => `translate(${d._cx},${d._y})${GS < 1 ? ` scale(${GS})` : ''}`)
     .attr('aria-label', d => `${d.label}, ${fmt(parse(d.start))}.${d.soft_law ? ' Soft law.' : ''} ${d.short_note}${hasScene(d) ? ' Has 3D scene.' : ''}`);
