@@ -98,7 +98,7 @@ h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .hero .copy p{margin:0;max-width:640px;font-size:15px;color:#cfd6e8}
 .hero .prompt{display:inline-flex;gap:8px;align-items:center;font-weight:600;color:#ffe08a;margin-bottom:6px}
 .illus{position:absolute;top:10px;left:10px;font:600 11px/1.2 var(--sans);letter-spacing:.04em;background:rgba(5,8,18,.75);
-  color:#ffe08a;border:1px solid rgba(255,224,138,.45);border-radius:6px;padding:5px 8px;z-index:2;max-width:70%}
+  color:#ffe08a;border:1px solid rgba(255,224,138,.45);border-radius:6px;padding:5px 8px;z-index:2;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hlabel{position:absolute;font:600 11px/1 var(--sans);color:#dfe6f7;background:rgba(5,8,18,.6);padding:3px 6px;border-radius:4px;
   pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
 
@@ -280,8 +280,11 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .aside-law{flex:none;padding:8px 14px;border-top:1px solid #2a3558}
 .panel .aside-law .btn{width:100%;justify-content:flex-start;text-align:left;line-height:1.25;height:auto;min-height:36px}
 .panel a{color:#8cc8ff}
-.panel .pin-src{flex:none;margin:0;padding:6px 14px;border-top:1px solid #2a3558;font-size:12px;line-height:1.35;max-height:5.6em;overflow:auto;overflow-wrap:anywhere}
-.panel .aside-law.none{padding:5px 14px}
+.panel .pin-src{flex:none;margin:0;padding:6px 14px;border-top:1px solid #2a3558;font-size:12px;line-height:1.35;max-height:8.5em;overflow:auto;overflow-wrap:anywhere}
+.panel .aside-law.none{display:none} /* no related law: the note is one inline phrase at the end of the source line */
+.panel .pin-src .nolaw{color:#a9b3cc;white-space:nowrap}
+#scCams{scrollbar-width:none}#scCams::-webkit-scrollbar{display:none}
+.lbl-s{display:none}
 .panel .aside-law.none .btn{min-height:0;width:auto;border:0;background:transparent;padding:0;font-size:12px;color:#a9b3cc;opacity:1;cursor:default}
 .panel aside h3{color:#fff;margin-top:6px}
 .panel aside .src{font-size:12.5px;color:#a9b3cc}
@@ -312,6 +315,8 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   #scStatus:not(.sr){grid-column:1/-1}
   #scStatic{grid-column:1/3}
   #scExport{grid-column:3}
+  .panel .ctrl #scExport .lbl-s{display:inline}
+  #scCams.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
   .panel .pin-src{padding:5px 12px}
   .panel .aside-law.none{padding:4px 12px}
   .panel .ctrl .btn{min-height:34px}
@@ -379,7 +384,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 <main>
 <div class="wrap">
   <section class="hero" aria-label="Overview scene: Earth with LEO, MEO and GEO shells">
-    <div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div>
+    <div class="illus">Illustrative<span class="hide-phone">, not orbit-propagated</span> · compressed radial scale</div>
     <button class="btn small hero-rot" id="heroRot" type="button" aria-label="Rotate the globe: load the interactive 3D overview">⟳ Rotate the globe</button>
     <div class="stage" id="heroStage"></div>
     <div class="copy">
@@ -535,7 +540,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
       <span class="static-note" id="scStatic" hidden>Static diagram: no timeline (reduced motion or no WebGL).</span>
       <span id="scCams" style="display:flex;gap:6px"></span>
       <span class="static-note" id="scStatus" role="status" aria-live="polite"></span>
-      <button class="btn small" id="scExport" type="button" aria-label="Export still image (PNG)">⤓<span class="lbl"> Export still (PNG)</span></button>
+      <button class="btn small" id="scExport" type="button" aria-label="Export still image (PNG)">⤓<span class="lbl"> Export still (PNG)</span><span class="lbl-s"> PNG</span></button>
     </div>
   </div>
 </div>

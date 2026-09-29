@@ -168,7 +168,8 @@ export function drawC(el = document.getElementById('svgC')) {
     l.y1 = Math.max(yy, yCur + laneHead + 32) + lanePad;
     yCur = l.y1;
   });
-  const H = yCur + 28 + (zoomedC() && !EXPORTING ? 16 : 0);
+  const flagLines = zoomedC() && !EXPORTING ? wrap('ZOOMED: axis 1995–2026, not the shared 1957–2026 scale', W - M.l - 8, 11, 600) : [],
+    H = yCur + 28 + (flagLines.length ? 8 + flagLines.length * 14 : 0);
   const svg = d3
     .select(el)
     .append('svg')
@@ -231,13 +232,20 @@ export function drawC(el = document.getElementById('svgC')) {
     segs.push([ys, yCur]);
     segs.forEach(([a, b]) => hg.append('line').attr('x1', HX).attr('x2', HX).attr('y1', a).attr('y2', b));
   }
-  if (zoomedC() && !EXPORTING)
-    svg
+  if (flagLines.length) {
+    const t = svg
       .append('text')
       .attr('class', 'zoom-flag')
       .attr('x', M.l)
-      .attr('y', yCur + 42)
-      .text('ZOOMED: axis 1995–2026, not the shared 1957–2026 scale');
+      .attr('y', yCur + 42);
+    flagLines.forEach((ln, i) =>
+      t
+        .append('tspan')
+        .attr('x', M.l)
+        .attr('dy', i ? 14 : 0)
+        .text(ln),
+    );
+  }
   {
     const t = phone ? 'last destructive test' : `Last destructive DA-ASAT test (${fmtMY(parse(LAST_DA))})`,
       w = tw(t, 11, 600);

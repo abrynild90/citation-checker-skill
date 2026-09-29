@@ -74,7 +74,7 @@ export async function openScene(id, originEl) {
   document.getElementById('sceneCaption').textContent = cfg.caption;
   const ev = byId[cfg.event];
   document.getElementById('sceneSrc').innerHTML =
-    `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}`;
+    `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}${cfg.related ? '' : ' <span class="nolaw">· No specific legal item</span>'}`;
   document.getElementById('sceneScale').textContent =
     `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale.${cfg.scaleNote ? ' ' + cfg.scaleNote : ''} Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
   const rel = document.getElementById('scRelated');
@@ -111,6 +111,7 @@ export async function openScene(id, originEl) {
     });
     h.play();
     syncScrub(h.t);
+    requestAnimationFrame(camFade);
   } else {
     renderSVG(sim, view);
   }
@@ -126,6 +127,13 @@ export async function openScene(id, originEl) {
   );
   document.getElementById('scClose').focus();
 }
+// Phone: the camera presets scroll sideways; a fade on the right edge says more chips lie beyond it.
+const camsEl = document.getElementById('scCams');
+function camFade() {
+  camsEl.classList.toggle('fade-r', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft > 4);
+}
+camsEl.addEventListener('scroll', camFade, { passive: true });
+addEventListener('resize', camFade);
 // While the dialog is open the page behind it is inert (no focus, not read out).
 function setInert(on) {
   document.querySelectorAll('header.top, main, footer, #card').forEach((n) => {

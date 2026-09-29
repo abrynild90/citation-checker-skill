@@ -43,11 +43,16 @@ export function drawMethod() {
     if (!m) return `<p>${esc(t)}</p>`;
     return `<ul class="sub">${li('Covered:', m[1] + '.')}${li('Also included:', m[2] + '.')}${li('Excluded, co-orbital tests:', m[4] + '.')}${li('Excluded, a date variant:', m[5] + ' (' + m[6] + ').')}${li('Added:', m[7])}</ul>`;
   })();
+  const covered = (t) => {
+    const [a, b] = t.split(/,\s*and\s+(?=every flight)/);
+    const mm = b?.match(/^(.*?),\s*is a row(.*)$/s);
+    return mm ? li('Covered:', a + '.') + li('Also covered:', mm[1] + '.') + li('Each is a row', mm[2]) : li('Covered:', t);
+  };
   const coRule = (() => {
     const t = unlabel(SCHEMA.co_scope_rule),
       m = t.match(/^(.*?)\s*Two exceptions, both disclosed:\s*\(a\)\s*(.*?);\s*\(b\)\s*(.*?)\s*\((.*?)\),\s*(the text-dated step.*?\.)\s+(RPO rows record.*)$/s);
     if (!m) return `<p>${esc(t)}</p>`;
-    return `<ul class="sub">${li('Covered:', m[1])}${li('Exception (a):', m[2] + '.')}${li('Exception (b):', m[3] + '.')}${li('Cases for (b):', m[4] + '.')}${li('Then:', m[5])}${li('Reading a row:', m[6])}</ul>`;
+    return `<ul class="sub">${covered(m[1])}${li('Exception (a):', m[2] + '.')}${li('Exception (b):', m[3] + '.')}${li('Cases for (b):', m[4] + '.')}${li('Then:', m[5])}${li('Reading a row:', m[6])}</ul>`;
   })();
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
   document.getElementById('methodBody').innerHTML = `
