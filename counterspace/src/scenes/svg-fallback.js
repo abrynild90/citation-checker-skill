@@ -6,7 +6,27 @@
 // ---------------------------------------------------------------- SVG fallback (static)
 // A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,
 // with the same screen-space label de-confliction (pills + leader lines) as the live scene.
-let svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
+// Blue Marble re-projected for the static globe: every pixel of the disc is inverted through the orthographic projection to lon/lat and sampled
+// (bilinear) from the equirectangular image; the result is drawn into a canvas and embedded as a data-URL <image> clipped to the sphere.
+let earthPix = null, earthPixSrc = null;
+function earthRaster(proj, CX, CY, R) {
+  if (!earthImg) return null;
+  try {
+    if (earthPixSrc !== earthImg) { const sw = Math.min(2048, earthImg.naturalWidth || earthImg.width), c = document.createElement('canvas'); c.width = sw; c.height = sw / 2; const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(earthImg, 0, 0, sw, sw / 2); earthPix = { w: sw, h: sw / 2, d: g.getImageData(0, 0, sw, sw / 2).data }; earthPixSrc = earthImg; }
+    const dpr = Math.min(devicePixelRatio || 1, 2), S = Math.max(64, Math.min(Math.round(2 * R * dpr), 1400)), k = 2 * R / S, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d'), out = g.createImageData(S, S), o = out.data, { w, h, d } = earthPix, x0 = CX - R, y0 = CY - R;
+    for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) {
+      const px = x0 + (i + 0.5) * k, py = y0 + (j + 0.5) * k; if ((px - CX) ** 2 + (py - CY) ** 2 > R * R) continue;
+      const ll = proj.invert([px, py]); if (!ll || !isFinite(ll[0])) continue;
+      let u = ((ll[0] + 180) / 360 % 1 + 1) % 1 * w - 0.5, v = (90 - ll[1]) / 180 * h - 0.5; const ix = Math.floor(u), iy = Math.max(0, Math.min(h - 2, Math.floor(v))), fx = u - ix, fy = v - iy, ia = ((ix % w + w) % w), ib = ((ix + 1) % w + w) % w;
+      const a = (iy * w + ia) * 4, b = (iy * w + ib) * 4, cc = ((iy + 1) * w + ia) * 4, dd = ((iy + 1) * w + ib) * 4, q = (j * S + i) * 4;
+      for (let ch = 0; ch < 3; ch++) o[q + ch] = (d[a + ch] * (1 - fx) + d[b + ch] * fx) * (1 - fy) + (d[cc + ch] * (1 - fx) + d[dd + ch] * fx) * fy;
+      o[q + 3] = 255;
+    }
+    g.putImageData(out, 0, 0); return c.toDataURL('image/jpeg', 0.9);
+  } catch (e) { return null; }
+}
+let earthUpgrade = false, pendingStatic = null, svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
 export function renderSVG(sim, el, t = sim.still) {
   const U = 'sf' + (++svgSeq);
   const W = el.clientWidth || 640, H = el.clientHeight || 420;
@@ -24,6 +44,7 @@ export function renderSVG(sim, el, t = sim.still) {
   let x0 = -1.08, x1 = 1.08, y0 = -1.08, y1 = 1.08;
   const grow = p => { if (!p || p.hidden) return; x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); };
   { for (const it of sim.items) {
+      if (it.ctx) continue; // context-only actors (constellations) never shrink the fit
       if (it.kind === 'curve') it.pts(t).forEach(q => grow(unit(q)));
       else if (it.kind === 'point' && !it.liveOnly) { const q = it.pos(t); if (q) grow(unit(q)); }
       else if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { grow(unit(A)); grow(unit(B)); } }
@@ -62,14 +83,20 @@ export function renderSVG(sim, el, t = sim.still) {
   defs.append('clipPath').attr('id', `${U}-clip`).append('path').datum({ type: 'Sphere' }).attr('d', path);
   svg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-bg)`);
   { const rs = mulberry(99); for (let k = 0; k < 90; k++) { const x = rs() * W, y = rs() * H, b = 0.25 + rs() * 0.5; svg.append('circle').attr('cx', x).attr('cy', y).attr('r', rs() < 0.15 ? 1.1 : 0.7).attr('fill', '#dfe8ff').attr('fill-opacity', b); } }
-  const shells = sim.items.filter(i => i.kind === 'shell'), cands = [], obst = [];
-  shells.forEach(it => svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', it.r * R > 0.62 * Math.min(W, H) ? 0 : 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
+  const shells = sim.items.filter(i => i.kind === 'shell'), cands = [], obst = [], marks = [], ringsL = [], pcell = 8, pnx = Math.ceil(W / pcell), pny = Math.ceil(H / pcell), pgrid = new Uint16Array(pnx * pny);
+  const mark = (p, r, n) => { if (p && !p.hidden) marks.push({ x: p.x, y: p.y, r, n }); };
+  const pcount = (x0, y0, x1, y1) => { const a = Math.max(0, Math.floor(x0 / pcell)), b = Math.min(pnx - 1, Math.floor(x1 / pcell)), c = Math.max(0, Math.floor(y0 / pcell)), d = Math.min(pny - 1, Math.floor(y1 / pcell)); let n = 0; for (let j = c; j <= d; j++) for (let i = a; i <= b; i++) n += pgrid[j * pnx + i]; return n; };
+  shells.forEach(it => { if (it.noRing) return; const rp = []; for (let a = 0; a <= 120; a++) rp.push([CX + it.r * R * Math.cos(a / 120 * 2 * Math.PI), CY + it.r * R * Math.sin(a / 120 * 2 * Math.PI)]); ringsL.push(rp); });
+  shells.forEach(it => svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', it.r * R > 0.62 * Math.min(W, H) ? 0 : 0.05).attr('stroke', it.color).attr('stroke-opacity', it.noRing ? 0 : 0.55).attr('stroke-dasharray', '3 4'));
   svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', R * 1.08).attr('fill', `url(#${U}-glow)`);
   svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
   svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
   // Ring winding is data-dependent: any ring that d3 reads as "more than a hemisphere" is reversed so it fills land, not the complement.
   const landGeo = { type: 'MultiPolygon', coordinates: (LAND || []).map(r => { const c = []; for (let k = 0; k < r.length; k += 2) c.push([r[k], r[k + 1]]); if (c.length > 2 && d3.geoArea({ type: 'Polygon', coordinates: [c] }) > 2 * Math.PI) c.reverse(); return [c]; }) };
-  svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#4c7a56').attr('filter', `url(#${U}-tex)`).attr('stroke', '#8fb98a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.55);
+  const ras = earthRaster(proj, CX, CY, R);
+  if (ras) svg.append('image').attr('href', ras).attr('x', CX - R).attr('y', CY - R).attr('width', 2 * R).attr('height', 2 * R).attr('preserveAspectRatio', 'none').attr('clip-path', `url(#${U}-clip)`);
+  else svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#4c7a56').attr('filter', `url(#${U}-tex)`).attr('stroke', '#8fb98a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.55);
+  svg.node().dataset.earth = ras ? 'bluemarble' : 'vector';
   { // Sun direction in the view basis; the terminator crosses the view axis at a = -sz (units of R), night is on the far side.
     const sd = toLL(sunFor(sim.sunRef)), [slo, sla] = rot([sd.lon, sd.lat]), sx = Math.cos(sla * DEG) * Math.sin(slo * DEG), sy = Math.sin(sla * DEG), sz = Math.cos(sla * DEG) * Math.cos(slo * DEG), pm = Math.hypot(sx, sy) || 1e-6;
     const ux = sx / pm, uy = -sy / pm, cx = CX, cyy = CY, at = a => [cx + ux * a * R, cyy + uy * a * R];
@@ -82,40 +109,44 @@ export function renderSVG(sim, el, t = sim.still) {
     svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', 'none').attr('stroke', '#8cc8ff').attr('stroke-opacity', 0.55).attr('stroke-width', 1.2); }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
-  shells.forEach((it, i) => { if (!it.label) return; const a = (it.ang ?? 35 + i * 14) * DEG, px = CX + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a); cands.push({ x: px, y: py, px, py, w: labelW(it.label), h: 19, fixed: true, text: it.label, color: it.color }); });
-  const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null) => { if (!p || p.hidden || !text) return; cands.push({ x: at ? at[0] * W : p.x + dx, y: at ? at[1] * H : p.y - 14 + dy, px: p.x, py: p.y, w: labelW(text), h: 19, text, color }); };
+  shells.forEach((it, i) => { const lab = it.staticLabel ?? it.label; if (!lab) return; const a = (it.ang ?? 35 + i * 14) * DEG, px = CX + it.r * R * Math.cos(a), py = CY - it.r * R * Math.sin(a), tx = (it.short && W < 520 && !it.staticLabel) ? it.short : lab, w = labelW(tx), o = w / 2 * Math.abs(Math.cos(a)) + 9.5 * Math.abs(Math.sin(a)) + 7; // the pill sits just outside its dashed shell line, never on it
+    cands.push({ x: px + Math.cos(a) * o, y: py - Math.sin(a) * o, px, py, w, h: 19, fixed: true, text: tx, color: it.color }); });
+  const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false) => { if (!p || p.hidden || !text || p.x < 4 || p.y < 4 || p.x > W - 4 || p.y > H - 4) return; cands.push({ x: at ? at[0] * W : p.x + dx, y: at ? at[1] * H : p.y - 14 + dy, px: p.x, py: p.y, w: labelW(text), h: 19, text, color, opt }); };
   for (const it of sim.items) {
     if (it.kind === 'dome') g.append('path').datum(d3.geoCircle().center([it.at[1], it.at[0]]).radius(it.radius)()).attr('d', path).attr('fill', it.color).attr('fill-opacity', 0.32).attr('stroke', it.color).attr('stroke-width', 1.6);
     if (it.kind === 'curve') {
       const pts = it.pts(t).map(project); let seg = [];
       const flush = () => { if (seg.length > 1) g.append('path').attr('d', d3.line()(seg)).attr('fill', 'none').attr('stroke', it.color).attr('stroke-linecap', 'round').attr('stroke-opacity', it.thick ? Math.max(0.85, it.opacity ?? 1) : (it.opacity ?? 1)).attr('stroke-width', it.thick ? Math.max(2.2, it.thick * R * 1.8) : (it.width || 1.2)); seg = []; };
-      if (it.avoid) { let cur = []; pts.forEach(p => { if (p.hidden) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push([p.x, p.y]); }); if (cur.length > 1) obst.push(cur); }
+      if (it.avoid) { let cur = []; const fl = () => { if (cur.length > 1) { cur.soft = !!it.soft; obst.push(cur); } cur = []; }; pts.forEach(p => { if (p.hidden) fl(); else cur.push([p.x, p.y]); }); fl(); }
       pts.forEach(p => { if (p.hidden) flush(); else seg.push([p.x, p.y]); }); flush();
-      if (it.label && it.labelAt && pts.length > 2) label(project(it.labelAt), (it.short && W < 520) ? it.short : it.label, it.color, it.labelDx, it.labelDy, it.staticAt);
+      if (!it.dynamic && it.orbit) { let cur = []; pts.forEach(p => { if (p.hidden) { if (cur.length > 1) ringsL.push(cur); cur = []; } else cur.push([p.x, p.y]); }); if (cur.length > 1) ringsL.push(cur); }
+      if (it.label && it.labelAt && pts.length > 2) label(project(it.labelAt), (it.short && W < 520) ? it.short : it.label, it.color, it.labelDx, it.labelDy, (W < 520 ? null : it.staticAt));
     }
     if (it.kind === 'cloud') {
       const arr = new Float32Array(it.n * 3), col = it.dynCol ? new Float32Array(it.n * 4) : null; it.fill(t, arr, col);
       const step = Math.max(1, Math.floor(it.n / 900));
       for (let k = 0; k < it.n; k += step) { if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue; const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]); if (p.hidden) continue;
+        if (!it.bg) { const gx = Math.floor(p.x / pcell), gy = Math.floor(p.y / pcell); if (gx >= 0 && gy >= 0 && gx < pnx && gy < pny) pgrid[gy * pnx + gx] += Math.max(1, step / 2); }
         g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', it.n > 500 ? 1.1 : it.dynCol ? 1.7 : 1.4).attr('fill', col ? d3.rgb(col[4 * k] * 255, col[4 * k + 1] * 255, col[4 * k + 2] * 255) : it.color)                .attr('fill-opacity', it.n > 500 ? 0.62 : 0.85); }
       if (it.label && (it.labelAt || arr[0] || arr[1] || arr[2])) label(project(it.labelAt || [arr[0], arr[1], arr[2]]), (it.short && W < 520) ? it.short : it.label, it.color || '#dfe6f7');
     }
-    if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (it.avoid && !a.hidden && !b.hidden) obst.push([[a.x, a.y], [b.x, b.y]]); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8)).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 5 : 1.2); if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color); } }
+    if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (it.avoid && !a.hidden && !b.hidden) { const sg = [[a.x, a.y], [b.x, b.y]]; sg.soft = !!it.soft; obst.push(sg); } if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8)).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 5 : 1.2); if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color); } }
     if (it.kind === 'point') { const q = it.liveOnly ? null : it.pos(t); if (!q) continue; const p = project(q); if (p.hidden) continue;
       const c = it.statusColor ? it.statusColor(t) : it.color;
+      mark(p, it.shape === 'sat' ? (it.small ? 4 : 10 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1)) : it.shape === 'aircraft' ? 8 : it.shape === 'tick' ? 6 : 5, it.label || it.shape);
       if (it.shape === 'sat') { const q = it.small ? (it.scale ? Math.min(10, 2 + it.scale * 1.3) : 4) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1); g.append('rect').attr('x', p.x - q / 2).attr('y', p.y - q / 2).attr('width', q).attr('height', q).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8); }
       else if (it.shape === 'tick') g.append('path').attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`).attr('fill', c).attr('stroke', '#070b17');
       else if (it.shape === 'aircraft') g.append('path').attr('d', `M${p.x},${p.y - 7}L${p.x + 5},${p.y + 5}L${p.x - 5},${p.y + 5}Z`).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
       else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
       else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
-      if (it.label) { const n0 = cands.length; label(p, it.labelFn ? it.labelFn(t) : (it.short && W < 520 ? it.short : it.label), c, it.labelDx, it.labelDy, it.staticAt); if (it.offGlobe && cands.length > n0) cands.at(-1).off = true; } }
-    if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4', it.labelDx, it.labelDy); }
+      if (it.label && !it.ctx) { const n0 = cands.length; label(p, it.labelFn ? it.labelFn(t) : (it.short && W < 520 ? it.short : it.label), c, it.labelDx, it.labelDy, (W < 520 ? null : it.staticAt), it.opt); if (it.offGlobe && cands.length > n0) cands.at(-1).off = true; } }
+    if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) { const p = project(it.pos); mark(p, 12, it.label || 'flash'); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4', it.labelDx, it.labelDy); }
     if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + (it.span ?? 0.14)) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
   }
   const reserved = [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22]];
   cands.forEach(c => { if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, CX, CY, R * 1.08); });
   cands.forEach(c => { c.avoidDisc = !!c.off; });
-  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.08 }, obst);
+  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.08 }, obst, null, { marks, rings: ringsL, parts: { count: pcount }, fine: true });
   cands.forEach((c, i) => { const q = pl[i]; if (!q) return;
     if (q.leader) { g.append('line').attr('x1', q.ax).attr('y1', q.ay).attr('x2', q.qx).attr('y2', q.qy).attr('stroke', c.color).attr('stroke-opacity', 0.8); g.append('circle').attr('cx', q.ax).attr('cy', q.ay).attr('r', 2).attr('fill', c.color); }
     g.append('rect').attr('x', q.x - c.w / 2).attr('y', q.y - c.h / 2).attr('width', c.w).attr('height', c.h).attr('rx', 4).attr('fill', 'rgba(5,8,18,0.78)').attr('stroke', c.color).attr('stroke-opacity', 0.35);
@@ -126,8 +157,20 @@ export function renderSVG(sim, el, t = sim.still) {
   { const ft = ftxt;
     svg.append('rect').attr('x', 6).attr('y', H - 26).attr('width', fw).attr('height', 20).attr('rx', 4).attr('fill', 'rgba(5,8,18,0.82)');
     svg.append('text').attr('x', 14).attr('y', H - 12).attr('fill', '#a9b3cc').attr('font-size', Math.min(10.5, (W - 32) / (ft.length * 0.56))).attr('font-family', 'system-ui').text(ft); }
+  { const lb = []; cands.forEach((c, i) => { const q = pl[i]; if (q) lb.push({ text: c.text, x0: q.x - c.w / 2, y0: q.y - c.h / 2, x1: q.x + c.w / 2, y1: q.y + c.h / 2, leader: q.leader ? [q.ax, q.ay, q.qx, q.qy] : null, pc: pcount(q.x - c.w / 2, q.y - c.h / 2, q.x + c.w / 2, q.y + c.h / 2) }); });
+    svg.node().__lay = { W, H, labels: lb, marks, rings: ringsL, obst: obst.map(pl => ({ p: pl, soft: !!pl.soft })), reserved: [{ n: 'status', x0: (W - stW) / 2, y0: stY, x1: (W + stW) / 2, y1: stY + stH }, { n: 'footer', x0: 6, y0: H - 26, x1: 6 + fw, y1: H - 6 }] }; }
   el.querySelector(':scope > svg')?.remove();
   el.prepend(svg.node());
+  // Static mode (reduced motion, or a scene opened without WebGL): fetch the imagery once and redraw this diagram with the photographic globe.
+  // The hero's placeholder diagram only does this under reduced motion, and after the page has loaded and gone idle (never at first paint).
+  if (!earthImg) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches, wanted = el.id === 'sceneView' || (reduced && sim.cfg.spin);
+    if (wanted) {
+      pendingStatic = { sim, el, t, node: svg.node() };
+      const go = () => loadEarth(2048).then(ok => { earthUpgrade = false; const q = pendingStatic; if (ok && q && q.node.isConnected) { pendingStatic = null; renderSVG(q.sim, q.el, q.t); } });
+      if (!earthUpgrade) { earthUpgrade = true; if (sim.cfg.spin && document.readyState !== 'complete') addEventListener('load', () => (window.requestIdleCallback || setTimeout)(go), { once: true }); else if (sim.cfg.spin) (window.requestIdleCallback || setTimeout)(go); else go(); }
+    }
+  }
   return svg.node();
 }
 

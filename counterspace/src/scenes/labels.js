@@ -4,10 +4,13 @@
 // ============================================================================
 // Screen-space label de-confliction shared by the live HTML labels, the PNG still and the SVG fallback.
 // list[i] = {x, y (preferred centre), px, py (object point), w, h, fixed} or null.
+// Optional extras: obst = drawn paths (leaders and labels avoid them; .soft paths are only lightly penalised), extra = {marks: sprite circles, rings: ring polylines,
+// parts: particle-count grid, fine: finer fallback search, scale: px scale of the canvas}: a label never sits on those; entries flagged opt are dropped if they cannot be placed cleanly.
 // Returns placements {x, y, leader, ax, ay, qx, qy}. Fixed labels are placed first; others are nudged
 // up/down/sideways to the nearest free slot, clamped inside the frame, and given a leader line to the object.
-export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], memo = null) {
-  const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], M = 4;
+export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], memo = null, extra = null) {
+  const ex = extra || {}, marks = ex.marks || [], rings = ex.rings || [], parts = ex.parts || null;
+  const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], M = 8 * (ex.scale || 1);
   const out = new Array(list.length).fill(null);
   const order = list.map((_, i) => i).filter(i => list[i]).sort((a, b) => ((list[b] && list[b].fixed) ? 1 : 0) - ((list[a] && list[a].fixed) ? 1 : 0) || a - b);
   // Does segment (x1,y1)-(x2,y2) pass through the interior of box b (shrunk by 1 px)? Liang-Barsky clip.
@@ -33,9 +36,13 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01;
       if (memo && memo[i]) n += Math.hypot(x - memo[i][0], y - memo[i][1]) * 0.06; // stickiness: keep last frame's slot unless something clearly better exists
       if (lead) { n += Math.hypot(qx - c.px, qy - c.py) * 0.04; for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600; for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500; }
-      if (lead) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += 550;
-      const me = { x, y, w, h }; for (let o = 0; o < list.length; o++) { const q = list[o]; if (q && q !== c && Math.abs(q.px - x) < w / 2 + 2 && Math.abs(q.py - y) < h / 2 + 2) n += 400; }
-      for (const pl of obst) if (polyBox(pl, me)) n += 650;
+      if (lead) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += pl.soft ? 70 : 550;
+      const me = { x, y, w: w + 6, h: h + 6 }; for (let o = 0; o < list.length; o++) { const q = list[o]; if (q && q !== c && Math.abs(q.px - x) < w / 2 + 2 && Math.abs(q.py - y) < h / 2 + 2) n += 400; }
+      for (const pl of obst) if (polyBox(pl, me)) n += pl.soft ? 90 : 650;
+      // Sprites, ring lines and dense particle clumps are things a label must not sit on (its leader may still point into them).
+      for (const m of marks) { const ddx = Math.max(Math.abs(x - m.x) - w / 2, 0), ddy = Math.max(Math.abs(y - m.y) - h / 2, 0); if (ddx * ddx + ddy * ddy < (m.r + 3) * (m.r + 3)) n += 700; }
+      for (const rg of rings) if (polyBox(rg, me)) n += 650;
+      if (parts) { const pc = parts.count(x - w / 2, y - h / 2, x + w / 2, y + h / 2); if (pc > 2) n += Math.min(900, (pc - 2) * 140); }
       for (const s of segs) if (segBox(s[0], s[1], s[2], s[3], me)) n += 600;
       if (disc && c.avoidDisc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.35) { const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0), dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0); if (Math.hypot(dx0, dy0) < disc.r) n += 900; }
       return n;
@@ -46,6 +53,8 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
   const place = (i, boxes, segs) => {
     const m = mk(i, boxes, segs); if (!m) return null; const { c, w, h, cx, cy, cost } = m;
     const cand = [[0, 0]];
+    for (const dy of [4, -4, 8, -8, 12, -12, 16, -16]) cand.push([0, dy]); // small nudges first: often enough to clear a thin line
+    for (const dx of [8, -8, 16, -16]) cand.push([dx, 0]);
     for (let k = 1; k <= 8; k++) cand.push([0, -k * h * 1.12], [0, k * h * 1.12]);
     for (const j of [0, -1, 1, -2, 2, -3, 3]) { cand.push([w * 0.55 + 14, j * h * 1.12], [-(w * 0.55 + 14), j * h * 1.12]); }
     for (const m of [1.4, 2.2, 3.2]) for (let a = 0; a < 8; a++) cand.push([Math.cos(a * Math.PI / 4) * (w * 0.55 + 14) * m, Math.sin(a * Math.PI / 4) * (h * 1.6) * m]);
@@ -53,7 +62,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     const tryAt = (x, y) => { const n = cost(x, y); if (n < bestN) { best = [x, y]; bestN = n; } return n; };
     for (const [dx, dy] of cand) if (tryAt(cx(c.x + dx), cy(c.y + dy)) < 0.5) break;
     // Nothing clean nearby (crowded frame or a reserved band in the way): search the whole free area on a grid.
-    if (bestN >= 500) for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += Math.max(4, h * 0.4)) for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += Math.max(6, w * 0.12)) tryAt(gx, gy);
+    if (bestN >= 500) for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += ex.fine ? Math.max(3, h * 0.15) : Math.max(4, h * 0.4)) for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += ex.fine ? Math.max(5, w * 0.05) : Math.max(6, w * 0.12)) tryAt(gx, gy);
     return [best[0], best[1], bestN];
   };
   const fin = (i, x, y, boxes, segs, out) => { const c = list[i], { w, h } = c; boxes.push({ x, y, w, h });
@@ -86,6 +95,12 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
   let bestRun = null;
   for (const o of tries) { const r = run(o); if (!bestRun || r.total < bestRun.total) bestRun = r; if (bestRun.total < 300) break; }
   repair(bestRun);
+  // An optional label (opt) that still collides with something hard is dropped rather than drawn on top of it.
+  if (list.some(c => c && c.opt)) for (let pass = 0; pass < 2; pass++) { let dropped = false;
+    for (const j of bestRun.got) { const o = bestRun.out[j]; if (!o || !list[j].opt) continue;
+      const bx = base(), sg = []; for (const k of bestRun.got) if (k !== j && bestRun.out[k]) { const q = bestRun.out[k]; bx.push({ x: q.x, y: q.y, w: list[k].w, h: list[k].h }); if (q.leader) sg.push([q.ax, q.ay, q.qx, q.qy]); }
+      if (scoreAt(j, o.x, o.y, bx, sg) >= 500) { bestRun.out[j] = null; dropped = true; } }
+    if (!dropped) break; }
   if (memo) bestRun.out.forEach((o, i) => { if (o) memo[i] = [o.x, o.y]; else delete memo[i]; });
   return bestRun.out;
 }

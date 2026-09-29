@@ -32,21 +32,47 @@ Object.assign(GLHost.prototype, {
       const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h; let lx = px + L.dx * k, ly = py + (L.dy - 12) * k;
       const hu = this.sim.cfg.spin ? 1.22 : 1, lw = labelW(text, u * hu * (noBanner ? 1.1 : 1)), lh = 19 * u * hu;
       if (L.item?.offGlobe) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), lm = this._limb(1, 0), c1 = new T.Vector3(...lm).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h, gr = Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy); [lx, ly] = offDisc(px, py, lw, lh, gx, gy, gr * 1.05); }
-      raw.push({ x: lx, y: ly, px, py, w: lw, h: lh, fixed: L.cls === 'shell', text, color, avoidDisc: !!L.item?.offGlobe });
+      raw.push({ x: lx, y: ly, px, py, w: lw, h: lh, fixed: L.cls === 'shell', opt: !!L.opt, text, color, avoidDisc: !!L.item?.offGlobe });
     }
     // Reserved areas are the real DOM boxes in the live view (banner, status caption); stills pass their own caption box.
     const er = this.el.getBoundingClientRect(), rel = e => { const b = e.getBoundingClientRect(); return [b.left - er.left - 3, b.top - er.top - 3, b.width + 6, b.height + 6]; }, bn = noBanner ? null : this.el.querySelector('.illus');
-    const banner = noBanner ? [] : [bn ? rel(bn) : [8, 8, Math.min(w - 16, 430), 32]], status = noBanner ? statusBox : (this.status && this.statusEl ? rel(this.statusEl) : null);
+    const banner = noBanner || (this.sim.cfg.spin && !bn) ? [] : [bn ? rel(bn) : [8, 8, Math.min(w - 16, 430), 32]], status = noBanner ? statusBox : (this.status && this.statusEl ? rel(this.statusEl) : null);
     let disc = null; if (raw.some(r => r && r.avoidDisc)) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), c1 = new T.Vector3(...this._limb(1, 0)).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h; disc = { cx: gx, cy: gy, r: Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy) * 1.05 }; }
     const obst = [], vp = p => { const v = new T.Vector3(...p).project(this.camera); return [(v.x + 1) / 2 * w, (1 - v.y) / 2 * h, occluded([cam.x, cam.y, cam.z], p) || v.z > 1]; };
     for (const it of this.obst || []) { let pts = it.kind === 'beam' ? (it.on(this.t) && it.a(this.t) && it.b(this.t) ? [it.a(this.t), it.b(this.t)] : []) : it.pts(this.t), cur = [];
-      const st = Math.max(1, Math.ceil(pts.length / 40)); for (let k = 0; k < pts.length; k += st) { const q = vp(pts[k]); if (q[2]) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push(q); } if (cur.length > 1) obst.push(cur); }
-    const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst, noBanner ? null : (this._lm ||= {}));
+      const st = Math.max(1, Math.ceil(pts.length / 40)), flush = () => { if (cur.length > 1) { cur.soft = !!it.soft; obst.push(cur); } cur = []; }; for (let k = 0; k < pts.length; k += st) { const q = vp(pts[k]); if (q[2]) flush(); else cur.push(q); } flush(); }
+    const objs = this._sceneObjects(w, h); objs.scale = u; this._lastObjs = objs; this._lastObst = obst;
+    const chip = !noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : [];
+    const pl = placeLabels(raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, noBanner ? null : (this._lm ||= {}), objs);
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
-  _label(text, posFn, cls, item, dy = 0, dx = 0, short = null) {
+  // Everything drawn that a label must stay off, in screen px for a w x h canvas: sprites (marks, with their drawn radius), dense particle
+  // clumps (a count grid) and ring lines (shell rings and thick orbit rings). Shared by live labels, the PNG still and the QA checker.
+  _sceneObjects(w, h) {
+    const T = this.T, cam = this.camera, cp = cam.position, k = h / (this.el.clientHeight || h), sc = h / (2 * Math.tan(cam.fov * DEG / 2)), V = new T.Vector3(), M = this.root.matrixWorld;
+    const me = cam.matrixWorldInverse.elements, pm = cam.projectionMatrix.elements;
+    const scr = p => { const x = p[0], y = p[1], z = p[2], vx = me[0] * x + me[4] * y + me[8] * z + me[12], vy = me[1] * x + me[5] * y + me[9] * z + me[13], vz = me[2] * x + me[6] * y + me[10] * z + me[14], d = -vz;
+      if (d <= 0.05) return [0, 0, d, true]; return [((pm[0] * vx + pm[8] * vz) / d + 1) / 2 * w, (1 - (pm[5] * vy + pm[9] * vz) / d) / 2 * h, d, false]; };
+    const marks = [], rings = [], W3 = new T.Vector3();
+    for (const { it, obj } of this.dyn) {
+      if (!obj.visible) continue;
+      if (it.kind === 'point') { obj.getWorldPosition(W3); const p = [W3.x, W3.y, W3.z]; if (occluded([cp.x, cp.y, cp.z], p)) continue; const q = scr(p); if (q[3]) continue;
+        const u = obj.userData, wr = u.span ? u.span * obj.scale.x * (it.shape === 'ship' ? 0.42 : 0.5) : (u.wr ?? 0.012); marks.push({ x: q[0], y: q[1], r: Math.max(wr * sc / q[2], 3 * k), it }); }
+      else if (it.kind === 'flash') { obj.getWorldPosition(W3); const p = [W3.x, W3.y, W3.z]; const q = scr(p); if (!q[3]) marks.push({ x: q[0], y: q[1], r: Math.max(obj.userData.core.scale.x * 0.35 * sc / q[2], 4 * k), it }); }
+    }
+    const grid = { cell: 8 * k, nx: Math.ceil(w / (8 * k)), ny: Math.ceil(h / (8 * k)) }; grid.c = new Uint16Array(grid.nx * grid.ny); grid.d = new Uint16Array(grid.nx * grid.ny);
+    for (const { it, obj } of this.dyn) { if (it.kind !== 'cloud' || !obj.visible || it.bg) continue; const a = obj.geometry.attributes.position.array;
+      for (let i = 0; i < it.n; i++) { const p = [a[3 * i], a[3 * i + 1], a[3 * i + 2]]; if (!p[0] && !p[1] && !p[2]) continue; if (this.sim.cfg.spin) { W3.set(...p).applyMatrix4(M); p[0] = W3.x; p[1] = W3.y; p[2] = W3.z; }
+        const q = scr(p); if (q[3] || occluded([cp.x, cp.y, cp.z], p)) continue; const gx = Math.floor(q[0] / grid.cell), gy = Math.floor(q[1] / grid.cell); if (gx >= 0 && gy >= 0 && gx < grid.nx && gy < grid.ny) { grid.c[gy * grid.nx + gx]++; if (it.dynCol && !it.colored) grid.d[gy * grid.nx + gx]++; } } }
+    const parts = { grid, count: (x0, y0, x1, y1, deb) => { const g = grid, arr = deb ? g.d : g.c, a = Math.max(0, Math.floor(x0 / g.cell)), b = Math.min(g.nx - 1, Math.floor(x1 / g.cell)), c = Math.max(0, Math.floor(y0 / g.cell)), d = Math.min(g.ny - 1, Math.floor(y1 / g.cell)); let n = 0; for (let j = c; j <= d; j++) for (let i = a; i <= b; i++) n += arr[j * g.nx + i]; return n; } };
+    for (const pts of this.ringPts || []) { if (pts.shell && this.hideShell) continue; const st = Math.max(1, Math.floor(pts.length / 160)); let cur = [];
+      for (let i = 0; i < pts.length; i += st) { const p = W3.set(...pts[i]).applyMatrix4(M).toArray(), q = scr(p); if (q[3] || occluded([cp.x, cp.y, cp.z], p)) { if (cur.length > 1) rings.push(cur); cur = []; } else cur.push([q[0], q[1]]); }
+      if (cur.length > 1) rings.push(cur); }
+    return { marks, parts, rings, scale: 1 };
+  },
+  _label(text, posFn, cls, item, dy = 0, dx = 0, short = null, opt = false) {
     const d = document.createElement('div'); d.className = 'hlabel'; d.textContent = text; if (this.sim?.cfg.spin) d.style.fontSize = '13.5px'; this.labelLayer.appendChild(d);
-    this.labels.push({ d, posFn, item, text, dy, dx, short, cls });
+    this.labels.push({ d, posFn, item, text, dy, dx, short, cls, opt });
   },
   _renderLabels() {
     const pos = this._labelPositions(this.el.clientWidth, this.el.clientHeight);

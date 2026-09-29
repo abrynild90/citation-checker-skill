@@ -8,7 +8,7 @@
 //   scenes/config.js       SCENES + HERO data (per-scene framing, actors, captions)
 //   scenes/sim.js          buildSim(cfg): items + cameras
 //   scenes/earth.js        land canvas, Blue Marble loader, sprites
-//   scenes/gl-host.js      GLHost class (live render, labels, stillPNG)
+//   scenes/gl-host.js      GLHost class (live render, model/glow fitting, labels, stillPNG)
 //   scenes/svg-fallback.js renderSVG(): static diagram
 //
 // app.js and scene-ui.js use these names from a single scope: tools/build_page.py concatenates the
