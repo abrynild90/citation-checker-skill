@@ -12,7 +12,7 @@ Object.assign(GLHost.prototype, {
     const cam = this.camera, keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell }, sc = this.sim.cfg.stillCam;
     if (sc) { this.hideShell = !!sc.hideShell; this.target.set(...(sc.look ? ll(...sc.look) : [0, 0, 0])); cam.position.set(...ll(...sc.at)); cam.up.set(0, 1, 0); cam.lookAt(this.target); cam.updateMatrixWorld(); }
     cam.clearViewOffset(); cam.updateProjectionMatrix(); this._viewShift = null;
-    this.renderer.setPixelRatio(1); this.renderer.setSize(W, H, false); this.renderer.render(this.scene, this.camera);
+    this.renderer.setPixelRatio(1); this.renderer.setSize(W, H, false); this._ptUniforms(); this.renderer.render(this.scene, this.camera);
     // Layout: header band (banner) | render | footer band (title, source, imagery credit). Nothing is drawn over the globe.
     const s = W / 1000, hb = Math.round(40 * s), fb = Math.round(92 * s);
     const c = document.createElement('canvas'); c.width = W; c.height = H + hb + fb;

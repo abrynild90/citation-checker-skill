@@ -66,3 +66,23 @@ function ringCanvas() {
   const r = g.createRadialGradient(64, 64, 40, 64, 64, 64); r.addColorStop(0, 'rgba(255,255,255,0)'); r.addColorStop(0.7, 'rgba(255,255,255,0.9)'); r.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = r; g.fillRect(0, 0, 128, 128); return ringCv;
 }
+
+// Beam ribbon texture: soft gaussian falloff across the width (used for the core and the halo of every beam).
+let beamCv = null;
+function beamCanvas() {
+  if (beamCv) return beamCv;
+  beamCv = document.createElement('canvas'); beamCv.width = 64; beamCv.height = 4; const g = beamCv.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 64, 0);
+  for (let k = 0; k <= 16; k++) { const x = k / 16, a = Math.exp(-Math.pow((x - 0.5) / 0.5, 2) * 3.6) * (1 - Math.pow(Math.abs(x - 0.5) * 2, 6)); gr.addColorStop(x, `rgba(255,255,255,${a.toFixed(3)})`); }
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 4); return beamCv;
+}
+// Solar-panel cell texture for the satellite models.
+let panelCv = null;
+function panelCanvas() {
+  if (panelCv) return panelCv;
+  panelCv = document.createElement('canvas'); panelCv.width = 64; panelCv.height = 32; const g = panelCv.getContext('2d');
+  g.fillStyle = '#2c5db0'; g.fillRect(0, 0, 64, 32); g.strokeStyle = 'rgba(190,215,255,0.65)'; g.lineWidth = 1;
+  for (let x = 0; x <= 64; x += 8) { g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, 32); g.stroke(); }
+  for (let y = 0; y <= 32; y += 8) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(64, y + 0.5); g.stroke(); }
+  return panelCv;
+}

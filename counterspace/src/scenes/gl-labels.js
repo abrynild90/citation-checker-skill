@@ -12,6 +12,12 @@ Object.assign(GLHost.prototype, {
     const p = right.multiplyScalar(Math.cos(deg * DEG) * rr).add(up.multiplyScalar(Math.sin(deg * DEG) * rr)).add(d.multiplyScalar(r * r / L));
     return [p.x, p.y, p.z];
   },
+  // Shell label anchor: the limb point at `deg`, moved around the shell to the nearest angle that is comfortably inside the stage (never off-screen).
+  _limbVis(r, deg) {
+    const T = this.T, ks = [0]; for (let k = 15; k <= 180; k += 15) ks.push(k, -k);
+    for (const k of ks) { const p = this._limb(r, deg + k), v = new T.Vector3(...p).project(this.camera); if (Math.abs(v.x) < 0.8 && v.y > -0.72 && v.y < 0.72) return p; }
+    return null;
+  },
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
   _labelPositions(w, h, u = 1, noBanner = false, statusBox = null) {
@@ -21,10 +27,10 @@ Object.assign(GLHost.prototype, {
       let p = L.posFn(this.t); if (p && this.sim.cfg.spin && L.cls !== 'shell') { const v = new T.Vector3(...p).applyMatrix4(this.root.matrixWorld); p = [v.x, v.y, v.z]; }
       if (!p) { raw.push(null); continue; }
       const v = new T.Vector3(...p).project(this.camera);
-      if (occluded([cam.x, cam.y, cam.z], p) || v.z > 1) { raw.push(null); continue; }
+      if (occluded([cam.x, cam.y, cam.z], p) || v.z > 1 || Math.abs(v.x) > 0.985 || Math.abs(v.y) > 0.985) { raw.push(null); continue; } // hidden: behind Earth, or its referent is off the stage
       const text = L.item?.labelFn ? L.item.labelFn(this.t) : (L.short && this.el.clientWidth < 520 ? L.short : L.text), color = L.item?.labelFn ? L.item.statusColor(this.t) : null;
       const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h; let lx = px + L.dx * k, ly = py + (L.dy - 12) * k;
-      const lw = labelW(text, u * (noBanner ? 1.1 : 1)), lh = 19 * u;
+      const hu = this.sim.cfg.spin ? 1.22 : 1, lw = labelW(text, u * hu * (noBanner ? 1.1 : 1)), lh = 19 * u * hu;
       if (L.item?.offGlobe) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), lm = this._limb(1, 0), c1 = new T.Vector3(...lm).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h, gr = Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy); [lx, ly] = offDisc(px, py, lw, lh, gx, gy, gr * 1.05); }
       raw.push({ x: lx, y: ly, px, py, w: lw, h: lh, fixed: L.cls === 'shell', text, color, avoidDisc: !!L.item?.offGlobe });
     }
@@ -39,7 +45,7 @@ Object.assign(GLHost.prototype, {
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   _label(text, posFn, cls, item, dy = 0, dx = 0, short = null) {
-    const d = document.createElement('div'); d.className = 'hlabel'; d.textContent = text; this.labelLayer.appendChild(d);
+    const d = document.createElement('div'); d.className = 'hlabel'; d.textContent = text; if (this.sim?.cfg.spin) d.style.fontSize = '13.5px'; this.labelLayer.appendChild(d);
     this.labels.push({ d, posFn, item, text, dy, dx, short, cls });
   },
   _renderLabels() {

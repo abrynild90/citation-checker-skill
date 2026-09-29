@@ -9,7 +9,7 @@ export function buildSim(cfg) {
   const rnd = mulberry(cfg.id.length * 7919 + 17);
   const shellDefs = { LEO: [2000, '#78a8ff', 'LEO ≤2,000 km'], MEO: [20200, '#a88cff', 'MEO (GPS)'], GEO: [GEO_ALT, '#ffcf6e', 'GEO'] };
   const sl = cfg.shellLabels || {}, sa = cfg.shellAng || {}, angDef = { LEO: 150, MEO: 38, GEO: 60 };
-  (cfg.shells || []).forEach(s => items.push({ kind: 'shell', r: rAlt(shellDefs[s][0]), color: shellDefs[s][1], label: s in sl ? sl[s] : shellDefs[s][2], ang: sa[s] ?? angDef[s], dx: cfg.shellOff?.[s]?.[0] ?? 0, dy: cfg.shellOff?.[s]?.[1] ?? 0 }));
+  (cfg.shells || []).forEach(s => items.push({ kind: 'shell', r: rAlt(shellDefs[s][0]), color: shellDefs[s][1], label: s in sl ? sl[s] : shellDefs[s][2], ang: sa[s] ?? angDef[s], strong: !!cfg.spin, dx: cfg.shellOff?.[s]?.[0] ?? 0, dy: cfg.shellOff?.[s]?.[1] ?? 0 }));
   let tgt = null, focus = cfg.focus || null;
   const H = cfg.hit;
   if (H) {
@@ -24,7 +24,7 @@ export function buildSim(cfg) {
   let aircraftPos = null;
   if (cfg.status) items.push({ kind: 'status', text: (t, still) => { let s = cfg.status[0][1]; for (const [t0, tx] of cfg.status) if (t >= t0) s = tx; const c = items._decayCloud; return !still && c && !cfg.noSimCount && tgt && t >= tgt.t ? `${s} · ${c.vis} of ${c.n} simulated pieces aloft` : s; } });
   for (const a of cfg.actors) {
-    if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 0.8 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy });
+    if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 1.7 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ship') items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label });
     if (a.type === 'ring') {
       let raan = a.raan, phase = a.sat?.phase ?? 0;
@@ -34,13 +34,13 @@ export function buildSim(cfg) {
       }
       const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(a.alt, a.inc, raan, k / 180 * 2 * Math.PI));
       items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: a.opacity ?? 0.55, thick: a.thick, label: a.label, labelAt: pts[a.sat ? 118 : 45] });
-      if (a.sat) items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.sat.label, labelDx: a.sat.dx, labelDy: a.sat.dy, offGlobe: a.sat.offGlobe, scale: a.sat.big, pos: t => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed) });
+      if (a.sat) items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.sat.label, labelDx: a.sat.dx, labelDy: a.sat.dy, offGlobe: a.sat.offGlobe, iss: !!a.sat.iss, scale: a.sat.big, pos: t => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed) });
       if (a.sats) for (let s = 0; s < a.sats; s++) { const ph = s / a.sats * 2 * Math.PI; items.push({ kind: 'point', shape: 'sat', small: true, color: a.color, pos: () => orbitPos(a.alt, a.inc, a.raan, ph) }); }
     }
     if (a.type === 'target' && tgt) {
       const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, k / 180 * 2 * Math.PI));
       items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35 });
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, short: a.short, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
+      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
         pos: t => (a.noHit || t <= tgt.t) ? tgt.pos(t) : null,
         glow: a.noHit ? (t => Math.abs(t - tgt.t) < 0.08) : null });
     }
@@ -48,8 +48,8 @@ export function buildSim(cfg) {
       a.fall.forEach((f, i) => {
         const pos = t => { const dt = t - tgt.t; if (dt < 0) return null; const alt = tgt.alt * (1 - f.k * dt) - 6 * dt; return alt > 70 ? orbitPos(alt, tgt.inc + f.di, tgt.raan + f.dr, tgt.uHit + tgt.w * dt * f.dw) : null; };
         const tEnd = tgt.t + (1 - 75 / tgt.alt) / f.k, N = 36, all = []; for (let k = 0; k <= N; k++) all.push(pos(tgt.t + (tEnd - tgt.t) * k / N) || pos(tgt.t + (tEnd - tgt.t) * (k - 1) / N));
-        items.push({ kind: 'curve', dynamic: true, all, thick: 0.009, color: '#ffb066', width: 2, pts: t => { const s = clamp01((t - tgt.t) / (tEnd - tgt.t)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
-        items.push({ kind: 'point', shape: 'sat', small: true, scale: 3.2, color: '#ffd19a', label: i === 0 ? 'Larger pieces falling (illustrative)' : null, labelDx: 60, labelDy: 16, pos });
+        items.push({ kind: 'curve', dynamic: true, all, thick: 0.0045, color: '#ff9a55', width: 2, pts: t => { const s = clamp01((t - tgt.t) / (tEnd - tgt.t)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
+        items.push({ kind: 'point', shape: 'kv', kvSize: 0.055, color: '#ffb872', label: i === 0 ? 'Larger pieces falling (illustrative)' : null, labelDx: 60, labelDy: 16, pos });
         items.push({ kind: 'flash', pos: all[N], t0: Math.min(0.98, tEnd), color: '#ffd9a0', size: 0.12, span: 0.1 });
       });
     }
@@ -57,7 +57,7 @@ export function buildSim(cfg) {
       const r = 1.012 + a.alt / 6371;
       const P = s => { const la = lerp(a.path[0][0], a.path[1][0], s), lo = lerp(a.path[0][1], a.path[1][1], s); return ll(la, lo, r); };
       const pos = t => (t >= a.t0 - 1e-6 && t <= a.t1 + 1e-6) ? P(clamp01((t - a.t0) / (a.t1 - a.t0))) : (t > a.t1 && !a.gnss ? null : null);
-      const item = { kind: 'point', shape: 'aircraft', scale: a.gnss ? null : 0.6, color: '#e9edf7', label: a.label, labelDy: a.labelDy, labelDx: a.dx, pos: t => pos(Math.min(t, a.t1)) };
+      const item = { kind: 'point', shape: 'aircraft', scale: a.gnss ? null : 1.1, color: '#e9edf7', label: a.label, labelDy: a.labelDy, labelDx: a.dx, pos: t => pos(Math.min(t, a.t1)) };
       if (!a.gnss) {
         aircraftPos = t => P(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         // Climb: altitude rises along the path (exaggerated) and a trail shows where the F-15 has been.
@@ -80,17 +80,19 @@ export function buildSim(cfg) {
       items._arc = { from, to, mid: bez(0.5) };
       // Faint predicted path (whole arc, always visible) under the bright growing trail.
       items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028 });
-      items.push({ kind: 'curve', dynamic: true, avoid: true, all, thick: 0.0065, color: a.color, width: 2, label: a.label, labelAt: bez(0.5),
+      items.push({ kind: 'curve', dynamic: true, avoid: true, all, thick: 0.0065, color: a.color, width: 2, label: a.label, labelAt: bez(0.5), labelEnd: tgt.t + 0.03,
         pts: t => { const s = clamp01((t - a.t0) / (tgt.t - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
       items.push({ kind: 'point', shape: 'kv', color: a.color, pos: t => (t > a.t0 && t < tgt.t) ? bez(clamp01((t - a.t0) / (tgt.t - a.t0))) : null });
       items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, size: a.flash ?? 0.3, span: 0.16 });
     }
     if (a.type === 'debris' && tgt) {
       const n = Math.min(a.count, PARTICLE_BUDGET);
-      const P = []; for (let k = 0; k < n; k++) P.push({ da: gauss(rnd) * a.spreadAlt, di: gauss(rnd) * a.spreadInc, dr: gauss(rnd) * 0.4, dw: 1 + gauss(rnd) * a.dv, du: gauss(rnd) * 0.02, dec: a.decay * (0.4 + rnd() * 1.4) });
-      const cloud = { kind: 'cloud', n, color: a.color, halo: a.halo, size: a.size ?? (n > 2000 ? 0.012 : n > 400 ? 0.018 : 0.03), label: a.label, vis: 0,
-        fill(t, out) {
-          const dt = t - tgt.t; let vis = 0;
+      const P = []; for (let k = 0; k < n; k++) P.push({ da: gauss(rnd) * a.spreadAlt, di: gauss(rnd) * a.spreadInc, dr: gauss(rnd) * 0.4, dw: 1 + gauss(rnd) * a.dv, du: gauss(rnd) * 0.02, dec: a.decay * (0.4 + rnd() * 1.4), cj: (rnd() - 0.5) * 0.5, br: 0.7 + rnd() * 0.3 });
+      // Fragments start hot (pale orange) and cool to dim red with age; each has its own tint and brightness. Soft sprites, normal blending: no white clipping.
+      const HOT = [1, 0.8, 0.5], MID = [1, 0.5, 0.2], COOL = [0.62, 0.17, 0.12];
+      const cloud = { kind: 'cloud', n, color: a.color, dynCol: true, alpha: 0.7, size: a.size ?? (n > 2000 ? 0.019 : n > 400 ? 0.018 : 0.027), label: a.label, labelDx: a.dx, labelDy: a.dy, vis: 0,
+        fill(t, out, colr) {
+          const dt = t - tgt.t; let vis = 0; const dens = Math.min(1, Math.sqrt(300 / n));
           for (let k = 0; k < n; k++) {
             const p = P[k]; let x = 0, y = 0, z = 0;
             if (dt > 0) {
@@ -98,6 +100,8 @@ export function buildSim(cfg) {
               if (alt > 60) { const q = orbitPos(alt, tgt.inc + p.di, tgt.raan + p.dr, tgt.uHit + p.du + tgt.w * (a.drift ?? 1) * dt * p.dw); x = q[0]; y = q[1]; z = q[2]; vis++; }
             }
             out[3 * k] = x; out[3 * k + 1] = y; out[3 * k + 2] = z;
+            if (colr) { const age = clamp01(dt * (a.decay > 0 ? 2.2 : 0.8) + p.cj), c = age < 0.4 ? lerp3(HOT, MID, age / 0.4) : lerp3(MID, COOL, (age - 0.4) / 0.6), fade = 1 - 0.45 * age, k4 = 4 * k;
+              colr[k4] = c[0] * p.br; colr[k4 + 1] = c[1] * p.br; colr[k4 + 2] = c[2] * p.br; colr[k4 + 3] = (0.7 + 0.3 * dens) * 0.9 * fade * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1); }
           }
           cloud.vis = vis; return vis;
         } };
@@ -126,15 +130,18 @@ export function buildSim(cfg) {
     if (a.type === 'flash') items.push({ kind: 'flash', pos: ll(a.at[0], a.at[1], rAlt(a.at[2])), t0: a.t0, color: a.color, big: true, size: a.size, span: a.span, ringColor: a.ringColor, label: a.label, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'belt') {
       const n = Math.min(a.count, PARTICLE_BUDGET);
-      const P = []; for (let k = 0; k < n; k++) { const L = lerp(a.L[0], a.L[1], rnd()); const lm = Math.acos(Math.sqrt(1 / L)) / DEG; P.push({ L, lat: (rnd() * 2 - 1) * lm * 0.95, side: rnd() * 2 - 1, j: rnd() }); }
-      items.push({ kind: 'cloud', n, color: a.color, size: a.size ?? 0.014, label: a.label, labelAt: ll(0, a.at[1] + 70, 1.7), labelDx: 60, labelDy: 30,
+      // Particles sit on discrete dipole field lines: L-shells r = L cos^2(lat), spaced around the planet in longitude, so the belt reads as beaded arches.
+      const nL = 5, nLon = 10, lines = nL * nLon, per = Math.ceil(n / lines), P = [];
+      for (let k = 0; k < n; k++) { const li = Math.floor(k / per), Li = li % nL, lo = Math.floor(li / nL), L = lerp(a.L[0], a.L[1], (Li + 0.5) / nL) + (rnd() - 0.5) * 0.01, lm = Math.acos(Math.sqrt(1 / L)) / DEG, u = ((k % per) + rnd() * 0.6) / per;
+        P.push({ L, lat: (u * 2 - 1) * lm * 0.97, side: ((lo + 0.5) / nLon) * 2 - 1 + (rnd() - 0.5) * 0.02, j: (lo * 0.37 % 1) * 0.6 + rnd() * 0.05, rj: (rnd() - 0.5) * 0.012 }); }
+      items.push({ kind: 'cloud', n, color: a.color, alpha: 0.9, size: a.size ?? 0.016, label: a.label, labelAt: ll(0, a.at[1] + 70, 1.7), labelDx: 60, labelDy: 30,
         fill(t, out) {
           const s = clamp01((t - a.t0) / (a.t1 - a.t0)); let vis = 0;
           for (let k = 0; k < n; k++) {
             const p = P[k]; let x = 0, y = 0, z = 0;
             if (s > p.j * 0.25) {
               const rr = p.L * Math.cos(p.lat * DEG) ** 2; const alt = (rr - 1) * 6371;
-              const q = ll(p.lat, a.at[1] + p.side * 180 * Math.min(1, s * 1.3), rAlt(alt)); x = q[0]; y = q[1]; z = q[2]; vis++;
+              const q = ll(p.lat, a.at[1] + p.side * 180 * Math.min(1, s * 1.3), rAlt(alt) + p.rj); x = q[0]; y = q[1]; z = q[2]; vis++;
             }
             out[3 * k] = x; out[3 * k + 1] = y; out[3 * k + 2] = z;
           }
@@ -152,8 +159,8 @@ export function buildSim(cfg) {
       for (let p = 0; p < a.planes; p++) {
         const raan = p * 360 / a.planes, pts = [];
         for (let k = 0; k <= 120; k++) pts.push(orbitPos(a.alt, a.inc, raan, k / 120 * 2 * Math.PI));
-        items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.13, label: p === 0 ? a.label : null, labelAt: pts[20] });
-        for (let s = 0; s < a.per; s++) { const ph = s / a.per * 2 * Math.PI + p * 0.5; const pos = t => orbitPos(a.alt, a.inc, raan, ph + t * a.speed * 2 * Math.PI); sats.push(pos); items.push({ kind: 'point', shape: 'sat', small: true, color: a.color, pos }); }
+        items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.13 });
+        for (let s = 0; s < a.per; s++) { const ph = s / a.per * 2 * Math.PI + p * 0.5; const pos = t => orbitPos(a.alt, a.inc, raan, ph + t * a.speed * 2 * Math.PI); sats.push(pos); items.push({ kind: 'point', shape: 'sat', small: true, color: a.color, pos, label: p === 0 && s === 0 ? a.label : null, labelDx: a.dx ?? 50, labelDy: a.dy ?? -30 }); }
       }
       items._gps = sats;
     }
@@ -163,7 +170,7 @@ export function buildSim(cfg) {
       items.push({ kind: 'curve', pts: () => q, color: '#ff8080', opacity: 1, thick: 0.004 }); }
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, labelDy: -30, scale: 2.2, bright: true, pos: () => g });
+      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, labelDy: -30, scale: 1.7, bright: true, pos: () => g });
       a.beams.forEach((b, bi) => { // space side stays bright; only the ground-side segment dims once the ground network is hit
         const e = ll(b[0], b[1], 1.003), m = add(scl(g, 0.4), scl(e, 0.6));
         items.push({ kind: 'beam', a: () => g, b: () => m, on: () => true, color: a.color, opacity: 0.5, width: 0.006 });
@@ -195,10 +202,10 @@ export function buildSim(cfg) {
       const nw = Math.max(...a.boxes.map(b => (b[5] ?? 0) + 1));
       a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => { const m = Math.round(a.count * frac); for (let k = 0; k < m; k++) P.push({ p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004), off: wave == null ? lerp(a.t0, a.t1, bi === 0 ? rnd() * 0.6 : 0.3 + rnd() * 0.7) : lerp(a.t0, a.t1, (wave + rnd() * 0.8) / nw) }); });
       const n = P.length;
-      items.push({ kind: 'cloud', n, size: 0.045, label: a.label, short: a.short, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
+      items.push({ kind: 'cloud', n, size: 0.0125, minPx: 2.4, maxPx: 6, dynCol: true, label: a.label, short: a.short, labelAt: ll(49, 30, 1.05), labelDx: 40, labelDy: -34, colored: true,
         fill(t, out, col) {
           for (let k = 0; k < n; k++) { const q = P[k].p; out[3 * k] = q[0]; out[3 * k + 1] = q[1]; out[3 * k + 2] = q[2];
-            const dark = t > P[k].off, blink = dark && t < P[k].off + 0.07; col[3 * k] = blink ? 1 : dark ? 0.9 : 0.35; col[3 * k + 1] = blink ? 0.9 : dark ? 0.2 : 1.0; col[3 * k + 2] = blink ? 0.8 : dark ? 0.2 : 0.62; }
+            const dark = t > P[k].off, blink = dark && t < P[k].off + 0.07; const k4 = 4 * k; col[k4] = blink ? 1 : dark ? 1 : 0.35; col[k4 + 1] = blink ? 0.85 : dark ? 0.24 : 1.0; col[k4 + 2] = blink ? 0.6 : dark ? 0.2 : 0.62; col[k4 + 3] = blink ? 1 : dark ? 0.8 : 0.75; }
           return n;
         } });
       const dark = t => { let d = 0; for (let k = 0; k < n; k++) if (t > P[k].off) d++; return d; };
@@ -207,7 +214,7 @@ export function buildSim(cfg) {
     if (a.type === 'beam' && tgt) {
       const from = ll(a.from[0], a.from[1], 1.004);
       const su = norm(from); // beam is on while the satellite is above the site's horizon, within the window
-      items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label, short: a.short });
+      items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.022, coreColor: '#ffe3f9', ends: 0.09, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy });
     }
   }
   // GNSS links: aircraft <-> 4 highest GPS satellites; red when inside zone.
@@ -217,7 +224,7 @@ export function buildSim(cfg) {
       const inZone = t => { const p = ac.pos(t); return p && Math.acos(Math.min(1, dot(norm(p), zc))) / DEG < z.radius; };
       ac.statusColor = t => inZone(t) ? C.jam : C.ok;
       ac.labelFn = t => inZone(t) ? ac.label + ' · GNSS lost' : ac.label + ' · GNSS OK';
-      for (let k = 0; k < 2; k++) items.push({ kind: 'beam', link: true, opacity: 0.7, width0: 0.0018,
+      for (let k = 0; k < 2; k++) items.push({ kind: 'beam', link: true, avoid: true, opacity: 0.7, width0: 0.0018,
         a: t => ac.pos(t), b: t => { const p = ac.pos(t); if (!p) return null; const s = items._gps.map(f => f(t)).map(q => [q, dot(norm(q), norm(p))]).sort((x, y) => y[1] - x[1]); return s[k][0]; },
         on: t => !!ac.pos(t), colorFn: t => inZone(t) ? C.jam : C.ok, dashFn: inZone });
     });
@@ -232,7 +239,7 @@ export function buildSim(cfg) {
     const { from, to, mid } = items._arc, md = norm(mid), e1 = norm(add(to, scl(from, -1))), nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);
     const look = add(mid, scl(md, -0.03 - (cfg.lookMix ?? 0) * len(mid))), launch = { name: 'Launch', pos: add(look, add(scl(nrm, 0.78 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)), scl(md, 0.34 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)))), look, hideShell: true };
     if (cfg.wideLaunch) { const D = cfg.wideLaunch * (IS_PHONE ? 1.05 : 1); launch.pos = add(scl(md, D * 0.86), scl(nrm, D * 0.5)); launch.look = scl(md, cfg.lookK ?? 0.3); }
-    const orbit = { name: 'Orbit', pos: ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)) };
+    const orbit = { name: 'Orbit', pos: cfg.orbitAt ? ll(...cfg.orbitAt) : ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)) };
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
   return { cfg, items, cams, still: cfg.still ?? 0.5, sunRef: cfg.wideLaunch && H ? ll(H.lat * 0.7, H.lon - 10, 4) : cams[0].pos };

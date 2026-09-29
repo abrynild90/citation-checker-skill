@@ -27,7 +27,7 @@ export function renderSVG(sim, el, t = sim.still) {
       if (it.kind === 'curve') it.pts(t).forEach(q => grow(unit(q)));
       else if (it.kind === 'point' && !it.liveOnly) { const q = it.pos(t); if (q) grow(unit(q)); }
       else if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { grow(unit(A)); grow(unit(B)); } }
-      else if (it.kind === 'cloud') { const arr = new Float32Array(it.n * 3), col = it.colored ? new Float32Array(it.n * 3) : null; it.fill(t, arr, col);
+      else if (it.kind === 'cloud') { const arr = new Float32Array(it.n * 3), col = it.dynCol ? new Float32Array(it.n * 4) : null; it.fill(t, arr, col);
         for (let k = 0; k < it.n; k += Math.max(1, Math.floor(it.n / 400))) if (arr[3 * k] || arr[3 * k + 1] || arr[3 * k + 2]) grow(unit([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]])); }
     } }
   // Real banner box (the page's "illustrative" note sits over the diagram) and the footer strip are reserved for labels and the fit.
@@ -39,29 +39,37 @@ export function renderSVG(sim, el, t = sim.still) {
   const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([CX, CY]).scale(R).clipAngle(90);
   const project = p => { const u = unit(p); return { x: CX + u.x * R, y: CY + u.y * R, hidden: u.hidden }; };
   const path = d3.geoPath(proj);
-  const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: static diagram`);
+  const svg = d3.create('svg').style('background', '#070b16').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: static diagram`);
   const defs = svg.append('defs');
   const bg = defs.append('radialGradient').attr('id', `${U}-bg`).attr('cx', '50%').attr('cy', '50%').attr('r', '75%');
-  bg.append('stop').attr('offset', 0).attr('stop-color', '#0f1a33'); bg.append('stop').attr('offset', 1).attr('stop-color', '#05070f');
+  bg.append('stop').attr('offset', 0).attr('stop-color', '#0f1a33'); bg.append('stop').attr('offset', 1).attr('stop-color', '#070b16');
   const gl = defs.append('radialGradient').attr('id', `${U}-glow`); gl.append('stop').attr('offset', 0.9).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0.5); gl.append('stop').attr('offset', 1).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0);
   const oc = defs.append('radialGradient').attr('id', `${U}-ocean`).attr('cx', '38%').attr('cy', '35%').attr('r', '80%');
-  oc.append('stop').attr('offset', 0).attr('stop-color', '#1a4a7c'); oc.append('stop').attr('offset', 1).attr('stop-color', '#0a2040');
+  oc.append('stop').attr('offset', 0).attr('stop-color', '#245c98'); oc.append('stop').attr('offset', 0.6).attr('stop-color', '#123a68'); oc.append('stop').attr('offset', 1).attr('stop-color', '#071a34');
   // Lit globe: soft sphere shading + a blurred night side, from the same sun direction as the live scene.
   const sh = defs.append('radialGradient').attr('id', `${U}-shade`).attr('gradientUnits', 'userSpaceOnUse').attr('cx', CX - 0.28 * R).attr('cy', CY - 0.3 * R).attr('r', 1.55 * R);
   sh.append('stop').attr('offset', 0).attr('stop-color', '#fff').attr('stop-opacity', 0.16); sh.append('stop').attr('offset', 0.45).attr('stop-color', '#fff').attr('stop-opacity', 0); sh.append('stop').attr('offset', 0.45).attr('stop-color', '#000').attr('stop-opacity', 0);
   sh.append('stop').attr('offset', 1).attr('stop-color', '#000').attr('stop-opacity', 0.5);
   defs.append('filter').attr('id', `${U}-blur`).attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%').append('feGaussianBlur').attr('stdDeviation', Math.max(4, R * 0.05));
+  { // Land texture: fractal-noise mottling clipped to the land shape (desert/forest/ice tones), so the coastlines are not a flat cartoon fill.
+    const f = defs.append('filter').attr('id', `${U}-tex`).attr('x', 0).attr('y', 0).attr('width', 1).attr('height', 1);
+    f.append('feTurbulence').attr('type', 'fractalNoise').attr('baseFrequency', 0.014).attr('numOctaves', 3).attr('seed', 4).attr('result', 'n');
+    f.append('feColorMatrix').attr('in', 'n').attr('type', 'matrix').attr('values', '0 0 0 0 0.86  0 0 0 0 0.74  0 0 0 0 0.5  0 0 0 1.1 -0.42').attr('result', 't');
+    f.append('feComposite').attr('in', 't').attr('in2', 'SourceGraphic').attr('operator', 'in').attr('result', 'tl');
+    const m = f.append('feMerge'); m.append('feMergeNode').attr('in', 'SourceGraphic'); m.append('feMergeNode').attr('in', 'tl'); }
+  const sc = defs.append('radialGradient').attr('id', `${U}-sheen`).attr('gradientUnits', 'userSpaceOnUse').attr('cx', CX - 0.32 * R).attr('cy', CY - 0.34 * R).attr('r', 0.5 * R);
+  sc.append('stop').attr('offset', 0).attr('stop-color', '#cfe6ff').attr('stop-opacity', 0.2); sc.append('stop').attr('offset', 1).attr('stop-color', '#cfe6ff').attr('stop-opacity', 0);
   defs.append('clipPath').attr('id', `${U}-clip`).append('path').datum({ type: 'Sphere' }).attr('d', path);
   svg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-bg)`);
   { const rs = mulberry(99); for (let k = 0; k < 90; k++) { const x = rs() * W, y = rs() * H, b = 0.25 + rs() * 0.5; svg.append('circle').attr('cx', x).attr('cy', y).attr('r', rs() < 0.15 ? 1.1 : 0.7).attr('fill', '#dfe8ff').attr('fill-opacity', b); } }
   const shells = sim.items.filter(i => i.kind === 'shell'), cands = [], obst = [];
-  shells.forEach(it => svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
+  shells.forEach(it => svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', it.r * R).attr('fill', it.color).attr('fill-opacity', it.r * R > 0.62 * Math.min(W, H) ? 0 : 0.05).attr('stroke', it.color).attr('stroke-opacity', 0.55).attr('stroke-dasharray', '3 4'));
   svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', R * 1.08).attr('fill', `url(#${U}-glow)`);
   svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
   svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
   // Ring winding is data-dependent: any ring that d3 reads as "more than a hemisphere" is reversed so it fills land, not the complement.
   const landGeo = { type: 'MultiPolygon', coordinates: (LAND || []).map(r => { const c = []; for (let k = 0; k < r.length; k += 2) c.push([r[k], r[k + 1]]); if (c.length > 2 && d3.geoArea({ type: 'Polygon', coordinates: [c] }) > 2 * Math.PI) c.reverse(); return [c]; }) };
-  svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#3b7a5e').attr('stroke', '#5fae8a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.7);
+  svg.append('path').datum(landGeo).attr('d', path).attr('fill', '#4c7a56').attr('filter', `url(#${U}-tex)`).attr('stroke', '#8fb98a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.55);
   { // Sun direction in the view basis; the terminator crosses the view axis at a = -sz (units of R), night is on the far side.
     const sd = toLL(sunFor(sim.sunRef)), [slo, sla] = rot([sd.lon, sd.lat]), sx = Math.cos(sla * DEG) * Math.sin(slo * DEG), sy = Math.sin(sla * DEG), sz = Math.cos(sla * DEG) * Math.cos(slo * DEG), pm = Math.hypot(sx, sy) || 1e-6;
     const ux = sx / pm, uy = -sy / pm, cx = CX, cyy = CY, at = a => [cx + ux * a * R, cyy + uy * a * R];
@@ -69,7 +77,7 @@ export function renderSVG(sim, el, t = sim.still) {
     const ng = defs.append('linearGradient').attr('id', `${U}-night`).attr('gradientUnits', 'userSpaceOnUse').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
     ng.append('stop').attr('offset', 0).attr('stop-color', '#01030a').attr('stop-opacity', 0.78); ng.append('stop').attr('offset', 1).attr('stop-color', '#01030a').attr('stop-opacity', 0);
     const cg = svg.append('g').attr('clip-path', `url(#${U}-clip)`);
-    cg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-shade)`);
+    cg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-shade)`); cg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-sheen)`);
     cg.append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', H).attr('fill', `url(#${U}-night)`).attr('opacity', pm < 0.06 && sz > 0 ? 0 : 1);
     svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', 'none').attr('stroke', '#8cc8ff').attr('stroke-opacity', 0.55).attr('stroke-width', 1.2); }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
@@ -86,10 +94,10 @@ export function renderSVG(sim, el, t = sim.still) {
       if (it.label && it.labelAt && pts.length > 2) label(project(it.labelAt), (it.short && W < 520) ? it.short : it.label, it.color, it.labelDx, it.labelDy, it.staticAt);
     }
     if (it.kind === 'cloud') {
-      const arr = new Float32Array(it.n * 3), col = it.colored ? new Float32Array(it.n * 3) : null; it.fill(t, arr, col);
+      const arr = new Float32Array(it.n * 3), col = it.dynCol ? new Float32Array(it.n * 4) : null; it.fill(t, arr, col);
       const step = Math.max(1, Math.floor(it.n / 900));
       for (let k = 0; k < it.n; k += step) { if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue; const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]); if (p.hidden) continue;
-        g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', it.halo ? 2.6 : 1.4).attr('fill', col ? d3.rgb(col[3 * k] * 255, col[3 * k + 1] * 255, col[3 * k + 2] * 255) : it.color).attr('fill-opacity', 0.85); }
+        g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', it.n > 500 ? 1.1 : it.dynCol ? 1.7 : 1.4).attr('fill', col ? d3.rgb(col[4 * k] * 255, col[4 * k + 1] * 255, col[4 * k + 2] * 255) : it.color)                .attr('fill-opacity', it.n > 500 ? 0.62 : 0.85); }
       if (it.label && (it.labelAt || arr[0] || arr[1] || arr[2])) label(project(it.labelAt || [arr[0], arr[1], arr[2]]), (it.short && W < 520) ? it.short : it.label, it.color || '#dfe6f7');
     }
     if (it.kind === 'beam') { const A = it.a(t), B = it.b(t); if (A && B && it.on(t)) { const a = project(A), b = project(B); if (it.avoid && !a.hidden && !b.hidden) obst.push([[a.x, a.y], [b.x, b.y]]); if (!a.hidden && !b.hidden) g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.colorFn ? it.colorFn(t) : it.color).attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8)).attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null).attr('stroke-width', it.width ? 5 : 1.2); if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color); } }

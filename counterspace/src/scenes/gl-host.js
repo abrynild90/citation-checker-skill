@@ -30,9 +30,14 @@ export class GLHost {
     this.renderer.setSize(w, h, false); this.camera.aspect = w / h;
     // Narrow (phone) frames keep about a 1.1:1 horizontal field of view (was 1.5:1): subjects render ~35% larger while the action still fits.
     this.camera.fov = 2 * Math.atan(Math.tan(20 * DEG) * Math.max(1, 1.1 / (w / h))) / DEG; this.camera.updateProjectionMatrix();
-    this._viewShift = null; this._applyBands();
+    this._viewShift = null; this._applyBands(); this._heroFit();
     this.canvas.style.width = '100%'; this.canvas.style.height = '100%';
     this.render();
+  }
+  // Hero: the camera distance follows the stage aspect so Earth and the shells fill the stage (wide stage: close and centred; phone: far enough for the GEO ring).
+  _heroFit() {
+    if (!this.sim?.cfg.spin || !this.camIdx && this.camIdx !== 0) return;
+    const d = Math.max(4.9, 7.3 / Math.max(this.camera.aspect, 1.1)), p = this.camera.position.clone().sub(this.target); p.setLength(d); this.camera.position.copy(p.add(this.target)); this.camera.lookAt(this.target);
   }
   // Reserve room for the banner (top) and the status caption (bottom): the projection centre moves to the middle of the free band, so subjects never sit under the caption.
   _applyBands() {
@@ -45,7 +50,7 @@ export class GLHost {
   }
   load(sim) {
     this.unload();
-    const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = []; this._lm = {};
+    const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = []; this._lm = {}; this.ptMats = []; this.beamTex = null; this._pt = null;
     // Sun fixed in world space, set ~50 deg east of the opening camera so the event region
     // is in daylight and the terminator shows on the limb. Orbiting reveals the night side.
     const sunDir = sunFor(sim.sunRef);
@@ -86,7 +91,7 @@ export class GLHost {
     mat.map = map; mat.needsUpdate = true;
     old.forEach(t => t?.dispose());
   }
-  setCam(i, instant) { const c = this.sim.cams[i]; this.camIdx = i; this.hideShell = !!c.hideShell; this.target.set(...(c.look || [0, 0, 0])); this.camera.position.set(...c.pos); this.camera.up.set(0, 1, 0); this.camera.lookAt(this.target); this.render(); }
+  setCam(i, instant) { const c = this.sim.cams[i]; this.camIdx = i; this.hideShell = !!c.hideShell; this.target.set(...(c.look || [0, 0, 0])); this.camera.position.set(...c.pos); this.camera.up.set(0, 1, 0); this.camera.lookAt(this.target); this._heroFit(); this.render(); }
   update(t) {
     const T = this.T; this.t = t;
     for (const { it, obj } of this.dyn) {
@@ -100,31 +105,39 @@ export class GLHost {
         const n = it.ref.pts(t).length; obj.geometry.setDrawRange(0, n < 2 ? 0 : Math.round(Math.min(1, (n - 1) / it.segs) * it.segs) * 30);
       } else if (it.kind === 'point') {
         const p = it.pos(t); obj.visible = !!p; if (p) obj.position.set(...p);
-        if (it.shape === 'aircraft' && p) { obj.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(p))); }
-        if (obj.userData.body && p) { // keep solar wings roughly along the orbit track
-          const q = it.pos(t + 0.002); if (q) { obj.lookAt(new T.Vector3(...q)); } }
-        const tint = obj.userData.body ? obj.userData.body.material : obj.material;
-        if (it.statusColor && tint) tint.color.set(it.statusColor(t));
-        if (it.glow) { const on = it.glow(t); tint.color.set(on ? '#ffffff' : it.color);
-          if (obj.userData.halo) { obj.userData.halo.material.color.set(on ? '#ff8cf0' : it.color); obj.userData.halo.scale.setScalar(on ? 0.12 + 0.02 * Math.sin(performance.now() / 60) : 0.09); obj.userData.halo.material.opacity = on ? 0.95 : 0.55; } }
+        const ud = obj.userData;
+        if (it.shape === 'aircraft' && p) { // wings level, nose along the ground track
+          const up = new T.Vector3(...norm(p)), a2 = it.pos(Math.min(1, t + 0.004)), a1 = it.pos(Math.max(0, t - 0.004));
+          const f = new T.Vector3(...a2).sub(new T.Vector3(...a1)); f.addScaledVector(up, -f.dot(up));
+          if (f.lengthSq() > 1e-12) { f.normalize(); ud.f = f; } else if (!ud.f) { ud.f = new T.Vector3(0, 0, 1).addScaledVector(up, -up.z).normalize(); }
+          const side = new T.Vector3().crossVectors(up, ud.f).normalize(); obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(side, up, ud.f)); }
+        if (ud.sat && p) { const q = it.pos(t + 0.002); if (q) obj.lookAt(new T.Vector3(...q)); } // keep solar wings across the orbit track
+        if (ud.iss && p) { const q = it.pos(t + 0.002); if (q) obj.lookAt(new T.Vector3(...q)); }
+        const tint = ud.body ? ud.body.material : ud.tintMat ? ud.tintMat : obj.material;
+        if (it.statusColor && tint) { const c = it.statusColor(t); tint.color.set(c); if (ud.halo) ud.halo.material.color.set(c); }
+        if (it.glow && tint) { const on = it.glow(t); tint.color.set(on ? '#ffffff' : it.color);
+          if (ud.halo) { ud.halo.material.color.set(on ? '#ff8cf0' : it.color); ud.halo.scale.setScalar(on ? 0.1 + 0.015 * Math.sin(performance.now() / 60) : 0.06); ud.halo.material.opacity = on ? 0.8 : 0.32; } }
       } else if (it.kind === 'cloud') {
-        const a = obj.geometry.attributes.position; it.fill(t, a.array, obj.geometry.attributes.color?.array); a.needsUpdate = true;
-        if (obj.geometry.attributes.color) obj.geometry.attributes.color.needsUpdate = true;
+        const g = obj.geometry, a = g.attributes.position; it.fill(t, a.array, it.dynCol ? g.attributes.aCol.array : null); a.needsUpdate = true;
+        if (it.dynCol) g.attributes.aCol.needsUpdate = true;
       } else if (it.kind === 'beam') {
         const A = it.a(t), B = it.b(t), on = A && B && it.on(t); obj.visible = !!on;
-        if (on) { const v = new T.Vector3(B[0] - A[0], B[1] - A[1], B[2] - A[2]); const L = v.length();
-          obj.scale.set(1, L, 1); obj.position.set((A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2);
-          obj.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), v.normalize());
+        if (on) { const v = new T.Vector3(B[0] - A[0], B[1] - A[1], B[2] - A[2]); const L = v.length(); v.normalize();
+          const mid = new T.Vector3((A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2), cd = mid.clone().sub(this.camera.position).normalize();
+          const right = new T.Vector3().crossVectors(v, cd); if (right.lengthSq() < 1e-8) right.set(1, 0, 0); right.normalize(); const nz = new T.Vector3().crossVectors(right, v);
+          obj.position.copy(mid); obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(right, v, nz));
+          obj.children.forEach(ch => { if (ch.isMesh) ch.scale.set(2 * ch.userData.hw, L, 1); });
+          if (obj.userData.ends) { obj.userData.ends[0].position.set(0, -L / 2, 0); obj.userData.ends[1].position.set(0, L / 2, 0); }
           const core = obj.userData.core.material, now = performance.now() / 1000;
           if (it.opFn) { const o = it.opFn(t); core.color.set(it.colorFn ? it.colorFn(t) : it.color); core.opacity = o; if (obj.userData.halo) obj.userData.halo.material.opacity = 0.22 * o; }
           else if (it.colorFn) { // GNSS links: steady green outside the zone, faint flickering red inside it
             const jam = it.dashFn(t); core.color.set(it.colorFn(t)); core.opacity = jam ? 0.12 + 0.18 * Math.abs(Math.sin(now * 13 + L * 9)) : 0.55; }
-          else if (obj.userData.halo) { const pulse = 0.75 + 0.25 * Math.sin(now * 30); core.opacity = (it.opacity ?? 0.9) * pulse; obj.userData.halo.material.opacity = 0.22 * pulse; } }
+          else if (obj.userData.halo) { const pulse = 0.8 + 0.2 * Math.sin(now * 30); core.opacity = (it.opacity ?? 0.9) * pulse; obj.userData.halo.material.opacity = 0.24 * pulse; } }
       } else if (it.kind === 'flash') {
         const span = it.span ?? (it.big ? 0.3 : 0.14), dt = t - it.t0, on = dt > 0 && dt < span;
         obj.visible = on;
         if (on) { const f = dt / span, { core, ring } = obj.userData;
-          core.scale.setScalar((it.size ?? (it.big ? 0.55 : 0.16)) * Math.sqrt(Math.min(1, f * 3)) + 0.01); core.material.opacity = Math.max(0, 1 - f * 1.6);
+          core.scale.setScalar((it.size ?? (it.big ? 0.55 : 0.16)) * Math.sqrt(Math.min(1, f * 3)) + 0.01); core.material.opacity = 0.85 * Math.max(0, 1 - f * 1.6);
           ring.scale.setScalar((it.size ? it.size * 1.7 : it.big ? 0.9 : 0.3) * Math.pow(f, 0.6) + 0.01); ring.material.opacity = 0.9 * (1 - f); }
       }
     }
@@ -132,8 +145,14 @@ export class GLHost {
     if (this.statusEl) { this.statusEl.textContent = this.status ? this.status.text(t) : ''; this._applyBands(); }
     this.render();
   }
+  // Point sprite sizes follow the drawing-buffer height (live canvas or the print-resolution still).
+  _ptUniforms() {
+    const bh = this.renderer.domElement.height, k = bh / (this.el?.clientHeight || bh), sc = bh / (2 * Math.tan(this.camera.fov * DEG / 2));
+    for (const m of this.ptMats || []) { m.uniforms.uScale.value = sc; m.uniforms.uMin.value = m.userData.minPx * k; m.uniforms.uMax.value = m.userData.maxPx * k; }
+  }
   render() {
     if (!this.scene) return;
+    this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
     this._renderLabels();
   }
@@ -152,7 +171,7 @@ export class GLHost {
       // Dispose every geometry, material and texture (map, specularMap, sprites) the scene created.
       this.scene.traverse(o => { o.geometry?.dispose(); const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
         ms.forEach(m => { for (const k in m) if (m[k] && m[k].isTexture) m[k].dispose(); m.dispose(); }); });
-      this.spriteTex?.dispose(); this.ringTex?.dispose(); this.spriteTex = this.ringTex = null;
+      this.spriteTex?.dispose(); this.ringTex?.dispose(); this.beamTex?.dispose(); this._pt?.dispose(); this.spriteTex = this.ringTex = this.beamTex = this._pt = null; this.ptMats = [];
       this.scene.clear(); this.scene = null; this.earthMat = null;
     }
     this.renderer.renderLists.dispose();
