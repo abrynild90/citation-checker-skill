@@ -88,7 +88,7 @@ Object.assign(GLHost.prototype, {
       const core = mk(w * (it.width ? 0.5 : 1), it.opacity ?? 0.8); m.add(core); m.userData.core = core;
       if (it.width) { const halo = mk(w * 2.2, 0.22); m.add(halo); m.userData.halo = halo; }
       root.add(m); this.dyn.push({ it, obj: m }); if (it.avoid) this.obst.push(it);
-      if (it.label) this._label(it.label, t => { const A = it.a(t), B = it.b(t); return A && B && it.on(t) ? scl(add(A, B), 0.5) : null; }, null, null, it.labelDy ?? 0, it.labelDx ?? 0);
+      if (it.label) this._label(it.label, t => { const A = it.a(t), B = it.b(t); return A && B && it.on(t) ? scl(add(A, B), 0.5) : null; }, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short);
     } else if (it.kind === 'dome') {
       const c = ll(it.at[0], it.at[1]);
       const m = new T.Mesh(new T.SphereGeometry(it.radius * DEG * 1.0, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.28, depthWrite: false, side: T.DoubleSide }));

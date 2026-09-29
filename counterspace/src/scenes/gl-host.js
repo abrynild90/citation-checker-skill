@@ -45,7 +45,7 @@ export class GLHost {
   }
   load(sim) {
     this.unload();
-    const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = [];
+    const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = []; this._lm = {};
     // Sun fixed in world space, set ~50 deg east of the opening camera so the event region
     // is in daylight and the terminator shows on the limb. Orbiting reveals the night side.
     const sunDir = sunFor(sim.sunRef);

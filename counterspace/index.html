@@ -472,7 +472,7 @@ return { raan: lon - dl / DEG, u };
 }
 function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const gauss = rnd => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
-function placeLabels(list, W, H, reserved = [], disc = null, obst = []) {
+function placeLabels(list, W, H, reserved = [], disc = null, obst = [], memo = null) {
 const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], M = 4;
 const out = new Array(list.length).fill(null);
 const order = list.map((_, i) => i).filter(i => list[i]).sort((a, b) => ((list[b] && list[b].fixed) ? 1 : 0) - ((list[a] && list[a].fixed) ? 1 : 0) || a - b);
@@ -484,17 +484,16 @@ return u1 - u0 > 0.02;
 const segSeg = (a, b) => { const d = (b[3] - b[1]) * (a[2] - a[0]) - (b[2] - b[0]) * (a[3] - a[1]); if (Math.abs(d) < 1e-9) return false; const ua = ((b[2] - b[0]) * (a[1] - b[1]) - (b[3] - b[1]) * (a[0] - b[0])) / d, ub = ((a[2] - a[0]) * (a[1] - b[1]) - (a[3] - a[1]) * (a[0] - b[0])) / d; return ua > 0.02 && ua < 0.98 && ub > 0.02 && ub < 0.98; };
 const polyCross = (a, pl) => { for (let k = 0; k + 1 < pl.length; k++) if (segSeg(a, [pl[k][0], pl[k][1], pl[k + 1][0], pl[k + 1][1]])) return true; return false; };
 const polyBox = (pl, b) => { for (let k = 0; k + 1 < pl.length; k++) if (segBox(pl[k][0], pl[k][1], pl[k + 1][0], pl[k + 1][1], b)) return true; return false; };
-const run = order => {
-const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], out = new Array(list.length).fill(null); let total = 0;
-for (const i of order) {
-const c = list[i]; if (!c || !isFinite(c.x + c.y + c.px + c.py)) continue;
-if (reserved.some(r => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) continue;
+const mk = (i, boxes, segs) => {
+const c = list[i]; if (!c || !isFinite(c.x + c.y + c.px + c.py)) return null;
+if (reserved.some(r => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) return null;
 const { w, h } = c;
 const cx = x => Math.max(w / 2 + M, Math.min(W - w / 2 - M, x)), cy = y => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
 const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
 const cost = (x, y) => {
 const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), lead = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
 let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01;
+if (memo && memo[i]) n += Math.hypot(x - memo[i][0], y - memo[i][1]) * 0.06; // stickiness: keep last frame's slot unless something clearly better exists
 if (lead) { n += Math.hypot(qx - c.px, qy - c.py) * 0.04; for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600; for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500; }
 if (lead) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += 550;
 const me = { x, y, w, h }; for (let o = 0; o < list.length; o++) { const q = list[o]; if (q && q !== c && Math.abs(q.px - x) < w / 2 + 2 && Math.abs(q.py - y) < h / 2 + 2) n += 400; }
@@ -503,6 +502,11 @@ for (const s of segs) if (segBox(s[0], s[1], s[2], s[3], me)) n += 600;
 if (disc && c.avoidDisc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.35) { const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0), dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0); if (Math.hypot(dx0, dy0) < disc.r) n += 900; }
 return n;
 };
+return { c, w, h, cx, cy, cost };
+};
+const scoreAt = (i, x, y, boxes, segs) => mk(i, boxes, segs).cost(x, y);
+const place = (i, boxes, segs) => {
+const m = mk(i, boxes, segs); if (!m) return null; const { c, w, h, cx, cy, cost } = m;
 const cand = [[0, 0]];
 for (let k = 1; k <= 8; k++) cand.push([0, -k * h * 1.12], [0, k * h * 1.12]);
 for (const j of [0, -1, 1, -2, 2, -3, 3]) { cand.push([w * 0.55 + 14, j * h * 1.12], [-(w * 0.55 + 14), j * h * 1.12]); }
@@ -511,18 +515,37 @@ let best = null, bestN = 1e9;
 const tryAt = (x, y) => { const n = cost(x, y); if (n < bestN) { best = [x, y]; bestN = n; } return n; };
 for (const [dx, dy] of cand) if (tryAt(cx(c.x + dx), cy(c.y + dy)) < 0.5) break;
 if (bestN >= 500) for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += Math.max(4, h * 0.4)) for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += Math.max(6, w * 0.12)) tryAt(gx, gy);
-total += bestN; const [x, y] = best; boxes.push({ x, y, w, h });
+return [best[0], best[1], bestN];
+};
+const fin = (i, x, y, boxes, segs, out) => { const c = list[i], { w, h } = c; boxes.push({ x, y, w, h });
 const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), leader = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
 if (leader) segs.push([c.px, c.py, qx, qy]);
-out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy };
+out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy }; };
+const base = () => reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] }));
+const run = order => {
+const boxes = base(), segs = [], out = new Array(list.length).fill(null), got = []; let total = 0;
+for (const i of order) { const r = place(i, boxes, segs); if (!r) continue; total += r[2]; got.push(i); fin(i, r[0], r[1], boxes, segs, out); }
+return { out, total, got };
+};
+const sym = (out, got) => { let t = 0; for (const j of got) { const bx = base(), sg = []; for (const k of got) if (k !== j) { const o = out[k]; bx.push({ x: o.x, y: o.y, w: list[k].w, h: list[k].h }); if (o.leader) sg.push([o.ax, o.ay, o.qx, o.qy]); } t += scoreAt(j, out[j].x, out[j].y, bx, sg); } return t; };
+const repair = res => {
+let cur = sym(res.out, res.got);
+for (let pass = 0; pass < 2 && cur >= 300; pass++) for (const i of res.got) {
+const boxes = base(), segs = [];
+for (const j of res.got) if (j !== i) { const o = res.out[j]; boxes.push({ x: o.x, y: o.y, w: list[j].w, h: list[j].h }); if (o.leader) segs.push([o.ax, o.ay, o.qx, o.qy]); }
+const r = place(i, boxes, segs); if (!r) continue;
+const no = res.out.slice(), nb = [], ns = []; fin(i, r[0], r[1], nb, ns, no);
+const t = sym(no, res.got); if (t < cur - 1) { res.out = no; cur = t; }
 }
-return { out, total };
+res.total = cur; return res;
 };
 const fx = order.filter(i => list[i] && list[i].fixed), rest = order.filter(i => !(list[i] && list[i].fixed)), tries = [order, fx.concat(rest.slice().reverse()), fx.concat(rest.slice().sort((p, q) => (list[p].py || 0) - (list[q].py || 0))), fx.concat(rest.slice().sort((p, q) => (list[q].py || 0) - (list[p].py || 0))), fx.concat(rest.slice().sort((p, q) => (list[p].px || 0) - (list[q].px || 0))), fx.concat(rest.slice().sort((p, q) => (list[q].px || 0) - (list[p].px || 0)))];
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-for (let k = 0; k < 12; k++) { const r = rest.slice(); for (let j = r.length - 1; j > 0; j--) { const m = Math.floor(rnd() * (j + 1)); [r[j], r[m]] = [r[m], r[j]]; } tries.push(fx.concat(r)); }
+for (let k = 0; k < 4; k++) { const r = rest.slice(); for (let j = r.length - 1; j > 0; j--) { const m = Math.floor(rnd() * (j + 1)); [r[j], r[m]] = [r[m], r[j]]; } tries.push(fx.concat(r)); }
 let bestRun = null;
 for (const o of tries) { const r = run(o); if (!bestRun || r.total < bestRun.total) bestRun = r; if (bestRun.total < 300) break; }
+repair(bestRun);
+if (memo) bestRun.out.forEach((o, i) => { if (o) memo[i] = [o.x, o.y]; else delete memo[i]; });
 return bestRun.out;
 }
 function offDisc(x, y, w, h, cx, cy, r) {
@@ -582,7 +605,7 @@ cite: 'SWF 2026, pp. 03-20, 03-22.', related: null, event: 'cn-2013-dn2',
 actors: [
 { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
 { type: 'suborbital', from: [28.2, 102.0], to: [-20.0, 78.0], apex: 30000, t0: 0.05, t1: 0.9, color: '#ff7a7a', thick: 0.011, label: 'DN-2 path (no target: not an intercept)', short: 'DN-2 path · no target', labelIdx: 0.12, dx: -40, dy: -50, head: true, apexT: 0.47, staticAt: [0.6, 0.09],
-marks: [{ alt: 10000, label: '10,000 km · China’s stated figure', short: '10,000 km · China', color: '#ffd9a0', dx: -70, dy: 52, staticAt: [0.66, 0.78] }, { alt: 30000, label: 'Apogee ≥30,000 km (SWF-cited)', short: '≥30,000 km · SWF', color: '#ff9c9c', apex: true, dx: -96, dy: -58, staticAt: [0.6, 0.18] }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO · 35,786 km', color: C.geo, dx: 24, dy: 58, staticAt: [0.3, 0.7] }] },
+marks: [{ alt: 10000, label: '10,000 km · China’s stated figure', short: '10,000 km', color: '#ffd9a0', dx: -20, dy: -40 }, { alt: 30000, label: 'Apogee ≥30,000 km (SWF-cited)', short: '≥30,000 km (SWF)', color: '#ff9c9c', apex: true, dx: 0, dy: -68 }, { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', color: C.geo, dx: 0, dy: 46 }] },
 { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.012, opacity: 0.95, sats: 10 },
 ], still: 0.62, camDist: 7.5, stillCam: { at: [22, 8, 6.4], look: [0, 94, 0.6] }, status: [[0, 'Rocket climbs from Xichang on a suborbital path'], [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)'], [0.8, 'Falls back over the Indian Ocean · no target: reach, not an intercept']], shellLabels: { MEO: null, GEO: null },
 cameras: [{ name: 'Profile', at: [22, 8, 6.0], look: [0, 96, 0.6], phone: { at: [24, 24, 4.9], look: [0, 100, 0.7] } }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
@@ -632,12 +655,12 @@ cameras: [{ name: 'Europe + GEO', at: [26, -10, 5.0], look: [20, 9, 1.8], phone:
 { id: 'laser', date: '1997-10-17', title: 'MIRACL laser test on MSTI-3 (1997)', shells: ['LEO'], duration: 12,
 caption: 'In October 1997 the US fired the MIRACL chemical laser at MSTI-3, a retired US Air Force experimental satellite that carried infrared sensors. MIRACL is now part of a test facility at White Sands Missile Range, New Mexico, where this diagram places the site. A low-power beam can dazzle a satellite’s optical sensor; a high-power beam could damage it. SWF describes Russia’s Peresvet as a mobile laser dazzler; the animated view has a Russia camera marking the shelter sites SWF names (Teykovo, Yoshkar-Ola, Novosibirsk). No beam is drawn for Peresvet.',
 cite: 'SWF 2026, p. 01-35 (MIRACL); pp. 02-35 to 02-36 (Peresvet shelter sites; site markers approximate).', related: null, event: 'us-1997-miracl',
-hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.3 }, staticZoom: 2.6, staticCenter: [35, -108],
+hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.3 }, lift: 30, staticZoom: 2.6, staticCenter: [35, -108],
 actors: [
-{ type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', color: C.ground },
-{ type: 'target', label: 'MSTI-3 (US test target)', color: C.tgt, noHit: true, big: 1.7 },
-{ type: 'beam', from: [32.4, -106.4], window: 0.42, color: C.laser, label: 'MIRACL beam (illustrative)', width: 0.034 },
-{ type: 'site', at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', color: '#ffb0f0', dx: 0, dy: 30, small: true, liveOnly: true },
+{ type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground },
+{ type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7 },
+{ type: 'beam', from: [32.4, -106.4], window: 0.42, color: C.laser, label: 'MIRACL beam (illustrative)', short: 'MIRACL beam', width: 0.034 },
+{ type: 'site', at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', short: 'Teykovo', color: '#ffb0f0', dx: 0, dy: 30, small: true, liveOnly: true },
 { type: 'site', at: [56.63, 47.89], label: 'Yoshkar-Ola', color: '#ffb0f0', dx: 40, dy: -18, small: true, liveOnly: true },
 { type: 'site', at: [55.03, 82.92], label: 'Novosibirsk', color: '#ffb0f0', dx: 0, dy: 26, small: true, liveOnly: true },
 ], still: 0.5,
@@ -669,7 +692,7 @@ focus = focus || [H.lat, H.lon];
 let aircraftPos = null;
 if (cfg.status) items.push({ kind: 'status', text: (t, still) => { let s = cfg.status[0][1]; for (const [t0, tx] of cfg.status) if (t >= t0) s = tx; const c = items._decayCloud; return !still && c && !cfg.noSimCount && tgt && t >= tgt.t ? `${s} · ${c.vis} of ${c.n} simulated pieces aloft` : s; } });
 for (const a of cfg.actors) {
-if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 0.8 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy });
+if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 0.8 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy });
 if (a.type === 'ship') items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label });
 if (a.type === 'ring') {
 let raan = a.raan, phase = a.sat?.phase ?? 0;
@@ -685,7 +708,7 @@ if (a.sats) for (let s = 0; s < a.sats; s++) { const ph = s / a.sats * 2 * Math.
 if (a.type === 'target' && tgt) {
 const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, k / 180 * 2 * Math.PI));
 items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35 });
-items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
+items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, short: a.short, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
 pos: t => (a.noHit || t <= tgt.t) ? tgt.pos(t) : null,
 glow: a.noHit ? (t => Math.abs(t - tgt.t) < 0.08) : null });
 }
@@ -846,7 +869,7 @@ items.push({ kind: 'status', text: t => { const tx = t < a.pulse0 ? 'Before the 
 if (a.type === 'beam' && tgt) {
 const from = ll(a.from[0], a.from[1], 1.004);
 const su = norm(from); // beam is on while the satellite is above the site's horizon, within the window
-items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
+items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label, short: a.short });
 }
 }
 if (items._gps && items._zone) {
@@ -969,7 +992,7 @@ this.camera.updateProjectionMatrix();
 }
 load(sim) {
 this.unload();
-const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = [];
+const T = this.T, S = new T.Scene(); this.scene = S; this.sim = sim; this.dyn = []; this.labels = []; this.obst = []; this._lm = {};
 const sunDir = sunFor(sim.sunRef);
 this.sunDir = sunDir;
 S.add(new T.AmbientLight(0x9fb4ff, 0.22));
@@ -1174,7 +1197,7 @@ const mk = (r, op) => new T.Mesh(new T.CylinderGeometry(r, r, 1, 10, 1, true), n
 const core = mk(w * (it.width ? 0.5 : 1), it.opacity ?? 0.8); m.add(core); m.userData.core = core;
 if (it.width) { const halo = mk(w * 2.2, 0.22); m.add(halo); m.userData.halo = halo; }
 root.add(m); this.dyn.push({ it, obj: m }); if (it.avoid) this.obst.push(it);
-if (it.label) this._label(it.label, t => { const A = it.a(t), B = it.b(t); return A && B && it.on(t) ? scl(add(A, B), 0.5) : null; }, null, null, it.labelDy ?? 0, it.labelDx ?? 0);
+if (it.label) this._label(it.label, t => { const A = it.a(t), B = it.b(t); return A && B && it.on(t) ? scl(add(A, B), 0.5) : null; }, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short);
 } else if (it.kind === 'dome') {
 const c = ll(it.at[0], it.at[1]);
 const m = new T.Mesh(new T.SphereGeometry(it.radius * DEG * 1.0, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.28, depthWrite: false, side: T.DoubleSide }));
@@ -1218,8 +1241,8 @@ let disc = null; if (raw.some(r => r && r.avoidDisc)) { const c0 = new T.Vector3
 const obst = [], vp = p => { const v = new T.Vector3(...p).project(this.camera); return [(v.x + 1) / 2 * w, (1 - v.y) / 2 * h, occluded([cam.x, cam.y, cam.z], p) || v.z > 1]; };
 for (const it of this.obst || []) { let pts = it.kind === 'beam' ? (it.on(this.t) && it.a(this.t) && it.b(this.t) ? [it.a(this.t), it.b(this.t)] : []) : it.pts(this.t), cur = [];
 const st = Math.max(1, Math.ceil(pts.length / 40)); for (let k = 0; k < pts.length; k += st) { const q = vp(pts[k]); if (q[2]) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push(q); } if (cur.length > 1) obst.push(cur); }
-const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst);
-return raw.map((r, i) => r && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
+const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst, noBanner ? null : (this._lm ||= {}));
+return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
 },
 _label(text, posFn, cls, item, dy = 0, dx = 0, short = null) {
 const d = document.createElement('div'); d.className = 'hlabel'; d.textContent = text; this.labelLayer.appendChild(d);

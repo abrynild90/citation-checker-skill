@@ -24,7 +24,7 @@ export function buildSim(cfg) {
   let aircraftPos = null;
   if (cfg.status) items.push({ kind: 'status', text: (t, still) => { let s = cfg.status[0][1]; for (const [t0, tx] of cfg.status) if (t >= t0) s = tx; const c = items._decayCloud; return !still && c && !cfg.noSimCount && tgt && t >= tgt.t ? `${s} · ${c.vis} of ${c.n} simulated pieces aloft` : s; } });
   for (const a of cfg.actors) {
-    if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 0.8 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy });
+    if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 0.8 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ship') items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label });
     if (a.type === 'ring') {
       let raan = a.raan, phase = a.sat?.phase ?? 0;
@@ -40,7 +40,7 @@ export function buildSim(cfg) {
     if (a.type === 'target' && tgt) {
       const pts = []; for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, k / 180 * 2 * Math.PI));
       items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35 });
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
+      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, short: a.short, scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null, bright: !!a.bright,
         pos: t => (a.noHit || t <= tgt.t) ? tgt.pos(t) : null,
         glow: a.noHit ? (t => Math.abs(t - tgt.t) < 0.08) : null });
     }
@@ -207,7 +207,7 @@ export function buildSim(cfg) {
     if (a.type === 'beam' && tgt) {
       const from = ll(a.from[0], a.from[1], 1.004);
       const su = norm(from); // beam is on while the satellite is above the site's horizon, within the window
-      items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label });
+      items.push({ kind: 'beam', avoid: true, a: () => from, b: t => tgt.pos(t), on: t => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, color: a.color, opacity: 0.95, width: 0.02, label: a.label, short: a.short });
     }
   }
   // GNSS links: aircraft <-> 4 highest GPS satellites; red when inside zone.

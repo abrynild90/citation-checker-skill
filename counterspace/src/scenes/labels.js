@@ -6,7 +6,7 @@
 // list[i] = {x, y (preferred centre), px, py (object point), w, h, fixed} or null.
 // Returns placements {x, y, leader, ax, ay, qx, qy}. Fixed labels are placed first; others are nudged
 // up/down/sideways to the nearest free slot, clamped inside the frame, and given a leader line to the object.
-export function placeLabels(list, W, H, reserved = [], disc = null, obst = []) {
+export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], memo = null) {
   const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], M = 4;
   const out = new Array(list.length).fill(null);
   const order = list.map((_, i) => i).filter(i => list[i]).sort((a, b) => ((list[b] && list[b].fixed) ? 1 : 0) - ((list[a] && list[a].fixed) ? 1 : 0) || a - b);
@@ -20,18 +20,18 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = []) {
   // Obstacles are drawn paths (screen-space polylines): neither a label nor a leader line may cross them.
   const polyCross = (a, pl) => { for (let k = 0; k + 1 < pl.length; k++) if (segSeg(a, [pl[k][0], pl[k][1], pl[k + 1][0], pl[k + 1][1]])) return true; return false; };
   const polyBox = (pl, b) => { for (let k = 0; k + 1 < pl.length; k++) if (segBox(pl[k][0], pl[k][1], pl[k + 1][0], pl[k + 1][1], b)) return true; return false; };
-  const run = order => {
-  const boxes = reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })), segs = [], out = new Array(list.length).fill(null); let total = 0;
-  for (const i of order) {
-    const c = list[i]; if (!c || !isFinite(c.x + c.y + c.px + c.py)) continue;
+  // Best slot for label i given the boxes and leader segments already placed.
+  const mk = (i, boxes, segs) => {
+    const c = list[i]; if (!c || !isFinite(c.x + c.y + c.px + c.py)) return null;
     // An object hidden under the banner or caption band gets no label (nothing visible to point at).
-    if (reserved.some(r => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) continue;
+    if (reserved.some(r => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) return null;
     const { w, h } = c;
     const cx = x => Math.max(w / 2 + M, Math.min(W - w / 2 - M, x)), cy = y => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
     const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
     const cost = (x, y) => {
       const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), lead = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
       let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01;
+      if (memo && memo[i]) n += Math.hypot(x - memo[i][0], y - memo[i][1]) * 0.06; // stickiness: keep last frame's slot unless something clearly better exists
       if (lead) { n += Math.hypot(qx - c.px, qy - c.py) * 0.04; for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600; for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500; }
       if (lead) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += 550;
       const me = { x, y, w, h }; for (let o = 0; o < list.length; o++) { const q = list[o]; if (q && q !== c && Math.abs(q.px - x) < w / 2 + 2 && Math.abs(q.py - y) < h / 2 + 2) n += 400; }
@@ -40,6 +40,11 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = []) {
       if (disc && c.avoidDisc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.35) { const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0), dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0); if (Math.hypot(dx0, dy0) < disc.r) n += 900; }
       return n;
     };
+    return { c, w, h, cx, cy, cost };
+  };
+  const scoreAt = (i, x, y, boxes, segs) => mk(i, boxes, segs).cost(x, y);
+  const place = (i, boxes, segs) => {
+    const m = mk(i, boxes, segs); if (!m) return null; const { c, w, h, cx, cy, cost } = m;
     const cand = [[0, 0]];
     for (let k = 1; k <= 8; k++) cand.push([0, -k * h * 1.12], [0, k * h * 1.12]);
     for (const j of [0, -1, 1, -2, 2, -3, 3]) { cand.push([w * 0.55 + 14, j * h * 1.12], [-(w * 0.55 + 14), j * h * 1.12]); }
@@ -49,19 +54,39 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = []) {
     for (const [dx, dy] of cand) if (tryAt(cx(c.x + dx), cy(c.y + dy)) < 0.5) break;
     // Nothing clean nearby (crowded frame or a reserved band in the way): search the whole free area on a grid.
     if (bestN >= 500) for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += Math.max(4, h * 0.4)) for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += Math.max(6, w * 0.12)) tryAt(gx, gy);
-    total += bestN; const [x, y] = best; boxes.push({ x, y, w, h });
+    return [best[0], best[1], bestN];
+  };
+  const fin = (i, x, y, boxes, segs, out) => { const c = list[i], { w, h } = c; boxes.push({ x, y, w, h });
     const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)), qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)), leader = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
     if (leader) segs.push([c.px, c.py, qx, qy]);
-    out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy };
-  }
-  return { out, total };
+    out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy }; };
+  const base = () => reserved.map(r => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] }));
+  const run = order => {
+    const boxes = base(), segs = [], out = new Array(list.length).fill(null), got = []; let total = 0;
+    for (const i of order) { const r = place(i, boxes, segs); if (!r) continue; total += r[2]; got.push(i); fin(i, r[0], r[1], boxes, segs, out); }
+    return { out, total, got };
+  };
+  // Repair sweeps: re-place each label with every other one held fixed (lets a late label undo an early greedy choice).
+  const sym = (out, got) => { let t = 0; for (const j of got) { const bx = base(), sg = []; for (const k of got) if (k !== j) { const o = out[k]; bx.push({ x: o.x, y: o.y, w: list[k].w, h: list[k].h }); if (o.leader) sg.push([o.ax, o.ay, o.qx, o.qy]); } t += scoreAt(j, out[j].x, out[j].y, bx, sg); } return t; };
+  const repair = res => {
+    let cur = sym(res.out, res.got);
+    for (let pass = 0; pass < 2 && cur >= 300; pass++) for (const i of res.got) {
+      const boxes = base(), segs = [];
+      for (const j of res.got) if (j !== i) { const o = res.out[j]; boxes.push({ x: o.x, y: o.y, w: list[j].w, h: list[j].h }); if (o.leader) segs.push([o.ax, o.ay, o.qx, o.qy]); }
+      const r = place(i, boxes, segs); if (!r) continue;
+      const no = res.out.slice(), nb = [], ns = []; fin(i, r[0], r[1], nb, ns, no);
+      const t = sym(no, res.got); if (t < cur - 1) { res.out = no; cur = t; }
+    }
+    res.total = cur; return res;
   };
   // Greedy placement in a few different orders when the first leaves a collision or a crossing leader; keep the cleanest result.
   const fx = order.filter(i => list[i] && list[i].fixed), rest = order.filter(i => !(list[i] && list[i].fixed)), tries = [order, fx.concat(rest.slice().reverse()), fx.concat(rest.slice().sort((p, q) => (list[p].py || 0) - (list[q].py || 0))), fx.concat(rest.slice().sort((p, q) => (list[q].py || 0) - (list[p].py || 0))), fx.concat(rest.slice().sort((p, q) => (list[p].px || 0) - (list[q].px || 0))), fx.concat(rest.slice().sort((p, q) => (list[q].px || 0) - (list[p].px || 0)))];
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let k = 0; k < 12; k++) { const r = rest.slice(); for (let j = r.length - 1; j > 0; j--) { const m = Math.floor(rnd() * (j + 1)); [r[j], r[m]] = [r[m], r[j]]; } tries.push(fx.concat(r)); }
+  for (let k = 0; k < 4; k++) { const r = rest.slice(); for (let j = r.length - 1; j > 0; j--) { const m = Math.floor(rnd() * (j + 1)); [r[j], r[m]] = [r[m], r[j]]; } tries.push(fx.concat(r)); }
   let bestRun = null;
   for (const o of tries) { const r = run(o); if (!bestRun || r.total < bestRun.total) bestRun = r; if (bestRun.total < 300) break; }
+  repair(bestRun);
+  if (memo) bestRun.out.forEach((o, i) => { if (o) memo[i] = [o.x, o.y]; else delete memo[i]; });
   return bestRun.out;
 }
 // Push a label box (centre x,y size w,h) out of a disc (globe on screen) so it never sits on the planet.

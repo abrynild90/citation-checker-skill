@@ -35,8 +35,8 @@ Object.assign(GLHost.prototype, {
     const obst = [], vp = p => { const v = new T.Vector3(...p).project(this.camera); return [(v.x + 1) / 2 * w, (1 - v.y) / 2 * h, occluded([cam.x, cam.y, cam.z], p) || v.z > 1]; };
     for (const it of this.obst || []) { let pts = it.kind === 'beam' ? (it.on(this.t) && it.a(this.t) && it.b(this.t) ? [it.a(this.t), it.b(this.t)] : []) : it.pts(this.t), cur = [];
       const st = Math.max(1, Math.ceil(pts.length / 40)); for (let k = 0; k < pts.length; k += st) { const q = vp(pts[k]); if (q[2]) { if (cur.length > 1) obst.push(cur); cur = []; } else cur.push(q); } if (cur.length > 1) obst.push(cur); }
-    const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst);
-    return raw.map((r, i) => r && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
+    const pl = placeLabels(raw, w, h, status ? banner.concat([status]) : banner, disc, obst, noBanner ? null : (this._lm ||= {}));
+    return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   _label(text, posFn, cls, item, dy = 0, dx = 0, short = null) {
     const d = document.createElement('div'); d.className = 'hlabel'; d.textContent = text; this.labelLayer.appendChild(d);
