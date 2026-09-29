@@ -6,13 +6,15 @@
 import { SCENES, HERO } from './scenes/config.js';
 import { buildSim } from './scenes/sim.js';
 import { GLHost } from './scenes/gl-host.js';
-// These three only extend GLHost.prototype (items, labels, still export); they must load after gl-host.js and before the first scene opens.
-import {} from './scenes/gl-items.js';
-import {} from './scenes/gl-labels.js';
-import {} from './scenes/gl-still.js';
+import { installGLItems } from './scenes/gl-items.js';
+import { installGLLabels } from './scenes/gl-labels.js';
+import { installGLStill } from './scenes/gl-still.js';
 import { renderSVG } from './scenes/svg-fallback.js';
 import { PARTICLE_BUDGET } from './scenes/core.js';
 import { setLand, loadEarth, earthReady, EARTH_URL } from './scenes/earth.js';
+
+// GLHost is split over four files; the mixins add items, labels and the still export to its prototype. Runs at module load, before any scene can open.
+[installGLItems, installGLLabels, installGLStill].forEach((install) => install(GLHost));
 
 performance.mark('cs:module-start');
 export const D = JSON.parse(document.getElementById('cs-data').textContent);

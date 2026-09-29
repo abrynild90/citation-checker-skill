@@ -1,12 +1,11 @@
 // ============================================================================
 // scenes/gl-still.js: GLHost mixin: print-resolution PNG still (banner band, labels with leaders, footer with title/source/credit)
-// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLStill(GLHost), see app.js.)
 // ============================================================================
-import { GLHost } from './gl-host.js';
 import { DEG, ll } from './core.js';
 import { earthImg } from './earth.js';
 
-Object.assign(GLHost.prototype, {
+const methods = {
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
   // the illustrative banner, caption and source into the PNG, then restore the live size.
   // One frame of the still: the render, its labels with leaders and the status caption, drawn into a W x H canvas (no bands). `o.t` picks the scene time and
@@ -232,4 +231,9 @@ Object.assign(GLHost.prototype, {
     this.resize();
     return url;
   },
-});
+};
+
+// Adds this file's methods to GLHost.prototype. Called once from app.js, after gl-host.js is loaded and before any scene opens.
+export function installGLStill(GLHost) {
+  Object.assign(GLHost.prototype, methods);
+}

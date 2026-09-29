@@ -1,6 +1,6 @@
 // ============================================================================
 // scenes/earth.js: Earth textures: vector land canvas, NASA Blue Marble loader, sprite canvases
-// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes.js.)
 // ============================================================================
 import { IS_PHONE } from './core.js';
 

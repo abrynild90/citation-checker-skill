@@ -9,9 +9,13 @@
 //   scenes/config.js       SCENES + HERO data (per-scene framing, actors, captions)
 //   scenes/sim.js          buildSim(cfg): items + cameras
 //   scenes/earth.js        land canvas, Blue Marble loader, sprites
-//   scenes/gl-host.js      GLHost class (live render, model/glow fitting, labels, stillPNG)
+//   scenes/gl-host.js      GLHost class (live render, camera, model/glow fitting)
+//   scenes/gl-items.js     GLHost mixin: item builders (installGLItems)
+//   scenes/gl-labels.js    GLHost mixin: HTML labels, leaders, context inset (installGLLabels)
+//   scenes/gl-still.js     GLHost mixin: print-resolution PNG still (installGLStill)
 //   scenes/svg-fallback.js renderSVG(): static diagram
 //
-// app.js and scene-ui.js use these names from a single scope: tools/build_page.py concatenates the
-// modules above (in that order) and strips import/export keywords. This file holds no code.
+// Each file is an ES module that imports what it uses; tools/build_page.py bundles src/boot.js and everything it imports with esbuild
+// into one IIFE (no shared scope, no concatenation). app.js applies the three GLHost mixins (gl-items, gl-labels, gl-still) with
+// installGLItems/Labels/Still(GLHost). This file holds no code and is not imported.
 // ============================================================================

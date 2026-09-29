@@ -1,12 +1,11 @@
 // ============================================================================
 // scenes/gl-labels.js: GLHost mixin: HTML labels, leader lines, screen-space label placement and limb geometry
-// (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
+// (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLLabels(GLHost), see app.js.)
 // ============================================================================
-import { GLHost } from './gl-host.js';
 import { DEG, ll, occluded } from './core.js';
 import { labelW, offDisc, placeLabels } from './labels.js';
 
-Object.assign(GLHost.prototype, {
+const methods = {
   _placeLabels: placeLabels, // exposed for tools/scene_check.mjs debugging
   // Point on a sphere of radius r at the visible silhouette, `deg` counter-clockwise from screen-right.
   _limb(r, deg) {
@@ -511,4 +510,9 @@ Object.assign(GLHost.prototype, {
       }
     });
   },
-});
+};
+
+// Adds this file's methods to GLHost.prototype. Called once from app.js, after gl-host.js is loaded and before any scene opens.
+export function installGLLabels(GLHost) {
+  Object.assign(GLHost.prototype, methods);
+}
