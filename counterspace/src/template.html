@@ -301,7 +301,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
   .panel header .lbl{display:none}
   .panel header .btn{min-width:38px;justify-content:center}
   .panel .ctrl{padding:8px 10px}
-  .hero .stage{height:340px;min-height:0}
+  .hero .stage{height:400px;min-height:0}
   .lede{font-size:16px}
   .chart-head p{font-size:14.5px}
 }
@@ -339,6 +339,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
     <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
     <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
     <a href="#chartC"><b>C · Non-kinetic</b><span>Jamming, lasers and cyber</span></a>
+    <a href="#chartR"><b>RPO · Co-orbital</b><span>Proximity operations, docking, spaceplanes</span></a>
     <a href="#chartB"><b>B · Capabilities</b><span>States holding each, by decade</span></a>
     <a href="#lag"><b>Chronology</b><span>Years from capability to a later legal step</span></a>
     <a href="#sources"><b>Sources</b><span>Citations and method</span></a>
@@ -413,6 +414,24 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
       <div class="svgbox" id="svgC"></div>
       <ul class="legend" id="legendC"></ul>
       <details class="table"><summary>Data table: Chart C</summary><div class="tscroll" id="tableC"></div></details>
+    </section>
+
+    <section class="chart" id="chartR" aria-labelledby="hR">
+      <div class="chart-head">
+        <div><h2 id="hR">Co-orbital proximity operations (RPO)</h2>
+        <p>Rendezvous, docking, capture, release and spaceplane-mission rows from SWF’s co-orbital tables, one lane per actor. Each mark sits at the start date of a ledger row; shape shows the activity and colour the actor.</p></div>
+        <div class="tools">
+          <span class="seg" role="group" aria-label="Co-orbital chart year range">
+            <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+            <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
+          </span>
+          <button class="btn small" data-export="R" type="button">Export SVG</button></div>
+      </div>
+      <p class="note block" id="noteR0"><b>A proximity operation is not an attack.</b> Most rows are inspection, servicing or technology demonstrations, and SWF’s wording on intent is hedged (“possibly”, “appeared to”, “likely”). The ledger records that an operation happened, not why; outlined marks show where SWF itself hedges.</p>
+      <p class="note block" id="noteR"></p>
+      <div class="svgbox" id="svgR"></div>
+      <ul class="legend" id="legendR"></ul>
+      <details class="table"><summary>Data table: co-orbital rows</summary><div class="tscroll" id="tableR"></div></details>
     </section>
 
     <section class="chart" id="chartB" aria-labelledby="hB">

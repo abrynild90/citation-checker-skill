@@ -2,7 +2,7 @@
 from .rows import *
 
 LEDGER_ASOF = "2026-09-29"
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 SOURCE_FULL = {
     "SWF 2026": "Victoria Samson & Kathleen Brett eds., Global Counterspace Capabilities: An Open Source Assessment "
                 "(Secure World Foundation, 9th ed., Apr. 2026), " + SWF_URL,
@@ -15,13 +15,15 @@ SOURCE_FULL = {
 }
 CAP_STATES = ["Australia", "China", "France", "Germany", "India", "Iran", "Israel", "Japan", "North Korea", "Russia",
               "South Korea", "USSR/Russia", "United Kingdom", "United States"]
-SCENE_IDS = ["starfish", "solwind", "fengyun", "burnt-frost", "dn2", "shakti", "cosmos1408", "gnss", "viasat", "laser"]
+SCENE_IDS = ["starfish", "solwind", "fengyun", "burnt-frost", "dn2", "shakti", "cosmos1408", "gnss", "viasat", "laser", "sj21-tug", "rpo", "spaceplanes"]
 ENUMS = {
-    "domain": ["kinetic", "non_kinetic"],
+    "domain": ["kinetic", "non_kinetic", "co_orbital"],
     "confidence": ["high", "medium", "low"],
     "type": ["destructive", "non_destructive", "midcourse_intercept", "apogee_only", "flyby", "nuclear"],
     "altitude_kind": ["intercept", "apogee", "detonation"],
-    "date_precision": ["day", "month"],
+    "date_precision": ["day", "month", "year"],
+    "activity": ["capture_tow", "rpo", "docking", "release", "spaceplane_mission"],
+    "orbit_regime": ["LEO", "GEO", "HEO", "not_stated"],
     "category": ["directed_energy", "ew_uplink", "ew_downlink", "gnss_jamming", "gnss_spoofing", "cyber"],
     "attribution": ["official_government", "multi_government", "researcher_osint", "alleged"],
     "target_regime": ["ISR_LEO", "GEO_comms", "GNSS_MEO", "LEO_constellation", "ground_segment"],
@@ -35,9 +37,17 @@ SCOPE_RULE = ("Scope rule: every direct-ascent (DA-ASAT) test row that SWF 2026 
               "experiment; Table 16-2's Soviet IS, Naryad, Polyot and Cosmos 2521/2536 entries), and the Table 16-3 line "
               "'Apr. 15, 2023' (treated as a date variant of the 14 Apr 2023 test, see that row's conflicts). "
               "Starfish Prime (not an SWF DA-ASAT table row) is the one added nuclear marker.")
+CO_SCOPE_RULE = ("Co-orbital rule: every line of SWF 2026 Table 1-3 (US RPOs), Table 2-3 (Russian RPOs) and Table 3-2 (Chinese RPOs), and every flight in "
+                 "Table 1-1 (X-37B) and Table 3-1 (Chinese reusable experimental spacecraft), is a row with domain co_orbital, dated from the table (or from SWF's text where the row says so "
+                 "and gives the reason). Two exceptions, both disclosed: (a) the Jan. 2022 USA 270 / Shiyan-12 approach is listed in both Table 1-3 and Table 3-2 and "
+                 "is one row; (b) where SWF's text dates separate steps that a table folds into one line (SJ-21 with Compass G2; SJ-21 with SJ-25; "
+                 "the Cosmos 2542 release of Cosmos 2543; the SY-7 release of Payload A Debris; the GSSAP 'flanking' of SJ-21 and SJ-25), the text-dated "
+                 "step is its own row and the row says so. RPO rows record that a proximity operation happened as SWF reports it; they are not attacks, "
+                 "and SWF's wording on intent is hedged and kept in the row.")
 SCHEMA = {
     "schema_version": SCHEMA_VERSION,
     "scope_rule": SCOPE_RULE,
+    "co_scope_rule": CO_SCOPE_RULE,
     "page_strings": {"ledger_as_of_display": "29 Sept. 2026", "swf_edition_label": "SWF 9th ed. (Apr. 2026)"},
     "enums": ENUMS,
     "generated_by": "tools/build_data.py",
@@ -46,8 +56,8 @@ SCHEMA = {
                    "(unchanged shape); capabilities.json is an object. Version bumps: patch = new rows or "
                    "corrected values; minor = new optional fields; major = shape change.",
     "files": {
-        "events.json": {"shape": "array of event rows, sorted by date/start; domain is 'kinetic' or 'non_kinetic'",
-            "common_fields": {"id": "stable key", "domain": "kinetic | non_kinetic", "confidence": "high | medium | low",
+        "events.json": {"shape": "array of event rows, sorted by date/start; domain is 'kinetic', 'non_kinetic' or 'co_orbital'",
+            "common_fields": {"id": "stable key", "domain": "kinetic | non_kinetic | co_orbital", "confidence": "high | medium | low",
                 "notes": "free-text caveats", "source": "short source label", "source_full": "full citation string for a sources list",
                 "source_url": "link to the source", "pin": "table/passage plus printed page and PDF page",
                 "conflicts": "optional list of disagreements inside the sources", "scene_3d": "optional 3D scene key"},
@@ -60,6 +70,12 @@ SCHEMA = {
                 "attribution": "official_government | multi_government | researcher_osint | alleged",
                 "target_system": "string", "target_regime": "ISR_LEO | GEO_comms | GNSS_MEO | LEO_constellation | ground_segment",
                 "operational_use": "bool", "effect": "string"},
+            "co_orbital_fields": {"start": "YYYY-MM-DD (first of the month or 1 Jan. when date_precision is month or year)", "end": "YYYY-MM-DD, last day of the month or 31 Dec. under month or year precision, or null (ongoing in SWF's Apr. 2026 edition)",
+                "date_precision": "optional: day (default) | month | year; applies to start and end", "actor": "the chaser's operator: string",
+                "system": "the acting spacecraft (chaser, releasing vehicle or spaceplane)", "target": "the approached or released object, or null for a spaceplane mission",
+                "activity": "capture_tow | rpo | docking | release | spaceplane_mission",
+                "orbit_regime": "LEO | GEO (belt or its immediate vicinity, incl. the disposal region) | HEO | not_stated",
+                "description": "the builder's own summary, keeping SWF's hedges", "related_events": "optional list of event ids"},
             "validation": "tools/build_data.py validate() enforces this schema on every build: unique ids, enums, date formats, required fields per domain, required source fields, id resolution, fragments_in_orbit <= fragments_cataloged, capabilities.json states/decades/D-P values, lag_pairs.json ids, and the counts and as-of dates in methodology.md, ledger.md and verification_log.md."},
         "legal.json": {"shape": "array of legal items, sorted by start",
             "fields": {"id": "stable key", "start": "YYYY-MM-DD", "end": "YYYY-MM-DD or null",

@@ -8,6 +8,7 @@ from .verification import DISCREPANCIES
 ROOT = OUT.parent
 KIN_REQ = ("state", "system", "target", "date", "type", "altitude_kind")
 NK_REQ = ("actor", "category", "start", "attribution", "target_regime")
+CO_REQ = ("actor", "system", "start", "activity", "orbit_regime", "description")
 
 
 def validate(events, legal, caps, pairs, docs):
@@ -41,7 +42,7 @@ def validate(events, legal, caps, pairs, docs):
         enum(r, "domain"); enum(r, "confidence")
         if r.get("scene_3d") and r["scene_3d"] not in SCENE_IDS:
             err.append("%s: unknown scene_3d %r" % (r["id"], r["scene_3d"]))
-        need = KIN_REQ if r["domain"] == "kinetic" else NK_REQ
+        need = KIN_REQ if r["domain"] == "kinetic" else CO_REQ if r["domain"] == "co_orbital" else NK_REQ
         for f in need:
             if r.get(f) in (None, ""):
                 err.append("%s: missing required %s field %s" % (r["id"], r["domain"], f))
@@ -69,6 +70,33 @@ def validate(events, legal, caps, pairs, docs):
                 err.append("%s: bad end %r" % (r["id"], r["end"]))
             if good_date(r.get("start")) and r.get("end") and good_date(r["end"]) and r["end"] < r["start"]:
                 err.append("%s: end before start" % r["id"])
+        elif r["domain"] == "co_orbital":
+            enum(r, "activity"); enum(r, "orbit_regime")
+            if r["activity"] != "spaceplane_mission" and not r.get("target"):
+                err.append("%s: co_orbital %s row needs a target" % (r["id"], r["activity"]))
+            if not good_date(r.get("start")):
+                err.append("%s: bad start %r" % (r["id"], r.get("start")))
+            if r.get("end") is not None and not good_date(r["end"]):
+                err.append("%s: bad end %r" % (r["id"], r["end"]))
+            if good_date(r.get("start")) and r.get("end") and good_date(r["end"]) and r["end"] < r["start"]:
+                err.append("%s: end before start" % r["id"])
+            if "date_precision" in r:
+                enum(r, "date_precision")
+                if good_date(r.get("start")):
+                    d0 = datetime.date.fromisoformat(r["start"])
+                    if r["date_precision"] == "month" and d0.day != 1:
+                        err.append("%s: month-precision start must be the 1st" % r["id"])
+                    if r["date_precision"] == "year" and (d0.month, d0.day) != (1, 1):
+                        err.append("%s: year-precision start must be 1 Jan." % r["id"])
+                if good_date(r.get("end") or ""):
+                    d1 = datetime.date.fromisoformat(r["end"])
+                    last = (d1 + datetime.timedelta(days=1)).day == 1
+                    if r["date_precision"] == "month" and not last:
+                        err.append("%s: month-precision end must be the last day of the month" % r["id"])
+                    if r["date_precision"] == "year" and (d1.month, d1.day) != (12, 31):
+                        err.append("%s: year-precision end must be 31 Dec." % r["id"])
+            if r["activity"] == "spaceplane_mission" and r.get("target"):
+                err.append("%s: a spaceplane_mission row has no target (use a separate release or rpo row)" % r["id"])
         for rid in r.get("related_events", []):
             if rid not in idset:
                 err.append("%s: related_events %s does not resolve" % (r["id"], rid))
@@ -127,9 +155,10 @@ def validate(events, legal, caps, pairs, docs):
         err.append("destructive tests: %d ledger + %d co-orbital != SWF total %d" % (len(dest), CO_ORBITAL["count"], CO_ORBITAL["total_swf"]))
     # ---- documents
     nk_n = sum(r["domain"] == "non_kinetic" for r in events)
-    kin_n = len(events) - nk_n
+    co_n = sum(r["domain"] == "co_orbital" for r in events)
+    kin_n = len(events) - nk_n - co_n
     m = (ROOT / "methodology.md").read_text()
-    for lab, n in (("Kinetic events", kin_n), ("Non-kinetic events", nk_n), ("Legal items", len(legal)), ("Capability categories", len(caps["coding"]))):
+    for lab, n in (("Kinetic events", kin_n), ("Non-kinetic events", nk_n), ("Co-orbital events", co_n), ("Legal items", len(legal)), ("Capability categories", len(caps["coding"]))):
         if not re.search(r"\| %s \| %d \|" % (lab, n), m):
             err.append("methodology.md: '%s' row count is not %d" % (lab, n))
     led, log = docs["ledger"], docs["log"]
@@ -142,8 +171,8 @@ def validate(events, legal, caps, pairs, docs):
             err.append("%s: does not state the ledger as-of date %s" % (lab, LEDGER_ASOF))
     if SCHEMA["ledger_as_of"] != LEDGER_ASOF or datetime.date.fromisoformat(LEDGER_ASOF).strftime("%-d") + " " not in SCHEMA["page_strings"]["ledger_as_of_display"]:
         err.append("schema.json: ledger_as_of / display string disagree with LEDGER_ASOF")
-    for frag in ("records %d kinetic tests, %d non-kinetic operations and %d legal items" % (kin_n, nk_n, len(legal)),
-                 "| Kinetic events | %d |" % kin_n, "| Non-kinetic events | %d |" % nk_n, "| Legal items | %d |" % len(legal),
+    for frag in ("records %d kinetic tests, %d non-kinetic operations, %d co-orbital rows and %d legal items" % (kin_n, nk_n, co_n, len(legal)),
+                 "| Kinetic events | %d |" % kin_n, "| Non-kinetic events | %d |" % nk_n, "| Co-orbital events | %d |" % co_n, "| Legal items | %d |" % len(legal),
                  "| Capability categories | %d |" % len(caps["coding"]),
                  "the %d direct-ascent tests" % len(dest) if False else "These are the %d direct-ascent tests" % len(dest),
                  "**%d co-orbital** destructive tests" % CO_ORBITAL["count"], "lists %d destructive ASAT tests in all" % CO_ORBITAL["total_swf"]):
@@ -152,7 +181,7 @@ def validate(events, legal, caps, pairs, docs):
     # verification_log.md: one table row per data row, per-set counts, status totals
     from .logmd import log_rows, counts, STATUSES
     lrows = [tuple(c.strip() for c in l.strip().strip("|").split(" | ")) for l in log.split("\n")
-             if re.match(r"\| (kinetic|non-kinetic|legal|capability) \| `", l)]
+             if re.match(r"\| (kinetic|non-kinetic|co-orbital|legal|capability) \| `", l)]
     want = [(s, i) for s, i, *_ in log_rows(events, legal)]
     got = [(c[0], c[1].strip("`")) for c in lrows]
     if got != want:
@@ -162,7 +191,7 @@ def validate(events, legal, caps, pairs, docs):
     tot = "| **Total** | **%d** | %s |" % (len(want), " | ".join("**%d**" % sum(v[x] for v in cnt.values()) for x in STATUSES))
     if tot not in log:
         err.append("verification_log.md: totals row is not %r" % tot)
-    if "%d items = %d kinetic + %d non-kinetic" % (len(want), kin_n, nk_n) not in log:
+    if "%d items = %d kinetic + %d non-kinetic + %d co-orbital" % (len(want), kin_n, nk_n, co_n) not in log:
         err.append("verification_log.md: scope line counts differ from data")
     nd = len(re.findall(r"^\| \d+ ", log, flags=re.M))
     if nd != len(DISCREPANCIES) or ("%d found and fixed in total" % nd) not in log:

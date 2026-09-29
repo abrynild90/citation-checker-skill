@@ -82,6 +82,18 @@ Object.assign(GLHost.prototype, {
     const h = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.3, depthWrite: false, blending: T.AdditiveBlending })); h.scale.setScalar(0.085); g.add(h); g.userData.halo = h;
     Object.assign(g.userData, { span: 0.11, minPx: 24, maxPx: 62 }); return g;
   },
+  // Spaceplane (X-37B / CSSHQ class): delta planform, short fuselage, one canted fin pair; span about 0.05 (exaggerated).
+  _planeModel(color, bright) {
+    const T = this.T, g = new T.Group(), body = this._mat(color), dark = this._mat(0x2b3140);
+    const sh = new T.Shape(); sh.moveTo(0, 0.026); sh.lineTo(0.021, -0.014); sh.lineTo(0.008, -0.019); sh.lineTo(-0.008, -0.019); sh.lineTo(-0.021, -0.014); sh.closePath();
+    const wing = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 0.0035, bevelEnabled: false }), body); wing.rotation.x = Math.PI / 2; wing.position.y = 0.0018; g.add(wing);
+    const belly = new T.Mesh(new T.BoxGeometry(0.011, 0.0025, 0.03), dark); belly.position.set(0, -0.0018, 0.002); g.add(belly);
+    const nose = new T.Mesh(new T.ConeGeometry(0.0052, 0.012, 8), body); nose.rotation.x = Math.PI / 2; nose.position.set(0, 0.0015, 0.027); g.add(nose);
+    [-1, 1].forEach(s => { const f = new T.Mesh(new T.BoxGeometry(0.0012, 0.0085, 0.008), body); f.position.set(s * 0.006, 0.0068, -0.014); f.rotation.z = -s * 0.35; g.add(f); });
+    g.userData.body = wing; g.userData.sat = true;
+    const h = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: bright ? 0.5 : 0.34, depthWrite: false, blending: T.AdditiveBlending })); h.scale.setScalar(0.07); g.add(h); g.userData.halo = h;
+    return g;
+  },
   _aircraftModel() {
     const T = this.T, g = new T.Group(), m = new T.MeshBasicMaterial({ color: 0xe9edf7, side: T.DoubleSide });
     const fus = new T.Mesh(new T.CylinderGeometry(0.0022, 0.0022, 0.026, 8), m); fus.rotation.x = Math.PI / 2; g.add(fus);
@@ -135,7 +147,7 @@ Object.assign(GLHost.prototype, {
       }
       if (it.label) this._label(it.label, () => this._limbVis(it.r, it.ang ?? 45), 'shell', null, it.dy ?? 0, it.dx ?? 0, it.short, it.opt);
     } else if (it.kind === 'curve') {
-      const g = new T.BufferGeometry(); const pts = it.dynamic ? [] : it.pts(0);
+      const g = new T.BufferGeometry(); const pts = it.dynamic ? [] : (it.all || it.pts(0));
       const max = it.dynamic ? 200 : pts.length; const arr = new Float32Array(max * 3);
       pts.forEach((p, k) => arr.set(p, 3 * k));
       g.setAttribute('position', new T.BufferAttribute(arr, 3)); g.setDrawRange(0, pts.length);
@@ -145,23 +157,25 @@ Object.assign(GLHost.prototype, {
         line = new T.Line(g, new T.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
         line.userData.rgb = col(it.color);
       } else line = new T.Line(g, new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: it.opacity ?? 1 }));
-      root.add(line); if (it.dynamic) this.dyn.push({ it, obj: line });
+      root.add(line); if (it.dynamic || it.gate) this.dyn.push({ it, obj: line });
       if (it.thick) { // bright tube so the path reads at any zoom; dynamic ones are revealed with drawRange
         const src = it.dynamic ? it.all : pts, closed = !it.dynamic && src.length > 3 && Math.hypot(src[0][0] - src[src.length - 1][0], src[0][1] - src[src.length - 1][1], src[0][2] - src[src.length - 1][2]) < 1e-6;
         const vp = (closed ? src.slice(0, -1) : src).map(q => new T.Vector3(...q)), curve = new T.CatmullRomCurve3(vp, closed);
         const segs = it.dynamic ? src.length - 1 : Math.max(60, vp.length), geo = new T.TubeGeometry(curve, segs, it.thick, 5, closed);
         const tube = new T.Mesh(geo, this._tubeMat(col(it.color), it.dynamic ? 0.9 : (it.opacity ?? 1), it.dynamic ? T.AdditiveBlending : T.NormalBlending, it.thick, it.dynamic ? 2.2 : 1.4));
         if (!it.dynamic && it.orbit) (this.ringPts ||= []).push(pts);
-        root.add(tube); if (it.dynamic) this.dyn.push({ it: { kind: 'tube', ref: it, segs }, obj: tube });
+        root.add(tube); if (it.dynamic) this.dyn.push({ it: { kind: 'tube', ref: it, segs }, obj: tube }); else if (it.gate) this.dyn.push({ it: { kind: 'gtube', ref: it }, obj: tube });
         line.visible = !it.dynamic ? false : line.visible; if (!it.dynamic) line.material.opacity = 0; }
       if (it.avoid) this.obst.push(it);
-      if (it.label) this._label(it.label, t => it.labelEnd != null && t > it.labelEnd ? null : it.dynamic ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
+      if (it.label) this._label(it.label, t => it.labelEnd != null && t > it.labelEnd ? null : (it.dynamic || it.gate) ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
     } else if (it.kind === 'point') {
       let m;
-      if (it.shape === 'kv') { // glowing interceptor head
+      if (it.shape === 'none') m = new T.Object3D();
+      else if (it.shape === 'kv') { // glowing interceptor head
         m = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: col(it.color), transparent: true, opacity: 0.9, depthWrite: false, blending: T.AdditiveBlending }));
         m.scale.setScalar(it.kvSize ?? 0.1); Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: 5, maxPx: 22 }); // glow heads keep a bounded on-screen size
       } else if (it.shape === 'sat' && !it.small) m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright);
+      else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
       else if (it.shape === 'aircraft') m = this._aircraftModel();
       else if (it.shape === 'site') m = this._siteModel(it.color, it.pos(0));
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));

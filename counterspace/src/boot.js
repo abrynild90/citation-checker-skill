@@ -4,6 +4,7 @@
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { drawC } from './charts/c.js';
+import { drawR } from './charts/rpo.js';
 import { chipsB, drawB } from './charts/b.js';
 import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
@@ -28,16 +29,16 @@ document.getElementById('themeBtn').onclick = () => {
 
 // ---------------------------------------------------------------- boot
 // Above-the-fold pieces draw first; the rest is drawn on the next task (or on demand by audit/export).
-// Charts below the fold (C, B, lag) and the sources section are drawn when they come within 700 px of the viewport, or on demand by audit/export.
+// Charts below the fold (C, R, B, lag) and the sources section are drawn when they come within 700 px of the viewport, or on demand by audit/export.
 const idle = (f, timeout) => (window.requestIdleCallback || (g => setTimeout(g, 200)))(f, { timeout });
-const LAZY = { svgC: () => drawC(), svgB: () => drawB(), svgL: () => drawL(), methodBody: drawMethod }; // the sources section is below the fold too
+const LAZY = { svgC: () => drawC(), svgR: () => drawR(), svgB: () => drawB(), svgL: () => drawL(), methodBody: drawMethod }; // the sources section is below the fold too
 const drawnLazy = new Set();
 let lazyIO = null;
 function drawLazy(id) { if (drawnLazy.has(id)) return; drawnLazy.add(id); lazyIO?.unobserve(document.getElementById(id)); timed('draw-' + id, LAZY[id]); }
 function drawRest() { Object.keys(LAZY).forEach(drawLazy); legalScroll(); }
 hooks.drawRest = drawRest;
 function drawAll(lazy = false) {
-  guides.length = 0; drawnLazy.delete('svgC'); drawnLazy.delete('svgB'); drawnLazy.delete('svgL'); lazyIO?.disconnect(); lazyIO = null;
+  guides.length = 0; drawnLazy.delete('svgC'); drawnLazy.delete('svgR'); drawnLazy.delete('svgB'); drawnLazy.delete('svgL'); lazyIO?.disconnect(); lazyIO = null;
   timed('draw-legal', () => drawLegal()); timed('draw-legal-zoom', () => drawLegal(document.getElementById('legalZoom'), true)); timed('draw-svgA', () => drawA()); timed('probe-band', probeBand);
   if (!lazy || !('IntersectionObserver' in window)) return drawRest();
   lazyIO = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && drawLazy(e.target.id)), { rootMargin: '700px 0px' });

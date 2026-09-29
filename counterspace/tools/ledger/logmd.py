@@ -16,7 +16,7 @@ def _c(t, n=None):
 def log_rows(events, legal):
     """[(set, id, status, pin, evidence)] in table order: kinetic, non-kinetic, legal, capabilities."""
     out = []
-    for dom, name in (("kinetic", "kinetic"), ("non_kinetic", "non-kinetic")):
+    for dom, name in (("kinetic", "kinetic"), ("non_kinetic", "non-kinetic"), ("co_orbital", "co-orbital")):
         for r in sorted((e for e in events if e["domain"] == dom), key=lambda r: r.get("date") or r["start"]):
             out.append((name, r["id"], r["pin"]))
     out += [("legal", r["id"], r["citation"]) for r in sorted(legal, key=lambda r: r["start"])]
@@ -54,8 +54,8 @@ def render(events, legal):
     a("")
     a("## 1. Summary")
     a("")
-    a("- **Scope:** %d items = %d kinetic + %d non-kinetic rows (`data/events.json`), %d legal items (`data/legal.json`), %d capability categories (`data/capabilities.json`)." % (
-        total, n["kinetic"], n["non-kinetic"], n["legal"], n["capability"]))
+    a("- **Scope:** %d items = %d kinetic + %d non-kinetic + %d co-orbital rows (`data/events.json`), %d legal items (`data/legal.json`), %d capability categories (`data/capabilities.json`)." % (
+        total, n["kinetic"], n["non-kinetic"], n["co-orbital"], n["legal"], n["capability"]))
     a("- **Status:** every item is VERIFIED, VERIFIED (external) or CORRECTED, except %d PARTIAL (%s). None is UNCHECKED." % (
         len(partial), ", ".join("`%s`" % p for p in partial)))
     a("- **Discrepancies:** %d found and fixed in total ([section 5](#5-discrepancies-found-and-fixed))." % len(DISCREPANCIES))
@@ -63,9 +63,9 @@ def render(events, legal):
     a("")
     a("| Set | Rows | VERIFIED | VERIFIED (external) | PARTIAL | CORRECTED |")
     a("|---|---|---|---|---|---|")
-    order = ["kinetic", "non-kinetic", "legal", "capability"]
+    order = ["kinetic", "non-kinetic", "co-orbital", "legal", "capability"]
     for s in order:
-        a("| %s | %d | %s |" % (s.capitalize() if s != "non-kinetic" else "Non-kinetic", n[s], " | ".join(str(cnt[s][x]) for x in STATUSES)))
+        a("| %s | %d | %s |" % ("Non-kinetic" if s == "non-kinetic" else "Co-orbital" if s == "co-orbital" else s.capitalize(), n[s], " | ".join(str(cnt[s][x]) for x in STATUSES)))
     a("| **Total** | **%d** | %s |" % (total, " | ".join("**%d**" % sum(cnt[s][x] for s in order) for x in STATUSES)))
     a("")
     a("Each row counts once, under its status. CORRECTED means a defect was found, fixed in the builder, then re-verified.")
@@ -73,7 +73,7 @@ def render(events, legal):
     a("## 2. Method")
     a("")
     a("1. **SWF rows.** The SWF 2026 text extraction was searched programmatically and read by hand. Each row's date, value and pin were checked against the pinned PDF page; the printed section-page (for example `02-36`) was mapped to the PDF page by the page-footer label (e.g. PDF 72 = 01-23, PDF 149 = 02-36).")
-    a("2. **Tables.** Tables 1-4, 4-1, 5-1 and 16-2 to 16-4 extract with scrambled columns in plain text, so they were read cell by cell with pdfplumber. Table 1-4 (PDF 72-73) has 33 rows: 32 are ledger rows and the 33rd, the US Delta 180 intercept of 5 Sep 1986, is co-orbital and excluded by the scope rule. Table 5-1 (PDF 212) lists 16 destructive tests: 5 direct-ascent (ledger rows) and 11 co-orbital (excluded).")
+    a("2. **Tables.** Tables 1-4, 4-1, 5-1 and 16-2 to 16-4 extract with scrambled columns in plain text, so they were read cell by cell with pdfplumber. The co-orbital tables (Tables 1-1, 1-3, 2-3, 3-1 and 3-2; PDF 57, 63-64, 128, 169 and 175-177) were also read cell by cell, and every quotation in a co-orbital evidence cell was checked as a substring of the extracted text or table cells and kept to 15 words or fewer. Table 1-4 (PDF 72-73) has 33 rows: 32 are ledger rows and the 33rd, the US Delta 180 intercept of 5 Sep 1986, is co-orbital and excluded by the scope rule. Table 5-1 (PDF 212) lists 16 destructive tests: 5 direct-ascent (ledger rows) and 11 co-orbital (excluded).")
     a("3. **Non-SWF and legal rows.** Sources were fetched with WebFetch or curl or located by search. Where a site blocks bots (ICAO, UNOOSA, UN Digital Library, treaties.unoda.org, OUP), mirrors such as `documents.un.org` symbol access were tried; otherwise the fact was checked through a search snippet or another source, as the row says. No row is VERIFIED on inference or on a neighboring row.")
     a("4. **URLs.** Every distinct `source_url` was requested with curl and its landing page inspected, not only its status code.")
     a("5. **Capability matrix.** SWF's country matrix (Executive Summary, PDF pp. 22-32) was read from its vector shapes by position and colour (green none, yellow some, red significant, dark \"?\" uncertain, dash no data) across all 12 country tables. It has no cyber row. Pre-2020s cells are the builder's reconstruction, not SWF-assessed, and are labeled so on the chart.")

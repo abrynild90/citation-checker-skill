@@ -32,7 +32,8 @@ Object.assign(GLHost.prototype, {
       if (!p) { raw.push(null); continue; }
       const v = new T.Vector3(...p).project(this.camera);
       if (occluded([cam.x, cam.y, cam.z], p) || v.z > 1 || Math.abs(v.x) > 0.985 || Math.abs(v.y) > 0.985) { raw.push(null); continue; } // hidden: behind Earth, or its referent is off the stage
-      const text = L.item?.labelFn ? L.item.labelFn(this.t) : (L.short && this.el.clientWidth < 520 ? L.short : L.text), color = L.item?.labelFn ? L.item.statusColor(this.t) : null;
+      const text = L.item?.labelFn ? L.item.labelFn(this.t, this.el.clientWidth < 520) : (L.short && this.el.clientWidth < 520 ? L.short : L.text), color = L.item?.labelFn ? L.item.statusColor(this.t) : null;
+      if (!text) { raw.push(null); continue; } // a label function may hide its label (act windows, docked pairs)
       const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h; let lx = px + L.dx * k, ly = py + (L.dy - 12) * k;
       const hu = this.sim.cfg.spin ? 1.22 : 1, lw = labelW(text, u * hu * (noBanner ? 1.1 : 1)), lh = 19 * u * hu;
       if (L.item?.offGlobe) { const c0 = new T.Vector3(0, 0, 0).project(this.camera), lm = this._limb(1, 0), c1 = new T.Vector3(...lm).project(this.camera), gx = (c0.x + 1) / 2 * w, gy = (1 - c0.y) / 2 * h, gr = Math.hypot((c1.x + 1) / 2 * w - gx, (1 - c1.y) / 2 * h - gy); [lx, ly] = offDisc(px, py, lw, lh, gx, gy, gr * 1.05); }

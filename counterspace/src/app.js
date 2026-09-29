@@ -22,6 +22,7 @@ export function ensureLand() { if (landDone) return; landDone = true; performanc
 export const EVENTS = D.events, LEGAL = D.legal, CAPS = D.caps, SCHEMA = D.schema; // SCHEMA: as-of strings and the scope rule, embedded from data/schema.json at build
 export const KIN = EVENTS.filter(e => e.domain === 'kinetic');
 export const NK = EVENTS.filter(e => e.domain === 'non_kinetic');
+export const CO = EVENTS.filter(e => e.domain === 'co_orbital');
 export const byId = Object.fromEntries([...EVENTS, ...LEGAL].map(r => [r.id, r]));
 export const parse = d3.utcParse('%Y-%m-%d');
 export const fmt = d3.utcFormat('%b %-d, %Y'), fmtY = d3.utcFormat('%Y'), fmtMY = d3.utcFormat('%b %Y');
@@ -36,7 +37,7 @@ export const LAST_DA = KIN.filter(e => e.type === 'destructive').map(e => e.date
 document.getElementById('asof').innerHTML = `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of ${LEDGER_AS_OF}; debris counts as of Feb. 2026. CSIS <i>Space Threat Assessment 2025</i> was consulted for cross-checking; no row cites it.`;
 
 { const nDest = KIN.filter(e => e.type === 'destructive').length;
-  document.getElementById('glance').innerHTML = `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
+  document.getElementById('glance').innerHTML = `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Co-orbital RPO and mission rows</dt><dd>${CO.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
 document.querySelector('#legalPhone summary').textContent = `All ${LEGAL.length} law and policy items, in date order`;
 document.querySelector('.cta-note').textContent = `${SCENES.length} short scenes, or select any cube badge on a chart.`;
 // ---------------------------------------------------------------- palette & helpers
@@ -45,6 +46,8 @@ export const actorKey = a => Object.keys(STATE_VAR).find(k => a.startsWith(k) ||
 export const colorOf = name => `var(${STATE_VAR[actorKey(name)] || '--c-multi'})`;
 export const TYPE_LABEL = { destructive: 'Destructive intercept', non_destructive: 'Non-destructive test', flyby: 'Flyby (no intercept)', midcourse_intercept: 'Intercept of suborbital (missile) target', nuclear: 'Nuclear detonation', apogee_only: 'Apogee only (no target)' };
 export const ATTR_LABEL = { official_government: 'Official (single government)', multi_government: 'Multiple governments / intergovernmental body', researcher_osint: 'Researcher / open-source analysis', alleged: 'Alleged (unconfirmed)' };
+export const ACTIVITY = { rpo: 'Rendezvous or proximity operation', docking: 'Docking', capture_tow: 'Capture and tow', release: 'Release of an object', spaceplane_mission: 'Spaceplane mission (launch to landing)' };
+export const REGIME_CO = { LEO: 'LEO', GEO: 'GEO (belt or its vicinity)', HEO: 'Highly elliptical (HEO)', not_stated: 'Not stated by SWF' };
 export const REGIME_LABEL = { GNSS_MEO: 'GNSS receivers (MEO signals)', GEO_comms: 'GEO communications', LEO_constellation: 'LEO constellation', ground_segment: 'Ground segment', ISR_LEO: 'LEO imaging / ISR' };
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const fmtD = e => e.date_precision === 'month' ? fmtMY(parse(e.date)) : fmt(parse(e.date)); // rows dated only to a month show month and year

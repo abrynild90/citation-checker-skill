@@ -7,10 +7,16 @@
 import { DEG, GEO_ALT, IS_PHONE, PARTICLE_BUDGET, add, clamp01, dot, gauss, groundArc, len, lerp, ll, mulberry, norm, orbitPos, orbitThrough, rAlt, scl, smooth, toLL } from './core.js';
 import { lerp3 } from './gl-items.js';
 import { C } from './config.js';
+import { craftPos, makeAnchor } from './co-sim.js';
 
 export function buildSim(cfg) {
   const items = [];
   const rnd = mulberry(cfg.id.length * 7919 + 17);
+  // Co-orbital scenes (see co-sim.js): anchors, crafts and acts. flags.all shows every act at once (static diagram).
+  const flags = { all: false }, A = cfg.acts || null, anchors = {}, crafts = {};
+  for (const [nm, an] of Object.entries(cfg.anchors || {})) anchors[nm] = makeAnchor(an);
+  const actOn = (t, acts) => flags.all || !A || !acts || acts.some(i => t >= A[i].t0 - 1e-9 && (t < A[i].t1 || (i === A.length - 1 && t <= A[i].t1 + 1e-9)));
+  const aPos = (a, t) => { const an = anchors[a.anchor], f = an.frame(t), o = a.off || [0, 0, 0]; return add(add(add(an.pos(t), scl(f.along, o[0])), scl(f.rad, o[1])), scl(f.cross, o[2])); };
   const shellDefs = { LEO: [2000, '#78a8ff', 'LEO ≤2,000 km'], MEO: [20200, '#a88cff', 'MEO (GPS)'], GEO: [GEO_ALT, '#ffcf6e', 'GEO'] };
   const sl = cfg.shellLabels || {}, sa = cfg.shellAng || {}, angDef = { LEO: 150, MEO: 38, GEO: 60 };
   (cfg.shells || []).forEach(s => items.push({ kind: 'shell', r: rAlt(shellDefs[s][0]), color: shellDefs[s][1], label: s in sl ? sl[s] : shellDefs[s][2], short: cfg.shellShort?.[s], staticLabel: cfg.staticShellLabels?.[s], noRing: !!cfg.noRing?.includes(s), ang: sa[s] ?? angDef[s], strong: !!cfg.spin, dx: cfg.shellOff?.[s]?.[0] ?? 0, dy: cfg.shellOff?.[s]?.[1] ?? 0 }));
@@ -28,6 +34,25 @@ export function buildSim(cfg) {
   let aircraftPos = null;
   if (cfg.status) items.push({ kind: 'status', text: (t, still) => { let s = cfg.status[0][1]; for (const [t0, tx] of cfg.status) if (t >= t0) s = tx; const c = items._decayCloud; return !still && c && !cfg.noSimCount && tgt && t >= tgt.t ? `${s} · ${c.vis} of ${c.n} simulated pieces aloft` : s; } });
   for (const a of cfg.actors) {
+    if (a.type === 'craft') {
+      const anc = anchors[a.anchor], raw = t => craftPos(anc, a.key, t), inVis = t => flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]), pos = t => actOn(t, a.acts) && inVis(t) ? raw(t) : null;
+      crafts[a.id] = { raw, pos };
+      const it = { kind: 'point', shape: a.model || 'sat', small: !!a.small, scale: a.scale ?? null, color: a.color, bright: !!a.bright, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy, pos,
+        orient: t => { const f = anc.frame(t); return { dir: f.along, up: f.rad }; } };
+      if (a.labelFn) { it.labelFn = (t, narrow) => actOn(t, a.acts) && inVis(t) ? a.labelFn(t, narrow) : null; it.statusColor = () => a.color; it.label = a.label || 'x'; }
+      items.push(it);
+    }
+    if (a.type === 'link') items.push({ kind: 'beam', a: t => crafts[a.a].pos(t), b: t => crafts[a.b].pos(t), on: t => t >= a.t0 && t <= a.t1, color: a.color, opacity: 0.95, width: a.width ?? 0.014, coreColor: a.coreColor });
+    if (a.type === 'burst') items.push({ kind: 'flash', pos: crafts[a.craft].raw(a.t0), t0: a.t0, color: a.color ?? '#fff1c1', ringColor: a.ringColor ?? a.color, big: true, size: a.size ?? 0.16, span: a.span ?? 0.06 });
+    if (a.type === 'trail') {
+      const N = 60, all = []; for (let k = 0; k <= N; k++) all.push(crafts[a.craft].raw(a.t0 + (a.t1 - a.t0) * k / N));
+      items.push({ kind: 'curve', dynamic: true, all, thick: a.thick ?? 0.0035, color: a.color, width: 2, pts: t => { if (!actOn(t, a.acts)) return []; const s = clamp01((t - a.t0) / (a.t1 - a.t0)); return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1)); } });
+    }
+    if (a.type === 'tag') items.push({ kind: 'point', shape: 'none', color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy, pos: t => actOn(t, a.acts) && (flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? aPos(a, t) : null });
+    if (a.type === 'path') { // static orbit line, shown only in its act(s)
+      const N = a.N ?? 120, all = a.points ? a.points : Array.from({ length: N + 1 }, (_, k) => a.fn(k / N));
+      items.push({ kind: 'curve', gate: true, all, pts: t => actOn(t, a.acts) ? all : [], color: a.color, opacity: a.opacity ?? 0.6, thick: a.thick, label: a.label, short: a.short, labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)], labelDx: a.dx, labelDy: a.dy });
+    }
     if (a.type === 'site') items.push({ kind: 'point', shape: 'site', liveOnly: a.liveOnly, scale: a.small ? 1.7 : null, pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ship') items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label });
     if (a.type === 'ring') {
@@ -243,7 +268,10 @@ export function buildSim(cfg) {
   const dist = (cfg.camDist || 4.2) * (IS_PHONE ? cfg.phoneK ?? 1 : 1);
   const wide = { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) }, polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
   let cams;
-  if (cfg.cameras) cams = cfg.cameras.map(c0 => { const c = IS_PHONE && c0.phone ? { ...c0, ...c0.phone } : c0; return { name: c.name, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }; });
+  const frameCam = fr => { const an = anchors[fr.anchor], p = an.pos(fr.t), f = an.frame(fr.t), o = v => add(add(add(p, scl(f.along, v[0])), scl(f.rad, v[1])), scl(f.cross, v[2])); return { pos: o(fr.from), look: o(fr.to), up: fr.up === false ? null : f.rad, hideShell: true }; };
+  if (cfg.cameras) cams = cfg.cameras.map(c0 => { const c = IS_PHONE && c0.phone ? { ...c0, ...c0.phone } : c0;
+    if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ...frameCam(c.frame) };
+    return { name: c.name, auto: !!c.auto, act: c.act, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look }; });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) { // launch site through the intercept: a side-on camera looking at the middle of the arc
     const { from, to, mid } = items._arc, md = norm(mid), e1 = norm(add(to, scl(from, -1))), nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);
@@ -253,7 +281,10 @@ export function buildSim(cfg) {
     const orbit = { name: 'Orbit', pos: cfg.orbitAt ? ll(cfg.orbitAt[0], cfg.orbitAt[1], cfg.orbitAt[2] * (IS_PHONE ? cfg.phoneK ?? 1 : 1)) : ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)) };
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
-  return { cfg, items, cams, still: cfg.still ?? 0.5, sunRef: cams[0].pos };
+  // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.
+  const stillCamFor = t => { if (A) { const i = A.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === A.length - 1)); const c = cams[A[Math.max(0, i)].cam]; return { pos: c.pos, look: c.look, up: c.up, hideShell: true }; }
+    return cfg.stillFrame ? frameCam(cfg.stillFrame) : null; };
+  return { cfg, items, cams, flags, stillCamFor, still: cfg.still ?? 0.5, sunRef: cams[0].pos };
 }
 
 // ---------------------------------------------------------------- land texture

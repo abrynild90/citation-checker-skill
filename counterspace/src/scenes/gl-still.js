@@ -13,8 +13,9 @@ Object.assign(GLHost.prototype, {
     const vw = this.el.clientWidth, vh = this.el.clientHeight, pr = this.renderer.getPixelRatio();
     const maxDim = Math.min(this.maxTex, 4096), W = Math.min(targetW, maxDim, Math.floor(maxDim * vw / vh)), H = Math.round(W * vh / vw);
     // A scene may define its own still framing (cfg.stillCam) so the print image shows the whole subject and its labels, whatever the live camera shows.
-    const cam = this.camera, keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell }, sc = this.sim.cfg.stillCam;
-    if (sc) { this.hideShell = !!sc.hideShell; this._syncShell(); this.target.set(...(sc.look ? ll(...sc.look) : [0, 0, 0])); cam.position.set(...ll(...sc.at)); cam.up.set(0, 1, 0); cam.lookAt(this.target); cam.updateMatrixWorld(); }
+    const cam = this.camera, keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell, up: cam.up.clone() }, sf = this.sim.stillCamFor?.(Math.min(this.t, 1)), sc = sf || this.sim.cfg.stillCam;
+    if (sf) { this.hideShell = true; this._syncShell(); this.target.set(...(sf.look || [0, 0, 0])); cam.position.set(...sf.pos); cam.up.set(...(sf.up || [0, 1, 0])); cam.lookAt(this.target); cam.updateMatrixWorld(); }
+    else if (sc) { this.hideShell = !!sc.hideShell; this._syncShell(); this.target.set(...(sc.look ? ll(...sc.look) : [0, 0, 0])); cam.position.set(...ll(...sc.at)); cam.up.set(0, 1, 0); cam.lookAt(this.target); cam.updateMatrixWorld(); }
     cam.clearViewOffset(); cam.updateProjectionMatrix(); this._viewShift = null;
     this.renderer.setPixelRatio(1); this.renderer.setSize(W, H, false); this._fitModels(); this._ptUniforms(); this.renderer.render(this.scene, this.camera);
     // Layout: header band (banner) | render | footer band (title, source, imagery credit). Nothing is drawn over the globe.
@@ -48,7 +49,7 @@ Object.assign(GLHost.prototype, {
     fit(`Source: ${String(cite || '').trim().replace(/[.;,\s]+$/, '')}.`, 15, hb + H + 54 * s, '#c3cbe0');
     fit(credit, 15, hb + H + 77 * s, '#c3cbe0'); g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
-    if (sc) { cam.position.copy(keep.pos); this.target.copy(keep.tgt); this.hideShell = keep.hide; this._syncShell(); cam.lookAt(this.target); }
+    if (sc) { cam.position.copy(keep.pos); this.target.copy(keep.tgt); this.hideShell = keep.hide; this._syncShell(); cam.up.copy(keep.up); cam.lookAt(this.target); }
     this.renderer.setPixelRatio(pr); this.resize();
     return url;
   },

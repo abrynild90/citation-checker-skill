@@ -3,7 +3,7 @@
 // Provides: bindMark(), showCard(), rove(), addGuide(), setOnce(), legend().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { ATTR_LABEL, EXPORTING, LAST_DA, PHONE_MAX, REGIME_LABEL, TYPE_LABEL, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
+import { ACTIVITY, ATTR_LABEL, EXPORTING, LAST_DA, PHONE_MAX, REGIME_CO, REGIME_LABEL, TYPE_LABEL, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
 import { hooks } from './shared.js';
 const card = document.getElementById('card');
 function showCard(html, evt, el) {
@@ -50,6 +50,10 @@ export function nkCard(e) {
   const span = e.end === e.start ? fmt(parse(e.start)) : `${fmtMY(parse(e.start))} – ${e.end ? fmtMY(parse(e.end)) : 'ongoing'}`;
   return `<h4>${esc(e.target_system)}</h4><dl><dt>When</dt><dd>${span}</dd><dt>Actor</dt><dd>${esc(e.actor)}</dd><dt>Attribution</dt><dd>${ATTR_LABEL[e.attribution]}</dd><dt>Category</dt><dd>${e.category.replace('_', ' ')}</dd><dt>Target</dt><dd>${REGIME_LABEL[e.target_regime]}</dd><dt>Use</dt><dd>${e.operational_use ? 'Operational (in conflict)' : 'Test, demonstration or peacetime'}</dd><dt>Effect</dt><dd>${esc(e.effect)}</dd><dt>Confidence</dt><dd>${e.confidence}</dd></dl>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`;
 }
+export const coWhen = e => { const f = e.date_precision === 'month' ? fmtMY : e.date_precision === 'year' ? fmtY : fmt, a = f(parse(e.start)), b = e.end ? f(parse(e.end)) : null; return b === a || (e.end === e.start) ? a : `${a} – ${b || 'ongoing (SWF, Apr. 2026)'}`; };
+export function coCard(e) {
+  return `<h4>${esc(e.system)}${e.target ? ' → ' + esc(e.target) : ''}</h4><dl><dt>When</dt><dd>${coWhen(e)}</dd><dt>Actor</dt><dd>${esc(e.actor)}</dd><dt>Activity</dt><dd>${ACTIVITY[e.activity]}</dd><dt>Orbit</dt><dd>${REGIME_CO[e.orbit_regime]}</dd><dt>Confidence</dt><dd>${e.confidence}</dd></dl><div>${esc(e.description)}</div>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : '<div class="hint">A proximity operation is not an attack; SWF’s wording on intent is hedged.</div>'}`;
+}
 export function legalCard(l) {
   const when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start));
   return `<h4>${esc(l.label)}</h4><dl><dt>Date</dt><dd>${when}</dd><dt>Kind</dt><dd>${l.soft_law ? 'Soft law (expert manual, not binding)' : l.kind.replace('_', ' ')}</dd></dl><div>${esc(l.short_note)}</div><div class="src">${esc(l.citation)}</div>${hasScene(l) ? '<div class="hint">▣ Click, tap or press Enter to open the related 3D scene</div>' : ''}`;
@@ -70,7 +74,7 @@ export function bindMark(sel, cardFn, onActivate) {
     .on('focus', function (ev, d) { this.__card = () => cardFn(d); cardEl = this; showCard(cardFn(d), ev, this); })
     .on('blur', function () { if (!touchMode && cardEl === this) hideCard(); });
 }
-export const activate = (d, el, ev) => { if (hasScene(d)) { hideCard(); hooks.openScene(d.scene_3d, el); } else showCard(d.domain ? (d.domain === 'kinetic' ? kinCard(d) : nkCard(d)) : legalCard(d), ev, el); };
+export const activate = (d, el, ev) => { if (hasScene(d)) { hideCard(); hooks.openScene(d.scene_3d, el); } else showCard(d.domain ? (d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d) : nkCard(d)) : legalCard(d), ev, el); };
 
 // ---------------------------------------------------------------- shared guide line
 export const guides = [];
@@ -124,7 +128,7 @@ export function legend(id, w = 22, h = 16) {
 // ---------------------------------------------------------------- data tables
 export const srcCell = r => `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}`;
 // Accessible data table. Each cell carries data-label so CSS can stack rows as cards on phones (no horizontal scroll).
-const CAPTIONS = { tableA: 'Chart A data: kinetic counterspace tests, one row per event', tableB: 'Chart B data: states holding each capability, by decade', tableC: 'Chart C data: non-kinetic operations, one row per event or campaign', tableL: 'The lag: capability and response dates for each pair', tableLegal: 'Law and policy items with abbreviations' };
+const CAPTIONS = { tableA: 'Chart A data: kinetic counterspace tests, one row per event', tableB: 'Chart B data: states holding each capability, by decade', tableC: 'Chart C data: non-kinetic operations, one row per event or campaign', tableR: 'Co-orbital data: rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one row per ledger row', tableL: 'The lag: capability and response dates for each pair', tableLegal: 'Law and policy items with abbreviations' };
 export function table(id, head, rows, caption = CAPTIONS[id]) {
   setOnce(id, `<table>${caption ? `<caption>${esc(caption)}</caption>` : ''}<thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
 }

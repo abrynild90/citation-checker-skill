@@ -1,10 +1,10 @@
 # Counterspace Timeline Ledger
 
-*Ledger as of 2026-09-29. Schema 1.1.0. Generated file: edit `tools/ledger/rows.py`, not this page.*
+*Ledger as of 2026-09-29. Schema 1.2.0. Generated file: edit `tools/ledger/rows.py`, not this page.*
 
 ## Preface
 
-**Purpose.** This ledger is the reference dataset behind the Counterspace Timeline. It records 61 kinetic tests, 15 non-kinetic operations and 19 legal items, and gives each one a source and a pin to the page that supports it. It exists so that any figure on the page can be traced to its source in one step, and so that places where the source disagrees with itself are visible instead of silently resolved.
+**Purpose.** This ledger is the reference dataset behind the Counterspace Timeline. It records 61 kinetic tests, 15 non-kinetic operations, 68 co-orbital rows and 19 legal items, and gives each one a source and a pin to the page that supports it. It exists so that any figure on the page can be traced to its source in one step, and so that places where the source disagrees with itself are visible instead of silently resolved.
 
 **How to use it.** Start with [Key figures](#key-figures) for the destructive tests and the size of the dataset. Read [How to read the tables](#how-to-read-the-tables) once for the terms and the pin format. Then look a row up by state or year, or go to the full tables. Long explanations are collected in the numbered [Endnotes](#endnotes); a table row points to its endnote by number, for example [1](#n1). Where sources conflict, see [Conflicts inside the sources](#conflicts-inside-the-sources).
 
@@ -18,9 +18,10 @@
 - [Quick lookup by year](#quick-lookup-by-year)
 - [Kinetic events (chronological)](#kinetic-events-chronological) (61 rows)
 - [Non-kinetic events (by start date)](#non-kinetic-events-by-start-date) (15 rows)
+- [Co-orbital events (by start date)](#co-orbital-events-by-start-date) (68 rows)
 - [Legal items (by start date)](#legal-items-by-start-date) (19 rows)
-- [Conflicts inside the sources](#conflicts-inside-the-sources) (9 rows)
-- [Endnotes](#endnotes) (76 notes)
+- [Conflicts inside the sources](#conflicts-inside-the-sources) (13 rows)
+- [Endnotes](#endnotes) (123 notes)
 - [Capability coding (Chart B)](#capability-coding-chart-b) (5 categories)
 - [Sources](#sources)
 
@@ -45,10 +46,11 @@
 |---|---|---|
 | Kinetic events | 61 | 5 destructive; 33 high confidence |
 | Non-kinetic events | 15 | 7 high confidence |
+| Co-orbital events | 68 | 46 high confidence; RPO, docking, capture/tow, release and spaceplane-mission rows (not attacks) |
 | Legal items | 19 | 3 soft law |
-| Documented source conflicts | 9 | listed in [Conflicts inside the sources](#conflicts-inside-the-sources) |
+| Documented source conflicts | 13 | listed in [Conflicts inside the sources](#conflicts-inside-the-sources) |
 | Capability categories | 5 | Chart B; 2020s follows SWF, earlier decades are reconstructed |
-| Schema version | 1.1.0 | `data/schema.json` |
+| Schema version | 1.2.0 | `data/schema.json` |
 
 **Sources.** Primary: Secure World Foundation, *Global Counterspace Capabilities: An Open Source Assessment*, 9th ed. (April 2026), cited as SWF 2026. CSIS *Space Threat Assessment 2025* was consulted for background only; no row, pin or citation depends on it. Verification is recorded in `verification_log.md`.
 
@@ -110,68 +112,83 @@
 | `medium` | Source is hedged ('likely', 'possible'), a value is missing, or a date conflict was resolved by a builder rule. |
 | `low` | SWF itself marks the value with '?', only one SWF table lists the row, or the report is an anonymous-source press account. |
 
+**Co-orbital rows.** Co-orbital rule: every line of SWF 2026 Table 1-3 (US RPOs), Table 2-3 (Russian RPOs) and Table 3-2 (Chinese RPOs), and every flight in Table 1-1 (X-37B) and Table 3-1 (Chinese reusable experimental spacecraft), is a row with domain co_orbital, dated from the table (or from SWF's text where the row says so and gives the reason). Two exceptions, both disclosed: (a) the Jan. 2022 USA 270 / Shiyan-12 approach is listed in both Table 1-3 and Table 3-2 and is one row; (b) where SWF's text dates separate steps that a table folds into one line (SJ-21 with Compass G2; SJ-21 with SJ-25; the Cosmos 2542 release of Cosmos 2543; the SY-7 release of Payload A Debris; the GSSAP 'flanking' of SJ-21 and SJ-25), the text-dated step is its own row and the row says so. RPO rows record that a proximity operation happened as SWF reports it; they are not attacks, and SWF's wording on intent is hedged and kept in the row.
+
+| field | meaning |
+|---|---|
+| start / end | Span of the operation or mission; `ongoing` means SWF's April 2026 edition lists it as continuing. `date_precision` `month` or `year` means SWF gives only that much: start is the 1st (or 1 Jan.) and end the last day (or 31 Dec.). |
+| actor / system / target | The chaser's operator; the acting spacecraft; the approached or released object (blank for a spaceplane mission). |
+| activity | `capture_tow`, `rpo` (rendezvous or proximity operation), `docking`, `release` (a spacecraft releases or separates from another object) or `spaceplane_mission` (an X-37B or CSSHQ flight, launch to landing). |
+| orbit regime | `LEO`, `GEO` (the belt or its immediate vicinity, including the disposal region), `HEO` or `not_stated`. |
+| description | The builder's own summary. SWF's hedges ("possibly", "appeared to", "may") are kept, and no intent is coded: an RPO is not an attack. |
+
 **Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. Soft-law manuals are marked (soft law) and are not binding.
 
 ## Quick lookup by state or actor
 
 Row ids grouped by acting state (kinetic tests) or actor (non-kinetic operations). Counts are in brackets; ids match the tables below.
 
-| state or actor | kinetic | non-kinetic |
-|---|---|---|
-| China | [13] cn-2005-sc19, cn-2006-sc19, cn-2007-fy1c, cn-2010-midcourse, cn-2013-midcourse, cn-2013-dn2, cn-2014-dn2, cn-2015-dn3, cn-2017-dn3, cn-2018-dn3, cn-2021-dn3, cn-2022-dn3, cn-2023-dn3 | [1] cn-2006-laser |
-| India | [2] in-2019-shakti-feb, in-2019-shakti | - |
-| Iran | - | [1] ir-2009-eutelsat |
-| Iran (jamming from Cuba; later Bulgaria, Libya) | - | [1] ir-2003-telstar12 |
-| Iraq | - | [1] iq-2003-gps |
-| Israel (IDF) | - | [1] mideast-2023-gnss |
-| North Korea | - | [1] kp-2010-gps |
-| Russia | [13] ru-2014-nudol, ru-2015-nudol-apr, ru-2015-nudol, ru-2016-nudol-may, ru-2016-nudol-dec, ru-2018-nudol-mar, ru-2018-nudol-dec, ru-2019-nudol-jun, ru-2019-nudol-nov, ru-2020-nudol-apr, ru-2020-nudol-dec, ru-2021-nudol-apr, ru-2021-cosmos1408 | [7] ru-2014-ukraine, ru-2016-syria, ru-2018-peresvet, ru-2018-trident, ru-2022-viasat, ru-2022-starlink, ru-2023-baltic |
-| Russia (origin locations cited by ITU RRB) | - | [1] ru-2024-eu-sats |
-| United States | [33] us-1959-high-virgo, us-1959-bold-orion, us-1961-sip-oct, us-1961-hiho-oct, us-1962-hiho-mar, us-1962-sip-may, us-1962-starfish-prime, us-1962-hiho-aug, us-1962-nike-zeus-wsmr, us-1963-nike-zeus-feb, us-1963-nike-zeus-mar, us-1963-nike-zeus-apr, us-1963-nike-zeus-may, us-1964-nike-zeus-jan, us-1964-p437-feb, us-1964-p437-mar, us-1964-p437-apr, us-1964-p437-may, us-1964-p437-nov, us-1965-nike-zeus-mar, us-1965-p437-apr, us-1965-nike-zeus-jun, us-1966-nike-zeus-jan, us-1967-p437-mar, us-1968-p437-may, us-1968-p437-nov, us-1970-p437-mar, us-1984-asm135-jan, us-1984-asm135-nov, us-1985-solwind, us-1986-asm135-aug, us-1986-asm135-sep, us-2008-burnt-frost | [1] us-1997-miracl |
+| state or actor | kinetic | non-kinetic | co-orbital |
+|---|---|---|---|
+| China | [13] cn-2005-sc19, cn-2006-sc19, cn-2007-fy1c, cn-2010-midcourse, cn-2013-midcourse, cn-2013-dn2, cn-2014-dn2, cn-2015-dn3, cn-2017-dn3, cn-2018-dn3, cn-2021-dn3, cn-2022-dn3, cn-2023-dn3 | [1] cn-2006-laser | [24] cn-2008-bx1-sz7, cn-2010-sj12-sj06f, cn-2013-sy7-sj15-cx3, cn-2013-sy7-release, cn-2016-sj17-chinasat, cn-2019-tjs3-akm, cn-2019-tjs3-roaming, cn-2020-sj17-chinasat6b-sj20, cn-2020-csshq1, cn-2022-sj21-compass-g2, cn-2022-sj6-05a-05b, cn-2022-csshq2, cn-2022-pts2-object-j, cn-2023-sj17-venesat1, cn-2023-csshq3, cn-2024-sj23-akm, cn-2024-sy24c-sj6, cn-2024-pts3-object-g, cn-2025-sj21-sj25-rpo, cn-2025-sj21-sj25-docking, cn-2025-sy12-02-usa336, cn-2025-sj21-sj25-undock, cn-2025-sj21-sj25-rpo-dec, cn-2026-csshq4 |
+| India | [2] in-2019-shakti-feb, in-2019-shakti | - | - |
+| Iran | - | [1] ir-2009-eutelsat | - |
+| Iran (jamming from Cuba; later Bulgaria, Libya) | - | [1] ir-2003-telstar12 | - |
+| Iraq | - | [1] iq-2003-gps | - |
+| Israel (IDF) | - | [1] mideast-2023-gnss | - |
+| North Korea | - | [1] kp-2010-gps | - |
+| Russia | [13] ru-2014-nudol, ru-2015-nudol-apr, ru-2015-nudol, ru-2016-nudol-may, ru-2016-nudol-dec, ru-2018-nudol-mar, ru-2018-nudol-dec, ru-2019-nudol-jun, ru-2019-nudol-nov, ru-2020-nudol-apr, ru-2020-nudol-dec, ru-2021-nudol-apr, ru-2021-cosmos1408 | [7] ru-2014-ukraine, ru-2016-syria, ru-2018-peresvet, ru-2018-trident, ru-2022-viasat, ru-2022-starlink, ru-2023-baltic | [16] ru-2014-cosmos2499, ru-2014-luch-olymp, ru-2015-cosmos2504-briz, ru-2017-cosmos2504-fy1c, ru-2017-cosmos2521-2519, ru-2018-cosmos2521-2519, ru-2019-cosmos2535-2536, ru-2019-cosmos2542-2543-usa245, ru-2019-cosmos2542-release, ru-2020-cosmos2543-2535, ru-2022-cosmos2558-usa326, ru-2022-cosmos2562-resurs-p3, ru-2023-luch-olymp-2, ru-2025-cosmos2581-2583, ru-2025-cosmos2558-object-c, ru-2025-cosmos2589-2590 |
+| Russia (origin locations cited by ITU RRB) | - | [1] ru-2024-eu-sats | - |
+| United States | [33] us-1959-high-virgo, us-1959-bold-orion, us-1961-sip-oct, us-1961-hiho-oct, us-1962-hiho-mar, us-1962-sip-may, us-1962-starfish-prime, us-1962-hiho-aug, us-1962-nike-zeus-wsmr, us-1963-nike-zeus-feb, us-1963-nike-zeus-mar, us-1963-nike-zeus-apr, us-1963-nike-zeus-may, us-1964-nike-zeus-jan, us-1964-p437-feb, us-1964-p437-mar, us-1964-p437-apr, us-1964-p437-may, us-1964-p437-nov, us-1965-nike-zeus-mar, us-1965-p437-apr, us-1965-nike-zeus-jun, us-1966-nike-zeus-jan, us-1967-p437-mar, us-1968-p437-may, us-1968-p437-nov, us-1970-p437-mar, us-1984-asm135-jan, us-1984-asm135-nov, us-1985-solwind, us-1986-asm135-aug, us-1986-asm135-sep, us-2008-burnt-frost | [1] us-1997-miracl | [25] us-2003-xss10, us-2005-dart, us-2005-xss11, us-2007-astro-nextsat, us-2008-dsp23-mitex, us-2009-pan, us-2010-otv1, us-2011-otv2, us-2012-otv3, us-2014-angels, us-2014-gssap, us-2014-clio, us-2015-otv4, us-2017-otv5, us-2018-mycroft-eagle, us-2019-mycroft-s5, us-2020-otv6, us-2020-usa271-sj20, us-2022-usa270-sy12, us-2023-otv7, us-2024-ldpe3a-sj23, us-2025-usa271-tjs15, us-2025-usa324-tjs16-17, us-2025-gssap-flank-sj21-sj25, us-2025-otv8 |
+| United States (with France) | - | - | [2] us-2025-us-france-first-rpo, us-2025-usa324-syracuse3a |
+| United States (with United Kingdom) | - | - | [1] us-2025-usa271-skynet5a |
 
 ## Quick lookup by year
 
-Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; see `methodology.md` (section 3) for the Chart A gap statement, which follows SWF's complete DA-ASAT tables.
+Counts per calendar year (kinetic by test date; non-kinetic, co-orbital and legal by start date). Years with no rows are omitted; see `methodology.md` (section 3) for the Chart A gap statement, which follows SWF's complete DA-ASAT tables.
 
-| year | kinetic | non-kinetic | legal |
-|---|---|---|---|
-| 1959 | 2 | - | - |
-| 1961 | 2 | - | - |
-| 1962 | 5 | - | - |
-| 1963 | 4 | - | 1 |
-| 1964 | 6 | - | - |
-| 1965 | 3 | - | - |
-| 1966 | 1 | - | - |
-| 1967 | 1 | - | 1 |
-| 1968 | 2 | - | - |
-| 1970 | 1 | - | - |
-| 1972 | - | - | 1 |
-| 1981 | - | - | 1 |
-| 1984 | 2 | - | - |
-| 1985 | 1 | - | 1 |
-| 1986 | 2 | - | - |
-| 1992 | - | - | 1 |
-| 1997 | - | 1 | - |
-| 2003 | - | 2 | - |
-| 2005 | 1 | - | - |
-| 2006 | 1 | 1 | - |
-| 2007 | 1 | - | - |
-| 2008 | 1 | - | 1 |
-| 2009 | - | 1 | - |
-| 2010 | 1 | 1 | - |
-| 2013 | 2 | - | - |
-| 2014 | 2 | 1 | 1 |
-| 2015 | 3 | - | - |
-| 2016 | 2 | 1 | - |
-| 2017 | 1 | - | 1 |
-| 2018 | 3 | 2 | - |
-| 2019 | 4 | - | - |
-| 2020 | 2 | - | 1 |
-| 2021 | 3 | - | - |
-| 2022 | 1 | 2 | 4 |
-| 2023 | 1 | 2 | - |
-| 2024 | - | 1 | 3 |
-| 2025 | - | - | 2 |
+| year | kinetic | non-kinetic | co-orbital | legal |
+|---|---|---|---|---|
+| 1959 | 2 | - | - | - |
+| 1961 | 2 | - | - | - |
+| 1962 | 5 | - | - | - |
+| 1963 | 4 | - | - | 1 |
+| 1964 | 6 | - | - | - |
+| 1965 | 3 | - | - | - |
+| 1966 | 1 | - | - | - |
+| 1967 | 1 | - | - | 1 |
+| 1968 | 2 | - | - | - |
+| 1970 | 1 | - | - | - |
+| 1972 | - | - | - | 1 |
+| 1981 | - | - | - | 1 |
+| 1984 | 2 | - | - | - |
+| 1985 | 1 | - | - | 1 |
+| 1986 | 2 | - | - | - |
+| 1992 | - | - | - | 1 |
+| 1997 | - | 1 | - | - |
+| 2003 | - | 2 | 1 | - |
+| 2005 | 1 | - | 2 | - |
+| 2006 | 1 | 1 | - | - |
+| 2007 | 1 | - | 1 | - |
+| 2008 | 1 | - | 2 | 1 |
+| 2009 | - | 1 | 1 | - |
+| 2010 | 1 | 1 | 2 | - |
+| 2011 | - | - | 1 | - |
+| 2012 | - | - | 1 | - |
+| 2013 | 2 | - | 2 | - |
+| 2014 | 2 | 1 | 5 | 1 |
+| 2015 | 3 | - | 2 | - |
+| 2016 | 2 | 1 | 1 | - |
+| 2017 | 1 | - | 3 | 1 |
+| 2018 | 3 | 2 | 2 | - |
+| 2019 | 4 | - | 6 | - |
+| 2020 | 2 | - | 5 | 1 |
+| 2021 | 3 | - | 1 | - |
+| 2022 | 1 | 2 | 6 | 4 |
+| 2023 | 1 | 2 | 4 | - |
+| 2024 | - | 1 | 4 | 3 |
+| 2025 | - | - | 15 | 2 |
+| 2026 | - | - | 1 | - |
 
 ## Kinetic events (chronological)
 
@@ -263,6 +280,81 @@ Counts per calendar year (kinetic by test date; non-kinetic and legal by start d
 | 2023-12-01 | ongoing | ru-2023-baltic | Russia | gnss_jamming | multi_government | GNSS_MEO | True | high | Baltic GNSS passages, p. 02-29 to 02-30 (PDF p. 142-143) | [75](#n75) |
 | 2024-03-01 | ongoing | ru-2024-eu-sats | Russia (origin locations cited by ITU RRB) | ew_uplink | multi_government | GEO_comms | True | high | ITU RRB passage, fn. 272, p. 02-32 (PDF p. 145) | [76](#n76) |
 
+## Co-orbital events (by start date)
+
+**68 rows.**
+
+| start | end | id | actor | activity | regime | system | target | conf | pin | note |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2003-01-01 | 2003-01-31 | us-2003-xss10 | United States | rpo | LEO | XSS-10 | Delta upper stage (R/B) that placed it in orbit | high | Table 1-3, p. 01-14 (PDF p. 63) | [77](#n77) |
+| 2005-04-01 | 2005-04-30 | us-2005-dart | United States | rpo | LEO | DART | MUBLCOM satellite | high | Table 1-3, p. 01-15 (PDF p. 64) | [78](#n78) |
+| 2005-04-01 | 2006-10-31 | us-2005-xss11 | United States | rpo | LEO | XSS-11 | Minotaur upper stage; other US objects in nearby LEO orbits | high | Table 1-3, p. 01-14 (PDF p. 63) | - |
+| 2007-03-01 | 2007-07-31 | us-2007-astro-nextsat | United States | docking | LEO | ASTRO | NEXTSat | high | Table 1-3, p. 01-15 (PDF p. 64) | [79](#n79) |
+| 2008-09-01 | 2008-09-30 | cn-2008-bx1-sz7 | China | rpo | not_stated | BX-1 | SZ-7 (Shenzhou-7) | high | Table 3-2, p. 03-14 (PDF p. 175) | [80](#n80) |
+| 2008-12-23 | 2009-01-01 | us-2008-dsp23-mitex | United States | rpo | GEO | MiTEx (USA 187, USA 188) | DSP 23 (USA 197), a US early-warning satellite that had failed in orbit | medium | Table 1-3, p. 01-15 (PDF p. 64); MiTEx passage, p. 01-10 (PDF p. 59) | [81](#n81) |
+| 2009-09-08 | 2013-12-31 | us-2009-pan | United States | rpo | GEO | PAN (USA 207) | Yahsat 1B and others (not identified) | medium | Table 1-3, p. 01-15 (PDF p. 64); PAN passage, p. 01-10 (PDF p. 59) | [82](#n82) |
+| 2010-04-22 | 2010-12-03 | us-2010-otv1 | United States | spaceplane_mission | LEO | X-37B OTV-1 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-04 (PDF p. 53) | [83](#n83) |
+| 2010-06-12 | 2010-08-19 | cn-2010-sj12-sj06f | China | rpo | LEO | SJ-12 | SJ-06F | medium | Table 3-2, p. 03-14 (PDF p. 175); passage, p. 03-02 (PDF p. 163) | [84](#n84) |
+| 2011-03-05 | 2012-06-16 | us-2011-otv2 | United States | spaceplane_mission | LEO | X-37B OTV-2 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-04 (PDF p. 53) and p. 01-05 (PDF p. 54) | - |
+| 2012-12-11 | 2014-10-17 | us-2012-otv3 | United States | spaceplane_mission | LEO | X-37B OTV-3 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-05 (PDF p. 54) | - |
+| 2013-07-19 | 2016-05-31 | cn-2013-sy7-sj15-cx3 | China | rpo | LEO | SY-7, Payload A debris, CX-3, SJ-15 | SY-7 and CX-3 | medium | Table 3-2, p. 03-15 (PDF p. 176); passage on SY-7, p. 03-02 (PDF p. 163); Figure 3-1, p. 03-03 (PDF p. 164) | [85](#n85) |
+| 2013-10-18 | 2013-10-18 | cn-2013-sy7-release | China | release | LEO | SY-7 | Payload A Debris (2013-037J) | high | Passage on SY-7, October 2013, p. 03-03 (PDF p. 164) | [86](#n86) |
+| 2014-06-01 | 2016-03-31 | ru-2014-cosmos2499 | Russia | rpo | LEO | Cosmos 2499 | Briz-KM upper stage (R/B) | high | Table 2-3, p. 02-15 (PDF p. 128) | [87](#n87) |
+| 2014-07-01 | 2017-11-30 | us-2014-angels | United States | rpo | GEO | ANGELS, Delta 4 upper stage (R/B) | Each other (in the GSO disposal region) | high | Table 1-3, p. 01-15 (PDF p. 64); ANGELS passage, p. 01-13 (PDF p. 62) | [88](#n88) |
+| 2014-07-01 | ongoing | us-2014-gssap | United States | rpo | GEO | GSSAP satellites (multiple) | Various other objects in the GEO region | high | Table 1-3, p. 01-15 (PDF p. 64); GSSAP passage, p. 01-10 (PDF p. 59) and p. 01-11 (PDF p. 60) | - |
+| 2014-09-01 | ongoing | us-2014-clio | United States | rpo | GEO | Clio | Other orbital slots | medium | Table 1-3, p. 01-15 (PDF p. 64) | [89](#n89) |
+| 2014-10-01 | 2025-10-31 | ru-2014-luch-olymp | Russia | rpo | GEO | Luch (Olymp) | More than two dozen communications satellites | high | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-12 (PDF p. 125) and p. 02-13 (PDF p. 126) | [90](#n90) |
+| 2015-04-01 | 2017-04-30 | ru-2015-cosmos2504-briz | Russia | rpo | LEO | Cosmos 2504 | Briz-KM upper stage (R/B) | medium | Table 2-3, p. 02-15 (PDF p. 128) | [91](#n91) |
+| 2015-05-20 | 2017-05-07 | us-2015-otv4 | United States | spaceplane_mission | LEO | X-37B OTV-4 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-05 (PDF p. 54) | - |
+| 2016-11-01 | 2018-08-31 | cn-2016-sj17-chinasat | China | rpo | GEO | SJ-17 | Chinasat 5A, Chinasat 20, Chinasat 1C | medium | Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-08 (PDF p. 169) and p. 03-09 (PDF p. 170) | [92](#n92) |
+| 2017-03-01 | 2017-04-30 | ru-2017-cosmos2504-fy1c | Russia | rpo | LEO | Cosmos 2504 | A piece of Chinese debris from the 2007 ASAT test (Fengyun-1C) | high | Table 2-3, p. 02-15 (PDF p. 128) | [93](#n93) |
+| 2017-08-01 | 2017-10-31 | ru-2017-cosmos2521-2519 | Russia | docking | LEO | Cosmos 2521 | Cosmos 2519 (and Cosmos 2523) | high | Table 2-3, p. 02-15 (PDF p. 128) | [94](#n94) |
+| 2017-09-07 | 2019-10-27 | us-2017-otv5 | United States | spaceplane_mission | LEO | X-37B OTV-5 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-05 (PDF p. 54) | [95](#n95) |
+| 2018-03-01 | 2018-04-30 | ru-2018-cosmos2521-2519 | Russia | rpo | LEO | Cosmos 2521 | Cosmos 2519 | high | Table 2-3, p. 02-15 (PDF p. 128) | [96](#n96) |
+| 2018-05-01 | 2018-05-31 | us-2018-mycroft-eagle | United States | rpo | GEO | Mycroft | EAGLE | high | Table 1-3, p. 01-15 (PDF p. 64); Mycroft passage, p. 01-13 (PDF p. 62) | - |
+| 2019-01-01 | 2019-04-30 | cn-2019-tjs3-akm | China | release | GEO | TJS-3 | TJS-3 AKM (object 43917) | medium | Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-10 (PDF p. 171) | - |
+| 2019-05-01 | ongoing | cn-2019-tjs3-roaming | China | rpo | GEO | TJS-3 | Luch, USA 233, USA 263, Chinasat 10, Chinasat 16, SJ-20, Chinasat 12, TJS-10 | high | Table 3-2, p. 03-15 (PDF p. 176) | [97](#n97) |
+| 2019-08-01 | 2019-12-31 | ru-2019-cosmos2535-2536 | Russia | rpo | LEO | Cosmos 2535 | Cosmos 2536 | high | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-09 (PDF p. 122) | [98](#n98) |
+| 2019-10-01 | 2019-10-31 | us-2019-mycroft-s5 | United States | rpo | GEO | Mycroft | S5 (US experimental satellite that had stopped communicating) | high | Table 1-3, p. 01-15 (PDF p. 64); Mycroft/S5 passage, p. 01-14 (PDF p. 63) | - |
+| 2019-12-01 | 2020-03-31 | ru-2019-cosmos2542-2543-usa245 | Russia | rpo | LEO | Cosmos 2542 and Cosmos 2543 | USA 245 (US NRO imaging satellite) | medium | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-09 (PDF p. 122) and p. 02-10 (PDF p. 123) | [99](#n99) |
+| 2019-12-06 | 2019-12-06 | ru-2019-cosmos2542-release | Russia | release | LEO | Cosmos 2542 | Cosmos 2543 (subsatellite) | high | Cosmos 2542 passage, p. 02-09 (PDF p. 122) | [100](#n100) |
+| 2020-01-01 | 2020-10-31 | cn-2020-sj17-chinasat6b-sj20 | China | rpo | GEO | SJ-17 | Chinasat 6B and SJ-20 | high | Table 3-2, p. 03-15 (PDF p. 176) | - |
+| 2020-05-17 | 2022-11-12 | us-2020-otv6 | United States | spaceplane_mission | LEO | X-37B OTV-6 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-06 (PDF p. 55) | [101](#n101) |
+| 2020-06-01 | 2020-10-31 | ru-2020-cosmos2543-2535 | Russia | rpo | LEO | Cosmos 2543 | Cosmos 2535 (with Cosmos 2536) | medium | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-10 (PDF p. 123) and p. 02-11 (PDF p. 124) | [102](#n102) |
+| 2020-08-01 | 2020-08-31 | us-2020-usa271-sj20 | United States | rpo | GEO | USA 271 (GSSAP) | SJ-20 (China) | high | Table 1-3, p. 01-15 (PDF p. 64) | - |
+| 2020-09-04 | 2020-09-06 | cn-2020-csshq1 | China | spaceplane_mission | LEO | China's reusable experimental spacecraft (CSSHQ), flight 1 (PRC Test Spacecraft, 2020-063A) | - | high | Table 3-1, p. 03-08 (PDF p. 169); passage, p. 03-06 (PDF p. 167) | [103](#n103) |
+| 2021-12-25 | 2022-01-27 | cn-2022-sj21-compass-g2 | China | capture_tow | GEO | SJ-21 | Compass G2 (defunct Chinese navigation satellite) | medium | Table 3-2, p. 03-15 (PDF p. 176); passage on SJ-21, p. 03-11 (PDF p. 172) | [104](#n104) |
+| 2022-01-01 | 2022-01-31 | us-2022-usa270-sy12 | United States | rpo | GEO | USA 270 (GSSAP) | Shiyan-12 01 and Shiyan-12 02 (China) | medium | Table 1-3, p. 01-15 (PDF p. 64); Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-11 (PDF p. 172) and p. 03-12 (PDF p. 173) | [105](#n105) |
+| 2022-03-01 | 2022-10-31 | cn-2022-sj6-05a-05b | China | rpo | LEO | SJ-6 05A | SJ-6 05B | high | Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-04 (PDF p. 165) and p. 03-05 (PDF p. 166) | - |
+| 2022-08-01 | 2024-05-31 | ru-2022-cosmos2558-usa326 | Russia | rpo | LEO | Cosmos 2558 | USA 326 (US NRO imaging satellite) | low | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-11 (PDF p. 124) | [106](#n106) |
+| 2022-08-04 | 2023-05-08 | cn-2022-csshq2 | China | spaceplane_mission | LEO | CSSHQ flight 2 (PRC Test Spacecraft 2, 2022-093A) | - | high | Table 3-1, p. 03-08 (PDF p. 169); passage, p. 03-07 (PDF p. 168) | - |
+| 2022-11-01 | 2023-03-31 | cn-2022-pts2-object-j | China | docking | LEO | PRC Test Spacecraft 2 (CSSHQ flight 2) | Object J (2022-093J) | medium | Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-07 (PDF p. 168) | [107](#n107) |
+| 2022-11-01 | 2022-11-30 | ru-2022-cosmos2562-resurs-p3 | Russia | rpo | LEO | Cosmos 2562 | Resurs-P3 | high | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-16 (PDF p. 129) | [108](#n108) |
+| 2023-02-01 | ongoing | cn-2023-sj17-venesat1 | China | rpo | GEO | SJ-17 | VENESAT-1 and YAMAL 300K | high | Table 3-2, p. 03-15 (PDF p. 176) | - |
+| 2023-03-01 | ongoing | ru-2023-luch-olymp-2 | Russia | rpo | GEO | Luch (Olymp) 2 | Multiple American and European communications satellites | high | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-14 (PDF p. 127) | - |
+| 2023-12-14 | 2024-09-05 | cn-2023-csshq3 | China | spaceplane_mission | LEO | CSSHQ flight 3 (PRC Test Spacecraft 3, 2023-195A) | - | high | Table 3-1, p. 03-08 (PDF p. 169); passage, p. 03-07 (PDF p. 168) | - |
+| 2023-12-28 | 2025-03-07 | us-2023-otv7 | United States | spaceplane_mission | HEO | X-37B OTV-7 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-06 (PDF p. 55); Figure 1-3 and passage, p. 01-07 (PDF p. 56) | [109](#n109) |
+| 2024-01-01 | 2024-02-29 | cn-2024-sj23-akm | China | release | GEO | SJ-23 | SJ-23 AKM (object 2023-002C) | medium | Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-12 (PDF p. 173) | [110](#n110) |
+| 2024-03-01 | 2024-12-31 | cn-2024-sy24c-sj6 | China | rpo | LEO | SY-24C 01, SY-24C 02, SY-24C 03, SJ-6 05A, SJ-6 05B | Each other | high | Table 3-2, p. 03-16 (PDF p. 177); passage, p. 03-05 (PDF p. 166) | [111](#n111) |
+| 2024-06-01 | 2024-06-30 | cn-2024-pts3-object-g | China | release | not_stated | PRC Test Spacecraft 3 (CSSHQ flight 3) | Object G (2023-195G) | high | Table 3-2, p. 03-15 (PDF p. 176); passage, p. 03-07 (PDF p. 168) | - |
+| 2024-10-01 | 2024-11-30 | us-2024-ldpe3a-sj23 | United States | rpo | GEO | LDPE 3A (USA 342) | SJ-23 (China) | medium | Table 1-3, p. 01-15 (PDF p. 64); LDPE 3A passage, p. 01-16 (PDF p. 65) | [112](#n112) |
+| 2025-02-01 | ongoing | ru-2025-cosmos2581-2583 | Russia | rpo | LEO | Cosmos 2581, Cosmos 2582, Cosmos 2583 | Each other | high | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-12 (PDF p. 125) | [113](#n113) |
+| 2025-04-01 | 2025-04-30 | us-2025-us-france-first-rpo | United States (with France) | rpo | not_stated | A US and a French satellite (not identified) | A 'strategic competitor spacecraft' (not identified) | low | Table 1-3, p. 01-15 (PDF p. 64); passage, p. 01-14 (PDF p. 63) | [114](#n114) |
+| 2025-04-01 | 2025-04-30 | us-2025-usa271-tjs15 | United States | rpo | GEO | USA 271 (GSSAP 4) | TJS-15 (China) | high | Table 1-3, p. 01-15 (PDF p. 64); passage, p. 01-13 (PDF p. 62) | - |
+| 2025-04-01 | 2025-04-30 | us-2025-usa324-tjs16-17 | United States | rpo | GEO | USA 324 (GSSAP 5) | TJS-16 and TJS-17 (China) | high | Table 1-3, p. 01-15 (PDF p. 64); passage, p. 01-13 (PDF p. 62) | - |
+| 2025-06-01 | ongoing | ru-2025-cosmos2558-object-c | Russia | release | LEO | Cosmos 2558 | Object C (released by Cosmos 2558) and USA 326 | low | Table 2-3, p. 02-15 (PDF p. 128); passage, p. 02-11 (PDF p. 124) | [115](#n115) |
+| 2025-06-01 | 2025-11-30 | ru-2025-cosmos2589-2590 | Russia | release | HEO | Cosmos 2589 | Cosmos 2590 (released object) | high | Table 2-3, p. 02-15 (PDF p. 128) | [116](#n116) |
+| 2025-06-09 | 2025-06-09 | us-2025-gssap-flank-sj21-sj25 | United States | rpo | GEO | USA 270 and USA 271 (GSSAP) | SJ-21 and SJ-25 (China) | medium | Passage on SJ-21 and SJ-25 in GEO, p. 03-12 (PDF p. 173); note 116 | [117](#n117) |
+| 2025-06-13 | 2025-06-14 | cn-2025-sj21-sj25-rpo | China | rpo | GEO | SJ-21 | SJ-25 | medium | Table 3-2, p. 03-16 (PDF p. 177); passage, p. 03-12 (PDF p. 173) and p. 03-13 (PDF p. 174) | [118](#n118) |
+| 2025-06-30 | 2025-11-25 | cn-2025-sj21-sj25-docking | China | docking | GEO | SJ-21 | SJ-25 | medium | Table 3-2, p. 03-16 (PDF p. 177); passage, p. 03-13 (PDF p. 174) | [119](#n119) |
+| 2025-08-21 | ongoing | us-2025-otv8 | United States | spaceplane_mission | not_stated | X-37B OTV-8 | - | high | Table 1-1, p. 01-08 (PDF p. 57); passage, p. 01-07 (PDF p. 56) | [120](#n120) |
+| 2025-09-01 | 2025-09-30 | cn-2025-sy12-02-usa336 | China | rpo | GEO | SY-12 02 | USA 336 (US SBIRS GEO 6) | medium | Table 3-2, p. 03-16 (PDF p. 177); passage, p. 03-12 (PDF p. 173) | - |
+| 2025-09-05 | 2025-09-11 | us-2025-usa271-skynet5a | United States (with United Kingdom) | rpo | GEO | USA 271 (GSSAP 4) | SKYNET 5A (United Kingdom) | high | Table 1-3, p. 01-15 (PDF p. 64); passage, p. 01-14 (PDF p. 63) | [121](#n121) |
+| 2025-11-11 | 2025-11-29 | us-2025-usa324-syracuse3a | United States (with France) | rpo | GEO | USA 324 (GSSAP 5) | SYRACUSE 3A (France) | high | Table 1-3, p. 01-15 (PDF p. 64); passage, p. 01-14 (PDF p. 63) | [122](#n122) |
+| 2025-11-25 | 2025-11-29 | cn-2025-sj21-sj25-undock | China | release | GEO | SJ-25 | SJ-21 | high | Table 3-2, p. 03-16 (PDF p. 177); passage, p. 03-13 (PDF p. 174) | - |
+| 2025-12-18 | 2026-01-16 | cn-2025-sj21-sj25-rpo-dec | China | rpo | GEO | SJ-21 | SJ-25 | high | Table 3-2, p. 03-16 (PDF p. 177); passage, p. 03-13 (PDF p. 174) | - |
+| 2026-02-06 | ongoing | cn-2026-csshq4 | China | spaceplane_mission | LEO | CSSHQ flight 4 (PRC Test Spacecraft 4, 2026-024A) | - | high | Table 3-1, p. 03-08 (PDF p. 169); passage, p. 03-08 (PDF p. 169) | [123](#n123) |
+
 ## Legal items (by start date)
 
 **19 rows.**
@@ -291,7 +383,7 @@ Counts per calendar year (kinetic by test date; non-kinetic and legal by start d
 
 ## Conflicts inside the sources
 
-**9 rows.**
+**13 rows.**
 
 Where SWF (or a source) disagrees with itself, the row keeps one value under a stated rule and records the other here and in the row's `conflicts` field. Rule: Table 5-1 for intercept altitude and debris counts; the appendix or announcement date where two SWF places outvote a table.
 
@@ -301,15 +393,19 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 | cn-2005-sc19 | Date: 5 July (Table 16-3, p. 16-04) vs 7 July (Table 3-3, p. 03-22) | [33](#n33) |
 | cn-2007-fy1c | Altitude/pieces: 880 km, 3,532 (Table 5-1, p. 05-01) vs 865 km apogee, 3,533 (Table 3-3, p. 03-22) | [35](#n35) |
 | us-2008-burnt-frost | Intercept altitude: 220 km (Table 5-1, p. 05-01) vs 240 km (prose p. 01-24) vs 2,700 km apogee column (Table 1-4, p. 01-24) | [36](#n36) |
+| us-2008-dsp23-mitex | Table 1-3 dates the two observations 23 Dec. 2008 and 1 Jan. 2009; SWF's text on p. 01-10 says 23 Dec. 2009 and 1 Jan. 2010. The ledger uses the table's dates. | [81](#n81) |
 | cn-2013-dn2 | Apogee: 10,000 km (CAS) vs 'nearly to GEO' (US military; GEO is 35,786 km) vs at least ~30,000 km (analysis cited by SWF) | [39](#n39) |
 | ru-2015-nudol | Date: 18 Nov 2015 (Table 2-4, p. 02-21) vs 18 Oct 2015 (Table 16-2, p. 16-03) | [44](#n44) |
+| ru-2019-cosmos2542-2543-usa245 | SWF's text says Cosmos 2543 came within 20 km of USA 245 several times in January 2020; Table 2-3 says Cosmos 2542 came 'within 30 km'. The ledger uses the text's 20 km. (The table line also reads 'Cosmos 2542 did station keeping with Cosmos 2542', evidently meaning Cosmos 2543.) | [99](#n99) |
 | ru-2020-nudol-apr | Outcome: 'Successful, nothing hit' (Table 2-4, p. 02-21) vs 'Potential intercept, debris created' (Table 16-2, p. 16-03) | [55](#n55) |
 | cn-2022-dn3 | Date: 21 June (prose p. 03-21; Table 16-3 p. 16-04) vs 19 June (Table 3-3, p. 03-22) | [60](#n60) |
+| ru-2022-cosmos2558-usa326 | Table 2-3 dates the line 'Feb. 2022 - May 2024?'; SWF's text says Cosmos 2558 launched on 1 Aug. 2022. The ledger starts the row at the launch date and keeps the table's '?' end date. | [106](#n106) |
 | cn-2023-dn3 | Date: 14 April 2023 (Table 3-3, p. 03-22; prose p. 03-21) vs 14 and 15 April both listed (Table 16-3, p. 16-04) | [61](#n61) |
+| cn-2023-csshq3 | Table 3-1 gives the landing as 5 Sep. 2024; SWF's text says it landed on 6 Sep. 2024, both after 268 days. The ledger uses the table. | - |
 
 ## Endnotes
 
-**76 notes.** Numbered in table order; each table row points here by number. Format: number, row id, date, note.
+**123 notes.** Numbered in table order; each table row points here by number. Format: number, row id, date, note.
 
 <a id="n1"></a>**1. us-1959-high-virgo** (1959-09-22). Rocket test. SWF Table 1-4: "Unknown results due to loss of telemetry"; launch site Unknown.
 
@@ -462,6 +558,100 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 <a id="n75"></a>**75. ru-2023-baltic** (2023-12-01). SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). Terrestrial jamming of receivers, not attacks on satellites.
 
 <a id="n76"></a>**76. ru-2024-eu-sats** (2024-03-01). SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'multi_government' because the ITU, an intergovernmental body, located the source.
+
+<a id="n77"></a>**77. us-2003-xss10** (2003-01-01). Regime coded from the table's 800 x 800 km orbit (SWF's LEO limit is 2,000 km).
+
+<a id="n78"></a>**78. us-2005-dart** (2005-04-01). SWF cites this event as the model for the possible bump between SJ-12 and SJ-06F in 2010 (p. 03-02).
+
+<a id="n79"></a>**79. us-2007-astro-nextsat** (2007-03-01). Servicing demonstration between two US satellites; the pair is each other's target.
+
+<a id="n80"></a>**80. cn-2008-bx1-sz7** (2008-09-01). The table's orbit cell is a dash.
+
+<a id="n81"></a>**81. us-2008-dsp23-mitex** (2008-12-23). Text-based reading: the two MiTEx satellites drifted from their GSO parking slots toward DSP 23 (hobbyist observations).
+
+<a id="n82"></a>**82. us-2009-pan** (2009-09-08). The table dates the row 2009-2013 and lists 'Yahsat 1B, others unknown, PAN'; the ledger starts at PAN's launch date (text) and takes Yahsat 1B as one target. SWF calls the SIGINT purpose 'presumed'.
+
+<a id="n83"></a>**83. us-2010-otv1** (2010-04-22). SWF p. 01-09: to date the X-37B has not approached or rendezvoused with any other space object. Regime coded LEO from SWF's statement that earlier flights 'stayed well within LEO' (p. 01-06).
+
+<a id="n84"></a>**84. cn-2010-sj12-sj06f** (2010-06-12). Start = first maneuver (12 June 2010) and end = closest approach (19 Aug. 2010) from the text; the table gives Jun.-Aug. 2010. Orbit 570-600 km, 97.6 degrees.
+
+<a id="n85"></a>**85. cn-2013-sy7-sj15-cx3** (2013-07-19). SWF p. 03-02 says the SY-7 likely carried a robotic arm and that 2014 code-repository material described a teleoperated arm interacting with the separating subsatellite. Start = launch of the three payloads (19 Jul. 2013). Approx. 670 km, 98 degrees.
+
+<a id="n86"></a>**86. cn-2013-sy7-release** (2013-10-18). The 'joined' reports are unconfirmed per SWF. The same page says a US-official claim that one satellite 'grabbed' another could not be confirmed and did not involve SY-7.
+
+<a id="n87"></a>**87. ru-2014-cosmos2499** (2014-06-01). Table orbit: 1501 x 1480 km, 82.4 degrees.
+
+<a id="n88"></a>**88. us-2014-angels** (2014-07-01). The table's regime cell says 'GSO'; the text places the RPO in the disposal region several hundred km above GSO. Coded GEO (belt and its immediate vicinity).
+
+<a id="n89"></a>**89. us-2014-clio** (2014-09-01). The word 'multiple' is in quotation marks in SWF's table.
+
+<a id="n90"></a>**90. ru-2014-luch-olymp** (2014-10-01). SWF cites Kratos and Russian sources for a likely signals-intelligence mission, done by parking close enough to intercept uplinked signals (p. 02-13). That is SWF's assessment, not an observed fact.
+
+<a id="n91"></a>**91. ru-2015-cosmos2504-briz** (2015-04-01). Table orbit: 1507 x 1172 km, 82.5 degrees.
+
+<a id="n92"></a>**92. cn-2016-sj17-chinasat** (2016-11-01). SWF p. 03-08 reports US Space Command testimony that SJ-17 also carried a robotic arm 'that could be used for dual use capabilities'; SWF gives no arm operation.
+
+<a id="n93"></a>**93. ru-2017-cosmos2504-fy1c** (2017-03-01). Table orbit: 1507 x 848 km, 82.6 degrees.
+
+<a id="n94"></a>**94. ru-2017-cosmos2521-2519** (2017-08-01). Table orbit: 670 x 650 km, 97.9 degrees. SWF (p. 02-10) says the US military considers the Cosmos 2523 separation a weapons test.
+
+<a id="n95"></a>**95. us-2017-otv5** (2017-09-07). SWF's inference that the cubesats were deployed by the X-37B is its own conclusion from the catalog record, not an official statement of the deployment.
+
+<a id="n96"></a>**96. ru-2018-cosmos2521-2519** (2018-03-01). The table's orbit cell is blank; LEO from the previous line for the same pair.
+
+<a id="n97"></a>**97. cn-2019-tjs3-roaming** (2019-05-01). SWF's Russia section says Luch (Olymp) approached TJS-3 and its AKM within 30 km in spring 2019 (p. 02-13).
+
+<a id="n98"></a>**98. ru-2019-cosmos2535-2536** (2019-08-01). Table orbit: 623 x 621 km, 97.88 degrees. Debris objects were released near the pair before and during the RPOs (SWF p. 02-09).
+
+<a id="n99"></a>**99. ru-2019-cosmos2542-2543-usa245** (2019-12-01). SWF says the purpose 'strongly suggests' observing USA 245 (amateur analysis) and the table says 'likely for the purpose of surveillance'. Table orbit: 859 x 590 km, 97.9 degrees.
+
+<a id="n100"></a>**100. ru-2019-cosmos2542-release** (2019-12-06). Text-derived row; Table 2-3 folds the release into the 'Dec. 2019 - Mar. 2020' line.
+
+<a id="n101"></a>**101. us-2020-otv6** (2020-05-17). The Russian claim of a release in Oct. 2021 (an object keeping about 200 m away for a day) is a report SWF cites; SWF does not confirm it. The service module separated before landing.
+
+<a id="n102"></a>**102. ru-2020-cosmos2543-2535** (2020-06-01). SWF: USSPACECOM called the July 2020 object release a space-based weapons test; Russia's Foreign Ministry denied that. The table's orbit cell is blank; LEO from the neighboring lines.
+
+<a id="n103"></a>**103. cn-2020-csshq1** (2020-09-04). SWF: the mission of the small satellite is unknown. The spaceplane and the object were not registered with the UN as of Feb. 2026.
+
+<a id="n104"></a>**104. cn-2022-sj21-compass-g2** (2021-12-25). SWF does not describe how SJ-21 captured or docked with Compass G2, and does not describe the separation. SWF's table says SJ-21 pulled Compass G2 'well past graveyard orbit'. Dates are hedged in the text ('at some point', 'around January 21'). End date = the 27 Jan. observation of the higher orbit. Table 3-2 orbit: 35,876 km, 8 degrees.
+
+<a id="n105"></a>**105. us-2022-usa270-sy12** (2022-01-01). Listed in both Table 1-3 (US) and Table 3-2 (China); one row, with the US satellite as chaser. The text dates the approach 'late January 2022'.
+
+<a id="n106"></a>**106. ru-2022-cosmos2558-usa326** (2022-08-01). Low confidence: the table's end date carries a '?' and its start date disagrees with the text. SWF says the pair is 'not in an actual proximity orbit'.
+
+<a id="n107"></a>**107. cn-2022-pts2-object-j** (2022-11-01). Dates are the LeoLabs RPO windows in SWF's text (Nov.-Dec. 2022, Jan. 2023, Feb.-Mar. 2023). SWF prints LeoLabs' description as “least two and possibly three capture/docking operations” (the word 'at' is missing in SWF's text).
+
+<a id="n108"></a>**108. ru-2022-cosmos2562-resurs-p3** (2022-11-01). Table orbit: 400 x 385 km, 97.2 degrees.
+
+<a id="n109"></a>**109. us-2023-otv7** (2023-12-28). SWF says it is unclear whether OTV-7 went back to HEO or stayed in LEO after the aerobraking. The 38,838 km apogee is a hobbyist tracking figure quoted by SWF; a USSF image gave 38,318 km on 30 Jan. 2024 near apogee.
+
+<a id="n110"></a>**110. cn-2024-sj23-akm** (2024-01-01). The table dates the row Jan.-Feb. 2024. SWF's text puts the launch on 8 Jan. 2023, the apparent release around 15 Jan. 2023 and the within-10-km analysis in Feb. 2024. The row uses the table's dates.
+
+<a id="n111"></a>**111. cn-2024-sy24c-sj6** (2024-03-01). Non-contiguous: March-April, September and December 2024. A USSF fact sheet quoted by SWF describes the March-April activity; the row is not a finding on intent.
+
+<a id="n112"></a>**112. us-2024-ldpe3a-sj23** (2024-10-01). SWF's table lists only 'SJ-23' in the systems cell; its text and table note name LDPE 3A as the approaching vehicle.
+
+<a id="n113"></a>**113. ru-2025-cosmos2581-2583** (2025-02-01). Table orbit: 82-degree-inclined, about 595 x 578 km at launch.
+
+<a id="n114"></a>**114. us-2025-us-france-first-rpo** (2025-04-01). The table's orbit cell is '?'. Low confidence because SWF cannot identify the satellites or the target.
+
+<a id="n115"></a>**115. ru-2025-cosmos2558-object-c** (2025-06-01). Low confidence because the table marks the end with '?'. Table orbit: about 450 km.
+
+<a id="n116"></a>**116. ru-2025-cosmos2589-2590** (2025-06-01). Table orbit: highly elliptical, apogee 51,200 km, perigee 20,374 km.
+
+<a id="n117"></a>**117. us-2025-gssap-flank-sj21-sj25** (2025-06-09). Text-derived row, not a Table 1-3 line. The date is that of the COMSPOC observation cited in SWF note 116 (9 June 2025). SWF's own word is 'most likely' for the monitoring purpose.
+
+<a id="n118"></a>**118. cn-2025-sj21-sj25-rpo** (2025-06-13). Text-derived split of SWF's single Table 3-2 line (Jun. 2025 - Jan. 2026) into dated steps. SJ-25's declared purpose: 'satellite fuel replenishment and life extension service technology verification' (SWF p. 03-12).
+
+<a id="n119"></a>**119. cn-2025-sj21-sj25-docking** (2025-06-30). SWF hedges the early dates ('appeared', 'thought to have docked') and then says they 'remained docked'. SWF says the Chinese government has released no information about them. End date = the SJ-25 separation burn (25 Nov.). Analysts quoted by SWF believe SJ-25 served as a gas station for SJ-21; SWF does not present that as confirmed.
+
+<a id="n120"></a>**120. us-2025-otv8** (2025-08-21). SWF gives no orbit for OTV-8; the USSF release did not describe the mission.
+
+<a id="n121"></a>**121. us-2025-usa271-skynet5a** (2025-09-05). Announced by both governments as a joint operation. Longitude and closest distance are from COMSPOC data as reported by SWF.
+
+<a id="n122"></a>**122. us-2025-usa324-syracuse3a** (2025-11-11). Both governments acknowledged the maneuvers without specifics; the satellites were identified by COMSPOC.
+
+<a id="n123"></a>**123. cn-2026-csshq4** (2026-02-06). SWF's text says the flight started 'in February 2026'; Table 3-1 gives 6 Feb. 2026.
 
 ## Capability coding (Chart B)
 

@@ -16,7 +16,7 @@ export class GLHost {
     this.canvas.setAttribute('aria-hidden', 'true');
     this.camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
     this.target = new THREE.Vector3(0, 0, 0);
-    this.t = 0; this.playing = true; this.raf = 0; this.onTick = null;
+    this.t = 0; this.playing = true; this.raf = 0; this.onTick = null; this.lock = null; this._act = null;
     this._bindDrag();
     this.ro = new ResizeObserver(() => this.resize());
   }
@@ -83,7 +83,7 @@ export class GLHost {
     if (sim.cfg.spin) { const c = document.createElement('div'); c.className = 'hlabel'; c.textContent = '⟲ Drag to rotate · pick an event below'; c.style.cssText += ';left:50%;bottom:9px;top:auto;transform:translateX(-50%);font-size:12px;font-weight:500;color:#cfd8ee;background:rgba(5,8,18,.55);white-space:nowrap;transition:opacity .7s'; this.labelLayer.appendChild(c); this.chipEl = c; }
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); this.leaders.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;overflow:visible'); this.leaders.setAttribute('aria-hidden', 'true');
     this.labelLayer.prepend(this.leaders);
-    this.setCam(0, true); this.t = 0; this.update(0);
+    this.lock = null; this._act = null; this.setCam(0, true); this.t = 0; this.update(0);
   }
   refreshEarth() { if (this.earthMat && earthImg && this.earthMat.map?.image !== earthImg) { this._applyEarth(this.earthMat); this.render(); } }
   get maxTex() { return this.renderer.capabilities.maxTextureSize || 4096; }
@@ -98,9 +98,18 @@ export class GLHost {
     old.forEach(t => t?.dispose());
   }
   _syncShell() { for (const r of this.shellRings || []) r.visible = !this.hideShell; }
-  setCam(i, instant) { const c = this.sim.cams[i]; this.camIdx = i; this.hideShell = !!c.hideShell; this._syncShell(); this.target.set(...(c.look || [0, 0, 0])); this.camera.position.set(...c.pos); this.camera.up.set(0, 1, 0); this.camera.lookAt(this.target); this._heroFit(); this.render(); }
+  // Act scenes (cfg.acts): the camera cuts to each act's preset unless the viewer picked one (lock). A locked preset loops its own act.
+  pickCam(i) {
+    const c = this.sim.cams[i], acts = this.sim.cfg.acts; this.lock = null;
+    if (acts && c.auto) { this._act = null; this.update(this.t); return; }
+    if (acts && c.act != null) { this.lock = c.act; const a = acts[c.act]; if (this.t < a.t0 || this.t >= a.t1) { this.setCam(i); this.update(a.t0 + 0.001); return; } }
+    this.setCam(i);
+  }
+  setCam(i, instant) { const c = this.sim.cams[i]; this.camIdx = i; this.hideShell = !!c.hideShell; this._syncShell(); this.target.set(...(c.look || [0, 0, 0])); this.camera.position.set(...c.pos); this.camera.up.set(...(c.up || [0, 1, 0])); this.camera.lookAt(this.target); this._heroFit(); this.render(); }
   update(t) {
     const T = this.T; this.t = t;
+    const acts = this.sim.cfg.acts;
+    if (acts && this.lock == null) { let ai = acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1)); ai = Math.max(0, ai); if (this._act !== ai) { this._act = ai; this.setCam(acts[ai].cam, true); } }
     for (const { it, obj } of this.dyn) {
       if (it.kind === 'curve') {
         const pts = it.pts(t), a = obj.geometry.attributes.position; const n = Math.min(pts.length, a.count);
@@ -108,17 +117,19 @@ export class GLHost {
         a.needsUpdate = true; obj.geometry.setDrawRange(0, n);
         const c = obj.geometry.attributes.color, rgb = obj.userData.rgb;
         if (c && rgb) { for (let k = 0; k < n; k++) { const f = n > 1 ? k / (n - 1) : 1; c.array.set([rgb.r, rgb.g, rgb.b, it.uniformA ?? (0.12 + 0.88 * f * f)], 4 * k); } c.needsUpdate = true; }
+      } else if (it.kind === 'gtube') { obj.visible = it.ref.pts(t).length > 1;
       } else if (it.kind === 'tube') {
         const n = it.ref.pts(t).length; obj.geometry.setDrawRange(0, n < 2 ? 0 : Math.round(Math.min(1, (n - 1) / it.segs) * it.segs) * 30);
       } else if (it.kind === 'point') {
         const p = it.pos(t); obj.visible = !!p; if (p) obj.position.set(...p);
         const ud = obj.userData;
+        if (it.orient && p) { const o = it.orient(t); obj.up.set(...o.up); obj.lookAt(p[0] + o.dir[0], p[1] + o.dir[1], p[2] + o.dir[2]); ud.oriented = true; }
         if (it.shape === 'aircraft' && p) { // wings level, nose along the ground track
           const up = new T.Vector3(...norm(p)), a2 = it.pos(Math.min(1, t + 0.004)), a1 = it.pos(Math.max(0, t - 0.004));
           const f = new T.Vector3(...a2).sub(new T.Vector3(...a1)); f.addScaledVector(up, -f.dot(up));
           if (f.lengthSq() > 1e-12) { f.normalize(); ud.f = f; } else if (!ud.f) { ud.f = new T.Vector3(0, 0, 1).addScaledVector(up, -up.z).normalize(); }
           const side = new T.Vector3().crossVectors(up, ud.f).normalize(); obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(side, up, ud.f)); }
-        if (ud.sat && p) { const q = it.pos(t + 0.002); if (q) obj.lookAt(new T.Vector3(...q)); } // keep solar wings across the orbit track
+        if (ud.sat && p && !ud.oriented) { const q = it.pos(t + 0.002); if (q) obj.lookAt(new T.Vector3(...q)); } // keep solar wings across the orbit track
         if (ud.iss && p) { const q = it.pos(t + 0.002); if (q) obj.lookAt(new T.Vector3(...q)); }
         const tint = ud.body ? ud.body.material : ud.tintMat ? ud.tintMat : obj.material;
         if (it.statusColor && tint) { const c = it.statusColor(t); tint.color.set(c); if (ud.halo) ud.halo.material.color.set(c); }
@@ -183,7 +194,8 @@ export class GLHost {
     const loop = now => {
       this.raf = requestAnimationFrame(loop);
       const dt = Math.min(0.1, (now - last) / 1000); last = now;
-      if (this.playing && !this.dragging) { let t = this.t + dt / this.sim.cfg.duration; if (t > 1.08) t = 0; this.update(Math.min(t, 1)); this.t = t; this.onTick?.(Math.min(t, 1)); }
+      if (this.playing && !this.dragging) { let t = this.t + dt / this.sim.cfg.duration; if (t > 1.08) t = 0;
+        if (this.lock != null) { const a = this.sim.cfg.acts[this.lock]; if (t >= a.t1 || t < a.t0 - 1e-6) t = a.t0; } this.update(Math.min(t, 1)); this.t = t; this.onTick?.(Math.min(t, 1)); }
     };
     this.raf = requestAnimationFrame(loop);
   }
@@ -210,7 +222,7 @@ export class GLHost {
       if (!this.dragging) return; if (this.chipEl) this.chipEl.style.opacity = '0'; const dx = (e.clientX - sx) * 0.006, dy = (e.clientY - sy) * 0.006; sx = e.clientX; sy = e.clientY;
       const p = this.camera.position, o = p.clone().sub(this.target), r = o.length(); let th = Math.atan2(o.x, o.z) - dx, ph = Math.acos(o.y / r) - dy;
       ph = Math.max(0.1, Math.min(Math.PI - 0.1, ph));
-      p.set(r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph), r * Math.sin(ph) * Math.cos(th)).add(this.target); this.camera.lookAt(this.target); this.render();
+      p.set(r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph), r * Math.sin(ph) * Math.cos(th)).add(this.target); this.camera.up.set(0, 1, 0); this.camera.lookAt(this.target); this.render();
     });
     cv.addEventListener('wheel', e => { e.preventDefault(); const p = this.camera.position, o = p.clone().sub(this.target); const r = Math.max(this.target.length() > 0 ? 0.35 : 1.6, Math.min(12, o.length() * (1 + Math.sign(e.deltaY) * 0.08))); p.copy(o.setLength(r).add(this.target)); this.render(); }, { passive: false });
   }

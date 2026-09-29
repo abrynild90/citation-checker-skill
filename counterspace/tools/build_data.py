@@ -1,13 +1,14 @@
 """Builds the Counterspace Timeline data and generated docs. Entry point: `python3 tools/build_data.py`.
 
 Package `tools/ledger/`: rows.py (all rows, edit here), schema.py (enums, schema.json, LEDGER_ASOF = the single as-of date),
-lagpairs.py (lag panel pairs derived from related_events), markdown.py (ledger.md), verification.py + logmd.py
+lagpairs.py (lag panel pairs derived from related_events), co_rows.py (co-orbital rows), markdown.py (ledger.md), verification.py + logmd.py
 (verification_log.md), validate.py (fails the build when data and documents disagree).
 Writes data/{events,legal,capabilities,schema,lag_pairs}.json, ledger.md and verification_log.md.
 """
 import json, sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from ledger.rows import *
+from ledger.co_rows import CO
 from ledger.schema import *
 from ledger.lagpairs import build_pairs
 from ledger.markdown import ledger_md
@@ -18,7 +19,7 @@ from ledger.validate import validate
 def main():
     OUT.mkdir(exist_ok=True)
     root = OUT.parent
-    events = sorted(K + NK, key=lambda r: r.get("date") or r.get("start"))
+    events = sorted(K + NK + CO, key=lambda r: r.get("date") or r.get("start"))
     for r in events:
         r["source_full"] = SOURCE_FULL[r["source"]]
         extra = r.pop("_sf_extra", None)
@@ -39,7 +40,7 @@ def main():
     dump("lag_pairs.json", pairs)
     (root / "ledger.md").write_text(docs["ledger"])
     (root / "verification_log.md").write_text(docs["log"])
-    print(len(K), "kinetic", len(NK), "non-kinetic", len(L), "legal", len(pairs["pairs"]), "lag pairs")
+    print(len(K), "kinetic", len(NK), "non-kinetic", len(CO), "co-orbital", len(L), "legal", len(pairs["pairs"]), "lag pairs")
 
 
 if __name__ == "__main__":

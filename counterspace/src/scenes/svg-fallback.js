@@ -33,6 +33,7 @@ function earthRaster(proj, CX, CY, R) {
 let earthUpgrade = false, pendingStatic = null, svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
 export function renderSVG(sim, el, t = sim.still) {
   const U = 'sf' + (++svgSeq);
+  if (sim.cfg.acts) sim.flags.all = true; // static diagram of an act scene shows every act at once
   const W = el.clientWidth || 640, H = el.clientHeight || 420;
   const cam = sim.cams[0].pos, zoomed = !!(sim.items._arc && sim.cams[0].look), cl = toLL(sim.cfg.staticCenter ? ll(sim.cfg.staticCenter[0], sim.cfg.staticCenter[1]) : zoomed ? sim.items._arc.mid : cam);
   const rot = d3.geoRotation([-cl.lon, -cl.lat]);
@@ -40,7 +41,7 @@ export function renderSVG(sim, el, t = sim.still) {
   const unit = p => { const q = toLL(p); const [lo, la] = rot([q.lon, q.lat]); const x = Math.cos(la * DEG) * Math.sin(lo * DEG), y = Math.sin(la * DEG); const front = Math.cos(la * DEG) * Math.cos(lo * DEG);
     return { x: x * q.r, y: -y * q.r, hidden: front < 0 && Math.hypot(x * q.r, y * q.r) < 1 }; };
   // Status text is wrapped first: its height is part of the fit.
-  const st = sim.items.find(i => i.kind === 'status'), stTxt = st ? st.text(t, true) : '', maxCh = Math.floor((W - 40) / 6.6), stLines = [];
+  const st = sim.items.find(i => i.kind === 'status'), stTxt = sim.cfg.staticStatus || (st ? st.text(t, true) : ''), maxCh = Math.floor((W - 40) / 6.6), stLines = [];
   if (st) { let cur = ''; for (const wd of stTxt.split(' ')) { if ((cur + ' ' + wd).trim().length > maxCh && cur) { stLines.push(cur); cur = wd; } else cur = (cur + ' ' + wd).trim(); } if (cur) stLines.push(cur); }
   const stH = stLines.length * 16 + 10, stY = H - 34 - stH, stW = Math.min(W - 16, Math.max(...stLines.map(l => l.length), 1) * 6.6 + 24);
   // General fit rule (all scenes, all widths): the globe with its glow and every drawn subject (paths, points, debris, beams)
@@ -141,9 +142,11 @@ export function renderSVG(sim, el, t = sim.still) {
       if (it.shape === 'sat') { const q = it.small ? (it.scale ? Math.min(10, 2 + it.scale * 1.3) : 4) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1); g.append('rect').attr('x', p.x - q / 2).attr('y', p.y - q / 2).attr('width', q).attr('height', q).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8); }
       else if (it.shape === 'tick') g.append('path').attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`).attr('fill', c).attr('stroke', '#070b17');
       else if (it.shape === 'aircraft') g.append('path').attr('d', `M${p.x},${p.y - 7}L${p.x + 5},${p.y + 5}L${p.x - 5},${p.y + 5}Z`).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
+      else if (it.shape === 'plane') g.append('path').attr('d', `M${p.x},${p.y - 7}L${p.x + 7},${p.y + 5}L${p.x},${p.y + 2}L${p.x - 7},${p.y + 5}Z`).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
+      else if (it.shape === 'none') { /* label-only anchor */ }
       else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
       else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
-      if (it.label && !it.ctx) { const n0 = cands.length; label(p, it.labelFn ? it.labelFn(t) : (it.short && W < 520 ? it.short : it.label), c, it.labelDx, it.labelDy, (W < 520 ? null : it.staticAt), it.opt); if (it.offGlobe && cands.length > n0) cands.at(-1).off = true; } }
+      if (it.label && !it.ctx) { const n0 = cands.length; label(p, it.labelFn ? it.labelFn(t, W < 520) : (it.short && W < 520 ? it.short : it.label), c, it.labelDx, it.labelDy, (W < 520 ? null : it.staticAt), it.opt); if (it.offGlobe && cands.length > n0) cands.at(-1).off = true; } }
     if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) { const p = project(it.pos); mark(p, 12, it.label || 'flash'); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4'); label(p, it.label, '#fff3c4', it.labelDx, it.labelDy); }
     if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + (it.span ?? 0.14)) { const p = project(it.pos); g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7); }
   }

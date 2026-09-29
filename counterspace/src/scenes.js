@@ -4,6 +4,7 @@
 // fallback (svg-fallback.js) used for reduced motion / no WebGL. Illustrative only.
 //
 //   scenes/core.js         constants, vector/orbit math, seeded RNG, compressed radial scale rAlt()
+//   scenes/co-sim.js       anchors, keyframed crafts and Kepler ellipses for the co-orbital scenes
 //   scenes/labels.js       placeLabels(): label de-confliction shared by all renderers
 //   scenes/config.js       SCENES + HERO data (per-scene framing, actors, captions)
 //   scenes/sim.js          buildSim(cfg): items + cameras

@@ -44,7 +44,7 @@ export async function openScene(id, originEl) {
   document.getElementById('sceneCaption').textContent = cfg.caption;
   const ev = byId[cfg.event];
   document.getElementById('sceneSrc').innerHTML = `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}`;
-  document.getElementById('sceneScale').textContent = `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale. Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
+  document.getElementById('sceneScale').textContent = `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale.${cfg.scaleNote ? ' ' + cfg.scaleNote : ''} Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
   const rel = document.getElementById('scRelated'); rel.disabled = !cfg.related; rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
   // Text alternative for the visual: the scene's own status lines, in order, as an ordered list (t is the fraction of scene time).
   const steps = document.getElementById('sceneSteps'), dur = cfg.duration || 0;
@@ -56,7 +56,7 @@ export async function openScene(id, originEl) {
   if (h) {
     unloadHero();
     h.mount(view); h.load(sim); h.playing = true; setPlayBtn(true);
-    sim.cams.forEach((c, i) => { const b = document.createElement('button'); b.className = 'btn small'; b.type = 'button'; b.textContent = c.name; b.onclick = () => h.setCam(i); cams.appendChild(b); });
+    sim.cams.forEach((c, i) => { const b = document.createElement('button'); b.className = 'btn small'; b.type = 'button'; b.textContent = c.name; b.onclick = () => h.pickCam(i); cams.appendChild(b); });
     h.play(); syncScrub(h.t);
   } else {
     renderSVG(sim, view);
@@ -120,7 +120,7 @@ function svgToPNG(svg, title, cite) {
       g.fillStyle = '#e9edf7'; g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`; g.fillText(title, 16 * s, hb + H + 24 * s);
       const fit = (txt, px, y) => { let f = Math.round(px * s); g.font = `${f}px system-ui,sans-serif`; while (g.measureText(txt).width > PRINT_W - 32 * s && f > 10 * s) { f -= 0.5 * s; g.font = `${f}px system-ui,sans-serif`; } g.fillStyle = '#c3cbe0'; g.fillText(txt, 16 * s, y); };
       fit(`Source: ${String(cite || '').trim().replace(/[.;,\s]+$/, '')}.`, 15, hb + H + 54 * s);
-      fit('Vector land map: Natural Earth (public domain).', 15, hb + H + 77 * s);
+      fit(svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).', 15, hb + H + 77 * s);
       resolve(c.toDataURL('image/png'));
     };
     img.onerror = () => reject(new Error('The diagram could not be rasterised'));

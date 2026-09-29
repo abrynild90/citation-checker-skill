@@ -330,3 +330,6 @@ DISCREPANCIES = [('1', '`ru-2018-peresvet`', 'Pin said p. 02-35 (PDF 148). The P
   'crisis "provided the impetus for an agreement"; worldwide concern about radioactive fallout), cite added to the citation; "followed" wording '
   'kept. Starfish `source_full` now also cites SWF p. 12-05 (PDF 269), verified: such tests "damaged or destroyed satellites in orbit". Shakti pin: '
   '45-day statement is on p. 04-04 (PDF 204) in the data; the page cite (p. 04-03) is a page-side fix.')]
+
+from .co_verify import VERIFY_CO  # co-orbital rows (domain co_orbital), kept in their own file
+VERIFY.update(VERIFY_CO)

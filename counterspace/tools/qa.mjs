@@ -10,7 +10,7 @@ import http from 'http'; import fs from 'fs'; import path from 'path'; import cr
 
 const root = path.resolve('.'), out = process.env.OUT || 'qa', PORT = +(process.env.PORT || 8881);
 const BASELINE = path.join(root, 'tools/qa-baseline.json'), AXE_URL = 'https://cdn.jsdelivr.net/npm/axe-core@4.10.2/axe.min.js';
-const SECTIONS = ['legalBand', 'chartA', 'chartC', 'chartB', 'lag'];
+const SECTIONS = ['legalBand', 'chartA', 'chartC', 'chartR', 'chartB', 'lag'];
 const VIEWPORTS = [['1440', 1440, 900], ['900', 900, 800], ['375', 375, 800]];
 fs.mkdirSync(out, { recursive: true });
 
@@ -88,7 +88,7 @@ for (const [vname, w, h] of VIEWPORTS) for (const scheme of ['dark', 'light']) {
       res.legalTap = await p.evaluate(() => { const t = document.getElementById('legalTap'); return { hidden: t.hidden, text: t.textContent.slice(0, 60) }; });
       await p.screenshot({ path: `${out}/phone-legal-tap.png`, clip: { x: 0, y: 0, width: 375, height: 800 } });
     }
-    if (scheme === 'light' && vname === '1440') for (const k of ['A', 'B', 'C', 'L', 'legal']) {
+    if (scheme === 'light' && vname === '1440') for (const k of ['A', 'B', 'C', 'R', 'L', 'legal']) {
       const svg = await p.evaluate(k => window.__cs.exportSVG(k), k); fs.writeFileSync(`exports/chart-${k}.svg`, svg);
       (res.exportAsOf ??= {})[k] = /Data as of SWF 9th ed\.,? \(?Apr\. 2026\)?/.test(svg) && /Source: SWF 2026/.test(svg);
     }
@@ -133,7 +133,7 @@ await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorSchem
   res.guideX = await p.evaluate(() => { const x = sel => { const l = document.querySelector(sel + ' line.guide'); return l && l.style.display !== 'none' ? l.getBoundingClientRect().left : null; }; return { legal: x('#legalSvg'), chartA: x('#svgA') }; });
   res.guideEqual = res.guideX.legal != null && Math.abs(res.guideX.legal - res.guideX.chartA) < 0.6;
   await p.screenshot({ path: `${out}/legal-band-1440.png`, clip: { x: 0, y: 0, width: 1440, height: 400 } });
-  res.svgExports = await p.evaluate(() => ['A', 'B', 'C', 'L', 'legal'].map(k => window.__cs.exportSVG(k).length));
+  res.svgExports = await p.evaluate(() => ['A', 'B', 'C', 'R', 'L', 'legal'].map(k => window.__cs.exportSVG(k).length));
   res.perf = await p.evaluate(() => window.__cs.perf());
   return res;
 });

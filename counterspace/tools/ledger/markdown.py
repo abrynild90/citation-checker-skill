@@ -15,11 +15,12 @@ def _anchor(t):
 def ledger_md(events):
     kin = sorted([e for e in events if e["domain"] == "kinetic"], key=lambda r: r["date"])
     nk_ = sorted([e for e in events if e["domain"] == "non_kinetic"], key=lambda r: r["start"])
+    co_ = sorted([e for e in events if e["domain"] == "co_orbital"], key=lambda r: (r["start"], r["id"]))
     leg = sorted(L, key=lambda r: r["start"])
     nconf = sum(len(r.get("conflicts", [])) for r in events)
     # endnote numbers follow table order (kinetic, then non-kinetic)
     enum = {}
-    for r in kin + nk_:
+    for r in kin + nk_ + co_:
         if r.get("notes"):
             enum[r["id"]] = len(enum) + 1
 
@@ -36,9 +37,9 @@ def ledger_md(events):
     a("## Preface")
     a("")
     a("**Purpose.** This ledger is the reference dataset behind the Counterspace Timeline. It records %d kinetic tests, "
-      "%d non-kinetic operations and %d legal items, and gives each one a source and a pin to the page that supports it. "
+      "%d non-kinetic operations, %d co-orbital rows and %d legal items, and gives each one a source and a pin to the page that supports it. "
       "It exists so that any figure on the page can be traced to its source in one step, and so that places where the "
-      "source disagrees with itself are visible instead of silently resolved." % (len(kin), len(nk_), len(leg)))
+      "source disagrees with itself are visible instead of silently resolved." % (len(kin), len(nk_), len(co_), len(leg)))
     a("")
     a("**How to use it.** Start with [Key figures](#key-figures) for the destructive tests and the size of the dataset. "
       "Read [How to read the tables](#how-to-read-the-tables) once for the terms and the pin format. Then look a row up "
@@ -57,6 +58,7 @@ def ledger_md(events):
            ("Quick lookup by state or actor", ""), ("Quick lookup by year", ""),
            ("Kinetic events (chronological)", "%d rows" % len(kin)),
            ("Non-kinetic events (by start date)", "%d rows" % len(nk_)),
+           ("Co-orbital events (by start date)", "%d rows" % len(co_)),
            ("Legal items (by start date)", "%d rows" % len(leg)),
            ("Conflicts inside the sources", "%d rows" % nconf),
            ("Endnotes", "%d notes" % len(enum)),
@@ -95,6 +97,7 @@ def ledger_md(events):
     a("| Kinetic events | %d | %d destructive; %d high confidence |" % (
         len(kin), len(dest), sum(r["confidence"] == "high" for r in kin)))
     a("| Non-kinetic events | %d | %d high confidence |" % (len(nk_), sum(r["confidence"] == "high" for r in nk_)))
+    a("| Co-orbital events | %d | %d high confidence; RPO, docking, capture/tow, release and spaceplane-mission rows (not attacks) |" % (len(co_), sum(r["confidence"] == "high" for r in co_)))
     a("| Legal items | %d | %d soft law |" % (len(leg), sum(r["soft_law"] for r in leg)))
     a("| Documented source conflicts | %d | listed in [Conflicts inside the sources](#conflicts-inside-the-sources) |" % nconf)
     a("| Capability categories | %d | Chart B; 2020s follows SWF, earlier decades are reconstructed |" % len(CAP))
@@ -159,6 +162,16 @@ def ledger_md(events):
     for x in CONF_LEGEND:
         a("| `%s` | %s |" % x)
     a("")
+    a("**Co-orbital rows.** " + CO_SCOPE_RULE)
+    a("")
+    a("| field | meaning |")
+    a("|---|---|")
+    a("| start / end | Span of the operation or mission; `ongoing` means SWF's April 2026 edition lists it as continuing. `date_precision` `month` or `year` means SWF gives only that much: start is the 1st (or 1 Jan.) and end the last day (or 31 Dec.). |")
+    a("| actor / system / target | The chaser's operator; the acting spacecraft; the approached or released object (blank for a spaceplane mission). |")
+    a("| activity | `capture_tow`, `rpo` (rendezvous or proximity operation), `docking`, `release` (a spacecraft releases or separates from another object) or `spaceplane_mission` (an X-37B or CSSHQ flight, launch to landing). |")
+    a("| orbit regime | `LEO`, `GEO` (the belt or its immediate vicinity, including the disposal region), `HEO` or `not_stated`. |")
+    a("| description | The builder's own summary. SWF's hedges (\"possibly\", \"appeared to\", \"may\") are kept, and no intent is coded: an RPO is not an attack. |")
+    a("")
     a("**Legal rows.** `kind` is treaty, resolution, negotiation span, unilateral pledge, veto, or soft law. "
       "Soft-law manuals are marked (soft law) and are not binding.")
     a("")
@@ -166,26 +179,29 @@ def ledger_md(events):
     a("")
     a("Row ids grouped by acting state (kinetic tests) or actor (non-kinetic operations). Counts are in brackets; ids match the tables below.")
     a("")
-    a("| state or actor | kinetic | non-kinetic |")
-    a("|---|---|---|")
-    actors = sorted({r["state"] for r in kin} | {r["actor"] for r in nk_})
+    a("| state or actor | kinetic | non-kinetic | co-orbital |")
+    a("|---|---|---|---|")
+    actors = sorted({r["state"] for r in kin} | {r["actor"] for r in nk_} | {r["actor"] for r in co_})
     for ac in actors:
         ks = [r["id"] for r in kin if r["state"] == ac]
         ns = [r["id"] for r in nk_ if r["actor"] == ac]
-        a("| %s | %s | %s |" % (ac, ("[%d] " % len(ks) + ", ".join(ks)) if ks else "-",
-                                ("[%d] " % len(ns) + ", ".join(ns)) if ns else "-"))
+        cs = [r["id"] for r in co_ if r["actor"] == ac]
+        a("| %s | %s | %s | %s |" % (ac, ("[%d] " % len(ks) + ", ".join(ks)) if ks else "-",
+                                ("[%d] " % len(ns) + ", ".join(ns)) if ns else "-",
+                                ("[%d] " % len(cs) + ", ".join(cs)) if cs else "-"))
     a("")
     a("## Quick lookup by year")
     a("")
-    a("Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; "
+    a("Counts per calendar year (kinetic by test date; non-kinetic, co-orbital and legal by start date). Years with no rows are omitted; "
       "see `methodology.md` (section 3) for the Chart A gap statement, which follows SWF's complete DA-ASAT tables.")
     a("")
-    a("| year | kinetic | non-kinetic | legal |")
-    a("|---|---|---|---|")
-    yrs = sorted({r["date"][:4] for r in kin} | {r["start"][:4] for r in nk_} | {r["start"][:4] for r in leg})
+    a("| year | kinetic | non-kinetic | co-orbital | legal |")
+    a("|---|---|---|---|---|")
+    yrs = sorted({r["date"][:4] for r in kin} | {r["start"][:4] for r in nk_} | {r["start"][:4] for r in co_} | {r["start"][:4] for r in leg})
     for y in yrs:
-        a("| %s | %s | %s | %s |" % (y, sum(r["date"][:4] == y for r in kin) or "-",
+        a("| %s | %s | %s | %s | %s |" % (y, sum(r["date"][:4] == y for r in kin) or "-",
                                     sum(r["start"][:4] == y for r in nk_) or "-",
+                                    sum(r["start"][:4] == y for r in co_) or "-",
                                     sum(r["start"][:4] == y for r in leg) or "-"))
     a("")
     # kinetic
@@ -218,6 +234,16 @@ def ledger_md(events):
         a("| {start} | {e} | {id} | {actor} | {category} | {attribution} | {target_regime} | {operational_use} | {confidence} | {pn} | {nr} |".format(
             e=r["end"] or "ongoing", pn=pn, nr=nref(r), **r))
     a("")
+    a("## Co-orbital events (by start date)")
+    a("")
+    a("**%d rows.**" % len(co_))
+    a("")
+    a("| start | end | id | actor | activity | regime | system | target | conf | pin | note |")
+    a("|---|---|---|---|---|---|---|---|---|---|---|")
+    for r in co_:
+        a("| {start} | {e} | {id} | {actor} | {activity} | {orbit_regime} | {system} | {t} | {confidence} | {pin} | {nr} |".format(
+            e=r["end"] or "ongoing", t=r["target"] or "-", nr=nref(r), **r))
+    a("")
     a("## Legal items (by start date)")
     a("")
     a("**%d rows.**" % len(leg))
@@ -247,7 +273,7 @@ def ledger_md(events):
     a("")
     a("**%d notes.** Numbered in table order; each table row points here by number. Format: number, row id, date, note." % len(enum))
     a("")
-    for r in kin + nk_:
+    for r in kin + nk_ + co_:
         if r["id"] in enum:
             n = enum[r["id"]]
             a('<a id="n%d"></a>**%d. %s** (%s). %s' % (n, n, r["id"], r.get("date") or r.get("start"), r["notes"]))

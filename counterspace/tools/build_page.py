@@ -11,11 +11,11 @@ import json, re, pathlib, os, subprocess, shutil
 R = pathlib.Path(__file__).resolve().parent.parent
 d = lambda p: json.loads((R / p).read_text())
 data = dict(events=d('data/events.json'), legal=d('data/legal.json'), caps=d('data/capabilities.json'),
-            lag_pairs=d('data/lag_pairs.json'), schema={k: d('data/schema.json')[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'page_strings')})
+            lag_pairs=d('data/lag_pairs.json'), schema={k: d('data/schema.json')[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'co_scope_rule', 'page_strings')})
 blob = json.dumps(data, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 land_blob = json.dumps(d('src/land.json'), separators=(',', ':')).replace('</', '<\\/')  # separate script tag: parsed only when a scene or the hero needs it
 strip = lambda t: re.sub(r"^import .*? from '.*?';\n", '', re.sub(r'^export ', '', t, flags=re.M), flags=re.M)
-ORDER = ['scenes.js', 'shared.js', 'scenes/core.js', 'scenes/labels.js', 'scenes/config.js', 'scenes/sim.js', 'scenes/earth.js', 'scenes/gl-host.js', 'scenes/gl-items.js', 'scenes/gl-labels.js', 'scenes/gl-still.js', 'scenes/svg-fallback.js', 'app.js', 'audit.js', 'ui.js', 'charts/legal.js', 'charts/a.js', 'charts/c.js', 'charts/b.js', 'charts/lag.js',
+ORDER = ['scenes.js', 'shared.js', 'scenes/core.js', 'scenes/co-sim.js', 'scenes/labels.js', 'scenes/config.js', 'scenes/sim.js', 'scenes/earth.js', 'scenes/gl-host.js', 'scenes/gl-items.js', 'scenes/gl-labels.js', 'scenes/gl-still.js', 'scenes/svg-fallback.js', 'app.js', 'audit.js', 'ui.js', 'charts/legal.js', 'charts/a.js', 'charts/c.js', 'charts/rpo.js', 'charts/b.js', 'charts/lag.js',
          'method.js', 'export.js', 'scene-ui.js', 'boot.js']
 ESB = R / 'tools/node_modules/.bin/esbuild'
 def esbuild(args, text=None, cwd=R / 'src'):

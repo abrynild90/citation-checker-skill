@@ -1,11 +1,18 @@
 // ============================================================================
-// scenes/config.js: scene configuration data: palette, the ten SCENES and the HERO overview
+// scenes/config.js: scene configuration data: palette, the SCENES (ten kinetic/non-kinetic plus three co-orbital) and the HERO overview
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
 // ---------------------------------------------------------------- configs
-import { GEO_ALT } from './core.js';
+import { GEO_ALT, IS_PHONE, orbitPos } from './core.js';
+import { ellipsePath } from './co-sim.js';
 
-export const C = { tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', gps: '#9be7c4', jam: '#ff5d5d', ok: '#6ee7a8', laser: '#ff4fd8', geo: '#ffcf6e', belt: '#b28cff', ground: '#e9edf7' };
+// Actor colours follow the page palette (US, Russia, China); UK and defunct objects are neutral.
+export const C = { us: '#56B4E9', ru: '#FF8C5A', cn: '#F0C24B', dead: '#9aa3b5', tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', gps: '#9be7c4', jam: '#ff5d5d', ok: '#6ee7a8', laser: '#ff4fd8', geo: '#ffcf6e', belt: '#b28cff', ground: '#e9edf7' };
+
+// OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
+// Spacecraft models are drawn larger on phones (PK) so they stay legible in the small stage.
+const PK = IS_PHONE ? 1.5 : 1;
+const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
 
 export const SCENES = [
   { id: 'starfish', date: '1962-07-09', title: 'Starfish Prime (1962)', shells: ['LEO'], duration: 14,
@@ -117,6 +124,103 @@ export const SCENES = [
       { type: 'site', at: [55.03, 82.92], label: 'Novosibirsk', color: '#ffb0f0', dx: 0, dy: 26, small: true, liveOnly: true },
     ], still: 0.5,
     status: [[0, 'MSTI-3 rises over White Sands'], [0.15, 'MIRACL beam tracks the satellite while it is above the horizon'], [0.8, 'Same principle: SWF describes Russia’s Peresvet (named in 2018) as a mobile laser dazzler']], cameras: [{ name: 'Side view', at: [24, -126, 2.7], look: [34, -107, 1.15] }, { name: 'Zoom', at: [28, -119, 1.6], look: [35, -107, 1.2] }, { name: 'Russia: Peresvet sites (SWF)', at: [50, 55, 2.3], look: [56, 58, 1.0] }] },
+  // ---------------------------------------------------------------- co-orbital scenes (SWF 2026): sj21-tug, rpo, spaceplanes
+  { id: 'sj21-tug', date: '2022-01-21', title: 'SJ-21 tows a defunct satellite out of the GEO belt (2022)', shells: [], duration: 24,
+    caption: 'SWF reports that China’s SJ-21 rendezvoused with Compass G2, a defunct Chinese navigation satellite, in December 2021, “docked to it at some point”, and around 21 January 2022 used its own propulsion to pull both objects above the GEO belt (by 27 January: 290 to 3,100 km above the protected zone). SJ-21 then came back down close to GEO. SWF does not say how SJ-21 captured or docked with Compass G2, so the scene shows a docking contact, not an arm. SWF does report robotic-arm demonstrations on other Chinese satellites: SY-7 (2013, p. 03-02) and Aolong-1 (2016, p. 03-04).',
+    cite: 'SWF 2026, p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15; robotic arms on other satellites: SY-7 p. 03-02, Aolong-1 p. 03-04, SJ-17 p. 03-08.', related: null, event: 'cn-2022-sj21-compass-g2',
+    scaleNote: 'Heights above the belt, the spacing between the two spacecraft and their position along the belt are illustrative.',
+    anchors: { g: { geo: { lon: 105 } } },
+    actors: [
+      { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.005, opacity: 0.85, label: 'GEO belt (35,786 km)' },
+      { type: 'craft', id: 'cg2', anchor: 'g', color: C.dead, scale: 2.2 * PK, label: 'Compass G2 (defunct)', short: 'Compass G2', dx: 60, dy: 34, labelFn: t => t >= 0.40 && t < 0.80 ? null : 'Compass G2 (defunct)',
+        key: [[0, 0, 0, 0], [0.40, 0.05, 0, 0], [0.50, 0.05, 0, 0], [0.76, 0.13, 0.27, 0], [1, 0.155, 0.275, 0.004]] },
+      { type: 'craft', id: 'sj21', anchor: 'g', color: C.cn, bright: true, scale: 2.2 * PK, label: 'SJ-21 (China)', short: 'SJ-21', dx: -50, dy: -40, labelFn: (t, n) => t >= 0.40 && t < 0.80 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : 'SJ-21 (China)',
+        key: [[0, 0.68, 0, 0], [0.20, 0.22, 0, 0], [0.27, 0.19, 0.006, -0.008], [0.34, 0.15, -0.004, 0.006], [0.40, 0.10, 0, 0], [0.50, 0.10, 0, 0], [0.76, 0.18, 0.27, 0], [0.80, 0.235, 0.285, 0.014], [0.97, 0.06, 0.0, 0.0], [1, 0.05, 0, 0]] },
+      { type: 'link', a: 'sj21', b: 'cg2', t0: 0.40, t1: 0.80, color: '#fff1c1', width: 0.012 },
+      { type: 'burst', craft: 'sj21', t0: 0.40, color: '#fff1c1', ringColor: C.cn, size: 0.12, span: 0.07 },
+      { type: 'trail', craft: 'sj21', t0: 0.50, t1: 0.78, color: C.cn },
+    ], still: 0.78,
+    status: [[0, 'SJ-21 (China) approaches Compass G2, a defunct Chinese navigation satellite in GEO (25 Dec. 2021)'], [0.2, 'For several weeks SJ-21 keeps in tight proximity to Compass G2'], [0.34, 'SWF: SJ-21 “docked to it at some point” (how is not described)'], [0.5, 'Around 21 Jan. 2022 SJ-21’s own propulsion pulls both objects above the GEO belt'],
+      [0.72, 'By 27 Jan. both are in an orbit 290–3,100 km above the protected GEO zone (height exaggerated)'], [0.8, 'SWF does not describe the separation; it says SJ-21 later lowered its orbit back close to GEO'], [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”']],
+    cameras: [{ name: 'Whole event', frame: { anchor: 'g', t: 0.5, from: [0.36, 0.13, 1.3], to: [0.36, 0.13, 0] }, phone: { frame: { anchor: 'g', t: 0.5, from: [0.34, 0.14, 1.0], to: [0.34, 0.14, 0] } } }, { name: 'Approach and docking', frame: { anchor: 'g', t: 0.3, from: [0.27, 0.02, 0.62], to: [0.27, 0.02, 0] } },
+      { name: 'Tow (angled)', frame: { anchor: 'g', t: 0.6, from: [-0.35, 0.22, 0.85], to: [0.12, 0.13, 0] } }, { name: 'GEO belt (wide)', at: [26, 70, 7.4] }],
+    stillFrame: { anchor: 'g', t: 0.6, from: [0.36, 0.13, 1.3], to: [0.36, 0.13, 0] }, staticCenter: [78, 105] },
+  { id: 'rpo', date: '2025-06-13', title: 'Proximity operations: China, the US and Russia (2019–2025)', shells: [], duration: 32,
+    caption: 'Three separate episodes from SWF’s RPO tables. (1) GEO, 2025: China’s SJ-21 and SJ-25 approach, appear to dock and later separate, while two US GSSAP satellites are positioned “flanking” them. (2) LEO, 2019–20: Russia’s Cosmos 2542 releases Cosmos 2543, which then works near a US satellite, USA 245. (3) GEO, 2025: a US GSSAP satellite and the UK’s SKYNET 5A in a jointly announced RPO. SWF hedges the intent behind the first two; an RPO is not an attack.',
+    cite: 'SWF 2026: Tables 1-3 (p. 01-15), 2-3 (p. 02-15), 3-2 (p. 03-16); SJ-21 and SJ-25 pp. 03-12 to 03-13; Cosmos 2542 pp. 02-09 to 02-10; USA 271 and SKYNET 5A p. 01-14.', related: null, event: 'cn-2025-sj21-sj25-docking',
+    scaleNote: 'Distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen; the three episodes are at different times and places.',
+    anchors: { g1: { geo: { lon: 127 } }, l1: { orbit: { alt: 600, inc: 97.9, through: [58, 52], tThrough: 0.57, du: 0.4 } }, g3: { geo: { lon: 95.3 } } },
+    acts: [{ t0: 0, t1: 0.42, cam: 1 }, { t0: 0.42, t1: 0.72, cam: 2 }, { t0: 0.72, t1: 1, cam: 3 }],
+    actors: [
+      { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.004, opacity: 0.6, label: 'GEO belt' },
+      // ---- 1 · China + US in GEO (SJ-21, SJ-25, USA 270, USA 271), June 2025 to January 2026
+      { type: 'tag', anchor: 'g1', off: [0.0, 0.34, 0], color: '#ffe08a', label: '1 · China + US, GEO (2025)', short: '1 · GEO 2025', acts: [0], dx: 0, dy: -8 },
+      { type: 'craft', id: 'sj25', anchor: 'g1', acts: [0], color: C.cn, scale: 1.5 * PK, label: 'SJ-25 (China)', short: 'SJ-25', dx: -20, dy: 44, labelFn: t => t >= 0.27 && t < 0.335 ? null : 'SJ-25 (China)',
+        key: [[0, 0, 0, 0], [0.335, 0, 0, 0], [0.355, -0.10, 0, 0], [0.385, -0.06, 0, 0.01], [0.398, -0.05, 0, 0], [0.415, -0.30, 0, 0]] },
+      { type: 'craft', id: 'sj21b', anchor: 'g1', acts: [0], color: C.cn, bright: true, scale: 1.5 * PK, label: 'SJ-21 (China)', short: 'SJ-21', dx: 30, dy: -44, labelFn: (t, n) => t >= 0.27 && t < 0.335 ? (n ? 'SJ-21 + SJ-25 docked' : 'SJ-21 + SJ-25 (docked)') : 'SJ-21 (China)',
+        key: [[0, 0.52, 0, 0.01], [0.09, 0.20, 0, 0], [0.15, 0.14, 0, 0], [0.175, 0.032, 0, 0], [0.21, 0.13, 0, 0], [0.245, 0.10, 0, 0.005], [0.27, 0.032, 0, 0], [0.335, 0.032, 0, 0], [0.42, 0.032, 0, 0]] },
+      { type: 'link', a: 'sj21b', b: 'sj25', t0: 0.27, t1: 0.335, color: '#fff1c1', width: 0.011 },
+      { type: 'craft', id: 'usa270', anchor: 'g1', acts: [0], color: C.us, scale: 1.4 * PK, label: 'USA 270 (US GSSAP)', short: 'USA 270', dx: -10, dy: -40, key: [[0, -0.95, -0.05, 0.02], [0.13, -0.42, -0.05, 0.02], [0.42, -0.42, -0.05, 0.02]] },
+      { type: 'craft', id: 'usa271', anchor: 'g1', acts: [0], color: C.us, scale: 1.4 * PK, label: 'USA 271 (US GSSAP)', short: 'USA 271', dx: 20, dy: -34, key: [[0, 0.95, 0.05, -0.02], [0.13, 0.42, 0.05, -0.02], [0.42, 0.42, 0.05, -0.02]] },
+      // ---- 2 · Russia in LEO (Cosmos 2542, Cosmos 2543, USA 245), December 2019 to January 2020
+      { type: 'tag', anchor: 'l1', off: [0.30, 0.42, 0], t: 0.57, color: '#ffe08a', label: '2 · Russia, LEO (2019–20)', short: '2 · LEO 2019', acts: [1], dx: 0, dy: -8 },
+      { type: 'craft', id: 'c2542', anchor: 'l1', acts: [1], color: C.ru, scale: 1.5 * PK, label: 'Cosmos 2542 (Russia)', short: 'Cosmos 2542', dx: -60, dy: 36, key: [[0.42, 0, 0, 0], [0.72, 0, 0, 0]] },
+      { type: 'burst', craft: 'c2542', t0: 0.447, color: '#ffd9c0', ringColor: C.ru, size: 0.1, span: 0.05 },
+      { type: 'craft', id: 'c2543', anchor: 'l1', acts: [1], vis: [0.447, 0.72], color: C.ru, small: true, scale: 1.6 * PK, label: 'Cosmos 2543', short: 'Cosmos 2543', dx: 10, dy: 40, labelFn: () => 'Cosmos 2543 (subsatellite)',
+        key: [[0.42, 0, 0, 0], [0.447, 0, 0, 0], [0.48, 0.055, 0.012, 0.014], [0.53, 0.065, 0.014, 0.014], [0.60, 0.42, 0.10, 0.02], [0.645, 0.53, 0.06, 0.025], [0.68, 0.40, 0.09, 0.02], [0.72, 0.30, 0.10, 0.02]] },
+      { type: 'trail', craft: 'c2543', t0: 0.447, t1: 0.68, color: C.ru, acts: [1] },
+      { type: 'craft', id: 'usa245', anchor: 'l1', acts: [1], color: C.us, scale: 1.4 * PK, label: 'USA 245 (US satellite)', short: 'USA 245', dx: 40, dy: -40, key: [[0.42, 0.62, 0.03, 0.05], [0.72, 0.60, 0.03, 0.05]] },
+      // ---- 3 · US + UK in GEO (USA 271, SKYNET 5A), September 2025
+      { type: 'tag', anchor: 'g3', off: [0.0, 0.32, 0], color: '#ffe08a', label: '3 · US + UK, GEO (2025)', short: '3 · GEO 2025', acts: [2], dx: 0, dy: -8 },
+      { type: 'craft', id: 'sky', anchor: 'g3', acts: [2], color: '#cfd8ea', scale: 1.5 * PK, label: 'SKYNET 5A (UK)', short: 'SKYNET 5A', dx: -20, dy: 42, key: [[0.72, 0, 0, 0], [1, 0, 0, 0]] },
+      { type: 'craft', id: 'usa271b', anchor: 'g3', acts: [2], color: C.us, bright: true, scale: 1.5 * PK, label: 'USA 271 (US GSSAP)', short: 'USA 271', dx: 20, dy: -40, key: [[0.72, 0.85, 0.05, 0], [0.80, 0.22, 0.05, 0], [0.83, 0.05, 0.05, 0], [0.93, 0.05, 0.05, 0], [1, -0.35, 0.05, 0]] },
+      { type: 'burst', craft: 'usa271b', t0: 0.80, color: '#cfe8ff', ringColor: C.us, size: 0.1, span: 0.05 },
+      { type: 'trail', craft: 'usa271b', t0: 0.72, t1: 0.83, color: C.us, acts: [2] },
+    ], still: 0.3, staticCenter: [28, 92], staticStatus: 'Three separate episodes shown together: 1 China + US in GEO (2025) · 2 Russia in LEO (2019–20) · 3 US + UK in GEO (2025)',
+    status: [[0, '1 · GEO, June 2025: SJ-21 (China) drifts west along the belt toward SJ-25'], [0.08, 'Two US GSSAP satellites take positions SWF, quoting COMSPOC, calls “flanking” SJ-21 and SJ-25'], [0.16, '13–14 June: SJ-21 and SJ-25 within 1 km, possibly docked, then they separate'],
+      [0.235, '30 June to 6 July: they appear to dock; SWF hedges (“thought to have docked”)'], [0.29, 'SWF: they “remained docked until November 2025”'], [0.34, '25 Nov.: SJ-25 burns to separate; imagery on 29 Nov. shows two satellites'], [0.385, 'Dec.–Jan.: RPOs continue, closest just under 3 km on 13 Jan.; 130 km apart by 16 Jan.'],
+      [0.42, '2 · LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small subsatellite, Cosmos 2543'], [0.47, 'Cosmos 2543 stays within 2 km of Cosmos 2542 for three days'], [0.53, 'It then raises its apogee (590 km by 16 Dec.)'], [0.6, 'SWF: amateur analysis “strongly suggests” the aim was to observe USA 245; within 20 km several times in Jan. 2020'],
+      [0.665, 'Russia’s Foreign Ministry said Cosmos 2543 posed no threat to USA 245'],
+      [0.72, '3 · GEO, Sept. 2025: USA 271 (US GSSAP) drifts west, about 1.5° per day, toward the UK’s SKYNET 5A'], [0.8, '4 Sept.: an in-track maneuver; USA 271 stops within 0.05° of SKYNET 5A near 95.3° E'], [0.84, '5–11 Sept.: closest about 13 km. A first joint US–UK RPO, announced by both space commands'], [0.94, 'The RPO lasted roughly 5–11 Sept. (SWF)']],
+    cameras: [{ name: 'Tour (auto)', auto: true, frame: { anchor: 'g1', t: 0.2, from: [0.25, 0.55, 1.15], to: [0.05, 0.02, 0] } }, { name: 'China + US in GEO', act: 0, frame: { anchor: 'g1', t: 0.2, from: [0.25, 0.55, 1.15], to: [0.05, 0.02, 0] } },
+      { name: 'Russia in LEO', act: 1, frame: { anchor: 'l1', t: 0.57, from: [0.20, 0.60, 1.0], to: [0.30, 0.05, 0.02] } }, { name: 'US + UK in GEO', act: 2, frame: { anchor: 'g3', t: 0.85, from: [0.30, 0.50, 0.95], to: [0.10, 0.02, 0] } }] },
+  { id: 'spaceplanes', date: '2023-12-28', title: 'Spaceplanes: the US X-37B and China’s reusable spacecraft (2010–2026)', shells: [], duration: 32,
+    caption: 'SWF’s flight tables: the US X-37B has flown eight missions since 2010 (six of 224 to 908 days, then OTV-7 in an orbit reaching 38,838 km, then OTV-8, launched in August 2025). China’s reusable experimental spacecraft (CSSHQ) has flown three missions (2 to 276 days) and a fourth launched in February 2026; after flights 2 and 3, objects catalogued as released from it were approached by it repeatedly. SWF says the X-37B has not approached any other object, and mission purposes are not stated. A 2019 PLA analysis, as SWF reports it, warned that the X-37B could become an “aggressive” fighter in space.',
+    cite: 'SWF 2026: Table 1-1 (p. 01-08), Figure 1-3 (p. 01-07), pp. 01-04 to 01-09; Table 3-1 (p. 03-08), pp. 03-06 to 03-08.', related: null, event: 'us-2023-otv7',
+    scaleNote: 'Orbits use the compressed radial scale; the distances to the released objects are exaggerated and orbital motion is slowed.',
+    anchors: { us: { orbit: { alt: 350, inc: 45, raan: 30, u0: 0.3, du: 9 } }, heo: { ellipse: HEO_ORBIT }, cn: { orbit: { alt: 600, inc: 50, raan: 250, u0: 1.0, du: 0.5 } } },
+    acts: [{ t0: 0, t1: 0.3, cam: 1 }, { t0: 0.3, t1: 0.54, cam: 2 }, { t0: 0.54, t1: 1, cam: 3 }],
+    actors: [
+      // ---- US X-37B, OTV-1 to OTV-6: LEO flights
+      { type: 'path', fn: u => orbitPos(350, 38, 30, u * 2 * Math.PI), N: 120, color: '#8fd0ff', opacity: 0.5, acts: [0] },
+      { type: 'path', fn: u => orbitPos(350, 54, 30, u * 2 * Math.PI), N: 120, color: '#8fd0ff', opacity: 0.5, acts: [0], label: 'X-37B flights: 300–400 km, 38°–54° (SWF)', short: '300–400 km · 38°–54°', labelIdx: 20, dx: 40, dy: -30 },
+      { type: 'path', fn: u => orbitPos(350, 45, 30, u * 2 * Math.PI), N: 120, color: C.us, opacity: 0.9, thick: 0.004, acts: [0] },
+      { type: 'craft', id: 'x37', anchor: 'us', acts: [0], model: 'plane', color: C.us, bright: true, scale: 3 * PK, label: 'X-37B (US)', short: 'X-37B', dx: 46, dy: -34, key: [[0, 0, 0, 0], [1, 0, 0, 0]] },
+      // ---- US X-37B, OTV-7: highly elliptical orbit
+      { type: 'path', fn: u => orbitPos(GEO_ALT, 0, 0, u * 2 * Math.PI), N: 120, color: C.geo, opacity: 0.7, thick: 0.004, acts: [1], label: 'GEO ring (35,786 km)', short: 'GEO', labelIdx: 92, dx: 20, dy: 20 },
+      { type: 'path', points: ellipsePath(HEO_ORBIT, 160), color: C.us, opacity: 0.9, thick: 0.004, acts: [1], label: 'OTV-7 orbit: 323 × 38,838 km, 59.1° (Feb. 2024)', short: 'OTV-7 orbit', labelIdx: 80, dx: 40, dy: -20 },
+      { type: 'craft', id: 'x37h', anchor: 'heo', acts: [1], model: 'plane', color: C.us, bright: true, scale: 4.5 * PK, label: 'X-37B OTV-7 (US)', short: 'OTV-7', dx: -60, dy: 34, key: [[0, 0, 0, 0], [1, 0, 0, 0]] },
+      // ---- China, CSSHQ: flights 2 and 3 and the objects released from them
+      { type: 'path', fn: u => orbitPos(600, 50, 250, u * 2 * Math.PI), N: 120, color: C.cn, opacity: 0.55, thick: 0.003, acts: [2], label: 'CSSHQ orbit: about 600 km, 50° (SWF)', short: '~600 km · 50°', labelIdx: 30, dx: 30, dy: -30 },
+      { type: 'craft', id: 'csshq', anchor: 'cn', acts: [2], model: 'plane', color: C.cn, bright: true, scale: 1.7 * PK, label: 'CSSHQ (China)', short: 'CSSHQ', dx: -50, dy: -34, labelFn: (t, n) => t < 0.765 ? (n ? 'CSSHQ flight 2' : 'CSSHQ flight 2 (China)') : (n ? 'CSSHQ flight 3' : 'CSSHQ flight 3 (China)'), key: [[0.54, 0, 0, 0], [1, 0, 0, 0]] },
+      { type: 'craft', id: 'objJ', anchor: 'cn', acts: [2], vis: [0.585, 0.755], small: true, scale: 1.6 * PK, color: C.cn, label: 'Object J', short: 'Obj. J', dx: 40, dy: 34,
+        key: [[0.585, 0, 0, 0], [0.605, 0.10, 0.01, 0.02], [0.625, 0.20, 0.012, 0.03], [0.640, 0.062, 0, 0], [0.655, 0.20, 0.012, 0.03], [0.676, 0.062, 0, 0], [0.69, 0.21, 0, 0.03], [0.72, 0.075, 0.004, 0.01], [0.735, 0.18, 0.01, 0.03], [0.755, 0.16, 0.01, 0.03]] },
+      { type: 'link', a: 'csshq', b: 'objJ', t0: 0.635, t1: 0.647, color: '#fff1c1', width: 0.009 },
+      { type: 'link', a: 'csshq', b: 'objJ', t0: 0.671, t1: 0.683, color: '#fff1c1', width: 0.009 },
+      { type: 'craft', id: 'objG', anchor: 'cn', acts: [2], vis: [0.80, 0.985], small: true, scale: 1.6 * PK, color: C.cn, label: 'Object G', short: 'Obj. G', dx: 40, dy: 34,
+        key: [[0.80, 0, 0, 0], [0.815, 0.09, 0.01, 0.03], [0.86, 0.24, 0.02, 0.04], [0.895, 0.08, 0.005, 0.02], [0.93, 0.10, 0.005, 0.02], [0.96, 0.08, 0.005, 0.02]] },
+    ], still: 0.5,
+    status: [[0, 'US X-37B, OTV-1 to OTV-6 (2010–2022): flights of 224, 469, 675, 718, 780 and 908 days (SWF Table 1-1)'], [0.1, 'SWF: the X-37B has historically flown at 300–400 km and 38°–54° inclination (hobbyist tracking)'],
+      [0.2, 'Runway landings: Vandenberg AFB (OTV-1 to OTV-3) and Kennedy Space Center (OTV-4 to OTV-6)'], [0.26, 'SWF: to date the X-37B “has not approached nor rendezvoused with any other space objects”'],
+      [0.3, 'OTV-7 (launched 28 Dec. 2023) was located in Feb. 2024 in a highly elliptical orbit, 323 × 38,838 km at 59.1°'], [0.38, 'Far above earlier flights; SWF says it may have tested a new sensor or payload, but it is unclear what or why'],
+      [0.46, 'Oct. 2024: aerobraking announced to lower the orbit; landed at Vandenberg on 7 Mar. 2025 after 434 days'], [0.51, 'OTV-8 launched 21 Aug. 2025; SWF says it was still in orbit in Feb. 2026'],
+      [0.54, 'China’s reusable experimental spacecraft (CSSHQ): flights of 2, 276 and 268 days; a fourth launched 6 Feb. 2026 (SWF Table 3-1)'], [0.575, 'Flight 2 (Aug. 2022 – May 2023): after its orbit was raised to about 607 × 597 km, Object J was catalogued, apparently released'],
+      [0.625, 'LeoLabs, as printed in SWF: RPOs with Object J, “[at] least two and possibly three capture/docking operations”'], [0.76, 'Flight 3 (Dec. 2023 – Sept. 2024): released Object G on 24 May 2024; RPOs in June, within 1 km on 12 June'],
+      [0.86, 'SWF reports a 2019 PLA analysis (the PLA’s view, not SWF’s): the X-37B could “transform into an aggressive unmanned intelligent fighter in space”'], [0.93, 'SWF: Chinese concern about the X-37B is thought to have driven China to build its own spaceplane'],
+      [0.975, 'Flight 4 launched from Jiuquan on 6 Feb. 2026; SWF reports no landing yet']],
+    cameras: [{ name: 'Tour (auto)', auto: true, at: [52, -25, 4.3], phone: { at: [52, -25, 5.0] } }, { name: 'X-37B: LEO flights', act: 0, at: [52, -25, 4.3], phone: { at: [52, -25, 5.0] } }, { name: 'X-37B OTV-7: elliptical orbit', act: 1, at: [52, 40, 7.4], phone: { at: [52, 40, 9.6] } },
+      { name: 'China: CSSHQ and released objects', act: 2, frame: { anchor: 'cn', t: 0.75, from: [0.22, 0.62, 0.95], to: [0.08, 0.02, 0.02] } }],
+    staticCenter: [35, 30], staticStatus: 'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and a fourth launched in Feb. 2026' },
 ];
 export const HERO = { id: 'hero', title: 'Overview', shells: ['LEO', 'MEO', 'GEO'], duration: 40, spin: true,
   shellLabels: { LEO: 'LEO ≤2,000 km', MEO: 'MEO · GPS ~20,200 km', GEO: 'GEO ~35,786 km' }, shellShort: { LEO: 'LEO', MEO: 'MEO · GPS', GEO: 'GEO' }, shellAng: { LEO: 205, MEO: 12, GEO: 62 }, shellOff: { LEO: [-150, 50], MEO: [120, 24], GEO: [70, -40] },
