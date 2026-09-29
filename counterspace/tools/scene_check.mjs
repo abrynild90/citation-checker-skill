@@ -1,6 +1,6 @@
 // Scene collision / framing checker for the 13 WebGL scenes, their static SVG diagrams and their PNG stills.
 //   NODE_PATH=tools/node_modules OUT=<dir> PORT=9122 node tools/scene_check.mjs
-// Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.2,0.3,...  MODES=live,static,still  SHOT=1 (save a PNG per state)  QUIET=1
+// Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.2,0.3,...  MODES=live,static,still,hero  SHOT=1 (save a PNG per state)  QUIET=1
 // Every state is (scene x camera preset x t x viewport) for live scenes; static SVG at each viewport; live and static stills at 1440.
 // FAILURES (each is a hard failure, exit code 1 if any):
 //   label-overlap    two label boxes overlap                 label-reserved  a label sits on the banner, status caption or hint chip
@@ -27,7 +27,7 @@ const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const VPS = (process.env.VPS || '1440,900,375').split(',').map(Number);
 const TS = (process.env.TS || '0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9').split(',').map(Number);
 const CAMS = (process.env.CAMS || '').split(',').filter(Boolean).map(Number);
-const MODES = (process.env.MODES || 'live,static,still').split(',');
+const MODES = (process.env.MODES || 'live,static,still,hero').split(',');
 const SHOT = !!process.env.SHOT, QUIET = !!process.env.QUIET;
 fs.mkdirSync(out, { recursive: true });
 const srv = http.createServer((q, r) => {
@@ -138,7 +138,8 @@ function check(S) {
   }
   if (S.def && P.refs) for (const r of P.refs) if (r.px < 6) f('ref-small', `${r.text} ${r.px.toFixed(1)} px`);
   // action region: each side counts at least 40% of the frame, so a long trail across the frame qualifies
-  if (S.def && S.action !== undefined) { const a = S.action; const fr = a ? Math.max((a.x1 - a.x0) / W, 0.4) * Math.max((a.y1 - a.y0) / H, 0.4) : 0; if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`); }
+  if (S.def && S.action !== undefined && !S.docked) { // a docked pair is one object: the action region is that single spot, so it is exempt while docked
+    const a = S.action; const fr = a ? Math.max((a.x1 - a.x0) / W, 0.4) * Math.max((a.y1 - a.y0) / H, 0.4) : 0; if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`); }
   if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
   if (S.status != null && S.evT != null && S.t < S.evT + 0.02 && (S.evRe || HITRE).test(S.status)) f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
   if (S.statusLines > 1) f('status-wrap', `status wraps to ${S.statusLines} lines at ${W}px: "${(S.status || '').slice(0, 60)}"`);
@@ -194,16 +195,16 @@ const LIVE = (KEYS) => {
     const under = res.some(r => x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1);
     if (x < 10 || y < 10 || x > W - 10 || y > H - 10 || v.z > 1 || occ || under) keyOut.push(`${Lb.text} ${occ ? 'behind Earth' : under ? 'under the caption/banner' : 'off frame'} (${Math.round(x)},${Math.round(y)})`);
   }
-  return { W, H, labels, reserved, probe, hidden, status, statusLines, hitT, keyOut, t: h.t, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), act: h._act };
+  return { W, H, labels, reserved, probe, hidden, status, statusLines, hitT, keyOut, docked: h.sim.items.some(i => i.dockOn && i.dockOn(h.t)), t: h.t, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), act: h._act };
 };
-const SSX = () => { const v = [...document.querySelectorAll('#sceneView svg[data-ss]')].map(e => +e.dataset.ss).filter(Boolean); return v.length ? Math.min(...v) : null; };
-const STATIC = () => {
-  const svg = document.querySelector('#sceneView > svg'), z = svg && svg.__lay; if (!z) return null;
-  const bn0 = document.querySelector('#sceneView > .illus'), lines0 = bn0 && bn0.getBoundingClientRect().height > 32 ? 2 : 1;
+const SSX = (sel = '#sceneView') => { const v = [...document.querySelectorAll(sel + ' svg[data-ss]')].map(e => +e.dataset.ss).filter(Boolean); return v.length ? Math.min(...v) : null; };
+const STATIC = (sel = '#sceneView') => {
+  const svg = document.querySelector(sel + ' > svg'), z = svg && svg.__lay; if (!z) return null;
+  const bn0 = document.querySelector(sel + ' > .illus'), lines0 = bn0 && bn0.getBoundingClientRect().height > 32 ? 2 : 1;
   const mapLay = l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: -1, onDisc: false });
   if (z.panels) return { panels: z.panels.map(p => ({ W: p.W, H: p.H, labels: p.labels.map(mapLay), reserved: p.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 })), probe: p.probe })), bannerLines: lines0, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
   const labels = z.labels.map(l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: -1, onDisc: false }));
-  const bn = document.querySelector('#sceneView > .illus'), er = document.getElementById('sceneView').getBoundingClientRect();
+  const bn = document.querySelector(sel + ' > .illus'), er = document.querySelector(sel).getBoundingClientRect();
   const reserved = z.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 }));
   if (bn) { const b = bn.getBoundingClientRect(); reserved.push({ n: 'banner', x0: b.left - er.left, y0: b.top - er.top, x1: b.right - er.left, y1: b.bottom - er.top }); }
   return { W: z.W, H: z.H, labels, reserved, probe: z.probe, bannerLines: bn && bn.getBoundingClientRect().height > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
@@ -215,19 +216,21 @@ const record = (tag, F, extra = {}) => { results.push({ tag, F, ...extra }); for
 const ctxOpts = (w, extra = {}) => ({ viewport: { width: w, height: w <= 400 ? 800 : w <= 900 ? 800 : 900 }, colorScheme: 'dark', ignoreHTTPSErrors: true, isMobile: w < 640, hasTouch: w < 640, ...extra });
 async function boot(w, extra) {
   const ctx = await browser.newContext(ctxOpts(w, extra)), page = await ctx.newPage(), errs = [];
-  page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => errs.push('pageerror: ' + e.message));
+  page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => errs.push('pageerror [' + curTag + ']: ' + e.message + ' ' + (e.stack || '').split('\n').slice(1, 3).join(' | ')));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 25000 }).catch(() => {});
   await page.waitForTimeout(500);
   return { ctx, page, errs };
 }
 const ids = async page => (await page.evaluate(() => window.__cs.scenes)).filter(i => !ONLY.length || ONLY.includes(i));
-const tag = (...a) => a.join('-');
+let curTag = '';
+const tag = (...a) => (curTag = a.join('-'));
 const camActs = (page) => page.evaluate(() => { const h = window.__cs.host(); return { cams: h.sim.cams.map(c => ({ name: c.name, act: c.act ?? null, auto: !!c.auto })), acts: h.sim.cfg.acts || null }; });
 
 if (MODES.includes('live')) for (const w of VPS) {
   const { ctx, page, errs } = await boot(w);
   for (const id of await ids(page)) {
+    curTag = 'open-' + id;
     await page.evaluate(id => window.__cs.openScene(id), id); await page.waitForTimeout(900);
     const { cams, acts } = await camActs(page);
     for (let ci = 0; ci < cams.length; ci++) {
@@ -274,6 +277,45 @@ if (MODES.includes('static')) for (const w of VPS) {
   }
   if (errs.length) console.log('console errors static', w, errs.slice(0, 5));
   await ctx.close();
+}
+
+// ---------------------------------------------------------------- hero (overview): live WebGL and the static diagram, at every viewport
+const HEROLIVE = () => {
+  const h = window.__cs.host(), T = h.T, W = h.el.clientWidth, H = h.el.clientHeight, cp = h.camera.position;
+  const P = h._probe(W, H); let iss = null;
+  for (const { it, obj } of h.dyn) if (it.iss && obj.visible) {
+    obj.getWorldPosition(new T.Vector3());
+    const p = new T.Vector3(); obj.getWorldPosition(p);
+    const q = p.clone().project(h.camera), occ = (() => { const d = [p.x - cp.x, p.y - cp.y, p.z - cp.z], L = Math.hypot(...d), u = d.map(c => c / L), b = cp.x * u[0] + cp.y * u[1] + cp.z * u[2], dd = b * b - (cp.lengthSq() - 1); return dd >= 0 && (-b - Math.sqrt(dd)) > 0 && (-b - Math.sqrt(dd)) < L - 1e-3; })();
+    const m = P.pts.find(m => m.i === h.sim.items.indexOf(it));
+    iss = { occ, px: m ? m.r * 2 : 0, on: Math.abs(q.x) < 1 && Math.abs(q.y) < 1 };
+  }
+  return { iss };
+};
+if (MODES.includes('hero')) for (const w of VPS) {
+  const { ctx, page, errs } = await boot(w);
+  await page.evaluate(() => { const b = document.getElementById('heroRot'); b && !b.hidden ? b.click() : document.getElementById('heroStage').dispatchEvent(new Event('pointerenter')); });
+  await page.waitForFunction(() => { const h = window.__cs.host(); return h && h.sim && h.sim.cfg.spin && h.dyn; }, null, { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(1200);
+  await page.locator('#heroStage').scrollIntoViewIfNeeded();
+  for (const t of [0.05, 0.2, 0.35, 0.5, 0.65, 0.8, 0.95]) {
+    await page.evaluate(t => { const h = window.__cs.host(); h.playing = false; h._lm = {}; h.update(t); h.update(t); }, t);
+    const S = await page.evaluate(LIVE, []); S.def = false; S.kind = 'hero'; S.action = undefined; S.u = 1;
+    const F = check(S), hc = await page.evaluate(HEROLIVE);
+    S.shellCrop = shellCrop(S.probe.circles, S.W, S.H); F.push(...S.shellCrop.map(d => ({ type: 'shell-crop', detail: d })));
+    if (hc.iss && !hc.iss.occ && hc.iss.on && hc.iss.px < 12) F.push({ type: 'hero-iss', detail: `ISS marker ${hc.iss.px.toFixed(0)} px at t=${t}` });
+    if (!hc.iss) F.push({ type: 'hero-iss', detail: `no ISS marker at t=${t}` });
+    record(tag('hero-live', w, 't' + t), F, { W: w });
+    if (SHOT) await page.locator('#heroStage').screenshot({ path: `${out}/hero-live-${w}-t${t}.png` });
+  }
+  await ctx.close();
+  const b2 = await boot(w, { reducedMotion: 'reduce' });
+  await b2.page.waitForTimeout(800);
+  const S2 = await b2.page.evaluate(STATIC, '#heroStage');
+  if (!S2) record(tag('hero-static', w), [{ type: 'audit', detail: 'no static hero svg' }]);
+  else { S2.kind = 'static'; S2.def = false; S2.action = undefined; S2.resX = await b2.page.evaluate(SSX, '#heroStage'); record(tag('hero-static', w), check(S2), { W: w });
+    if (SHOT) await b2.page.locator('#heroStage').screenshot({ path: `${out}/hero-static-${w}.png` }); }
+  await b2.ctx.close();
 }
 if (MODES.includes('still')) {
   const { ctx, page, errs } = await boot(1440);

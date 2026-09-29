@@ -200,25 +200,19 @@ const methods = {
     g.fillText(title, 16 * s, hb + H + 24 * s);
     // Source line (cite) and imagery credit each on their own line, at a readable size (shrunk only if a line would overflow).
     const credit = earthImg ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
-    const fit = (txt, px, y, col) => {
-      let f = Math.round(px * s);
+    // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
+    const srcTxt = `Source: ${String(cite || '')
+      .trim()
+      .replace(/[.;,\s]+$/, '')}.`;
+    let f = Math.round(15 * s);
+    for (; f > 10 * s; f -= 0.5 * s) {
       g.font = `${f}px system-ui,sans-serif`;
-      while (g.measureText(txt).width > W - 32 * s && f > 10 * s) {
-        f -= 0.5 * s;
-        g.font = `${f}px system-ui,sans-serif`;
-      }
-      g.fillStyle = col;
-      g.fillText(txt, 16 * s, y);
-    };
-    fit(
-      `Source: ${String(cite || '')
-        .trim()
-        .replace(/[.;,\s]+$/, '')}.`,
-      15,
-      hb + H + 54 * s,
-      '#c3cbe0',
-    );
-    fit(credit, 15, hb + H + 77 * s, '#c3cbe0');
+      if (Math.max(g.measureText(srcTxt).width, g.measureText(credit).width) <= W - 32 * s) break;
+    }
+    g.font = `${f}px system-ui,sans-serif`;
+    g.fillStyle = '#c3cbe0';
+    g.fillText(srcTxt, 16 * s, hb + H + 54 * s);
+    g.fillText(credit, 16 * s, hb + H + 77 * s);
     g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
     cam.position.copy(keep.pos);

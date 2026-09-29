@@ -88,7 +88,7 @@ export function buildSim(cfg) {
         for (const x of cfg.status) if (t >= x[0]) e = x;
         const s = phone && e[2] ? e[2] : e[1],
           c = items._decayCloud;
-        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t) return s;
+        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + 0.02) return s;
         return phone ? `${s} · ${c.vis}/${c.n} aloft` : `${s} · ${c.vis} of ${c.n} simulated pieces aloft`;
       },
     });
@@ -155,9 +155,10 @@ export function buildSim(cfg) {
         span: a.span ?? 0.06,
       });
     if (a.type === 'trail') {
-      const N = 60,
-        all = [];
-      for (let k = 0; k <= N; k++) all.push(crafts[a.craft].raw(a.t0 + ((a.t1 - a.t0) * k) / N));
+      const N = a.N ?? 60,
+        all = [],
+        ts = crafts[a.craft].anc.times?.(a.t0, a.t1, N);
+      for (let k = 0; k <= N; k++) all.push(crafts[a.craft].raw(ts ? ts[k] : a.t0 + ((a.t1 - a.t0) * k) / N));
       items.push({
         kind: 'curve',
         dynamic: true,
@@ -168,7 +169,7 @@ export function buildSim(cfg) {
         pts: (t) => {
           if (!actOn(t, a.acts)) return [];
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
-          return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
+          return s <= 0 ? [] : all.slice(0, Math.max(2, ts ? ts.filter((x) => x <= t).length : Math.round(s * N) + 1));
         },
       });
     }
@@ -202,6 +203,7 @@ export function buildSim(cfg) {
         labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)],
         labelDx: a.dx,
         labelDy: a.dy,
+        opt: a.opt,
       });
     }
     if (a.type === 'site')
@@ -289,13 +291,14 @@ export function buildSim(cfg) {
       items.push({
         kind: 'point',
         shape: 'tick',
+        impactMark: true,
         color: '#fff1c1',
-        label: 'Impact point',
+        label: 'Impact',
         short: 'Impact',
-        labelDx: 40,
-        labelDy: -30,
+        labelDx: a.impactDx ?? 70,
+        labelDy: a.impactDy ?? -50,
         opt: true,
-        pos: (t) => (t >= tgt.t ? tgt.hitPos : null),
+        pos: (t) => (t > tgt.t + 0.06 ? tgt.hitPos : null),
       });
     if (a.type === 'target' && tgt && a.fall) {
       // after the hit the body breaks into larger pieces that sink and burn up (illustrative)
@@ -437,7 +440,7 @@ export function buildSim(cfg) {
         color: a.color,
         pos: (t) => (t > a.t0 && t < tgt.t ? bez(clamp01((t - a.t0) / (tgt.t - a.t0))) : null),
       });
-      items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, size: a.flash ?? 0.3, span: 0.16 });
+      items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1), span: 0.16 });
     }
     if (a.type === 'debris' && tgt) {
       const n = Math.min(a.count, PARTICLE_BUDGET);
@@ -1016,6 +1019,7 @@ export function buildSim(cfg) {
     };
   // The viewing direction n is fixed for the whole scene (no roll or jump as the debris spreads); only the target point and the distance are fitted.
   const fitPose = (pts, n, look, o = {}) => {
+    pts = pts.filter(Boolean);
     const [tanH, tanV] = tanFor(o.asp ?? ASPECT);
     let pos = null;
     for (let D = o.dMin ?? 0.9; D <= (o.dMax ?? 9); D += 0.05) {
@@ -1034,7 +1038,10 @@ export function buildSim(cfg) {
     }
     return { pos, look };
   };
-  const centroid = (pts) => scl(pts.reduce((q, p) => add(q, p), [0, 0, 0]), 1 / pts.length);
+  const centroid = (pts) => {
+    const v = pts.filter(Boolean); // a craft that is not drawn at this t has no position
+    return scl(v.reduce((q, p) => add(q, p), [0, 0, 0]), 1 / Math.max(1, v.length));
+  };
   const debrisPts = (tk, pct) => {
     const cl = items.find((i) => i.kind === 'cloud' && i.dynCol && !i.colored);
     if (!cl || !tgt || tk <= tgt.t + 0.01) return [];
@@ -1151,7 +1158,7 @@ export function buildSim(cfg) {
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
       }
       if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, ...frameCam(c.frame) };
-      return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
+      return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, hide: c.hide, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
     });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) {

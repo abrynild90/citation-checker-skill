@@ -62,10 +62,14 @@ export class GLHost {
     this.canvas.style.height = '100%';
     this.render();
   }
-  // Hero: the camera distance follows the stage aspect so Earth and the shells fill the stage (wide stage: close and centred; phone: far enough for the GEO ring).
+  // Hero: the camera distance follows the stage aspect so the whole outermost shell (its glow included) stays inside the stage, banner and hint chip
+  // clear of it: wide stage = the vertical field of view decides, phone = the horizontal one.
   _heroFit() {
     if (!this.sim?.cfg.spin || (!this.camIdx && this.camIdx !== 0)) return;
-    const d = Math.max(4.9, 7.3 / Math.max(this.camera.aspect, 1.1)),
+    const R = Math.max(1.5, ...this.sim.items.filter((i) => i.kind === 'shell').map((i) => i.r)) * 1.03,
+      fv = this.camera.fov * DEG,
+      fh = 2 * Math.atan(Math.tan(fv / 2) * this.camera.aspect),
+      d = Math.max(R / Math.sin(fv * 0.5 * 0.9), R / Math.sin(fh * 0.5 * 0.95)),
       p = this.camera.position.clone().sub(this.target);
     p.setLength(d);
     this.camera.position.copy(p.add(this.target));
@@ -417,7 +421,7 @@ export class GLHost {
     if (this.sim.cfg.spin) this.root.rotation.y = t * Math.PI * 2;
     this._drawInset();
     if (this.statusEl) {
-      this.statusEl.textContent = this.status ? this.status.text(t, false, this.el.clientWidth < 520) : '';
+      this.statusEl.textContent = this.status ? this.status.text(t, false, this.el.clientWidth < 640) : '';
       this._applyBands();
     }
     this.render();

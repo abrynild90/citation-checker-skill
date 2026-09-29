@@ -416,7 +416,7 @@ const methods = {
     if (it.kind === 'shell') {
       // Shell: fresnel bubble (bright at its limb) + a clear equatorial ring, so LEO / MEO / GEO read as nested layers.
       const c = col(it.color);
-      root.add(
+      const glow = (
         new T.Mesh(
           new T.SphereGeometry(it.r, 64, 40),
           new T.ShaderMaterial({
@@ -430,6 +430,8 @@ const methods = {
           }),
         ),
       );
+      root.add(glow);
+      (this.shellRings ||= []).push(glow); // hidden with the rings when a camera hides the shells
       if (!it.noRing) {
         const ring = new T.Mesh(
           new T.TorusGeometry(it.r, it.strong ? 0.0075 : 0.0055, 6, 200),
@@ -445,7 +447,18 @@ const methods = {
           (this.ringPts ||= []).push(rp);
         }
       }
-      if (it.label) this._label(it.label, () => this._limbVis(it.r, it.ang ?? 45), 'shell', null, it.dy ?? 0, it.dx ?? 0, it.short, it.opt);
+      // Hero: a shell's label sits on its own ring (ang = degrees round the ring from the point facing the camera), not on the sphere's limb.
+      if (it.label)
+        this._label(
+          it.label,
+          this.sim?.cfg.spin && !it.noRing ? () => this._ringPt(it.r, it.ang ?? 45) : () => this._limbVis(it.r, it.ang ?? 45),
+          'shell',
+          null,
+          it.dy ?? 0,
+          it.dx ?? 0,
+          it.short,
+          it.opt,
+        );
     } else if (it.kind === 'curve') {
       const g = new T.BufferGeometry();
       const pts = it.dynamic ? [] : it.all || it.pts(0);

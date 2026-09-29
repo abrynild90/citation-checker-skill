@@ -24,6 +24,12 @@ const methods = {
       .add(d.multiplyScalar((r * r) / L));
     return [p.x, p.y, p.z];
   },
+  // Point on the equatorial ring of radius r, `deg` round the ring from the point that faces the camera (hero shell labels).
+  _ringPt(r, deg) {
+    const cp = this.camera.position,
+      a = Math.atan2(cp.z, cp.x) - deg * DEG;
+    return [r * Math.cos(a), 0, r * Math.sin(a)];
+  },
   // Shell label anchor: the limb point at `deg`, moved around the shell to the nearest angle that is comfortably inside the stage (never off-screen).
   _limbVis(r, deg) {
     const T = this.T,
@@ -46,6 +52,18 @@ const methods = {
     for (const L of this.labels) {
       if (L.cls === 'shell' && this.hideShell) {
         raw.push(null);
+        continue;
+      }
+      if (noBanner && L.item?.impactMark) {
+        raw.push(null); // the still shows the debris and the flash; the impact marker's label is a live-view aid and crowds the print frame
+        continue;
+      }
+      if (this.el.clientWidth < 520 && this.sim.cfg.phoneHide?.some((h) => L.text.startsWith(h))) {
+        raw.push(null); // secondary labels left out of a phone-width stage
+        continue;
+      }
+      if ((this.sim.cams[this.camIdx]?.hide || this.sim.cfg.camHide?.[this.camIdx])?.some((h) => L.text.startsWith(h))) {
+        raw.push(null); // this camera looks elsewhere: labels of objects it does not show are left out
         continue;
       }
       let p = L.posFn(this.t);
@@ -358,6 +376,19 @@ const methods = {
           b = scr(ll(it.at[0] + it.radius, it.at[1]));
         domes.push({ x: a[0], y: a[1], r: Math.hypot(a[0] - b[0], a[1] - b[1]) * 1.2 });
       }
+    }
+    // Shell rings (equatorial circles, seen as ellipses): polylines a label leader may end on.
+    for (const pts of this.ringPts || []) {
+      if (pts.shell && this.hideShell) continue;
+      let cur = [];
+      for (const q0 of pts) {
+        const q = scr(W3.set(...q0).applyMatrix4(this.root.matrixWorld).toArray());
+        if (q[2]) {
+          if (cur.length > 1) polys.push({ p: cur, role: 'orbit' });
+          cur = [];
+        } else cur.push([q[0], q[1]]);
+      }
+      if (cur.length > 1) polys.push({ p: cur, role: 'orbit' });
     }
     let action = null;
     const inb = act.filter((p) => p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h);

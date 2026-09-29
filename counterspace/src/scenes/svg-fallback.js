@@ -27,9 +27,9 @@ function earthRaster(proj, CX, CY, R) {
       earthPix = { w: sw, h: sw / 2, d: g.getImageData(0, 0, sw, sw / 2).data };
       earthPixSrc = earthImg;
     }
-    // Supersampled: at least 2x the CSS size of the disc (capped at 1400 px), so a phone-width diagram still exports a sharp Earth in the print-size PNG.
+    // Supersampled: at least 2x the CSS size of the disc (capped at 2000 px), so a phone-width diagram still exports a sharp Earth in the print-size PNG.
     const dpr = Math.max(2, Math.min(devicePixelRatio || 1, 3)),
-      S = Math.max(64, Math.min(Math.round(2 * R * dpr), 1400)),
+      S = Math.max(64, Math.min(Math.round(2 * R * dpr), 2000)),
       k = (2 * R) / S,
       c = document.createElement('canvas');
     c.width = c.height = S;
@@ -376,6 +376,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('stroke-opacity', it.noRing ? 0 : 0.55)
       .attr('stroke-dasharray', '3 4'),
   );
+  const gi0 = svg.node().childNodes.length; // everything drawn from here to the label layer is the globe (removed again when it is mostly cropped)
   svg
     .append('circle')
     .attr('cx', CX)
@@ -467,12 +468,29 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('stroke-opacity', 0.55)
       .attr('stroke-width', 1.2);
   }
+  // A panel that looks at craft far from the Earth (GEO) would show only a cropped sliver of the globe: drop it and let the craft and the belt speak.
+  let showGlobe = true;
+  if (opts.panel) {
+    let inRect = 0,
+      inDisc = 0;
+    for (let i = 0; i < 24; i++)
+      for (let j = 0; j < 24; j++) {
+        const x = CX + ((i + 0.5) / 12 - 1) * R,
+          y = CY + ((j + 0.5) / 12 - 1) * R;
+        if ((x - CX) ** 2 + (y - CY) ** 2 > R * R) continue;
+        inDisc++;
+        if (x >= 0 && x <= W && y >= 0 && y <= H) inRect++;
+      }
+    showGlobe = inRect / inDisc >= 0.45;
+    if (!showGlobe) [...svg.node().childNodes].slice(gi0).forEach((n) => n.remove());
+  }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
+  const NARROW = W < 520 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
   shells.forEach((it, i) => {
     const lab = it.staticLabel ?? it.label;
     if (!lab) return;
-    const tx = it.short && W < 520 && !it.staticLabel ? it.short : lab,
+    const tx = it.short && NARROW && !it.staticLabel ? it.short : lab,
       w = labelW(tx);
     // the label sits on the shell line at its preferred angle, or at the nearest angle where that point is inside the frame
     let a = (it.ang ?? 35 + i * 14) * DEG,
@@ -564,11 +582,12 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       if (it.label && it.labelAt && pts.length > 2)
         label(
           project(it.labelAt),
-          it.short && W < 520 ? it.short : it.label,
+          it.short && NARROW ? it.short : it.label,
           it.color,
           it.labelDx,
           it.labelDy,
           W < 520 ? null : it.staticAt,
+          it.opt,
         );
     }
     if (it.kind === 'cloud') {
@@ -631,15 +650,18 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     if (it.kind === 'point') {
       const q = it.liveOnly ? null : it.pos(t);
       if (!q) continue;
-      const p = project(q);
+      let p = project(q);
       if (p.hidden) continue;
+      // Docked pair: the two squares sit side by side, touching (no link is drawn: SWF says docked, not how).
+      if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + 6.5 };
+      else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - 6.5 };
       const c = it.statusColor ? it.statusColor(t) : it.color;
       if (it.shape !== 'none')
       mark(
         p,
         it.shape === 'sat'
           ? it.small
-            ? 4
+            ? 7
             : 10 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1)
           : it.shape === 'aircraft'
             ? 8
@@ -649,7 +671,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         it.label || it.shape,
       );
       if (it.shape === 'sat') {
-        const q = it.small ? (it.scale ? Math.min(10, 2 + it.scale * 1.3) : 4) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1);
+        const q = it.small ? (it.scale ? Math.min(10, 5 + it.scale * 1.3) : 6) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1);
         g.append('rect')
           .attr('x', p.x - q / 2)
           .attr('y', p.y - q / 2)
@@ -684,7 +706,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         const n0 = cands.length;
         label(
           p,
-          it.labelFn ? it.labelFn(t, W < 520) : it.short && W < 520 ? it.short : it.label,
+          it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label,
           c,
           it.labelDx,
           it.labelDy,
@@ -781,7 +803,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('width', fw)
       .attr('height', 20)
       .attr('rx', 4)
-      .attr('fill', 'rgba(5,8,18,0.82)');
+      .attr('fill', sim.cfg.spin ? 'none' : 'rgba(5,8,18,0.82)'); // the hero's scale note is plain text on the stage, not a dark strip
     svg
       .append('text')
       .attr('x', 14)
@@ -810,7 +832,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     svg.node().__lay = {
       W,
       H,
-      probe: { disc: { cx: CX, cy: CY, r: R }, circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })), pts: marks.map((m) => ({ x: m.x, y: m.y, r: m.r, i: -2 })), polys: dPolys, cloud: dCloud, domes: [] },
+      probe: { disc: { cx: CX, cy: CY, r: showGlobe ? R : 0 }, circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })), pts: marks.map((m) => ({ x: m.x, y: m.y, r: m.r, i: -2 })), polys: dPolys, cloud: dCloud, domes: [] },
       labels: lb,
       marks,
       rings: ringsL,

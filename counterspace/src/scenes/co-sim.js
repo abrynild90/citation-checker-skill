@@ -21,37 +21,38 @@ function keyAt(keys, t) {
   const l = keys[keys.length - 1];
   return [l[1], l[2], l[3]];
 }
-// Kepler ellipse in km (altitudes above the surface), mapped to the page's compressed radial scale like orbitPos().
+// Kepler ellipse. The timing is Kepler's (real eccentricity, mean and eccentric anomaly), but the radius is drawn in the page's compressed radial scale:
+// perigee and apogee altitudes are mapped through rAlt() and the orbit between them is a true ellipse in that scale (so it reads as a smooth ellipse,
+// not a polygon-like spiral that compressing every radius separately would give).
 function ellipseGeom(a) {
   const rp = RE_KM + a.perigee,
     ra = RE_KM + a.apogee;
   return { A: (rp + ra) / 2, e: (ra - rp) / (ra + rp) };
 }
-function ellipseAt(a, nu, r) {
+function ellipseAt(a, nu) {
   const u = nu + a.argp * DEG,
     i = a.inc * DEG,
     O = a.raan * DEG;
   const x = Math.cos(O) * Math.cos(u) - Math.sin(O) * Math.sin(u) * Math.cos(i),
     y = Math.sin(O) * Math.cos(u) + Math.cos(O) * Math.sin(u) * Math.cos(i),
     z = Math.sin(u) * Math.sin(i);
-  const R = rAlt(r - RE_KM);
+  const pc = rAlt(a.perigee),
+    ac = rAlt(a.apogee),
+    ec = (ac - pc) / (ac + pc),
+    R = (pc * (1 + ec)) / (1 + ec * Math.cos(nu));
   return [R * x, R * z, -R * y];
 }
 function ellipsePos(a, t) {
-  const { A, e } = ellipseGeom(a),
+  const { e } = ellipseGeom(a),
     M = (a.m0 ?? 0) + 2 * Math.PI * a.revs * t;
   let E = M;
   for (let k = 0; k < 8; k++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
   const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
-  return ellipseAt(a, nu, A * (1 - e * Math.cos(E)));
+  return ellipseAt(a, nu);
 }
 export function ellipsePath(a, N = 160) {
-  const { A, e } = ellipseGeom(a),
-    out = [];
-  for (let k = 0; k <= N; k++) {
-    const nu = (2 * Math.PI * k) / N;
-    out.push(ellipseAt(a, nu, (A * (1 - e * e)) / (1 + e * Math.cos(nu))));
-  }
+  const out = [];
+  for (let k = 0; k <= N; k++) out.push(ellipseAt(a, (2 * Math.PI * k) / N));
   return out;
 }
 export function makeAnchor(a) {
@@ -79,7 +80,26 @@ export function makeAnchor(a) {
     al = norm(add(al, scl(rad, -dot(al, rad))));
     return { rad, along: al, cross: cross3(rad, al) };
   };
-  return { pos, frame };
+  // Sample times for a trail: on an ellipse they are uniform in eccentric anomaly (dense near perigee where the craft is fast), so the trail is smooth.
+  const times = a.ellipse
+    ? (t0, t1, N) => {
+        const { e } = ellipseGeom(a.ellipse),
+          m0 = a.ellipse.m0 ?? 0,
+          k = 2 * Math.PI * a.ellipse.revs,
+          solve = (M) => {
+            let E = M;
+            for (let i = 0; i < 12; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+            return E;
+          },
+          E0 = solve(m0 + k * t0),
+          E1 = solve(m0 + k * t1);
+        return Array.from({ length: N + 1 }, (_, i) => {
+          const E = E0 + ((E1 - E0) * i) / N;
+          return (E - e * Math.sin(E) - m0) / k;
+        });
+      }
+    : null;
+  return { pos, frame, times };
 }
 // arcs: [{t0, t1, o:[along, rad, cross]}] bend a leg of the path: the offset grows and fades as sin(pi * progress), so a transfer is a curve, not a straight line.
 export function craftPos(anc, keys, t, arcs = null) {
