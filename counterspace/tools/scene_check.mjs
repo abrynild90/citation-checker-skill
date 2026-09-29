@@ -44,6 +44,7 @@ const segBox = (s, b) => { // segment vs box interior shrunk 1.5 px (Liang-Barsk
 };
 const distPtSeg = (px, py, x1, y1, x2, y2) => { const dx = x2 - x1, dy = y2 - y1, L = dx * dx + dy * dy, u = L ? Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / L)) : 0; return Math.hypot(px - x1 - u * dx, py - y1 - u * dy); };
 const boxDisc = (b, d) => { const dx = Math.max(b.x0 - d.cx, 0, d.cx - b.x1), dy = Math.max(b.y0 - d.cy, 0, d.cy - b.y1); return Math.hypot(dx, dy) < d.r - 2; };
+const crossesCircle = (b, c) => { const dx0 = Math.max(b.x0 - c.cx, 0, c.cx - b.x1), dy0 = Math.max(b.y0 - c.cy, 0, c.cy - b.y1), fx = Math.max(Math.abs(b.x0 - c.cx), Math.abs(b.x1 - c.cx)), fy = Math.max(Math.abs(b.y0 - c.cy), Math.abs(b.y1 - c.cy)); return Math.hypot(dx0, dy0) < c.r + 2 && Math.hypot(fx, fy) > c.r - 2; };
 const boxCircle = (b, c) => { const dx = Math.max(b.x0 - c.x, 0, c.x - b.x1), dy = Math.max(b.y0 - c.y, 0, c.y - b.y1); return Math.hypot(dx, dy) < c.r; };
 
 // S = {kind, W, H, labels:[{text, x0,y0,x1,y1, leader:[ax,ay,qx,qy]|null, item}], reserved:[{n,x0,y0,x1,y1}], probe, def (default camera), bannerLines}
@@ -71,6 +72,7 @@ function check(S) {
         for (const c of P.polys || []) { for (let k = 0; k + 1 < c.p.length && !near; k++) if (distPtSeg(ax, ay, ...c.p[k], ...c.p[k + 1]) < 4.5) near = true; if (near) break; }
         if (!near) for (const c of P.cloud || []) if (Math.hypot(ax - c[0], ay - c[1]) < 7) { near = true; break; }
         if (!near) for (const d of P.domes || []) if (Math.hypot(ax - d.x, ay - d.y) < d.r) { near = true; break; }
+        if (!near) for (const c of P.circles || []) if (Math.abs(Math.hypot(ax - c.cx, ay - c.cy) - c.r) < 7) { near = true; break; }
         if (!near) for (const m of P.marks || []) if (Math.hypot(ax - m.x, ay - m.y) < m.r + 3) { near = true; break; }
         if (!near) f('leader-end', `${L[i].text} ends on ${other ? 'another referent' : 'nothing'} at (${Math.round(ax)},${Math.round(ay)})`);
       }
@@ -88,6 +90,9 @@ function check(S) {
         if (Math.hypot(qx - ref[0], qy - ref[1]) > lim * 0.9) continue;
         if (B.some((o, j) => j !== i && boxHit(b, o, 2)) || (S.reserved || []).some(r => boxHit(b, r, 1))) continue;
         if ((P.pts || []).some(m => boxCircle(b, { x: m.x, y: m.y, r: m.r + 2 }))) continue;
+        if ((P.circles || []).some(c => c.ring && crossesCircle(b, c))) continue;
+        if ((P.polys || []).some(c => c.role !== 'line' && c.role !== 'orbit' && c.p.some((q, k) => k && segBox([c.p[k - 1][0], c.p[k - 1][1], q[0], q[1]], b)))) continue;
+        if ((P.cloud || []).filter(q => q[0] > b.x0 && q[0] < b.x1 && q[1] > b.y0 && q[1] < b.y1).length > 2) continue;
         ok = true;
       }
       if (ok) f('label-disc', `${L[i].text} on the Earth disc, clear slot within reach`);
@@ -121,7 +126,7 @@ const LIVE = () => {
   // Referents (labelled craft / satellites / aircraft) that the sim draws at this t but the camera cannot show.
   const hidden = [], cp = h.camera.position, T = h.T;
   for (const { it, obj } of h.dyn) {
-    if (it.kind !== 'point' || !['sat', 'plane', 'aircraft'].includes(it.shape) || it.ctx || !it.label || it.small && !it.label) continue;
+    if (it.kind !== 'point' || !it.prim || h.sim.cams[h.camIdx].ref === false) continue;
     const p = it.pos(h.t); if (!p) continue;
     const v = new T.Vector3(...p).project(h.camera), x = (v.x + 1) / 2 * W, y = (1 - v.y) / 2 * H;
     const d = [p[0] - cp.x, p[1] - cp.y, p[2] - cp.z], Ld = Math.hypot(...d), u = d.map(c => c / Ld), b = cp.x * u[0] + cp.y * u[1] + cp.z * u[2], c2 = cp.lengthSq() - 1, disc = b * b - c2;
@@ -129,15 +134,18 @@ const LIVE = () => {
     if (x < 8 || y < 8 || x > W - 8 || y > H - 8 || v.z > 1 || occ) hidden.push(`${it.label} ${occ ? 'behind Earth' : 'off frame'} (${Math.round(x)},${Math.round(y)})`);
   }
   const tb = bn ? bn.getBoundingClientRect().height : 0;
-  return { W, H, labels, reserved, probe, hidden, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit(), t: h.t, act: h._act };
+  return { W, H, labels, reserved, probe, hidden, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), t: h.t, act: h._act };
 };
 const STATIC = () => {
   const svg = document.querySelector('#sceneView > svg'), z = svg && svg.__lay; if (!z) return null;
+  const bn0 = document.querySelector('#sceneView > .illus'), lines0 = bn0 && bn0.getBoundingClientRect().height > 32 ? 2 : 1;
+  const mapLay = l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, item: -1, onDisc: false });
+  if (z.panels) return { panels: z.panels.map(p => ({ W: p.W, H: p.H, labels: p.labels.map(mapLay), reserved: p.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 })), probe: p.probe })), bannerLines: lines0, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
   const labels = z.labels.map(l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, item: -1, onDisc: false }));
   const bn = document.querySelector('#sceneView > .illus'), er = document.getElementById('sceneView').getBoundingClientRect();
   const reserved = z.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 }));
   if (bn) { const b = bn.getBoundingClientRect(); reserved.push({ n: 'banner', x0: b.left - er.left, y0: b.top - er.top, x1: b.right - er.left, y1: b.bottom - er.top }); }
-  return { W: z.W, H: z.H, labels, reserved, probe: z.probe, bannerLines: bn && bn.getBoundingClientRect().height > 32 ? 2 : 1, audit: window.__cs.audit(), earth: svg.dataset.earth };
+  return { W: z.W, H: z.H, labels, reserved, probe: z.probe, bannerLines: bn && bn.getBoundingClientRect().height > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
 };
 
 // ---------------------------------------------------------------- run
@@ -190,7 +198,9 @@ if (MODES.includes('static')) for (const w of VPS) {
     const S = await page.evaluate(STATIC);
     if (!S) { record(tag('static', id, w), [{ type: 'audit', detail: 'no static svg' }]); continue; }
     S.kind = 'static'; S.def = false; S.action = undefined;
-    record(tag('static', id, w), check(S), { W: w, earth: S.earth });
+    const parts = S.panels ? S.panels.map(p => ({ ...S, ...p, kind: 'static', def: false, action: undefined, audit: null })) : [S];
+    if (S.panels && S.audit) parts[0].audit = S.audit;
+    record(tag('static', id, w), parts.flatMap(check), { W: w, earth: S.earth });
     if (SHOT) await page.locator('#sceneView').screenshot({ path: `${out}/static-${id}-${w}.png` });
     if (w === 1440) {
       const url = await page.evaluate(() => window.__cs.exportStill());
@@ -208,15 +218,16 @@ if (MODES.includes('still')) {
     const stillT = await page.evaluate(() => { const h = window.__cs.host(); return h.sim.still; });
     const r = await page.evaluate(async () => {
       const h = window.__cs.host(); h.playing = false; h._lm = {}; h.update(h.sim.still);
-      const url = h.stillPNG('Title', 'SWF 2026, Table 5-1, p. 05-01.'), z = h.stillLayout, s = z.W / 1000;
-      const labels = z.labels.filter(Boolean).map(q => ({ text: q.text, x0: q.x - q.w / 2, x1: q.x + q.w / 2, y0: q.y - q.h / 2, y1: q.y + q.h / 2, leader: q.leader ? [q.ax, q.ay, q.qx, q.qy] : null, item: -1 }));
-      const reserved = z.sBox ? [{ n: 'status', x0: z.sBox[0], y0: z.sBox[1], x1: z.sBox[0] + z.sBox[2], y1: z.sBox[1] + z.sBox[3] }] : [];
-      return { url, W: z.W, H: z.H, labels, reserved, probe: z.probe };
+      const url = h.stillPNG('Title', 'SWF 2026, Table 5-1, p. 05-01.'), z = h.stillLayout;
+      const conv = q => ({ W: q.W, H: q.H,
+        labels: q.labels.filter(Boolean).map(l => ({ text: l.text, x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h / 2, y1: l.y + l.h / 2, leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null, item: -1 })),
+        reserved: (q.rsv || []).map((r, i) => ({ n: 'rsv' + i, x0: r[0], y0: r[1], x1: r[0] + r[2], y1: r[1] + r[3] })), probe: q.probe });
+      return { url, tiles: (z.tiles || [z]).map(conv) };
     });
     fs.writeFileSync(`${out}/still-live-${id}.png`, Buffer.from(r.url.split(',')[1], 'base64'));
-    const S = { kind: 'still', u: r.W / 1000, W: r.W, H: r.H, labels: r.labels, reserved: r.reserved, probe: r.probe, def: false };
-    // stills are ~3000 px wide: scale the pixel rules down to the 1440 px live frame so limits mean the same thing
-    record(tag('still-live', id), check(S), { stillT });
+    const F = r.tiles.flatMap(t => check({ kind: 'still', u: t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false }));
+    // stills are ~3000 px wide: the pixel rules are scaled by u (label font scale) so the limits mean the same thing as in the live frame
+    record(tag('still-live', id), F, { stillT });
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);
   }
   if (errs.length) console.log('console errors still', errs.slice(0, 5));

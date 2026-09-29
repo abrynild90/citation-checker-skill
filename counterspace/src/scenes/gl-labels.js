@@ -7,6 +7,7 @@ import { DEG, ll, occluded } from './core.js';
 import { labelW, offDisc, placeLabels } from './labels.js';
 
 Object.assign(GLHost.prototype, {
+  _placeLabels: placeLabels, // exposed for tools/scene_check.mjs debugging
   // Point on a sphere of radius r at the visible silhouette, `deg` counter-clockwise from screen-right.
   _limb(r, deg) {
     const T = this.T,
@@ -88,7 +89,20 @@ Object.assign(GLHost.prototype, {
           gr = Math.hypot(((c1.x + 1) / 2) * w - gx, ((1 - c1.y) / 2) * h - gy);
         [lx, ly] = offDisc(px, py, lw, lh, gx, gy, gr * 1.05);
       }
-      raw.push({ x: lx, y: ly, px, py, w: lw, h: lh, fixed: L.cls === 'shell', opt: !!L.opt, text, color, avoidDisc: !!L.item?.offGlobe });
+      raw.push({
+        x: lx,
+        y: ly,
+        px,
+        py,
+        w: lw,
+        h: lh,
+        fixed: L.cls === 'shell',
+        opt: !!L.opt,
+        text,
+        color,
+        avoidDisc: !!L.item?.offGlobe,
+        noLeader: !!L.item?.noLeader,
+      });
     }
     // Reserved areas are the real DOM boxes in the live view (banner, status caption); stills pass their own caption box.
     const er = this.el.getBoundingClientRect(),
@@ -100,12 +114,12 @@ Object.assign(GLHost.prototype, {
     const banner = noBanner || (this.sim.cfg.spin && !bn) ? [] : [bn ? rel(bn) : [8, 8, Math.min(w - 16, 430), 32]],
       status = noBanner ? statusBox : this.status && this.statusEl ? rel(this.statusEl) : null;
     let disc = null;
-    if (raw.some((r) => r && r.avoidDisc)) {
+    {
       const c0 = new T.Vector3(0, 0, 0).project(this.camera),
         c1 = new T.Vector3(...this._limb(1, 0)).project(this.camera),
         gx = ((c0.x + 1) / 2) * w,
         gy = ((1 - c0.y) / 2) * h;
-      disc = { cx: gx, cy: gy, r: Math.hypot(((c1.x + 1) / 2) * w - gx, ((1 - c1.y) / 2) * h - gy) * 1.05 };
+      disc = { cx: gx, cy: gy, r: Math.hypot(((c1.x + 1) / 2) * w - gx, ((1 - c1.y) / 2) * h - gy) * 1.005 };
     }
     const obst = [],
       vp = (p) => {
@@ -134,7 +148,10 @@ Object.assign(GLHost.prototype, {
     objs.scale = u;
     this._lastObjs = objs;
     this._lastObst = obst;
-    const chip = !noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : [];
+    const chip = (!noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : []).concat(
+      !noBanner && this.insetEl ? [rel(this.insetEl)] : [],
+    );
+    this._lastPlace = [raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, null, objs];
     const pl = placeLabels(
       raw,
       w,
@@ -270,6 +287,7 @@ Object.assign(GLHost.prototype, {
       polys = [],
       cloud = [],
       domes = [],
+      circles = [],
       refs = [],
       act = [];
     for (const { it, obj } of this.dyn) {
@@ -285,7 +303,7 @@ Object.assign(GLHost.prototype, {
           r = it.kind === 'flash' ? Math.max((u.core.scale.x * 0.35 * sc) / d, 4 * k) : Math.max(px * 0.5 * k, 3 * k);
         pts.push({ x: q[0], y: q[1], r, i: items.indexOf(it), shape: it.shape || 'flash' });
         if (it.kind === 'point' && ['sat', 'plane', 'aircraft'].includes(it.shape) && !it.ctx) {
-          if (it.label || it.small) refs.push({ text: it.label || it.shape, px, x: q[0], y: q[1] });
+          if (it.prim) refs.push({ text: it.label || it.shape, px, x: q[0], y: q[1] });
           if (!it.small || it.label) act.push([q[0], q[1]]);
         }
         if (it.kind === 'point' && it.shape === 'kv') act.push([q[0], q[1]]);
@@ -298,7 +316,7 @@ Object.assign(GLHost.prototype, {
           const q = scr(p);
           if (q[2]) continue;
           cloud.push([q[0], q[1]]);
-          if (!it.bg) act.push([q[0], q[1]]);
+          act.push([q[0], q[1]]);
         }
       }
     }
@@ -333,6 +351,9 @@ Object.assign(GLHost.prototype, {
               if (!q[2]) act.push([q[0], q[1]]);
             }
         }
+      } else if (it.kind === 'shell' && !this.hideShell) {
+        const b = scr(this._limb(it.r, 0));
+        circles.push({ cx: disc.cx, cy: disc.cy, r: Math.hypot(b[0] - disc.cx, b[1] - disc.cy), ring: !it.noRing });
       } else if (it.kind === 'dome') {
         const a = scr(ll(it.at[0], it.at[1])),
           b = scr(ll(it.at[0] + it.radius, it.at[1]));
@@ -346,7 +367,100 @@ Object.assign(GLHost.prototype, {
         ys = inb.map((p) => p[1]);
       action = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
     }
-    return { W: w, H: h, disc, pts, polys, cloud, domes, refs, action };
+    return { W: w, H: h, disc, pts, polys, cloud, domes, circles, refs, action };
+  },
+  // Context inset (cfg.inset): a small schematic seen from above the pole (Earth disc, orbit lines flagged `inset`, a dot per craft), so a tight main camera
+  // keeps the Earth and the orbit in view. Drawn on a 2D canvas over the stage; labels treat it as a reserved box.
+  _makeInset() {
+    const c = document.createElement('canvas');
+    c.setAttribute('aria-hidden', 'true');
+    c.style.cssText = 'position:absolute;right:8px;border:1px solid rgba(255,224,138,.4);border-radius:8px;pointer-events:none;background:rgba(5,8,18,.86)';
+    this.labelLayer.appendChild(c);
+    this.insetEl = c;
+  },
+  _drawInset() {
+    const c = this.insetEl;
+    if (!c) return;
+    const phone = this.el.clientWidth < 520,
+      w = phone ? 128 : 188,
+      h = phone ? 104 : 142,
+      d = Math.min(devicePixelRatio || 1, 2);
+    if (c.width !== Math.round(w * d)) {
+      c.width = Math.round(w * d);
+      c.height = Math.round(h * d);
+      c.style.width = w + 'px';
+      c.style.height = h + 'px';
+      c.style.top = (phone ? 40 : 42) + 'px';
+    }
+    {
+      c.style.left = Math.round(this.el.clientWidth - w - 8) + 'px';
+      c.style.right = 'auto';
+    }
+    const g = c.getContext('2d'),
+      t = this.t;
+    g.setTransform(d, 0, 0, d, 0, 0);
+    g.clearRect(0, 0, w, h);
+    const curves = this.sim.items.filter((i) => i.kind === 'curve' && i.inset),
+      lines = curves.map((i) => i.pts(t)).filter((p) => p.length > 1);
+    let rmax = 1.2;
+    for (const pl of lines) for (const p of pl) rmax = Math.max(rmax, Math.hypot(p[0], p[2]));
+    const sc = (Math.min(w, h - 16) / 2 - 6) / rmax,
+      cx = w / 2,
+      cy = h / 2 + 7;
+    const gr = g.createRadialGradient(cx - 0.3 * sc, cy - 0.3 * sc, 1, cx, cy, sc);
+    gr.addColorStop(0, '#5aa0e6');
+    gr.addColorStop(1, '#123a68');
+    g.fillStyle = gr;
+    g.beginPath();
+    g.arc(cx, cy, sc, 0, 7);
+    g.fill();
+    g.lineWidth = 1.3;
+    curves.forEach((it, k) => {
+      const pl = lines.length === curves.length ? lines[k] : it.pts(t);
+      if (pl.length < 2) return;
+      g.strokeStyle = it.color;
+      g.globalAlpha = 0.9;
+      g.beginPath();
+      pl.forEach((p, i) => (i ? g.lineTo(cx + p[0] * sc, cy + p[2] * sc) : g.moveTo(cx + p[0] * sc, cy + p[2] * sc)));
+      g.stroke();
+    });
+    g.globalAlpha = 1;
+    const dots = [];
+    const ctxDots = [];
+    for (const { it, obj } of this.dyn)
+      if (it.kind === 'point' && obj.visible) {
+        const p = obj.position;
+        if (it.prim) dots.push([cx + p.x * sc, cy + p.z * sc, it.statusColor ? it.statusColor(t) : it.color]);
+        else if (it.ctx) ctxDots.push([cx + p.x * sc, cy + p.z * sc, it.color]);
+      }
+    for (const q of ctxDots) {
+      g.fillStyle = q[2];
+      g.beginPath();
+      g.arc(q[0], q[1], 1.7, 0, 7);
+      g.fill();
+    }
+    if (dots.length) {
+      const mx = dots.reduce((a, q) => a + q[0], 0) / dots.length,
+        my = dots.reduce((a, q) => a + q[1], 0) / dots.length,
+        rr = Math.max(7, ...dots.map((q) => Math.hypot(q[0] - mx, q[1] - my) + 5));
+      g.strokeStyle = '#ffe08a';
+      g.lineWidth = 1;
+      g.setLineDash([3, 3]);
+      g.beginPath();
+      g.arc(mx, my, rr, 0, 7);
+      g.stroke();
+      g.setLineDash([]);
+    }
+    for (const q of dots) {
+      g.fillStyle = q[2];
+      g.beginPath();
+      g.arc(q[0], q[1], 2.6, 0, 7);
+      g.fill();
+    }
+    g.fillStyle = '#c3cbe0';
+    g.font = '600 9.5px system-ui,sans-serif';
+    g.textBaseline = 'top';
+    g.fillText(this.sim.cfg.inset, 6, 4);
   },
   _label(text, posFn, cls, item, dy = 0, dx = 0, short = null, opt = false) {
     const d = document.createElement('div');

@@ -79,14 +79,19 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       cy = (y) => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
     const hits = (x, y) =>
       boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
+    // A leader longer than this (share of the canvas width) is a defect: the label belongs next to its object.
+    const lim = W * (W <= 400 ? 0.3 : 0.22);
     const cost = (x, y) => {
+      let soft = 0;
       const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)),
         qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)),
-        lead = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
-      let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * 0.01;
+        lead = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
+      let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * (c.noLeader ? 0.3 : 0.01);
       if (memo && memo[i]) n += Math.hypot(x - memo[i][0], y - memo[i][1]) * 0.06; // stickiness: keep last frame's slot unless something clearly better exists
       if (lead) {
-        n += Math.hypot(qx - c.px, qy - c.py) * 0.04;
+        const ll0 = Math.hypot(qx - c.px, qy - c.py);
+        if (ll0 > lim * 0.92) n += 330 + (ll0 - lim * 0.92) * 2;
+        n += ll0 * 0.04;
         for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600;
         for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500;
       }
@@ -109,16 +114,26 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
         if (pc > 2) n += Math.min(900, (pc - 2) * 140);
       }
       for (const s of segs) if (segBox(s[0], s[1], s[2], s[3], me)) n += 600;
-      if (disc && c.avoidDisc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.35) {
+      if (disc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.55) {
         const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0),
           dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0);
-        if (Math.hypot(dx0, dy0) < disc.r) n += 900;
+        if (Math.hypot(dx0, dy0) < disc.r) {
+          if (c.avoidDisc) n += 900;
+          else if (!c.onDisc) soft += 64; // a label prefers open sky to the planet whenever a slot is within reach
+        }
       }
-      return n;
+      m.soft = soft;
+      return n + soft;
     };
-    return { c, w, h, cx, cy, cost };
+    const m = { c, w, h, cx, cy, cost, soft: 0 };
+    return m;
   };
-  const scoreAt = (i, x, y, boxes, segs) => mk(i, boxes, segs).cost(x, y);
+  // Cost of label i at (x, y) split into [hard collisions, soft preferences].
+  const scoreAt = (i, x, y, boxes, segs) => {
+    const m = mk(i, boxes, segs),
+      n = m.cost(x, y);
+    return [n - m.soft, m.soft];
+  };
   const place = (i, boxes, segs) => {
     const m = mk(i, boxes, segs);
     if (!m) return null;
@@ -143,12 +158,22 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       }
       return n;
     };
-    for (const [dx, dy] of cand) if (tryAt(cx(c.x + dx), cy(c.y + dy)) < 0.5) break;
+    let bestSoft = 0;
+    const tryAt2 = (x, y) => {
+      const n = tryAt(x, y);
+      if (best && best[0] === x && best[1] === y) bestSoft = m.soft;
+      return n;
+    };
+    for (const [dx, dy] of cand) if (tryAt2(cx(c.x + dx), cy(c.y + dy)) < 0.5) break;
+    // Still resting on the planet (or a soft cost): try rings of slots around the preferred spot, nearest first.
+    if (bestN >= 30 && bestN < 500)
+      for (const rad of [30, 48, 70, 96, 128, 164, 204, 250])
+        for (let a = 0; a < 16; a++) tryAt2(cx(c.x + Math.cos((a * Math.PI) / 8) * rad), cy(c.y + Math.sin((a * Math.PI) / 8) * rad * 0.8));
     // Nothing clean nearby (crowded frame or a reserved band in the way): search the whole free area on a grid.
     if (bestN >= 500)
       for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += ex.fine ? Math.max(3, h * 0.15) : Math.max(4, h * 0.4))
-        for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += ex.fine ? Math.max(5, w * 0.05) : Math.max(6, w * 0.12)) tryAt(gx, gy);
-    return [best[0], best[1], bestN];
+        for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += ex.fine ? Math.max(5, w * 0.05) : Math.max(6, w * 0.12)) tryAt2(gx, gy);
+    return [best[0], best[1], bestN, bestSoft];
   };
   const fin = (i, x, y, boxes, segs, out) => {
     const c = list[i],
@@ -156,7 +181,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     boxes.push({ x, y, w, h });
     const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)),
       qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)),
-      leader = Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
+      leader = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
     if (leader) segs.push([c.px, c.py, qx, qy]);
     out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy };
   };
@@ -166,19 +191,22 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       segs = [],
       out = new Array(list.length).fill(null),
       got = [];
-    let total = 0;
+    let total = 0,
+      hard = 0;
     for (const i of order) {
       const r = place(i, boxes, segs);
       if (!r) continue;
       total += r[2];
+      hard += r[2] - r[3];
       got.push(i);
       fin(i, r[0], r[1], boxes, segs, out);
     }
-    return { out, total, got };
+    return { out, total, got, hard };
   };
   // Repair sweeps: re-place each label with every other one held fixed (lets a late label undo an early greedy choice).
   const sym = (out, got) => {
-    let t = 0;
+    let t = 0,
+      hd = 0;
     for (const j of got) {
       const bx = base(),
         sg = [];
@@ -188,13 +216,15 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
           bx.push({ x: o.x, y: o.y, w: list[k].w, h: list[k].h });
           if (o.leader) sg.push([o.ax, o.ay, o.qx, o.qy]);
         }
-      t += scoreAt(j, out[j].x, out[j].y, bx, sg);
+      const [a, b] = scoreAt(j, out[j].x, out[j].y, bx, sg);
+      t += a + b;
+      hd += a;
     }
-    return t;
+    return [t, hd];
   };
   const repair = (res) => {
-    let cur = sym(res.out, res.got);
-    for (let pass = 0; pass < 2 && cur >= 300; pass++)
+    let [cur, hd] = sym(res.out, res.got);
+    for (let pass = 0; pass < 2 && hd >= 300; pass++)
       for (const i of res.got) {
         const boxes = base(),
           segs = [];
@@ -210,10 +240,11 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
           nb = [],
           ns = [];
         fin(i, r[0], r[1], nb, ns, no);
-        const t = sym(no, res.got);
+        const [t, th] = sym(no, res.got);
         if (t < cur - 1) {
           res.out = no;
           cur = t;
+          hd = th;
         }
       }
     res.total = cur;
@@ -244,7 +275,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
   for (const o of tries) {
     const r = run(o);
     if (!bestRun || r.total < bestRun.total) bestRun = r;
-    if (bestRun.total < 300) break;
+    if (bestRun.hard < 300) break;
   }
   repair(bestRun);
   // An optional label (opt) that still collides with something hard is dropped rather than drawn on top of it.
@@ -262,7 +293,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
             bx.push({ x: q.x, y: q.y, w: list[k].w, h: list[k].h });
             if (q.leader) sg.push([q.ax, q.ay, q.qx, q.qy]);
           }
-        if (scoreAt(j, o.x, o.y, bx, sg) >= 500) {
+        if (scoreAt(j, o.x, o.y, bx, sg)[0] >= 500) {
           bestRun.out[j] = null;
           dropped = true;
         }
@@ -303,3 +334,13 @@ export const labelW = (text, u = 1) => {
   }
   return (w + 16) * u;
 };
+// The "illustrative" banner sits over the scene view: keep it on one line at any width (its CSS allows 70% of the view, which wraps on a phone).
+export function fitBanner(view) {
+  const b = view?.querySelector(':scope > .illus');
+  if (!b) return;
+  b.style.whiteSpace = 'nowrap';
+  b.style.maxWidth = 'calc(100% - 20px)';
+  b.style.fontSize = '';
+  const room = view.clientWidth - 20;
+  if (room > 0 && b.scrollWidth > room) b.style.fontSize = Math.max(8.5, Math.floor((11 * room) / b.scrollWidth * 10) / 10) + 'px';
+}

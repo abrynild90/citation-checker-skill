@@ -4,7 +4,7 @@
 // ============================================================================
 import { LAND, earthImg, loadEarth } from './earth.js';
 import { DEG, ll, mulberry, sunFor, toLL } from './core.js';
-import { labelW, offDisc, placeLabels } from './labels.js';
+import { fitBanner, labelW, offDisc, placeLabels } from './labels.js';
 
 // ---------------------------------------------------------------- SVG fallback (static)
 // A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,
@@ -70,14 +70,87 @@ function earthRaster(proj, CX, CY, R) {
 let earthUpgrade = false,
   pendingStatic = null,
   svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
-export function renderSVG(sim, el, t = sim.still) {
-  const U = 'sf' + ++svgSeq;
-  if (sim.cfg.acts) sim.flags.all = true; // static diagram of an act scene shows every act at once
+// Scenes with cfg.panels (the RPO scene: three unrelated episodes) get one small labelled panel per episode instead of one composite ring.
+function renderPanels(sim, el) {
   const W = el.clientWidth || 640,
-    H = el.clientHeight || 420;
+    H = el.clientHeight || 420,
+    narrow = W < 520,
+    top = narrow ? 38 : 40,
+    gap = 6,
+    n = sim.cfg.panels.length,
+    pw = narrow ? W - 2 * gap : (W - (n + 1) * gap) / n,
+    ph = narrow ? (H - top - (n + 1) * gap) / n : H - top - 2 * gap;
+  fitBanner(el);
+  const root = d3.create('svg').style('background', '#070b16').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: static diagram, one panel per episode`);
+  root.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b16');
+  const lays = [];
+  sim.cfg.panels.forEach((pn, k) => {
+    // focus: the middle of the craft visible at this episode's time
+    const pts = sim.items.filter((i) => i.kind === 'point' && i.shape !== 'none' && i.prim).map((i) => i.pos(pn.t)).filter(Boolean);
+    const focus = pts.reduce((a, p) => [a[0] + p[0] / pts.length, a[1] + p[1] / pts.length, a[2] + p[2] / pts.length], [0, 0, 0]),
+      span = Math.max(0.16, ...pts.map((p) => Math.hypot(p[0] - focus[0], p[1] - focus[1], p[2] - focus[2])));
+    sim.flags.all = false;
+    const node = renderSVG(sim, el, pn.t, {
+      panel: true,
+      W: pw,
+      H: ph,
+      view: { focus, span },
+      status: narrow ? '' : pn.status,
+      title: narrow ? `${pn.title} · ${pn.brief}` : pn.title,
+      keep: true,
+    });
+    const x = narrow ? gap : gap + k * (pw + gap),
+      y = narrow ? top + gap + k * (ph + gap) : top + gap;
+    node.setAttribute('x', x);
+    node.setAttribute('y', y);
+    node.setAttribute('width', pw);
+    node.setAttribute('height', ph);
+    root.node().appendChild(node);
+    const lay = node.__lay;
+    lay.ox = x;
+    lay.oy = y;
+    lays.push(lay);
+    root.append('rect').attr('x', x).attr('y', y).attr('width', pw).attr('height', ph).attr('fill', 'none').attr('stroke', 'rgba(255,224,138,.35)').attr('rx', 6);
+  });
+  sim.flags.all = true;
+  root.node().__lay = { panels: lays, W, H };
+  root.node().dataset.earth = root.node().querySelector('svg')?.dataset.earth || 'vector';
+  el.querySelector(':scope > svg')?.remove();
+  el.prepend(root.node());
+  if (!earthImg) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (el.id === 'sceneView' || reduced) {
+      pendingStatic = { sim, el, t: sim.still, node: root.node() };
+      if (!earthUpgrade) {
+        earthUpgrade = true;
+        loadEarth(2048).then((ok) => {
+          earthUpgrade = false;
+          const q = pendingStatic;
+          if (ok && q && q.node.isConnected) {
+            pendingStatic = null;
+            renderSVG(q.sim, q.el, q.t);
+          }
+        });
+      }
+    }
+  }
+  return root.node();
+}
+export function renderSVG(sim, el, t = sim.still, opts = {}) {
+  if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el);
+  const U = 'sf' + ++svgSeq;
+  if (!opts.panel) fitBanner(el);
+  if (sim.cfg.acts && !opts.panel) sim.flags.all = true; // static diagram of an act scene shows every act at once
+  const W = opts.W || el.clientWidth || 640,
+    H = opts.H || el.clientHeight || 420;
   const cam = sim.cams[0].pos,
-    zoomed = !!(sim.items._arc && sim.cams[0].look),
-    cl = toLL(sim.cfg.staticCenter ? ll(sim.cfg.staticCenter[0], sim.cfg.staticCenter[1]) : zoomed ? sim.items._arc.mid : cam);
+    zoomed = !!(sim.items._arc && sim.cams[0].look);
+  let cl = toLL(sim.cfg.staticCenter ? ll(sim.cfg.staticCenter[0], sim.cfg.staticCenter[1]) : zoomed ? sim.items._arc.mid : cam);
+  if (opts.view) {
+    // a panel looks at its craft from the side: the view axis is turned away from them so they sit beside the Earth, not in front of it
+    const fl = toLL(opts.view.focus);
+    cl = { lat: Math.max(-70, Math.min(70, fl.lat + 24)), lon: fl.lon - 38 };
+  }
   const rot = d3.geoRotation([-cl.lon, -cl.lat]);
   // Unit projection (globe radius 1, origin at the globe centre, y down); scaled and shifted below once the fit is known.
   const unit = (p) => {
@@ -90,10 +163,10 @@ export function renderSVG(sim, el, t = sim.still) {
   };
   // Status text is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
-    stTxt = sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
-    maxCh = Math.floor((W - 40) / 6.6),
+    stTxt = opts.panel ? opts.status || '' : sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
+    maxCh = Math.floor((W - (opts.panel ? 14 : 40)) / (opts.panel ? 6 : 6.6)),
     stLines = [];
-  if (st) {
+  if (opts.panel ? stTxt : st) {
     let cur = '';
     for (const wd of stTxt.split(' ')) {
       if ((cur + ' ' + wd).trim().length > maxCh && cur) {
@@ -104,7 +177,7 @@ export function renderSVG(sim, el, t = sim.still) {
     if (cur) stLines.push(cur);
   }
   const stH = stLines.length * 16 + 10,
-    stY = H - 34 - stH,
+    stY = H - (opts.panel ? 6 : 34) - stH,
     stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * 6.6 + 24);
   // General fit rule (all scenes, all widths): the globe with its glow and every drawn subject (paths, points, debris, beams)
   // must sit inside the free area: below the banner, above the status/caption band, inside the side margins. The globe is never cropped.
@@ -122,7 +195,10 @@ export function renderSVG(sim, el, t = sim.still) {
   {
     for (const it of sim.items) {
       if (it.ctx) continue; // context-only actors (constellations) never shrink the fit
-      if (it.kind === 'curve') it.pts(t).forEach((q) => grow(unit(q)));
+      if (it.kind === 'curve') {
+        // On a phone the Earth gets the room: orbit and belt lines run off the frame, only trails and paths of the action set the fit.
+        if (!(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
+      }
       else if (it.kind === 'point' && !it.liveOnly) {
         const q = it.pos(t);
         if (q) grow(unit(q));
@@ -143,21 +219,28 @@ export function renderSVG(sim, el, t = sim.still) {
     }
   }
   // Real banner box (the page's "illustrative" note sits over the diagram) and the footer strip are reserved for labels and the fit.
-  let bRes = [8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26];
-  {
+  let bRes = opts.panel ? [-20, -20, 1, 1] : [8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26];
+  if (!opts.panel) {
     const bn = el.querySelector(':scope > .illus'),
       er = el.getBoundingClientRect(),
       br = bn?.getBoundingClientRect();
     if (br && br.width && er.width) bRes = [br.left - er.left - 3, br.top - er.top - 3, br.width + 6, br.height + 6];
   }
-  const ftxt = `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`,
-    fw = Math.min(W - 12, ftxt.length * 5.6 + 16);
+  const ftxt = opts.panel ? opts.title || '' : `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`,
+    fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * 5.6 + 16);
   const fx = 14,
-    fTop = Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4),
+    fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4),
     fBot = stY - 8;
-  const R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
-  const CX = W / 2 - ((x0 + x1) / 2) * R,
+  let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
+  let CX = W / 2 - ((x0 + x1) / 2) * R,
     CY = (fTop + fBot) / 2 - ((y0 + y1) / 2) * R;
+  if (opts.view) {
+    // Panel: the craft fill the panel (span = their half-extent); the Earth is drawn wherever it falls.
+    const f = unit(opts.view.focus);
+    R = Math.max(30, Math.min((W - 16) / (2 * opts.view.span * 1.5), (fBot - fTop) / (2 * opts.view.span * 1.5)));
+    CX = W / 2 - f.x * R;
+    CY = (fTop + fBot) / 2 - f.y * R;
+  }
   const proj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([CX, CY]).scale(R).clipAngle(90);
   const project = (p) => {
     const u = unit(p);
@@ -384,11 +467,24 @@ export function renderSVG(sim, el, t = sim.still) {
   shells.forEach((it, i) => {
     const lab = it.staticLabel ?? it.label;
     if (!lab) return;
-    const a = (it.ang ?? 35 + i * 14) * DEG,
-      px = CX + it.r * R * Math.cos(a),
+    const tx = it.short && W < 520 && !it.staticLabel ? it.short : lab,
+      w = labelW(tx);
+    // the label sits on the shell line at its preferred angle, or at the nearest angle where that point is inside the frame
+    let a = (it.ang ?? 35 + i * 14) * DEG,
+      shown = false;
+    for (const k of [0, 10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 80, -80, 100, -100, 130, -130, 160, -160, 180]) {
+      const b = a + k * DEG,
+        qx = CX + it.r * R * Math.cos(b),
+        qy = CY - it.r * R * Math.sin(b);
+      if (qx > w / 2 + 12 && qx < W - w / 2 - 12 && qy > fTop + 10 && qy < stY - 24) {
+        a += k * DEG;
+        shown = true;
+        break;
+      }
+    }
+    if (!shown) return;
+    const px = CX + it.r * R * Math.cos(a),
       py = CY - it.r * R * Math.sin(a),
-      tx = it.short && W < 520 && !it.staticLabel ? it.short : lab,
-      w = labelW(tx),
       o = (w / 2) * Math.abs(Math.cos(a)) + 9.5 * Math.abs(Math.sin(a)) + 7; // the pill sits just outside its dashed shell line, never on it
     cands.push({ x: px + Math.cos(a) * o, y: py - Math.sin(a) * o, px, py, w, h: 19, fixed: true, text: tx, color: it.color });
   });
@@ -601,14 +697,15 @@ export function renderSVG(sim, el, t = sim.still) {
       g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7);
     }
   }
-  const reserved = [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22]];
+  const reserved = opts.panel ? [[(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6]] : [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22]];
+  if (opts.panel && opts.title) reserved.push([0, 0, W, 20]);
   cands.forEach((c) => {
     if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, CX, CY, R * 1.08);
   });
   cands.forEach((c) => {
     c.avoidDisc = !!c.off;
   });
-  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.08 }, obst, null, {
+  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.02 }, obst, null, {
     marks,
     rings: ringsL,
     parts: { count: pcount },
@@ -644,7 +741,7 @@ export function renderSVG(sim, el, t = sim.still) {
       .attr('fill', c.color)
       .text(c.text);
   });
-  if (st) {
+  if (opts.panel ? stTxt : st) {
     g.append('rect')
       .attr('x', (W - stW) / 2)
       .attr('y', stY)
@@ -656,14 +753,17 @@ export function renderSVG(sim, el, t = sim.still) {
       g
         .append('text')
         .attr('x', W / 2)
-        .attr('y', stY + 17 + k * 16)
+        .attr('y', stY + (opts.panel ? 15 : 17) + k * 16)
         .attr('text-anchor', 'middle')
         .attr('fill', '#ffe08a')
-        .attr('font-size', 12)
+        .attr('font-size', opts.panel ? 10 : 12)
         .text(l),
     );
   }
-  {
+  if (opts.panel) {
+    if (opts.title)
+      svg.append('text').attr('x', 8).attr('y', 14).attr('fill', '#ffe08a').attr('font-family', 'system-ui').attr('font-weight', 700).attr('font-size', 11).text(opts.title);
+  } else {
     const ft = ftxt;
     svg
       .append('rect')
@@ -700,7 +800,7 @@ export function renderSVG(sim, el, t = sim.still) {
     svg.node().__lay = {
       W,
       H,
-      probe: { disc: { cx: CX, cy: CY, r: R }, pts: marks.map((m) => ({ x: m.x, y: m.y, r: m.r, i: -2 })), polys: dPolys, cloud: dCloud, domes: [] },
+      probe: { disc: { cx: CX, cy: CY, r: R }, circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })), pts: marks.map((m) => ({ x: m.x, y: m.y, r: m.r, i: -2 })), polys: dPolys, cloud: dCloud, domes: [] },
       labels: lb,
       marks,
       rings: ringsL,
@@ -711,6 +811,7 @@ export function renderSVG(sim, el, t = sim.still) {
       ],
     };
   }
+  if (opts.panel) return svg.node();
   el.querySelector(':scope > svg')?.remove();
   el.prepend(svg.node());
   // Static mode (reduced motion, or a scene opened without WebGL): fetch the imagery once and redraw this diagram with the photographic globe.

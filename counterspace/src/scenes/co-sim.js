@@ -81,9 +81,20 @@ export function makeAnchor(a) {
   };
   return { pos, frame };
 }
-export function craftPos(anc, keys, t) {
+// arcs: [{t0, t1, o:[along, rad, cross]}] bend a leg of the path: the offset grows and fades as sin(pi * progress), so a transfer is a curve, not a straight line.
+export function craftPos(anc, keys, t, arcs = null) {
   const p = anc.pos(t),
     f = anc.frame(t),
     o = keyAt(keys, t);
+  if (arcs)
+    for (const ar of arcs) {
+      const u = (t - ar.t0) / (ar.t1 - ar.t0);
+      if (u > 0 && u < 1) {
+        const w = Math.sin(Math.PI * u);
+        o[0] += ar.o[0] * w;
+        o[1] += ar.o[1] * w;
+        o[2] += ar.o[2] * w;
+      }
+    }
   return add(add(add(p, scl(f.along, o[0])), scl(f.rad, o[1])), scl(f.cross, o[2]));
 }

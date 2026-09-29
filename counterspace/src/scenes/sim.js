@@ -92,13 +92,16 @@ export function buildSim(cfg) {
   for (const a of cfg.actors) {
     if (a.type === 'craft') {
       const anc = anchors[a.anchor],
-        raw = (t) => craftPos(anc, a.key, t),
+        raw = (t) => craftPos(anc, a.key, t, a.arcs),
         inVis = (t) => flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]),
         pos = (t) => (actOn(t, a.acts) && inVis(t) ? raw(t) : null);
-      crafts[a.id] = { raw, pos };
+      crafts[a.id] = { raw, pos, anc };
       const it = {
         kind: 'point',
         shape: a.model || 'sat',
+        prim: true,
+        minPx: a.minPx,
+        maxPx: a.maxPx,
         small: !!a.small,
         scale: a.scale ?? null,
         color: a.color,
@@ -164,6 +167,7 @@ export function buildSim(cfg) {
       items.push({
         kind: 'point',
         shape: 'none',
+        noLeader: true,
         color: a.color,
         label: a.label,
         short: a.short,
@@ -178,6 +182,7 @@ export function buildSim(cfg) {
       items.push({
         kind: 'curve',
         gate: true,
+        inset: true,
         all,
         pts: (t) => (actOn(t, a.acts) ? all : []),
         color: a.color,
@@ -221,6 +226,7 @@ export function buildSim(cfg) {
       items.push({
         kind: 'curve',
         orbit: true,
+        inset: !!a.inset,
         pts: () => pts,
         color: a.color,
         opacity: a.opacity ?? 0.55,
@@ -251,10 +257,11 @@ export function buildSim(cfg) {
     if (a.type === 'target' && tgt) {
       const pts = [];
       for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, (k / 180) * 2 * Math.PI));
-      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35 });
+      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35, role: 'orbit' });
       items.push({
         kind: 'point',
         shape: 'sat',
+        prim: true,
         color: a.color,
         label: a.label,
         short: a.short,
@@ -318,6 +325,7 @@ export function buildSim(cfg) {
       const item = {
         kind: 'point',
         shape: 'aircraft',
+        prim: true,
         scale: a.gnss ? null : 1.1,
         color: '#e9edf7',
         label: a.label,
@@ -379,15 +387,15 @@ export function buildSim(cfg) {
       const N = 60,
         all = [];
       for (let k = 0; k <= N; k++) all.push(bez(k / N));
-      items._arc = { from, to, mid: bez(0.5) };
+      items._arc = { from, to, mid: bez(0.5), bez, t0: a.t0 };
       // Faint predicted path (whole arc, always visible) under the bright growing trail.
-      items.push({ kind: 'curve', avoid: true, pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028 });
+      items.push({ kind: 'curve', avoid: true, pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028, role: 'action' });
       items.push({
         kind: 'curve',
         dynamic: true,
         avoid: true,
         all,
-        thick: 0.0065,
+        thick: 0.0042,
         color: a.color,
         width: 2,
         label: a.label,
@@ -424,8 +432,18 @@ export function buildSim(cfg) {
       const HOT = [1, 0.8, 0.5],
         MID = [1, 0.5, 0.2],
         COOL = [0.62, 0.17, 0.12];
+      let kc = 0,
+        kb = 1e9;
+      P.forEach((p, k) => {
+        const sc = Math.abs(p.dw - 1) * 3 + Math.abs(p.da) / a.spreadAlt + Math.abs(p.du) * 8 + Math.abs(p.di) / a.spreadInc;
+        if (sc < kb) {
+          kb = sc;
+          kc = k;
+        }
+      });
       const cloud = {
         kind: 'cloud',
+        labelIdx: kc,
         n,
         color: a.color,
         dynCol: true,
@@ -497,6 +515,7 @@ export function buildSim(cfg) {
       items.push({
         kind: 'curve',
         dynamic: true,
+        trackable: true,
         avoid: true,
         opt: a.opt,
         short: a.short,
@@ -672,7 +691,7 @@ export function buildSim(cfg) {
         const raan = (p * 360) / a.planes,
           pts = [];
         for (let k = 0; k <= 120; k++) pts.push(orbitPos(a.alt, a.inc, raan, (k / 120) * 2 * Math.PI));
-        items.push({ kind: 'curve', ctx: true, pts: () => pts, color: a.color, opacity: 0.13 });
+        items.push({ kind: 'curve', ctx: true, inset: !!a.inset, pts: () => pts, color: a.color, opacity: 0.13 });
         for (let s = 0; s < a.per; s++) {
           const ph = (s / a.per) * 2 * Math.PI + p * 0.5;
           const pos = (t) => orbitPos(a.alt, a.inc, raan, ph + t * a.speed * 2 * Math.PI);
@@ -704,11 +723,11 @@ export function buildSim(cfg) {
         const th = (k / 72) * 2 * Math.PI;
         q.push(add(scl(c, Math.cos(rho) * 1.006), scl(add(scl(e1, Math.cos(th)), scl(e2, Math.sin(th))), Math.sin(rho) * 1.006)));
       }
-      items.push({ kind: 'curve', pts: () => q, color: '#ff8080', opacity: 1, thick: 0.004 });
+      items.push({ kind: 'curve', pts: () => q, color: '#ff8080', opacity: 1, thick: 0.004, role: 'action' });
     }
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
-      items.push({ kind: 'point', shape: 'sat', color: a.color, label: a.label, labelDy: -30, scale: 1.7, bright: true, pos: () => g });
+      items.push({ kind: 'point', shape: 'sat', prim: true, color: a.color, label: a.label, labelDy: -30, scale: 1.7, bright: true, pos: () => g });
       a.beams.forEach((b, bi) => {
         // space side stays bright; only the ground-side segment dims once the ground network is hit
         const e = ll(b[0], b[1], 1.003),
@@ -807,7 +826,7 @@ export function buildSim(cfg) {
             t0: pulse[0] + dt,
             color: '#ffb3b3',
             ringColor: '#ff6b6b',
-            size: 0.34,
+            size: 0.2,
             span: 0.16,
           }),
         );
@@ -831,8 +850,8 @@ export function buildSim(cfg) {
         kind: 'cloud',
         n,
         size: 0.0125,
-        minPx: 1.5,
-        maxPx: 6,
+        minPx: 2.6,
+        maxPx: 9,
         dynCol: true,
         label: a.label,
         short: a.short,
@@ -872,7 +891,7 @@ export function buildSim(cfg) {
                 ? 'Attackers reach the ground management network and push malicious commands (illustrative network)'
                 : t < a.t1
                   ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
-                  : 'Modems offline (red) · satellite kept working: the attack hit the ground segment';
+                  : 'Modems offline (red) · the satellite kept working';
           return t >= a.t0 ? `${tx} · ${dark(t)} of ${n} simulated terminals offline` : tx;
         },
       });
@@ -911,7 +930,7 @@ export function buildSim(cfg) {
         };
         ac.statusColor = (t) => (inZone(t) ? C.jam : C.ok);
         ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GNSS lost' : ac.label + ' · GNSS OK');
-        for (let k = 0; k < 2; k++)
+        for (let k = 0; k < 1; k++)
           items.push({
             kind: 'beam',
             link: true,
@@ -940,18 +959,151 @@ export function buildSim(cfg) {
   const wide = { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) },
     polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
   let cams;
-  const frameCam = (fr) => {
+  // Frame camera: position and target given in an anchor's local frame [along, radial, cross-track] in Earth radii. `follow: true` re-solves it at every t,
+  // so the camera rides with a moving craft and the craft is always in frame.
+  const frameAt = (fr, t) => {
     const an = anchors[fr.anchor],
-      p = an.pos(fr.t),
-      f = an.frame(fr.t),
+      p = an.pos(t),
+      f = an.frame(t),
       o = (v) => add(add(add(p, scl(f.along, v[0])), scl(f.rad, v[1])), scl(f.cross, v[2]));
-    return { pos: o(fr.from), look: o(fr.to), up: fr.up === false ? null : f.rad, hideShell: true };
+    return { pos: o(fr.from), look: o(fr.to), up: fr.up === false ? null : f.rad };
+  };
+  const frameCam = (fr) => ({ ...frameAt(fr, fr.t), hideShell: true, follow: fr.follow ? (t) => frameAt(fr, t) : null });
+  // Dolly camera for the hit scenes: at a few key times the camera is fitted to everything that matters then (launch site, target, hit point, the
+  // bulk of the debris) so the action fills the frame; between keys it glides, so it pulls back as the debris spreads.
+  const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const ASPECT = IS_PHONE ? 1.04 : 1.22,
+    tanV = Math.tan(20 * DEG) * Math.max(1, 1.1 / ASPECT),
+    tanH = tanV * ASPECT;
+  // The viewing direction n is fixed for the whole scene (no roll or jump as the debris spreads); only the target point and the distance are fitted.
+  const fitPose = (pts, n, look, o = {}) => {
+    let pos = null;
+    for (let D = o.dMin ?? 0.9; D <= (o.dMax ?? 9); D += 0.05) {
+      pos = add(look, scl(n, D));
+      const f = norm(add(look, scl(pos, -1))),
+        r = norm(cross3(f, o.up || [0, 1, 0])),
+        u = cross3(r, f);
+      if (
+        pts.every((q) => {
+          const v = add(q, scl(pos, -1)),
+            z = dot(v, f);
+          return z > 0.1 && Math.abs(dot(v, r) / z) <= tanH * (o.fillX ?? 0.8) && Math.abs(dot(v, u) / z) <= tanV * (o.fillY ?? 0.66);
+        })
+      )
+        break;
+    }
+    return { pos, look };
+  };
+  const centroid = (pts) => scl(pts.reduce((q, p) => add(q, p), [0, 0, 0]), 1 / pts.length);
+  const debrisPts = (tk, pct) => {
+    const cl = items.find((i) => i.kind === 'cloud' && i.dynCol && !i.colored);
+    if (!cl || !tgt || tk <= tgt.t + 0.01) return [];
+    const arr = new Float32Array(cl.n * 3);
+    cl.fill(tk, arr);
+    const q = [];
+    for (let k = 0; k < cl.n; k++) if (arr[3 * k] || arr[3 * k + 1] || arr[3 * k + 2]) q.push([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]);
+    if (q.length < 3) return [];
+    const c = scl(q.reduce((a, p) => add(a, p), [0, 0, 0]), 1 / q.length),
+      d = q.map((p) => len(add(p, scl(c, -1)))),
+      cut = d.slice().sort((x, y) => x - y)[Math.floor((q.length - 1) * pct)];
+    return q.filter((p, k) => d[k] <= cut).filter((p, k, a) => k % Math.max(1, Math.floor(a.length / 40)) === 0);
+  };
+  const dollyCam = () => {
+    const ht = tgt.t,
+      arc = items._arc,
+      keys = [0, ht, ht + 0.1, 0.6, 1],
+      core = [tgt.hitPos].concat(arc ? [arc.from] : [], aircraftPos ? [aircraftPos(0)] : []),
+      c0 = centroid(core),
+      cn = norm(c0);
+    let sd = cross3(cn, [0, 1, 0]);
+    if (len(sd) < 0.2) sd = [1, 0, 0];
+    const tilt = (cfg.fitTilt ?? 24) * DEG,
+      n = norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
+      poses = keys.map((tk) => {
+        const P = core.slice();
+        if (arc && tk <= ht + 0.05) P.push(arc.to);
+        if (tk <= ht) P.push(tgt.pos(tk));
+        if (tk > ht) P.push(...debrisPts(tk, cfg.fitPct ?? 0.8));
+        return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
+          dMin: cfg.fitMin ?? 0.3,
+          dMax: cfg.fitMax ?? 6.5,
+          fillX: cfg.fitFill ?? 0.9,
+          fillY: (cfg.fitFill ?? 0.9) * 0.8,
+        });
+      });
+    const at = (t) => {
+      let i = 0;
+      while (i < keys.length - 2 && t > keys[i + 1]) i++;
+      const s = smooth((t - keys[i]) / (keys[i + 1] - keys[i])),
+        a = poses[i],
+        b = poses[i + 1];
+      return { pos: add(scl(a.pos, 1 - s), scl(b.pos, s)), look: add(scl(a.look, 1 - s), scl(b.look, s)), up: null };
+    };
+    return { name: 'Follow the action', follow: at, ...at(0), hideShell: true };
   };
   if (cfg.cameras)
     cams = cfg.cameras.map((c0) => {
       const c = IS_PHONE && c0.phone ? { ...c0, ...c0.phone } : c0;
-      if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ...frameCam(c.frame) };
-      return { name: c.name, auto: !!c.auto, act: c.act, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
+      if (c.fit && tgt) {
+        // Tracking camera: fitted at every t to a ground site and the (moving) target, so the satellite is always in frame.
+        const site = ll(c.fit.site[0], c.fit.site[1], 1.004),
+          mid = norm(add(site, tgt.pos(tgt.t))),
+          sd = norm(cross3(mid, [0, 1, 0])),
+          tilt = (c.fit.tilt ?? 26) * DEG,
+          n = norm(add(scl(mid, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.fit.side ?? 1)))),
+          at = (t) => {
+            const q = tgt.pos(t),
+              P = [site, q],
+              look = scl(add(scl(site, 0.5), scl(q, 0.5)), 0.97);
+            return { ...fitPose(P, n, look, { dMin: 0.3, dMax: c.fit.dMax ?? 6, fillX: c.fit.fill ?? 0.86, fillY: (c.fit.fill ?? 0.86) * 0.8 }), up: null };
+          };
+        return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(tgt.t), hideShell: true };
+      }
+      if (c.fitPts) {
+        // Static camera fitted once to a list of [lat, lon, r] points, seen from the direction dir = [lat, lon].
+        const P = c.fitPts.pts.map((q) => ll(q[0], q[1], q[2] ?? 1.004)),
+          n = norm(ll(c.fitPts.dir[0], c.fitPts.dir[1])),
+          look = scl(centroid(P), c.fitPts.lookK ?? 1),
+          v = fitPose(P, n, look, { dMin: 1, dMax: 12, fillX: c.fitPts.fill ?? 0.86, fillY: (c.fitPts.fillY ?? c.fitPts.fill ?? 0.86) * 0.8 });
+        return { name: c.name, auto: false, ref: c.ref, pos: v.pos, look: v.look, hideShell: true };
+      }
+      if (c.trackPath) {
+        // Camera that follows a suborbital path: fitted at every t to the launch site, the head of the path and (later) the GEO ring above the apogee.
+        const it = items.find((i) => i.trackable),
+          all = it.all,
+          up = norm(all[all.length >> 1]),
+          sd = norm(cross3(up, [0, 1, 0])),
+          tilt = (c.trackPath.tilt ?? 30) * DEG,
+          n = norm(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1)))),
+          at = (t) => {
+            const pl = it.pts(t),
+              P = [all[0], pl.length ? pl[pl.length - 1] : all[1]];
+            if (t > (c.trackPath.geoT ?? 0.35)) P.push(scl(up, rAlt(GEO_ALT)));
+            const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
+            return { ...fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8 }), up: null };
+          };
+        return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(0), hideShell: true };
+      }
+      if (c.fitCraft) {
+        // Tight follow camera on a set of craft: the view direction is given in the anchor's local frame [along, radial, cross-track] and stays fixed;
+        // the target point and the distance are fitted at every t to the craft (now and a little ahead), so the action always fills the frame.
+        const an = anchors[c.fitCraft.anchor],
+          ids = c.fitCraft.ids,
+          at = (t) => {
+            const P = [];
+            for (const id of ids) for (const dt of [-0.03, 0, 0.03]) {
+              const q = crafts[id].raw(Math.max(0, Math.min(1, t + dt)));
+              if (q) P.push(q);
+            }
+            const f = an.frame(t),
+              d = c.fitCraft.dir,
+              n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
+            return { ...fitPose(P, n, centroid(P), { up: f.rad, dMin: c.fitCraft.dMin ?? 0.3, dMax: 6, fillX: c.fitCraft.fill ?? 0.8, fillY: (c.fitCraft.fill ?? 0.8) * 0.8 }), up: f.rad };
+          };
+        return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
+      }
+      if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, ...frameCam(c.frame) };
+      return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
     });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) {
@@ -987,15 +1139,19 @@ export function buildSim(cfg) {
         : ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)),
     };
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
+    if (H && cfg.dolly !== false) cams.unshift(dollyCam());
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
   // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.
   const stillCamFor = (t) => {
     if (A) {
       const i = A.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === A.length - 1));
-      const c = cams[A[Math.max(0, i)].cam];
-      return { pos: c.pos, look: c.look, up: c.up, hideShell: true };
+      const c = cams[A[Math.max(0, i)].cam],
+        v = c.follow ? c.follow(t) : c;
+      return { pos: v.pos, look: v.look, up: v.up, hideShell: true };
     }
-    return cfg.stillFrame ? frameCam(cfg.stillFrame) : null;
+    if (cfg.stillFrame) return frameCam(cfg.stillFrame);
+    if (cfg.stillDolly !== false && cfg.stillCam == null && cams[0].follow && !cfg.acts) return { ...cams[0].follow(t), hideShell: true };
+    return null;
   };
   return { cfg, items, cams, flags, stillCamFor, still: cfg.still ?? 0.5, sunRef: cams[0].pos };
 }

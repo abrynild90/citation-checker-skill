@@ -3,6 +3,7 @@
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
 import { DEG, IS_PHONE, mulberry, norm, occluded, scl, sunFor } from './core.js';
+import { fitBanner } from './labels.js';
 import { earthImg, earthPromise, getLandCanvas, loadEarth, oceanMask, ringCanvas, spriteCanvas } from './earth.js';
 
 // ---------------------------------------------------------------- WebGL host (single shared renderer)
@@ -26,6 +27,7 @@ export class GLHost {
     this.onTick = null;
     this.lock = null;
     this._act = null;
+    this._user = false; // the viewer dragged or zoomed: a following camera stays where they put it until they pick a preset
     this._bindDrag();
     this.ro = new ResizeObserver(() => this.resize());
   }
@@ -40,6 +42,7 @@ export class GLHost {
     this.labelLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;overflow:hidden';
     el.appendChild(this.labelLayer);
     this.ro.observe(el);
+    fitBanner(el);
     this.resize();
   }
   resize() {
@@ -163,6 +166,8 @@ export class GLHost {
       this.labelLayer.appendChild(c);
       this.chipEl = c;
     }
+    this.insetEl = null;
+    if (sim.cfg.inset) this._makeInset();
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.leaders.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;overflow:visible');
     this.leaders.setAttribute('aria-hidden', 'true');
@@ -232,6 +237,7 @@ export class GLHost {
   setCam(i, instant) {
     const c = this.sim.cams[i];
     this.camIdx = i;
+    this._user = false;
     this.hideShell = !!c.hideShell;
     this._syncShell();
     this.target.set(...(c.look || [0, 0, 0]));
@@ -252,6 +258,15 @@ export class GLHost {
         this._act = ai;
         this.setCam(acts[ai].cam, true);
       }
+    }
+    // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
+    const fc = this.sim.cams[this.camIdx];
+    if (fc?.follow && !this._user) {
+      const v = fc.follow(t);
+      this.target.set(...v.look);
+      this.camera.position.set(...v.pos);
+      this.camera.up.set(...(v.up || [0, 1, 0]));
+      this.camera.lookAt(this.target);
     }
     for (const { it, obj } of this.dyn) {
       if (it.kind === 'curve') {
@@ -274,6 +289,7 @@ export class GLHost {
         obj.visible = it.ref.pts(t).length > 1;
       } else if (it.kind === 'tube') {
         const n = it.ref.pts(t).length;
+        if (obj.material.uniforms.uHead && it.ref.fade !== false) obj.material.uniforms.uHead.value = n < 2 ? 0 : Math.min(1, (n - 1) / it.segs);
         obj.geometry.setDrawRange(0, n < 2 ? 0 : Math.round(Math.min(1, (n - 1) / it.segs) * it.segs) * 30);
       } else if (it.kind === 'point') {
         const p = it.pos(t);
@@ -393,6 +409,7 @@ export class GLHost {
       }
     }
     if (this.sim.cfg.spin) this.root.rotation.y = t * Math.PI * 2;
+    this._drawInset();
     if (this.statusEl) {
       this.statusEl.textContent = this.status ? this.status.text(t) : '';
       this._applyBands();
@@ -512,6 +529,8 @@ export class GLHost {
     this.status = null;
     this.statusEl = null;
     this.chipEl = null;
+    this.insetEl = null;
+    this._lastPlace = this._lastObjs = this._lastObst = null;
   }
   memory() {
     return { ...this.renderer.info.memory, programs: this.renderer.info.programs?.length };
@@ -522,6 +541,7 @@ export class GLHost {
       sy = 0;
     cv.addEventListener('pointerdown', (e) => {
       this.dragging = true;
+      this._user = true;
       sx = e.clientX;
       sy = e.clientY;
       cv.setPointerCapture(e.pointerId);
@@ -554,6 +574,7 @@ export class GLHost {
       'wheel',
       (e) => {
         e.preventDefault();
+        this._user = true;
         const p = this.camera.position,
           o = p.clone().sub(this.target);
         const r = Math.max(this.target.length() > 0 ? 0.35 : 1.6, Math.min(12, o.length() * (1 + Math.sign(e.deltaY) * 0.08)));

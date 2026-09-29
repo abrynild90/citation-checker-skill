@@ -3,23 +3,20 @@
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
 import { GLHost } from './gl-host.js';
-import { ll } from './core.js';
+import { DEG, ll } from './core.js';
 import { earthImg } from './earth.js';
 
 Object.assign(GLHost.prototype, {
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
   // the illustrative banner, caption and source into the PNG, then restore the live size.
-  stillPNG(title, cite, targetW = 3000) {
+  // One frame of the still: the render, its labels with leaders and the status caption, drawn into a W x H canvas (no bands). `o.t` picks the scene time and
+  // the act camera for that time (used for the tiles of a multi-episode still), `o.status` overrides the caption, `o.title` adds a title strip.
+  _stillBody(W, H, o = {}) {
     const vw = this.el.clientWidth,
-      vh = this.el.clientHeight,
-      pr = this.renderer.getPixelRatio();
-    const maxDim = Math.min(this.maxTex, 4096),
-      W = Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
-      H = Math.round((W * vh) / vw);
-    // A scene may define its own still framing (cfg.stillCam) so the print image shows the whole subject and its labels, whatever the live camera shows.
-    const cam = this.camera,
-      keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell, up: cam.up.clone() },
-      sf = this.sim.stillCamFor?.(Math.min(this.t, 1)),
+      vh = this.el.clientHeight;
+    const cam = this.camera;
+    if (o.t != null) this.update(o.t);
+    const sf = this.sim.stillCamFor?.(Math.min(this.t, 1)),
       sc = sf || this.sim.cfg.stillCam;
     if (sf) {
       this.hideShell = true;
@@ -39,6 +36,10 @@ Object.assign(GLHost.prototype, {
       cam.updateMatrixWorld();
     }
     cam.clearViewOffset();
+    if (o.aspect) {
+      cam.aspect = o.aspect;
+      cam.fov = (2 * Math.atan(Math.tan(20 * DEG) * Math.max(1, 1.1 / o.aspect))) / DEG;
+    }
     cam.updateProjectionMatrix();
     this._viewShift = null;
     this.renderer.setPixelRatio(1);
@@ -46,19 +47,14 @@ Object.assign(GLHost.prototype, {
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
-    // Layout: header band (banner) | render | footer band (title, source, imagery credit). Nothing is drawn over the globe.
     const s = W / 1000,
-      hb = Math.round(40 * s),
-      fb = Math.round(92 * s);
-    const c = document.createElement('canvas');
+      c = document.createElement('canvas');
     c.width = W;
-    c.height = H + hb + fb;
+    c.height = H;
     const g = c.getContext('2d');
-    g.fillStyle = '#070b17';
-    g.fillRect(0, 0, W, c.height);
-    g.drawImage(this.canvas, 0, hb);
+    g.drawImage(this.canvas, 0, 0);
     // Status caption: wrapped to the frame first, so its box can be reserved before labels are placed.
-    const status = this.status?.text(Math.min(this.t, 1)),
+    const status = o.status ?? this.status?.text(Math.min(this.t, 1)),
       lay = { W, H, boxes: [], segs: [] };
     this.stillLayout = lay;
     let sLines = [],
@@ -80,12 +76,17 @@ Object.assign(GLHost.prototype, {
       sBox = [W / 2 - tw / 2, H - 12 * s - th, tw, th];
       lay.boxes.push({ n: 'STATUS', x: sBox[0], y: sBox[1], w: sBox[2], h: sBox[3] });
     }
-    const lp = this._labelPositions(W, H, s, true, sBox ? [sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s] : null);
+    const tBox = o.title ? [0, 0, W, 26 * s] : null,
+      rsv = [];
+    if (sBox) rsv.push([sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s]);
+    if (tBox) rsv.push(tBox);
+    const lp = this._labelPositions(W, H, s, true, rsv);
     lay.objs = this._lastObjs;
     lay.probe = this._probe(W, H);
     lay.obst = this._lastObst;
     lay.labels = lp;
     lay.sBox = sBox;
+    lay.rsv = rsv;
     g.textAlign = 'center';
     g.lineJoin = 'round';
     for (const q of lp) {
@@ -95,8 +96,8 @@ Object.assign(GLHost.prototype, {
       g.globalAlpha = 0.75;
       g.lineWidth = 1.2 * s;
       g.beginPath();
-      g.moveTo(q.ax, q.ay + hb);
-      g.lineTo(q.qx, q.qy + hb);
+      g.moveTo(q.ax, q.ay);
+      g.lineTo(q.qx, q.qy);
       g.stroke();
       g.globalAlpha = 1;
     }
@@ -107,22 +108,78 @@ Object.assign(GLHost.prototype, {
       lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * s, w: tw, h: 18 * s });
       g.fillStyle = 'rgba(5,8,18,0.8)';
       g.beginPath();
-      g.roundRect(q.x - tw / 2, q.y + hb - 9 * s, tw, 18 * s, 4 * s);
+      g.roundRect(q.x - tw / 2, q.y - 9 * s, tw, 18 * s, 4 * s);
       g.fill();
       g.textBaseline = 'middle';
       g.fillStyle = q.color || '#dfe6f7';
-      g.fillText(q.text, q.x, q.y + hb);
+      g.fillText(q.text, q.x, q.y);
       g.textBaseline = 'alphabetic';
     }
     if (sBox) {
       g.font = `${Math.round(12 * s)}px system-ui,sans-serif`;
       g.fillStyle = 'rgba(5,8,18,0.78)';
-      g.fillRect(sBox[0], hb + sBox[1], sBox[2], sBox[3]);
+      g.fillRect(sBox[0], sBox[1], sBox[2], sBox[3]);
       g.fillStyle = '#ffe08a';
       g.textBaseline = 'middle';
-      sLines.forEach((l, k) => g.fillText(l, W / 2, hb + sBox[1] + 5 * s + 8 * s + k * 16 * s));
+      sLines.forEach((l, k) => g.fillText(l, W / 2, sBox[1] + 5 * s + 8 * s + k * 16 * s));
       g.textBaseline = 'alphabetic';
     }
+    if (o.title) {
+      g.textAlign = 'left';
+      g.textBaseline = 'middle';
+      g.font = `700 ${Math.round(13 * s)}px system-ui,sans-serif`;
+      const tw = g.measureText(o.title).width + 16 * s;
+      g.fillStyle = 'rgba(5,8,18,0.85)';
+      g.fillRect(0, 0, Math.min(W, tw), 26 * s);
+      g.fillStyle = '#ffe08a';
+      g.fillText(o.title, 8 * s, 13 * s);
+      g.textBaseline = 'alphabetic';
+    }
+    return c;
+  },
+  // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and the illustrative banner, caption and source into the PNG, then
+  // restore the live size. Scenes with cfg.panels (three unrelated episodes) get a composite: one tile per episode, each with its own camera, title and caption.
+  stillPNG(title, cite, targetW = 3000) {
+    const vw = this.el.clientWidth,
+      vh = this.el.clientHeight,
+      pr = this.renderer.getPixelRatio();
+    const maxDim = Math.min(this.maxTex, 4096),
+      W = Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
+      panels = this.sim.cfg.panels,
+      H = panels ? Math.round(W / panels.length / 1.25) : Math.round((W * vh) / vw);
+    const cam = this.camera,
+      keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell, up: cam.up.clone(), t: this.t, aspect: cam.aspect, fov: cam.fov };
+    let body,
+      tileLays = null;
+    if (panels) {
+      const tw = Math.floor(W / panels.length);
+      body = document.createElement('canvas');
+      body.width = tw * panels.length;
+      body.height = H;
+      const bg = body.getContext('2d');
+      tileLays = [];
+      panels.forEach((pn, k) => {
+        const tile = this._stillBody(tw, H, { t: pn.t, aspect: tw / H, status: pn.status, title: `${pn.title} · ${pn.brief}` });
+        bg.drawImage(tile, k * tw, 0);
+        bg.strokeStyle = 'rgba(255,224,138,0.5)';
+        bg.lineWidth = Math.max(1, W / 1000);
+        bg.strokeRect(k * tw + 0.5, 0.5, tw - 1, H - 1);
+        tileLays.push({ ...this.stillLayout, ox: k * tw });
+      });
+      this.update(keep.t);
+    } else body = this._stillBody(W, H, {});
+    const lay = this.stillLayout;
+    if (tileLays) lay.tiles = tileLays;
+    const s = W / 1000,
+      hb = Math.round(40 * s),
+      fb = Math.round(92 * s);
+    const c = document.createElement('canvas');
+    c.width = body.width;
+    c.height = H + hb + fb;
+    const g = c.getContext('2d');
+    g.fillStyle = '#070b17';
+    g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(body, 0, hb);
     g.textAlign = 'left';
     g.fillStyle = '#0b1120';
     g.fillRect(0, 0, W, hb);
@@ -165,14 +222,12 @@ Object.assign(GLHost.prototype, {
     fit(credit, 15, hb + H + 77 * s, '#c3cbe0');
     g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
-    if (sc) {
-      cam.position.copy(keep.pos);
-      this.target.copy(keep.tgt);
-      this.hideShell = keep.hide;
-      this._syncShell();
-      cam.up.copy(keep.up);
-      cam.lookAt(this.target);
-    }
+    cam.position.copy(keep.pos);
+    this.target.copy(keep.tgt);
+    this.hideShell = keep.hide;
+    this._syncShell();
+    cam.up.copy(keep.up);
+    cam.lookAt(this.target);
     this.renderer.setPixelRatio(pr);
     this.resize();
     return url;

@@ -22,10 +22,11 @@ const PT_FS = `uniform float uGain; varying vec4 vC;
 void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r)); gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 2.2); gl_FragColor = vec4(uColor, clamp(0.015 + rim * uGain, 0.0, 1.0)); }`;
-const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx;
-void main(){ vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1); float r = min(uR, uMaxPx * d / uScale); gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
-const TUBE_FS = `uniform vec3 uColor; uniform float uOp;
-void main(){ gl_FragColor = vec4(uColor, uOp);\n#include <colorspace_fragment>\n}`;
+const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; varying float vU;
+void main(){ vU = uv.x; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1); float r = min(uR, uMaxPx * d / uScale); gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
+// uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
+const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; varying float vU;
+void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0; gl_FragColor = vec4(uColor, uOp * f);\n#include <colorspace_fragment>\n}`;
 export const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
 
 Object.assign(GLHost.prototype, {
@@ -88,6 +89,7 @@ Object.assign(GLHost.prototype, {
           uR: { value: radius },
           uScale: { value: 800 },
           uMaxPx: { value: maxPx },
+          uHead: { value: 0 },
         },
       });
     m.userData = { maxPx };
@@ -270,6 +272,7 @@ Object.assign(GLHost.prototype, {
     h.scale.setScalar(0.07);
     g.add(h);
     g.userData.halo = h;
+    Object.assign(g.userData, { span: 0.052, minPx: 22, maxPx: 60 });
     return g;
   },
   _aircraftModel() {
@@ -318,7 +321,7 @@ Object.assign(GLHost.prototype, {
     h.scale.setScalar(0.06);
     g.add(h);
     g.userData.halo = h;
-    Object.assign(g.userData, { span: 0.042, minPx: 13, maxPx: 34 });
+    Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
     return g;
   },
   // Ground site: base plate, mast and a tilted dish (small pylon/dish glyph), standing on the local vertical.
@@ -482,7 +485,7 @@ Object.assign(GLHost.prototype, {
             it.dynamic ? 0.9 : (it.opacity ?? 1),
             it.dynamic ? T.AdditiveBlending : T.NormalBlending,
             it.thick,
-            it.dynamic ? 2.2 : 1.4,
+            it.dynamic ? 1.9 : 1.4,
           ),
         );
         if (!it.dynamic && it.orbit) (this.ringPts ||= []).push(pts);
@@ -522,7 +525,10 @@ Object.assign(GLHost.prototype, {
         );
         m.scale.setScalar(it.kvSize ?? 0.1);
         Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: 5, maxPx: 22 }); // glow heads keep a bounded on-screen size
-      } else if (it.shape === 'sat' && !it.small) m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright);
+      } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
+        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright);
+        if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
+      }
       else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
       else if (it.shape === 'aircraft') m = this._aircraftModel();
       else if (it.shape === 'site') m = this._siteModel(it.color, it.pos(0));
@@ -536,13 +542,15 @@ Object.assign(GLHost.prototype, {
         Object.assign(
           m.userData,
           it.shape === 'sat'
-            ? { span: 0.036, minPx: 4.5, maxPx: 8.5 }
+            ? { span: 0.036, minPx: 6, maxPx: 10 }
             : it.shape === 'tick'
               ? { span: 0.06, minPx: 7, maxPx: 12 }
               : { span: 0.03, minPx: 6, maxPx: 12 },
         );
       }
       if (m.userData.span) {
+        if (it.minPx) m.userData.minPx = it.minPx;
+        if (it.maxPx) m.userData.maxPx = it.maxPx;
         m.userData.base = it.scale ?? m.userData.baseScale ?? 1;
         m.scale.setScalar(m.userData.base);
       } else if (it.scale) m.scale.setScalar(it.scale);
@@ -587,7 +595,7 @@ Object.assign(GLHost.prototype, {
           (t) =>
             it.labelAt ||
             (it.fill(t, g.attributes.position.array) > 0
-              ? [g.attributes.position.array[0], g.attributes.position.array[1], g.attributes.position.array[2]]
+              ? [3 * (it.labelIdx ?? 0), 3 * (it.labelIdx ?? 0) + 1, 3 * (it.labelIdx ?? 0) + 2].map((i) => g.attributes.position.array[i])
               : null),
           null,
           null,
