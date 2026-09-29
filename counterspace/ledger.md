@@ -1,6 +1,6 @@
 # Counterspace Timeline Ledger
 
-*Ledger as of 2026-09-28. Schema 1.1.0. Generated file: edit `tools/build_data.py`, not this page.*
+*Ledger as of 2026-09-29. Schema 1.1.0. Generated file: edit `tools/ledger/rows.py`, not this page.*
 
 ## Preface
 
@@ -8,7 +8,7 @@
 
 **How to use it.** Start with [Key figures](#key-figures) for the destructive tests and the size of the dataset. Read [How to read the tables](#how-to-read-the-tables) once for the terms and the pin format. Then look a row up by state or year, or go to the full tables. Long explanations are collected in the numbered [Endnotes](#endnotes); a table row points to its endnote by number, for example [1](#n1). Where sources conflict, see [Conflicts inside the sources](#conflicts-inside-the-sources).
 
-**How to cite it.** Cite the primary source for any figure, and this ledger for the coding. For a row, give its id and its pin, for example: *Counterspace Timeline Ledger, row `cn-2007-fy1c` (ledger as of 2026-09-28), citing SWF 2026, Table 5-1, p. 05-01.* Do not cite the ledger alone for a debris count or an altitude. Verification status is in `verification_log.md`; coding decisions are in `methodology.md`.
+**How to cite it.** Cite the primary source for any figure, and this ledger for the coding. For a row, give its id and its pin, for example: *Counterspace Timeline Ledger, row `cn-2007-fy1c` (ledger as of 2026-09-29), citing SWF 2026, Table 5-1, p. 05-01.* Do not cite the ledger alone for a debris count or an altitude. Verification status is in `verification_log.md`; coding decisions are in `methodology.md`.
 
 ## Contents
 
@@ -26,7 +26,7 @@
 
 ## Key figures
 
-**Destructive direct-ascent (DA-ASAT) tests.** These are the 5 tests in the ledger that created cataloged fragments. Fragment counts are as of 2026-02 (SWF Table 5-1); altitude is the intercept altitude in that table.
+**Destructive direct-ascent (DA-ASAT) tests.** These are the 5 direct-ascent tests in the ledger that created cataloged fragments. Fragment counts are as of 2026-02 (SWF Table 5-1); altitude is the intercept altitude in that table.
 
 | date | state | system | target | altitude (km) | cataloged fragments | fragments in orbit | pin | endnote |
 |---|---|---|---|---|---|---|---|---|
@@ -37,7 +37,7 @@
 | 2021-11-15 | Russia | Nudol (PL-19) | Cosmos 1408 | 470 | 1,807 | 5 | Table 5-1, p. 05-01 (PDF p. 212); prose p. 02-21 (PDF p. 134) | [59](#n59) |
 | **Total** | | | | | **5,929** | **2,356** | | |
 
-SWF reports no destructive DA-ASAT test after 15 Nov 2021. Table 5-1 also lists co-orbital tests that created fragments; they are outside this ledger's kinetic rows.
+**What is counted.** The table lists the 5 destructive **direct-ascent** tests, the only destructive tests that are ledger rows. SWF (Table 5-1, p. 05-01 (PDF p. 212)) lists 16 destructive ASAT tests in all: these 5 plus **11 co-orbital** destructive tests (10 Soviet/Russian, 1 US: the Delta 180 intercept of 5 Sep 1986), which created 975 cataloged fragments (417 still on orbit) and are outside the ledger's kinetic rows. Direct-ascent plus co-orbital: 5 + 11 = 16. SWF reports no destructive DA-ASAT test after 15 Nov 2021.
 
 **Size and quality of the dataset.**
 

@@ -1,0 +1,65 @@
+{
+ "rule": "Pairs come from legal.json related_events only: each event is paired with the earliest later legal item that lists it. Chronology, not causation.",
+ "pairs": [
+  {
+   "event": "us-1962-starfish-prime",
+   "law": "ltbt-1963",
+   "months": 13,
+   "text": "Starfish Prime (1962), then the Limited Test Ban Treaty (1963), which followed it"
+  },
+  {
+   "event": "kp-2010-gps",
+   "law": "icao-2025",
+   "months": 182,
+   "text": "North Korean GNSS jamming (from 2010), then an ICAO Assembly finding on GNSS interference (2025), which SWF also ties to the Baltic case"
+  },
+  {
+   "event": "in-2019-shakti",
+   "law": "unga-77-41",
+   "months": 45,
+   "text": "Shakti destructive test (2019), then UNGA 77/41 (2022), a non-binding call not to conduct destructive DA-ASAT tests"
+  },
+  {
+   "event": "ru-2021-cosmos1408",
+   "law": "us-moratorium-2022",
+   "months": 5,
+   "text": "Cosmos 1408 destructive test (2021), then a US test moratorium (2022, unilateral pledge)"
+  },
+  {
+   "event": "ru-2023-baltic",
+   "law": "icao-2025",
+   "months": 22,
+   "text": "Baltic-region GNSS interference (from 2023), then an ICAO Assembly finding on recurring GNSS interference (2025)"
+  },
+  {
+   "event": "ru-2024-eu-sats",
+   "law": "itu-rrb-2024",
+   "months": 4,
+   "text": "Jamming of European satellites (2024), then ITU RRB “grave concern” (2024)"
+  }
+ ],
+ "open": [
+  {
+   "event": "us-1997-miracl",
+   "text": "Laser fired at a satellite (1997): no legal item in the ledger is related to it",
+   "basis": "No related_events link; the ring states an absence in this ledger, not a finding that no rule exists."
+  },
+  {
+   "event": "ru-2022-viasat",
+   "text": "Viasat cyberattack (2022): the only related legal item, Tallinn Manual 2.0 (2017), is soft law and pre-dates it",
+   "basis": "tallinn-2017 lists ru-2022-viasat in related_events but is earlier, so it forms no forward pair."
+  }
+ ],
+ "dropped": [
+  {
+   "event": "us-1959-bold-orion",
+   "law": "ost-1967",
+   "reason": "No sourced link: SWF and the treaty text do not connect the 1959 Bold Orion flyby to the Outer Space Treaty."
+  },
+  {
+   "event": "cn-2007-fy1c",
+   "law": "unga-77-41",
+   "reason": "No sourced link: unga-77-41 relates to Cosmos 1408 and Shakti; a Fengyun-1C link would be the builder's inference."
+  }
+ ]
+}
