@@ -1,6 +1,6 @@
 # Counterspace Timeline Ledger
 
-*Ledger as of 2026-09-28. Schema 1.0.0. Generated file: edit `tools/build_data.py`, not this page.*
+*Ledger as of 2026-09-28. Schema 1.1.0. Generated file: edit `tools/build_data.py`, not this page.*
 
 ## Preface
 
@@ -48,7 +48,7 @@ SWF reports no destructive DA-ASAT test after 15 Nov 2021. Table 5-1 also lists 
 | Legal items | 19 | 3 soft law |
 | Documented source conflicts | 9 | listed in [Conflicts inside the sources](#conflicts-inside-the-sources) |
 | Capability categories | 5 | Chart B; 2020s follows SWF, earlier decades are reconstructed |
-| Schema version | 1.0.0 | `data/schema.json` |
+| Schema version | 1.1.0 | `data/schema.json` |
 
 **Sources.** Primary: Secure World Foundation, *Global Counterspace Capabilities: An Open Source Assessment*, 9th ed. (April 2026), cited as SWF 2026. CSIS *Space Threat Assessment 2025* was consulted for background only; no row, pin or citation depends on it. Verification is recorded in `verification_log.md`.
 

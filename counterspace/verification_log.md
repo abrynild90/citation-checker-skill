@@ -1,12 +1,25 @@
 # Counterspace Ledger: Verification Log
 
+## Current state (as of 2026-09-29)
+
 | | |
 |---|---|
-| **Date** | 2026-09-28 (second full pass; supersedes the first log of the same day). Later the same day, UN document mirrors were used for PAROS 36/97 and the two PPWT documents, and a follow-up review after grading round 5 corrected three more items (Discrepancies 33-35). |
-| **Scope** | 83 items: 44 kinetic and 15 non-kinetic rows in `data/events.json`, 19 rows in `data/legal.json`, and 5 capability categories in `data/capabilities.json`. |
-| **Method** | Each row checked against the pinned SWF page or a fetched primary source (see [Method](#method)). |
-| **Result** | 81 items VERIFIED or CORRECTED, 2 PARTIAL, none UNCHECKED; 35 defects found and fixed ([Discrepancies](#discrepancies-found-and-fixed)). |
-| **Regenerate** | `python3 tools/build_data.py` rebuilds the data files and `ledger.md` after any correction. |
+| **Scope** | 100 items: 61 kinetic and 15 non-kinetic rows in `data/events.json`, 19 rows in `data/legal.json`, 5 capability categories in `data/capabilities.json`. |
+| **Status** | Every item VERIFIED or CORRECTED except 2 PARTIAL (the `direct_ascent` and `co_orbital` capability categories; see [Open items](#open-items-and-impact)). None UNCHECKED. 41 discrepancies found and fixed. |
+| **Automated** | `python3 tools/build_data.py` runs `validate()` (ids, enums, dates, source fields, id resolution, fragment counts, methodology row counts) and stops on failure. |
+| **Method** | Each row checked against the pinned SWF page (tables read with pdfplumber) or a fetched primary source ([Method](#method)). |
+
+**Table 1-4 completeness check (2026-09-29).** SWF Table 1-4 (PDF 72-73) has 33 rows. Before this check the ledger held 17 of them. Now 32 are ledger rows; the 33rd, the US Delta 180 intercept of 5 Sep 1986, is co-orbital (SWF text, Delta 180 section; Table 5-1 lists it as Co-orbital) and is excluded by the scope rule. Rows added: High Virgo (22 Sep 1959), SIP (1 Oct 1961, 5 May 1962), HiHo (5 Oct 1961, 26 Mar 1962, 26 Aug 1962), Nike Zeus (21 Mar, 19 Apr, 24 May 1963; Mar. 1965; Jun.-Jul. 1965; 13 Jan 1966), ASM-135 (13 Nov 1984, 22 Aug 1986, 29 Sep 1986). Other countries: Russia Tables 2-4 and 16-2 (all Nudol rows now in; Table 16-2 "April 2021" added; co-orbital entries excluded), China Tables 3-3 and 16-3 (all in; Table 16-3's 15 Apr 2023 is treated as a date variant of 14 Apr 2023, recorded in that row's conflicts), India Tables 4-1 and 16-4 (12 Feb 2019 failed test added). Scope rule: all SWF-listed DA-ASAT tests are included; co-orbital tests are not.
+
+**Solwind in-orbit cell (resolved).** Table 5-1 (PDF 212), pdfplumber: Solwind / 530 km / 285 tracked / 0 on orbit / 18.7 years. The zero is verified; all Solwind fragments have decayed per SWF. Earlier entries that said "could not be tied" are superseded (Discrepancy 40).
+
+**Changes in the 2026-09-29 pass** (Discrepancies 36-41): 17 rows added; Bold Orion note fixed; Nudol 15 Apr 2020 conflict recorded; `mideast-2023-gnss` recoded to Israel/IDF/jamming and its "others" dropped; Peresvet marked a capability announcement; LTBT context sourced to the Office of the Historian; Starfish adds SWF p. 12-05; validation added.
+
+## History (earlier passes, kept for the record)
+
+| | |
+|---|---|
+| **2026-09-28** | Second full pass (supersedes the first log of the day): 83 items, 35 defects. Later the same day, UN document mirrors were used for PAROS 36/97 and the two PPWT documents, and a follow-up corrected three more items (Discrepancies 33-35). Counts below in [Executive summary](#executive-summary) and [Results by category](#results-by-category) are as of that pass (44 kinetic rows), before the 2026-09-29 additions. |
 
 ## Contents
 
@@ -21,7 +34,7 @@
 9. [Legal rows](#legaljson)
 10. [Capability categories](#capabilitiesjson)
 
-## Executive summary
+## Executive summary (2026-09-28 pass; current state is at the top)
 
 - **Outcome:** every event, legal item and capability category was checked; none is UNCHECKED. 81 of 83 items are VERIFIED or CORRECTED (defect fixed, then verified); 2 are PARTIAL.
 - **Defects:** 35 discrepancies were found and fixed in `tools/build_data.py`. No factual error in a plotted value is known.
@@ -110,9 +123,15 @@ All 35 were corrected in `tools/build_data.py`.
 | 32 | Legal `itu-rrb-2024` | Citation gave only the issue date. | The 96th RRB meeting was 24-28 June 2024 (ITU agenda and minutes pages); the summary was issued 1 July 2024. Citation now gives both. |
 | 33 | `ru-2024-eu-sats` | Coded `official_government` on the ground that the ITU RRB "is a governmental body". The ledger's own rule gives intergovernmental findings (ITU, ICAO) `multi_government`, as for `ir-2009-eutelsat`. The RRB located earth stations; it made no state-responsibility finding. | Recoded `multi_government`; note reworded. Chart C fill is unchanged (both levels draw solid). |
 | 34 | `cn-2023-dn3` | The 14 vs 14-and-15 April 2023 discrepancy (Discrepancy 9) was in the note but not in the row's `conflicts` field, so `ledger.md` listed 7 conflicts, not 8. | `conflicts` entry added; the ledger's conflicts table now has 8 rows. |
-| 35 | `us-1985-solwind`, `ru-2016-syria`, `in-2019-shakti`, `cn-2013-dn2` (notes) | Solwind: the note said the zero in-orbit figure "reflects the debris having decayed", an inference. Syria: the note referred to "an earlier draft". Shakti: the note discussed an unsourced 400-piece estimate. DN-2: the conflict entry gave "~36,000 km" for the US military, whose words were "nearly to GEO". | Solwind note now says the cell is not tied to its row and is not plotted; the process language and the unsourced estimate are removed; the DN-2 entry quotes "nearly to GEO" (GEO is 35,786 km). |
+| 35 (superseded for Solwind by 40) | `us-1985-solwind`, `ru-2016-syria`, `in-2019-shakti`, `cn-2013-dn2` (notes) | Solwind: the note said the zero in-orbit figure "reflects the debris having decayed", an inference. Syria: the note referred to "an earlier draft". Shakti: the note discussed an unsourced 400-piece estimate. DN-2: the conflict entry gave "~36,000 km" for the US military, whose words were "nearly to GEO". | Solwind note (at that time) said the cell was not tied to its row; this was resolved in Discrepancy 40 (verified 0); the process language and the unsourced estimate are removed; the DN-2 entry quotes "nearly to GEO" (GEO is 35,786 km). |
+| 36 | Kinetic scope: US Table 1-4 | Round-8 review: the ledger silently omitted 15 US Table 1-4 rows (High Virgo, SIP, HiHo x3, Nike Zeus 21 Mar/19 Apr/24 May 1963, Mar. 1965, Jun.-Jul. 1965, 13 Jan 1966, ASM-135 13 Nov 1984, 22 Aug 1986, 29 Sep 1986); also Russia's Apr. 2021 Table 16-2 line and India's 12 Feb 2019 failed test (Tables 4-1, 16-4). | 17 rows added; scope rule recorded (methodology section 3, ledger.md, schema.json). See the completeness check above. |
+| 37 | `us-1959-bold-orion` (note) | Note paired "Unknown results due to loss of telemetry" with Bold Orion; pdfplumber shows that cell belongs to the High Virgo row above it (plain-text column scramble). | Note corrected. |
+| 38 | `ru-2020-nudol-apr` | Table 16-2 says "Potential intercept, debris created"; Table 2-4 says "Successful, nothing hit". Only Table 2-4 was cited. | Both pinned; conflict recorded; no fragment count coded (none given). |
+| 39 | `ru-2018-peresvet`, `mideast-2023-gnss` (attribution) | Peresvet's `official_government` is the government's own announcement of a system, not an attributed act. `mideast-2023-gnss` was `official_government` with actor "Israel and others", stronger than SWF p. 10-02, which says open sources cannot tell whether Israel, Hamas or others conduct the EW; only the IDF statement (jamming) supports a level, only for Israel. | Peresvet: effect and note say capability announcement, self-declared. Mideast: recoded to Israel (IDF), `gnss_jamming`, `official_government`; "others" dropped (no source allegation); start moved from 1 Oct to 7 Oct 2023 (SWF: escalation after the 7 Oct attack). |
+| 40 | `us-1985-solwind` (in-orbit cell) | Contradiction: the log said the Solwind zero was verified with pdfplumber, while the row note and ledger endnote said the cell "could not be tied to this row". | Re-read 2026-09-29, PDF 212 table row: "Sep. 13, 1985 / US / ASM-135 / Direct-Ascent / Solwind / 530 km / 285 / 0 / 18.7 years". The zero is verified: no Solwind piece remains on orbit. Row note and ledger endnote updated. |
+| 41 | `ltbt-1963` (legal note), `us-1962-starfish-prime` (source) | The note's "fallout concerns and the Cuban Missile Crisis" had no source. Starfish satellite damage was cited to DOE/NV-209, which does not say that. | Context sourced to Office of the Historian, U.S. Dep't of State (history.state.gov/milestones/1961-1968/limited-ban; fetched 2026-09-29: the crisis "provided the impetus for an agreement"; worldwide concern about radioactive fallout), cite added to the citation; "followed" wording kept. Starfish `source_full` now also cites SWF p. 12-05 (PDF 269), verified: such tests "damaged or destroyed satellites in orbit". Shakti pin: 45-day statement is on p. 04-04 (PDF 204) in the data; the page cite (p. 04-03) is a page-side fix. |
 
-**Scope disclosure.** SWF Appendix Table 16-2 also lists Cosmos 2521 (Burevestnik?) on 30 Oct 2017 and a "September 2019?" co-orbital entry. These are co-orbital or RPO events, not direct-ascent tests, and are outside the ledger's kinetic scope (see `methodology.md`, coding rules). After the additions, every Nudol row in Tables 2-4 and 16-2 is in the ledger (Aug 2014, Apr 2015, Nov 2015, May 2016, Dec 2016, Mar 2018, Dec 2018, Jun 2019, Nov 2019, Apr 2020, Dec 2020, Nov 2021).
+**Scope disclosure (earlier pass).** SWF Appendix Table 16-2 also lists Cosmos 2521 (Burevestnik?) on 30 Oct 2017 and a "September 2019?" co-orbital entry. These are co-orbital or RPO events, not direct-ascent tests, and are outside the ledger's kinetic scope (see `methodology.md`, coding rules). After the additions, every Nudol row in Tables 2-4 and 16-2 is in the ledger (Aug 2014, Apr 2015, Nov 2015, May 2016, Dec 2016, Mar 2018, Dec 2018, Jun 2019, Nov 2019, Apr 2020, Dec 2020, Nov 2021).
 
 ## events.json: kinetic rows
 
@@ -120,7 +139,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 
 | id | status | pin checked | evidence |
 |---|---|---|---|
-| us-1959-bold-orion | VERIFIED | T1-4, p. 01-23 (PDF 72) | "Oct. 13, 1959 Bold Orion ... Explorer VI 200 km" |
+| us-1959-bold-orion | CORRECTED (Disc. 37) | T1-4, p. 01-23 (PDF 72) | pdfplumber row: "Oct. 13, 1959 / Bold Orion / Unknown / Explorer VI / 200 km / Success (passed within kill radius)" |
 | us-1962-starfish-prime | VERIFIED (external) | DOE/NV-209 PDF pp. 41-42; SWF p. 12-05 | "07/09/1962 ... Johnston Island area"; "250 miles"; "1.4 Mt". SWF 12-05: tests "damaged or destroyed satellites". |
 | us-1962-nike-zeus-wsmr | VERIFIED | T1-4, p. 01-23 | "Dec. 17, 1962 ... WSMR ... 160 km" |
 | us-1963-nike-zeus-feb | VERIFIED | T1-4, p. 01-23 | "Feb. 15, 1963 ... Kwajalein ... 241 km" |
@@ -160,10 +179,28 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | ru-2019-nudol-nov | CORRECTED | T2-4, p. 02-21; prose p. 02-21 | "Nov. 15, 2019 ... Nudol ... Plesetsk ... Likely KKV"; "first known intercept test of the Nudol" (Nov. 2021). "No intercept" removed from the T2-4 attribution (Discrepancy 29). Not in T16-2. |
 | ru-2018-nudol-mar | VERIFIED | T2-4, p. 02-21 | "Mar. 26, 2018 ... Likely KKV"; "First test from a mobile launcher" |
 | ru-2018-nudol-dec | VERIFIED | T2-4; T16-2 | "Dec. 23, 2018 ... Likely KKV"; T16-2 "Potential KKV, no intercept" |
-| ru-2020-nudol-apr | VERIFIED | T2-4; fn. 148 p. 02-20 | "Apr. 15, 2020 ... Likely KKV"; "Successful, nothing hit"; USSPACECOM release cited |
+| ru-2020-nudol-apr | CORRECTED (Disc. 38) | T2-4; fn. 148 p. 02-20 | "Apr. 15, 2020 ... Likely KKV"; "Successful, nothing hit"; USSPACECOM release cited |
 | ru-2020-nudol-dec | VERIFIED | T2-4; fn. 149 p. 02-20 | "Dec. 16, 2020"; USSPACECOM release cited |
 | in-2019-shakti | CORRECTED | T5-1 p. 05-01; prose p. 04-04 (PDF 204) | T5-1 "PDV-MK II ... Microsat-R 300 km 130"; "within 45 days at most"; "final piece ... June 2022" |
 | ru-2021-cosmos1408 | VERIFIED | T5-1 p. 05-01; prose p. 02-21 (PDF 134) | T5-1 "Nudol ... Cosmos 1408 470 km 1807 5"; "more than 1,800 pieces ... 5 still in orbit" |
+| **Added 2026-09-29 (Table 1-4 completeness; all read with pdfplumber, PDF 72-73)** | | | |
+| us-1959-high-virgo | VERIFIED | T1-4 p. 01-23 | "Sept. 22, 1959 / High Virgo (TX-20) / Unknown / None / 12 km / Unknown results due to loss of telemetry" |
+| us-1961-sip-oct | VERIFIED | T1-4 p. 01-23 | "Oct. 1, 1961 / SIP (NOTS-EV-2) / San Nicolas Island / None / Unknown / Successful rocket test" |
+| us-1961-hiho-oct | VERIFIED | T1-4 p. 01-23 | "Oct. 5, 1961 / HiHo (NOTS-EV-1) / F4D-I / None / Unknown / Rocket failure" |
+| us-1962-hiho-mar | VERIFIED | T1-4 p. 01-23 | "Mar. 26, 1962 / HiHo / F4D-I / None / Unknown / Rocket failure" |
+| us-1962-sip-may | VERIFIED | T1-4 p. 01-23 | "May 5, 1962 / SIP / F4-C / None / Unknown / Successful rocket test" |
+| us-1962-hiho-aug | VERIFIED | T1-4 p. 01-23 | "Aug. 26, 1962 / HiHo / F4-C / None / 1,600 km / Successful rocket test" |
+| us-1963-nike-zeus-mar | VERIFIED | T1-4 p. 01-23 | "Mar. 21, 1963 / Program 505 / Kwajalein / None / - / Unsuccessful attempt to intercept simulated satellite target" |
+| us-1963-nike-zeus-apr | VERIFIED | T1-4 p. 01-23 | "Apr. 19, 1963 ... Unsuccessful attempt to intercept simulated satellite target" |
+| us-1963-nike-zeus-may | VERIFIED | T1-4 p. 01-23 | "May 24, 1963 / Program 505 / Kwajalein / Agena D / Unknown / Successful close intercept" |
+| us-1965-nike-zeus-mar | VERIFIED | T1-4 p. 01-23 | "Mar. 1965 / Program 505 / Kwajalein / None / - / -" (month only) |
+| us-1965-nike-zeus-jun | VERIFIED | T1-4 p. 01-23 | "Jun. - Jul., 1965 / ... Unknown / Four test intercepts, of which three were successful" (month range; one row) |
+| us-1966-nike-zeus-jan | VERIFIED | T1-4 p. 01-23 | "Jan. 13, 1966 / Program 505 / Kwajalein / None / Unknown / Successful intercept with simulated target" |
+| us-1984-asm135-nov | VERIFIED | T1-4 p. 01-24; fn. 177 p. 01-22 | "Nov. 13, 1984 / ASM-135 / Aircraft / Star / 1,000 km / Failed test"; fn. 177: "failed missile test directing MHV at a star on November 13, 1984" |
+| us-1986-asm135-aug | VERIFIED | T1-4 p. 01-24; fn. 177 | "Aug. 22, 1986 / ASM-135 / Star / 1,000 km / Successful test in tracking" |
+| us-1986-asm135-sep | VERIFIED | T1-4 p. 01-24; fn. 177 | "Sept. 29, 1986 / ASM-135 / Star / 1,000 km / Successful test in tracking" |
+| ru-2021-nudol-apr | VERIFIED | T16-2 p. 16-03 (PDF 307) | "April 2021 / Nudol / Direct-Ascent / Plesetsk / None / Unknown" (month only; low confidence) |
+| in-2019-shakti-feb | VERIFIED | T4-1 p. 04-04 (PDF 204); T16-4 p. 16-04 (PDF 308) | "Feb. 12, 2019 / PDV-MK II / Microsat-R / Suborbital / Booster failed within 30 seconds, no intercept. Failed."; T16-4: "Unsuccessful intercept"; text: anonymous US government sources (The Diplomat) |
 
 ## events.json: non-kinetic rows
 
@@ -178,7 +215,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 | ru-2014-ukraine | VERIFIED (external) | p. 02-28 (PDF 141) | "nearly 10,000 suspected incidents" (SWF). The 2014 start: Breaking Defense, 1 Mar 2022 (fetched): "The Russian military has routinely jammed GPS receivers in eastern Ukraine since the Crimean conflict in 2014". The Foreign Policy (Oct. 2015) piece named in the row note could not be fetched. The month (March) is the builder's coding of the Crimea conflict start; the year is sourced. |
 | ru-2016-syria | VERIFIED | p. 02-28 | "The spoofing began in 2016, peaked in 2017" |
 | ru-2018-trident | CORRECTED | p. 02-28 | "In November 2018 ... NATO exercise"; Norway "had proof" (Mar. 2019). Dates external (NATO). |
-| ru-2018-peresvet | CORRECTED | p. 02-36 (PDF 149) | "formally named ... speech ... on March 1, 2018" |
+| ru-2018-peresvet | CORRECTED (Disc. 39) | p. 02-36 (PDF 149) | "formally named ... speech ... on March 1, 2018" |
 | ru-2022-viasat | CORRECTED | pp. 15-06, 15-07 | "Within hours of Russian troops crossing the border"; "one hour before the first Russian troops"; US/UK/EU attribute to GRU, May 2022 |
 | ru-2022-starlink | CORRECTED | p. 02-32 (PDF 145) | "no independent or public validation"; "Ukrainian government official" on May 2024 |
 | ru-2023-baltic | VERIFIED | pp. 02-29, 02-30 | "picked up in late 2023 and early 2024"; Kaliningrad and St. Petersburg; ICAO Oct. 2025; RRB Nov. 2025 |
@@ -189,7 +226,7 @@ Quotes are from the pinned page unless noted. "T1-4" = Table 1-4, "T5-1" = Table
 
 | id | status | check |
 |---|---|---|
-| ltbt-1963 | VERIFIED (external) | Cite "14 U.S.T. 1313, 480 U.N.T.S. 43"; signed Moscow 5 Aug 1963 and in force 10 Oct 1963 (JFK Library, EBSCO, Arms Control Association; Senate consent 24 Sept. 1963, 80-19). "Followed Starfish Prime" is chronological only (July 1962). URL bot-blocked (202). |
+| ltbt-1963 | VERIFIED (external; context sourced 2026-09-29, Disc. 41) | Cite "14 U.S.T. 1313, 480 U.N.T.S. 43"; signed Moscow 5 Aug 1963 and in force 10 Oct 1963 (JFK Library, EBSCO, Arms Control Association; Senate consent 24 Sept. 1963, 80-19). "Followed Starfish Prime" is chronological only (July 1962). URL bot-blocked (202). |
 | ost-1967 | VERIFIED (external) | Cite "18 U.S.T. 2410, 610 U.N.T.S. 205" confirmed. UNOOSA: adopted by res. 2222 (XXI), opened for signature 27 Jan 1967, in force 10 Oct 1967. URL bot-blocked. |
 | abm-1972 | CORRECTED | Cite "23 U.S.T. 3435" confirmed. Art. XII: "Each Party undertakes not to interfere with the national technical means" (ACA / State text via search). US notice of withdrawal 13 Dec 2001, effective 13 June 2002 (ACA, CRS RS21088). |
 | paros-1981 | VERIFIED | Alternative mirror: `documents.un.org/api/symbol/access?s=A/RES/36/97` (PDF read). Resolution 36/97 part **C**, "Prevention of an arms race in outer space", adopted at the 91st plenary meeting, 9 December 1981; operative para. 3 requests the Committee on Disarmament to consider the question "as from the beginning of its session in 1982". Same source for 36/99, "Conclusion of a treaty on the prohibition of the stationing of weapons of any kind in outer space", 9 December 1981. The UNOOSA page remains the ledger URL. |

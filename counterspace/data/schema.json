@@ -1,5 +1,5 @@
 {
- "schema_version": "1.0.0",
+ "schema_version": "1.1.0",
  "scope_rule": "Scope rule: every direct-ascent (DA-ASAT) test row that SWF 2026 lists in Table 1-4 (US), Tables 2-4 and 16-2 (Russia), Tables 3-3 and 16-3 (China) and Tables 4-1 and 16-4 (India) is a row in this ledger, including failures, rocket-only tests and tests against a star or no target. Exclusions, all disclosed: co-orbital tests (Table 1-4 also lists the US Delta 180 co-orbital intercept of 5 Sep 1986, which SWF's text calls a co-orbital experiment; Table 16-2's Soviet IS, Naryad, Polyot and Cosmos 2521/2536 entries), and the Table 16-3 line 'Apr. 15, 2023' (treated as a date variant of the 14 Apr 2023 test, see that row's conflicts). Starfish Prime (not an SWF DA-ASAT table row) is the one added nuclear marker.",
  "page_strings": {
   "ledger_as_of_display": "28 Sept. 2026",

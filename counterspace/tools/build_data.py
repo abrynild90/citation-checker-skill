@@ -592,7 +592,7 @@ CAP_SOURCES = {
 
 
 LEDGER_ASOF = "2026-09-28"
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 SOURCE_FULL = {
     "SWF 2026": "Victoria Samson & Kathleen Brett eds., Global Counterspace Capabilities: An Open Source Assessment "
                 "(Secure World Foundation, 9th ed., Apr. 2026), " + SWF_URL,

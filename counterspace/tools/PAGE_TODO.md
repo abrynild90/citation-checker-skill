@@ -1,0 +1,15 @@
+# Page-side changes needed (for the page agent; data and docs are already updated)
+
+Data now has 61 kinetic, 15 non-kinetic, 19 legal rows (was 44/15/19). Rebuild with `python3 tools/build_page.py` after the edits below.
+
+1. **Chart A gap note** (`src/charts/a.js` ~line 82): "No tests in the ledger 1971-83 or 1986-2004 / Only ASM-135 1984-85 falls between" is false. Ledger now has ASM-135 rows on 21 Jan 1984, 13 Nov 1984, 13 Sep 1985 (Solwind), 22 Aug 1986, 29 Sep 1986. Use: no ledger row of any state in 1971-83 or 1987-2004 (the gaps follow SWF's complete DA-ASAT tables); no destructive test between Solwind (1985) and FY-1C (2007). See methodology section 3.
+2. **New rows in Chart A**: 17 added (US 15, Russia Apr. 2021, India 12 Feb 2019). Many have `altitude_km: null`, so they go in the no-altitude strip; High Virgo (12 km) and HiHo Aug 1962 (1,600 km) have apogees. Rows with `date_precision: "month"` (us-1965-nike-zeus-mar, us-1965-nike-zeus-jun, ru-2021-nudol-apr) should show the month, not a day, in cards/tooltips. Check any hard-coded row counts, label collisions and the qa baseline (`BASELINE=1` after review).
+3. **Lag panel** (`src/charts/lag.js`): retitle to chronology, not causation ("elapsed time between a ledger event and a later legal item"); remove "the legal or policy response that addressed" wording; ICAO 2025 must pair with `ru-2023-baltic` (per `legal.json` related_events), not `ru-2014-ukraine`, and must not say "first ICAO finding against Russia"; keep "followed" wording for LTBT/Starfish. Review the Bold Orion -> OST and FY-1C -> UNGA 77/41 pairs for the same wording.
+4. **Shakti scene cite** (`src/scenes/config.js`): "p. 04-03" -> "p. 04-04" (45-day statement, PDF 204).
+5. **Starfish scene caption**: cite SWF p. 12-05 (PDF 269) for "damaged or destroyed satellites in orbit"; DOE/NV-209 only for date/altitude/yield. `events.json` source_full now cites both.
+6. **Solwind scene caption/status**: data now verifies 0 in orbit (Table 5-1: 285 tracked, 0 on orbit, 18.7 yr lifespan), so "all since decayed" is supported by SWF; word it "per SWF Table 5-1, none remain on orbit as of Feb. 2026".
+7. **As-of strings** (`src/app.js` ~23-31): read `ledger_as_of` and `page_strings.{ledger_as_of_display, swf_edition_label}` from `data/schema.json` instead of hard-coding.
+8. **CSIS** (`src/app.js` ~31, `src/method.js` ~17): CSIS Space Threat Assessment 2025 is "consulted for background, not cited"; do not list it as a secondary source.
+9. **method.js Sources & methodology text**: add the Table 1-4 scope rule (`schema.json` `scope_rule`); update any counts and the round/score history text (methodology.md section 12 is now a neutral paragraph).
+10. **mideast-2023-gnss** row changed: actor "Israel (IDF)", category `gnss_jamming`, start 2023-10-07. Chart C may need a check (category color/label, actor label lengths). `ru-2018-peresvet`: effect text now "Capability announcement, not an act"; consider a tooltip note.
+11. **ltbt-1963** short_note now cites the Office of the Historian for Cuban Missile Crisis/fallout context; page text must not add unsourced drivers.
