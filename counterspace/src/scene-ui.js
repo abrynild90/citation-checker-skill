@@ -34,8 +34,8 @@ async function openScene(id, originEl) {
   const rel = document.getElementById('scRelated'); rel.disabled = !cfg.related; rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
   // Text alternative for the visual: the scene's own status lines, in order, as an ordered list (t is the fraction of scene time).
   const steps = document.getElementById('sceneSteps'), dur = cfg.duration || 0;
-  steps.innerHTML = (cfg.status || []).map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`).join('');
-  document.getElementById('sceneStepsBox').open = !isPhoneNow(); document.getElementById('sceneStepsBox').hidden = !(cfg.status || []).length;
+  steps.innerHTML = (cfg.status || cfg.steps || []).map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`).join('');
+  document.getElementById('sceneStepsBox').open = !isPhoneNow(); document.getElementById('sceneStepsBox').hidden = !(cfg.status || cfg.steps || []).length;
   const sim = buildSim(cfg); const cams = document.getElementById('scCams'); cams.innerHTML = '';
   const h = await getHost();
   view.querySelector(':scope > svg')?.remove();
@@ -48,7 +48,7 @@ async function openScene(id, originEl) {
     renderSVG(sim, view);
   }
   staticMode(!h);
-  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim());
+  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim());
   document.getElementById('scClose').focus();
 }
 // While the dialog is open the page behind it is inert (no focus, not read out).

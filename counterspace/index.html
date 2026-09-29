@@ -650,7 +650,7 @@ actors: [
 { type: 'flash', at: [51, 14, 0], t0: 0.38, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
 { type: 'flash', at: [46, 1, 0], t0: 0.46, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
 { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.3, span: 0.16 },
-], still: 0.75, camDist: 4.9, focus: [33, 12], shellLabels: { GEO: null }, staticZoom: 1.5,
+], steps: [[0, 'Network normal: KA-SAT serves user modems across Ukraine and Europe'], [0.1, 'Attackers push AcidRain wiper malware through the ground management network'], [0.3, 'Commands reach user modems region by region; modems are wiped and go offline'], [0.62, 'Tens of thousands of modems offline; the satellite itself keeps operating'], [0.8, 'Attributed to Russia (GRU) by the US, UK and EU in May 2022 (SWF 15-07)']], still: 0.75, camDist: 4.9, focus: [33, 12], shellLabels: { GEO: null }, staticZoom: 1.5,
 cameras: [{ name: 'Europe + GEO', at: [26, -10, 5.0], look: [20, 9, 1.8], phone: { at: [24, -10, 5.8], look: [14, 8, 2.0] } }, { name: 'Ground network', at: [42, -2, 2.3], look: [46, 14, 1.0] }, { name: 'Wide', at: [30, -6, 6.5] }] },
 { id: 'laser', date: '1997-10-17', title: 'MIRACL laser test on MSTI-3 (1997)', shells: ['LEO'], duration: 12,
 caption: 'In October 1997 the US fired the MIRACL chemical laser at MSTI-3, a retired US Air Force experimental satellite that carried infrared sensors. MIRACL is now part of a test facility at White Sands Missile Range, New Mexico, where this diagram places the site. A low-power beam can dazzle a satellite’s optical sensor; a high-power beam could damage it. SWF describes Russia’s Peresvet as a mobile laser dazzler; the animated view has a Russia camera marking the shelter sites SWF names (Teykovo, Yoshkar-Ola, Novosibirsk). No beam is drawn for Peresvet.',
@@ -2297,8 +2297,8 @@ document.getElementById('sceneSrc').innerHTML = `Source: ${esc(cfg.cite)}${ev ? 
 document.getElementById('sceneScale').textContent = `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale. Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
 const rel = document.getElementById('scRelated'); rel.disabled = !cfg.related; rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
 const steps = document.getElementById('sceneSteps'), dur = cfg.duration || 0;
-steps.innerHTML = (cfg.status || []).map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`).join('');
-document.getElementById('sceneStepsBox').open = !isPhoneNow(); document.getElementById('sceneStepsBox').hidden = !(cfg.status || []).length;
+steps.innerHTML = (cfg.status || cfg.steps || []).map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`).join('');
+document.getElementById('sceneStepsBox').open = !isPhoneNow(); document.getElementById('sceneStepsBox').hidden = !(cfg.status || cfg.steps || []).length;
 const sim = buildSim(cfg); const cams = document.getElementById('scCams'); cams.innerHTML = '';
 const h = await getHost();
 view.querySelector(':scope > svg')?.remove();
@@ -2311,7 +2311,7 @@ h.play(); syncScrub(h.t);
 renderSVG(sim, view);
 }
 staticMode(!h);
-setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim());
+setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim());
 document.getElementById('scClose').focus();
 }
 function setInert(on) { document.querySelectorAll('header.top, main, footer, #card').forEach(n => { n.inert = on; }); }
