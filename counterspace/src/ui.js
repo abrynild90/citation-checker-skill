@@ -273,6 +273,16 @@ export const activate = (d, el, ev) => {
   }
 };
 
+// In-page links: draw the lazily drawn charts first, so the heights above the target are final and the jump lands on the heading (not 600 px off).
+document.addEventListener(
+  'click',
+  (e) => {
+    const a = e.target.closest?.('a[href^="#"]');
+    if (a && a.getAttribute('href').length > 1 && a.getAttribute('href') !== '#legalBand') hooks.drawRest?.();
+  },
+  true,
+);
+
 // ---------------------------------------------------------------- shared guide line
 export const guides = [];
 export function setGuide(date) {
