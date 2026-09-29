@@ -23,6 +23,12 @@ const report = {}, hashes = {}, PH_TOL = 18, PH_STILLS = ['starfish', 'fengyun',
 
 async function run(name, opts, fn) {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, ...opts }), page = await ctx.newPage(), errs = [];
+  // Network bytes (encoded, as transferred) per URL since navigation start, read through CDP; used for the "bytes before interaction" check.
+  const cdp = await ctx.newCDPSession(page), net = new Map(), urls = new Map();
+  await cdp.send('Network.enable');
+  cdp.on('Network.requestWillBeSent', e => urls.set(e.requestId, e.request.url));
+  cdp.on('Network.loadingFinished', e => net.set(urls.get(e.requestId) || e.requestId, (net.get(urls.get(e.requestId) || e.requestId) || 0) + e.encodedDataLength));
+  page.netBytes = () => { const list = [...net].map(([u, b]) => [u.slice(0, 90), b]).sort((a, b) => b[1] - a[1]); return { totalKB: Math.round(list.reduce((t, [, b]) => t + b, 0) / 1024), top: list.slice(0, 4).map(([u, b]) => `${Math.round(b / 1024)} KB ${u}`), heavy3d: list.filter(([u]) => /three|blue-marble|earth/i.test(u)).map(([u]) => u) }; };
   page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(m.type() + ': ' + m.text()); });
   page.on('pageerror', e => errs.push('pageerror: ' + e.message));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' }); await page.waitForTimeout(1500);
@@ -132,7 +138,12 @@ await run('data-checks', { viewport: { width: 1440, height: 900 }, colorScheme: 
 // 2. Desktop scenes: memory, live-scene audit, still export, keyboard flow.
 await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark' }, async p => {
   const res = { mem: [], sceneAudit: [] };
+  // Before any interaction only the static hero (vector map) is on the page: no three.js, no Earth JPG, no canvas.
+  res.bytesBeforeInteraction = p.netBytes(); res.canvasesBeforeInteraction = await p.evaluate(() => window.__cs.contexts());
   await p.screenshot({ path: `${out}/desktop-dark-full.png`, fullPage: true });
+  // Intent: pointer entering the hero upgrades it to WebGL (three.js + Earth imagery load now).
+  await p.hover('#heroStage'); await p.waitForFunction(() => window.__cs.contexts() > 0, null, { timeout: 20000 }).catch(() => {});
+  res.bytesAfterHeroIntent = p.netBytes(); res.heroRotateHidden = await p.evaluate(() => document.getElementById('heroRot').hidden);
   const t0 = Date.now(); await p.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 20000 }).catch(() => {});
   res.earthReady = await p.evaluate(() => window.__cs.earthReady()); res.earthWaitMs = Date.now() - t0;
   res.earthAfterLoad = await p.evaluate(u => { const e = performance.getEntriesByName(u)[0], n = performance.getEntriesByType('navigation')[0]; return e ? { start: Math.round(e.startTime), loadEvent: Math.round(n.loadEventEnd), kb: Math.round((e.transferSize || e.encodedBodySize) / 1024) } : null; }, await p.evaluate(() => window.__cs.EARTH_URL));
@@ -197,6 +208,30 @@ for (const [name, vp, mobile] of [['static-375', { width: 375, height: 800 }, tr
     return res;
   });
 }
+
+// 3b. Round-10 UX checks: focus return after a programmatic scene, Enter feedback on a mark without a scene, phone RPO default zoom, tap card closes on scroll.
+await run('ux-checks', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark', reducedMotion: 'reduce' }, async p => {
+  const res = {};
+  await p.evaluate(() => window.__cs.openScene('fengyun')); await p.waitForTimeout(500); await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  res.focusAfterProgrammaticEsc = await p.evaluate(() => { const a = document.activeElement; return a?.dataset?.id || a?.id || a?.tagName; });
+  await p.evaluate(() => document.getElementById('svgR').scrollIntoView()); await p.waitForTimeout(400);
+  const id = await p.evaluate(() => [...document.querySelectorAll('#svgR .mark')].find(m => !/Opens 3D scene/.test(m.getAttribute('aria-label'))).dataset.id);
+  await p.focus(`#svgR [data-id="${id}"]`); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  res.enterFeedback = await p.evaluate(() => ({ cardOn: document.getElementById('card').classList.contains('on'), live: document.getElementById('cardLive').textContent.slice(0, 80) }));
+  res.rpoExportKeys = await p.evaluate(() => { const s = window.__cs.exportSVG('R'); return { shapeKey: s.includes('>Shape:<') && s.includes('>Docking<'), noDanglingLabelledby: !s.includes('aria-labelledby') }; });
+  res.aExportBubbleKey = await p.evaluate(() => window.__cs.exportSVG('A').includes('Debris bubble area = cataloged fragments'));
+  return res;
+});
+await run('ux-phone', { viewport: { width: 375, height: 800 }, colorScheme: 'dark', hasTouch: true, isMobile: true }, async p => {
+  await p.evaluate(() => document.getElementById('svgR').scrollIntoView()); await p.waitForTimeout(500);
+  const res = { rpoDefault: await p.evaluate(() => ({ zoomPressed: document.getElementById('rFocus').getAttribute('aria-pressed'), flag: document.querySelector('#svgR .zoom-flag')?.textContent.slice(0, 60), flagOverflow: (() => { const t = document.querySelector('#svgR .zoom-flag'), s = document.querySelector('#svgR svg'); return t.getBoundingClientRect().right > s.getBoundingClientRect().right + 0.5; })() })),
+    aDefault: await p.evaluate(() => document.getElementById('aZoom').getAttribute('aria-pressed')) };
+  await p.tap('#svgR [data-id="cn-2025-sy12-02-usa336"] .hit').catch(() => {}); await p.waitForTimeout(400);
+  res.cardBeforeScroll = await p.evaluate(() => document.getElementById('card').classList.contains('on'));
+  await p.evaluate(() => scrollBy(0, 300)); await p.waitForTimeout(500);
+  res.cardAfterScroll = await p.evaluate(() => document.getElementById('card').classList.contains('on'));
+  return res;
+});
 
 // 4. Visual regression against the saved baseline (hashes of SVG sections).
 fs.writeFileSync(`${out}/hashes.json`, JSON.stringify(hashes, null, 1));

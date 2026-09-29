@@ -7,7 +7,7 @@ import { drawA } from './charts/a.js';
 import { AS_OF, KIN, NK, actorKey, colorOf, setExporting, tw, wrap } from './app.js';
 import { CATS, drawB, stateB } from './charts/b.js';
 import { drawC, stateC } from './charts/c.js';
-import { drawR, stateR } from './charts/rpo.js';
+import { R_SHAPE_KEY, R_STYLE_KEY, R_VERT_NOTE, drawR, zoomedR } from './charts/rpo.js';
 import { drawL } from './charts/lag.js';
 import { ABBR_NOTE, drawLegal } from './charts/legal.js';
 import { hooks } from './shared.js';
@@ -39,6 +39,7 @@ const EXPORT_SPEC = {
         t: s === 'Russia' ? 'USSR / Russia' : s,
       })),
     }),
+    bubbles: true, // frameExport adds a size key (debris bubble area) under the colour key
     title: 'Chart A · Kinetic tests: altitude over time',
     key: 'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. 2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.',
   },
@@ -78,12 +79,24 @@ const EXPORT_SPEC = {
   R: {
     id: 'svgR',
     draw: () => drawR,
-    legend: () => ({ head: 'Actor:', items: ['United States', 'China', 'Russia'].map((s) => ({ c: colorOf(s), t: s })) }),
+    // Shape key (activity), outline key (how firmly SWF states it), then the actor colours: the same glyphs as the page legend.
+    legend: () => ({
+      items: [
+        { head: 'Shape:' },
+        ...R_SHAPE_KEY.map(([g, t, gw]) => ({ g, t: t.replace(' (launch to landing)', ''), gw })),
+        { head: 'Outline:' },
+        ...R_STYLE_KEY.map(([g, t, gw]) => ({ g, t, gw })),
+        { head: 'Actor:' },
+        ...['United States', 'China', 'Russia'].map((s) => ({ c: colorOf(s), t: s })),
+      ],
+    }),
     title: 'Co-orbital proximity operations (RPO)',
     get key() {
       return (
-        (stateR.focus ? 'Zoomed view: the axis is 2000–2026, not the shared 1957–2026 axis. ' : '') +
-        'Circle: rendezvous or proximity operation. Square: docking. Triangle: capture and tow. Diamond: release of an object. Bar: spaceplane mission, launch to landing. Solid: stated plainly by SWF. Outline: hedged by SWF. Dashed outline: unclear or conflicted. Arrowhead: ongoing. A proximity operation is not an attack; SWF’s wording on intent is hedged.'
+        (zoomedR() ? 'Zoomed view: the axis is 2000–2026, not the shared 1957–2026 axis. ' : '') +
+        'Circle: rendezvous or proximity operation. Square: docking. Triangle: capture and tow. Diamond: release of an object. Bar: spaceplane mission, launch to landing. Solid: stated plainly by SWF. Outline: hedged by SWF. Dashed outline: unclear or conflicted. Arrowhead: ongoing. ' +
+        R_VERT_NOTE +
+        ' A proximity operation is not an attack; SWF’s wording on intent is hedged.'
       );
     },
   },
@@ -136,9 +149,9 @@ function frameExport(spec, clone, box) {
   let cur = null,
     cx = 0;
   if (leg) {
-    const items = [{ head: leg.head }, ...leg.items];
+    const items = [...(leg.head ? [{ head: leg.head }] : []), ...leg.items];
     items.forEach((it) => {
-      const w = it.head ? tw(it.head, 10.5, 600) + 8 : 14 + tw(it.t, 10.5) + 16;
+      const w = it.head ? tw(it.head, 10.5, 600) + 8 : (it.g ? (it.gw || 14) + 6 : 14) + tw(it.t, 10.5) + 16;
       if (!cur || cx + w > EW - 32) {
         cur = [];
         legRows.push(cur);
@@ -148,10 +161,11 @@ function frameExport(spec, clone, box) {
       cx += w;
     });
   }
-  const LEGH = legRows.length * 16 + (legRows.length ? 8 : 0);
+  const LEGH = legRows.length * 16 + (legRows.length ? 8 : 0),
+    BK = spec.bubbles ? 68 : 0; // height of the bubble-size key row
   const foot = wrap(spec.key, EW - 32, 10.5).concat(wrap(SOURCE_LINE, EW - 32, 10.5)),
     HDR = 40,
-    HT = HDR + vb[3] + LEGH + foot.length * 14 + 16;
+    HT = HDR + vb[3] + LEGH + BK + foot.length * 14 + 16;
   const out = document.createElementNS(ns, 'svg');
   out.setAttribute('xmlns', ns);
   out.setAttribute('width', EW);
@@ -176,19 +190,42 @@ function frameExport(spec, clone, box) {
     `Data as of ${AS_OF} · Source: SWF 2026 and ledger`,
   );
   Object.entries({ x: 0, y: HDR, width: EW, height: vb[3] }).forEach(([k, v]) => clone.setAttribute(k, v));
-  clone.removeAttribute('id');
+  // the nested chart svg would point at a heading id that does not exist in the file: the outer svg carries the title (role img, aria-label)
+  ['id', 'aria-labelledby', 'role'].forEach((a) => clone.removeAttribute(a));
+  clone.setAttribute('aria-hidden', 'true');
   out.appendChild(clone);
   legRows.forEach((row, ri) =>
     row.forEach((it) => {
       const yy = HDR + vb[3] + 14 + ri * 16;
       if (it.head) mk('text', { x: LX + it.x, y: yy, style: `fill:${fg};font:600 10.5px ${SANS_EXPORT}` }, it.head);
-      else {
+      else if (it.g) {
+        const gw = it.gw || 14;
+        mk('g', { transform: `translate(${LX + it.x + gw / 2},${yy - 4})`, 'aria-hidden': 'true' }).innerHTML = rv(it.g);
+        mk('text', { x: LX + it.x + gw + 6, y: yy, style: `fill:${fg};font:10.5px ${SANS_EXPORT}` }, it.t);
+      } else {
         mk('rect', { x: LX + it.x, y: yy - 9, width: 10, height: 10, rx: 2, style: `fill:${rv(it.c)}` });
         mk('text', { x: LX + it.x + 14, y: yy, style: `fill:${fg};font:10.5px ${SANS_EXPORT}` }, it.t);
       }
     }),
   );
-  foot.forEach((t, i) => mk('text', { x: 16, y: HDR + vb[3] + LEGH + 18 + i * 14, style: `fill:${muted};font:10.5px ${SANS_EXPORT}` }, t));
+  if (spec.bubbles) {
+    // Bubble-size key: nested dashed circles (same sqrt scale as the chart, 30 px radius = 3,600 fragments) with their fragment counts.
+    const r30 = (n) => 30 * Math.sqrt(n / 3600),
+      by = HDR + vb[3] + LEGH + 4 + 62,
+      cx0 = LX + 32;
+    [100, 1000, 3500].forEach((n) => {
+      mk('circle', { cx: cx0, cy: by - r30(n), r: r30(n), style: `fill:none;stroke:${muted};stroke-dasharray:2 2` });
+      mk('text', { x: cx0 + 36, y: by - 2 * r30(n) + 9, style: `fill:${muted};font:10px ${SANS_EXPORT}` }, n.toLocaleString('en-US'));
+    });
+    mk(
+      'text',
+      { x: cx0 + 80, y: by - 26, style: `fill:${fg};font:10.5px ${SANS_EXPORT}` },
+      'Debris bubble area = cataloged fragments (as of Feb. 2026); labels give fragment counts.',
+    );
+  }
+  foot.forEach((t, i) =>
+    mk('text', { x: 16, y: HDR + vb[3] + LEGH + BK + 18 + i * 14, style: `fill:${muted};font:10.5px ${SANS_EXPORT}` }, t),
+  );
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(out);
 }
 // Redraw a chart off-screen at the fixed export width (desktop layout) and serialise it.

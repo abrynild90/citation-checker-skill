@@ -24,6 +24,7 @@ export function ensureLand() {
   performance.mark('cs:land-parse');
   setLand(JSON.parse(document.getElementById('cs-land').textContent));
 }
+D.events.forEach((e) => Object.assign(e, D.sources[e.s])); // rows carry a source index; the three source fields are stored once (tools/build_page.py)
 export const EVENTS = D.events,
   LEGAL = D.legal,
   CAPS = D.caps,

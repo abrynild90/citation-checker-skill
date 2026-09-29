@@ -19,6 +19,22 @@ def script_json(obj):
     return json.dumps(obj, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 
 
+SRC_KEYS = ('source', 'source_url', 'source_full')
+DROP_KEYS = ('evidence', 'conflicts')  # ledger-only fields: verification notes the page never reads (see ledger.md)
+
+
+def slim_events(events):
+    """The ledger repeats the same three source fields on every row (only a handful of distinct sources exist), which was ~60 KB of the page.
+    Embed each distinct source once and give the row an index (`s`); app.js copies the fields back onto the row at load."""
+    table, out = [], []
+    for e in events:
+        src = {k: e[k] for k in SRC_KEYS if k in e}
+        if src not in table:
+            table.append(src)
+        out.append({**{k: v for k, v in e.items() if k not in SRC_KEYS + DROP_KEYS}, 's': table.index(src)})
+    return out, table
+
+
 def esbuild(args, text=None):
     r = subprocess.run([str(ESB), *args], input=text, capture_output=True, text=True, cwd=R / 'src')
     if r.returncode:
@@ -30,7 +46,8 @@ def main():
     if not ESB.exists():
         raise SystemExit('esbuild not found: run `npm install` in tools/')
     schema = read_json('data/schema.json')
-    data = dict(events=read_json('data/events.json'), legal=read_json('data/legal.json'), caps=read_json('data/capabilities.json'),
+    events, sources = slim_events(read_json('data/events.json'))
+    data = dict(events=events, sources=sources, legal=read_json('data/legal.json'), caps=read_json('data/capabilities.json'),
                 lag_pairs=read_json('data/lag_pairs.json'),
                 schema={k: schema[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'co_scope_rule', 'page_strings')})
     js = esbuild(['--bundle', '--format=iife', '--minify', '--legal-comments=none', 'boot.js'])

@@ -104,7 +104,7 @@
 - A caption states SWF's hedges (for example "docked to it at some point", "possibly docked", "thought to have docked") and never states an intent SWF does not.
 
 ## 7. Image and data credits
-- **Earth imagery:** NASA Blue Marble (U.S. government work, public domain), 4096x2048 px, 1.4 MB, loaded from a pinned copy on jsDelivr (`three-globe@2.45.0/example/img/earth-blue-marble.jpg`). It is fetched after the page's load event, skipped when reduced motion is on or WebGL is unavailable, and downscaled to 2048 px on phones.
+- **Earth imagery:** NASA Blue Marble (U.S. government work, public domain), 4096x2048 px, 1.4 MB, loaded from a pinned copy on jsDelivr (`three-globe@2.45.0/example/img/earth-blue-marble.jpg`). It is not part of the initial page: the hero first renders as a static vector diagram, and the imagery (with three.js) is fetched only on user intent (pointer or touch on the hero, the "Rotate the globe" button) or when a scene opens. It is skipped when reduced motion is on or WebGL is unavailable (the static diagram then uses it only if a scene is opened), and it is downscaled to 2048 px on phones.
 - **Coastlines:** Natural Earth via world-atlas (public domain).
 - **Report data:** SWF 2026 is licensed CC BY-NC 4.0 (Secure World Foundation). The page cites it and does not reproduce its tables wholesale.
 

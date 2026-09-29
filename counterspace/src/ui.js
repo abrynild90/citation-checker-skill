@@ -29,11 +29,17 @@ function showCard(html, evt, el) {
   card.setAttribute('aria-hidden', 'false');
   card.classList.toggle('dock', innerWidth < PHONE_MAX);
   card.dataset.touch = touchMode ? '1' : '';
+  shownY = scrollY;
   if (innerWidth < PHONE_MAX) {
     card.style.left = '';
     card.style.top = '';
     return;
   }
+  // Dense strips (the RPO chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a few
+  // neighbouring marks (cheap, not free) and keeps off the lane titles; elsewhere covering a mark costs far more than distance.
+  const near = !!el?.closest?.('#svgR'),
+    WM = near ? 0.7 : 6;
+  card.style.maxWidth = near ? '440px' : '';
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
@@ -52,6 +58,7 @@ function showCard(html, evt, el) {
           )
       : [];
   root?.querySelectorAll('text.ann, text.ann-sub').forEach((n) => others.push(n.getBoundingClientRect()));
+  if (near) root.querySelectorAll('text.band-label').forEach((n) => others.push(n.getBoundingClientRect()));
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -79,7 +86,7 @@ function showCard(html, evt, el) {
         T = Math.min(Math.max(8, tp), VH - ch - 8),
         q = { left: L, right: L + cw, top: T, bottom: T + ch };
       const score =
-        others.filter((o) => hit(q, o)).length * 6 +
+        others.filter((o) => hit(q, o)).length * WM +
         (ax && hit(q, ax, 2) ? 60 : 0) +
         (hit(q, r, 0) ? 80 : 0) +
         Math.abs(L - l) / 40 +
@@ -88,16 +95,16 @@ function showCard(html, evt, el) {
       return { L, T, score };
     });
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
-  if (best.score >= 6) {
+  if (best.score >= (near ? 14 : 6)) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
     for (let T = 8; T <= VH - ch - 8; T += 10)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
         const q = { left: L, right: L + cw, top: T, bottom: T + ch };
         const score =
-          others.filter((o) => hit(q, o)).length * 6 +
+          others.filter((o) => hit(q, o)).length * WM +
           (ax && hit(q, ax, 2) ? 60 : 0) +
           (hit(q, r, 0) ? 80 : 0) +
-          Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 60 +
+          Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (near ? 15 : 60) +
           0.5;
         if (score < best.score) best = { L, T, score };
       }
@@ -105,7 +112,16 @@ function showCard(html, evt, el) {
   card.style.left = best.L + 'px';
   card.style.top = best.T + 'px';
 }
-let touchMode = false;
+let touchMode = false,
+  shownY = 0;
+// A touch card is dismissed by scrolling the page (more than 24 px from where it opened), as well as by a tap outside it.
+addEventListener(
+  'scroll',
+  () => {
+    if (card.classList.contains('on') && (touchMode || card.classList.contains('dock')) && Math.abs(scrollY - shownY) > 24) hideCard();
+  },
+  { passive: true },
+);
 document.addEventListener(
   'pointerdown',
   (e) => {
@@ -213,12 +229,32 @@ export function bindMark(sel, cardFn, onActivate) {
       if (!touchMode && cardEl === this) hideCard();
     });
 }
+// Live region for cards: pressing Enter on a mark that has no 3D scene re-opens its card, pulses it and reads it out.
+const live = Object.assign(document.createElement('div'), { id: 'cardLive', className: 'sr' });
+live.setAttribute('role', 'status');
+live.setAttribute('aria-live', 'polite');
+document.body.appendChild(live);
+function announceCard() {
+  card.classList.remove('pulse');
+  void card.offsetWidth;
+  card.classList.add('pulse');
+  setTimeout(() => card.classList.remove('pulse'), 900);
+  const say = [...card.querySelectorAll('h4, dl, div:not(.hint)')]
+    .map((n) => n.textContent.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('. ');
+  live.textContent = '';
+  setTimeout(() => (live.textContent = `Details shown. ${say} No 3D scene for this item.`), 60);
+}
 export const activate = (d, el, ev) => {
   if (hasScene(d)) {
     hideCard();
     hooks.openScene(d.scene_3d, el);
-  } else
+  } else {
     showCard(d.domain ? (d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d) : nkCard(d)) : legalCard(d), ev, el);
+    cardEl = el;
+    announceCard();
+  }
 };
 
 // ---------------------------------------------------------------- shared guide line

@@ -79,6 +79,7 @@ export async function openScene(id, originEl) {
     `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale.${cfg.scaleNote ? ' ' + cfg.scaleNote : ''} Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
   const rel = document.getElementById('scRelated');
   rel.disabled = !cfg.related;
+  document.getElementById('asideLaw').classList.toggle('none', !cfg.related); // no legal item: a slim note, not a full-width bar
   rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
   // Text alternative for the visual: the scene's own status lines, in order, as an ordered list (t is the fraction of scene time).
   const steps = document.getElementById('sceneSteps'),
@@ -133,6 +134,7 @@ function setInert(on) {
 }
 export function closeScene() {
   if (!cur) return;
+  const closing = cur;
   cur = null;
   setInert(false);
   setStatus('');
@@ -143,12 +145,14 @@ export function closeScene() {
     host.unload();
   }
   view.querySelector(':scope > svg')?.remove();
-  startHero();
-  if (returnFocus && document.contains(returnFocus)) returnFocus.focus();
-  else {
-    const m = document.querySelector(`[data-id="${returnFocus?.dataset?.id}"]`);
-    m?.focus();
-  }
+  if (heroWanted) startHero();
+  // Focus goes back to whatever opened the scene. If nothing did (opened from code, so focus was on <body>), fall back to the scene's own timeline
+  // mark (by data-id), then to the tour button, so keyboard users never lose their place.
+  const live = (n) => n && n !== document.body && document.contains(n) && !n.inert;
+  const byMark = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #svgC [data-id="${id}"], #svgR [data-id="${id}"]`);
+  const target = [returnFocus, byMark(returnFocus?.dataset?.id), byMark(closing.event), document.getElementById('tourBtn')].find(live);
+  returnFocus = null;
+  target?.focus();
 }
 const scrub = document.getElementById('scScrub'),
   scTime = document.getElementById('scTime');
@@ -349,7 +353,9 @@ overlay.addEventListener('click', (e) => {
 
 // Hero overview uses the same single renderer; it is unloaded whenever a scene opens.
 export const heroStage = document.getElementById('heroStage');
+let heroWanted = false; // the hero has been upgraded to WebGL (on user intent); only then does closing a scene restart it
 export async function startHero() {
+  heroWanted = true;
   heroSim = buildSim(HERO);
   const h = await getHost();
   if (cur) return;
