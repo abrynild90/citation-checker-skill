@@ -2,6 +2,8 @@
 // audit.js: overlapping or clipped text in every chart SVG, static scene diagrams and live scene labels (bounding-box tests).
 // Provides: audit(). Each finding is { chart, kind: overlap | clip | text-on-mark | sticky-clip, a, b?, w?, h? }; [] means clean.
 // ============================================================================
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { hooks } from './shared.js';
 const CHART_SVGS = '#legalSvg svg, #legalZoom svg, #svgA svg, #svgB svg, #svgC svg, #svgL svg';
 const SCENE_SVGS = '#sceneView > svg, #heroStage > svg';
 const boxOf = r => ({ x0: r.left, x1: r.right, y0: r.top, y1: r.bottom });
@@ -33,8 +35,8 @@ function auditSvg(svg, chart) {
   const ts = svgTexts(svg);
   return [...textOnMarks(svg, ts, chart), ...textClips(ts, svg.getBoundingClientRect(), chart), ...pairOverlaps(ts, chart)];
 }
-function audit() {
-  drawRest();
+export function audit() {
+  hooks.drawRest();
   const out = [];
   document.querySelectorAll(CHART_SVGS).forEach(svg => out.push(...auditSvg(svg, svg.parentElement.id)));
   document.querySelectorAll(SCENE_SVGS).forEach(svg => { if (svg.getClientRects().length) out.push(...auditSvg(svg, 'scene-svg:' + (svg.parentElement.id || 'view'))); });

@@ -2,14 +2,18 @@
 // charts/b.js: Chart B, capability diffusion (stacked step area by decade).
 // Provides: drawB(), chipsB().
 // ============================================================================
-const CATS = [
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { CAPS, DOMAIN, EXPORTING, isPhoneNow, layout, parse, wrap, xAxis } from '../app.js';
+import { addGuide, legend, table } from '../ui.js';
+import { drawC, stateC } from './c.js';
+export const CATS = [
   { key: 'direct_ascent', label: 'Direct-ascent ASAT', v: '--cat-da', kin: true },
   { key: 'co_orbital', label: 'Co-orbital', v: '--cat-co', kin: true },
   { key: 'electronic_warfare', label: 'Electronic warfare', v: '--cat-ew', kin: false },
   { key: 'directed_energy', label: 'Directed energy', v: '--cat-de', kin: false },
   { key: 'cyber', label: 'Cyber', v: '--cat-cy', kin: false },
 ];
-const stateB = { group: 'cat', on: new Set(CATS.map(c => c.key)) };
+export const stateB = { group: 'cat', on: new Set(CATS.map(c => c.key)) };
 // 2020s "developing" (P) entries for which SWF's country matrix (Executive Summary, PDF pp. 22-32) shows "no data": the builder's reading of the
 // country chapters, not the matrix. Source: verification_log.md, "Open items and impact" (direct_ascent and co_orbital, both PARTIAL).
 // Hard-coded here on purpose: data/ and build_data.py are not changed by the page.
@@ -31,7 +35,7 @@ function countsB() {
   })))).filter(sr => sr.key.endsWith(':D') || sr.key.endsWith(':P') || sr.vals.some(n => n));
   return { series };
 }
-function drawB(el = document.getElementById('svgB')) {
+export function drawB(el = document.getElementById('svgB')) {
   el.innerHTML = '';
   const { W, M, x } = layout(el), phone = isPhoneNow();
   // annotation lives in its own band ABOVE the plot, so it never sits on the data
@@ -105,7 +109,7 @@ function drawB(el = document.getElementById('svgB')) {
   table('tableB', ['Category', ...CAPS.decades], CATS.map(c => [c.label, ...CAPS.decades.map(d => { const o = CAPS.coding[c.key][d] || {}; const D_ = Object.keys(o).filter(k => o[k] === 'D'), P_ = Object.keys(o).filter(k => o[k] === 'P' && !isNoData(c.key, d, k)), N_ = Object.keys(o).filter(k => o[k] === 'P' && isNoData(c.key, d, k)); return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}${N_.length ? `; ${N_.length} developing, builder-assessed, SWF matrix: no data (${N_.join(', ')})` : ''}`; })]));
 }
 // Chips are built once and updated in place, so a toggle never drops keyboard focus.
-function chipsB() {
+export function chipsB() {
   const el = document.getElementById('chipsB');
   if (![...el.children].some(c => c.dataset.key)) CATS.forEach(c => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.key = c.key; b.innerHTML = `<i style="background:var(${c.v})"></i>${c.label}`;

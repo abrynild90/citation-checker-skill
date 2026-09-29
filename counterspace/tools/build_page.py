@@ -4,7 +4,7 @@ src/ is one shared-scope program: most modules use each other's top-level names 
 imports), so it cannot be bundled as a module graph yet (tools/PAGE_TODO_BUNDLER.md lists the missing imports).
 Default path: the files in ORDER are joined into one module scope (whole-line `import ... from` lines removed, `export ` keyword
 removed, both checked against esbuild's metafile), then esbuild minifies the JS (IIFE) and CSS with a real parser.
-ESBUILD_GRAPH=1: bundle src/boot.js as a true module graph (works once the page agent adds the imports).
+Module graph: src/boot.js is bundled as a true module graph when ESBUILD_GRAPH=1, or by default once the scene modules have their imports (graph_ready()); ESBUILD_GRAPH=0 forces the joined-scope build.
 Fallback (esbuild missing or NOESBUILD=1): the old line-based minifier. NOMIN=1 skips minification on that path.
 OUTFILE=path writes the page elsewhere."""
 import json, re, pathlib, os, subprocess, shutil
@@ -15,7 +15,7 @@ data = dict(events=d('data/events.json'), legal=d('data/legal.json'), caps=d('da
 blob = json.dumps(data, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 land_blob = json.dumps(d('src/land.json'), separators=(',', ':')).replace('</', '<\\/')  # separate script tag: parsed only when a scene or the hero needs it
 strip = lambda t: re.sub(r"^import .*? from '.*?';\n", '', re.sub(r'^export ', '', t, flags=re.M), flags=re.M)
-ORDER = ['scenes.js', 'scenes/core.js', 'scenes/labels.js', 'scenes/config.js', 'scenes/sim.js', 'scenes/earth.js', 'scenes/gl-host.js', 'scenes/gl-items.js', 'scenes/gl-labels.js', 'scenes/gl-still.js', 'scenes/svg-fallback.js', 'app.js', 'audit.js', 'ui.js', 'charts/legal.js', 'charts/a.js', 'charts/c.js', 'charts/b.js', 'charts/lag.js',
+ORDER = ['scenes.js', 'shared.js', 'scenes/core.js', 'scenes/labels.js', 'scenes/config.js', 'scenes/sim.js', 'scenes/earth.js', 'scenes/gl-host.js', 'scenes/gl-items.js', 'scenes/gl-labels.js', 'scenes/gl-still.js', 'scenes/svg-fallback.js', 'app.js', 'audit.js', 'ui.js', 'charts/legal.js', 'charts/a.js', 'charts/c.js', 'charts/b.js', 'charts/lag.js',
          'method.js', 'export.js', 'scene-ui.js', 'boot.js']
 ESB = R / 'tools/node_modules/.bin/esbuild'
 def esbuild(args, text=None, cwd=R / 'src'):
@@ -34,15 +34,23 @@ def check_strip():
     seen = sum(len(re.findall(r"^import .*? from '.*?';\n", (R / 'src' / f).read_text(), flags=re.M)) for f in ORDER)
     if real != seen:
         raise RuntimeError('import strip mismatch: esbuild sees %d import statements, the strip removes %d' % (real, seen))
+def graph_ready():
+    """Default for the module-graph build: on once the scene modules carry their own import lines (see tools/PAGE_TODO_SCENES_IMPORTS.md)."""
+    return bool(re.search(r'^import ', (R / 'src/scenes/gl-host.js').read_text(), flags=re.M))
+GRAPH = {'1': True, '0': False}.get(os.environ.get('ESBUILD_GRAPH'), graph_ready())  # ESBUILD_GRAPH=1 forces the graph, =0 forces the joined-scope build
 use_esbuild = ESB.exists() and not os.environ.get('NOESBUILD')
 tpl = (R / 'src/template.html').read_text()
 js = None
 if use_esbuild:
     try:
         check_strip()
-        if os.environ.get('ESBUILD_GRAPH'):
-            js = esbuild(['--bundle', '--format=iife', '--minify', '--legal-comments=none', 'boot.js']).strip()
-        else:
+        if GRAPH:
+            try:
+                js = esbuild(['--bundle', '--format=iife', '--minify', '--legal-comments=none', 'boot.js']).strip()
+                print('module graph bundle (src/boot.js)')
+            except Exception as e:  # keep the joined-scope build as the fallback
+                print('graph bundle failed, using the joined-scope build:', str(e)[:300]); js = None
+        if js is None:
             js = esbuild(['--format=iife', '--minify', '--legal-comments=none', '--loader=js'],
                          '\n'.join(strip((R / 'src' / f).read_text()) for f in ORDER)).strip()
         tpl = re.sub(r'(<style>)(.*?)(</style>)', lambda m: m.group(1) + esbuild(['--loader=css', '--minify'], m.group(2)).strip() + m.group(3), tpl, count=1, flags=re.S)

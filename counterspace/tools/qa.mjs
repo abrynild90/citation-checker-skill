@@ -90,7 +90,7 @@ for (const [vname, w, h] of VIEWPORTS) for (const scheme of ['dark', 'light']) {
     }
     if (scheme === 'light' && vname === '1440') for (const k of ['A', 'B', 'C', 'L', 'legal']) {
       const svg = await p.evaluate(k => window.__cs.exportSVG(k), k); fs.writeFileSync(`exports/chart-${k}.svg`, svg);
-      (res.exportAsOf ??= {})[k] = /Data as of SWF 9th ed\., Apr\. 2026/.test(svg) && /Source: SWF 2026/.test(svg);
+      (res.exportAsOf ??= {})[k] = /Data as of SWF 9th ed\.,? \(?Apr\. 2026\)?/.test(svg) && /Source: SWF 2026/.test(svg);
     }
     return res;
   });

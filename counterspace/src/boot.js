@@ -2,6 +2,25 @@
 // boot.js: first draw, lazy drawing, resize, theme toggle and the window.__cs test hooks.
 // Needs: every other module. Runs last.
 // ============================================================================
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { drawC } from './charts/c.js';
+import { chipsB, drawB } from './charts/b.js';
+import { drawL } from './charts/lag.js';
+import { drawMethod } from './method.js';
+import { ensureLand, timed } from './app.js';
+import { drawLegal, drawLegalKey, legalScroll } from './charts/legal.js';
+import { hooks } from './shared.js';
+import { guides, hideCard } from './ui.js';
+import { drawA } from './charts/a.js';
+import { buildSim } from './scenes/sim.js';
+import { HERO } from './scenes/config.js';
+import { ORDER, closeScene, exportStill, heroStage, host, openScene, setHeroSim, startHero } from './scene-ui.js';
+import { renderSVG } from './scenes/svg-fallback.js';
+import { EARTH_URL, earthReady } from './scenes/earth.js';
+import { exportSVG } from './export.js';
+import { audit } from './audit.js';
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { probeBand } from './charts/legal.js';
 document.getElementById('themeBtn').onclick = () => {
   const root = document.documentElement; const now = root.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   root.dataset.theme = now === 'light' ? 'dark' : 'light'; // every chart colour is a CSS variable, so no redraw is needed
@@ -16,9 +35,10 @@ const drawnLazy = new Set();
 let lazyIO = null;
 function drawLazy(id) { if (drawnLazy.has(id)) return; drawnLazy.add(id); lazyIO?.unobserve(document.getElementById(id)); timed('draw-' + id, LAZY[id]); }
 function drawRest() { Object.keys(LAZY).forEach(drawLazy); legalScroll(); }
+hooks.drawRest = drawRest;
 function drawAll(lazy = false) {
   guides.length = 0; drawnLazy.delete('svgC'); drawnLazy.delete('svgB'); drawnLazy.delete('svgL'); lazyIO?.disconnect(); lazyIO = null;
-  timed('draw-legal', () => drawLegal()); timed('draw-legal-zoom', () => drawLegal(document.getElementById('legalZoom'), true)); timed('draw-svgA', () => drawA());
+  timed('draw-legal', () => drawLegal()); timed('draw-legal-zoom', () => drawLegal(document.getElementById('legalZoom'), true)); timed('draw-svgA', () => drawA()); timed('probe-band', probeBand);
   if (!lazy || !('IntersectionObserver' in window)) return drawRest();
   lazyIO = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && drawLazy(e.target.id)), { rootMargin: '700px 0px' });
   Object.keys(LAZY).forEach(id => lazyIO.observe(document.getElementById(id)));
@@ -30,15 +50,12 @@ performance.mark('cs:first-draw-done');
 // Hero: a static diagram (vector map, ~57 KB of land data) is drawn straight away so the stage is never empty. three.js (~1.3 MB) and the Earth
 // JPG (~1.5 MB) are NOT fetched at first paint: they load only after the page has loaded and the browser has gone idle AND the hero is near the
 // viewport (IntersectionObserver with a 300 px margin), or as soon as the user opens a scene. Reduced motion / no WebGL keep the static diagram.
-{ ensureLand(); heroSim = buildSim(HERO); renderSVG(heroSim, heroStage, 0.2); }
+{ ensureLand(); const s = buildSim(HERO); setHeroSim(s); renderSVG(s, heroStage, 0.2); }
 let heroSeen = false, heroReady = false;
 const heroGo = () => { if (heroSeen && heroReady) { heroIO.disconnect(); startHero(); } };
 const heroIO = new IntersectionObserver(es => { heroSeen = es.some(e => e.isIntersecting); heroGo(); }, { rootMargin: '300px 0px' });
 heroIO.observe(heroStage);
 (f => document.readyState === 'complete' ? f() : addEventListener('load', f, { once: true }))(() => idle(() => { heroReady = true; heroGo(); }, 3000));
-// Earth imagery is fetched once, after the WebGL host exists (hero or scene), and skipped with reduced motion or without WebGL.
-let earthStarted = false;
-function prefetchEarth() { if (earthStarted) return; earthStarted = true; getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
 let rz = 0, lastW = innerWidth; addEventListener('resize', () => { if (innerWidth === lastW) return; lastW = innerWidth; clearTimeout(rz); rz = setTimeout(() => drawAll(true), 150); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') hideCard(); });
 

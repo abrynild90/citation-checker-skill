@@ -2,12 +2,21 @@
 // export.js: SVG export (fresh 1200 px desktop render, titled, with as-of line and source footer) and file download.
 // Provides: exportSVG(), download().
 // ============================================================================
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { drawA } from './charts/a.js';
+import { AS_OF, KIN, NK, actorKey, colorOf, setExporting, tw, wrap } from './app.js';
+import { CATS, drawB, stateB } from './charts/b.js';
+import { drawC, stateC } from './charts/c.js';
+import { drawL } from './charts/lag.js';
+import { ABBR_NOTE, drawLegal } from './charts/legal.js';
+import { hooks } from './shared.js';
+import { guides } from './ui.js';
 const STYLE_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-opacity', 'opacity', 'font-family', 'font-size', 'font-weight', 'letter-spacing', 'text-anchor', 'display', 'paint-order'];
 const EXPORT_SPEC = {
   A: { id: 'svgA', draw: () => drawA, legend: () => ({ head: 'Country:', items: [...new Set(KIN.map(e => actorKey(e.state) || e.state))].map(s => ({ c: colorOf(s), t: s === 'Russia' ? 'USSR / Russia' : s })) }), title: 'Chart A · Kinetic tests: altitude over time', key: 'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. 2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.' },
-  B: { id: 'svgB', draw: () => drawB, legend: () => ({ head: 'Colour:', items: stateB.group === 'cat' ? CATS.filter(c => stateB.on.has(c.key)).map(c => ({ c: `var(${c.v})`, t: c.label })) : [{ c: 'var(--cat-da)', t: 'Kinetic (direct-ascent, co-orbital)' }, { c: 'var(--cat-ew)', t: 'Non-kinetic (EW, directed energy, cyber)' }] }), title: 'Chart B · Capability diffusion', key: 'Solid: capability demonstrated (tested or used). Hatched: developing or latent. Stack height counts state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, not assessed by SWF.' },
+  B: { id: 'svgB', draw: () => drawB, legend: () => ({ head: 'Colour:', items: stateB.group === 'cat' ? CATS.filter(c => stateB.on.has(c.key)).map(c => ({ c: `var(${c.v})`, t: c.label })) : [{ c: 'var(--cat-da)', t: 'Kinetic (direct-ascent, co-orbital)' }, { c: 'var(--cat-ew)', t: 'Non-kinetic (EW, directed energy, cyber)' }] }), title: 'Chart B · Capability diffusion', key: 'Solid: capability demonstrated (tested or used). Hatched: developing or latent (SWF matrix supports it). Dotted fill: developing, builder-assessed (2020s entries for which the SWF matrix shows no data). Faded fill with dashed edge: reconstructed decades. Whisker above each decade: low end = demonstrated only, high end = demonstrated plus developing. Stack height counts state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, not assessed by SWF.' },
   C: { id: 'svgC', draw: () => drawC, legend: () => ({ head: 'Actor:', items: [...new Set(NK.map(e => actorKey(e.actor) || 'Other or multiple actors'))].map(s => ({ c: colorOf(s), t: s })) }), title: 'Chart C · Non-kinetic operations', get key() { return (stateC.focus ? 'Zoomed view: the axis is 1995–2026, not the shared 1957–2026 axis (the ledger has no earlier non-kinetic entry; earliest: 1997 MIRACL laser test). ' : '') + 'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.'; } },
-  L: { id: 'svgL', draw: () => drawL, title: 'Chronology: capability milestones and later legal steps', key: 'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. Open ring: no binding rule yet. Chronology only: a pair shows which came first, not causation.' },
+  L: { id: 'svgL', draw: () => drawL, title: 'Chronology: capability milestones and later legal steps', key: 'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. Open ring: no later legal item paired in the ledger (not a claim that no rule exists). Chronology only: a pair shows which came first, not causation.' },
   legal: { id: 'legalSvg', draw: () => drawLegal, title: 'Law and policy responses, 1957–2026', key: 'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond: soft law (expert manual, not binding). Cross: veto. Bars: negotiation spans. Marks that would collide are stacked vertically; each stays at its true date on the axis. ' + ABBR_NOTE },
 };
 const EXPORT_W = 1200, SANS_EXPORT = 'system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
@@ -45,19 +54,19 @@ function frameExport(spec, clone, box) {
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(out);
 }
 // Redraw a chart off-screen at the fixed export width (desktop layout) and serialise it.
-function exportSVG(which) {
-  drawRest();
+export function exportSVG(which) {
+  hooks.drawRest();
   const spec = EXPORT_SPEC[which]; if (!spec) return '';
   const savedGuides = guides.length;
-  FORCE_DESKTOP = true; EXPORTING = true;
+  setExporting(true, true);
   const box = document.createElement('div'); box.className = 'xbox ' + (document.getElementById('expDark')?.checked ? 'xdark' : 'xlight'); box.style.cssText = `position:absolute;left:-99999px;top:0;width:${EXPORT_W}px`; document.body.appendChild(box);
   try {
     spec.draw()(box);
     const src = box.querySelector('svg'), clone = src.cloneNode(true);
     inlineStyles(src, clone);
     return frameExport(spec, clone, box);
-  } finally { EXPORTING = false; FORCE_DESKTOP = false; box.remove(); guides.length = savedGuides; }
+  } finally { setExporting(false, false); box.remove(); guides.length = savedGuides; }
 }
-function download(name, data, type) { const a = document.createElement('a'); a.href = data.startsWith('data:') ? data : URL.createObjectURL(new Blob([data], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+export function download(name, data, type) { const a = document.createElement('a'); a.href = data.startsWith('data:') ? data : URL.createObjectURL(new Blob([data], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
 document.querySelectorAll('[data-export]').forEach(b => b.onclick = () => download(`counterspace-${b.dataset.export}.svg`, exportSVG(b.dataset.export), 'image/svg+xml'));
 

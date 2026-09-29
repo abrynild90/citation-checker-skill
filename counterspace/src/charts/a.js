@@ -2,12 +2,17 @@
 // charts/a.js: Chart A, kinetic tests by altitude (log axis) with debris bubbles.
 // Provides: drawA(), table().
 // ============================================================================
-function drawA(el = document.getElementById('svgA')) {
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { DOMAIN, EXPORTING, KIN, LAST_DA, Placer, TYPE_LABEL, badge, byId, colorOf, fmtD, fmtMY, hasScene, isPhoneNow, layout, num, parse, star, tw, xAxis } from '../app.js';
+import { activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table } from '../ui.js';
+const stateA = { zoom: false }, ZOOM_A0 = '2004-01-01';
+export function drawA(el = document.getElementById('svgA')) {
   el.innerHTML = '';
-  const { W, M, x } = layout(el), phone = isPhoneNow();
+  const phone = isPhoneNow(), zoomed = phone && stateA.zoom, KV = zoomed ? KIN.filter(e => e.date >= ZOOM_A0) : KIN; // phone zoom: 2004 onward, where the marks crowd
+  const { W, M, x } = layout(el, zoomed ? [parse(ZOOM_A0), DOMAIN[1]] : DOMAIN);
   const top = 18, plotH = phone ? 300 : 380;
   // Tests with no reported altitude sit in a strip below the axis at their true dates; marks that would overlap are dodged into extra rows (x never moves).
-  const unk = KIN.filter(e => e.altitude_km == null).sort((a, b) => a.date < b.date ? -1 : 1), rowEnd = [], STEP = phone ? 11 : 12, ROWH = phone ? 12 : 13;
+  const unk = KV.filter(e => e.altitude_km == null).sort((a, b) => a.date < b.date ? -1 : 1), rowEnd = [], STEP = phone ? 11 : 12, ROWH = phone ? 12 : 13;
   unk.forEach(e => { const X = x(parse(e.date)); let r = rowEnd.findIndex(v => v <= X - STEP); if (r < 0) { r = rowEnd.length; rowEnd.push(0); } rowEnd[r] = X; e._row = r; });
   const stripH = 12 + Math.max(1, rowEnd.length) * ROWH + 4, capH = 16, H = top + plotH + capH + stripH + 30;
   const y = d3.scaleLog().domain([8, 48000]).range([top + plotH, top]);
@@ -16,9 +21,9 @@ function drawA(el = document.getElementById('svgA')) {
   // bands
   const bandLabels = [], HX = x(parse(LAST_DA));
   // The hand-off label runs vertically just right of the dotted line, so it can never meet the marks or callouts (the DN-2 mark sits under a horizontal label).
-  const HT = [`Last destructive DA-ASAT test (${fmtMY(parse(LAST_DA))})`, `Last destructive test (${fmtMY(parse(LAST_DA))})`, 'Last destructive test'], nearX = KIN.filter(e => e.altitude_km != null && Math.abs(x(parse(e.date)) - HX) < 34).map(e => y(e.altitude_km) - (e.fragments_cataloged ? (phone ? 22 : 30) : 14));
+  const HT = [`Last destructive DA-ASAT test (${fmtMY(parse(LAST_DA))})`, `Last destructive test (${fmtMY(parse(LAST_DA))})`, 'Last destructive test'], nearX = KV.filter(e => e.altitude_km != null && Math.abs(x(parse(e.date)) - HX) < 34).map(e => y(e.altitude_km) - (e.fragments_cataloged ? (phone ? 22 : 30) : 14));
   const roomV = Math.min(top + plotH, ...nearX) - top - 14, handoffText = HT.find(s => tw(s, 11, 600) <= roomV) || HT.at(-1);
-  const pts = KIN.filter(e => e.altitude_km != null).map(e => [x(parse(e.date)), y(e.altitude_km)]);
+  const pts = KV.filter(e => e.altitude_km != null).map(e => [x(parse(e.date)), y(e.altitude_km)]);
   const band = (a, b, fill, label, above) => { const ly = above ? y(b) - 4 : y(b) + (b === 35000 ? 24 : 13), lw = tw(label, 10.5, 600) + label.length * 0.85; let bx = M.l + 6;
     while (bx < W * 0.5 && pts.some(([px, py]) => px > bx - 12 && px < bx + lw + 12 && py > ly - 16 && py < ly + 8)) bx += 6; // slide right until clear of the marks
     bandLabels.push({ x: bx, y: ly, w: lw }); svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', y(b)).attr('height', y(a) - y(b)).style('fill', fill);
@@ -34,17 +39,17 @@ function drawA(el = document.getElementById('svgA')) {
   const sy = top + plotH + capH, stripY = e => sy + 10 + (e._row || 0) * ROWH;
   svg.append('rect').attr('x', M.l).attr('width', W - M.l - M.r).attr('y', sy).attr('height', stripH).style('fill', 'var(--surface-2)');
   svg.append('text').attr('class', 'band-label').attr('x', M.l + 6).attr('y', sy - 5).text(phone ? 'ALTITUDE NOT REPORTED' : 'ALTITUDE NOT REPORTED (no point on the scale)');
-  xAxis(svg, x, sy + stripH);
+  xAxis(svg, x, sy + stripH, zoomed ? 5 : undefined);
   // debris scale
   const rD = d3.scaleSqrt().domain([0, 3600]).range([0, phone ? 22 : 30]);
   // handoff marker
   handoff(svg, x, top, sy + stripH, null).append('text').attr('transform', `translate(${HX + 13},${top + 4}) rotate(90)`).attr('text-anchor', 'start').text(handoffText);
   // bubbles first (behind)
-  const dest = KIN.filter(e => e.type === 'destructive');
+  const dest = KV.filter(e => e.type === 'destructive');
   svg.append('g').selectAll('circle').data(dest).join('circle').attr('cx', d => x(parse(d.date))).attr('cy', d => y(d.altitude_km)).attr('r', d => rD(d.fragments_cataloged))
     .style('fill', d => colorOf(d.state)).style('fill-opacity', 0.16).style('stroke', d => colorOf(d.state)).style('stroke-opacity', 0.7).style('stroke-dasharray', '2 2').attr('aria-hidden', 'true');
   // marks
-  const g = svg.append('g').selectAll('g').data(KIN).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id)
+  const g = svg.append('g').selectAll('g').data(KV).join('g').attr('class', 'mark').attr('role', 'button').attr('data-id', d => d.id)
     .attr('transform', d => `translate(${x(parse(d.date))},${d.altitude_km == null ? stripY(d) : y(d.altitude_km)})`)
     .attr('aria-label', d => `${fmtD(d)}. ${d.state}, ${d.system} against ${d.target}. ${TYPE_LABEL[d.type]}. Altitude ${d.altitude_km == null ? 'not reported' : d.altitude_km + ' km'}.${d.fragments_cataloged ? ' ' + d.fragments_cataloged + ' fragments cataloged.' : ''}${hasScene(d) ? ' Opens 3D scene.' : ''}`);
   g.each(function (d) {
@@ -61,7 +66,7 @@ function drawA(el = document.getElementById('svgA')) {
   const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: H });
   bandLabels.forEach(b => pl.add(pl.textRect(b.x, b.y, 'start', b.w, 10.5)));
   pl.add([HX + 2, top + 4, HX + 16, top + 8 + tw(handoffText, 11, 600)]);
-  KIN.forEach(d => { const X = x(parse(d.date)), Y = d.altitude_km == null ? stripY(d) : y(d.altitude_km); pl.add([X - 11, Y - 19, X + 17, Y + 11], 'M'); });
+  KV.forEach(d => { const X = x(parse(d.date)), Y = d.altitude_km == null ? stripY(d) : y(d.altitude_km); pl.add([X - 11, Y - 19, X + 17, Y + 11], 'M'); });
   const ann = (id, t1, t2, prefs) => {
     const e = byId[id], X = x(parse(e.date)), Y = y(e.altitude_km), w = Math.max(tw(t1, 12, 600), t2 ? tw(t2, 11.5) : 0);
     for (const [dx, dy, anchor] of prefs) {
@@ -82,12 +87,12 @@ function drawA(el = document.getElementById('svgA')) {
     ann('cn-2007-fy1c', 'Peak intercept is still Fengyun-1C (2007): 880 km', 'Intercept altitudes have not climbed since.', [[-34, -42, 'end'], [-34, -60, 'end'], ...around(34, 42), ...sweep()]);
     ann('us-1962-starfish-prime', 'Starfish Prime (nuclear, 1962)', null, [[18, -40, 'start'], [18, -60, 'start'], ...around(18, 30), ...sweep()]);
   } else {
-    ann('cn-2013-dn2', 'DN-2 reach (apogee)', null, around(20, 24));
+    ann('cn-2013-dn2', 'DN-2 reach (apogee)', null, [...around(20, 24), ...sweep()]);
     ann('cn-2007-fy1c', 'Peak intercept: FY-1C', null, [[-20, -34, 'end'], [20, -34, 'start'], ...around(20, 30), ...sweep()]);
   }
   // The empty stretches of the scatter are data, not a bug: say so in-chart. The note is computed from the ledger (no hard-coded years):
   // gaps = runs of 5+ calendar years between consecutive kinetic rows of any state, plus the longest span with no destructive test.
-  { const yr = e => +e.date.slice(0, 4), ys = KIN.slice().sort((a, b) => a.date < b.date ? -1 : 1), gaps = [];
+  if (!zoomed) { const yr = e => +e.date.slice(0, 4), ys = KIN.slice().sort((a, b) => a.date < b.date ? -1 : 1), gaps = [];
     ys.forEach((e, i) => { const nx = ys[i + 1]; if (nx && yr(nx) - yr(e) >= 6) gaps.push({ a: yr(e) + 1, b: yr(nx) - 1, x0: x(parse(e.date)) + 8, x1: x(parse(nx.date)) - 8 }); });
     const ds = ys.filter(e => e.type === 'destructive'); let dg = null; ds.forEach((e, i) => { const nx = ds[i + 1]; if (nx && (!dg || yr(nx) - yr(e) > yr(dg[1]) - yr(dg[0]))) dg = [e, nx]; });
     const rng = g => g.a === g.b ? `${g.a}` : `${g.a}–${String(g.b).slice((g.a / 100 | 0) === (g.b / 100 | 0) ? 2 : 0)}`;
@@ -111,7 +116,9 @@ function drawA(el = document.getElementById('svgA')) {
         tt.append('tspan').attr('x', placed.cxx).text(l1); if (placed.withL2) tt.append('tspan').attr('x', placed.cxx).attr('dy', 14).text(l2);
       }
     } }
-  addGuide(svg, x, top, sy + stripH);
+  addGuide(svg, x, top, sy + stripH, 'A');
+  if (zoomed) svg.append('text').attr('class', 'zoom-flag').attr('x', W - M.r).attr('y', top + plotH - 6).attr('text-anchor', 'end').text(`ZOOMED 2004–26 · ${KIN.length - KV.length} earlier tests hidden`);
+  if (!EXPORTING) { const b = document.getElementById('aZoom'); b.setAttribute('aria-pressed', !!zoomed); b.textContent = zoomed ? 'Show full span 1957–2026' : 'Zoom to 2004–2026'; }
   // legend
   if (EXPORTING) return;
   const L = legend('legendA', 22, 18), li = L.item;
@@ -128,10 +135,4 @@ function drawA(el = document.getElementById('svgA')) {
   table('tableA', ['Date', 'State', 'System', 'Target', 'Type', 'Altitude (km)', 'Kind', 'Cataloged', 'In orbit', 'Conf.', 'Source'],
     KIN.map(e => [e.date_precision === 'month' ? e.date.slice(0, 7) : e.date, e.state, e.system, e.target, TYPE_LABEL[e.type], e.altitude_km ?? '—', e.altitude_kind, num(e.fragments_cataloged), num(e.fragments_in_orbit), e.confidence, srcCell(e)]));
 }
-const srcCell = r => `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}`;
-// Accessible data table. Each cell carries data-label so CSS can stack rows as cards on phones (no horizontal scroll).
-const CAPTIONS = { tableA: 'Chart A data: kinetic counterspace tests, one row per event', tableB: 'Chart B data: states holding each capability, by decade', tableC: 'Chart C data: non-kinetic operations, one row per event or campaign', tableL: 'The lag: capability and response dates for each pair', tableLegal: 'Law and policy items with abbreviations' };
-function table(id, head, rows, caption = CAPTIONS[id]) {
-  setOnce(id, `<table>${caption ? `<caption>${esc(caption)}</caption>` : ''}<thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
-}
-
+document.getElementById('aZoom').onclick = () => { stateA.zoom = !stateA.zoom; drawA(); };

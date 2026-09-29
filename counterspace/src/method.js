@@ -2,7 +2,10 @@
 // method.js: sources and methodology section.
 // Provides: drawMethod().
 // ============================================================================
-function drawMethod() {
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { AS_OF, EVENTS, LAST_DA, LEDGER_AS_OF, LEGAL, SCHEMA, esc, fmt, parse } from './app.js';
+import { PARTICLE_BUDGET } from './scenes/core.js';
+export function drawMethod() {
   // one entry per distinct source URL: a full citation (legal rows carry their own; event sources are expanded below) plus the pin(s)
   const bare = t => esc(t).replace(/,\s*https?:\/\/\S+$/, '');
   const groups = new Map(); EVENTS.concat(LEGAL).forEach(r => { if (!groups.has(r.source_url)) groups.set(r.source_url, []); groups.get(r.source_url).push(r); });

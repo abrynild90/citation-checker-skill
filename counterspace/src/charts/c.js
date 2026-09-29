@@ -2,6 +2,9 @@
 // charts/c.js: Chart C, non-kinetic operations as swimlanes.
 // Provides: drawC(), stateC.
 // ============================================================================
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { ATTR_LABEL, DOMAIN, EXPORTING, LAST_DA, NK, Placer, REGIME_LABEL, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw, wrap, xAxis } from '../app.js';
+import { activate, addGuide, bindMark, legend, nkCard, rove, srcCell, table } from '../ui.js';
 const LANES = [
   { key: 'ew', label: 'EW: uplink / downlink jamming', cats: ['ew_uplink', 'ew_downlink'] },
   { key: 'gnss', label: 'GNSS jamming & spoofing', cats: ['gnss_jamming', 'gnss_spoofing'] },
@@ -23,10 +26,10 @@ function attrStyle(sel, d) {
   else if (d.attribution === 'researcher_osint') sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2);
   else sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2).style('stroke-dasharray', '4 2.5');
 }
-const stateC = { focus: false }; // default: the full shared 1957-2026 axis; 'focus' is the explicit 1995-2026 zoom
+export const stateC = { focus: false }; // default: the full shared 1957-2026 axis; 'focus' is the explicit 1995-2026 zoom
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
 const LINE_H = 12.5, LINE_H_PHONE = 14.5;
-function drawC(el = document.getElementById('svgC')) {
+export function drawC(el = document.getElementById('svgC')) {
   el.innerHTML = ''; // a re-draw replaces the chart (never stacks a second one)
   const dom = stateC.focus ? C_FOCUS() : DOMAIN;
   const { W, M, x } = layout(el, dom), phone = isPhoneNow();

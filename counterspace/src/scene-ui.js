@@ -2,7 +2,17 @@
 // scene-ui.js: scene overlay (dialog, scrubber, camera presets, still export) and the hero.
 // Provides: openScene(), closeScene(), exportStill(), startHero(); owns the single WebGL host.
 // ============================================================================
-let THREE = null, host = null, glOK = null;
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { REDUCED, byId, ensureLand, esc, isPhoneNow, parse } from './app.js';
+import { GLHost } from './scenes/gl-host.js';
+import { loadEarth } from './scenes/earth.js';
+import { HERO, SCENES } from './scenes/config.js';
+import { buildSim } from './scenes/sim.js';
+import { renderSVG } from './scenes/svg-fallback.js';
+import { setGuide } from './ui.js';
+import { download } from './export.js';
+import { hooks } from './shared.js';
+export let THREE = null, host = null, glOK = null;
 async function getHost() {
   ensureLand();
   if (REDUCED) return null;
@@ -17,10 +27,14 @@ async function getHost() {
     glOK = true; return host;
   } catch (e) { console.warn('WebGL unavailable, using static diagrams', e); glOK = false; return null; }
 }
-const ORDER = [...SCENES].sort((a, b) => a.date < b.date ? -1 : 1);
+// Earth imagery is fetched once, after the WebGL host exists (hero or scene), and skipped with reduced motion or without WebGL.
+let earthStarted = false;
+function prefetchEarth() { if (earthStarted) return; earthStarted = true; getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
+export const ORDER = [...SCENES].sort((a, b) => a.date < b.date ? -1 : 1);
 const overlay = document.getElementById('overlay'), view = document.getElementById('sceneView');
 let cur = null, returnFocus = null, heroSim = null;
-async function openScene(id, originEl) {
+export function setHeroSim(s) { heroSim = s; }
+export async function openScene(id, originEl) {
   const cfg = SCENES.find(s => s.id === id); if (!cfg) return;
   if (!overlay.classList.contains('open')) { returnFocus = originEl || document.activeElement; }
   cur = cfg;
@@ -53,7 +67,7 @@ async function openScene(id, originEl) {
 }
 // While the dialog is open the page behind it is inert (no focus, not read out).
 function setInert(on) { document.querySelectorAll('header.top, main, footer, #card').forEach(n => { n.inert = on; }); }
-function closeScene() {
+export function closeScene() {
   if (!cur) return;
   cur = null; setInert(false); setStatus(''); overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); document.body.style.overflow = '';
   if (host) { host.unload(); }
@@ -75,7 +89,8 @@ function staticMode(on) {
   if (!on) setPlayBtn(true);
 }
 scrub.oninput = () => { if (host && cur && !scrub.hidden) { host.playing = false; setPlayBtn(false); host.update(scrub.value / 1000); } };
-function setPlayBtn(on) { const b = document.getElementById('scPlay'); b.setAttribute('aria-pressed', on); b.textContent = on ? '❚❚ Pause' : '▶ Play'; b.disabled = false; }
+// Play/pause: an icon button (label hidden on phones) whose accessible name is the action it will do; the highlighted style marks "playing".
+function setPlayBtn(on) { const b = document.getElementById('scPlay'); b.classList.toggle('playing', !!on); b.setAttribute('aria-label', on ? 'Pause' : 'Play'); b.innerHTML = on ? '❚❚<span class="lbl"> Pause</span>' : '▶<span class="lbl"> Play</span>'; b.disabled = false; }
 document.getElementById('scPlay').onclick = () => { if (!host || !cur || scrub.hidden) return; host.playing = !host.playing; if (host.playing && host.t >= 1) host.t = 0; setPlayBtn(host.playing); };
 document.getElementById('scClose').onclick = closeScene;
 document.getElementById('scPrev').onclick = () => { const i = ORDER.indexOf(cur); openScene(ORDER[(i - 1 + ORDER.length) % ORDER.length].id); };
@@ -112,7 +127,7 @@ function svgToPNG(svg, title, cite) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
   });
 }
-async function exportStill() {
+export async function exportStill() {
   if (!cur) return null;
   if (host && glOK) return host.stillPNG(cur.title, cur.cite);
   const svg = view.querySelector(':scope > svg'); if (!svg) throw new Error('No diagram to export');
@@ -121,7 +136,15 @@ async function exportStill() {
 function setStatus(msg, quiet) { const s = document.getElementById('scStatus'); s.textContent = msg; s.classList.toggle('sr', !!quiet); } // quiet: announced to screen readers, not shown (the title and counter already say it)
 // Scroll cue: the aside text is fully reachable by scrolling; a fade and label show while more is below.
 const asideBody = document.getElementById('asideBody'), asideWrap = document.getElementById('asideWrap');
-function updateCue() { asideWrap.classList.toggle('more', asideBody.scrollTop + asideBody.clientHeight < asideBody.scrollHeight - 6); }
+// The cue row is reserved under the text (never overlaps it): it shows a label and a progress bar while the text is scrollable.
+const cueTxt = document.getElementById('cueTxt'), cueProg = document.getElementById('scrollProg');
+function updateCue() {
+  const max = asideBody.scrollHeight - asideBody.clientHeight, more = asideBody.scrollTop < max - 6;
+  asideWrap.classList.toggle('scrollable', max > 6); asideWrap.classList.toggle('more', more);
+  cueTxt.textContent = more ? '▾ Scroll for more' : 'End of text';
+  cueProg.style.width = max > 6 ? Math.max(6, 100 * asideBody.clientHeight / asideBody.scrollHeight) + '%' : '100%';
+  cueProg.style.left = max > 6 ? (100 - parseFloat(cueProg.style.width)) * (asideBody.scrollTop / max) + '%' : '0';
+}
 asideBody.addEventListener('scroll', updateCue, { passive: true }); addEventListener('resize', updateCue);
 asideBody.addEventListener('toggle', updateCue, true); if ('ResizeObserver' in window) new ResizeObserver(updateCue).observe(asideBody);
 document.getElementById('scExport').onclick = async () => {
@@ -138,8 +161,8 @@ overlay.addEventListener('keydown', e => {
 overlay.addEventListener('click', e => { if (e.target === overlay) closeScene(); });
 
 // Hero overview uses the same single renderer; it is unloaded whenever a scene opens.
-const heroStage = document.getElementById('heroStage');
-async function startHero() {
+export const heroStage = document.getElementById('heroStage');
+export async function startHero() {
   heroSim = buildSim(HERO);
   const h = await getHost();
   if (cur) return;
@@ -151,3 +174,4 @@ function unloadHero() { if (host && host.el === heroStage) host.unload(); }
 
 // Static diagrams size themselves from the stage at open time: redraw them if the overlay is resized while open.
 let srz = 0; addEventListener('resize', () => { clearTimeout(srz); srz = setTimeout(() => { if (cur && !(host && glOK)) { view.querySelector(':scope > svg')?.remove(); renderSVG(buildSim(cur), view); } }, 200); });
+hooks.openScene = openScene; hooks.prefetchEarth = prefetchEarth;

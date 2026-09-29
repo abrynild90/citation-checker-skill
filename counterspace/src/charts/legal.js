@@ -2,12 +2,16 @@
 // charts/legal.js: legal band (sticky, dodged marks, 2021-26 zoom, phone strip with tap-to-label), key and list.
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), legalScroll().
 // ============================================================================
+// Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
+import { DOMAIN, EXPORTING, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { activate, addGuide, bindMark, legalCard, legend, rove, setGuide, table } from '../ui.js';
+import { hooks } from '../shared.js';
 const ABBR = { 'ltbt-1963': 'LTBT', 'ost-1967': 'OST', 'abm-1972': 'ABM Art. XII', 'paros-1981': 'PAROS', 'cd-paros-committee': 'CD PAROS cttee', 'itu-1992': 'ITU Arts. 45/48', 'ppwt-2008': 'PPWT', 'ppwt-2014': 'PPWT II', 'tallinn-2017': 'Tallinn 2.0*', 'unga-75-36': 'UNGA 75/36', 'oewg-2022': 'OEWG', 'us-moratorium-2022': 'US moratorium', 'milamos-2022': 'MILAMOS*', 'unga-77-41': 'UNGA 77/41', 'unsc-veto-2024': 'UNSC veto (nukes)', 'woomera-2024': 'Woomera*', 'itu-rrb-2024': 'ITU RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'ITU RRB ’25' };
 const SHORT = { 'tallinn-2017': 'Tallinn*', 'unga-75-36': '75/36', 'milamos-2022': 'MILAMOS*', 'us-moratorium-2022': 'US pledge', 'unga-77-41': '77/41', 'woomera-2024': 'Woomera*', 'unsc-veto-2024': 'Veto', 'itu-rrb-2024': 'RRB ’24', 'icao-2025': 'ICAO ’25', 'itu-rrb-2025': 'RRB ’25' };
-const ABBR_NOTE = 'LTBT: Limited Test Ban Treaty. OST: Outer Space Treaty. ABM Art. XII: ABM Treaty (non-interference with national technical means). PAROS: Prevention of an Arms Race in Outer Space. CD: Conference on Disarmament. ITU Arts. 45/48: ITU Constitution (harmful interference; military radio services). PPWT: Russia-China draft treaty on the placement of weapons in outer space. UNGA 75/36 and 77/41: UN General Assembly resolutions. OEWG: Open-ended Working Group. US pledge: 2022 US DA-ASAT test moratorium. Veto: Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit (it did not concern DA-ASAT testing). RRB: ITU Radio Regulations Board. ICAO: International Civil Aviation Organization. An asterisk marks soft law (expert manuals, not binding).';
+export const ABBR_NOTE = 'LTBT: Limited Test Ban Treaty. OST: Outer Space Treaty. ABM Art. XII: ABM Treaty (non-interference with national technical means). PAROS: Prevention of an Arms Race in Outer Space. CD: Conference on Disarmament. ITU Arts. 45/48: ITU Constitution (harmful interference; military radio services). PPWT: Russia-China draft treaty on the placement of weapons in outer space. UNGA 75/36 and 77/41: UN General Assembly resolutions. OEWG: Open-ended Working Group. US pledge: 2022 US DA-ASAT test moratorium. Veto: Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit (it did not concern DA-ASAT testing). RRB: ITU Radio Regulations Board. ICAO: International Civil Aviation Organization. An asterisk marks soft law (expert manuals, not binding).';
 const SPAN_LABEL = { 'paros-1981': 'PAROS: UNGA agenda item since 1981', 'cd-paros-committee': 'CD Ad Hoc Cttee on PAROS, 1985–94', 'oewg-2022': 'OEWG, 2022–23' };
 const KIND_LABEL = { treaty: 'Treaty', resolution: 'Resolution / body finding', unilateral: 'Unilateral pledge or soft law', veto: 'Veto', negotiation_span: 'Negotiation' };
-function legalGlyph(sel, l) {
+export function legalGlyph(sel, l) {
   if (l.soft_law) sel.append('path').attr('d', 'M0,-6.5L6.5,0L0,6.5L-6.5,0Z').style('fill', 'var(--bg)').style('stroke', 'var(--accent-2)').style('stroke-width', 1.8);
   else if (l.kind === 'treaty') sel.append('circle').attr('r', 5.5).style('fill', 'var(--accent)').style('stroke', 'var(--bg)').style('stroke-width', 1);
   else if (l.kind === 'resolution') sel.append('rect').attr('x', -5).attr('y', -5).attr('width', 10).attr('height', 10).style('fill', 'var(--accent)').style('stroke', 'var(--bg)').style('stroke-width', 1);
@@ -16,7 +20,7 @@ function legalGlyph(sel, l) {
   else sel.append('path').attr('d', 'M0,-5.5L5.5,0L0,5.5L-5.5,0Z').style('fill', 'var(--muted)').style('stroke', 'var(--bg)').style('stroke-width', 1).attr('transform', 'scale(0.9)');
 }
 const ZOOM = [parse('2021-06-01'), parse('2026-07-01')];
-function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
+export function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.innerHTML = '';
   // On phones the band becomes a horizontally scrollable, fully labelled strip (desktop layout at STRIP_W px), scrolled to the recent cluster.
   const strip = isPhoneNow() && !zoom && !EXPORTING && el.id === 'legalSvg';
@@ -87,12 +91,17 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
       const r = run(best.c.order, best.c.prim, true); labels.push(...r.out); maxUp = Math.max(maxUp, r.mu); maxDn = Math.max(maxDn, r.md);
     });
   }
+  // Sticky (compact) band: abbreviated labels sit under the line where they fit; marks that do not fit keep the hover/focus card.
+  const cLabels = [];
+  if (compact) { const p2 = new Placer({ x0: 2, x1: W - 2, y0: -999, y1: 999 });
+    pts.slice().reverse().forEach(d => { const s = SHORT[d.id] || ABBR[d.id] || d.label, w = tw(s, 10, 600);
+      for (const [anchor, dx] of [['middle', 0], ['end', 5], ['start', -5]]) { const q = p2.textRect(d._cx + dx, 11, anchor, w, 10); if (p2.free(q, [], 2.5)) { p2.add(q); cLabels.push({ d, s, tx: d._cx + dx, anchor }); break; } } }); }
   const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 24, key ? -key.rel + 8 : 0);
   const dnSpace = !small && maxDn >= 0 ? 20 + maxDn * PITCH + 8 : 0;
   // spans: lanes below the mark line (and below any labels hanging under it)
   const lanes = [];
   spans.sort((a, b) => a.start < b.start ? -1 : 1).forEach(d => { const a = Math.max(M.l, x(parse(d.start))), b = Math.min(W - M.r, d.end ? x(parse(d.end)) : x(DOMAIN[1])); let i = lanes.findIndex(e => a > e + 6); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = b; d._lane = i; d._a = a; d._b = b; });
-  const laneP = phone ? 9 : compact ? 6 : 18, lane0 = yMark + (small ? (compact ? 12 : 14) : Math.max(28, dnSpace + 18));
+  const laneP = phone ? 9 : compact ? 6 : 18, lane0 = yMark + (small ? (compact ? 23 : 14) : Math.max(28, dnSpace + 18));
   const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10), H = yAx + 22;
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', zoom ? 'Legal and policy timeline, zoom on 2021 to 2026' : 'Legal and policy timeline');
   svg.append('title').text(zoom ? 'Law and policy responses, zoom 2021–2026' : 'Law and policy responses, 1957–2026');
@@ -106,6 +115,7 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
     else lg.append('line').attr('x1', d._cx).attr('x2', d._cx).attr('y1', yMark + 9).attr('y2', yMark + off - FS).style('stroke', 'var(--line)');
     lg.append('text').attr('x', tx).attr('y', yMark + off).attr('text-anchor', anchor).style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)').style('font', `600 ${FS}px var(--sans)`).text(t);
   });
+  cLabels.forEach(({ d, s, tx, anchor }) => lg.append('text').attr('x', tx).attr('y', yMark + 11).attr('text-anchor', anchor).style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)').style('font', '600 10px var(--sans)').text(s));
   if (key) {
     const ky = yMark + key.rel;
     lg.append('text').attr('class', 'band-label').attr('x', key.x0).attr('y', ky + 8).text('2021–26 MARKS, NUMBERED');
@@ -143,17 +153,25 @@ function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   rove(svg.selectAll('.mark'));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(zoom ? 1 : phone ? 20 : 10)).tickFormat(fmtY).tickSizeOuter(0));
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
-  if (strip) el.scrollLeft = el.scrollWidth;
+  lg.raise(); // labels (with a background halo, see CSS) sit above the guide line so it never strikes through them
+  if (strip) { el.scrollLeft = el.scrollWidth; el._x = x; el.onscroll = stripPos; stripPos(); } else { el.onscroll = null; document.getElementById('stripPos').hidden = true; }
+}
+// Phone strip position: says the strip is a scrollable 1957–2026 window and shows which years are in view.
+function stripPos() {
+  const el = document.getElementById('legalSvg'), box = document.getElementById('stripPos'), x = el._x; if (!x || !el.scrollWidth) return;
+  const [r0, r1] = x.range(), sw = el.scrollWidth, a = el.scrollLeft, b = a + el.clientWidth, yr = px => Math.round(+fmtY(x.invert(Math.min(r1, Math.max(r0, px))))), y0 = a <= 2 ? 1957 : yr(a), y1 = b >= sw - 2 ? 2026 : yr(b);
+  box.hidden = false; box.querySelector('.lab').textContent = `Scrollable strip · full 1957–2026 · showing ${y0}–${y1}${a > 2 ? ' · scroll left for earlier items' : ' · scroll right for later items'}`;
+  const f = box.querySelector('i'); f.style.left = (100 * a / sw) + '%'; f.style.width = (100 * el.clientWidth / sw) + '%';
 }
 // Phone strip: tapping a mark labels it inline under the strip (card text plus a button for the 3D scene, if any).
 function tapLegal(d, el) {
   const box = document.getElementById('legalTap'), when = d.end ? `${fmtY(parse(d.start))}–${fmtY(parse(d.end))}` : fmt(parse(d.start));
   box.innerHTML = `<b>${esc(d.label)}</b> · ${when}${d.soft_law ? ' · soft law' : ''}<br>${esc(d.short_note)}${hasScene(d) ? ' <button class="btn small" type="button">Open 3D scene</button>' : ''}`;
-  box.dataset.on = '1'; box.hidden = false; box.querySelector('button')?.addEventListener('click', () => openScene(d.scene_3d, el));
+  box.dataset.on = '1'; box.hidden = false; box.querySelector('button')?.addEventListener('click', () => hooks.openScene(d.scene_3d, el));
   document.querySelectorAll('#legalSvg .mark.hl').forEach(m => m.classList.remove('hl')); el.classList.add('hl'); setGuide(parse(d.start));
 }
 let legalCompact = false;
-function legalScroll() {
+export function legalScroll() {
   const band = document.getElementById('legalBand'), tr = document.getElementById('timeline').getBoundingClientRect();
   const stuck = !isPhoneNow() && band.getBoundingClientRect().top <= 0.5 && tr.top < -1 && tr.bottom > 200;
   if (stuck === legalCompact) return;
@@ -163,13 +181,21 @@ function legalScroll() {
   if (stuck) document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
   band.style.marginBottom = stuck ? Math.max(0, h0 - band.offsetHeight) + 'px' : '0px';
 }
+// Measures the sticky (compact) band's height once per layout so section anchors clear it exactly (--band-h drives scroll-margin-top).
+export function probeBand() {
+  if (isPhoneNow()) return;
+  const band = document.getElementById('legalBand'), was = legalCompact; if (was) return; // already stuck: legalScroll keeps --band-h current
+  legalCompact = true; band.classList.add('compact'); drawLegal();
+  document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
+  legalCompact = false; band.classList.remove('compact'); drawLegal();
+}
 let scrollTick = false; // at most one legalScroll per frame
 addEventListener('scroll', () => { if (scrollTick) return; scrollTick = true; requestAnimationFrame(() => { scrollTick = false; legalScroll(); }); }, { passive: true });
 function drawLegalList() {
   const ul = document.getElementById('legalList');
   ul.innerHTML = LEGAL.slice().sort((a, b) => a.start < b.start ? -1 : 1).map(l => `<li><span class="ld">${l.end ? fmtY(parse(l.start)) + '–' + fmtY(parse(l.end)) : fmtMY(parse(l.start))}</span> <b>${esc(l.label)}</b>${l.soft_law ? ' <i>(soft law)</i>' : ''}<span class="ls">${esc(l.short_note)}</span></li>`).join('');
 }
-function drawLegalKey() {
+export function drawLegalKey() {
   drawLegalList();
   const L = legend('legendLegal', 20, 16), li = L.item;
   li('<circle r="5.5" style="fill:var(--accent)"/>', 'Treaty');
