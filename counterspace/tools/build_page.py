@@ -50,7 +50,9 @@ def main():
     data = dict(events=events, sources=sources, legal=read_json('data/legal.json'), caps=read_json('data/capabilities.json'),
                 lag_pairs=read_json('data/lag_pairs.json'),
                 schema={k: schema[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'co_scope_rule', 'page_strings')})
-    js = esbuild(['--bundle', '--format=iife', '--minify', '--legal-comments=none', 'boot.js'])
+    # NOMIN=1: unminified bundle with an inline source map (readable stack traces when chasing a page error)
+    nomin = bool(os.environ.get('NOMIN'))
+    js = esbuild(['--bundle', '--format=iife', '--legal-comments=none', 'boot.js'] + (['--sourcemap=inline'] if nomin else ['--minify']))
     tpl = (R / 'src/template.html').read_text()
     tpl = re.sub(r'(<style>)(.*?)(</style>)', lambda m: m.group(1) + esbuild(['--loader=css', '--minify'], m.group(2)) + m.group(3),
                  tpl, count=1, flags=re.S)

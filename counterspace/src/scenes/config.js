@@ -37,7 +37,7 @@ export const SCENES = [
       0.5], hideShell: true }, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.16, 'Detonation: electrons trapped on Earth’s field lines',
       'Detonation: electrons trapped'], [0.3, 'Trapped electrons spread in longitude and latitude along field lines', 'Electrons spread along field lines'],
       [0.75, 'Belt has drifted around Earth (illustrative spread)', 'Belt drifts around Earth (illustrative)']] },
-  { id: 'solwind', date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
+  { id: 'solwind', fitPct: 0.99, date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
     caption: 'An F-15 in a supersonic zoom climb releases an ASM-135 missile. The missile’s miniature homing vehicle rises to meet' +
       ' the Solwind P78-1 satellite' +
         ' at about 530 km (SWF Table 5-1; its text says 555 km) and destroys it by collision. SWF counts 285 tracked fragments; all have since decayed. The' +
@@ -53,7 +53,7 @@ export const SCENES = [
     ], still: 0.56, status: [[0, 'F-15 in a supersonic zoom climb'], [0.24, 'Missile released; homing vehicle rises to the satellite',
       'Missile released; vehicle rises to satellite'], [0.52, 'Collision at ~530 km; fragments spread and decay', 'Collision at ~530 km'],
       [0.75, 'Time compressed: SWF counts 285 tracked fragments, all since decayed', 'SWF: 285 fragments, all decayed']] },
-  { id: 'fengyun', date: '2007-01-11', title: 'Fengyun-1C (2007)', shells: ['LEO'], duration: 16,
+  { id: 'fengyun', fitPct: 0.94, date: '2007-01-11', title: 'Fengyun-1C (2007)', shells: ['LEO'], duration: 16,
     caption: 'China’s SC-19 interceptor strikes the Fengyun-1C weather satellite at about 880 km (SWF Table 5-1). At that altitude, fragments stay up for' +
         ' decades. They spread along the old orbit into a ring around the planet. It produced the most cataloged fragments of any test in SWF’s Table 5-1.',
     cite: 'SWF 2026, Table 5-1, p. 05-01 (3,532 cataloged; 2,351 in orbit as of Feb. 2026).', related: 'unga-77-41', event: 'cn-2007-fy1c',
@@ -115,7 +115,7 @@ export const SCENES = [
       { type: 'debris', count: 130, spreadAlt: 170, spreadInc: 3.6, spreadRaan: 2.6, dv: 1.2, drift: 0.15, decay: 3.0, color: '#ffd2a6', size: 0.022 },
     ], still: 0.43, status: [[0, 'PDV Mk-II rises from Abdul Kalam Island'], [0.40, 'Collision at ~300 km; fragments spread and decay quickly',
       'Collision at ~300 km'], [0.65, 'Time compressed: SWF counts 130 cataloged pieces, none still in orbit', 'SWF: 130 pieces, none in orbit']] },
-  { id: 'cosmos1408', date: '2021-11-15', title: 'Nudol vs. Cosmos 1408 (2021)', shells: ['LEO'], duration: 16,
+  { id: 'cosmos1408', fitPct: 0.92, date: '2021-11-15', title: 'Nudol vs. Cosmos 1408 (2021)', shells: ['LEO'], duration: 16,
     caption: 'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 at about 470 km. The debris cloud spreads across altitudes' +
       ' that cross the International' +
         ' Space Station’s orbit (drawn schematically), and the ISS crew sheltered in their docked spacecraft. SWF counts 1,807 cataloged fragments, 5 still' +

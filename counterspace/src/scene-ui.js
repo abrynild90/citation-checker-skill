@@ -264,30 +264,23 @@ function svgToPNG(svg, title, cite) {
       g.fillStyle = '#e9edf7';
       g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`;
       g.fillText(title, 16 * s, hb + H + 24 * s);
-      const fit = (txt, px, y) => {
-        let f = Math.round(px * s);
-        g.font = `${f}px system-ui,sans-serif`;
-        while (g.measureText(txt).width > PRINT_W - 32 * s && f > 10 * s) {
-          f -= 0.5 * s;
-          g.font = `${f}px system-ui,sans-serif`;
-        }
-        g.fillStyle = '#c3cbe0';
-        g.fillText(txt, 16 * s, y);
-      };
-      fit(
-        `Source: ${String(cite || '')
-          .trim()
-          .replace(/[.;,\s]+$/, '')}.`,
-        15,
-        hb + H + 54 * s,
-      );
-      fit(
+      const srcTxt = `Source: ${String(cite || '')
+        .trim()
+        .replace(/[.;,\s]+$/, '')}.`;
+      const credit =
         svg.dataset.earth === 'bluemarble'
           ? 'Earth imagery: NASA Blue Marble (public domain).'
-          : 'Vector land map: Natural Earth (public domain).',
-        15,
-        hb + H + 77 * s,
-      );
+          : 'Vector land map: Natural Earth (public domain).';
+      // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
+      let f = Math.round(15 * s);
+      for (; f > 10 * s; f -= 0.5 * s) {
+        g.font = `${f}px system-ui,sans-serif`;
+        if (Math.max(g.measureText(srcTxt).width, g.measureText(credit).width) <= PRINT_W - 32 * s) break;
+      }
+      g.font = `${f}px system-ui,sans-serif`;
+      g.fillStyle = '#c3cbe0';
+      g.fillText(srcTxt, 16 * s, hb + H + 54 * s);
+      g.fillText(credit, 16 * s, hb + H + 77 * s);
       resolve(c.toDataURL('image/png'));
     };
     img.onerror = () => reject(new Error('The diagram could not be rasterised'));

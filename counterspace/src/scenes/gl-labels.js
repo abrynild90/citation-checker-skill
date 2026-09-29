@@ -318,7 +318,8 @@ const methods = {
           d = Math.max(0.05, cp.distanceTo(W3)),
           px = u.span ? (u.span * obj.scale.x * sc) / d / k : 0,
           r = it.kind === 'flash' ? Math.max((u.core.scale.x * 0.35 * sc) / d, 4 * k) : Math.max(px * 0.5 * k, 3 * k);
-        pts.push({ x: q[0], y: q[1], r, i: items.indexOf(it), shape: it.shape || 'flash' });
+        const rg = it.kind === 'flash' && u.ring && u.ring.material.opacity > 0.03 ? (u.ring.scale.x * 0.5 * sc) / d : 0;
+        pts.push({ x: q[0], y: q[1], r, i: items.indexOf(it), shape: it.shape || 'flash', ring: rg });
         if (it.kind === 'point' && ['sat', 'plane', 'aircraft'].includes(it.shape) && !it.ctx) {
           if (it.prim) refs.push({ text: it.label || it.shape, px, x: q[0], y: q[1] });
           if (!it.small || it.label) act.push([q[0], q[1]]);

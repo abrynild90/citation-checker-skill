@@ -18,6 +18,7 @@
 //   key-out          a key object (KEY table: KA-SAT, MSTI-3, White Sands, ...) is off frame, behind Earth or under the caption on the default camera
 //   shell-crop       a shell ring/glow is cut by the frame edge or the footer in a still or the hero (fully inside, or fully covering the frame, only)
 //   still-res        a still's Earth is under 1.5x supersampled relative to the viewport it was exported from (checked at 375 too)
+//   burst-edge       default camera: a burst ring / debris point touches the frame edge (4 px margin)
 //   hero-*           hero: ISS marker missing (hero-iss), a shell label more than 40 px from its ring (hero-label), caption strip / heading wrap (page side)
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
@@ -140,6 +141,14 @@ function check(S) {
   // action region: each side counts at least 40% of the frame, so a long trail across the frame qualifies
   if (S.def && S.action !== undefined && !S.docked) { // a docked pair is one object: the action region is that single spot, so it is exempt while docked
     const a = S.action; const fr = a ? Math.max((a.x1 - a.x0) / W, 0.4) * Math.max((a.y1 - a.y0) / H, 0.4) : 0; if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`); }
+  // burst-edge: on the default camera no burst ring / hit point / debris may touch the frame edge (it must sit inside with margin)
+  if (S.def && S.kind === 'live') {
+    const m = 4, hit = (x, y, r) => x - r < m || y - r < m || x + r > W - m || y + r > H - m;
+    for (const q of P.pts || []) if (q.shape === 'flash' && hit(q.x, q.y, Math.max(q.r, q.ring || 0))) f('burst-edge', `burst ring r=${Math.round(Math.max(q.r, q.ring || 0))} at (${Math.round(q.x)},${Math.round(q.y)}) touches the ${W}x${H} frame edge`);
+    const e = (P.cloud || []).filter(c => Math.min(c[0], c[1], W - c[0], H - c[1]) > -2 && Math.min(c[0], c[1], W - c[0], H - c[1]) < 2);
+    // debris fields of the hit scenes only (the Starfish belt and space-weather clouds fill the frame by design); >= 3 points in the edge band = the cloud is cut, a lone fragment is an outlier
+    if (S.hitT != null && e.length >= 3) f('burst-edge', `${e.length} debris point(s) touch the frame edge, first at (${Math.round(e[0][0])},${Math.round(e[0][1])})`);
+  }
   if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
   if (S.status != null && S.evT != null && S.t < S.evT + 0.02 && (S.evRe || HITRE).test(S.status)) f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
   if (S.statusLines > 1) f('status-wrap', `status wraps to ${S.statusLines} lines at ${W}px: "${(S.status || '').slice(0, 60)}"`);
@@ -211,12 +220,12 @@ const STATIC = (sel = '#sceneView') => {
 };
 
 // ---------------------------------------------------------------- run
-const results = [], failCount = {};
+const results = [], failCount = {}, pageErrs = [];
 const record = (tag, F, extra = {}) => { results.push({ tag, F, ...extra }); for (const x of F) { const k = x.type; failCount[k] = (failCount[k] || 0) + 1; } if (F.length && !QUIET) console.log(tag, F.length, F.slice(0, 6).map(x => `${x.type}:${x.detail}`).join(' | ')); };
 const ctxOpts = (w, extra = {}) => ({ viewport: { width: w, height: w <= 400 ? 800 : w <= 900 ? 800 : 900 }, colorScheme: 'dark', ignoreHTTPSErrors: true, isMobile: w < 640, hasTouch: w < 640, ...extra });
 async function boot(w, extra) {
   const ctx = await browser.newContext(ctxOpts(w, extra)), page = await ctx.newPage(), errs = [];
-  page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => errs.push('pageerror [' + curTag + ']: ' + e.message + ' ' + (e.stack || '').split('\n').slice(1, 3).join(' | ')));
+  page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); page.on('pageerror', e => pageErrs.push('pageerror [' + curTag + ']: ' + e.message + ' ' + (e.stack || '').split('\n').slice(1, 6).join(' | '))), page.on('pageerror', e => errs.push('pageerror [' + curTag + ']: ' + e.message + ' ' + (e.stack || '').split('\n').slice(1, 3).join(' | ')));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 25000 }).catch(() => {});
   await page.waitForTimeout(500);
@@ -340,7 +349,8 @@ if (MODES.includes('still')) {
   await ctx.close();
 }
 fs.writeFileSync(`${out}/results.json`, JSON.stringify(results));
-const total = results.reduce((n, r) => n + r.F.length, 0);
+const total = results.reduce((n, r) => n + r.F.length, 0) + pageErrs.length;
+console.log('page errors', pageErrs.length, pageErrs.slice(0, 5));
 console.log(`\nstates ${results.length}, failing states ${results.filter(r => r.F.length).length}, failures ${total}`, JSON.stringify(failCount));
 await browser.close(); srv.close();
 process.exit(total ? 1 : 0);

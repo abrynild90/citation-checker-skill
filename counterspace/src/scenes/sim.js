@@ -1053,7 +1053,11 @@ export function buildSim(cfg) {
     const c = scl(q.reduce((a, p) => add(a, p), [0, 0, 0]), 1 / q.length),
       d = q.map((p) => len(add(p, scl(c, -1)))),
       cut = d.slice().sort((x, y) => x - y)[Math.floor((q.length - 1) * pct)];
-    return q.filter((p, k) => d[k] <= cut).filter((p, k, a) => k % Math.max(1, Math.floor(a.length / 40)) === 0);
+    const kept = q.filter((p, k) => d[k] <= cut),
+      dk = kept.map((p) => len(add(p, scl(c, -1))));
+    // an even sample, plus the farthest kept fragments (the frame edge is decided by the extremes, not the bulk)
+    const far = kept.map((p, k) => k).sort((a, b) => dk[b] - dk[a]).slice(0, 12);
+    return kept.filter((p, k) => k % Math.max(1, Math.floor(kept.length / 40)) === 0 || far.includes(k));
   };
   const dollyCam = () => {
     const ht = tgt.t,
@@ -1067,9 +1071,17 @@ export function buildSim(cfg) {
     const tilt = (cfg.fitTilt ?? 24) * DEG,
       n = norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
       cache = {},
+      burst = items.find((i) => i.kind === 'flash' && i.big && tgt.hitPos && i.pos === tgt.hitPos) || items.find((i) => i.kind === 'flash' && i.big),
+      hn = norm(tgt.hitPos),
+      e1 = norm(cross3(hn, [0, 1, 0])),
+      e2 = cross3(hn, e1),
+      bR = burst ? (burst.size ?? 0.3) * 1.7 * 0.5 * (cfg.burstPad ?? 1.3) : 0,
+      burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
       posesFor = (asp) =>
         (cache[Math.round(asp * 20)] ||= keys.map((tk) => {
         const P = core.slice();
+        // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
+        if (burst && tk <= ht + 0.16) P.push(...burstPad);
         if (arc && tk <= ht + 0.05) P.push(arc.to);
         if (tk <= ht) P.push(tgt.pos(tk));
         if (tk > ht) P.push(...debrisPts(tk, cfg.fitPct ?? 0.8));
