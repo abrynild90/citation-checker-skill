@@ -62,7 +62,13 @@ function drawAll(lazy = false) {
   lazyIO = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && drawLazy(e.target.id)), { rootMargin: '700px 0px' });
   Object.keys(LAZY).forEach((id) => lazyIO.observe(document.getElementById(id)));
   // Anything still undrawn is filled in when the browser is idle, so deep links, find-in-page and tests never meet an empty chart.
-  idle(() => Object.keys(LAZY).filter((id) => id !== 'methodBody').forEach(drawLazy), 1500); // the sources section waits for the viewport (or audit/export)
+  idle(
+    () =>
+      Object.keys(LAZY)
+        .filter((id) => id !== 'methodBody')
+        .forEach(drawLazy),
+    1500,
+  ); // the sources section waits for the viewport (or audit/export)
 }
 timed('first-draw', () => {
   chipsB();

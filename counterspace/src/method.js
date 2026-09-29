@@ -39,7 +39,9 @@ export function drawMethod() {
   const li = (h, t) => `<li>${h ? `<b>${h}</b> ` : ''}${esc(t)}</li>`;
   const scopeRule = (() => {
     const t = unlabel(SCHEMA.scope_rule),
-      m = t.match(/^(.*?),\s*including\s+(.*?)\.\s*Exclusions, all disclosed:\s*(.*?)\s*\((.*?)\),\s*and\s+(the Table 16-3 line.*?)\s*\((.*?)\)\.\s*(Starfish.*)$/s);
+      m = t.match(
+        /^(.*?),\s*including\s+(.*?)\.\s*Exclusions, all disclosed:\s*(.*?)\s*\((.*?)\),\s*and\s+(the Table 16-3 line.*?)\s*\((.*?)\)\.\s*(Starfish.*)$/s,
+      );
     if (!m) return `<p>${esc(t)}</p>`;
     return `<ul class="sub">${li('Covered:', m[1] + '.')}${li('Also included:', m[2] + '.')}${li('Excluded, co-orbital tests:', m[4] + '.')}${li('Excluded, a date variant:', m[5] + ' (' + m[6] + ').')}${li('Added:', m[7])}</ul>`;
   })();
@@ -50,11 +52,14 @@ export function drawMethod() {
   };
   const coRule = (() => {
     const t = unlabel(SCHEMA.co_scope_rule),
-      m = t.match(/^(.*?)\s*Two exceptions, both disclosed:\s*\(a\)\s*(.*?);\s*\(b\)\s*(.*?)\s*\((.*?)\),\s*(the text-dated step.*?\.)\s+(RPO rows record.*)$/s);
+      m = t.match(
+        /^(.*?)\s*Two exceptions, both disclosed:\s*\(a\)\s*(.*?);\s*\(b\)\s*(.*?)\s*\((.*?)\),\s*(the text-dated step.*?\.)\s+(RPO rows record.*)$/s,
+      );
     if (!m) return `<p>${esc(t)}</p>`;
     return `<ul class="sub">${covered(m[1])}${li('Exception (a):', m[2] + '.')}${li('Exception (b):', m[3] + '.')}${li('Cases for (b):', m[4] + '.')}${li('Then:', m[5])}${li('Reading a row:', m[6])}</ul>`;
   })();
-  const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
+  const rule = (title, body, open) =>
+    `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
   document.getElementById('methodBody').innerHTML = `
   <h3>Editions and “as of” dates</h3>
   <ul><li><b>Primary:</b> Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen Brett eds., 9th ed., Apr. 2026). 13 countries, five categories. The 13-country count is a 2026 figure, not a historical constant. Debris counts as of Feb. 2026 (SWF Table 5-1).</li>

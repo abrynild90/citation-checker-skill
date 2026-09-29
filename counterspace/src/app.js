@@ -2,7 +2,7 @@
 // app.js: shared state, constants and helpers.
 // Provides: data (EVENTS, LEGAL, CAPS), layout(), tw()/wrap() text measurement, Placer (label collision), badge(), timed().
 // ============================================================================
-// Scene modules (see the map in scenes.js). tools/build_page.py bundles src/boot.js as an ES-module graph with esbuild.
+// Scene modules (see the map in scenes/README.md). tools/build_page.py bundles src/boot.js as an ES-module graph with esbuild.
 import { SCENES, HERO } from './scenes/config.js';
 import { buildSim } from './scenes/sim.js';
 import { GLHost } from './scenes/gl-host.js';
