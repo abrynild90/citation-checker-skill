@@ -255,7 +255,9 @@ export function renderSVG(sim, el, t = sim.still) {
     pcell = 8,
     pnx = Math.ceil(W / pcell),
     pny = Math.ceil(H / pcell),
-    pgrid = new Uint16Array(pnx * pny);
+    pgrid = new Uint16Array(pnx * pny),
+    dPolys = [],
+    dCloud = [];
   const mark = (p, r, n) => {
     if (p && !p.hidden) marks.push({ x: p.x, y: p.y, r, n });
   };
@@ -417,6 +419,7 @@ export function renderSVG(sim, el, t = sim.still) {
       const pts = it.pts(t).map(project);
       let seg = [];
       const flush = () => {
+        if (seg.length > 1) dPolys.push({ p: seg.slice(), role: it.role || 'line' });
         if (seg.length > 1)
           g.append('path')
             .attr('d', d3.line()(seg))
@@ -476,6 +479,7 @@ export function renderSVG(sim, el, t = sim.still) {
         if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue;
         const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]);
         if (p.hidden) continue;
+        dCloud.push([p.x, p.y]);
         if (!it.bg) {
           const gx = Math.floor(p.x / pcell),
             gy = Math.floor(p.y / pcell);
@@ -505,6 +509,7 @@ export function renderSVG(sim, el, t = sim.still) {
           sg.soft = !!it.soft;
           obst.push(sg);
         }
+        if (!a.hidden && !b.hidden) dPolys.push({ p: [[a.x, a.y], [b.x, b.y]], role: 'beam' });
         if (!a.hidden && !b.hidden)
           g.append('line')
             .attr('x1', a.x)
@@ -524,6 +529,7 @@ export function renderSVG(sim, el, t = sim.still) {
       const p = project(q);
       if (p.hidden) continue;
       const c = it.statusColor ? it.statusColor(t) : it.color;
+      if (it.shape !== 'none')
       mark(
         p,
         it.shape === 'sat'
@@ -694,6 +700,7 @@ export function renderSVG(sim, el, t = sim.still) {
     svg.node().__lay = {
       W,
       H,
+      probe: { disc: { cx: CX, cy: CY, r: R }, pts: marks.map((m) => ({ x: m.x, y: m.y, r: m.r, i: -2 })), polys: dPolys, cloud: dCloud, domes: [] },
       labels: lb,
       marks,
       rings: ringsL,

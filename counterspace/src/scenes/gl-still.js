@@ -82,6 +82,7 @@ Object.assign(GLHost.prototype, {
     }
     const lp = this._labelPositions(W, H, s, true, sBox ? [sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s] : null);
     lay.objs = this._lastObjs;
+    lay.probe = this._probe(W, H);
     lay.obst = this._lastObst;
     lay.labels = lp;
     lay.sBox = sBox;

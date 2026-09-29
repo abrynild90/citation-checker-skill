@@ -3,7 +3,7 @@
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
 import { GLHost } from './gl-host.js';
-import { DEG, occluded } from './core.js';
+import { DEG, ll, occluded } from './core.js';
 import { labelW, offDisc, placeLabels } from './labels.js';
 
 Object.assign(GLHost.prototype, {
@@ -247,6 +247,106 @@ Object.assign(GLHost.prototype, {
       if (cur.length > 1) rings.push(cur);
     }
     return { marks, parts, rings, scale: 1 };
+  },
+  // Layout probe for QA (tools/scene_check.mjs): what is drawn, in screen px for a w x h canvas: Earth disc, sprite marks (with the item index),
+  // curve/beam polylines, particle samples, dome discs, referent sizes and the action-region box (referents + trails + debris).
+  _probe(w, h) {
+    const T = this.T,
+      cam = this.camera,
+      cp = cam.position,
+      cpa = [cp.x, cp.y, cp.z],
+      k = h / (this.el.clientHeight || h),
+      sc = h / (2 * Math.tan((cam.fov * DEG) / 2)),
+      W3 = new T.Vector3(),
+      items = this.sim.items;
+    const scr = (p) => {
+      const v = new T.Vector3(...p).project(cam);
+      return [((v.x + 1) / 2) * w, ((1 - v.y) / 2) * h, v.z > 1 || occluded(cpa, p)];
+    };
+    const c0 = scr([0, 0, 0]),
+      c1 = scr(this._limb(1, 0));
+    const disc = { cx: c0[0], cy: c0[1], r: Math.hypot(c1[0] - c0[0], c1[1] - c0[1]) };
+    const pts = [],
+      polys = [],
+      cloud = [],
+      domes = [],
+      refs = [],
+      act = [];
+    for (const { it, obj } of this.dyn) {
+      if (!obj.visible) continue;
+      if (it.kind === 'point' || it.kind === 'flash') {
+        if (it.shape === 'none') continue;
+        obj.getWorldPosition(W3);
+        const q = scr([W3.x, W3.y, W3.z]);
+        if (q[2]) continue;
+        const u = obj.userData,
+          d = Math.max(0.05, cp.distanceTo(W3)),
+          px = u.span ? (u.span * obj.scale.x * sc) / d / k : 0,
+          r = it.kind === 'flash' ? Math.max((u.core.scale.x * 0.35 * sc) / d, 4 * k) : Math.max(px * 0.5 * k, 3 * k);
+        pts.push({ x: q[0], y: q[1], r, i: items.indexOf(it), shape: it.shape || 'flash' });
+        if (it.kind === 'point' && ['sat', 'plane', 'aircraft'].includes(it.shape) && !it.ctx) {
+          if (it.label || it.small) refs.push({ text: it.label || it.shape, px, x: q[0], y: q[1] });
+          if (!it.small || it.label) act.push([q[0], q[1]]);
+        }
+        if (it.kind === 'point' && it.shape === 'kv') act.push([q[0], q[1]]);
+      } else if (it.kind === 'cloud') {
+        const a = obj.geometry.attributes.position.array,
+          st = Math.max(1, Math.ceil(it.n / 700));
+        for (let i = 0; i < it.n; i += st) {
+          const p = [a[3 * i], a[3 * i + 1], a[3 * i + 2]];
+          if (!p[0] && !p[1] && !p[2]) continue;
+          const q = scr(p);
+          if (q[2]) continue;
+          cloud.push([q[0], q[1]]);
+          if (!it.bg) act.push([q[0], q[1]]);
+        }
+      }
+    }
+    const seg = (list, role) => {
+      let cur = [];
+      const fl = () => {
+        if (cur.length > 1) polys.push({ p: cur, role });
+        cur = [];
+      };
+      for (const p of list) {
+        const q = scr(p);
+        if (q[2]) fl();
+        else cur.push([q[0], q[1]]);
+      }
+      fl();
+    };
+    for (const it of items) {
+      if (it.kind === 'curve') {
+        const pl = it.pts(this.t);
+        seg(pl, it.role || (it.dynamic ? 'trail' : 'line'));
+        if (it.role === 'action' || (it.dynamic && !it.uniformA)) for (const p of pl) {
+            const q = scr(p);
+            if (!q[2]) act.push([q[0], q[1]]);
+          }
+      } else if (it.kind === 'beam' && it.on(this.t)) {
+        const A = it.a(this.t),
+          B = it.b(this.t);
+        if (A && B) {
+          seg([A, B], 'beam');
+          if (!it.link) for (const p of [A, B]) {
+              const q = scr(p);
+              if (!q[2]) act.push([q[0], q[1]]);
+            }
+        }
+      } else if (it.kind === 'dome') {
+        const a = scr(ll(it.at[0], it.at[1])),
+          b = scr(ll(it.at[0] + it.radius, it.at[1]));
+        domes.push({ x: a[0], y: a[1], r: Math.hypot(a[0] - b[0], a[1] - b[1]) * 1.2 });
+      }
+    }
+    let action = null;
+    const inb = act.filter((p) => p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h);
+    if (inb.length > 1) {
+      const xs = inb.map((p) => p[0]),
+        ys = inb.map((p) => p[1]);
+      action = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+    }
+    return { W: w, H: h, disc, pts, polys, cloud, domes, refs, action };
   },
   _label(text, posFn, cls, item, dy = 0, dx = 0, short = null, opt = false) {
     const d = document.createElement('div');
