@@ -74,8 +74,9 @@ let earthUpgrade = false,
 function renderPanels(sim, el) {
   const W = el.clientWidth || 640,
     H = el.clientHeight || 420,
-    narrow = W < 520,
-    top = narrow ? 38 : 40,
+    narrow = W < 760, // stacked rows; three columns only when there is room for their labels
+    phone = W < 520,
+    top = phone ? 38 : 40,
     gap = 6,
     n = sim.cfg.panels.length,
     pw = narrow ? W - 2 * gap : (W - (n + 1) * gap) / n,
@@ -95,8 +96,8 @@ function renderPanels(sim, el) {
       W: pw,
       H: ph,
       view: { focus, span },
-      status: narrow ? '' : pn.status,
-      title: narrow ? `${pn.title} · ${pn.brief}` : pn.title,
+      status: phone ? '' : pn.status,
+      title: phone || narrow ? `${pn.title} · ${pn.brief}` : pn.title,
       keep: true,
     });
     const x = narrow ? gap : gap + k * (pw + gap),
@@ -589,7 +590,11 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           .attr('fill-opacity', it.n > 500 ? 0.62 : 0.85);
       }
       if (it.label && (it.labelAt || arr[0] || arr[1] || arr[2]))
-        label(project(it.labelAt || [arr[0], arr[1], arr[2]]), it.short && W < 520 ? it.short : it.label, it.color || '#dfe6f7');
+        label(
+          project((typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt) || [arr[0], arr[1], arr[2]]),
+          it.short && W < 520 ? it.short : it.label,
+          it.color || '#dfe6f7',
+        );
     }
     if (it.kind === 'beam') {
       const A = it.a(t),
@@ -671,7 +676,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       } else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
       else
         g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
-      if (it.label && !it.ctx) {
+      if (it.label && !it.ctx && !it.noLeader) {
         const n0 = cands.length;
         label(
           p,
@@ -705,7 +710,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   cands.forEach((c) => {
     c.avoidDisc = !!c.off;
   });
-  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.02 }, obst, null, {
+  const pl = placeLabels(cands, W, H, reserved, { cx: CX, cy: CY, r: R * 1.02 + 4 }, obst, null, {
     marks,
     rings: ringsL,
     parts: { count: pcount },
@@ -794,6 +799,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           x1: q.x + c.w / 2,
           y1: q.y + c.h / 2,
           leader: q.leader ? [q.ax, q.ay, q.qx, q.qy] : null,
+          ref: [q.ax, q.ay],
           pc: pcount(q.x - c.w / 2, q.y - c.h / 2, q.x + c.w / 2, q.y + c.h / 2),
         });
     });

@@ -108,7 +108,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
           ddy = Math.max(Math.abs(y - m.y) - h / 2, 0);
         if (ddx * ddx + ddy * ddy < (m.r + 3) * (m.r + 3)) n += 700;
       }
-      for (const rg of rings) if (polyBox(rg, me)) n += 650;
+      for (const rg of rings) if (polyBox(rg, me)) n += 140; // a thin ring line under a label is a smaller defect than a label on the planet
       if (parts) {
         const pc = parts.count(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
         if (pc > 2) n += Math.min(900, (pc - 2) * 140);
@@ -119,7 +119,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
           dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0);
         if (Math.hypot(dx0, dy0) < disc.r) {
           if (c.avoidDisc) n += 900;
-          else if (!c.onDisc) soft += 64; // a label prefers open sky to the planet whenever a slot is within reach
+          else if (!c.onDisc) soft += 320; // a label prefers open sky to the planet whenever a slot is within reach
         }
       }
       m.soft = soft;
@@ -169,6 +169,11 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     if (bestN >= 30 && bestN < 500)
       for (const rad of [30, 48, 70, 96, 128, 164, 204, 250])
         for (let a = 0; a < 16; a++) tryAt2(cx(c.x + Math.cos((a * Math.PI) / 8) * rad), cy(c.y + Math.sin((a * Math.PI) / 8) * rad * 0.8));
+    // Still resting on the planet: a dense local scan for any slot off it (same cost function, so every other rule still holds).
+    if (bestSoft > 0 && bestN < 500) {
+      const R0 = 0.11 * W;
+      for (let gy = -R0; gy <= R0; gy += 5) for (let gx = -R0; gx <= R0; gx += 5) if (gx * gx + gy * gy <= R0 * R0) tryAt2(cx(c.x + gx), cy(c.y + gy));
+    }
     // Nothing clean nearby (crowded frame or a reserved band in the way): search the whole free area on a grid.
     if (bestN >= 500)
       for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += ex.fine ? Math.max(3, h * 0.15) : Math.max(4, h * 0.4))
@@ -224,7 +229,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
   };
   const repair = (res) => {
     let [cur, hd] = sym(res.out, res.got);
-    for (let pass = 0; pass < 2 && hd >= 300; pass++)
+    for (let pass = 0; pass < 2 && (hd >= 300 || cur - hd >= 100); pass++)
       for (const i of res.got) {
         const boxes = base(),
           segs = [];
@@ -293,7 +298,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
             bx.push({ x: q.x, y: q.y, w: list[k].w, h: list[k].h });
             if (q.leader) sg.push([q.ax, q.ay, q.qx, q.qy]);
           }
-        if (scoreAt(j, o.x, o.y, bx, sg)[0] >= 500) {
+        if (scoreAt(j, o.x, o.y, bx, sg)[0] >= 300) {
           bestRun.out[j] = null;
           dropped = true;
         }

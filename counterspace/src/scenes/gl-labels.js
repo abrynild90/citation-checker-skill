@@ -119,7 +119,7 @@ Object.assign(GLHost.prototype, {
         c1 = new T.Vector3(...this._limb(1, 0)).project(this.camera),
         gx = ((c0.x + 1) / 2) * w,
         gy = ((1 - c0.y) / 2) * h;
-      disc = { cx: gx, cy: gy, r: Math.hypot(((c1.x + 1) / 2) * w - gx, ((1 - c1.y) / 2) * h - gy) * 1.005 };
+      disc = { cx: gx, cy: gy, r: Math.hypot(((c1.x + 1) / 2) * w - gx, ((1 - c1.y) / 2) * h - gy) * 1.005 + 4 * k };
     }
     const obst = [],
       vp = (p) => {
@@ -337,7 +337,7 @@ Object.assign(GLHost.prototype, {
       if (it.kind === 'curve') {
         const pl = it.pts(this.t);
         seg(pl, it.role || (it.dynamic ? 'trail' : 'line'));
-        if (it.role === 'action' || (it.dynamic && !it.uniformA)) for (const p of pl) {
+        if (it.role === 'action' || it.role === 'orbit' || (it.dynamic && !it.uniformA)) for (const p of pl) {
             const q = scr(p);
             if (!q[2]) act.push([q[0], q[1]]);
           }
@@ -460,7 +460,7 @@ Object.assign(GLHost.prototype, {
     g.fillStyle = '#c3cbe0';
     g.font = '600 9.5px system-ui,sans-serif';
     g.textBaseline = 'top';
-    g.fillText(this.sim.cfg.inset, 6, 4);
+    g.fillText(this.sim.cfg.inset, 6, 4, w - 10);
   },
   _label(text, posFn, cls, item, dy = 0, dx = 0, short = null, opt = false) {
     const d = document.createElement('div');
@@ -480,6 +480,8 @@ Object.assign(GLHost.prototype, {
         return;
       }
       L.d.style.display = '';
+      L.ax = q.ax; // the referent's screen position (read by tools/scene_check.mjs)
+      L.ay = q.ay;
       L.d.style.left = q.x + 'px';
       L.d.style.top = q.y + 'px';
       if (L.d.textContent !== q.text) L.d.textContent = q.text;

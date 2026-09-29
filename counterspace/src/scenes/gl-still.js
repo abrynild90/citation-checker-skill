@@ -16,7 +16,7 @@ Object.assign(GLHost.prototype, {
       vh = this.el.clientHeight;
     const cam = this.camera;
     if (o.t != null) this.update(o.t);
-    const sf = this.sim.stillCamFor?.(Math.min(this.t, 1)),
+    const sf = this.sim.stillCamFor?.(Math.min(this.t, 1), o.aspect || W / H),
       sc = sf || this.sim.cfg.stillCam;
     if (sf) {
       this.hideShell = true;

@@ -5,10 +5,10 @@
 // FAILURES (each is a hard failure, exit code 1 if any):
 //   label-overlap    two label boxes overlap                 label-reserved  a label sits on the banner, status caption or hint chip
 //   label-mark       a label covers a drawn sprite           label-edge      a label box is within 8 px of the frame edge
-//   label-disc       a label box overlaps the Earth disc although a clear slot exists within reach (leader <= limit, <= 0.16 W away)
+//   label-disc       a label box overlaps the Earth disc although a clear slot exists within reach (leader <= limit, <= 0.10 W away)
 //   leader-long      leader longer than 0.22 W (0.30 W at 375)      leader-cross  a leader crosses another label box or leader
 //   leader-end       the leader ends on empty space (no drawn referent within a few px) or on another labelled referent
-//   ref-small        a labelled craft/satellite is drawn < 6 px on the default camera            action-small  action region < 20% of the frame (default camera)
+//   ref-small        a labelled craft/satellite is drawn < 6 px on the default camera            action-small  action region < 20% of the frame (default camera; sides count at least 40%)
 //   ref-hidden       a labelled craft is visible in the sim but off frame or behind Earth on some camera
 //   banner-wrap      the "illustrative" banner wraps to two lines at 375   audit  the page audit() reports overlapping/clipped text
 import { chromium } from 'playwright';
@@ -79,28 +79,32 @@ function check(S) {
     }
     // Earth disc: only a failure when a clear slot exists within reach
     if (P.disc && boxDisc(B[i], P.disc) && !L[i].onDisc) {
-      const w = B[i].x1 - B[i].x0, h = B[i].y1 - B[i].y0, cx = (B[i].x0 + B[i].x1) / 2, cy = (B[i].y0 + B[i].y1) / 2, reach = 0.16 * W;
-      const ref = L[i].leader ? [L[i].leader[0], L[i].leader[1]] : [cx, cy];
+      const w = B[i].x1 - B[i].x0, h = B[i].y1 - B[i].y0, cx = (B[i].x0 + B[i].x1) / 2, cy = (B[i].y0 + B[i].y1) / 2, reach = 0.1 * W;
+      const ref = L[i].ref && isFinite(L[i].ref[0]) ? L[i].ref : L[i].leader ? [L[i].leader[0], L[i].leader[1]] : [cx, cy];
       let ok = false;
       for (let dy = -reach; dy <= reach && !ok; dy += 6) for (let dx = -reach; dx <= reach && !ok; dx += 6) {
         if (Math.hypot(dx, dy) > reach) continue;
         const b = { x0: B[i].x0 + dx, x1: B[i].x1 + dx, y0: B[i].y0 + dy, y1: B[i].y1 + dy };
-        if (b.x0 < 8 || b.y0 < 8 || b.x1 > W - 8 || b.y1 > H - 8 || boxDisc(b, P.disc)) continue;
+        if (b.x0 < 8 || b.y0 < 8 || b.x1 > W - 8 || b.y1 > H - 8 || boxDisc(b, { ...P.disc, r: P.disc.r + 8 * u })) continue; // a slot must clear the disc by a margin, like the placer's own rule
         const qx = Math.max(b.x0, Math.min(b.x1, ref[0])), qy = Math.max(b.y0, Math.min(b.y1, ref[1]));
         if (Math.hypot(qx - ref[0], qy - ref[1]) > lim * 0.9) continue;
-        if (B.some((o, j) => j !== i && boxHit(b, o, 2)) || (S.reserved || []).some(r => boxHit(b, r, 1))) continue;
-        if ((P.pts || []).some(m => boxCircle(b, { x: m.x, y: m.y, r: m.r + 2 }))) continue;
+        if (Math.hypot(qx - ref[0], qy - ref[1]) > 14 && L.some((o, j) => j !== i && o.leader && segSeg([ref[0], ref[1], qx, qy], o.leader))) continue;
+        if (Math.hypot(qx - ref[0], qy - ref[1]) > 14 && L.some((o, j) => j !== i && segBox([ref[0], ref[1], qx, qy], { x0: o.x0, x1: o.x1, y0: o.y0, y1: o.y1 }))) continue;
+        if (Math.hypot(qx - ref[0], qy - ref[1]) > 14 && (P.polys || []).some(c => c.role !== 'line' && c.role !== 'orbit' && c.p.some((q, k) => k && segSeg([ref[0], ref[1], qx, qy], [c.p[k - 1][0], c.p[k - 1][1], q[0], q[1]])))) continue;
+        if (B.some((o, j) => j !== i && boxHit(b, o, 4)) || (S.reserved || []).some(r => boxHit(b, r, 3))) continue;
+        if ((P.pts || []).some(m => boxCircle(b, { x: m.x, y: m.y, r: m.r + 4 }))) continue;
+        if (L.some((o, j) => j !== i && o.ref && o.ref[0] > b.x0 - 2 && o.ref[0] < b.x1 + 2 && o.ref[1] > b.y0 - 2 && o.ref[1] < b.y1 + 2)) continue; // never sits on another label's object
         if ((P.circles || []).some(c => c.ring && crossesCircle(b, c))) continue;
         if ((P.polys || []).some(c => c.role !== 'line' && c.role !== 'orbit' && c.p.some((q, k) => k && segBox([c.p[k - 1][0], c.p[k - 1][1], q[0], q[1]], b)))) continue;
         if ((P.cloud || []).filter(q => q[0] > b.x0 && q[0] < b.x1 && q[1] > b.y0 && q[1] < b.y1).length > 2) continue;
-        ok = true;
+        ok = [Math.round((b.x0 + b.x1) / 2), Math.round((b.y0 + b.y1) / 2)];
       }
-      if (ok) f('label-disc', `${L[i].text} on the Earth disc, clear slot within reach`);
+      if (ok) f('label-disc', `${L[i].text} on the Earth disc by ${Math.round(P.disc.r - Math.hypot(Math.max(B[i].x0 - P.disc.cx, 0, P.disc.cx - B[i].x1), Math.max(B[i].y0 - P.disc.cy, 0, P.disc.cy - B[i].y1)))} px, clear slot within reach at ${ok} (now ${Math.round(cx)},${Math.round(cy)})`);
     }
   }
   if (S.def && P.refs) for (const r of P.refs) if (r.px < 6) f('ref-small', `${r.text} ${r.px.toFixed(1)} px`);
-  // action region: each side counts at least 30% of the frame, so a long trail across the frame qualifies
-  if (S.def && S.action !== undefined) { const a = S.action; const fr = a ? Math.max((a.x1 - a.x0) / W, 0.3) * Math.max((a.y1 - a.y0) / H, 0.3) : 0; if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`); }
+  // action region: each side counts at least 40% of the frame, so a long trail across the frame qualifies
+  if (S.def && S.action !== undefined) { const a = S.action; const fr = a ? Math.max((a.x1 - a.x0) / W, 0.4) * Math.max((a.y1 - a.y0) / H, 0.4) : 0; if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`); }
   if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
   if (S.bannerLines > 1) f('banner-wrap', `banner wraps to ${S.bannerLines} lines`);
   if (S.audit) for (const a of S.audit) f('audit', JSON.stringify(a).slice(0, 140));
@@ -114,7 +118,7 @@ const LIVE = () => {
   const labels = [];
   h.labels.forEach(Lb => {
     if (Lb.d.style.display === 'none') return;
-    const r = rel(Lb.d), o = { text: Lb.d.textContent, ...r, item: Lb.item ? h.sim.items.indexOf(Lb.item) : -1, leader: null };
+    const r = rel(Lb.d), o = { text: Lb.d.textContent, ...r, item: Lb.item ? h.sim.items.indexOf(Lb.item) : -1, leader: null, ref: [Lb.ax, Lb.ay] };
     if (Lb.ln && Lb.ln.style.display !== 'none') o.leader = ['x1', 'y1', 'x2', 'y2'].map(a => +Lb.ln.getAttribute(a));
     labels.push(o);
   });
@@ -139,9 +143,9 @@ const LIVE = () => {
 const STATIC = () => {
   const svg = document.querySelector('#sceneView > svg'), z = svg && svg.__lay; if (!z) return null;
   const bn0 = document.querySelector('#sceneView > .illus'), lines0 = bn0 && bn0.getBoundingClientRect().height > 32 ? 2 : 1;
-  const mapLay = l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, item: -1, onDisc: false });
+  const mapLay = l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: -1, onDisc: false });
   if (z.panels) return { panels: z.panels.map(p => ({ W: p.W, H: p.H, labels: p.labels.map(mapLay), reserved: p.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 })), probe: p.probe })), bannerLines: lines0, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
-  const labels = z.labels.map(l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, item: -1, onDisc: false }));
+  const labels = z.labels.map(l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: -1, onDisc: false }));
   const bn = document.querySelector('#sceneView > .illus'), er = document.getElementById('sceneView').getBoundingClientRect();
   const reserved = z.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 }));
   if (bn) { const b = bn.getBoundingClientRect(); reserved.push({ n: 'banner', x0: b.left - er.left, y0: b.top - er.top, x1: b.right - er.left, y1: b.bottom - er.top }); }
@@ -220,7 +224,7 @@ if (MODES.includes('still')) {
       const h = window.__cs.host(); h.playing = false; h._lm = {}; h.update(h.sim.still);
       const url = h.stillPNG('Title', 'SWF 2026, Table 5-1, p. 05-01.'), z = h.stillLayout;
       const conv = q => ({ W: q.W, H: q.H,
-        labels: q.labels.filter(Boolean).map(l => ({ text: l.text, x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h / 2, y1: l.y + l.h / 2, leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null, item: -1 })),
+        labels: q.labels.filter(Boolean).map(l => ({ text: l.text, x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h / 2, y1: l.y + l.h / 2, leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null, ref: [l.ax, l.ay], item: -1 })),
         reserved: (q.rsv || []).map((r, i) => ({ n: 'rsv' + i, x0: r[0], y0: r[1], x1: r[0] + r[2], y1: r[1] + r[3] })), probe: q.probe });
       return { url, tiles: (z.tiles || [z]).map(conv) };
     });

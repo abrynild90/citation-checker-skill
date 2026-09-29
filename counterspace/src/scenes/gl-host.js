@@ -262,7 +262,7 @@ export class GLHost {
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
     const fc = this.sim.cams[this.camIdx];
     if (fc?.follow && !this._user) {
-      const v = fc.follow(t);
+      const v = fc.follow(t, this.camera.aspect);
       this.target.set(...v.look);
       this.camera.position.set(...v.pos);
       this.camera.up.set(...(v.up || [0, 1, 0]));
@@ -337,8 +337,8 @@ export class GLHost {
           tint.color.set(on ? '#ffffff' : it.color);
           if (ud.halo) {
             ud.halo.material.color.set(on ? '#ff8cf0' : it.color);
-            ud.halo.scale.setScalar(on ? 0.1 + 0.015 * Math.sin(performance.now() / 60) : 0.06);
-            ud.halo.material.opacity = on ? 0.8 : 0.32;
+            ud.halo.scale.setScalar(on ? 0.07 + 0.008 * Math.sin(performance.now() / 60) : 0.05);
+            ud.halo.material.opacity = on ? 0.65 : 0.3;
           }
         }
       } else if (it.kind === 'cloud') {
@@ -364,8 +364,14 @@ export class GLHost {
           const nz = new T.Vector3().crossVectors(right, v);
           obj.position.copy(mid);
           obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(right, v, nz));
+          // A ribbon keeps its world width at long range, but a close camera must not turn it into a fat bar: cap it at it.maxPx screen pixels.
+          let cap = Infinity;
+          if (it.maxPx) {
+            const bh = this.renderer.domElement.height;
+            cap = (it.maxPx * (bh / (this.el?.clientHeight || bh)) * Math.max(0.1, mid.distanceTo(this.camera.position))) / bh / Math.tan((this.camera.fov * DEG) / 2);
+          }
           obj.children.forEach((ch) => {
-            if (ch.isMesh) ch.scale.set(2 * ch.userData.hw, L, 1);
+            if (ch.isMesh) ch.scale.set(2 * Math.min(ch.userData.hw, cap), L, 1);
           });
           if (obj.userData.ends) {
             const e = it.ends * 0.3;
@@ -466,7 +472,7 @@ export class GLHost {
           s.updateWorldMatrix(true, false);
           v.setFromMatrixPosition(s.matrixWorld);
           s.visible = !occluded(c3, [v.x, v.y, v.z]);
-          s.scale.setScalar(Math.min(it.ends, (38 * k * Math.max(0.15, v.distanceTo(cp))) / sc));
+          s.scale.setScalar(Math.min(it.ends, (24 * k * Math.max(0.15, v.distanceTo(cp))) / sc));
         });
     }
   }

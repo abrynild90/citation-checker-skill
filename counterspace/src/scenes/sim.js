@@ -132,6 +132,7 @@ export function buildSim(cfg) {
         color: a.color,
         opacity: 0.95,
         width: a.width ?? 0.014,
+        maxPx: 3,
         coreColor: a.coreColor,
       });
     if (a.type === 'burst')
@@ -245,6 +246,8 @@ export function buildSim(cfg) {
           labelDy: a.sat.dy,
           offGlobe: a.sat.offGlobe,
           iss: !!a.sat.iss,
+          minPx: a.sat.minPx,
+          maxPx: a.sat.maxPx,
           scale: a.sat.big,
           pos: (t) => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed),
         });
@@ -305,6 +308,7 @@ export function buildSim(cfg) {
           kvSize: 0.055,
           color: '#ffb872',
           label: i === 0 ? 'Larger pieces falling (illustrative)' : null,
+          opt: true,
           short: 'Pieces falling (illustr.)',
           labelDx: 60,
           labelDy: 16,
@@ -516,6 +520,8 @@ export function buildSim(cfg) {
         kind: 'curve',
         dynamic: true,
         trackable: true,
+        t0: a.t0,
+        t1: a.t1,
         avoid: true,
         opt: a.opt,
         short: a.short,
@@ -533,6 +539,7 @@ export function buildSim(cfg) {
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
       });
+      items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: 0.22, role: 'action' });
       if (a.marks) {
         // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]),
@@ -644,7 +651,8 @@ export function buildSim(cfg) {
         size: a.size ?? 0.017,
         label: a.label,
         short: a.short,
-        labelAt: ll(0, a.at[1] + 70, 1.7),
+        labelFrom: a.t0 + 0.1,
+        labelAt: (t) => ll(0, a.at[1] + 0.5833 * 180 * spread(t), rAlt(0.7 * 6371)), // a point on the outer equatorial field line, where particles are
         labelDx: 60,
         labelDy: 30,
         fill(t, out) {
@@ -704,6 +712,7 @@ export function buildSim(cfg) {
             color: a.color,
             pos,
             label: p === 0 && s === 0 ? a.label : null,
+            opt: p === 0 && s === 0 ? !!a.opt : false,
             labelDx: a.dx ?? 50,
             labelDy: a.dy ?? -30,
           });
@@ -849,15 +858,15 @@ export function buildSim(cfg) {
       items.push({
         kind: 'cloud',
         n,
-        size: 0.0125,
-        minPx: 2.6,
-        maxPx: 9,
+        size: 0.02,
+        minPx: 3.6,
+        maxPx: 12,
         dynCol: true,
         label: a.label,
         short: a.short,
         labelAt: ll(49, 30, 1.05),
-        labelDx: 40,
-        labelDy: -34,
+        labelDx: 90,
+        labelDy: -56,
         colored: true,
         fill(t, out, col) {
           for (let k = 0; k < n; k++) {
@@ -908,8 +917,9 @@ export function buildSim(cfg) {
         color: a.color,
         opacity: 0.95,
         width: 0.022,
+        maxPx: 15,
         coreColor: '#ffe3f9',
-        ends: 0.09,
+        ends: 0.05,
         label: a.label,
         short: a.short,
         labelDx: a.dx,
@@ -972,11 +982,15 @@ export function buildSim(cfg) {
   // Dolly camera for the hit scenes: at a few key times the camera is fitted to everything that matters then (launch site, target, hit point, the
   // bulk of the debris) so the action fills the frame; between keys it glides, so it pulls back as the debris spreads.
   const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  // Frame fitting depends on the stage aspect: follow cameras are re-solved with the real aspect (host passes it), static ones use this default.
   const ASPECT = IS_PHONE ? 1.04 : 1.22,
-    tanV = Math.tan(20 * DEG) * Math.max(1, 1.1 / ASPECT),
-    tanH = tanV * ASPECT;
+    tanFor = (asp) => {
+      const tv = Math.tan(20 * DEG) * Math.max(1, 1.1 / asp);
+      return [tv * asp, tv];
+    };
   // The viewing direction n is fixed for the whole scene (no roll or jump as the debris spreads); only the target point and the distance are fitted.
   const fitPose = (pts, n, look, o = {}) => {
+    const [tanH, tanV] = tanFor(o.asp ?? ASPECT);
     let pos = null;
     for (let D = o.dMin ?? 0.9; D <= (o.dMax ?? 9); D += 0.05) {
       pos = add(look, scl(n, D));
@@ -1019,7 +1033,9 @@ export function buildSim(cfg) {
     if (len(sd) < 0.2) sd = [1, 0, 0];
     const tilt = (cfg.fitTilt ?? 24) * DEG,
       n = norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
-      poses = keys.map((tk) => {
+      cache = {},
+      posesFor = (asp) =>
+        (cache[Math.round(asp * 20)] ||= keys.map((tk) => {
         const P = core.slice();
         if (arc && tk <= ht + 0.05) P.push(arc.to);
         if (tk <= ht) P.push(tgt.pos(tk));
@@ -1029,9 +1045,11 @@ export function buildSim(cfg) {
           dMax: cfg.fitMax ?? 6.5,
           fillX: cfg.fitFill ?? 0.9,
           fillY: (cfg.fitFill ?? 0.9) * 0.8,
+          asp,
         });
-      });
-    const at = (t) => {
+      }));
+    const at = (t, asp = ASPECT) => {
+      const poses = posesFor(asp);
       let i = 0;
       while (i < keys.length - 2 && t > keys[i + 1]) i++;
       const s = smooth((t - keys[i]) / (keys[i + 1] - keys[i])),
@@ -1051,11 +1069,11 @@ export function buildSim(cfg) {
           sd = norm(cross3(mid, [0, 1, 0])),
           tilt = (c.fit.tilt ?? 26) * DEG,
           n = norm(add(scl(mid, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.fit.side ?? 1)))),
-          at = (t) => {
+          at = (t, asp) => {
             const q = tgt.pos(t),
               P = [site, q],
               look = scl(add(scl(site, 0.5), scl(q, 0.5)), 0.97);
-            return { ...fitPose(P, n, look, { dMin: 0.3, dMax: c.fit.dMax ?? 6, fillX: c.fit.fill ?? 0.86, fillY: (c.fit.fill ?? 0.86) * 0.8 }), up: null };
+            return { ...fitPose(P, n, look, { dMin: 0.3, dMax: c.fit.dMax ?? 6, fillX: c.fit.fill ?? 0.86, fillY: (c.fit.fill ?? 0.86) * 0.8, asp }), up: null };
           };
         return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(tgt.t), hideShell: true };
       }
@@ -1064,8 +1082,12 @@ export function buildSim(cfg) {
         const P = c.fitPts.pts.map((q) => ll(q[0], q[1], q[2] ?? 1.004)),
           n = norm(ll(c.fitPts.dir[0], c.fitPts.dir[1])),
           look = scl(centroid(P), c.fitPts.lookK ?? 1),
-          v = fitPose(P, n, look, { dMin: 1, dMax: 12, fillX: c.fitPts.fill ?? 0.86, fillY: (c.fitPts.fillY ?? c.fitPts.fill ?? 0.86) * 0.8 });
-        return { name: c.name, auto: false, ref: c.ref, pos: v.pos, look: v.look, hideShell: true };
+          at = (t, asp) => ({
+            ...fitPose(P, n, look, { dMin: 1, dMax: 12, fillX: c.fitPts.fill ?? 0.86, fillY: (c.fitPts.fillY ?? c.fitPts.fill ?? 0.86) * 0.8, asp }),
+            up: null,
+          }),
+          v = at(0);
+        return { name: c.name, auto: false, ref: c.ref, pos: v.pos, look: v.look, follow: at, hideShell: true };
       }
       if (c.trackPath) {
         // Camera that follows a suborbital path: fitted at every t to the launch site, the head of the path and (later) the GEO ring above the apogee.
@@ -1075,12 +1097,12 @@ export function buildSim(cfg) {
           sd = norm(cross3(up, [0, 1, 0])),
           tilt = (c.trackPath.tilt ?? 30) * DEG,
           n = norm(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1)))),
-          at = (t) => {
+          at = (t, asp) => {
             const pl = it.pts(t),
-              P = [all[0], pl.length ? pl[pl.length - 1] : all[1]];
+              P = [all[0], pl.length ? pl[pl.length - 1] : all[1], all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + 0.22) * (all.length - 1)))]];
             if (t > (c.trackPath.geoT ?? 0.35)) P.push(scl(up, rAlt(GEO_ALT)));
             const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
-            return { ...fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8 }), up: null };
+            return { ...fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp }), up: null };
           };
         return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(0), hideShell: true };
       }
@@ -1089,16 +1111,16 @@ export function buildSim(cfg) {
         // the target point and the distance are fitted at every t to the craft (now and a little ahead), so the action always fills the frame.
         const an = anchors[c.fitCraft.anchor],
           ids = c.fitCraft.ids,
-          at = (t) => {
+          at = (t, asp) => {
             const P = [];
-            for (const id of ids) for (const dt of [-0.03, 0, 0.03]) {
-              const q = crafts[id].raw(Math.max(0, Math.min(1, t + dt)));
-              if (q) P.push(q);
-            }
+            for (const id of ids)
+              if (crafts[id].pos(t))
+                for (const dt of [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
+            if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
             const f = an.frame(t),
               d = c.fitCraft.dir,
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
-            return { ...fitPose(P, n, centroid(P), { up: f.rad, dMin: c.fitCraft.dMin ?? 0.3, dMax: 6, fillX: c.fitCraft.fill ?? 0.8, fillY: (c.fitCraft.fill ?? 0.8) * 0.8 }), up: f.rad };
+            return { ...fitPose(P, n, centroid(P), { up: f.rad, dMin: c.fitCraft.dMin ?? 0.14, dMax: 6, fillX: c.fitCraft.fill ?? 0.8, fillY: (c.fitCraft.fill ?? 0.8) * 0.8, asp }), up: f.rad };
           };
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
       }
@@ -1142,15 +1164,15 @@ export function buildSim(cfg) {
     if (H && cfg.dolly !== false) cams.unshift(dollyCam());
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
   // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.
-  const stillCamFor = (t) => {
+  const stillCamFor = (t, asp) => {
     if (A) {
       const i = A.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === A.length - 1));
       const c = cams[A[Math.max(0, i)].cam],
-        v = c.follow ? c.follow(t) : c;
+        v = c.follow ? c.follow(t, asp) : c;
       return { pos: v.pos, look: v.look, up: v.up, hideShell: true };
     }
     if (cfg.stillFrame) return frameCam(cfg.stillFrame);
-    if (cfg.stillDolly !== false && cfg.stillCam == null && cams[0].follow && !cfg.acts) return { ...cams[0].follow(t), hideShell: true };
+    if (cfg.stillDolly !== false && cfg.stillCam == null && cams[0].follow && !cfg.acts) return { ...cams[0].follow(t, asp), hideShell: true };
     return null;
   };
   return { cfg, items, cams, flags, stillCamFor, still: cfg.still ?? 0.5, sunRef: cams[0].pos };
