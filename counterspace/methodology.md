@@ -27,7 +27,7 @@
 
 | Set | Rows | File |
 |---|---|---|
-| Kinetic events | 44 | `data/events.json` (`domain: kinetic`) |
+| Kinetic events | 61 | `data/events.json` (`domain: kinetic`) |
 | Non-kinetic events | 15 | `data/events.json` (`domain: non_kinetic`) |
 | Legal items | 19 | `data/legal.json` |
 | Capability categories | 5 | `data/capabilities.json` |

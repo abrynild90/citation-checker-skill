@@ -1,5 +1,78 @@
 {
  "schema_version": "1.0.0",
+ "scope_rule": "Scope rule: every direct-ascent (DA-ASAT) test row that SWF 2026 lists in Table 1-4 (US), Tables 2-4 and 16-2 (Russia), Tables 3-3 and 16-3 (China) and Tables 4-1 and 16-4 (India) is a row in this ledger, including failures, rocket-only tests and tests against a star or no target. Exclusions, all disclosed: co-orbital tests (Table 1-4 also lists the US Delta 180 co-orbital intercept of 5 Sep 1986, which SWF's text calls a co-orbital experiment; Table 16-2's Soviet IS, Naryad, Polyot and Cosmos 2521/2536 entries), and the Table 16-3 line 'Apr. 15, 2023' (treated as a date variant of the 14 Apr 2023 test, see that row's conflicts). Starfish Prime (not an SWF DA-ASAT table row) is the one added nuclear marker.",
+ "page_strings": {
+  "ledger_as_of_display": "28 Sept. 2026",
+  "swf_edition_label": "SWF 9th ed. (Apr. 2026)"
+ },
+ "enums": {
+  "domain": [
+   "kinetic",
+   "non_kinetic"
+  ],
+  "confidence": [
+   "high",
+   "medium",
+   "low"
+  ],
+  "type": [
+   "destructive",
+   "non_destructive",
+   "midcourse_intercept",
+   "apogee_only",
+   "flyby",
+   "nuclear"
+  ],
+  "altitude_kind": [
+   "intercept",
+   "apogee",
+   "detonation"
+  ],
+  "date_precision": [
+   "day",
+   "month"
+  ],
+  "category": [
+   "directed_energy",
+   "ew_uplink",
+   "ew_downlink",
+   "gnss_jamming",
+   "gnss_spoofing",
+   "cyber"
+  ],
+  "attribution": [
+   "official_government",
+   "multi_government",
+   "researcher_osint",
+   "alleged"
+  ],
+  "target_regime": [
+   "ISR_LEO",
+   "GEO_comms",
+   "GNSS_MEO",
+   "LEO_constellation",
+   "ground_segment"
+  ],
+  "legal_kind": [
+   "treaty",
+   "resolution",
+   "negotiation_span",
+   "unilateral",
+   "veto"
+  ],
+  "scene_3d": [
+   "starfish",
+   "solwind",
+   "fengyun",
+   "burnt-frost",
+   "dn2",
+   "shakti",
+   "cosmos1408",
+   "gnss",
+   "viasat",
+   "laser"
+  ]
+ },
  "generated_by": "tools/build_data.py",
  "ledger_as_of": "2026-09-28",
  "description": "Data files for the Counterspace Timeline. events.json and legal.json are top-level arrays (unchanged shape); capabilities.json is an object. Version bumps: patch = new rows or corrected values; minor = new optional fields; major = shape change.",
@@ -19,7 +92,8 @@
     "scene_3d": "optional 3D scene key"
    },
    "kinetic_fields": {
-    "date": "YYYY-MM-DD",
+    "date": "YYYY-MM-DD (first of the month when date_precision is month)",
+    "date_precision": "optional: day (default) | month, where SWF gives only a month",
     "state": "acting state",
     "system": "weapon system",
     "target": "target object",
@@ -40,7 +114,8 @@
     "target_regime": "ISR_LEO | GEO_comms | GNSS_MEO | LEO_constellation | ground_segment",
     "operational_use": "bool",
     "effect": "string"
-   }
+   },
+   "validation": "tools/build_data.py validate() enforces this schema on every build: unique ids, enums, date formats, required source fields, id resolution, fragments_in_orbit <= fragments_cataloged."
   },
   "legal.json": {
    "shape": "array of legal items, sorted by start",

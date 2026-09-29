@@ -4,7 +4,7 @@ capabilities.json, ledger.md) from the rows below.
 Every row carries source, source_url, and pin. SWF pins use the report's
 printed section-page numbers ("p. 05-01") plus the PDF page index.
 """
-import json, pathlib
+import json, pathlib, re, datetime, sys
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / "data"
 SWF = "SWF 2026"
@@ -25,7 +25,7 @@ def swfx(pin_text):
 
 
 def k(id, date, state, system, target, type, alt, kind, frag=None, orbit=None,
-      conf="high", notes="", scene=None, src=None, conflicts=None):
+      conf="high", notes="", scene=None, src=None, conflicts=None, prec=None):
     row = dict(id=id, domain="kinetic", date=date, state=state, system=system,
                target=target, type=type, altitude_km=alt, altitude_kind=kind,
                fragments_cataloged=frag, fragments_in_orbit=orbit,
@@ -34,6 +34,8 @@ def k(id, date, state, system, target, type, alt, kind, frag=None, orbit=None,
     row.update(src)
     if conflicts:
         row["conflicts"] = conflicts
+    if prec:
+        row["date_precision"] = prec
     if scene:
         row["scene_3d"] = scene
     return row
@@ -49,7 +51,7 @@ T164 = lambda: swf("16-04", 308, "Table 16-3")  # Appendix Table 16-3 (China)
 
 K = [
     k("us-1959-bold-orion", "1959-10-13", "United States", "Bold Orion", "Explorer 6",
-      "flyby", 200, "apogee", notes="SWF Table 1-4: \"Success (passed within kill radius)\" alongside \"Unknown results due to loss of telemetry\"; launch site listed as Unknown.",
+      "flyby", 200, "apogee", notes="SWF Table 1-4 (pdfplumber cell read): \"Success (passed within kill radius)\"; launch site listed as Unknown. (The adjacent High Virgo row, 22 Sep 1959, carries \"Unknown results due to loss of telemetry\".)",
       src=T14a()),
     k("us-1962-starfish-prime", "1962-07-09", "United States", "Thor / W49 (Operation Fishbowl)",
       "None (high-altitude nuclear test)", "nuclear", 400, "detonation", conf="medium",
@@ -57,7 +59,7 @@ K = [
             "tests are known to have damaged or destroyed satellites in orbit. Not in SWF DA-ASAT tables; "
             "included only as the nuclear marker the legal band references.",
       scene="starfish",
-      src=dict(source="DOE/NV-209 Rev. 16 (2015)",
+      src=dict(_sf_extra="SWF 2026, p. 12-05 (PDF p. 269), for the statement that such tests damaged or destroyed satellites in orbit (SWF 2026: " + SWF_URL + ")", source="DOE/NV-209 Rev. 16 (2015)",
                source_url="https://nnss.gov/wp-content/uploads/2023/08/DOE_NV-209_Rev16.pdf",
                pin="Table of U.S. nuclear tests, Starfish Prime row (Operation Fishbowl, 07/09/1962, \"High altitude - 250 miles\", 1.4 Mt), PDF pp. 41-42; secondary: SWF p. 12-05 (PDF p. 269)")),
     k("us-1962-nike-zeus-wsmr", "1962-12-17", "United States", "Program 505 (Nike Zeus)", "None",
@@ -88,12 +90,47 @@ K = [
       "non_destructive", 1074, "apogee", notes="Passed within kill radius.", src=T14b()),
     k("us-1984-asm135-jan", "1984-01-21", "United States", "ASM-135 (F-15)", "None",
       "non_destructive", 1000, "apogee", notes="Missile test, no target.", src=T14b()),
+    # ---- Table 1-4 completeness additions (US rows omitted from the first build)
+    k("us-1959-high-virgo", "1959-09-22", "United States", "High Virgo (TX-20)", "None", "non_destructive", 12, "apogee",
+      conf="medium", notes="Rocket test. SWF Table 1-4: \"Unknown results due to loss of telemetry\"; launch site Unknown.", src=T14a()),
+    k("us-1961-sip-oct", "1961-10-01", "United States", "SIP (NOTS-EV-2)", "None", "non_destructive", None, "apogee",
+      notes="\"Successful rocket test\"; site San Nicolas Island; apogee Unknown in SWF.", src=T14a()),
+    k("us-1961-hiho-oct", "1961-10-05", "United States", "HiHo (NOTS-EV-1)", "None", "non_destructive", None, "apogee",
+      notes="\"Rocket failure\"; launched from an F4D aircraft (SWF site column: F4D-I); apogee Unknown.", src=T14a()),
+    k("us-1962-hiho-mar", "1962-03-26", "United States", "HiHo (NOTS-EV-1)", "None", "non_destructive", None, "apogee",
+      notes="\"Rocket failure\"; site column F4D-I; apogee Unknown.", src=T14a()),
+    k("us-1962-sip-may", "1962-05-05", "United States", "SIP (NOTS-EV-2)", "None", "non_destructive", None, "apogee",
+      notes="\"Successful rocket test\"; site column F4-C; apogee Unknown.", src=T14a()),
+    k("us-1962-hiho-aug", "1962-08-26", "United States", "HiHo (NOTS-EV-1)", "None", "non_destructive", 1600, "apogee",
+      notes="\"Successful rocket test\"; site column F4-C.", src=T14a()),
+    k("us-1963-nike-zeus-mar", "1963-03-21", "United States", "Program 505 (Nike Zeus)", "None (simulated satellite target)",
+      "non_destructive", None, "apogee", notes="\"Unsuccessful attempt to intercept simulated satellite target\"; Kwajalein; apogee given as a dash.", src=T14a()),
+    k("us-1963-nike-zeus-apr", "1963-04-19", "United States", "Program 505 (Nike Zeus)", "None (simulated satellite target)",
+      "non_destructive", None, "apogee", notes="\"Unsuccessful attempt to intercept simulated satellite target\"; Kwajalein; apogee given as a dash.", src=T14a()),
+    k("us-1963-nike-zeus-may", "1963-05-24", "United States", "Program 505 (Nike Zeus)", "Agena D",
+      "non_destructive", None, "apogee", notes="\"Successful close intercept\" of an Agena D; Kwajalein; apogee Unknown. No debris reported.", src=T14a()),
+    k("us-1965-nike-zeus-mar", "1965-03-01", "United States", "Program 505 (Nike Zeus)", "None",
+      "non_destructive", None, "apogee", conf="low", prec="month",
+      notes="SWF gives only \"Mar. 1965\" (date shown as the 1st for sorting); apogee and notes cells are dashes. Kwajalein.", src=T14a()),
+    k("us-1965-nike-zeus-jun", "1965-06-01", "United States", "Program 505 (Nike Zeus)", "None",
+      "non_destructive", None, "apogee", conf="low", prec="month",
+      notes="SWF gives \"Jun. - Jul., 1965\" (date shown as 1 June for sorting): \"Four test intercepts, of which three were successful\". Kwajalein; apogee Unknown. One row for the four tests.", src=T14a()),
+    k("us-1966-nike-zeus-jan", "1966-01-13", "United States", "Program 505 (Nike Zeus)", "None (simulated target)",
+      "non_destructive", None, "apogee", notes="\"Successful intercept with simulated target\"; Kwajalein; apogee Unknown.", src=T14a()),
+    k("us-1984-asm135-nov", "1984-11-13", "United States", "ASM-135 (F-15)", "Star",
+      "non_destructive", 1000, "apogee", notes="\"Failed test\": missile directed its MHV at a star (SWF p. 01-22, fn. 177).", src=swfx("Table 1-4, p. 01-24 (PDF p. 73); fn. 177, p. 01-22 (PDF p. 71)")),
+    k("us-1986-asm135-aug", "1986-08-22", "United States", "ASM-135 (F-15)", "Star",
+      "non_destructive", 1000, "apogee", notes="\"Successful test in tracking\"; MHV directed at a star (fn. 177). Not a satellite intercept.", src=swfx("Table 1-4, p. 01-24 (PDF p. 73); fn. 177, p. 01-22 (PDF p. 71)")),
+    k("us-1986-asm135-sep", "1986-09-29", "United States", "ASM-135 (F-15)", "Star",
+      "non_destructive", 1000, "apogee", notes="\"Successful test in tracking\"; MHV directed at a star (fn. 177). Not a satellite intercept.", src=swfx("Table 1-4, p. 01-24 (PDF p. 73); fn. 177, p. 01-22 (PDF p. 71)")),
     k("us-1985-solwind", "1985-09-13", "United States", "ASM-135 (F-15)", "Solwind P78-1",
       "destructive", 530, "intercept", frag=285, orbit=0,
       notes="Conflict inside SWF 2026: Table 5-1 gives 530 km intercept; the prose (p. 01-22, PDF p. 71) and "
             "Table 1-4 (p. 01-24, PDF p. 73) give 555 km. Builder uses Table 5-1 for all intercept "
-            "altitudes. Tracked-debris count (285) is from Table 5-1. The zero 'still on orbit' figure could not "
-            "be tied to this row in the jumbled Table 5-1 text extraction, so it is shown in tables only and is not plotted.",
+            "altitudes. Debris figures are from Table 5-1, read cell by cell with pdfplumber (PDF p. 212): "
+            "row 'Sep. 13, 1985 / US / ASM-135 / Direct-Ascent / Solwind / 530 km / 285 / 0 / 18.7 years', "
+            "i.e. 285 tracked pieces, 0 still on orbit as of Feb. 2026, total debris lifespan 18.7 years "
+            "(all pieces have decayed, per SWF).",
       conflicts=["Intercept altitude: 530 km (Table 5-1, p. 05-01) vs 555 km (prose p. 01-22; Table 1-4 p. 01-24)"],
       scene="solwind", src=swfx("Table 5-1, p. 05-01 (PDF p. 212); prose p. 01-22 (PDF p. 71); Table 1-4, p. 01-24 (PDF p. 73)")),
     k("us-2008-burnt-frost", "2008-02-20", "United States", "SM-3 (USS Lake Erie)", "USA-193",
@@ -187,10 +224,19 @@ K = [
     k("ru-2018-nudol-dec", "2018-12-23", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
       conf="medium", notes="Payload column: Likely KKV. Appendix Table 16-2 (p. 16-03): potential KKV, no intercept.", src=T24()),
     k("ru-2020-nudol-apr", "2020-04-15", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
-      conf="medium", notes="Successful, nothing hit. US Space Command issued a public statement on the test (SWF p. 02-20, fn. 148).", src=T24()),
+      conf="medium", notes="Table 2-4: \"Successful, nothing hit.\" Appendix Table 16-2 (p. 16-03) instead says \"Potential intercept, debris created\"; no debris count is given anywhere in SWF, so no fragments are coded. US Space Command issued a public statement on the test (SWF p. 02-20, fn. 148).",
+      conflicts=["Outcome: 'Successful, nothing hit' (Table 2-4, p. 02-21) vs 'Potential intercept, debris created' (Table 16-2, p. 16-03)"],
+      src=swfx("Table 2-4, p. 02-21 (PDF p. 134); Table 16-2, p. 16-03 (PDF p. 307)")),
     k("ru-2020-nudol-dec", "2020-12-16", "Russia", "Nudol", "None", "non_destructive", None, "apogee",
       conf="medium", notes="Successful, nothing hit. US Space Command issued a public statement (SWF p. 02-20, fn. 149).",
       src=T24()),
+    k("ru-2021-nudol-apr", "2021-04-01", "Russia", "Nudol", "None", "non_destructive", None, "apogee", conf="low", prec="month",
+      notes="Listed only in Appendix Table 16-2 as \"April 2021 ... Nudol ... Unknown\" (month only; date shown as the 1st for sorting). Not in Table 2-4; no apogee, target or outcome reported.", src=T163()),
+    k("in-2019-shakti-feb", "2019-02-12", "India", "PDV Mk-II", "Microsat-R", "non_destructive", None, "apogee", conf="low",
+      notes="Failed test: \"Booster failed within 30 seconds, no intercept\" (Table 4-1); Table 16-4 says \"Unsuccessful intercept\". "
+            "Known from anonymous US government sources reported by The Diplomat (SWF p. 04-04, fn. 39); India has not confirmed it. "
+            "Apogee given as \"Suborbital\" (no value).",
+      src=swfx("Table 4-1, p. 04-04 (PDF p. 204); Table 16-4, p. 16-04 (PDF p. 308)")),
     k("in-2019-shakti", "2019-03-27", "India", "PDV Mk-II (Mission Shakti)", "Microsat-R", "destructive",
       300, "intercept", frag=130, orbit=0,
       notes="Indian officials said most debris would re-enter within days and all of it within 45 days at most "
@@ -299,12 +345,14 @@ NK = [
              "claim; Finland only expressed concern (external reporting)."),
     nk("ru-2018-peresvet", "2018-03-01", "2018-03-01", "Russia", "directed_energy", "official_government",
        "Satellites overflying Russian mobile ICBM units (stated purpose)", "ISR_LEO", False,
-       "Peresvet mobile laser announced by President Putin; later described as dazzling satellites. "
-       "Deployment status announced, not demonstrated against a satellite.",
+       "Capability announcement, not an act: President Putin announced the Peresvet mobile laser; SWF describes it as "
+       "appearing designed to blind imaging satellites. Not demonstrated against a satellite.",
        "medium", swf("02-36", 149, "Peresvet section"),
        notes="Named in Putin's 1 March 2018 speech (SWF p. 02-36); SWF describes it as appearing designed to protect "
              "mobile ICBMs from being imaged. Self-declared by the Russian government; no public evidence of use "
-             "against a satellite.",
+             "against a satellite. Attribution level 'official_government' here records the Russian government's own "
+             "announcement of a system (a self-declaration); it is kept in the directed-energy lane as a capability "
+             "announcement, not as an operation against a satellite.",
        scene="laser"),
     nk("ru-2022-viasat", "2022-02-24", "2022-02-24", "Russia", "cyber", "multi_government",
        "Viasat KA-SAT user terminals (modems) and management network", "ground_segment", True,
@@ -330,16 +378,18 @@ NK = [
              "government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). "
              "Terrestrial jamming of receivers, not attacks on satellites.",
        scene="gnss"),
-    nk("mideast-2023-gnss", "2023-10-01", None, "Israel and others (multiple actors)", "gnss_spoofing",
+    nk("mideast-2023-gnss", "2023-10-07", None, "Israel (IDF)", "gnss_jamming",
        "official_government", "GNSS receivers of aircraft over Israel and neighboring states", "GNSS_MEO", True,
-       "Extensive jamming/spoofing in the Eastern Mediterranean and Middle East affecting air traffic "
-       "management; Israel's own submission to the ITU RRB (Nov 2025) addressed interference cases.",
+       "The IDF stated publicly that it was jamming GPS in the region \"in a proactive manner for various operational needs\". "
+       "Lebanon's foreign minister blamed Israel (Mar. 2024).",
        "medium", swf("10-01 to 10-02", "254-255", "Section 10.3"),
-       notes="Actor set is mixed: SWF p. 10-02 says it is hard to tell from open sources whether Israel, Hamas or "
-             "others conduct the EW. The IDF stated publicly it was jamming GPS 'in a proactive manner for various "
-             "operational needs'; Lebanon blamed Israel (Mar. 2024). Coded at the level SWF supports for Israel; other "
-             "actors not attributed. SWF (p. 10-01) also reports interference before the row's start, in spring 2023 "
-             "(20% of regional aircraft in April 2023); the row starts at the Oct. 2023 escalation."),
+       notes="Attribution rests on the IDF's own public statement (SWF p. 10-02), so it is coded 'official_government' for "
+             "Israel and for jamming only. SWF also reports regional jamming and spoofing after the 7 Oct. 2023 Hamas attack "
+             "and says it is hard to tell from open sources whether Israel, Hamas or other actors conduct the EW; no other actor "
+             "is attributed, so no second row is coded (dropped, not 'alleged': SWF makes no allegation against a named "
+             "actor). The spoofing reports are therefore not attributed to anyone here. SWF p. 10-01 also reports interference in "
+             "spring 2023 (20% of regional aircraft in April 2023), before this row's start; start is set to 7 Oct. 2023, the "
+             "attack SWF names as the trigger of the escalation. Lebanon's claim is a government claim about Israel, not proof."),
     nk("ru-2024-eu-sats", "2024-03-01", None, "Russia (origin locations cited by ITU RRB)", "ew_uplink",
        "multi_government", "Swedish and French broadcasting satellites", "GEO_comms", True,
        "Hijacked/jammed broadcasts over Ukrainian channels; European states complained; RRB (July 2024) "
@@ -366,9 +416,11 @@ def lg(id, start, end, kind, label, short_note, citation, url, scene=None, relat
 L = [
     lg("ltbt-1963", "1963-08-05", None, "treaty", "Limited Test Ban Treaty",
        "Signed Aug 5, 1963; in force Oct 10, 1963. Bans nuclear tests in outer space. It followed "
-       "Starfish Prime; fallout concerns and the Cuban Missile Crisis were also drivers.",
+       "Starfish Prime. The US State Department's Office of the Historian says the Cuban Missile Crisis provided "
+       "the impetus for an agreement and that worldwide concern about radioactive fallout from atmospheric tests built support for it.",
        "Treaty Banning Nuclear Weapon Tests in the Atmosphere, in Outer Space and Under Water, "
-       "Aug. 5, 1963, 14 U.S.T. 1313, 480 U.N.T.S. 43.",
+       "Aug. 5, 1963, 14 U.S.T. 1313, 480 U.N.T.S. 43. For context, see Office of the Historian, U.S. Dep't of State, "
+       "Milestones: 1961-1968, The Limited Test Ban Treaty, 1963, https://history.state.gov/milestones/1961-1968/limited-ban.",
        "https://treaties.unoda.org/t/test_ban", scene="starfish", related=["us-1962-starfish-prime"]),
     lg("ost-1967", "1967-01-27", None, "treaty", "Outer Space Treaty",
        "Opened Jan 27, 1967; in force Oct 10, 1967. Art. IV bars nuclear weapons and WMD in orbit; "
@@ -551,8 +603,31 @@ SOURCE_FULL = {
                 "Operation Iraqi Freedom Progress (Mar. 25, 2003) (briefing by Maj. Gen. Victor Renuart), "
                 "https://www.globalsecurity.org/wmd/library/news/iraq/2003/iraq-030325-afps03.htm",
 }
+SCENE_IDS = ["starfish", "solwind", "fengyun", "burnt-frost", "dn2", "shakti", "cosmos1408", "gnss", "viasat", "laser"]
+ENUMS = {
+    "domain": ["kinetic", "non_kinetic"],
+    "confidence": ["high", "medium", "low"],
+    "type": ["destructive", "non_destructive", "midcourse_intercept", "apogee_only", "flyby", "nuclear"],
+    "altitude_kind": ["intercept", "apogee", "detonation"],
+    "date_precision": ["day", "month"],
+    "category": ["directed_energy", "ew_uplink", "ew_downlink", "gnss_jamming", "gnss_spoofing", "cyber"],
+    "attribution": ["official_government", "multi_government", "researcher_osint", "alleged"],
+    "target_regime": ["ISR_LEO", "GEO_comms", "GNSS_MEO", "LEO_constellation", "ground_segment"],
+    "legal_kind": ["treaty", "resolution", "negotiation_span", "unilateral", "veto"],
+    "scene_3d": SCENE_IDS,
+}
+SCOPE_RULE = ("Scope rule: every direct-ascent (DA-ASAT) test row that SWF 2026 lists in Table 1-4 (US), Tables 2-4 and 16-2 "
+              "(Russia), Tables 3-3 and 16-3 (China) and Tables 4-1 and 16-4 (India) is a row in this ledger, including failures, "
+              "rocket-only tests and tests against a star or no target. Exclusions, all disclosed: co-orbital tests "
+              "(Table 1-4 also lists the US Delta 180 co-orbital intercept of 5 Sep 1986, which SWF's text calls a co-orbital "
+              "experiment; Table 16-2's Soviet IS, Naryad, Polyot and Cosmos 2521/2536 entries), and the Table 16-3 line "
+              "'Apr. 15, 2023' (treated as a date variant of the 14 Apr 2023 test, see that row's conflicts). "
+              "Starfish Prime (not an SWF DA-ASAT table row) is the one added nuclear marker.")
 SCHEMA = {
     "schema_version": SCHEMA_VERSION,
+    "scope_rule": SCOPE_RULE,
+    "page_strings": {"ledger_as_of_display": "28 Sept. 2026", "swf_edition_label": "SWF 9th ed. (Apr. 2026)"},
+    "enums": ENUMS,
     "generated_by": "tools/build_data.py",
     "ledger_as_of": LEDGER_ASOF,
     "description": "Data files for the Counterspace Timeline. events.json and legal.json are top-level arrays "
@@ -564,7 +639,7 @@ SCHEMA = {
                 "notes": "free-text caveats", "source": "short source label", "source_full": "full citation string for a sources list",
                 "source_url": "link to the source", "pin": "table/passage plus printed page and PDF page",
                 "conflicts": "optional list of disagreements inside the sources", "scene_3d": "optional 3D scene key"},
-            "kinetic_fields": {"date": "YYYY-MM-DD", "state": "acting state", "system": "weapon system", "target": "target object",
+            "kinetic_fields": {"date": "YYYY-MM-DD (first of the month when date_precision is month)", "date_precision": "optional: day (default) | month, where SWF gives only a month", "state": "acting state", "system": "weapon system", "target": "target object",
                 "type": "destructive | non_destructive | midcourse_intercept | apogee_only | flyby | nuclear",
                 "altitude_km": "number or null", "altitude_kind": "intercept | apogee | detonation",
                 "fragments_cataloged": "int or null", "fragments_in_orbit": "int or null", "fragments_as_of": "YYYY-MM or null"},
@@ -572,7 +647,8 @@ SCHEMA = {
                 "category": "directed_energy | ew_uplink | ew_downlink | gnss_jamming | gnss_spoofing | cyber",
                 "attribution": "official_government | multi_government | researcher_osint | alleged",
                 "target_system": "string", "target_regime": "ISR_LEO | GEO_comms | GNSS_MEO | LEO_constellation | ground_segment",
-                "operational_use": "bool", "effect": "string"}},
+                "operational_use": "bool", "effect": "string"},
+            "validation": "tools/build_data.py validate() enforces this schema on every build: unique ids, enums, date formats, required source fields, id resolution, fragments_in_orbit <= fragments_cataloged."},
         "legal.json": {"shape": "array of legal items, sorted by start",
             "fields": {"id": "stable key", "start": "YYYY-MM-DD", "end": "YYYY-MM-DD or null",
                 "kind": "treaty | resolution | negotiation_span | unilateral | veto", "label": "short display label",
@@ -700,10 +776,13 @@ def ledger_md(events):
     a("| Schema version | %s | `data/schema.json` |" % SCHEMA_VERSION)
     a("")
     a("**Sources.** Primary: Secure World Foundation, *Global Counterspace Capabilities: An Open Source Assessment*, 9th ed. "
-      "(April 2026), cited as SWF 2026. CSIS *Space Threat Assessment 2026* had not been published when this was checked. "
+      "(April 2026), cited as SWF 2026. CSIS *Space Threat Assessment 2025* was consulted for background only; no row, pin or citation depends on it. "
       "Verification is recorded in `verification_log.md`.")
     a("")
     a("## How to read the tables")
+    a("")
+    a("**Scope and selection.** " + SCOPE_RULE + " The US Table 1-4 has 33 rows; %d are ledger rows and the one omitted row is the co-orbital Delta 180 test. "
+      "%d rows give SWF's month only (`date_precision: month`)." % (sum(r["state"] == "United States" and r["source"] == SWF for r in kin), sum(r.get("date_precision") == "month" for r in kin)))
     a("")
     a("**Pins.** An SWF pin gives the table or passage, the printed section-page (for example `p. 05-01`) and the PDF page "
       "index (`PDF p. 212`). A non-SWF pin names the passage and starts with the source key in brackets, for example "
@@ -718,7 +797,7 @@ def ledger_md(events):
     a("| field | meaning |")
     a("|---|---|")
     a("| id | Stable row key used by the page and by `related_events` in the legal items. |")
-    a("| date | Test date (YYYY-MM-DD); an endnote explains where sources differ. |")
+    a("| date | Test date (YYYY-MM-DD); month-only SWF dates use the 1st and `date_precision: month`. An endnote explains where sources differ. |")
     a("| type | Test outcome class (below). |")
     a("| alt (km) / kind | Altitude and what it measures (below). Blank when SWF reports none. |")
     a("| cataloged / in orbit | Cataloged fragments created / fragments still in orbit as of %s (destructive tests only). |" % DEBRIS_ASOF)
@@ -774,7 +853,7 @@ def ledger_md(events):
     a("## Quick lookup by year")
     a("")
     a("Counts per calendar year (kinetic by test date; non-kinetic and legal by start date). Years with no rows are omitted; "
-      "see the Chart A gap note in `methodology.md` (section 3) for the quiet stretches after 1970 and 1985.")
+      "see `methodology.md` (section 3) for the Chart A gap statement, which follows SWF's complete DA-ASAT tables.")
     a("")
     a("| year | kinetic | non-kinetic | legal |")
     a("|---|---|---|---|")
@@ -894,11 +973,98 @@ def ledger_md(events):
     return "\n".join(o)
 
 
+def validate(events, legal):
+    """Fail the build (SystemExit) if the rows violate the schema. Returns nothing."""
+    err = []
+    date_re, ym_re = re.compile(r"^\d{4}-\d{2}-\d{2}$"), re.compile(r"^\d{4}-\d{2}$")
+
+    def good_date(v):
+        if not isinstance(v, str) or not date_re.match(v):
+            return False
+        try:
+            datetime.date.fromisoformat(v)
+            return True
+        except ValueError:
+            return False
+
+    def enum(row, field, key=None):
+        if row.get(field) not in ENUMS[key or field]:
+            err.append("%s: bad %s %r" % (row["id"], field, row.get(field)))
+
+    ids = [r["id"] for r in events]
+    lids = [r["id"] for r in legal]
+    for label, lst in (("event", ids), ("legal", lids)):
+        for d in sorted({x for x in lst if lst.count(x) > 1}):
+            err.append("duplicate %s id %s" % (label, d))
+    idset = set(ids)
+    for r in events:
+        for f in ("source", "source_url", "pin", "source_full"):
+            if not r.get(f):
+                err.append("%s: missing %s" % (r["id"], f))
+        enum(r, "domain"); enum(r, "confidence")
+        if r.get("scene_3d") and r["scene_3d"] not in SCENE_IDS:
+            err.append("%s: unknown scene_3d %r" % (r["id"], r["scene_3d"]))
+        if r["domain"] == "kinetic":
+            enum(r, "type"); enum(r, "altitude_kind")
+            if not good_date(r.get("date")):
+                err.append("%s: bad date %r" % (r["id"], r.get("date")))
+            if "date_precision" in r:
+                enum(r, "date_precision")
+                if r["date_precision"] == "month" and not r["date"].endswith("-01"):
+                    err.append("%s: month-precision date must be the 1st" % r["id"])
+            fa = r.get("fragments_as_of")
+            if fa is not None and not ym_re.match(fa):
+                err.append("%s: bad fragments_as_of %r" % (r["id"], fa))
+            c, o = r.get("fragments_cataloged"), r.get("fragments_in_orbit")
+            if (c is None) != (fa is None):
+                err.append("%s: fragments_as_of must accompany fragments_cataloged" % r["id"])
+            if c is not None and o is not None and o > c:
+                err.append("%s: fragments_in_orbit %s > fragments_cataloged %s" % (r["id"], o, c))
+        elif r["domain"] == "non_kinetic":
+            enum(r, "category"); enum(r, "attribution"); enum(r, "target_regime")
+            if not good_date(r.get("start")):
+                err.append("%s: bad start %r" % (r["id"], r.get("start")))
+            if r.get("end") is not None and not good_date(r["end"]):
+                err.append("%s: bad end %r" % (r["id"], r["end"]))
+            if good_date(r.get("start")) and r.get("end") and good_date(r["end"]) and r["end"] < r["start"]:
+                err.append("%s: end before start" % r["id"])
+        for rid in r.get("related_events", []):
+            if rid not in idset:
+                err.append("%s: related_events %s does not resolve" % (r["id"], rid))
+    for r in legal:
+        for f in ("source_url", "citation", "label", "short_note"):
+            if not r.get(f):
+                err.append("%s: missing %s" % (r["id"], f))
+        enum(r, "kind", "legal_kind")
+        if not good_date(r.get("start")):
+            err.append("%s: bad start %r" % (r["id"], r.get("start")))
+        if r.get("end") is not None and not good_date(r["end"]):
+            err.append("%s: bad end %r" % (r["id"], r["end"]))
+        if r.get("scene_3d") and r["scene_3d"] not in SCENE_IDS:
+            err.append("%s: unknown scene_3d %r" % (r["id"], r["scene_3d"]))
+        for rid in r.get("related_events", []):
+            if rid not in idset:
+                err.append("%s: related_events %s does not resolve" % (r["id"], rid))
+    # methodology.md dataset table must match the data
+    m = (OUT.parent / "methodology.md").read_text()
+    nk_n = sum(r["domain"] == "non_kinetic" for r in events)
+    for lab, n in (("Kinetic events", len(events) - nk_n), ("Non-kinetic events", nk_n), ("Legal items", len(legal))):
+        if not re.search(r"\| %s \| %d \|" % (lab, n), m):
+            err.append("methodology.md: '%s' row count is not %d" % (lab, n))
+    if err:
+        sys.exit("VALIDATION FAILED (%d):\n  " % len(err) + "\n  ".join(err))
+    print("validate(): OK (%d events, %d legal items)" % (len(events), len(legal)))
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     events = sorted(K + NK, key=lambda r: r.get("date") or r.get("start"))
     for r in events:
         r["source_full"] = SOURCE_FULL[r["source"]]
+        extra = r.pop("_sf_extra", None)
+        if extra:
+            r["source_full"] += "; also " + extra
+    validate(events, L)
     (OUT / "schema.json").write_text(json.dumps(SCHEMA, indent=1, ensure_ascii=False))
     (OUT / "events.json").write_text(json.dumps(events, indent=1, ensure_ascii=False))
     (OUT / "legal.json").write_text(json.dumps(sorted(L, key=lambda r: r["start"]), indent=1, ensure_ascii=False))
