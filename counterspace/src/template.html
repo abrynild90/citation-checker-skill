@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <meta name="description" content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere.">
 <style>
-:root{
+:root, .xbox.xdark{
   color-scheme: dark;
   --bg:#0a0f1e; --surface:#10172c; --surface-2:#172040; --line:#2a3558; --grid:#212b4a;
   --text:#e9edf7; --muted:#a9b3cc; --faint:#7d88a6; --accent:#8cc8ff; --accent-2:#ffcf6e;
@@ -35,7 +35,7 @@
     --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
   }
 }
-:root[data-theme="light"]{
+:root[data-theme="light"], .xbox.xlight{
   color-scheme: light;
   --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
   --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
@@ -133,6 +133,7 @@ h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .only-phone{display:none}
 @media (max-width:640px){.hide-phone{display:none}}
 @media (max-width:640px){.only-phone{display:block}}
+.xbox{color:var(--text);background:var(--bg)}
 .xbox svg{display:block;width:100%}
 #legalKey{margin:8px 0 0}
 .note.block{margin:8px 0 0;max-width:820px}
@@ -202,6 +203,21 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 @media (max-width:640px){.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.chip{font-size:12.5px;padding:5px 9px;min-height:36px;border-radius:10px}}
 .chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
 
+.zbadge{display:inline-block;font:700 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;background:var(--accent-2);color:var(--bg);border-radius:4px;padding:3px 6px;margin-right:6px}
+.zoom-flag{fill:var(--accent-2);font:600 11px var(--sans)}
+.about{margin:6px 0 0;max-width:820px;font-size:13px;color:var(--muted)}
+.about summary{cursor:pointer;color:var(--accent);padding:4px 0}
+.about p{margin:4px 0 0}
+.kinkey{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--text)}
+.kinkey span{display:inline-flex;align-items:center;gap:7px}
+.kinkey i{width:16px;height:12px;border-radius:2px;display:inline-block}
+.chips.mode-kin .chip{opacity:.5;text-decoration:none;border-style:dotted;color:var(--muted)}
+.chips.mode-kin .chip i{background:var(--faint)!important}
+.chip-off-note{font-size:12.5px;color:var(--faint);align-self:center}
+#expDark{margin:0}
+.chart-head .tools{padding-right:2px}
+td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap}
+@media (max-width:640px){td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:normal}.legal-band .band-head{min-height:46px;margin-bottom:6px}}
 /* lag + sources */
 .lag-list{display:grid;gap:10px;margin-top:14px}
 .prose{max-width:820px}
@@ -229,7 +245,12 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel .steps{margin:0 0 10px;font-size:13.5px}.panel .steps summary{cursor:pointer;color:#fff;font-weight:600;min-height:24px}
 .panel .steps ol{margin:6px 0 0;padding-left:20px}.panel .steps li{margin:0 0 5px}.panel .steps .st{color:#a9b3cc;font-size:12px;white-space:nowrap}
 .panel .aside-body:focus-visible{outline-offset:-3px}
-.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 26px;scroll-padding-bottom:26px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent)}
+.aside-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 30px;scroll-padding-bottom:30px;scrollbar-width:thin;scrollbar-color:#5f70a3 #0b1122}
+.panel .aside-body::-webkit-scrollbar{width:9px}.panel .aside-body::-webkit-scrollbar-track{background:#0b1122}.panel .aside-body::-webkit-scrollbar-thumb{background:#5f70a3;border-radius:6px}
+.scroll-cue{position:absolute;left:0;right:0;bottom:0;height:38px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;background:linear-gradient(rgba(11,17,34,0),#0b1122 80%);font:600 11.5px var(--sans);color:#8cc8ff;pointer-events:none;opacity:0;transition:opacity .15s}
+.aside-wrap.more .scroll-cue{opacity:1}
+.panel .scalenote{margin:8px 0 0;font-size:12.5px}.panel .scalenote summary{cursor:pointer;color:#a9b3cc}.panel .scalenote p{margin:4px 0 0}
 .panel .aside-body p:first-child{margin-top:0}
 .panel .aside-law{flex:none;padding:8px 14px;border-top:1px solid #2a3558}
 .panel .aside-law .btn{width:100%;justify-content:flex-start;text-align:left;line-height:1.25;height:auto;min-height:36px}
@@ -249,11 +270,13 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 @keyframes flash{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px var(--focus))}}
 
 @media (max-width:760px){
-  .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(260px,1fr) auto auto;height:100%;border-radius:0}
+  .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(45vh,45vh) minmax(0,1fr) auto;height:100vh;height:100dvh;border-radius:0}
+  .overlay{align-items:stretch}
   .overlay{padding:0}
-  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:36vh}
-  .panel .aside-body{padding-bottom:28px;scroll-padding-bottom:28px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent)}
-  .panel .aside-body{padding:10px 12px 28px}
+  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:none}
+  .panel .ctrl{gap:6px 8px}
+  .panel .ctrl .btn{min-height:34px}
+  .panel .aside-body{padding:10px 12px 34px}
   .panel .aside-law{padding:6px 12px}
   .panel header{padding:8px 10px}
   .panel header h2{font-size:15px;line-height:1.2}
@@ -299,7 +322,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
     <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
     <a href="#chartC"><b>C · Non-kinetic</b><span>Jamming, lasers and cyber</span></a>
     <a href="#chartB"><b>B · Capabilities</b><span>States holding each, by decade</span></a>
-    <a href="#lag"><b>The lag</b><span>Years from capability to law</span></a>
+    <a href="#lag"><b>Chronology</b><span>Years from capability to a later legal step</span></a>
     <a href="#sources"><b>Sources</b><span>Citations and method</span></a>
   </nav>
   <p class="meta" id="asof"></p>
@@ -307,6 +330,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div>
     <div class="toolbar" role="toolbar" aria-label="Page controls">
       <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
+      <label class="btn small" for="expDark" title="SVG exports use the light palette (print-ready) unless this is checked"><input type="checkbox" id="expDark"> Dark SVG exports</label>
     </div>
     <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
   </div></div>
@@ -347,7 +371,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
     <section class="chart" id="chartA" aria-labelledby="hA">
       <div class="chart-head">
         <div><h2 id="hA">A · Kinetic tests: altitude over time</h2>
-        <p>Direct-ascent anti-satellite (DA-ASAT) tests and one high-altitude nuclear test. The log scale runs from 100 km to beyond GEO. For destructive tests, bubble <em>area</em> is proportional to the number of cataloged fragments.</p></div>
+        <p>Direct-ascent anti-satellite (DA-ASAT) tests and one high-altitude nuclear test. The log scale runs from 10 km (rocket-only tests) to beyond GEO. Tests with no reported altitude sit in a strip below the axis, at their true dates. For destructive tests, bubble <em>area</em> is proportional to the number of cataloged fragments.</p></div>
         <div class="tools"><button class="btn small" data-export="A" type="button">Export SVG</button></div>
       </div>
       <div class="svgbox" id="svgA"></div>
@@ -361,8 +385,8 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
         <p>Jamming, spoofing, lasers and cyber operations, drawn as sustained campaigns (bars) or discrete events (points). Fill style shows how strongly the source attributes the activity.</p></div>
         <div class="tools">
           <span class="seg" role="group" aria-label="Chart C year range">
-            <button class="btn small" id="cFocus" aria-pressed="true" type="button">Focus 1995–2026</button>
-            <button class="btn small" id="cFull" aria-pressed="false" type="button">Full span 1957–2026</button>
+            <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+            <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
           </span>
           <button class="btn small" data-export="C" type="button">Export SVG</button></div>
       </div>
@@ -375,7 +399,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
     <section class="chart" id="chartB" aria-labelledby="hB">
       <div class="chart-head">
         <div><h2 id="hB">B · Capability diffusion</h2>
-        <p>Number of states holding each counterspace capability, by decade, on a zero baseline. Solid bands mean demonstrated; hatched bands mean developing or latent, and dotted bands mean developing entries that SWF’s country matrix does not support (builder-assessed). Faded decades are reconstructed. In the five-category view the stack counts state-capability pairs, so a state with two capabilities counts twice.</p></div>
+        <p>Number of states holding each counterspace capability, by decade, on a zero baseline. Solid bands are demonstrated; hatched are developing or latent; faded decades are reconstructed, not SWF-assessed.</p></div>
         <div class="tools">
           <span class="seg" role="group" aria-label="Grouping">
             <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
@@ -385,6 +409,9 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
         </div>
       </div>
       <p class="note block" id="noteB" aria-live="polite"></p>
+      <details class="about" id="aboutB"><summary>About the coding</summary>
+        <p>The number above each decade is a range: demonstrated only, to demonstrated plus developing (the whisker). In the 2020s the states are SWF-assessed, but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part. Dotted bands are developing entries where SWF’s country matrix shows no data. Decades before 2020 are reconstructed from SWF’s test tables and country chapters. See the <a href="#codingRules">coding rules</a>.</p></details>
+      <div class="kinkey" id="kinKeyB" hidden></div>
       <div class="chips" id="chipsB" role="group" aria-label="Filter categories"></div>
       <div class="svgbox" id="svgB"></div>
       <ul class="legend" id="legendB"></ul>
@@ -393,13 +420,13 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 
     <section class="chart" id="lag" aria-labelledby="hL">
       <div class="chart-head">
-        <div><h2 id="hL">The lag</h2>
-        <p>Years between a capability milestone and the legal or policy response that addressed it. An open ring means no binding rule has followed yet.</p></div>
+        <div><h2 id="hL">Chronology: capability, then law</h2>
+        <p>Time between a capability milestone and a later legal or policy step. This is chronology, not causation: each pair shows which came first, not that one caused or answered the other. An open ring means no binding rule has followed yet.</p></div>
         <div class="tools"><button class="btn small" data-export="L" type="button">Export SVG</button></div>
       </div>
       <div class="svgbox" id="svgL"></div>
       <ul class="legend" id="legendL"></ul>
-      <details class="table"><summary>Data table: lag pairs</summary><div class="tscroll" id="tableL"></div></details>
+      <details class="table"><summary>Data table: chronology pairs</summary><div class="tscroll" id="tableL"></div></details>
     </section>
   </div>
 </div>
@@ -426,14 +453,17 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
         <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕<span class="lbl"> Close</span></button>
       </div>
     </header>
-    <div class="view" id="sceneView" role="group" aria-label="Scene visual (illustrative)" aria-describedby="sceneCaption sceneSteps"><div class="illus">Illustrative, not orbit-propagated · compressed radial scale</div></div>
+    <div class="view" id="sceneView" role="group" aria-label="Scene visual (illustrative)" aria-describedby="sceneCaption sceneSteps"><div class="illus">Illustrative<span class="hide-phone">, not orbit-propagated</span> · compressed radial scale</div></div>
     <aside>
-      <div class="aside-body" tabindex="0" role="region" aria-label="Scene description and source">
+      <div class="aside-wrap" id="asideWrap">
+      <div class="aside-body" id="asideBody" tabindex="0" role="region" aria-label="Scene description and source">
         <p id="sceneCaption"></p>
         <details class="steps" id="sceneStepsBox"><summary>What happens in this scene</summary>
           <ol id="sceneSteps"></ol></details>
         <p class="src" id="sceneSrc"></p>
-        <p class="src" id="sceneScale"></p>
+        <details class="scalenote"><summary>Scale and imagery note</summary><p class="src" id="sceneScale"></p></details>
+      </div>
+      <div class="scroll-cue" id="scrollCue" aria-hidden="true">▾ Scroll for more</div>
       </div>
       <div class="aside-law"><button class="btn small" id="scRelated" type="button">⚖ Related law</button></div>
     </aside>

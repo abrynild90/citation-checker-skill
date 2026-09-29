@@ -9,11 +9,20 @@ function showCard(html, evt, el) {
   card.dataset.touch = touchMode ? '1' : '';
   if (innerWidth < PHONE_MAX) { card.style.left = ''; card.style.top = ''; return; }
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
-  const cw = card.offsetWidth, ch = card.offsetHeight;
-  let left = r.right + 12, top = r.top - 8;
-  if (left + cw > innerWidth - 8) left = Math.max(8, r.left - cw - 12);
-  if (top + ch > innerHeight - 8) top = Math.max(8, innerHeight - ch - 8);
-  card.style.left = left + 'px'; card.style.top = top + 'px';
+  const cw = card.offsetWidth, ch = card.offsetHeight, G = 14, VW = innerWidth, VH = innerHeight;
+  // Smart placement: try right, left, above and below the mark and take the candidate that covers the fewest neighbouring marks and the chart's x axis.
+  const root = el?.closest?.('svg'), others = root ? [...root.querySelectorAll('.mark')].filter(n => n !== el).map(n => n.querySelector('.hit') ? n.querySelector(':scope > :not(.hit)')?.getBoundingClientRect() || n.getBoundingClientRect() : n.getBoundingClientRect()) : [];
+  root?.querySelectorAll('text.ann, text.ann-sub').forEach(n => others.push(n.getBoundingClientRect()));
+  const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
+  const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
+  const mid = (r.top + r.bottom) / 2, cx = (r.left + r.right) / 2;
+  const cands = [[r.right + G, mid - ch / 2], [r.left - cw - G, mid - ch / 2], [cx - cw / 2, r.top - ch - G], [cx - cw / 2, r.bottom + G], [r.right + G, r.top - 8], [r.left - cw - G, r.top - 8]].map(([l, tp], i) => {
+    const L = Math.min(Math.max(8, l), VW - cw - 8), T = Math.min(Math.max(8, tp), VH - ch - 8), q = { left: L, right: L + cw, top: T, bottom: T + ch };
+    const score = others.filter(o => hit(q, o)).length * 3 + (ax && hit(q, ax, 0) ? 25 : 0) + (hit(q, r, 0) ? 40 : 0) + Math.abs(L - l) / 40 + Math.abs(T - tp) / 40 + i * 0.1;
+    return { L, T, score };
+  });
+  const best = cands.reduce((a, b) => b.score < a.score ? b : a);
+  card.style.left = best.L + 'px'; card.style.top = best.T + 'px';
 }
 let touchMode = false;
 document.addEventListener('pointerdown', e => { touchMode = e.pointerType === 'touch'; if (touchMode && !e.target.closest('.mark') && !e.target.closest('#card')) hideCard(); }, true);
@@ -24,7 +33,7 @@ function kinCard(e) {
   const debris = e.type === 'destructive' ? `<dt>Fragments</dt><dd>${num(e.fragments_cataloged)} cataloged · ${num(e.fragments_in_orbit)} still in orbit (as of ${fmtMY(parse(e.fragments_as_of + '-01'))})</dd>` : '';
   const alt = e.altitude_km == null ? 'not reported' : `${num(e.altitude_km)} km (${e.altitude_kind})`;
   const mdo = e.id === 'us-2008-burnt-frost' ? '<div class="hint">Missile-defense interceptor (SM-3) used against a satellite: shows the missile-defense / ASAT overlap.</div>' : '';
-  return `<h4>${esc(e.system)} → ${esc(e.target)}</h4><dl><dt>Date</dt><dd>${fmt(parse(e.date))}</dd><dt>State</dt><dd>${esc(e.state)}</dd><dt>Type</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>Confidence</dt><dd>${e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`;
+  return `<h4>${esc(e.system)} → ${esc(e.target)}</h4><dl><dt>Date</dt><dd>${fmtD(e)}</dd><dt>State</dt><dd>${esc(e.state)}</dd><dt>Type</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>Confidence</dt><dd>${e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`;
 }
 function nkCard(e) {
   const span = e.end === e.start ? fmt(parse(e.start)) : `${fmtMY(parse(e.start))} – ${e.end ? fmtMY(parse(e.end)) : 'ongoing'}`;
@@ -57,11 +66,12 @@ function addGuide(svg, x, y0, y1, key) {
   const [r0, r1] = x.range();
   guides[at < 0 ? guides.length : at] = fn(date => date && x(date) >= r0 - 1 && x(date) <= r1 + 1 ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'));
 }
-function handoff(svg, x, y0, y1, label, anchorTop) {
+function handoff(svg, x, y0, y1, label, anchorTop, ty) {
   const X = x(parse(LAST_DA));
   const g = svg.append('g').attr('class', 'handoff').attr('aria-hidden', 'true');
   g.append('line').attr('x1', X).attr('x2', X).attr('y1', y0).attr('y2', y1);
-  if (label) g.append('text').attr('x', X - 5).attr('y', anchorTop ? y0 + 10 : y1 - 6).attr('text-anchor', 'end').text(label);
+  if (label) g.append('text').attr('x', X - 5).attr('y', ty ?? (anchorTop ? y0 + 10 : y1 - 6)).attr('text-anchor', 'end').text(label);
+  return g;
 }
 
 

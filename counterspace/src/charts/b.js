@@ -87,13 +87,15 @@ function drawB(el = document.getElementById('svgB')) {
     annL.forEach(l => t.append('tspan').attr('class', 'ann').attr('x', 4).attr('dy', n++ ? 15 : 0).text(l));
     annS.forEach(l => t.append('tspan').attr('class', 'ann-sub').attr('x', 4).attr('dy', n++ ? 15 : 0).text(l)); }
   if (EXPORTING) return;
-  document.getElementById('noteB').innerHTML = (stateB.group === 'cat'
-    ? 'Vertical axis: state-capability pairs. A state with two capabilities is counted twice.'
-    : 'Vertical axis changed: unique states per group, not pairs. A state with both kinetic and non-kinetic capability is counted once in each group, so the two bands can sum to more than the number of states.')
-    + ' Numbers above each decade give the range: demonstrated only to demonstrated plus developing (whisker). In the 2020s the states are SWF-assessed but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part; dotted bands are developing entries where SWF’s country matrix shows no data. See the <a href="#codingRules">coding rules</a>.';
+  document.getElementById('noteB').textContent = stateB.group === 'cat'
+    ? 'Stack height counts state-capability pairs: a state with two capabilities counts twice. The number above each decade is a range (whisker).'
+    : 'Unique states per group, not pairs. A state with both kinds is counted once in each band, so the bands can sum to more than the number of states. The number above each decade is a range (whisker).';
+  { const kk = document.getElementById('kinKeyB'), kin = stateB.group === 'kin';
+    kk.hidden = !kin;
+    kk.innerHTML = kin ? '<span><i style="background:var(--cat-da)"></i>Kinetic (direct-ascent, co-orbital)</span><span><i style="background:var(--cat-ew)"></i>Non-kinetic (EW, directed energy, cyber)</span>' : ''; }
   // legend + chips
   { const L = legend('legendB', 26, 16), C = 'var(--cat-ew)', sw = (inner, extra = '') => `<rect x="-12" y="-7" width="24" height="14" rx="1.5" ${extra}/>${inner}`;
-    L.raw('<li class="lhead" aria-hidden="true">Fill style = strength of evidence (colour = capability category)</li>')
+    L.raw('<li class="lhead" aria-hidden="true">Fill style = strength of evidence (colour = ' + (stateB.group === 'cat' ? 'capability category' : 'kinetic or non-kinetic group, keyed above') + ')</li>')
       .item(sw('', `style="fill:${C};fill-opacity:.85"`), '<b>Solid</b>: demonstrated, tested or used (verified against SWF)')
       .item(`<defs><pattern id="lgH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${C};fill-opacity:.14"/><line y2="6" style="stroke:${C};stroke-width:2.2"/></pattern></defs>` + sw('', 'fill="url(#lgH)"'), '<b>Hatched</b>: developing or latent')
       .item(`<defs><pattern id="lgD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${C};fill-opacity:.06"/><circle cx="2.5" cy="2.5" r="1" style="fill:${C}"/></pattern></defs>` + sw('', 'fill="url(#lgD)"'), '<b>Dotted</b>: developing, builder-assessed (2020s; SWF matrix: no data)')
@@ -105,12 +107,16 @@ function drawB(el = document.getElementById('svgB')) {
 // Chips are built once and updated in place, so a toggle never drops keyboard focus.
 function chipsB() {
   const el = document.getElementById('chipsB');
-  if (!el.children.length) CATS.forEach(c => {
+  if (![...el.children].some(c => c.dataset.key)) CATS.forEach(c => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.key = c.key; b.innerHTML = `<i style="background:var(${c.v})"></i>${c.label}`;
     b.onclick = () => { stateB.on.has(c.key) ? stateB.on.delete(c.key) : stateB.on.add(c.key); if (!stateB.on.size) stateB.on.add(c.key); chipsB(); drawB(); };
     el.appendChild(b);
   });
-  [...el.children].forEach(b => { b.setAttribute('aria-pressed', stateB.on.has(b.dataset.key)); b.disabled = stateB.group !== 'cat'; });
+  [...el.children].filter(b => b.dataset.key).forEach(b => { b.setAttribute('aria-pressed', stateB.on.has(b.dataset.key)); b.disabled = stateB.group !== 'cat'; });
+  el.classList.toggle('mode-kin', stateB.group !== 'cat');
+  let nt = el.querySelector('.chip-off-note');
+  if (stateB.group !== 'cat' && !nt) { nt = document.createElement('span'); nt.className = 'chip-off-note'; nt.textContent = 'Category filter applies to the five-category view only; colours here show the two groups above.'; el.appendChild(nt); }
+  else if (stateB.group === 'cat' && nt) nt.remove();
 }
 document.getElementById('cFocus').onclick = () => { stateC.focus = true; drawC(); };
 document.getElementById('cFull').onclick = () => { stateC.focus = false; drawC(); };

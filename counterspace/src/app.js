@@ -15,7 +15,7 @@ const D = JSON.parse(document.getElementById('cs-data').textContent);
 // Land polygons (~57 KB) sit in their own script tag and are parsed on first use (hero, scene or static diagram), see ensureLand().
 let landDone = false;
 function ensureLand() { if (landDone) return; landDone = true; performance.mark('cs:land-parse'); setLand(JSON.parse(document.getElementById('cs-land').textContent)); }
-const EVENTS = D.events, LEGAL = D.legal, CAPS = D.caps;
+const EVENTS = D.events, LEGAL = D.legal, CAPS = D.caps, SCHEMA = D.schema; // SCHEMA: as-of strings and the scope rule, embedded from data/schema.json at build
 const KIN = EVENTS.filter(e => e.domain === 'kinetic');
 const NK = EVENTS.filter(e => e.domain === 'non_kinetic');
 const byId = Object.fromEntries([...EVENTS, ...LEGAL].map(r => [r.id, r]));
@@ -25,13 +25,16 @@ const fmt = d3.utcFormat('%b %-d, %Y'), fmtY = d3.utcFormat('%Y'), fmtMY = d3.ut
 const timed = (name, fn) => { const t0 = performance.now(), r = fn(); performance.measure('cs:' + name, { start: t0, end: performance.now() }); return r; };
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const DOMAIN = [parse('1957-01-01'), parse('2027-01-01')];
-const AS_OF = 'SWF 9th ed., Apr. 2026';
+const LEDGER_AS_OF = SCHEMA.page_strings.ledger_as_of_display, SWF_ED = SCHEMA.page_strings.swf_edition_label; // e.g. 'SWF 9th ed. (Apr. 2026)'
+const AS_OF = SWF_ED;
 const LAST_DA = KIN.filter(e => e.type === 'destructive').map(e => e.date).sort().at(-1);
 
-document.getElementById('asof').innerHTML = `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of 28 Sept. 2026; debris counts as of Feb. 2026. Secondary: CSIS <i>Space Threat Assessment 2025</i>.`;
+document.getElementById('asof').innerHTML = `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of ${LEDGER_AS_OF}; debris counts as of Feb. 2026. CSIS <i>Space Threat Assessment 2025</i> was consulted for cross-checking; no row cites it.`;
 
 { const nDest = KIN.filter(e => e.type === 'destructive').length;
   document.getElementById('glance').innerHTML = `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`; }
+document.querySelector('#legalPhone summary').textContent = `All ${LEGAL.length} law and policy items, in date order`;
+document.querySelector('.cta-note').textContent = `${SCENES.length} short scenes, or select any cube badge on a chart.`;
 // ---------------------------------------------------------------- palette & helpers
 const STATE_VAR = { 'United States': '--c-us', 'Russia': '--c-ru', 'China': '--c-cn', 'India': '--c-in', 'Iran': '--c-ir', 'North Korea': '--c-kp', 'Israel': '--c-il', 'Iraq': '--c-iq' };
 const actorKey = a => Object.keys(STATE_VAR).find(k => a.startsWith(k) || (k === 'Iran' && a.startsWith('Iran'))) || (a.startsWith('Israel') ? 'Israel' : null);
@@ -40,6 +43,7 @@ const TYPE_LABEL = { destructive: 'Destructive intercept', non_destructive: 'Non
 const ATTR_LABEL = { official_government: 'Official (single government)', multi_government: 'Multiple governments / intergovernmental body', researcher_osint: 'Researcher / open-source analysis', alleged: 'Alleged (unconfirmed)' };
 const REGIME_LABEL = { GNSS_MEO: 'GNSS receivers (MEO signals)', GEO_comms: 'GEO communications', LEO_constellation: 'LEO constellation', ground_segment: 'Ground segment', ISR_LEO: 'LEO imaging / ISR' };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtD = e => e.date_precision === 'month' ? fmtMY(parse(e.date)) : fmt(parse(e.date)); // rows dated only to a month show month and year
 const num = n => n == null ? '—' : d3.format(',')(n);
 const hasScene = r => r.scene_3d && SCENES.some(s => s.id === r.scene_3d);
 
@@ -54,7 +58,7 @@ function layout(el, domain = DOMAIN, minW = 300) {
 }
 function xAxis(g, x, y, every) {
   const ax = d3.axisBottom(x).ticks(d3.utcYear.every(every || (isPhoneNow() ? 20 : 10))).tickFormat(fmtY).tickSizeOuter(0);
-  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${y})`).call(ax);
+  g.append('g').attr('class', 'axis xaxis').attr('transform', `translate(0,${y})`).call(ax);
 }
 // ---- shared text measurement + label placement (greedy, collision-aware)
 const mctx = document.createElement('canvas').getContext('2d');

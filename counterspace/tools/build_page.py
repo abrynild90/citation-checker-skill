@@ -3,7 +3,8 @@ JS modules are concatenated in dependency order into one module scope (imports/e
 import json, re, pathlib
 R = pathlib.Path(__file__).resolve().parent.parent
 d = lambda p: json.loads((R / p).read_text())
-data = dict(events=d('data/events.json'), legal=d('data/legal.json'), caps=d('data/capabilities.json'))
+data = dict(events=d('data/events.json'), legal=d('data/legal.json'), caps=d('data/capabilities.json'),
+            schema={k: d('data/schema.json')[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'page_strings')})
 blob = json.dumps(data, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 land_blob = json.dumps(d('src/land.json'), separators=(',', ':')).replace('</', '<\\/')  # separate script tag: parsed only when a scene or the hero needs it
 strip = lambda t: re.sub(r"^import .*? from '.*?';\n", '', re.sub(r'^export ', '', t, flags=re.M), flags=re.M)

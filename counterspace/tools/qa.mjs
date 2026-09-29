@@ -68,6 +68,9 @@ for (const [vname, w, h] of VIEWPORTS) for (const scheme of ['dark', 'light']) {
   const key = `${vname}-${scheme}`;
   await run(`matrix-${key}`, { viewport: { width: w, height: h }, colorScheme: scheme, reducedMotion: 'reduce', isMobile: w < 640, hasTouch: w < 640 }, async p => {
     const res = { audit: await audit(p), hscroll: await hscroll(p) };
+    // Chart C zoom toggle must replace the chart, never stack a second one: [after zoom, after full] SVG counts must both be 1.
+    res.svgCCounts = await p.evaluate(() => { document.getElementById('cFocus').click(); const a = document.querySelectorAll('#svgC svg').length; document.getElementById('cFull').click(); return [a, document.querySelectorAll('#svgC svg').length]; });
+    if (res.svgCCounts.join() !== '1,1') res.svgCDouble = true;
     if (w >= 761) { // sticky legal band: at each section anchor nothing below it may straddle its lower edge
       res.stickyClips = [];
       for (const id of SECTIONS.slice(1)) {

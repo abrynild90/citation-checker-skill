@@ -37,7 +37,7 @@ async function openScene(id, originEl) {
   steps.innerHTML = (cfg.status || cfg.steps || []).map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`).join('');
   document.getElementById('sceneStepsBox').open = !isPhoneNow(); document.getElementById('sceneStepsBox').hidden = !(cfg.status || cfg.steps || []).length;
   const sim = buildSim(cfg); const cams = document.getElementById('scCams'); cams.innerHTML = '';
-  const h = await getHost();
+  const h = await getHost(); if (h) prefetchEarth();
   view.querySelector(':scope > svg')?.remove();
   if (h) {
     unloadHero();
@@ -48,7 +48,7 @@ async function openScene(id, originEl) {
     renderSVG(sim, view);
   }
   staticMode(!h);
-  setInert(true); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim());
+  setInert(true); asideBody.scrollTop = 0; requestAnimationFrame(updateCue); setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim(), true);
   document.getElementById('scClose').focus();
 }
 // While the dialog is open the page behind it is inert (no focus, not read out).
@@ -118,7 +118,12 @@ async function exportStill() {
   const svg = view.querySelector(':scope > svg'); if (!svg) throw new Error('No diagram to export');
   return svgToPNG(svg, cur.title, cur.cite);
 }
-function setStatus(msg) { document.getElementById('scStatus').textContent = msg; }
+function setStatus(msg, quiet) { const s = document.getElementById('scStatus'); s.textContent = msg; s.classList.toggle('sr', !!quiet); } // quiet: announced to screen readers, not shown (the title and counter already say it)
+// Scroll cue: the aside text is fully reachable by scrolling; a fade and label show while more is below.
+const asideBody = document.getElementById('asideBody'), asideWrap = document.getElementById('asideWrap');
+function updateCue() { asideWrap.classList.toggle('more', asideBody.scrollTop + asideBody.clientHeight < asideBody.scrollHeight - 6); }
+asideBody.addEventListener('scroll', updateCue, { passive: true }); addEventListener('resize', updateCue);
+asideBody.addEventListener('toggle', updateCue, true); if ('ResizeObserver' in window) new ResizeObserver(updateCue).observe(asideBody);
 document.getElementById('scExport').onclick = async () => {
   const c = cur; if (!c) return;
   try { setStatus('Preparing PNG…'); const url = await exportStill(); download(`scene-${c.id}.png`, url, 'image/png'); setStatus('Saved scene-' + c.id + '.png'); }
@@ -138,8 +143,11 @@ async function startHero() {
   heroSim = buildSim(HERO);
   const h = await getHost();
   if (cur) return;
-  if (h) { heroStage.querySelector('svg')?.remove(); h.mount(heroStage); h.load(heroSim); h.setCam(0); h.playing = true; h.play(); }
-  else renderSVG(heroSim, heroStage, 0.2);
+  if (h) { heroStage.querySelector('svg')?.remove(); h.mount(heroStage); h.load(heroSim); h.setCam(0); h.playing = true; h.play(); prefetchEarth(); }
+  else if (!heroStage.querySelector('svg')) renderSVG(heroSim, heroStage, 0.2);
 }
 function unloadHero() { if (host && host.el === heroStage) host.unload(); }
 
+
+// Static diagrams size themselves from the stage at open time: redraw them if the overlay is resized while open.
+let srz = 0; addEventListener('resize', () => { clearTimeout(srz); srz = setTimeout(() => { if (cur && !(host && glOK)) { view.querySelector(':scope > svg')?.remove(); renderSVG(buildSim(cur), view); } }, 200); });

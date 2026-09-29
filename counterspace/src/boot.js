@@ -27,12 +27,18 @@ function drawAll(lazy = false) {
 }
 timed('first-draw', () => { chipsB(); drawLegalKey(); drawAll(true); });
 performance.mark('cs:first-draw-done');
-// Three.js is fetched only once the hero is on screen.
-new IntersectionObserver((es, io) => { if (es.some(e => e.isIntersecting)) { io.disconnect(); startHero(); } }).observe(heroStage);
-// Earth imagery (~1.5 MB) is not part of the page: it is prefetched once the page has
-// loaded and the browser is idle, and skipped entirely without WebGL or with reduced motion.
-function prefetchEarth() { getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
-addEventListener('load', () => idle(prefetchEarth, 4000));
+// Hero: a static diagram (vector map, ~57 KB of land data) is drawn straight away so the stage is never empty. three.js (~1.3 MB) and the Earth
+// JPG (~1.5 MB) are NOT fetched at first paint: they load only after the page has loaded and the browser has gone idle AND the hero is near the
+// viewport (IntersectionObserver with a 300 px margin), or as soon as the user opens a scene. Reduced motion / no WebGL keep the static diagram.
+{ ensureLand(); heroSim = buildSim(HERO); renderSVG(heroSim, heroStage, 0.2); }
+let heroSeen = false, heroReady = false;
+const heroGo = () => { if (heroSeen && heroReady) { heroIO.disconnect(); startHero(); } };
+const heroIO = new IntersectionObserver(es => { heroSeen = es.some(e => e.isIntersecting); heroGo(); }, { rootMargin: '300px 0px' });
+heroIO.observe(heroStage);
+(f => document.readyState === 'complete' ? f() : addEventListener('load', f, { once: true }))(() => idle(() => { heroReady = true; heroGo(); }, 3000));
+// Earth imagery is fetched once, after the WebGL host exists (hero or scene), and skipped with reduced motion or without WebGL.
+let earthStarted = false;
+function prefetchEarth() { if (earthStarted) return; earthStarted = true; getHost().then(h => { if (h) loadEarth(h.maxTex).then(ok => { if (ok) host?.refreshEarth(); }); }); }
 let rz = 0, lastW = innerWidth; addEventListener('resize', () => { if (innerWidth === lastW) return; lastW = innerWidth; clearTimeout(rz); rz = setTimeout(() => drawAll(true), 150); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') hideCard(); });
 

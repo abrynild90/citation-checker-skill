@@ -1,16 +1,16 @@
 // ============================================================================
-// charts/lag.js: the lag panel, capability milestone to legal response.
+// charts/lag.js: the chronology panel (elapsed time from a capability milestone to a later legal or policy step; not a causal claim).
 // Provides: drawL().
 // ============================================================================
 const LAG = [
-  { cap: 'us-1959-bold-orion', law: 'ost-1967', text: 'First DA-ASAT flyby → Outer Space Treaty (silent on conventional ASATs)' },
-  { cap: 'us-1962-starfish-prime', law: 'ltbt-1963', text: 'Starfish Prime → Limited Test Ban Treaty (followed it)' },
-  { cap: 'cn-2007-fy1c', law: 'unga-77-41', text: 'Fengyun-1C debris → UNGA 77/41 call to stop destructive tests (non-binding)' },
-  { cap: 'ru-2021-cosmos1408', law: 'us-moratorium-2022', text: 'Cosmos 1408 → US test moratorium (unilateral pledge)' },
-  { cap: 'ru-2014-ukraine', law: 'icao-2025', text: 'Russian GNSS interference (from 2014) → first ICAO finding against Russia' },
-  { cap: 'ru-2024-eu-sats', law: 'itu-rrb-2024', text: 'Jamming of European satellites → ITU RRB “grave concern”' },
-  { cap: 'us-1997-miracl', law: null, text: 'Laser fired at a satellite → no specific rule on lasers against satellites' },
-  { cap: 'ru-2022-viasat', law: null, text: 'Viasat cyberattack → attributions only; Tallinn 2.0 is soft law' },
+  { cap: 'us-1959-bold-orion', law: 'ost-1967', text: 'Bold Orion missile flyby (1959), then the Outer Space Treaty (1967), which bans nuclear weapons in orbit and is silent on conventional ASATs' },
+  { cap: 'us-1962-starfish-prime', law: 'ltbt-1963', text: 'Starfish Prime (1962), then the Limited Test Ban Treaty (1963), which followed it' },
+  { cap: 'cn-2007-fy1c', law: 'unga-77-41', text: 'Fengyun-1C destructive test (2007), then UNGA 77/41 (2022), a non-binding call not to conduct destructive tests' },
+  { cap: 'ru-2021-cosmos1408', law: 'us-moratorium-2022', text: 'Cosmos 1408 destructive test (2021), then a US test moratorium (2022, unilateral pledge)' },
+  { cap: 'ru-2023-baltic', law: 'icao-2025', text: 'Baltic-region GNSS interference (from 2023), then an ICAO Assembly finding on recurring GNSS interference (2025)' },
+  { cap: 'ru-2024-eu-sats', law: 'itu-rrb-2024', text: 'Jamming of European satellites (2024), then ITU RRB “grave concern” (2024)' },
+  { cap: 'us-1997-miracl', law: null, text: 'Laser fired at a satellite (1997): no specific rule on lasers against satellites' },
+  { cap: 'ru-2022-viasat', law: null, text: 'Viasat cyberattack (2022): attributions only; Tallinn 2.0 is soft law' },
 ];
 const capDate = r => parse(r.date || r.start);
 const HEX = 'M0,-6.5L5.6,-3.25L5.6,3.25L0,6.5L-5.6,3.25L-5.6,-3.25Z';
@@ -28,7 +28,7 @@ function drawL(el = document.getElementById('svgL')) {
   const rowsInfo = LAG.map(p => lagRow(p, wrap(p.text, maxW, FS), x, FS));
   const H = top + rowsInfo.reduce((s, r) => s + r.rowH, 0) + 30, yAx = H - 28;
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-labelledby', 'hL').attr('id', 'svgL-root');
-  svg.append('desc').text('Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the legal or policy response (circle for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the lag in years. An open ring means no binding rule yet.');
+  svg.append('desc').text('Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the later legal or policy step (circle for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the elapsed time in years, shown as chronology, not causation. An open ring means no binding rule yet.');
   svg.append('g').attr('class', 'gridline').attr('transform', `translate(0,${yAx})`).call(d3.axisBottom(x).ticks(d3.utcYear.every(phone ? 20 : 10)).tickSize(-(yAx - top)).tickFormat(''));
   xAxis(svg, x, yAx);
   const rows = []; let y0 = top;
@@ -60,11 +60,11 @@ function drawL(el = document.getElementById('svgL')) {
   const L = legend('legendL', 20, 16), li = L.item;
   li(`<path d="${HEX}" style="fill:var(--cat-da)"/>`, 'Kinetic capability milestone');
   li(`<path d="${HEX}" style="fill:var(--cat-ew)"/>`, 'Non-kinetic milestone');
-  li('<circle r="5.5" style="fill:var(--accent)"/>', 'Response: treaty (binding)');
-  li('<rect x="-5" y="-5" width="10" height="10" style="fill:var(--accent)"/>', 'Response: resolution or body finding (non-binding)');
-  li('<path d="M0,-6.5L6.5,5L-6.5,5Z" style="fill:var(--accent)"/>', 'Response: unilateral pledge');
+  li('<circle r="5.5" style="fill:var(--accent)"/>', 'Later step: treaty (binding)');
+  li('<rect x="-5" y="-5" width="10" height="10" style="fill:var(--accent)"/>', 'Later step: resolution or body finding (non-binding)');
+  li('<path d="M0,-6.5L6.5,5L-6.5,5Z" style="fill:var(--accent)"/>', 'Later step: unilateral pledge');
   li('<circle r="5" style="fill:none;stroke:var(--accent);stroke-width:2"/>', 'No binding rule yet');
   L.done();
-  table('tableL', ['Pair', 'Capability date', 'Response date', 'Response kind', 'Lag (years)', 'Ledger rows'], rows);
+  table('tableL', ['Pair', 'Capability date', 'Later legal step date', 'Legal step kind', 'Elapsed (years)', 'Ledger rows'], rows);
 }
 
