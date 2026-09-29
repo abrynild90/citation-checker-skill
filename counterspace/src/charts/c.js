@@ -53,13 +53,15 @@ function attrStyle(sel, d) {
   else if (d.attribution === 'researcher_osint') sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2);
   else sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2).style('stroke-dasharray', '4 2.5');
 }
-export const stateC = { focus: false }; // default: the full shared 1957-2026 axis; 'focus' is the explicit 1995-2026 zoom
+// stateC.focus: null = the default (zoom 1995-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere); true / false = the reader's choice.
+export const stateC = { focus: null };
+export const zoomedC = () => stateC.focus ?? isPhoneNow();
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
 const LINE_H = 12.5,
   LINE_H_PHONE = 14.5;
 export function drawC(el = document.getElementById('svgC')) {
   el.innerHTML = ''; // a re-draw replaces the chart (never stacks a second one)
-  const dom = stateC.focus ? C_FOCUS() : DOMAIN;
+  const dom = zoomedC() ? C_FOCUS() : DOMAIN;
   const { W, M, x } = layout(el, dom),
     phone = isPhoneNow();
   const FS = phone ? 11.5 : 10.5,
@@ -166,7 +168,7 @@ export function drawC(el = document.getElementById('svgC')) {
     l.y1 = Math.max(yy, yCur + laneHead + 32) + lanePad;
     yCur = l.y1;
   });
-  const H = yCur + 28 + (stateC.focus && !EXPORTING ? 16 : 0);
+  const H = yCur + 28 + (zoomedC() && !EXPORTING ? 16 : 0);
   const svg = d3
     .select(el)
     .append('svg')
@@ -203,11 +205,11 @@ export function drawC(el = document.getElementById('svgC')) {
     .call(
       d3
         .axisBottom(x)
-        .ticks(d3.utcYear.every(stateC.focus ? (phone ? 10 : 5) : 10))
+        .ticks(d3.utcYear.every(zoomedC() ? (phone ? 10 : 5) : 10))
         .tickSize(-(yCur - top))
         .tickFormat(''),
     );
-  xAxis(svg, x, yCur, stateC.focus ? (phone ? 10 : 5) : undefined);
+  xAxis(svg, x, yCur, zoomedC() ? (phone ? 10 : 5) : undefined);
   LANES.forEach((l) => {
     const t = l.label.toUpperCase();
     pl.add(pl.textRect(M.l + 6, l.y0 + 14, 'start', tw(t, 10.5, 600) + t.length * 0.85, 10.5));
@@ -229,7 +231,7 @@ export function drawC(el = document.getElementById('svgC')) {
     segs.push([ys, yCur]);
     segs.forEach(([a, b]) => hg.append('line').attr('x1', HX).attr('x2', HX).attr('y1', a).attr('y2', b));
   }
-  if (stateC.focus && !EXPORTING)
+  if (zoomedC() && !EXPORTING)
     svg
       .append('text')
       .attr('class', 'zoom-flag')
@@ -272,7 +274,7 @@ export function drawC(el = document.getElementById('svgC')) {
         .attr('text-anchor', 'end')
         .text(t);
   }
-  if (!phone && !stateC.focus) {
+  if (!phone && !zoomedC()) {
     // SWF framing callout: put it in the first lane where it clears every label and mark
     const CL = [
         'SWF 2026: only non-destructive capabilities are actively',
@@ -384,11 +386,11 @@ export function drawC(el = document.getElementById('svgC')) {
   rove(g);
   addGuide(svg, x, top, yCur);
   if (EXPORTING) return;
-  document.getElementById('noteC').innerHTML = stateC.focus
-    ? '<span class="zbadge">Zoomed</span> Axis 1995–2026: an enlargement of the recent decades, no longer aligned with the Law band above or Charts A and B. Choose “Full span” to return to the shared scale.'
+  document.getElementById('noteC').innerHTML = zoomedC()
+    ? `<span class="zbadge">Zoomed</span> Axis 1995–2026${stateC.focus === null ? ' (the default on phones)' : ''}: an enlargement of the recent decades, no longer aligned with the Law band above or Charts A and B. Choose “Full span” to return to the shared scale.`
     : 'Full span 1957–2026, on the same year axis as the Law band and Charts A and B. The ledger’s earliest non-kinetic entry is the 1997 MIRACL laser test, so the left of the chart is empty. Choose “Zoom 1995–2026” to enlarge the recent decades.';
-  document.getElementById('cFocus').setAttribute('aria-pressed', stateC.focus);
-  document.getElementById('cFull').setAttribute('aria-pressed', !stateC.focus);
+  document.getElementById('cFocus').setAttribute('aria-pressed', zoomedC());
+  document.getElementById('cFull').setAttribute('aria-pressed', !zoomedC());
   const L = legend('legendC', 26, 16),
     li = L.item;
   li('<rect x="-11" y="-5" width="22" height="10" rx="2" style="fill:var(--text)"/>', 'Official or multi-government attribution');

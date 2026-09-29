@@ -33,19 +33,25 @@ function showCard(html, evt, el) {
   if (innerWidth < PHONE_MAX) {
     card.style.left = '';
     card.style.top = '';
+    card.scrollTop = 0;
+    dockCue();
     return;
   }
-  // Dense strips (the RPO chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a few
-  // neighbouring marks (cheap, not free) and keeps off the lane titles; elsewhere covering a mark costs far more than distance.
+  card.classList.remove('more');
+  // Dense strips (the RPO chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a mark or
+  // two only when no empty spot is near (cheap, not free) and keeps off the lane titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
-    WM = near ? 0.7 : 6;
-  card.style.maxWidth = near ? '440px' : '';
+    WM = near ? 1.5 : 6;
+  card.style.maxWidth = near ? '340px' : '';
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
     G = 14,
     VW = innerWidth,
     VH = innerHeight;
+  // The sticky law band (when stuck to the top) is never covered by a card.
+  const bandR = document.getElementById('legalBand')?.getBoundingClientRect(),
+    TOP = bandR && bandR.top <= 1 && bandR.bottom > 0 && !(el && el.closest('#legalBand')) ? Math.max(8, bandR.bottom + 8) : 8;
   // Smart placement: try right, left, above and below the mark and take the candidate that covers the fewest neighbouring marks and the chart's x axis.
   const root = el?.closest?.('svg'),
     others = root
@@ -57,8 +63,11 @@ function showCard(html, evt, el) {
               : [n.getBoundingClientRect()],
           )
       : [];
-  root?.querySelectorAll('text.ann, text.ann-sub').forEach((n) => others.push(n.getBoundingClientRect()));
-  if (near) root.querySelectorAll('text.band-label').forEach((n) => others.push(n.getBoundingClientRect()));
+  // Annotation lines are tspans inside a <text>: the whole <text> is the obstacle. Band labels are obstacles everywhere (not only on the RPO strip).
+  const texts = new Set();
+  root?.querySelectorAll('.ann, .ann-sub').forEach((n) => texts.add(n.closest('text') || n));
+  root?.querySelectorAll('text.band-label, .handoff text').forEach((n) => texts.add(n));
+  const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or band-label text costs more than any distance
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -83,10 +92,11 @@ function showCard(html, evt, el) {
       [cx - cw - G, r.bottom + G],
     ].map(([l, tp], i) => {
       const L = Math.min(Math.max(8, l), VW - cw - 8),
-        T = Math.min(Math.max(8, tp), VH - ch - 8),
+        T = Math.min(Math.max(TOP, tp), VH - ch - 8),
         q = { left: L, right: L + cw, top: T, bottom: T + ch };
       const score =
         others.filter((o) => hit(q, o)).length * WM +
+        noText.filter((o) => hit(q, o)).length * 40 +
         (ax && hit(q, ax, 2) ? 60 : 0) +
         (hit(q, r, 0) ? 80 : 0) +
         Math.abs(L - l) / 40 +
@@ -95,13 +105,14 @@ function showCard(html, evt, el) {
       return { L, T, score };
     });
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
-  if (best.score >= (near ? 14 : 6)) {
+  if (best.score >= (near ? 14 : 6) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
-    for (let T = 8; T <= VH - ch - 8; T += 10)
+    for (let T = TOP; T <= VH - ch - 8; T += 10)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
         const q = { left: L, right: L + cw, top: T, bottom: T + ch };
         const score =
           others.filter((o) => hit(q, o)).length * WM +
+          noText.filter((o) => hit(q, o)).length * 40 +
           (ax && hit(q, ax, 2) ? 60 : 0) +
           (hit(q, r, 0) ? 80 : 0) +
           Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (near ? 15 : 60) +
@@ -112,6 +123,11 @@ function showCard(html, evt, el) {
   card.style.left = best.L + 'px';
   card.style.top = best.T + 'px';
 }
+// A docked (phone) card is capped in height and scrolls inside itself; while more text lies below the fold a visible cue says so.
+function dockCue() {
+  card.classList.toggle('more', card.scrollHeight - card.clientHeight - card.scrollTop > 6);
+}
+card.addEventListener('scroll', dockCue, { passive: true });
 let touchMode = false,
   shownY = 0;
 // A touch card is dismissed by scrolling the page (more than 24 px from where it opened), as well as by a tap outside it.

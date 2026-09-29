@@ -121,7 +121,7 @@ export function drawR(el = document.getElementById('svgR')) {
     CO.filter((e) => lane(e) === li)
       .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.id < b.id ? -1 : 1))
       .forEach((e) => {
-        const X0 = Math.max(x0min, x(parse(e.start))),
+        const X0 = Math.min(PR - 8 - 6.5 * k, Math.max(x0min, x(parse(e.start)))), // a mark's outer edge stays 8 px inside the plot edge (late marks shift a few px left)
           X1 = e.end ? Math.max(X0, x(parse(e.end))) : Math.max(X0, PR - 16), // an end arrow's tip stays 8 px inside the plot edge
           bar = e.activity === 'spaceplane_mission',
           sc = hasScene(e),
@@ -165,6 +165,31 @@ export function drawR(el = document.getElementById('svgR')) {
       }),
     );
     yCur = l.y1;
+  });
+  // Cube badges: try the default spot (right, above), then left/below variants, and take the first that touches no other mark or badge; if none is
+  // free the badge is left off (the card and the aria-label still say "opens 3D scene", and the export never draws badges).
+  const box = (p) => [p.X0 - 6.5, p.X1 + (p.e.end ? 0 : 8) + 6.5, p.y - 6.5, p.y + 6.5];
+  const boxes = placed.map(box),
+    bad = [];
+  const clash = (a, b) => a[0] < b[1] && a[1] > b[0] && a[2] < b[3] && a[3] > b[2];
+  placed.forEach((p, i) => {
+    if (!hasScene(p.e) || EXPORTING) return;
+    const bar = p.e.activity === 'spaceplane_mission',
+      right = bar ? p.X0 + 3 : p.X0 + 12,
+      left = p.X0 - 12,
+      opts = (p.bx === left ? [left, right] : [right, left]).flatMap((bx) => [
+        [bx, -9],
+        [bx, 9],
+      ]);
+    const ok = opts.find(([bx, dy]) => {
+      const q = [bx - 4.8, bx + 4.8, p.y + dy - 5.5, p.y + dy + 5.5];
+      return bx + 4.8 <= PR - 8 && bx - 4.8 >= M.l + 2 && !boxes.some((b, j) => j !== i && clash(q, b)) && !bad.some((b) => clash(q, b));
+    });
+    if (ok) {
+      p.bx = ok[0];
+      p.by = p.y + ok[1];
+      bad.push([ok[0] - 4.8, ok[0] + 4.8, p.by - 5.5, p.by + 5.5]);
+    } else p.bx = null;
   });
   const flagText = `ZOOMED: axis 2000–2026, not the shared 1957–2026 scale${phone ? '. Use “Full span” for the shared scale.' : ''}`,
     flagLines = zoomed && !EXPORTING ? wrap(flagText, W - M.l - 8, 11, 600) : [],
@@ -271,7 +296,7 @@ export function drawR(el = document.getElementById('svgR')) {
       s.append('path')
         .attr('d', `M${d.X1},${d.y - 6}L${d.X1 + 8},${d.y}L${d.X1},${d.y + 6}Z`)
         .style('fill', colorOf(e.actor));
-    if (hasScene(e)) badge(s, d.bx, d.y - 9);
+    if (hasScene(e) && d.bx != null) badge(s, d.bx, d.by ?? d.y - 9);
     s.append('rect')
       .attr('class', 'hit')
       .attr('x', d.X0 - 12)

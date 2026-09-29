@@ -195,6 +195,7 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 @media (prefers-reduced-motion:reduce){.card.pulse{animation:none;outline:2px solid var(--accent)}}
 .card.dock{left:8px!important;right:8px;top:auto!important;bottom:8px;max-width:none;max-height:46vh;overflow:auto;pointer-events:auto;padding-top:14px}
 .card.dock.on::after{content:'Tap this card to dismiss';display:block;margin-top:8px;font-size:11.5px;color:var(--faint)}
+.card.dock.more.on::after{content:'\2193  Scroll for more \00b7 tap to dismiss';position:sticky;bottom:-10px;margin:8px -12px -10px;padding:22px 12px 10px;text-align:center;font-weight:600;color:var(--accent);background:linear-gradient(to bottom,transparent,var(--surface) 55%)}
 .howto{margin:12px 0 0;max-width:760px;font-size:14px;color:var(--muted)}
 .howto b{color:var(--text)}
 .legend svg text{font-family:var(--sans)}
@@ -239,6 +240,10 @@ td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$
 .cites li{margin-bottom:6px;overflow-wrap:anywhere;word-break:normal}
 .cites{padding-left:22px}
 #methodBody ul.sub{margin:4px 0 2px;padding-left:18px}
+#methodBody details.rule{border:1px solid var(--grid);border-radius:8px;margin:8px 0;background:var(--surface)}
+#methodBody details.rule summary{cursor:pointer;padding:9px 12px;font-weight:600;font-size:14.5px;color:var(--text)}
+#methodBody details.rule .rb{padding:0 12px 8px}
+#methodBody details.rule .rb p{margin:4px 0}
 #methodBody ul.sub li{margin:3px 0}
 footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 
@@ -348,7 +353,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   <div class="top-grid"><div>
   <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
   <h1>Counterspace, 1957–2026: the weapons and the law that trailed them</h1>
-  <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military operations” (Executive Summary, p. xxiii). This page puts the technology and the law on one year axis.</p>
+  <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military operations” (Executive Summary, p. xxiii). This page puts the technology and the law on a single year axis.</p>
   <div class="cta"><button class="btn primary" id="tourBtn" type="button">▶ Start the 3D scene tour</button><span class="cta-note">10 short scenes, or select any cube badge on a chart.</span></div>
   <nav class="jump" aria-label="Jump to a section">
     <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
