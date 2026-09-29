@@ -103,7 +103,7 @@ export const SCENES = [
     caption: 'Within hours of Russian troops crossing into Ukraine in February 2022, attackers pushed destructive “AcidRain” malware through KA-SAT’s ground management network. Tens of thousands of user modems in Ukraine and across Europe went dark. The satellite itself kept working: the attack hit the ground segment.',
     cite: 'SWF 2026, pp. 15-06 to 15-07 (attributed to Russia by the US, UK and EU, May 2022).', related: 'tallinn-2017', event: 'ru-2022-viasat',
     actors: [
-      { type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', color: C.geo, dimT0: 0.4, dimT1: 0.7, hub: [46, 8], hubLabel: 'Ground management network (illustrative)', hubShort: 'Ground network', hubDx: -60, hubDy: 40, pulse: [0.1, 0.3], beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
+      { type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', short: 'KA-SAT (GEO)', dx: 0, dy: -50, color: C.geo, dimT0: 0.4, dimT1: 0.7, hub: [46, 8], hubLabel: 'Ground management network (illustrative)', hubShort: 'Ground network', hubDx: -60, hubDy: 40, pulse: [0.1, 0.3], beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
       { type: 'terminals', boxes: [[44, 52, 22, 40, 0.34, 0], [47, 55, 6, 22, 0.28, 1], [43, 50, -6, 8, 0.2, 2], [54, 60, 6, 26, 0.18, 3]], count: 900, pulse0: 0.1, t0: 0.3, t1: 0.62, label: 'Ground terminals (modems)', short: 'Terminals' },
       // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
       { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
