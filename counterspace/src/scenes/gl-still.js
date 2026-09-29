@@ -46,7 +46,7 @@ const methods = {
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
-    const s = W / 1000,
+    const s = (W / 1000) * (o.aspect ? 1.55 : 1), // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
       c = document.createElement('canvas');
     c.width = W;
     c.height = H;
@@ -54,7 +54,7 @@ const methods = {
     g.drawImage(this.canvas, 0, 0);
     // Status caption: wrapped to the frame first, so its box can be reserved before labels are placed.
     const status = o.status ?? this.status?.text(Math.min(this.t, 1)),
-      lay = { W, H, boxes: [], segs: [] };
+      lay = { W, H, u: s, boxes: [], segs: [] };
     this.stillLayout = lay;
     let sLines = [],
       sBox = null;

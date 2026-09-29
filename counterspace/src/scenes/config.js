@@ -33,8 +33,7 @@ export const SCENES = [
         label: 'Artificial radiation belt', short: 'Radiation belt' },
       { type: 'ring', alt: 800, inc: 44.8, raan: 40, color: '#8cc8ff', sat: { phase: 0, speed: 2.2, label: 'Satellite in belt',
         short: 'Satellite', dx: 30, dy: 60 } },
-    ], phoneHide: ['Thor launch'], still: 0.7, camDist: 3.5, staticZoom: 1.7, staticCenter: [14, -160], stillCam: { at: [28, -128, 4.3], look: [6, -168,
-      0.5], hideShell: true }, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.16, 'Detonation: electrons trapped on Earth’s field lines',
+    ], phoneHide: ['Thor launch'], still: 0.7, camDist: 3.5, staticZoom: 1.7, staticCenter: [35, -205], stillCam: { at: [14, -150, 4.2], look: [0, 0, 0], hideShell: true }, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.16, 'Detonation: electrons trapped on Earth’s field lines',
       'Detonation: electrons trapped'], [0.3, 'Trapped electrons spread in longitude and latitude along field lines', 'Electrons spread along field lines'],
       [0.75, 'Belt has drifted around Earth (illustrative spread)', 'Belt drifts around Earth (illustrative)']] },
   { id: 'solwind', fitPct: 0.99, date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
@@ -186,7 +185,7 @@ export const SCENES = [
     hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 }, lift: 30, staticZoom: 2.6, staticCenter: [35, -108],
     actors: [
       { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
-      { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.5, dx: 92, dy: -26 },
+      { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.5, minPx: 34, maxPx: 70, dx: 92, dy: -26 },
       { type: 'beam', from: [32.4, -106.4], window: 0.42, color: C.laser, label: 'MIRACL beam (illustrative)', short: 'MIRACL beam',
         width: 0.034, dx: 96, dy: 34 },
       { type: 'site', at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', short: 'Teykovo', color: '#ffb0f0', dx: 0, dy: 30, small: true, liveOnly: true },
@@ -198,9 +197,10 @@ export const SCENES = [
       'SWF: Russia’s Peresvet is a laser dazzler']], cameras: [{ name: 'Follow the satellite', fit: { site: [32.4, -106.4],
       tilt: 55 } }, { name: 'Side view', fit: { site: [32.4, -106.4], tilt: 58, side: -1, fill: 0.72 } }, { name: 'Zoom on MSTI-3',
       fit: { site: [32.4, -106.4], tilt: 10, fill: 0.95, dMax: 3 } }, { name: 'Russia: Peresvet sites (SWF)', at: [50, 55,
-      2.3], look: [56, 58, 1.0], ref: false, hide: ['MSTI-3', 'MIRACL', 'White Sands'] }] },
+      2.3], look: [56, 58, 1.0], ref: false, hide: ['MSTI-3', 'MIRACL', 'White Sands'],
+      status: ['SWF: Russia’s Peresvet is a mobile laser dazzler; pins mark its shelter sites', 'Peresvet shelter sites (approx.)'] }] },
   // ---------------------------------------------------------------- co-orbital scenes (SWF 2026): sj21-tug, rpo, spaceplanes
-  { id: 'sj21-tug', date: '2022-01-21', title: 'SJ-21 tows a defunct satellite out of the GEO belt (2022)', shells: [], duration: 24,
+  { id: 'sj21-tug', date: '2022-01-21', title: 'SJ-21 pulls a defunct satellite out of the GEO belt (2022)', shells: [], duration: 24,
     caption: 'SWF reports that China’s SJ-21 rendezvoused with Compass G2, a defunct Chinese navigation satellite, in December 2021, “docked to it at some' +
         ' point”, and around 21 January 2022 used its own propulsion to pull both objects above the GEO belt (by 27 January: 290' +
           ' to 3,100 km above the protected' +
@@ -228,7 +228,7 @@ export const SCENES = [
       { type: 'burst', craft: 'sj21', t0: 0.40, color: '#fff1c1', ringColor: C.cn, size: 0.12, span: 0.07 },
       { type: 'trail', craft: 'sj21', t0: 0.47, t1: 0.97, color: C.cn },
       { type: 'trail', craft: 'cg2', t0: 0.50, t1: 0.80, color: C.dead },
-    ], still: 0.78,
+    ], still: 0.78, staticT: 0.5,
     status: [[0, 'SJ-21 (China) approaches Compass G2, a defunct Chinese navigation satellite (25 Dec. 2021)', 'SJ-21 approaches defunct Compass G2'],
       [0.2, 'For several weeks SJ-21 keeps in tight proximity to Compass G2', 'SJ-21 stays close to G2 for weeks'], [0.34,
       'SWF: SJ-21 “docked to it at some point” (how is not described)', 'SWF: SJ-21 “docked to it at some point”'], [0.5,
@@ -242,7 +242,7 @@ export const SCENES = [
       fill: 0.7, dMin: 0.5, t: 0.3 } },
       { name: 'Tow (angled)', fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.7, 0.55, 0.45], fill: 0.7, dMin: 0.5,
         t: 0.6 } }, { name: 'GEO belt (wide)', at: [26, 70, 7.4] }],
-    stillCam: { at: [40, 104, 4.9], look: [0, 106, 2.05], hideShell: true }, staticCenter: [50, 15] },
+    stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true }, staticCenter: [40, 60] },
   { id: 'rpo', date: '2025-06-13', title: 'Proximity operations: China, the US and Russia (2019–2025)', shells: [], duration: 32,
     caption: 'Three separate episodes from SWF’s RPO tables. (1) GEO, 2025: China’s SJ-21 and SJ-25 approach, appear to dock and later separate, while two' +
         ' US GSSAP satellites are positioned “flanking” them. (2) LEO, 2019–20: Russia’s Cosmos 2542 releases Cosmos 2543, which' +
@@ -303,19 +303,19 @@ export const SCENES = [
       { type: 'trail', craft: 'usa271b', t0: 0.72, t1: 0.83, color: C.us, acts: [2] },
     ], still: 0.3, staticCenter: [28, 92], staticStatus: 'Three separate episodes shown together: 1 China + US in GEO (2025) · 2 Russia in LEO (2019–20)' +
         ' · 3 US + UK in GEO (2025)',
-    status: [[0, '1 · GEO, June 2025: SJ-21 (China) drifts west along the belt toward SJ-25', '1 · GEO 2025: SJ-21 drifts toward SJ-25'],
+    status: [[0, 'GEO, June 2025: SJ-21 (China) drifts west along the belt toward SJ-25', 'GEO 2025: SJ-21 drifts toward SJ-25'],
       [0.08, 'Two US GSSAP satellites move to positions COMSPOC calls “flanking” SJ-21 and SJ-25', 'US GSSAP satellites “flanking” them'],
       [0.16, '13–14 June: RPOs; on 13 June within 1 km, possibly docked, then separated (COMSPOC)', '13 June: within 1 km, possibly docked'],
       [0.235, '30 June: again close enough to dock; 2–6 July: “thought to have docked”', '30 June–6 July: “thought to have docked”'],
         [0.29, 'SWF: they “remained docked until November 2025”', 'SWF: “remained docked until November 2025”'], [0.34, '25 Nov.: SJ-25 burns to separate;' +
           ' imagery on 29 Nov. shows two satellites', '25 Nov.: SJ-25 burns to separate'], [0.385, 'Dec.–Jan.: RPOs continue, closest just under 3 km on' +
           ' 13 Jan.; 130 km apart by 16 Jan.', 'Jan.: closest just under 3 km (13 Jan.)'],
-      [0.42, '2 · LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small subsatellite, Cosmos 2543', '2 · LEO 2019: Cosmos 2542 releases 2543'],
+      [0.42, 'LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small subsatellite, Cosmos 2543', 'LEO 2019: Cosmos 2542 releases 2543'],
         [0.47, 'Cosmos 2543 stays within 2 km of Cosmos 2542 for three days', 'Cosmos 2543 stays within 2 km, 3 days'], [0.53,
         'It then raises its apogee (590 km by 16 Dec.)'], [0.6, 'Amateur analysis “strongly suggests” the aim was to observe USA 245; within 20 km in Jan.' +
           ' 2020', 'Analysis: aim was to observe USA 245'],
       [0.665, 'Russia’s Foreign Ministry said Cosmos 2543 posed no threat to USA 245', 'Russia: Cosmos 2543 posed no threat'],
-      [0.72, '3 · GEO, Sept. 2025: USA 271 (US GSSAP) drifts west, about 1.5° per day, toward SKYNET 5A', '3 · GEO 2025: USA 271 nears SKYNET 5A'],
+      [0.72, 'GEO, Sept. 2025: USA 271 (US GSSAP) drifts west, about 1.5° per day, toward SKYNET 5A', 'GEO 2025: USA 271 nears SKYNET 5A'],
         [0.8, '4 Sept.: an in-track maneuver; USA 271 stops within 0.05° of SKYNET 5A near 95.3° E', '4 Sept.: USA 271 stops near SKYNET 5A'],
         [0.84, '5–11 Sept.: closest about 13 km. A first joint US–UK RPO, announced by both space commands', '5–11 Sept.: closest about 13 km'],
         [0.94, 'The RPO lasted roughly 5–11 Sept. (SWF)']],
@@ -379,7 +379,7 @@ export const SCENES = [
       { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0025 },
       { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, color: '#ffe9a8', acts: [2], thick: 0.0022 },
       { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: '#ffe9a8', acts: [2], thick: 0.0022 },
-    ], still: 0.5,
+    ], still: 0.5, stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
     status: [[0, 'X-37B, OTV-1 to OTV-6 (2010–2022): flights of 224, 469, 675, 718, 780 and 908 days (SWF)', 'X-37B OTV-1 to 6: 224 to 908 days'],
       [0.1, 'SWF: the X-37B has flown at 300–400 km and 38°–54° inclination (hobbyist tracking)', '300–400 km, 38°–54° (SWF)'],
       [0.2, 'Runway landings: Vandenberg AFB (OTV-1 to OTV-3) and Kennedy Space Center (OTV-4 to OTV-6)', 'Landings: Vandenberg, then Kennedy'],
@@ -403,16 +403,16 @@ export const SCENES = [
       { name: 'China: CSSHQ and released objects', act: 2, fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3,
         0.6, 0.75], fill: 0.93, dMin: 0.1, t: 0.75 } },
       { name: 'Wide: Earth and X-37B LEO orbits', at: [40, -25, 4.4], phone: { at: [40, -25, 5.2] }, ref: false }],
-    staticCenter: [35, 30], staticStatus: 'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and' +
+    staticCenter: [40, 105], staticFit: 1.6, staticSnap: { csshq: [0.625, 0.86], objJ: [0.625], objG: [0.86] }, staticStatus: 'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and' +
         ' a fourth launched in Feb. 2026' },
 ];
 export const HERO = { id: 'hero', title: 'Overview', shells: ['LEO', 'MEO', 'GEO'], duration: 40, spin: true,
   shellLabels: { LEO: 'LEO ≤2,000 km', MEO: 'MEO · GPS', GEO: 'GEO ~35,786 km' }, shellShort: { LEO: 'LEO', MEO: 'MEO · GPS',
-    GEO: 'GEO' }, shellAng: { LEO: -58, MEO: 42, GEO: 80 }, shellOff: { LEO: [-30, 34], MEO: [46, 22], GEO: [46, -26] },
+    GEO: 'GEO' }, shellAng: { LEO: -58, MEO: 42, GEO: 80 }, staticShellAng: { LEO: 205, MEO: -28, GEO: 8 }, shellOff: { LEO: [-30, 34], MEO: [46, 22], GEO: [46, -26] },
   actors: [
     { type: 'ring', alt: 420, inc: 51.6, raan: 30, color: C.iss, sat: { phase: 0, speed: 3, label: 'ISS (illustrative orbit)',
       short: 'ISS', dx: 0, dy: 0, offGlobe: true, iss: true, big: 1.3, minPx: 46, maxPx: 72 } },
     { type: 'constellation', alt: 20200, inc: 55, planes: 6, per: 3, color: C.gps, speed: 0.4 },
     { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, sats: 14 },
-  ], still: 0.2, camDist: 7.2, focus: [22, -30] };
+  ], still: 0.2, camDist: 7.2, focus: [22, -30], wideLat: 13 };
 

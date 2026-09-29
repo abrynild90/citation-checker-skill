@@ -69,7 +69,11 @@ export class GLHost {
     const R = Math.max(1.5, ...this.sim.items.filter((i) => i.kind === 'shell').map((i) => i.r)) * 1.03,
       fv = this.camera.fov * DEG,
       fh = 2 * Math.atan(Math.tan(fv / 2) * this.camera.aspect),
-      d = Math.max(R / Math.sin(fv * 0.5 * 0.9), R / Math.sin(fh * 0.5 * 0.95)),
+      dFull = Math.max(R / Math.sin(fv * 0.5 * 0.9), R / Math.sin(fh * 0.5 * 0.95)),
+      // A wide stage (desktop): the GEO ring, not the whole glow sphere, sets the framing. The ring spans ~72% of the stage width and the shells' spheres
+      // run off the top and the bottom together (sides stay inside), so the Earth and the shells fill the stage instead of a 40% column.
+      dWide = Math.hypot(R, R / (0.72 * Math.tan(fh / 2))),
+      d = this.camera.aspect > 1.7 ? Math.min(dFull, dWide) : dFull,
       p = this.camera.position.clone().sub(this.target);
     p.setLength(d);
     this.camera.position.copy(p.add(this.target));
@@ -421,7 +425,8 @@ export class GLHost {
     if (this.sim.cfg.spin) this.root.rotation.y = t * Math.PI * 2;
     this._drawInset();
     if (this.statusEl) {
-      this.statusEl.textContent = this.status ? this.status.text(t, false, this.el.clientWidth < 640) : '';
+      const cst = this.sim.cams[this.camIdx]?.status; // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
+      this.statusEl.textContent = cst ? (this.el.clientWidth < 640 && cst[1] ? cst[1] : cst[0]) : this.status ? this.status.text(t, false, this.el.clientWidth < 640) : '';
       this._applyBands();
     }
     this.render();

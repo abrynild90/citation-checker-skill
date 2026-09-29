@@ -70,6 +70,56 @@ function earthRaster(proj, CX, CY, R) {
     return null;
   }
 }
+
+// ---------------------------------------------------------------- 2D craft silhouettes (simplified versions of the live models)
+// Each is drawn in a local frame (x right, y down, unit = s px) and centred on (x, y). `s` is the overall width in px.
+function drawCraft(g, shape, x, y, s, color, o = {}) {
+  const k = g.append('g').attr('transform', `translate(${x},${y}) rotate(${o.rot ?? 0}) scale(${s / 100})`).attr('stroke-linejoin', 'round');
+  const dark = '#070b17',
+    panel = '#2a4f9a';
+  const sw = 2.2;
+  const rect = (a, b, w, h, f, st = dark) => k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
+  const poly = (d, f, st = dark) => k.append('path').attr('d', d).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
+  if (shape === 'sat' || shape === 'iss') {
+    if (shape === 'iss') {
+      // truss with four solar-array pairs and a module cluster
+      rect(-50, -3, 100, 6, '#aab4c8');
+      for (const cx of [-42, -26, 26, 42]) {
+        rect(cx - 6, -30, 12, 26, panel);
+        rect(cx - 6, 4, 12, 26, panel);
+      }
+      rect(-16, -9, 32, 18, color);
+      rect(-9, -16, 18, 32, '#dfe6f7');
+    } else {
+      // bus with two solar wings (cell grid) and a small dish
+      for (const sg of [-1, 1]) {
+        const x0 = sg < 0 ? -50 : 14;
+        rect(x0, -17, 36, 34, panel);
+        for (let i = 1; i < 3; i++) k.append('line').attr('x1', x0 + i * 12).attr('x2', x0 + i * 12).attr('y1', -17).attr('y2', 17).attr('stroke', '#8fb0ee').attr('stroke-width', 1.2);
+        k.append('line').attr('x1', x0).attr('x2', x0 + 36).attr('y1', 0).attr('y2', 0).attr('stroke', '#8fb0ee').attr('stroke-width', 1.2);
+        k.append('line').attr('x1', sg * 14).attr('x2', sg * 15).attr('y1', 0).attr('y2', 0).attr('stroke', '#c3cbe0').attr('stroke-width', 3);
+      }
+      rect(-14, -15, 28, 30, color);
+      k.append('circle').attr('cx', 0).attr('cy', -21).attr('r', 6).attr('fill', '#dfe6f7').attr('stroke', dark).attr('stroke-width', 1.6);
+    }
+  } else if (shape === 'plane') {
+    // spaceplane: slim delta with twin tail fins, nose up
+    poly('M0,-48 C6,-30 10,-10 12,8 L42,34 L42,42 L10,34 L6,46 L-6,46 L-10,34 L-42,42 L-42,34 L-12,8 C-10,-10 -6,-30 0,-48Z', color);
+    k.append('path').attr('d', 'M0,-46 C3,-30 5,-14 6,4 L-6,4 C-5,-14 -3,-30 0,-46Z').attr('fill', '#f2f4fa').attr('fill-opacity', 0.5);
+  } else if (shape === 'aircraft') {
+    poly('M0,-46 C5,-30 6,-10 6,4 L46,26 L46,34 L6,24 L4,38 L14,46 L14,50 L0,46 L-14,50 L-14,46 L-4,38 L-6,24 L-46,34 L-46,26 L-6,4 C-6,-10 -5,-30 0,-46Z', '#f2f4fa', dark);
+  } else if (shape === 'ship') {
+    poly('M-50,-9 L30,-9 L50,0 L30,9 L-50,9Z', '#8e9bb4');
+    rect(-26, -6, 22, 12, '#dfe6f7');
+    rect(4, -5, 14, 10, '#c3cbe0');
+    rect(-44, -5, 14, 10, '#5d6a86');
+  } else if (shape === 'site') {
+    poly('M0,-40 L34,0 L0,40 L-34,0Z', color);
+    k.append('circle').attr('r', 12).attr('fill', '#fff').attr('fill-opacity', 0.85);
+  }
+  return k;
+}
+const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45 };
 let earthUpgrade = false,
   pendingStatic = null,
   svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
@@ -142,6 +192,7 @@ function renderPanels(sim, el) {
 }
 export function renderSVG(sim, el, t = sim.still, opts = {}) {
   if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el);
+  if (!opts.panel && sim.cfg.staticT != null && t === sim.still) t = sim.cfg.staticT;
   const U = 'sf' + ++svgSeq;
   if (!opts.panel) fitBanner(el);
   if (sim.cfg.acts && !opts.panel) sim.flags.all = true; // static diagram of an act scene shows every act at once
@@ -180,6 +231,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     }
     if (cur) stLines.push(cur);
   }
+  const nCraft = sim.items.filter((i) => i.kind === 'point' && i.prim && i.shape !== 'none' && !i.ctx && !i.liveOnly && i.pos(t)).length,
+    craftBase = opts.panel ? Math.min(W * 0.16, 40) : Math.max(26, Math.min(64, W * (W < 520 ? (nCraft <= 2 ? 0.09 : 0.07) : nCraft <= 2 ? 0.075 : nCraft <= 4 ? 0.055 : 0.045)));
   const stH = stLines.length * 16 + 10,
     stY = H - (opts.panel ? 6 : 34) - stH,
     stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * 6.6 + 24);
@@ -189,8 +242,10 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     x1 = 1.08,
     y0 = -1.08,
     y1 = 1.08;
+  const fitMax = sim.cfg.staticFit && !opts.panel ? sim.cfg.staticFit : 0; // far orbits (apogees, belts) may run off the frame so the Earth stays large
   const grow = (p) => {
     if (!p || p.hidden) return;
+    if (fitMax && Math.hypot(p.x, p.y) > fitMax) return;
     x0 = Math.min(x0, p.x);
     x1 = Math.max(x1, p.x);
     y0 = Math.min(y0, p.y);
@@ -230,11 +285,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       br = bn?.getBoundingClientRect();
     if (br && br.width && er.width) bRes = [br.left - er.left - 3, br.top - er.top - 3, br.width + 6, br.height + 6];
   }
-  const ftxt = opts.panel ? opts.title || '' : `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`,
-    fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * 5.6 + 16);
-  const fx = 14,
-    fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4),
-    fBot = stY - 8;
+  // Footer scale note: the longest wording that fits at >= 9.5 px (10 px on a desk); never shrunk below that.
+  const fFont = W < 520 ? 9.5 : 10,
+    fCands = [`${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`, 'Compressed radial scale (Earth radius = 1; altitude^0.45)', 'Compressed radial scale · altitude^0.45', 'Radial scale compressed'],
+    ftxt = opts.panel ? opts.title || '' : fCands.find((x) => x.length * fFont * 0.56 + 20 <= W - 12) || fCands.at(-1),
+    fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * fFont * 0.56 + 20);
+  const fx = 14 + (opts.panel ? 0 : Math.round(craftBase * 0.6)),
+    fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
+    fBot = stY - 8 - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
   let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
   let CX = W / 2 - ((x0 + x1) / 2) * R,
     CY = (fTop + fBot) / 2 - ((y0 + y1) / 2) * R;
@@ -251,6 +309,20 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     return { x: CX + u.x * R, y: CY + u.y * R, hidden: u.hidden };
   };
   const path = d3.geoPath(proj);
+  let showGlobe = true;
+  if (opts.panel) {
+    let inRect = 0,
+      inDisc = 0;
+    for (let i = 0; i < 24; i++)
+      for (let j = 0; j < 24; j++) {
+        const x = CX + ((i + 0.5) / 12 - 1) * R,
+          y = CY + ((j + 0.5) / 12 - 1) * R;
+        if ((x - CX) ** 2 + (y - CY) ** 2 > R * R) continue;
+        inDisc++;
+        if (x >= 0 && x <= W && y >= 0 && y <= H) inRect++;
+      }
+    showGlobe = inRect / inDisc >= 0.45;
+  }
   const svg = d3
     .create('svg')
     .style('background', '#070b16')
@@ -468,21 +540,22 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('stroke-opacity', 0.55)
       .attr('stroke-width', 1.2);
   }
-  // A panel that looks at craft far from the Earth (GEO) would show only a cropped sliver of the globe: drop it and let the craft and the belt speak.
-  let showGlobe = true;
-  if (opts.panel) {
-    let inRect = 0,
-      inDisc = 0;
-    for (let i = 0; i < 24; i++)
-      for (let j = 0; j < 24; j++) {
-        const x = CX + ((i + 0.5) / 12 - 1) * R,
-          y = CY + ((j + 0.5) / 12 - 1) * R;
-        if ((x - CX) ** 2 + (y - CY) ** 2 > R * R) continue;
-        inDisc++;
-        if (x >= 0 && x <= W && y >= 0 && y <= H) inRect++;
-      }
-    showGlobe = inRect / inDisc >= 0.45;
-    if (!showGlobe) [...svg.node().childNodes].slice(gi0).forEach((n) => n.remove());
+  // A panel that looks at craft far from the Earth (GEO) would show only a cropped sliver of the globe: drop it, and give a small Earth cue instead.
+  if (opts.panel && !showGlobe) {
+    [...svg.node().childNodes].slice(gi0).forEach((n) => n.remove());
+    // small Earth chip toward the Earth's true direction, at the panel edge
+    const dx = CX - W / 2,
+      dy = CY - (fTop + fBot) / 2,
+      dl = Math.hypot(dx, dy) || 1,
+      er = Math.max(14, Math.min(22, W * 0.07)),
+      ex = Math.max(er + 6, Math.min(W - er - 6, W / 2 + (dx / dl) * (W / 2 - er - 8))),
+      ey = Math.max(fTop + er + 4, Math.min(fBot - er - 4, (fTop + fBot) / 2 + (dy / dl) * ((fBot - fTop) / 2 - er - 8)));
+    const cue = svg.append('g');
+    cue.append('circle').attr('cx', ex).attr('cy', ey).attr('r', er + 4).attr('fill', `url(#${U}-glow)`);
+    cue.append('circle').attr('cx', ex).attr('cy', ey).attr('r', er).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.7);
+    cue.append('path').attr('d', `M${ex - er * 0.6},${ey - er * 0.2} q${er * 0.3},${-er * 0.5} ${er * 0.6},${-er * 0.1} q${er * 0.2},${er * 0.5} ${-er * 0.1},${er * 0.9} q${-er * 0.5},${er * 0.1} ${-er * 0.5},${-er * 0.8}z`).attr('fill', '#4c7a56').attr('opacity', 0.85);
+    cue.append('text').attr('x', Math.max(6 + 40, Math.min(W - 6 - 40, ex))).attr('y', ey + er + 12).attr('text-anchor', 'middle').attr('fill', '#a9b3cc').attr('font-family', 'system-ui').attr('font-size', 9.5).text('Earth (off scale)');
+    marks.push({ x: ex, y: ey, r: er + 14, n: 'earth-cue' });
   }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
   const NARROW = W < 520 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
@@ -493,7 +566,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     const tx = it.short && NARROW && !it.staticLabel ? it.short : lab,
       w = labelW(tx);
     // the label sits on the shell line at its preferred angle, or at the nearest angle where that point is inside the frame
-    let a = (it.ang ?? 35 + i * 14) * DEG,
+    let a = (it.staticAng ?? it.ang ?? 35 + i * 14) * DEG,
       shown = false;
     for (const k of [0, 10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 80, -80, 100, -100, 130, -130, 160, -160, 180]) {
       const b = a + k * DEG,
@@ -513,6 +586,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   });
   const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false) => {
     if (!p || p.hidden || !text || p.x < 4 || p.y < 4 || p.x > W - 4 || p.y > H - 4) return;
+    if (opt && W < 520 && sim.cfg.acts && !opts.panel) return; // the busy multi-act composite drops its secondary labels on a phone
     cands.push({
       x: at ? at[0] * W : p.x + dx,
       y: at ? at[1] * H : p.y - 14 + dy,
@@ -534,14 +608,18 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         .attr('fill-opacity', 0.32)
         .attr('stroke', it.color)
         .attr('stroke-width', 1.6);
+    if (it.kind === 'curve' && it.staticKeep === false) continue;
     if (it.kind === 'curve') {
-      const pts = it.pts(t).map(project);
+      let pts = it.pts(t).map(project);
+      if (it.limbOnly) pts = pts.map((p) => (Math.hypot(p.x - CX, p.y - CY) < R * 1.005 ? { ...p, hidden: true } : p)); // only the part outside the disc: an arch behind the globe, clipped at its limb
+      // a panel that shows no globe drops low-orbit context rings (they would be a stray arc with nothing to orbit)
+      if (opts.panel && !showGlobe && it.inset && pts.length && Math.min(...it.pts(t).map((q) => Math.hypot(...q))) < 1.6) continue;
       let seg = [];
       const flush = () => {
         if (seg.length > 1) dPolys.push({ p: seg.slice(), role: it.role || 'line' });
         if (seg.length > 1)
           g.append('path')
-            .attr('d', d3.line()(seg))
+            .attr('d', d3.line().curve(d3.curveCatmullRom.alpha(0.5))(seg))
             .attr('fill', 'none')
             .attr('stroke', it.color)
             .attr('stroke-linecap', 'round')
@@ -594,11 +672,11 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       const arr = new Float32Array(it.n * 3),
         col = it.dynCol ? new Float32Array(it.n * 4) : null;
       it.fill(t, arr, col);
-      const step = Math.max(1, Math.floor(it.n / 900));
+      const step = Math.max(1, Math.floor(it.n / (it.limbOnly ? 380 : 900)));
       for (let k = 0; k < it.n; k += step) {
         if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue;
         const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]);
-        if (p.hidden) continue;
+        if (p.hidden || (it.limbOnly && Math.hypot(p.x - CX, p.y - CY) < R * 1.005)) continue;
         dCloud.push([p.x, p.y]);
         if (!it.bg) {
           const gx = Math.floor(p.x / pcell),
@@ -647,61 +725,42 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color);
       }
     }
-    if (it.kind === 'point') {
+    if (it.kind === 'point') for (const tt of (!opts.panel && sim.cfg.staticSnap?.[it.craftId]) || [t]) {
+      const t = tt;
       const q = it.liveOnly ? null : it.pos(t);
       if (!q) continue;
       let p = project(q);
       if (p.hidden) continue;
-      // Docked pair: the two squares sit side by side, touching (no link is drawn: SWF says docked, not how).
-      if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + 6.5 };
-      else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - 6.5 };
       const c = it.statusColor ? it.statusColor(t) : it.color;
+      const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
+      // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
+      const cs = craftShape ? Math.round(craftBase * (it.iss ? 1.3 : 1) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1)) : 0;
+      // Docked pair: the two models sit side by side, touching (no link is drawn: SWF says docked, not how).
+      if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + cs * 0.5 };
+      else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - cs * 0.5 };
+      let rot = 0;
+      if (it.shape === 'plane' || it.shape === 'aircraft') {
+        const q2 = it.pos(Math.min(1, t + 0.012)) || q,
+          p2 = project(q2);
+        if (Math.hypot(p2.x - p.x, p2.y - p.y) > 0.3) rot = (Math.atan2(p2.y - p.y, p2.x - p.x) * 180) / Math.PI + 90;
+        else rot = -25;
+      }
+      const mi = marks.length;
       if (it.shape !== 'none')
-      mark(
-        p,
-        it.shape === 'sat'
-          ? it.small
-            ? 7
-            : 10 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1)
-          : it.shape === 'aircraft'
-            ? 8
-            : it.shape === 'tick'
-              ? 6
-              : 5,
-        it.label || it.shape,
-      );
-      if (it.shape === 'sat') {
-        const q = it.small ? (it.scale ? Math.min(10, 5 + it.scale * 1.3) : 6) : 9 * Math.min(1.6, it.scale ? 1 + it.scale * 0.25 : 1);
-        g.append('rect')
-          .attr('x', p.x - q / 2)
-          .attr('y', p.y - q / 2)
-          .attr('width', q)
-          .attr('height', q)
-          .attr('fill', c)
-          .attr('stroke', '#070b17')
-          .attr('stroke-width', 0.8);
+        mark(p, craftShape ? cs * (it.shape === 'sat' || it.shape === 'ship' ? 0.5 : 0.42) + 2 : it.shape === 'sat' ? 5 : it.shape === 'tick' ? 6 : 5, it.label || it.shape);
+      if (craftShape) drawCraft(g, it.shape, p.x, p.y, cs, c, { rot });
+      else if (it.shape === 'sat') {
+        const q3 = it.small ? 6 : 8;
+        g.append('rect').attr('x', p.x - q3 / 2).attr('y', p.y - q3 / 2).attr('width', q3).attr('height', q3).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
       } else if (it.shape === 'tick')
         g.append('path')
           .attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`)
           .attr('fill', c)
           .attr('stroke', '#070b17');
-      else if (it.shape === 'aircraft')
-        g.append('path')
-          .attr('d', `M${p.x},${p.y - 7}L${p.x + 5},${p.y + 5}L${p.x - 5},${p.y + 5}Z`)
-          .attr('fill', c)
-          .attr('stroke', '#070b17')
-          .attr('stroke-width', 0.8);
-      else if (it.shape === 'plane')
-        g.append('path')
-          .attr('d', `M${p.x},${p.y - 7}L${p.x + 7},${p.y + 5}L${p.x},${p.y + 2}L${p.x - 7},${p.y + 5}Z`)
-          .attr('fill', c)
-          .attr('stroke', '#070b17')
-          .attr('stroke-width', 0.8);
       else if (it.shape === 'none') {
         /* label-only anchor */
       } else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
-      else
-        g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
+      else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
       if (it.label && !it.ctx && !it.noLeader) {
         const n0 = cands.length;
         label(
@@ -714,6 +773,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           it.opt,
         );
         if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;
+        if (cands.length > n0 && marks.length > mi) cands.at(-1).mk = mi;
       }
     }
     if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) {
@@ -809,7 +869,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('x', 14)
       .attr('y', H - 12)
       .attr('fill', '#a9b3cc')
-      .attr('font-size', Math.min(10.5, (W - 32) / (ft.length * 0.56)))
+      .attr('font-size', fFont)
       .attr('font-family', 'system-ui')
       .text(ft);
   }
@@ -826,13 +886,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           y1: q.y + c.h / 2,
           leader: q.leader ? [q.ax, q.ay, q.qx, q.qy] : null,
           ref: [q.ax, q.ay],
+          mk: c.mk ?? -1,
           pc: pcount(q.x - c.w / 2, q.y - c.h / 2, q.x + c.w / 2, q.y + c.h / 2),
         });
     });
     svg.node().__lay = {
       W,
       H,
-      probe: { disc: { cx: CX, cy: CY, r: showGlobe ? R : 0 }, circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })), pts: marks.map((m) => ({ x: m.x, y: m.y, r: m.r, i: -2 })), polys: dPolys, cloud: dCloud, domes: [] },
+      probe: { disc: { cx: CX, cy: CY, r: showGlobe ? R : 0 }, circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })), pts: marks.map((m, i) => ({ x: m.x, y: m.y, r: m.r, i })), rings: ringsL, disc0: showGlobe ? { cx: CX, cy: CY, r: R } : null, minFont: Math.min(...[...svg.node().querySelectorAll('text')].map((e) => +e.getAttribute('font-size') || +e.parentNode.getAttribute('font-size') || 11)), polys: dPolys, cloud: dCloud, domes: [] },
       labels: lb,
       marks,
       rings: ringsL,

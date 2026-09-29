@@ -6,7 +6,7 @@
 //   label-overlap    two label boxes overlap                 label-reserved  a label sits on the banner, status caption or hint chip
 //   label-mark       a label covers a drawn sprite           label-edge      a label box is within 8 px of the frame edge
 //   label-disc       a label box overlaps the Earth disc although a clear slot exists within reach (leader <= limit, <= 0.10 W away)
-//   leader-long      leader longer than 0.22 W (0.30 W at 375)      leader-cross  a leader crosses another label box or leader
+//   leader-long      leader longer than 0.17 W (0.27 W at 375)      leader-cross  a leader crosses another label box or leader
 //   leader-end       the leader ends on empty space (no drawn referent within a few px) or on another labelled referent
 //   ref-small        a labelled craft/satellite is drawn < 6 px on the default camera            action-small  action region < 20% of the frame (default camera; sides count at least 40%)
 //   ref-hidden       a labelled craft is visible in the sim but off frame or behind Earth on some camera
@@ -19,6 +19,12 @@
 //   shell-crop       a shell ring/glow is cut by the frame edge or the footer in a still or the hero (fully inside, or fully covering the frame, only)
 //   still-res        a still's Earth is under 1.5x supersampled relative to the viewport it was exported from (checked at 375 too)
 //   burst-edge       default camera: a burst ring / debris point touches the frame edge (4 px margin)
+//   static-font      a static diagram's text is drawn under 9 px (footer note included)
+//   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
+//   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
+//   still-empty      a still has an empty band (no content) over more than 20% of its body height or width
+//   still-crop       a still shows the Earth disc partly cropped (50-98.5% visible) by the frame
+//   hero-small       hero live at >= 900 px: the outer ring spans under 60% of the stage width
 //   hero-*           hero: ISS marker missing (hero-iss), a shell label more than 40 px from its ring (hero-label), caption strip / heading wrap (page side)
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
@@ -59,14 +65,15 @@ const leadersNear = (a, b) => { // segments that run within 2.5 px of each other
 };
 const boxDisc = (b, d) => { const dx = Math.max(b.x0 - d.cx, 0, d.cx - b.x1), dy = Math.max(b.y0 - d.cy, 0, d.cy - b.y1); return Math.hypot(dx, dy) < d.r - 2; };
 const crossesCircle = (b, c) => { const dx0 = Math.max(b.x0 - c.cx, 0, c.cx - b.x1), dy0 = Math.max(b.y0 - c.cy, 0, c.cy - b.y1), fx = Math.max(Math.abs(b.x0 - c.cx), Math.abs(b.x1 - c.cx)), fy = Math.max(Math.abs(b.y0 - c.cy), Math.abs(b.y1 - c.cy)); return Math.hypot(dx0, dy0) < c.r + 2 && Math.hypot(fx, fy) > c.r - 2; };
-const shellCrop = (circles, W, H) => {
+const shellCrop = (circles, W, H, hero) => {
   const out = [];
   for (const c of circles || []) {
     if (!c.ring) continue;
     const r = c.r * 1.05, inside = c.cx - r >= 2 && c.cx + r <= W - 2 && c.cy - r >= 2 && c.cy + r <= H - 2;
     const cover = [[0, 0], [W, 0], [0, H], [W, H]].every(([x, y]) => Math.hypot(x - c.cx, y - c.cy) < r - 2);
     const dx = Math.max(-c.cx, 0, c.cx - W), dy = Math.max(-c.cy, 0, c.cy - H), away = Math.hypot(dx, dy) > r;
-    if (!inside && !cover && !away) out.push(`shell r=${Math.round(c.r)} at (${Math.round(c.cx)},${Math.round(c.cy)}) is cut by the frame ${W}x${H}`);
+    const vOnly = hero && W / H > 1.7 && c.cx - r >= 2 && c.cx + r <= W - 2 && c.cy - r < 2 && c.cy + r > H - 2; // a wide hero stage: a shell may run off the top and the bottom together, sides fully inside
+    if (!inside && !cover && !away && !vOnly) out.push(`shell r=${Math.round(c.r)} at (${Math.round(c.cx)},${Math.round(c.cy)}) is cut by the frame ${W}x${H}`);
   }
   return out;
 };
@@ -75,12 +82,13 @@ const boxCircle = (b, c) => { const dx = Math.max(b.x0 - c.x, 0, c.x - b.x1), dy
 // Event times that are not cfg.hit.t, and regexes for status text that describes the event; key objects that must stay in frame on the default camera.
 const EVENTS = { starfish: { t: 0.14, re: /detonation:|detonates/i } };
 const HITRE = /collision|destroys|destroyed|detonat|fragments spread|debris spreads/i;
-const KEY = { viasat: [/KA-SAT/], laser: [/MSTI-3/, /White Sands/], 'sj21-tug': [/SJ-21/, /Compass/], cosmos1408: [/Cosmos 1408/], shakti: [/Microsat/] };
+const KEY = { viasat: [/KA-SAT/], laser: [/MSTI-3/, /White Sands/], 'sj21-tug': [/SJ-21/, /Compass/], cosmos1408: [/Cosmos 1408/], shakti: [/Microsat/],
+  spaceplanes: [/X-37B/, /OTV-7/, /CSSHQ/], rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/] };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;
 
 // S = {kind, W, H, labels:[{text, x0,y0,x1,y1, leader:[ax,ay,qx,qy]|null, item}], reserved:[{n,x0,y0,x1,y1}], probe, def (default camera), bannerLines}
 function check(S) {
-  const F = [], { W, H } = S, u = S.u || 1, L = S.labels, P = S.probe || {}, phone = W <= 400, lim = W * (phone ? 0.3 : 0.22);
+  const F = [], { W, H } = S, u = S.u || 1, L = S.labels, P = S.probe || {}, phone = W <= 400, lim = W * (phone ? 0.27 : 0.17);
   const f = (type, detail) => F.push({ type, detail });
   const B = L.map(l => ({ x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1 }));
   for (let i = 0; i < L.length; i++) {
@@ -149,6 +157,22 @@ function check(S) {
     // debris fields of the hit scenes only (the Starfish belt and space-weather clouds fill the frame by design); >= 3 points in the edge band = the cloud is cut, a lone fragment is an outlier
     if (S.hitT != null && e.length >= 3) f('burst-edge', `${e.length} debris point(s) touch the frame edge, first at (${Math.round(e[0][0])},${Math.round(e[0][1])})`);
   }
+  if (S.minFont != null && S.minFont < 9) f('static-font', `smallest text ${S.minFont}px < 9px at ${W}px`);
+  if (P.disc0 && P.polys) for (const c of P.polys) {
+    if (c.role === 'beam' || c.p.length < 6) continue;
+    const a = c.p[0], b = c.p[c.p.length - 1], Lc = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (Lc < 0.8 * P.disc0.r) continue;
+    let dev = 0; for (const q of c.p) dev = Math.max(dev, distPtSeg(q[0], q[1], a[0], a[1], b[0], b[1]));
+    if (dev < 0.06 * Lc && distPtSeg(P.disc0.cx, P.disc0.cy, a[0], a[1], b[0], b[1]) < 0.3 * P.disc0.r) f('orbit-thru-centre', `a ${c.role} curve of ${Math.round(Lc)} px is a straight chord through the Earth's centre (dev ${dev.toFixed(1)} px)`);
+  }
+  if (S.kind === 'live' && P.refs && !S.noSubject) {
+    const thr = S.def ? (W >= 900 ? 22 : 18) : S.follow ? (W >= 900 ? 44 : 30) : 0;
+    if (thr) for (const r of P.refs) if (r.px < thr && r.x > 0 && r.x < W && r.y > 0 && r.y < H) f('subject-small', `${r.text} ${r.px.toFixed(0)} px < ${thr}`);
+  }
+  if (S.emptyBand != null && S.emptyBand > 0.2) f('still-empty', `empty band (gap or lopsided margin) of ${(S.emptyBand * 100).toFixed(0)}% of the still`);
+  if (S.emptyArea != null && S.emptyArea < 0.3) f('still-empty', `content fills only ${(S.emptyArea * 100).toFixed(0)}% of the still body`);
+  if (S.discVis != null && S.discVis > 0.5 && S.discVis < 0.985) f('still-crop', `Earth disc ${(S.discVis * 100).toFixed(0)}% inside the still (cropped)`);
+  if (S.kind === 'hero' && W >= 900 && S.heroSpan != null && S.heroSpan < 0.6) f('hero-small', `outer ring spans ${(S.heroSpan * 100).toFixed(0)}% of the stage width`);
   if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
   if (S.status != null && S.evT != null && S.t < S.evT + 0.02 && (S.evRe || HITRE).test(S.status)) f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
   if (S.statusLines > 1) f('status-wrap', `status wraps to ${S.statusLines} lines at ${W}px: "${(S.status || '').slice(0, 60)}"`);
@@ -201,7 +225,7 @@ const LIVE = (KEYS) => {
     const v = new T.Vector3(...p).project(h.camera), x = (v.x + 1) / 2 * W, y = (1 - v.y) / 2 * H;
     const d = [p[0] - cp.x, p[1] - cp.y, p[2] - cp.z], Ld = Math.hypot(...d), u = d.map(c => c / Ld), b = cp.x * u[0] + cp.y * u[1] + cp.z * u[2], c2 = cp.lengthSq() - 1, dd = b * b - c2;
     const occ = dd >= 0 && (-b - Math.sqrt(dd)) > 0 && (-b - Math.sqrt(dd)) < Ld - 1e-3;
-    const under = res.some(r => x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1);
+    const under = res.some(r => x > r.x0 - 18 && x < r.x1 + 18 && y > r.y0 - 18 && y < r.y1 + 18); // 18 px pad: a model half-hidden by the caption counts
     if (x < 10 || y < 10 || x > W - 10 || y > H - 10 || v.z > 1 || occ || under) keyOut.push(`${Lb.text} ${occ ? 'behind Earth' : under ? 'under the caption/banner' : 'off frame'} (${Math.round(x)},${Math.round(y)})`);
   }
   return { W, H, labels, reserved, probe, hidden, status, statusLines, hitT, keyOut, docked: h.sim.items.some(i => i.dockOn && i.dockOn(h.t)), t: h.t, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), act: h._act };
@@ -210,14 +234,30 @@ const SSX = (sel = '#sceneView') => { const v = [...document.querySelectorAll(se
 const STATIC = (sel = '#sceneView') => {
   const svg = document.querySelector(sel + ' > svg'), z = svg && svg.__lay; if (!z) return null;
   const bn0 = document.querySelector(sel + ' > .illus'), lines0 = bn0 && bn0.getBoundingClientRect().height > 32 ? 2 : 1;
-  const mapLay = l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: -1, onDisc: false });
-  if (z.panels) return { panels: z.panels.map(p => ({ W: p.W, H: p.H, labels: p.labels.map(mapLay), reserved: p.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 })), probe: p.probe })), bannerLines: lines0, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
-  const labels = z.labels.map(l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: -1, onDisc: false }));
+  const mapLay = l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: l.mk ?? -1, onDisc: false });
+  if (z.panels) return { panels: z.panels.map(p => ({ W: p.W, H: p.H, labels: p.labels.map(mapLay), reserved: p.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 })), probe: p.probe, minFont: p.probe.minFont })), bannerLines: lines0, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
+  const labels = z.labels.map(l => ({ text: l.text, x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1, leader: l.leader, ref: l.ref, item: l.mk ?? -1, onDisc: false }));
   const bn = document.querySelector(sel + ' > .illus'), er = document.querySelector(sel).getBoundingClientRect();
   const reserved = z.reserved.map(r => ({ n: r.n, x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1 }));
   if (bn) { const b = bn.getBoundingClientRect(); reserved.push({ n: 'banner', x0: b.left - er.left, y0: b.top - er.top, x1: b.right - er.left, y1: b.bottom - er.top }); }
-  return { W: z.W, H: z.H, labels, reserved, probe: z.probe, bannerLines: bn && bn.getBoundingClientRect().height > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
+  return { W: z.W, H: z.H, labels, reserved, probe: z.probe, minFont: z.probe.minFont, bannerLines: bn && bn.getBoundingClientRect().height > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), earth: svg.dataset.earth };
 };
+
+// Empty-band measure of a still (PNG data URL), body only (header/footer excluded): {band: largest empty gap inside the content, or the imbalance between opposite empty margins; area: content bounding box as a fraction of the body}.
+const EMPTY = async (url) => {
+  const img = new Image(); img.src = url; await img.decode();
+  const k = 4, w = Math.round(img.width / k), h = Math.round(img.height / k), c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, w, h); const d = g.getImageData(0, 0, w, h).data;
+  const y0 = Math.round(h * 0.06), y1 = Math.round(h * 0.9), rows = [], cols = new Array(w).fill(0);
+  for (let y = y0; y < y1; y++) { let n = 0; for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, L = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]; if (L > 46) { n++; cols[x]++; } } rows.push(n); }
+  // per axis: rows/cols with content (>= 3 bright px); lead/trail = empty margins, gap = longest empty run between content
+  const ax = (arr) => { const on = arr.map(v => v >= 3), first = on.indexOf(true), last = on.lastIndexOf(true); if (first < 0) return { lead: 1, trail: 0, gap: 0, span: 0 };
+    let gap = 0, cur = 0; for (let i = first; i <= last; i++) { if (!on[i]) { cur++; gap = Math.max(gap, cur); } else cur = 0; }
+    return { lead: first / arr.length, trail: (arr.length - 1 - last) / arr.length, gap: gap / arr.length, span: (last - first + 1) / arr.length }; };
+  const r = ax(rows), q = ax(cols);
+  return { band: Math.max(r.gap, q.gap, Math.abs(r.lead - r.trail), Math.abs(q.lead - q.trail)), area: r.span * q.span };
+};
+const discVisible = (d, W, H) => { if (!d || !(d.r > 0)) return null; let n = 0, ins = 0; for (let i = 0; i < 48; i++) for (let j = 0; j < 48; j++) { const x = d.cx + ((i + 0.5) / 24 - 1) * d.r, y = d.cy + ((j + 0.5) / 24 - 1) * d.r; if ((x - d.cx) ** 2 + (y - d.cy) ** 2 > d.r * d.r) continue; n++; if (x >= 0 && x <= W && y >= 0 && y <= H) ins++; } return ins / n; };
 
 // ---------------------------------------------------------------- run
 const results = [], failCount = {}, pageErrs = [];
@@ -234,7 +274,7 @@ async function boot(w, extra) {
 const ids = async page => (await page.evaluate(() => window.__cs.scenes)).filter(i => !ONLY.length || ONLY.includes(i));
 let curTag = '';
 const tag = (...a) => (curTag = a.join('-'));
-const camActs = (page) => page.evaluate(() => { const h = window.__cs.host(); return { cams: h.sim.cams.map(c => ({ name: c.name, act: c.act ?? null, auto: !!c.auto })), acts: h.sim.cfg.acts || null }; });
+const camActs = (page) => page.evaluate(() => { const h = window.__cs.host(); return { cams: h.sim.cams.map(c => ({ name: c.name, act: c.act ?? null, auto: !!c.auto, ref: c.ref, follow: !!c.follow && c.ref !== false })), acts: h.sim.cfg.acts || null }; });
 
 if (MODES.includes('live')) for (const w of VPS) {
   const { ctx, page, errs } = await boot(w);
@@ -250,7 +290,7 @@ if (MODES.includes('live')) for (const w of VPS) {
       if (!tl.length) tl = [acts[c.act].t0 + 0.05];
       for (const t of tl) {
         await page.evaluate(({ ci, t }) => { const h = window.__cs.host(); h.playing = false; h._lm = {}; h.pickCam(ci); h.update(t); h.update(t); }, { ci, t });
-        const S = await page.evaluate(LIVE, ci === 0 ? (KEY[id] || []).map(r => r.source) : []); S.def = ci === 0; S.kind = 'live';
+        const S = await page.evaluate(LIVE, cams[ci].ref === false ? [] : (KEY[id] || []).map(r => r.source)); S.def = ci === 0; S.kind = 'live'; S.follow = !!cams[ci].follow;
         S.evT = EVENTS[id]?.t ?? S.hitT; S.evRe = EVENTS[id]?.re;
         if (ci !== 0) S.action = undefined; else S.action = S.probe.action;
         const F = check(S);
@@ -281,6 +321,7 @@ if (MODES.includes('static')) for (const w of VPS) {
     if (w === 1440) {
       const url = await page.evaluate(() => window.__cs.exportStill());
       fs.writeFileSync(`${out}/still-static-${id}.png`, Buffer.from(url.split(',')[1], 'base64'));
+      const eb = await page.evaluate(EMPTY, url); record(tag('still-static', id), check({ kind: 'still', W: 1000, H: 1000, labels: [], reserved: [], emptyBand: eb.band, emptyArea: eb.area }), { W: w });
     }
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);
   }
@@ -311,7 +352,7 @@ if (MODES.includes('hero')) for (const w of VPS) {
     await page.evaluate(t => { const h = window.__cs.host(); h.playing = false; h._lm = {}; h.update(t); h.update(t); }, t);
     const S = await page.evaluate(LIVE, []); S.def = false; S.kind = 'hero'; S.action = undefined; S.u = 1;
     const F = check(S), hc = await page.evaluate(HEROLIVE);
-    S.shellCrop = shellCrop(S.probe.circles, S.W, S.H); F.push(...S.shellCrop.map(d => ({ type: 'shell-crop', detail: d })));
+    S.shellCrop = shellCrop(S.probe.circles, S.W, S.H, true); S.heroSpan = Math.max(0, ...(S.probe.circles || []).filter(c => c.ring).map(c => 2 * c.r)) / S.W; { const hp = check(S); F.length = 0; F.push(...hp); }
     if (hc.iss && !hc.iss.occ && hc.iss.on && hc.iss.px < 12) F.push({ type: 'hero-iss', detail: `ISS marker ${hc.iss.px.toFixed(0)} px at t=${t}` });
     if (!hc.iss) F.push({ type: 'hero-iss', detail: `no ISS marker at t=${t}` });
     record(tag('hero-live', w, 't' + t), F, { W: w });
@@ -334,13 +375,14 @@ if (MODES.includes('still')) {
     const r = await page.evaluate(async () => {
       const h = window.__cs.host(); h.playing = false; h._lm = {}; h.update(h.sim.still);
       const url = h.stillPNG('Title', 'SWF 2026, Table 5-1, p. 05-01.'), z = h.stillLayout;
-      const conv = q => ({ W: q.W, H: q.H,
+      const conv = q => ({ W: q.W, H: q.H, u: q.u,
         labels: q.labels.filter(Boolean).map(l => ({ text: l.text, x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h / 2, y1: l.y + l.h / 2, leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null, ref: [l.ax, l.ay], item: -1 })),
         reserved: (q.rsv || []).map((r, i) => ({ n: 'rsv' + i, x0: r[0], y0: r[1], x1: r[0] + r[2], y1: r[1] + r[3] })), probe: q.probe });
       return { url, tiles: (z.tiles || [z]).map(conv) };
     });
     fs.writeFileSync(`${out}/still-live-${id}.png`, Buffer.from(r.url.split(',')[1], 'base64'));
-    const F = r.tiles.flatMap(t => check({ kind: 'still', u: t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H) }));
+    const eb = await page.evaluate(EMPTY, r.url);
+    const F = r.tiles.flatMap(t => check({ kind: 'still', u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H) }));
     // stills are ~3000 px wide: the pixel rules are scaled by u (label font scale) so the limits mean the same thing as in the live frame
     record(tag('still-live', id), F, { stillT });
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);

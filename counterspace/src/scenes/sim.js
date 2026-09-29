@@ -61,6 +61,7 @@ export function buildSim(cfg) {
       staticLabel: cfg.staticShellLabels?.[s],
       noRing: !!cfg.noRing?.includes(s),
       ang: sa[s] ?? angDef[s],
+      staticAng: cfg.staticShellAng?.[s],
       strong: !!cfg.spin,
       dx: cfg.shellOff?.[s]?.[0] ?? 0,
       dy: cfg.shellOff?.[s]?.[1] ?? 0,
@@ -281,6 +282,8 @@ export function buildSim(cfg) {
         labelDx: a.dx,
         labelDy: a.dy,
         scale: typeof a.big === 'number' ? a.big : a.big ? 1.3 : null,
+        minPx: a.minPx,
+        maxPx: a.maxPx,
         bright: !!a.bright,
         pos: (t) => (a.noHit || t <= tgt.t ? tgt.pos(t) : null),
         glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
@@ -649,6 +652,8 @@ export function buildSim(cfg) {
             kind: 'curve',
             dynamic: true,
             uniformA: 0.3,
+            staticKeep: lo % 3 === 0 && Li !== 1, // the static diagram draws a third of the arches: a cage, not a tangle
+            limbOnly: true, // ... and only where they stand out against the sky, never across the Earth's face
             opacity: 0.3,
             color: a.color,
             all: [],
@@ -668,6 +673,7 @@ export function buildSim(cfg) {
         }
       items.push({
         kind: 'cloud',
+        limbOnly: true,
         n,
         bg: true,
         color: a.color,
@@ -995,7 +1001,7 @@ export function buildSim(cfg) {
   }
   const f = focus || [20, 0];
   const dist = (cfg.camDist || 4.2) * (IS_PHONE ? (cfg.phoneK ?? 1) : 1);
-  const wide = { name: 'Wide', pos: ll(f[0] * 0.6 + 10, f[1] - 25, dist) },
+  const wide = { name: 'Wide', pos: ll(cfg.wideLat != null && !IS_PHONE ? cfg.wideLat : f[0] * 0.6 + 10, f[1] - 25, dist) },
     polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
   let cams;
   // Frame camera: position and target given in an anchor's local frame [along, radial, cross-track] in Earth radii. `follow: true` re-solves it at every t,
@@ -1170,7 +1176,7 @@ export function buildSim(cfg) {
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
       }
       if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, ...frameCam(c.frame) };
-      return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, hide: c.hide, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
+      return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, hide: c.hide, status: c.status, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
     });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) {
@@ -1210,7 +1216,7 @@ export function buildSim(cfg) {
   } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
   // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.
   const stillCamFor = (t, asp) => {
-    if (A) {
+    if (A && !cfg.stillCam) {
       const i = A.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === A.length - 1));
       const c = cams[A[Math.max(0, i)].cam],
         v = c.follow ? c.follow(t, asp) : c;
