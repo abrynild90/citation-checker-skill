@@ -144,6 +144,7 @@
     "activity": "capture_tow | rpo | docking | release | spaceplane_mission",
     "orbit_regime": "LEO | GEO (belt or its immediate vicinity, incl. the disposal region) | HEO | not_stated",
     "description": "the builder's own summary, keeping SWF's hedges",
+    "evidence": "short verbatim SWF quotation, 1-15 words, supporting the row's central fact",
     "related_events": "optional list of event ids"
    },
    "validation": "tools/build_data.py validate() enforces this schema on every build: unique ids, enums, date formats, required fields per domain, required source fields, id resolution, fragments_in_orbit <= fragments_cataloged, capabilities.json states/decades/D-P values, lag_pairs.json ids, and the counts and as-of dates in methodology.md, ledger.md and verification_log.md."

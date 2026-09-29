@@ -72,6 +72,9 @@ def validate(events, legal, caps, pairs, docs):
                 err.append("%s: end before start" % r["id"])
         elif r["domain"] == "co_orbital":
             enum(r, "activity"); enum(r, "orbit_regime")
+            words = len(str(r.get("evidence", "")).split())
+            if not 1 <= words <= 15:
+                err.append("%s: co_orbital needs a verbatim evidence quotation of 1-15 words (has %d)" % (r["id"], words))
             if r["activity"] != "spaceplane_mission" and not r.get("target"):
                 err.append("%s: co_orbital %s row needs a target" % (r["id"], r["activity"]))
             if not good_date(r.get("start")):

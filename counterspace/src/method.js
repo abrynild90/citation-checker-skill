@@ -7,13 +7,23 @@ import { AS_OF, EVENTS, LAST_DA, LEDGER_AS_OF, LEGAL, SCHEMA, esc, fmt, parse } 
 import { PARTICLE_BUDGET } from './scenes/core.js';
 export function drawMethod() {
   // one entry per distinct source URL: a full citation (legal rows carry their own; event sources are expanded below) plus the pin(s)
-  const bare = t => esc(t).replace(/,\s*https?:\/\/\S+$/, '');
-  const groups = new Map(); EVENTS.concat(LEGAL).forEach(r => { if (!groups.has(r.source_url)) groups.set(r.source_url, []); groups.get(r.source_url).push(r); });
-  const cites = [...groups.values()].map(rs => { const r = rs[0], url = esc(r.source_url);
+  const bare = (t) => esc(t).replace(/,\s*https?:\/\/\S+$/, '');
+  const groups = new Map();
+  EVENTS.concat(LEGAL).forEach((r) => {
+    if (!groups.has(r.source_url)) groups.set(r.source_url, []);
+    groups.get(r.source_url).push(r);
+  });
+  const cites = [...groups.values()].map((rs) => {
+    const r = rs[0],
+      url = esc(r.source_url);
     if (!r.source_full && r.citation) return `<li><a href="${url}" target="_blank" rel="noopener">${esc(r.citation)}</a></li>`;
     const head = bare(r.source_full || r.source);
-    const pins = rs.length > 1 ? `; ${rs.length} ledger rows, each pinned to its table or page (see the card, the data table or <code>ledger.md</code>)` : `, ${esc(r.pin)}`;
-    return `<li><a href="${url}" target="_blank" rel="noopener">${head}</a>${pins}.</li>`; });
+    const pins =
+      rs.length > 1
+        ? `; ${rs.length} ledger rows, each pinned to its table or page (see the card, the data table or <code>ledger.md</code>)`
+        : `, ${esc(r.pin)}`;
+    return `<li><a href="${url}" target="_blank" rel="noopener">${head}</a>${pins}.</li>`;
+  });
   document.getElementById('methodBody').innerHTML = `
   <h3>Editions and “as of” dates</h3>
   <ul><li><b>Primary:</b> Secure World Foundation, <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen Brett eds., 9th ed., Apr. 2026). 13 countries, five categories. The 13-country count is a 2026 figure, not a historical constant. Debris counts as of Feb. 2026 (SWF Table 5-1).</li>
@@ -37,4 +47,3 @@ export function drawMethod() {
   <ol class="cites">${cites.join('')}</ol>
   <p class="note">The full ledger (every row with its pin), the verification log and the builder decisions are in <code>ledger.md</code>, <code>verification_log.md</code> and <code>methodology.md</code>.</p>`;
 }
-

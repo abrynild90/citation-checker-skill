@@ -96,6 +96,39 @@ for (const [vname, w, h] of VIEWPORTS) for (const scheme of ['dark', 'light']) {
   });
 }
 
+// 1b. Data assertions: what the page renders must equal data/*.json (counts, ids per chart, lag pairs, table rows). `problems` must be [].
+await run('data-checks', { viewport: { width: 1440, height: 900 }, colorScheme: 'light', reducedMotion: 'reduce' }, async p => {
+  const J = f => JSON.parse(fs.readFileSync(path.join(root, 'data', f), 'utf8')), events = J('events.json'), legal = J('legal.json');
+  const caps = J('capabilities.json'), lagPairs = J('lag_pairs.json'), problems = [];
+  for (const id of ['svgA', 'svgC', 'svgR', 'svgB', 'svgL']) { await p.evaluate(id => document.getElementById(id).scrollIntoView(), id); await p.waitForTimeout(500); }
+  const page = await p.evaluate(() => {
+    const ids = sel => [...document.querySelectorAll(sel)].map(n => n.dataset.id);
+    const rows = id => [...document.querySelectorAll(`#${id} tbody tr`)].map(tr => [...tr.cells].map(c => c.textContent.trim()));
+    return { A: ids('#svgA [data-id]'), C: ids('#svgC [data-id]'), R: ids('#svgR [data-id]'), legal: ids('#legalSvg [data-id]'),
+      tableL: rows('tableL'), tableB: rows('tableB'), tableA: rows('tableA'), tableC: rows('tableC'), tableR: rows('tableR'), tableLegal: rows('tableLegal') };
+  });
+  const same = (what, got, want) => {
+    const g = new Set(got), w = new Set(want);
+    if (got.length !== g.size) problems.push(`${what}: duplicate marks`);
+    const missing = [...w].filter(x => !g.has(x)), extra = [...g].filter(x => !w.has(x));
+    if (missing.length || extra.length) problems.push(`${what}: missing ${missing.join(',') || '-'}; unexpected ${extra.join(',') || '-'}`);
+  };
+  const byDomain = d => events.filter(e => e.domain === d).map(e => e.id);
+  // Every mark is a ledger id, and every ledger row of the domain has a mark (Chart A kinetic, Chart C non-kinetic, RPO chart co-orbital, legal band).
+  same('#svgA kinetic marks', page.A, byDomain('kinetic')); same('#svgC non-kinetic marks', page.C, byDomain('non_kinetic'));
+  same('#svgR co-orbital marks', page.R, byDomain('co_orbital')); same('#legalSvg legal marks', page.legal, legal.map(l => l.id));
+  // Data tables carry one row per data row.
+  for (const [k, want] of [['tableA', byDomain('kinetic').length], ['tableC', byDomain('non_kinetic').length], ['tableR', byDomain('co_orbital').length],
+    ['tableLegal', legal.length], ['tableB', Object.keys(caps.coding).length]])
+    if (page[k].length !== want) problems.push(`${k}: ${page[k].length} rows, data has ${want}`);
+  // Lag panel: the table's "Ledger rows" cell (event -> law, or the event alone for an open ring) must equal lag_pairs.json, pairs then open rings.
+  const cells = page.tableL.map(r => r[r.length - 1].split(' \u2192 ').map(s => s.trim()).join('>'));
+  const want = [...lagPairs.pairs.map(q => `${q.event}>${q.law}`), ...lagPairs.open.map(q => q.event)];
+  if (cells.join('|') !== want.join('|')) problems.push(`lag table ${JSON.stringify(cells)} != lag_pairs.json ${JSON.stringify(want)}`);
+  for (const q of lagPairs.dropped) if (cells.includes(`${q.event}>${q.law}`)) problems.push(`dropped lag pair drawn: ${q.event}`);
+  return { counts: { kinetic: page.A.length, nonKinetic: page.C.length, coOrbital: page.R.length, legal: page.legal.length, lagRows: cells.length }, problems };
+});
+
 // 2. Desktop scenes: memory, live-scene audit, still export, keyboard flow.
 await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark' }, async p => {
   const res = { mem: [], sceneAudit: [] };
