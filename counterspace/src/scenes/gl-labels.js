@@ -3,7 +3,7 @@
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
 import { GLHost } from './gl-host.js';
-import { DEG, dot, len, scl } from './core.js';
+import { DEG, occluded } from './core.js';
 import { labelW, offDisc, placeLabels } from './labels.js';
 
 Object.assign(GLHost.prototype, {
@@ -91,10 +91,3 @@ Object.assign(GLHost.prototype, {
           L.dot.setAttribute('cx', q.ax); L.dot.setAttribute('cy', q.ay); L.dot.setAttribute('fill', c); } } });
   },
 });
-export function occluded(cam, p) {
-  // Does the segment cam->p pass through the unit sphere before reaching p?
-  const d = [p[0] - cam[0], p[1] - cam[1], p[2] - cam[2]], L = len(d), u = scl(d, 1 / L);
-  const b = dot(cam, u), c = dot(cam, cam) - 1, disc = b * b - c;
-  if (disc < 0) return false; const t0 = -b - Math.sqrt(disc);
-  return t0 > 0 && t0 < L - 1e-3;
-}
