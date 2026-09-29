@@ -2,6 +2,10 @@
 // scenes/gl-items.js: GLHost mixin: atmosphere shaders and the per-kind item builders (shell, curve, point, cloud, beam, dome, flash)
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
+import { GLHost } from './gl-host.js';
+import { beamCanvas, panelCanvas } from './earth.js';
+import { DEG, IS_PHONE, add, ll, norm, scl } from './core.js';
+
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz; vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
 const ATMO_FS = `uniform vec3 uColor; uniform vec3 uSun; uniform float uPow; uniform float uGain; uniform float uBack; varying vec3 vN; varying vec3 vP; varying vec3 vW;
@@ -22,7 +26,7 @@ const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx;
 void main(){ vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1); float r = min(uR, uMaxPx * d / uScale); gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp;
 void main(){ gl_FragColor = vec4(uColor, uOp);\n#include <colorspace_fragment>\n}`;
-const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
+export const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
 
 Object.assign(GLHost.prototype, {
   _atmo(root, r, side, pow, gain, back, sunDir, color = 0x5fa8ff) {

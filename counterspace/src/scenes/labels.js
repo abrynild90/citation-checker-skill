@@ -105,12 +105,12 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
   return bestRun.out;
 }
 // Push a label box (centre x,y size w,h) out of a disc (globe on screen) so it never sits on the planet.
-function offDisc(x, y, w, h, cx, cy, r) {
+export function offDisc(x, y, w, h, cx, cy, r) {
   let dx = x - cx, dy = y - cy; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
   const need = r + Math.abs(dx) * w / 2 + Math.abs(dy) * h / 2 + 12;
   return d >= need ? [x, y] : [cx + dx * need, cy + dy * need];
 }
 // Label pill width: measured with the label font when a canvas is available (falls back to a per-character estimate).
 let _mctx; const _mw = {};
-const labelW = (text, u = 1) => { let w = _mw[text]; if (w == null) { try { _mctx ||= document.createElement('canvas').getContext('2d'); _mctx.font = '600 11px system-ui,sans-serif'; w = _mctx.measureText(text).width; } catch (e) { w = text.length * 6.6; } _mw[text] = w; } return (w + 16) * u; };
+export const labelW = (text, u = 1) => { let w = _mw[text]; if (w == null) { try { _mctx ||= document.createElement('canvas').getContext('2d'); _mctx.font = '600 11px system-ui,sans-serif'; w = _mctx.measureText(text).width; } catch (e) { w = text.length * 6.6; } _mw[text] = w; } return (w + 16) * u; };
 

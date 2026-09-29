@@ -2,6 +2,10 @@
 // scenes/gl-still.js: GLHost mixin: print-resolution PNG still (banner band, labels with leaders, footer with title/source/credit)
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
+import { GLHost } from './gl-host.js';
+import { ll } from './core.js';
+import { earthImg } from './earth.js';
+
 Object.assign(GLHost.prototype, {
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
   // the illustrative banner, caption and source into the PNG, then restore the live size.

@@ -2,6 +2,10 @@
 // scenes/gl-host.js: GLHost core: renderer, scene loading, cameras, update loop, playback and disposal (mixins: gl-items, gl-labels, gl-still)
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
+import { DEG, IS_PHONE, mulberry, norm, scl, sunFor } from './core.js';
+import { earthImg, earthPromise, getLandCanvas, loadEarth, oceanMask, ringCanvas, spriteCanvas } from './earth.js';
+import { occluded } from './gl-labels.js';
+
 
 // ---------------------------------------------------------------- WebGL host (single shared renderer)
 export class GLHost {

@@ -2,6 +2,10 @@
 // scenes/svg-fallback.js: static SVG renderer for reduced motion / no WebGL
 // (Concatenated into one module scope by tools/build_page.py; see src/scenes.js for the module map.)
 // ============================================================================
+import { LAND, earthImg, loadEarth } from './earth.js';
+import { DEG, ll, mulberry, sunFor, toLL } from './core.js';
+import { labelW, offDisc, placeLabels } from './labels.js';
+
 
 // ---------------------------------------------------------------- SVG fallback (static)
 // A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,

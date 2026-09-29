@@ -4,6 +4,10 @@
 // ============================================================================
 // ---------------------------------------------------------------- simulator
 // Items: {kind, ...} with time functions. Kinds: shell, curve, point, cloud, beam, dome, flash.
+import { DEG, GEO_ALT, IS_PHONE, PARTICLE_BUDGET, add, clamp01, dot, gauss, groundArc, len, lerp, ll, mulberry, norm, orbitPos, orbitThrough, rAlt, scl, smooth, toLL } from './core.js';
+import { lerp3 } from './gl-items.js';
+import { C } from './config.js';
+
 export function buildSim(cfg) {
   const items = [];
   const rnd = mulberry(cfg.id.length * 7919 + 17);
