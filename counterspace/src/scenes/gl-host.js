@@ -78,7 +78,7 @@ export class GLHost {
       h = this.el.clientHeight,
       top = w < 520 ? 46 : 36,
       bot = (this.statusEl && this.status ? this.statusEl.offsetHeight : 0) + 14;
-    const s = Math.round(Math.max(0, (bot - top) / 2) + (this.sim?.cfg.lift ?? 0));
+    const s = Math.round(Math.max(0, (bot - top) / 2) + (w < 520 ? (this.sim?.cfg.phoneLift ?? 0) : (this.sim?.cfg.lift ?? 0)));
     if (s === this._viewShift) return;
     this._viewShift = s;
     if (s) this.camera.setViewOffset(w, h, 0, s, w, h);
@@ -417,7 +417,7 @@ export class GLHost {
     if (this.sim.cfg.spin) this.root.rotation.y = t * Math.PI * 2;
     this._drawInset();
     if (this.statusEl) {
-      this.statusEl.textContent = this.status ? this.status.text(t) : '';
+      this.statusEl.textContent = this.status ? this.status.text(t, false, this.el.clientWidth < 520) : '';
       this._applyBands();
     }
     this.render();
@@ -453,6 +453,17 @@ export class GLHost {
         px = (u.span * u.base * sc) / d,
         f = Math.min(Math.max(px, u.minPx * k), u.maxPx * k) / px;
       obj.scale.setScalar(u.base * f);
+    }
+    // Docked pairs (it.dockWith): the two models sit side by side, touching, along the camera's right vector, whatever the zoom.
+    for (const { it, obj } of this.dyn) {
+      if (!it.dockWith || !obj.visible || !it.dockOn(this.t)) continue;
+      const B = this.dyn.find((d) => d.it.craftId === it.dockWith),
+        p = it.pos(this.t);
+      if (!B || !B.obj.visible || !p) continue;
+      const right = (this._right ||= new this.T.Vector3()).setFromMatrixColumn(this.camera.matrixWorld, 0),
+        w = 0.5 * 0.6 * Math.max((obj.userData.span || 0) * obj.scale.x, (B.obj.userData.span || 0) * B.obj.scale.x);
+      obj.position.set(...p).addScaledVector(right, w);
+      B.obj.position.set(...p).addScaledVector(right, -w);
     }
     // Glows drawn without a depth test (so the surface never cuts them in half) are hidden while the Earth is between them and the camera.
     const c3 = [cp.x, cp.y, cp.z];

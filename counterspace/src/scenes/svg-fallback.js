@@ -11,7 +11,8 @@ import { fitBanner, labelW, offDisc, placeLabels } from './labels.js';
 // with the same screen-space label de-confliction (pills + leader lines) as the live scene.
 // Blue Marble re-projected for the static globe: every pixel of the disc is inverted through the orthographic projection to lon/lat and sampled
 // (bilinear) from the equirectangular image; the result is drawn into a canvas and embedded as a data-URL <image> clipped to the sphere.
-let earthPix = null,
+let lastSS = 0,
+  earthPix = null,
   earthPixSrc = null;
 function earthRaster(proj, CX, CY, R) {
   if (!earthImg) return null;
@@ -26,11 +27,13 @@ function earthRaster(proj, CX, CY, R) {
       earthPix = { w: sw, h: sw / 2, d: g.getImageData(0, 0, sw, sw / 2).data };
       earthPixSrc = earthImg;
     }
-    const dpr = Math.min(devicePixelRatio || 1, 2),
+    // Supersampled: at least 2x the CSS size of the disc (capped at 1400 px), so a phone-width diagram still exports a sharp Earth in the print-size PNG.
+    const dpr = Math.max(2, Math.min(devicePixelRatio || 1, 3)),
       S = Math.max(64, Math.min(Math.round(2 * R * dpr), 1400)),
       k = (2 * R) / S,
       c = document.createElement('canvas');
     c.width = c.height = S;
+    lastSS = S / (2 * R);
     const g = c.getContext('2d'),
       out = g.createImageData(S, S),
       o = out.data,
@@ -419,6 +422,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('stroke-width', 0.5)
       .attr('stroke-opacity', 0.55);
   svg.node().dataset.earth = ras ? 'bluemarble' : 'vector';
+  svg.node().dataset.ss = ras ? lastSS.toFixed(2) : '';
   {
     // Sun direction in the view basis; the terminator crosses the view axis at a = -sz (units of R), night is on the far side.
     const sd = toLL(sunFor(sim.sunRef)),

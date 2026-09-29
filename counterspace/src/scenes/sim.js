@@ -82,17 +82,22 @@ export function buildSim(cfg) {
   if (cfg.status)
     items.push({
       kind: 'status',
-      text: (t, still) => {
-        let s = cfg.status[0][1];
-        for (const [t0, tx] of cfg.status) if (t >= t0) s = tx;
-        const c = items._decayCloud;
-        return !still && c && !cfg.noSimCount && tgt && t >= tgt.t ? `${s} · ${c.vis} of ${c.n} simulated pieces aloft` : s;
+      // Status entries are [t0, text, phoneText?]: a phone-width stage (one line at 375 px) uses the short text when there is one.
+      text: (t, still, phone) => {
+        let e = cfg.status[0];
+        for (const x of cfg.status) if (t >= x[0]) e = x;
+        const s = phone && e[2] ? e[2] : e[1],
+          c = items._decayCloud;
+        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t) return s;
+        return phone ? `${s} · ${c.vis}/${c.n} aloft` : `${s} · ${c.vis} of ${c.n} simulated pieces aloft`;
       },
     });
   for (const a of cfg.actors) {
     if (a.type === 'craft') {
       const anc = anchors[a.anchor],
-        raw = (t) => craftPos(anc, a.key, t, a.arcs),
+        // dock: {with, t0, t1}: while docked the craft sits exactly on its partner (the renderers then set the two models side by side in screen
+        // space, touching, at any zoom). Nothing is drawn between them: SWF says docked, not how.
+        raw = (t) => (a.dock && t >= a.dock.t0 && t <= a.dock.t1 ? crafts[a.dock.with].raw(t) : craftPos(anc, a.key, t, a.arcs)),
         inVis = (t) => flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]),
         pos = (t) => (actOn(t, a.acts) && inVis(t) ? raw(t) : null);
       crafts[a.id] = { raw, pos, anc };
@@ -100,6 +105,9 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: a.model || 'sat',
         prim: true,
+        craftId: a.id,
+        dockWith: a.dock?.with,
+        dockOn: a.dock ? (t) => t >= a.dock.t0 && t <= a.dock.t1 : null,
         minPx: a.minPx,
         maxPx: a.maxPx,
         small: !!a.small,
@@ -276,6 +284,19 @@ export function buildSim(cfg) {
         glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
       });
     }
+    if (a.type === 'target' && tgt && !a.noHit && a.label)
+      // The target itself is gone after the hit: a small marker and label keep the impact point identified for the rest of the scene.
+      items.push({
+        kind: 'point',
+        shape: 'tick',
+        color: '#fff1c1',
+        label: 'Impact point',
+        short: 'Impact',
+        labelDx: 40,
+        labelDy: -30,
+        opt: true,
+        pos: (t) => (t >= tgt.t ? tgt.hitPos : null),
+      });
     if (a.type === 'target' && tgt && a.fall) {
       // after the hit the body breaks into larger pieces that sink and burn up (illustrative)
       a.fall.forEach((f, i) => {
@@ -847,7 +868,7 @@ export function buildSim(cfg) {
       // Each box is a region [lat0, lat1, lon0, lon1, share, wave]: regions go dark one after another (wave order), terminals within a region over its own window.
       const nw = Math.max(...a.boxes.map((b) => (b[5] ?? 0) + 1));
       a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => {
-        const m = Math.round(a.count * frac);
+        const m = Math.round(a.count * frac * (IS_PHONE ? 0.6 : 1)); // fewer, smaller dots on a phone: the region stays readable instead of one red blob
         for (let k = 0; k < m; k++)
           P.push({
             p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004),
@@ -859,7 +880,7 @@ export function buildSim(cfg) {
         kind: 'cloud',
         n,
         size: 0.02,
-        minPx: 3.6,
+        minPx: IS_PHONE ? 1.7 : 3.6,
         maxPx: 12,
         dynCol: true,
         label: a.label,
@@ -892,7 +913,12 @@ export function buildSim(cfg) {
       };
       items.push({
         kind: 'status',
-        text: (t) => {
+        text: (t, still, phone) => {
+          if (phone) {
+            if (t < a.pulse0) return 'Before the attack: modems online';
+            if (t < a.t0) return 'Attackers reach the ground network';
+            return t < a.t1 ? `Malware wipes modems · ${dark(t)}/${n} offline` : 'Modems offline · satellite kept working';
+          }
           const tx =
             t < a.pulse0
               ? 'Before the attack: user modems online (green), KA-SAT serving Europe'
