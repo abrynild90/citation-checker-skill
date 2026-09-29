@@ -32,7 +32,8 @@ document.getElementById('themeBtn').onclick = () => {
 // Above-the-fold pieces draw first; the rest is drawn on the next task (or on demand by audit/export).
 // Charts below the fold (C, R, B, lag) and the sources section are drawn when they come within 700 px of the viewport, or on demand by audit/export.
 const idle = (f, timeout) => (window.requestIdleCallback || ((g) => setTimeout(g, 200)))(f, { timeout });
-const LAZY = { svgC: () => drawC(), svgR: () => drawR(), svgB: () => drawB(), svgL: () => drawL(), methodBody: drawMethod }; // the sources section is below the fold too
+// The charts and the sources section are below the fold: drawn lazily.
+const LAZY = { svgC: () => drawC(), svgR: () => drawR(), svgB: () => drawB(), svgL: () => drawL(), methodBody: drawMethod };
 const drawnLazy = new Set();
 let lazyIO = null;
 function drawLazy(id) {

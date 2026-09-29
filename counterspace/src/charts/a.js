@@ -33,7 +33,8 @@ export function drawA(el = document.getElementById('svgA')) {
     zoomed = phone && stateA.zoom,
     KV = zoomed ? KIN.filter((e) => e.date >= ZOOM_A0) : KIN; // phone zoom: 2004 onward, where the marks crowd
   const { W, M, x } = layout(el, zoomed ? [parse(ZOOM_A0), DOMAIN[1]] : DOMAIN);
-  const top = 18,
+  // zoomed: the "ZOOMED" note gets its own row above the plot, so it can never cross the plot's rules or marks
+  const top = zoomed ? 34 : 18,
     plotH = phone ? 300 : 380;
   // Tests with no reported altitude sit in a strip below the axis at their true dates; marks that would overlap are dodged into extra rows (x never moves).
   const unk = KV.filter((e) => e.altitude_km == null).sort((a, b) => (a.date < b.date ? -1 : 1)),
@@ -69,8 +70,14 @@ export function drawA(el = document.getElementById('svgA')) {
   svg
     .append('desc')
     .text(
-      'Scatter of kinetic counterspace tests: year on the x axis, altitude on a log scale on the y axis, with LEO, MEO and GEO bands. Destructive tests have debris bubbles sized by cataloged fragments. A table view follows the chart.',
+      'Scatter of kinetic counterspace tests: year on the x axis, altitude on a log scale on the y axis, with LEO, MEO and GEO bands. ' +
+        'Destructive tests have debris bubbles sized by cataloged fragments. A table view follows the chart.',
     );
+  // debris scale
+  const rD = d3
+    .scaleSqrt()
+    .domain([0, 3600])
+    .range([0, phone ? 22 : 30]);
   // bands
   const bandLabels = [],
     HX = x(parse(LAST_DA));
@@ -85,12 +92,21 @@ export function drawA(el = document.getElementById('svgA')) {
     );
   const roomV = Math.min(top + plotH, ...nearX) - top - 14,
     handoffText = HT.find((s) => tw(s, 11, 600) <= roomV) || HT.at(-1);
-  const pts = KV.filter((e) => e.altitude_km != null).map((e) => [x(parse(e.date)), y(e.altitude_km)]);
+  // Band labels are obstacles too: each slides right until clear of every mark, its 3D badge and every debris bubble.
+  const obst = KV.filter((e) => e.altitude_km != null).map((e) => {
+    const X = x(parse(e.date)),
+      Y = y(e.altitude_km),
+      r = e.fragments_cataloged ? rD(e.fragments_cataloged) : 0,
+      R = Math.max(r, 9);
+    return [X - R, Y - R, X + R + (hasScene(e) ? 8 : 0), Y + R];
+  });
   const band = (a, b, fill, label, above) => {
     const ly = above ? y(b) - 4 : y(b) + (b === 35000 ? 24 : 13),
       lw = tw(label, 10.5, 600) + label.length * 0.85;
     let bx = M.l + 6;
-    while (bx < W * 0.5 && pts.some(([px, py]) => px > bx - 12 && px < bx + lw + 12 && py > ly - 16 && py < ly + 8)) bx += 6; // slide right until clear of the marks
+    const hit = () => obst.some(([x0, y0, x1, y1]) => x0 < bx + lw + 2 && x1 > bx - 4 && y0 < ly + 5 && y1 > ly - 13);
+    while (bx < W * 0.5 && hit()) bx += 4; // slide right until clear of the marks
+    if (bx >= W * 0.5) bx = M.l + 6; // nowhere clear: stay at the edge
     bandLabels.push({ x: bx, y: ly, w: lw });
     svg
       .append('rect')
@@ -124,12 +140,14 @@ export function drawA(el = document.getElementById('svgA')) {
       d3
         .axisLeft(y)
         .tickValues([10, 100, 300, 1000, 3000, 10000, 30000])
+        .tickSize(phone ? 4 : 6) // phone: shorter ticks leave a clear gap between the "300" label and the rotated axis title
+        .tickPadding(phone ? 2 : 3)
         .tickFormat((d) => (d >= 1000 ? d / 1000 + 'k' : d)),
     );
   svg
     .append('text')
     .attr('class', 'ann-sub')
-    .attr('transform', `translate(${phone ? 9 : 12},${top + plotH / 2}) rotate(-90)`)
+    .attr('transform', `translate(${phone ? 9.5 : 12},${top + plotH / 2}) rotate(-90)`)
     .attr('text-anchor', 'middle')
     .style('font-size', phone ? '10px' : null)
     .text('Altitude, km (log)');
@@ -150,11 +168,6 @@ export function drawA(el = document.getElementById('svgA')) {
     .attr('y', sy - 5)
     .text(phone ? 'ALTITUDE NOT REPORTED' : 'ALTITUDE NOT REPORTED (no point on the scale)');
   xAxis(svg, x, sy + stripH, zoomed ? 5 : undefined);
-  // debris scale
-  const rD = d3
-    .scaleSqrt()
-    .domain([0, 3600])
-    .range([0, phone ? 22 : 30]);
   // handoff marker
   handoff(svg, x, top, sy + stripH, null)
     .append('text')
@@ -190,7 +203,9 @@ export function drawA(el = document.getElementById('svgA')) {
     .attr(
       'aria-label',
       (d) =>
-        `${fmtD(d)}. ${d.state}, ${d.system} against ${d.target}. ${TYPE_LABEL[d.type]}. Altitude ${d.altitude_km == null ? 'not reported' : d.altitude_km + ' km'}.${d.fragments_cataloged ? ' ' + d.fragments_cataloged + ' fragments cataloged.' : ''}${hasScene(d) ? ' Opens 3D scene.' : ''}`,
+        `${fmtD(d)}. ${d.state}, ${d.system} against ${d.target}. ${TYPE_LABEL[d.type]}. Altitude ` +
+        `${d.altitude_km == null ? 'not reported' : d.altitude_km + ' km'}` +
+        `.${d.fragments_cataloged ? ' ' + d.fragments_cataloged + ' fragments cataloged.' : ''}${hasScene(d) ? ' Opens 3D scene.' : ''}`,
     );
   g.each(function (d) {
     const s = d3.select(this),
@@ -351,7 +366,7 @@ export function drawA(el = document.getElementById('svgA')) {
       .append('text')
       .attr('class', 'zoom-flag')
       .attr('x', W - M.r)
-      .attr('y', top + plotH - 6)
+      .attr('y', top - 12)
       .attr('text-anchor', 'end')
       .text(`ZOOMED 2004–26 · ${KIN.length - KV.length} earlier tests hidden`);
   if (!EXPORTING) {
@@ -377,8 +392,17 @@ export function drawA(el = document.getElementById('svgA')) {
   const sizes = [100, 1000, 3500],
     mx = rD(3500),
     bw = mx * 2 + 46;
+  const bubble = (sz) => {
+    const r = rD(sz),
+      cy = mx * 2 + 3 - r;
+    return (
+      `<circle cx="${mx + 2}" cy="${cy}" r="${r}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/>` +
+      `<text x="${mx * 2 + 8}" y="${cy - r + 9}" style="fill:var(--muted);font:10px var(--sans)">${d3.format(',')(sz)}</text>`
+    );
+  };
   L.raw(
-    `<li class="wide"><svg width="${bw}" height="${mx * 2 + 6}" viewBox="0 0 ${bw} ${mx * 2 + 6}" aria-hidden="true">${sizes.map((sz) => `<circle cx="${mx + 2}" cy="${mx * 2 + 3 - rD(sz)}" r="${rD(sz)}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/><text x="${mx * 2 + 8}" y="${mx * 2 + 3 - rD(sz) * 2 + 9}" style="fill:var(--muted);font:10px var(--sans)">${d3.format(',')(sz)}</text>`).join('')}</svg><span>Debris bubble area = cataloged fragments (as of Feb. 2026). Still-in-orbit counts appear in cards and the table, never on this scale.</span></li>`,
+    `<li class="wide"><svg width="${bw}" height="${mx * 2 + 6}" viewBox="0 0 ${bw} ${mx * 2 + 6}" aria-hidden="true">${sizes.map(bubble).join('')}</svg>` +
+      '<span>Debris bubble area = cataloged fragments (as of Feb. 2026). Still-in-orbit counts appear in cards and the table, never on this scale.</span></li>',
   );
   L.done();
   // table

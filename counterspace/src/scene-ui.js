@@ -74,9 +74,12 @@ export async function openScene(id, originEl) {
   document.getElementById('sceneCaption').textContent = cfg.caption;
   const ev = byId[cfg.event];
   document.getElementById('sceneSrc').innerHTML =
-    `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}${cfg.related ? '' : ' <span class="nolaw">· No specific legal item</span>'}`;
+    `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}` +
+    `${cfg.related ? '' : ' <span class="nolaw">· No specific legal item</span>'}`;
   document.getElementById('sceneScale').textContent =
-    `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to scale.${cfg.scaleNote ? ' ' + cfg.scaleNote : ''} Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
+    `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to ` +
+    `scale.${cfg.scaleNote ? ' ' + cfg.scaleNote : ''} Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it ` +
+    `cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
   const rel = document.getElementById('scRelated');
   rel.disabled = !cfg.related;
   document.getElementById('asideLaw').classList.toggle('none', !cfg.related); // no legal item: a slim note, not a full-width bar
@@ -120,9 +123,8 @@ export async function openScene(id, originEl) {
   asideBody.scrollTop = 0;
   requestAnimationFrame(updateCue);
   setStatus(
-    `Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} stages are listed under “What happens in this scene”.`
-      .replace(/\s+/g, ' ')
-      .trim(),
+    `Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} ` +
+      `stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim(),
     true,
   );
   document.getElementById('scClose').focus();

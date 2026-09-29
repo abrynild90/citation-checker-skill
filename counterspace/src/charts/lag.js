@@ -47,7 +47,9 @@ export function drawL(el = document.getElementById('svgL')) {
   svg
     .append('desc')
     .text(
-      'Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the later legal or policy step (circle for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the elapsed time in years, shown as chronology, not causation. An open ring means no later legal item is paired in the ledger.',
+      'Dumbbell chart: for each pair, a hexagon marks the capability milestone and a shape marks the later legal or policy step (circle ' +
+        'for treaty, square for a resolution or body finding, triangle for a unilateral pledge). The gap is the elapsed time in years, ' +
+        'shown as chronology, not causation. An open ring means no later legal item is paired in the ledger.',
     );
   svg
     .append('g')

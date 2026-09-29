@@ -40,7 +40,12 @@ const SHORT = {
   'itu-rrb-2025': 'RRB ’25',
 };
 export const ABBR_NOTE =
-  'LTBT: Limited Test Ban Treaty. OST: Outer Space Treaty. ABM Art. XII: ABM Treaty (non-interference with national technical means). PAROS: Prevention of an Arms Race in Outer Space. CD: Conference on Disarmament. ITU Arts. 45/48: ITU Constitution (harmful interference; military radio services). PPWT: Russia-China draft treaty on the placement of weapons in outer space. UNGA 75/36 and 77/41: UN General Assembly resolutions. OEWG: Open-ended Working Group. US pledge: 2022 US DA-ASAT test moratorium. Veto: Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit (it did not concern DA-ASAT testing). RRB: ITU Radio Regulations Board. ICAO: International Civil Aviation Organization. An asterisk marks soft law (expert manuals, not binding).';
+  'LTBT: Limited Test Ban Treaty. OST: Outer Space Treaty. ABM Art. XII: ABM Treaty (non-interference with national technical means). ' +
+  'PAROS: Prevention of an Arms Race in Outer Space. CD: Conference on Disarmament. ITU Arts. 45/48: ITU Constitution (harmful ' +
+  'interference; military radio services). PPWT: Russia-China draft treaty on the placement of weapons in outer space. UNGA 75/36 and ' +
+  '77/41: UN General Assembly resolutions. OEWG: Open-ended Working Group. US pledge: 2022 US DA-ASAT test moratorium. Veto: ' +
+  'Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit (it did not concern DA-ASAT testing). RRB: ' +
+  'ITU Radio Regulations Board. ICAO: International Civil Aviation Organization. An asterisk marks soft law (expert manuals, not binding).';
 const SPAN_LABEL = {
   'paros-1981': 'PAROS: UNGA agenda item since 1981',
   'cd-paros-committee': 'CD Ad Hoc Cttee on PAROS, 1985–94',
@@ -117,9 +122,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     small = phone || compact;
   const FS = 10.5,
     PITCH = 13,
-    TP = phone ? 16 : compact ? 14 : 25,
+    TP = phone ? 16 : compact ? 11 : 25,
     SEP = phone ? 20 : compact ? 16 : 32,
-    GS = phone ? 0.85 : compact ? 0.75 : 1;
+    GS = phone ? 0.85 : compact ? 0.7 : 1;
   const spans = LEGAL.filter(
     (l) =>
       l.kind === 'negotiation_span' &&
@@ -245,13 +250,15 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         out = [];
       let mu = -1,
         md = -1,
+        cross = 0,
         ok = true;
       for (const d of order) {
         const t = zoom ? (isPhoneNow() ? SHORT[d.id] || ABBR[d.id] : ABBR[d.id]) || d.label : SHORT[d.id] || ABBR[d.id] || d.label,
           w = tw(t, FS, 600);
         let hit = null;
         for (let k = 0; k < 12 && !hit; k++)
-          for (const dir of ['dn', 'up']) {
+          // Phone strip: a raised (dodged) mark hangs its label ABOVE first (within two rows), so its leader does not run down through the mark line.
+          for (const dir of strip && d._t && k < 2 ? ['up', 'dn'] : ['dn', 'up']) {
             if (hit) break;
             for (const [anchor, dx] of anchorsOf[prim(d)]) {
               const off = dir === 'up' ? -(top0 + k * PITCH) : 20 + k * PITCH,
@@ -261,7 +268,10 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
                 pl.r.push([...q, 'T'], [...ld, 'L']);
                 hit = { d, t, tx: d._cx + dx, off, anchor, dir };
                 if (dir === 'up') mu = Math.max(mu, k);
-                else md = Math.max(md, k);
+                else {
+                  md = Math.max(md, k);
+                  if (d._t) cross++;
+                }
                 break;
               }
             }
@@ -273,7 +283,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         out.push(hit);
       }
       if (!commit || !ok) pl.r.length = base;
-      return ok ? { out, mu, md, cost: mu + 1 + (md + 1) } : null;
+      return ok ? { out, mu, md, cost: mu + 1 + (md + 1) + (strip ? cross * 0.4 : 0) } : null;
     };
     clusters.forEach((list) => {
       const cands = [];
@@ -326,7 +336,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         }
       });
   }
-  const yMark = small ? TP * maxT + 12 : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 24, key ? -key.rel + 8 : 0);
+  const yMark = small
+    ? TP * maxT + (compact ? 8 : 12)
+    : Math.max(maxUp >= 0 ? top0 + maxUp * PITCH + 12 : 0, TP * maxT + 24, key ? -key.rel + 8 : 0);
   const dnSpace = !small && maxDn >= 0 ? 20 + maxDn * PITCH + 8 : 0;
   // spans: lanes below the mark line (and below any labels hanging under it)
   const lanes = [];
@@ -346,9 +358,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       d._b = b;
     });
   const laneP = phone ? 9 : compact ? 6 : 18,
-    lane0 = yMark + (small ? (compact ? 23 : 14) : Math.max(28, dnSpace + 18));
+    lane0 = yMark + (small ? (compact ? 19 : 14) : Math.max(28, dnSpace + 18));
   const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10),
-    H = yAx + 22;
+    H = yAx + (compact ? 16 : 22);
   const svg = d3
     .select(el)
     .append('svg')
@@ -593,7 +605,9 @@ function stripPos() {
 function tapLegal(d, el) {
   const box = document.getElementById('legalTap'),
     when = d.end ? `${fmtY(parse(d.start))}–${fmtY(parse(d.end))}` : fmt(parse(d.start));
-  box.innerHTML = `<b>${esc(d.label)}</b> · ${when}${d.soft_law ? ' · soft law' : ''}<br>${esc(d.short_note)}${hasScene(d) ? ' <button class="btn small" type="button">Open 3D scene</button>' : ''}`;
+  box.innerHTML =
+    `<b>${esc(d.label)}</b> · ${when}${d.soft_law ? ' · soft law' : ''}<br>${esc(d.short_note)}` +
+    `${hasScene(d) ? ' <button class="btn small" type="button">Open 3D scene</button>' : ''}`;
   box.dataset.on = '1';
   box.hidden = false;
   box.querySelector('button')?.addEventListener('click', () => hooks.openScene(d.scene_3d, el));
@@ -648,7 +662,8 @@ function drawLegalList() {
     .sort((a, b) => (a.start < b.start ? -1 : 1))
     .map(
       (l) =>
-        `<li><span class="ld">${l.end ? fmtY(parse(l.start)) + '–' + fmtY(parse(l.end)) : fmtMY(parse(l.start))}</span> <b>${esc(l.label)}</b>${l.soft_law ? ' <i>(soft law)</i>' : ''}<span class="ls">${esc(l.short_note)}</span></li>`,
+        `<li><span class="ld">${l.end ? fmtY(parse(l.start)) + '–' + fmtY(parse(l.end)) : fmtMY(parse(l.start))}</span> <b>${esc(l.label)}` +
+        `</b>${l.soft_law ? ' <i>(soft law)</i>' : ''}<span class="ls">${esc(l.short_note)}</span></li>`,
     )
     .join('');
 }

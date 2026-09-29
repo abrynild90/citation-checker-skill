@@ -41,7 +41,10 @@ const EXPORT_SPEC = {
     }),
     bubbles: true, // frameExport adds a size key (debris bubble area) under the colour key
     title: 'Chart A · Kinetic tests: altitude over time',
-    key: 'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. 2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.',
+    key:
+      'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: ' +
+      'apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. ' +
+      '2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.',
   },
   B: {
     id: 'svgB',
@@ -57,7 +60,12 @@ const EXPORT_SPEC = {
             ],
     }),
     title: 'Chart B · Capability diffusion',
-    key: 'Solid: capability demonstrated (tested or used). Hatched: developing or latent (SWF matrix supports it). Dotted fill: developing, builder-assessed (2020s entries for which the SWF matrix shows no data). Faded fill with dashed edge: reconstructed decades. Whisker above each decade: low end = demonstrated only, high end = demonstrated plus developing. Stack height counts state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, not assessed by SWF.',
+    key:
+      'Solid: capability demonstrated (tested or used). Hatched: developing or latent (SWF matrix supports it). Dotted fill: ' +
+      'developing, builder-assessed (2020s entries for which the SWF matrix shows no data). Faded fill with dashed edge: reconstructed ' +
+      'decades. Whisker above each decade: low end = demonstrated only, high end = demonstrated plus developing. Stack height counts ' +
+      'state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, ' +
+      'not assessed by SWF.',
   },
   C: {
     id: 'svgC',
@@ -70,9 +78,11 @@ const EXPORT_SPEC = {
     get key() {
       return (
         (stateC.focus
-          ? 'Zoomed view: the axis is 1995–2026, not the shared 1957–2026 axis (the ledger has no earlier non-kinetic entry; earliest: 1997 MIRACL laser test). '
+          ? 'Zoomed view: the axis is 1995–2026, not the shared 1957–2026 axis (the ledger has no earlier non-kinetic entry; earliest: ' +
+            '1997 MIRACL laser test). '
           : '') +
-        'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.'
+        'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: ' +
+        'researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.'
       );
     },
   },
@@ -94,7 +104,9 @@ const EXPORT_SPEC = {
     get key() {
       return (
         (zoomedR() ? 'Zoomed view: the axis is 2000–2026, not the shared 1957–2026 axis. ' : '') +
-        'Circle: rendezvous or proximity operation. Square: docking. Triangle: capture and tow. Diamond: release of an object. Bar: spaceplane mission, launch to landing. Solid: stated plainly by SWF. Outline: hedged by SWF. Dashed outline: unclear or conflicted. Arrowhead: ongoing. ' +
+        'Circle: rendezvous or proximity operation. Square: docking. Triangle: capture and tow. Diamond: release of an object. Bar: ' +
+        'spaceplane mission, launch to landing. Solid: stated plainly by SWF. Outline: hedged by SWF. Dashed outline: unclear or ' +
+        'conflicted. Arrowhead: ongoing. ' +
         R_VERT_NOTE +
         ' A proximity operation is not an attack; SWF’s wording on intent is hedged.'
       );
@@ -104,20 +116,25 @@ const EXPORT_SPEC = {
     id: 'svgL',
     draw: () => drawL,
     title: 'Chronology: capability milestones and later legal steps',
-    key: 'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. Open ring: no later legal item paired in the ledger (not a claim that no rule exists). Chronology only: a pair shows which came first, not causation.',
+    key:
+      'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. ' +
+      'Open ring: no later legal item paired in the ledger (not a claim that no rule exists). Chronology only: a pair shows which came first, not causation.',
   },
   legal: {
     id: 'legalSvg',
     draw: () => drawLegal,
     title: 'Law and policy responses, 1957–2026',
     key:
-      'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond: soft law (expert manual, not binding). Cross: veto. Bars: negotiation spans. Marks that would collide are stacked vertically; each stays at its true date on the axis. ' +
+      'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond: soft law (expert manual, not binding). ' +
+      'Cross: veto. Bars: negotiation spans. Marks that would collide are stacked vertically; each stays at its true date on the axis. ' +
       ABBR_NOTE,
   },
 };
 const EXPORT_W = 1200,
   SANS_EXPORT = 'system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
-const SOURCE_LINE = `Source: Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment (9th ed., Apr. 2026) and the primary sources cited in the ledger. Data as of ${AS_OF}. Companion to Space Security Law: Governance Beyond the Atmosphere.`;
+const SOURCE_LINE =
+  `Source: Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment (9th ed., Apr. 2026) and ` +
+  `the primary sources cited in the ledger. Data as of ${AS_OF}. Companion to Space Security Law: Governance Beyond the Atmosphere.`;
 // Copy computed presentation properties onto the clone so the file renders the same without the page's stylesheet.
 function inlineStyles(src, clone) {
   const a = src.querySelectorAll('*'),

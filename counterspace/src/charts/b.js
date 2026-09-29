@@ -82,7 +82,9 @@ export function drawB(el = document.getElementById('svgB')) {
     .filter(([, v]) => v === 'D')
     .map(([k]) => k);
   const annHead = `Electronic warfare drives most of the crowding: ${ew20} states in the 2020s.`;
-  const annSub = `Demonstrated destructive DA-ASAT capability has stayed at four states: ${da20.map((s) => (s === 'Russia' ? 'USSR/Russia' : s === 'United States' ? 'US' : s)).join(', ')}.`;
+  const annSub =
+    `Demonstrated destructive DA-ASAT capability has stayed at four states: ` +
+    `${da20.map((s) => (s === 'Russia' ? 'USSR/Russia' : s === 'United States' ? 'US' : s)).join(', ')}.`;
   const annW = W - 24,
     annL = wrap(annHead, annW, 12, 600),
     annS = wrap(annSub, annW, 11.5),
@@ -289,13 +291,15 @@ export function drawB(el = document.getElementById('svgB')) {
   document.getElementById('noteB').textContent =
     stateB.group === 'cat'
       ? 'Stack height counts state-capability pairs: a state with two capabilities counts twice. The number above each decade is a range (whisker).'
-      : 'Unique states per group, not pairs. A state with both kinds is counted once in each band, so the bands can sum to more than the number of states. The number above each decade is a range (whisker).';
+      : 'Unique states per group, not pairs. A state with both kinds is counted once in each band, so the bands can sum to more than the ' +
+        'number of states. The number above each decade is a range (whisker).';
   {
     const kk = document.getElementById('kinKeyB'),
       kin = stateB.group === 'kin';
     kk.hidden = !kin;
     kk.innerHTML = kin
-      ? '<span><i style="background:var(--cat-da)"></i>Kinetic (direct-ascent, co-orbital)</span><span><i style="background:var(--cat-ew)"></i>Non-kinetic (EW, directed energy, cyber)</span>'
+      ? '<span><i style="background:var(--cat-da)"></i>Kinetic (direct-ascent, co-orbital)</span><span><i ' +
+        'style="background:var(--cat-ew)"></i>Non-kinetic (EW, directed energy, cyber)</span>'
       : '';
   }
   // legend + chips
@@ -310,12 +314,14 @@ export function drawB(el = document.getElementById('svgB')) {
     )
       .item(sw('', `style="fill:${C};fill-opacity:.85"`), '<b>Solid</b>: demonstrated, tested or used (verified against SWF)')
       .item(
-        `<defs><pattern id="lgH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${C};fill-opacity:.14"/><line y2="6" style="stroke:${C};stroke-width:2.2"/></pattern></defs>` +
+        `<defs><pattern id="lgH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" ` +
+          `height="6" style="fill:${C};fill-opacity:.14"/><line y2="6" style="stroke:${C};stroke-width:2.2"/></pattern></defs>` +
           sw('', 'fill="url(#lgH)"'),
         '<b>Hatched</b>: developing or latent',
       )
       .item(
-        `<defs><pattern id="lgD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${C};fill-opacity:.06"/><circle cx="2.5" cy="2.5" r="1" style="fill:${C}"/></pattern></defs>` +
+        `<defs><pattern id="lgD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${C}` +
+          `;fill-opacity:.06"/><circle cx="2.5" cy="2.5" r="1" style="fill:${C}"/></pattern></defs>` +
           sw('', 'fill="url(#lgD)"'),
         '<b>Dotted</b>: developing, builder-assessed (2020s; SWF matrix: no data)',
       )
@@ -341,7 +347,11 @@ export function drawB(el = document.getElementById('svgB')) {
         const D_ = Object.keys(o).filter((k) => o[k] === 'D'),
           P_ = Object.keys(o).filter((k) => o[k] === 'P' && !isNoData(c.key, d, k)),
           N_ = Object.keys(o).filter((k) => o[k] === 'P' && isNoData(c.key, d, k));
-        return `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}${N_.length ? `; ${N_.length} developing, builder-assessed, SWF matrix: no data (${N_.join(', ')})` : ''}`;
+        return (
+          `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} ` +
+          `developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}` +
+          `${N_.length ? `; ${N_.length} developing, builder-assessed, SWF matrix: no data (${N_.join(', ')})` : ''}`
+        );
       }),
     ]),
   );

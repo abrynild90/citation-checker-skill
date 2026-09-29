@@ -23,17 +23,21 @@ import {
 } from './app.js';
 import { hooks } from './shared.js';
 const card = document.getElementById('card');
-function showCard(html, evt, el) {
+function showCard(html, evt, el, full = false) {
   card.innerHTML = html;
+  card.classList.toggle('full', full);
   card.classList.add('on');
   card.setAttribute('aria-hidden', 'false');
-  card.classList.toggle('dock', innerWidth < PHONE_MAX);
+  const dock = innerWidth < PHONE_MAX;
+  card.classList.toggle('dock', dock);
+  // A docked card is a column: the text scrolls in .cbody and the dismiss / scroll cue is a footer of its own, so the cue never prints over text.
+  if (dock) card.innerHTML = `<div class="cbody">${html}</div>`;
   card.dataset.touch = touchMode ? '1' : '';
   shownY = scrollY;
-  if (innerWidth < PHONE_MAX) {
+  if (dock) {
     card.style.left = '';
     card.style.top = '';
-    card.scrollTop = 0;
+    card.firstChild.scrollTop = 0;
     dockCue();
     return;
   }
@@ -42,7 +46,8 @@ function showCard(html, evt, el) {
   // two only when no empty spot is near (cheap, not free) and keeps off the lane titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
     WM = near ? 1.5 : 6;
-  card.style.maxWidth = near ? '340px' : '';
+  card.style.maxWidth = near ? (card.classList.contains('full') ? '340px' : '260px') : '';
+  card.classList.toggle('cc', near && !full); // compact RPO hover card: heading clamped to two lines
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
@@ -73,7 +78,16 @@ function showCard(html, evt, el) {
   const mid = (r.top + r.bottom) / 2,
     cx = (r.left + r.right) / 2;
   const H = 3 * G,
+    // On the dense RPO strip the card prefers the space above or below the whole chart (outside every lane), so it hides no row.
+    outside =
+      near && root
+        ? (({ top, bottom }) => [
+            [cx - cw / 2, top - ch - 8],
+            [cx - cw / 2, bottom + 8],
+          ])(root.getBoundingClientRect())
+        : [],
     cands = [
+      ...outside,
       [r.right + G, mid - ch / 2],
       [r.left - cw - G, mid - ch / 2],
       [cx - cw / 2, r.top - ch - G],
@@ -125,9 +139,10 @@ function showCard(html, evt, el) {
 }
 // A docked (phone) card is capped in height and scrolls inside itself; while more text lies below the fold a visible cue says so.
 function dockCue() {
-  card.classList.toggle('more', card.scrollHeight - card.clientHeight - card.scrollTop > 6);
+  const b = card.querySelector('.cbody');
+  card.classList.toggle('more', !!b && b.scrollHeight - b.clientHeight - b.scrollTop > 6);
 }
-card.addEventListener('scroll', dockCue, { passive: true });
+card.addEventListener('scroll', dockCue, { passive: true, capture: true }); // scroll does not bubble: capture it from the .cbody
 let touchMode = false,
   shownY = 0;
 // A touch card is dismissed by scrolling the page (more than 24 px from where it opened), as well as by a tap outside it.
@@ -158,18 +173,31 @@ const srcLine = (r) => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}
 export function kinCard(e) {
   const debris =
     e.type === 'destructive'
-      ? `<dt>Fragments</dt><dd>${num(e.fragments_cataloged)} cataloged · ${num(e.fragments_in_orbit)} still in orbit (as of ${fmtMY(parse(e.fragments_as_of + '-01'))})</dd>`
+      ? `<dt>Fragments</dt><dd>${num(e.fragments_cataloged)} cataloged · ${num(e.fragments_in_orbit)} still in orbit (as of ` +
+        `${fmtMY(parse(e.fragments_as_of + '-01'))})</dd>`
       : '';
   const alt = e.altitude_km == null ? 'not reported' : `${num(e.altitude_km)} km (${e.altitude_kind})`;
   const mdo =
     e.id === 'us-2008-burnt-frost'
       ? '<div class="hint">Missile-defense interceptor (SM-3) used against a satellite: shows the missile-defense / ASAT overlap.</div>'
       : '';
-  return `<h4>${esc(e.system)} → ${esc(e.target)}</h4><dl><dt>Date</dt><dd>${fmtD(e)}</dd><dt>State</dt><dd>${esc(e.state)}</dd><dt>Type</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>Confidence</dt><dd>${e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`;
+  return (
+    `<h4>${esc(e.system)} → ${esc(e.target)}</h4><dl><dt>Date</dt><dd>${fmtD(e)}</dd><dt>State</dt><dd>${esc(e.state)}` +
+    `</dd><dt>Type</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>Confidence</dt><dd>${e.confidence}` +
+    `</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`
+  );
 }
 export function nkCard(e) {
   const span = e.end === e.start ? fmt(parse(e.start)) : `${fmtMY(parse(e.start))} – ${e.end ? fmtMY(parse(e.end)) : 'ongoing'}`;
-  return `<h4>${esc(e.target_system)}</h4><dl><dt>When</dt><dd>${span}</dd><dt>Actor</dt><dd>${esc(e.actor)}</dd><dt>Attribution</dt><dd>${ATTR_LABEL[e.attribution]}</dd><dt>Category</dt><dd>${e.category.replace('_', ' ')}</dd><dt>Target</dt><dd>${REGIME_LABEL[e.target_regime]}</dd><dt>Use</dt><dd>${e.operational_use ? 'Operational (in conflict)' : 'Test, demonstration or peacetime'}</dd><dt>Effect</dt><dd>${esc(e.effect)}</dd><dt>Confidence</dt><dd>${e.confidence}</dd></dl>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`;
+  return (
+    `<h4>${esc(e.target_system)}</h4><dl><dt>When</dt><dd>${span}</dd><dt>Actor</dt><dd>${esc(e.actor)}` +
+    `</dd><dt>Attribution</dt><dd>${ATTR_LABEL[e.attribution]}</dd><dt>Category</dt><dd>${e.category.replace('_', ' ')}` +
+    `</dd><dt>Target</dt><dd>${REGIME_LABEL[e.target_regime]}` +
+    `</dd><dt>Use</dt><dd>${e.operational_use ? 'Operational (in conflict)' : 'Test, demonstration or peacetime'}` +
+    `</dd><dt>Effect</dt><dd>${esc(e.effect)}</dd><dt>Confidence</dt><dd>${e.confidence}` +
+    `</dd></dl>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}` +
+    `${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`
+  );
 }
 export const coWhen = (e) => {
   const f = e.date_precision === 'month' ? fmtMY : e.date_precision === 'year' ? fmtY : fmt,
@@ -177,14 +205,35 @@ export const coWhen = (e) => {
     b = e.end ? f(parse(e.end)) : null;
   return b === a || e.end === e.start ? a : `${a} – ${b || 'ongoing (SWF, Apr. 2026)'}`;
 };
-export function coCard(e) {
-  return `<h4>${esc(e.system)}${e.target ? ' → ' + esc(e.target) : ''}</h4><dl><dt>When</dt><dd>${coWhen(e)}</dd><dt>Actor</dt><dd>${esc(e.actor)}</dd><dt>Activity</dt><dd>${ACTIVITY[e.activity]}</dd><dt>Orbit</dt><dd>${REGIME_CO[e.orbit_regime]}</dd><dt>Confidence</dt><dd>${e.confidence}</dd></dl><div>${esc(e.description)}</div>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : '<div class="hint">A proximity operation is not an attack; SWF’s wording on intent is hedged.</div>'}`;
+// Compact form (desktop hover on the dense RPO strip): heading plus the key fields only, so the card stays small and hides few neighbouring rows.
+// Click or Enter shows the full card (description, notes, source). Phones dock the full card, which scrolls inside itself.
+export function coCard(e, compact = false) {
+  const hint = hasScene(e)
+    ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>'
+    : compact
+      ? '<div class="hint">more… click or press Enter</div>'
+      : '<div class="hint">A proximity operation is not an attack; SWF’s wording on intent is hedged.</div>';
+  const fields =
+    `<dt>When</dt><dd>${coWhen(e)}</dd>` +
+    (compact ? '' : `<dt>Actor</dt><dd>${esc(e.actor)}</dd>`) + // compact: the lane already names the actor
+    `<dt>Activity</dt><dd>${ACTIVITY[e.activity]}</dd>` +
+    (compact ? '' : `<dt>Orbit</dt><dd>${REGIME_CO[e.orbit_regime]}</dd>`) +
+    `<dt>Confidence</dt><dd>${e.confidence}</dd>`;
+  const head = `<h4>${esc(e.system)}${e.target ? ' → ' + esc(e.target) : ''}</h4><dl>${fields}</dl>`;
+  if (compact) return head + hint;
+  return `${head}<div>${esc(e.description)}</div>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}${hint}`;
 }
 export function legalCard(l) {
   const when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start));
-  return `<h4>${esc(l.label)}</h4><dl><dt>Date</dt><dd>${when}</dd><dt>Kind</dt><dd>${l.soft_law ? 'Soft law (expert manual, not binding)' : l.kind.replace('_', ' ')}</dd></dl><div>${esc(l.short_note)}</div><div class="src">${esc(l.citation)}</div>${hasScene(l) ? '<div class="hint">▣ Click, tap or press Enter to open the related 3D scene</div>' : ''}`;
+  return (
+    `<h4>${esc(l.label)}</h4><dl><dt>Date</dt><dd>${when}` +
+    `</dd><dt>Kind</dt><dd>${l.soft_law ? 'Soft law (expert manual, not binding)' : l.kind.replace('_', ' ')}` +
+    `</dd></dl><div>${esc(l.short_note)}</div><div class="src">${esc(l.citation)}` +
+    `</div>${hasScene(l) ? '<div class="hint">▣ Click, tap or press Enter to open the related 3D scene</div>' : ''}`
+  );
 }
-// Keyboard modality: while the user navigates with keys, a mouse hover never replaces the card of the focused mark; the card always belongs to the focused mark.
+// Keyboard modality: while the user navigates with keys, a mouse hover never replaces the card of the focused mark;
+// the card always belongs to the focused mark.
 let kbd = false,
   cardEl = null;
 document.addEventListener(
@@ -255,22 +304,27 @@ function announceCard() {
   void card.offsetWidth;
   card.classList.add('pulse');
   setTimeout(() => card.classList.remove('pulse'), 900);
-  const say = [...card.querySelectorAll('h4, dl, div:not(.hint)')]
+  const say = [...card.querySelectorAll('h4, dl, div:not(.hint):not(.ack-line)')]
     .map((n) => n.textContent.replace(/\s+/g, ' ').trim())
     .filter(Boolean)
     .join('. ');
   live.textContent = '';
   setTimeout(() => (live.textContent = `Details shown. ${say} No 3D scene for this item.`), 60);
 }
+const cardFor = (d, full) =>
+  d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d, !full) : d.domain ? nkCard(d) : legalCard(d);
 export const activate = (d, el, ev) => {
   if (hasScene(d)) {
     hideCard();
     hooks.openScene(d.scene_3d, el);
-  } else {
-    showCard(d.domain ? (d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d) : nkCard(d)) : legalCard(d), ev, el);
-    cardEl = el;
-    announceCard();
+    return;
   }
+  // No scene: show the full card with a visible confirmation (a line in the card and a brief ring on the mark); announceCard() reads it out.
+  showCard('<div class="ack-line">✓ Details shown · no 3D scene for this item</div>' + cardFor(d, true), ev, el, true);
+  cardEl = el;
+  el.classList.add('ack');
+  setTimeout(() => el.classList.remove('ack'), 1600);
+  announceCard();
 };
 
 // In-page links: draw the lazily drawn charts first, so the heights above the target are final and the jump lands on the heading (not 600 px off).
@@ -371,8 +425,9 @@ const CAPTIONS = {
   tableLegal: 'Law and policy items with abbreviations',
 };
 export function table(id, head, rows, caption = CAPTIONS[id]) {
-  setOnce(
-    id,
-    `<table>${caption ? `<caption>${esc(caption)}</caption>` : ''}<thead><tr>${head.map((h) => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`,
-  );
+  const cell = (c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`;
+  const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
+  const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
+  const th = head.map((h) => `<th scope="col">${h}</th>`).join('');
+  setOnce(id, `<table>${cap}<thead><tr>${th}</tr></thead><tbody>${rows.map(tr).join('')}</tbody></table>`);
 }

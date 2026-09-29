@@ -53,7 +53,8 @@ function attrStyle(sel, d) {
   else if (d.attribution === 'researcher_osint') sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2);
   else sel.style('fill', 'var(--bg)').style('stroke', c).style('stroke-width', 2).style('stroke-dasharray', '4 2.5');
 }
-// stateC.focus: null = the default (zoom 1995-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere); true / false = the reader's choice.
+// stateC.focus: null = the default (zoom 1995-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere);
+// true / false = the reader's choice.
 export const stateC = { focus: null };
 export const zoomedC = () => stateC.focus ?? isPhoneNow();
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
@@ -79,7 +80,8 @@ export function drawC(el = document.getElementById('svgC')) {
   let yCur = top;
   const placed = [];
   // Labels are never truncated: each one is wrapped (up to 3 lines when it fits, more only as a last resort) and is kept clear of the 2021 hand-off line.
-  // Candidates: (A) above the bar, starting at its left end; (B) to the left of the mark; (G) in the gutter left of the hand-off line, joined to the mark by a dotted leader.
+  // Candidates: (A) above the bar, starting at its left end; (B) to the left of the mark;
+  // (G) in the gutter left of the hand-off line, joined to the mark by a dotted leader.
   const plan = (e) => {
     const point = e.end === e.start,
       X0 = XS(e),
@@ -182,7 +184,9 @@ export function drawC(el = document.getElementById('svgC')) {
   svg
     .append('desc')
     .text(
-      'Swimlane chart of non-kinetic counterspace operations by category. Bars are sustained campaigns; points are discrete events; arrowheads mark ongoing campaigns. Solid fill means official or multi-government attribution, outline means researcher or open-source attribution, dashed outline means alleged. A data table follows the chart.',
+      'Swimlane chart of non-kinetic counterspace operations by category. Bars are sustained campaigns; points are discrete events; ' +
+        'arrowheads mark ongoing campaigns. Solid fill means official or multi-government attribution, outline means researcher or ' +
+        'open-source attribution, dashed outline means alleged. A data table follows the chart.',
     );
   LANES.forEach((l, i) => {
     svg
@@ -323,7 +327,11 @@ export function drawC(el = document.getElementById('svgC')) {
     .attr('data-t', (d) => +parse(d.e.start))
     .attr('aria-label', (d) => {
       const e = d.e;
-      return `${e.actor}: ${e.target_system}. ${e.end === e.start ? fmt(parse(e.start)) : `${fmtY(parse(e.start))} to ${e.end ? fmtY(parse(e.end)) : 'ongoing'}`}. Attribution: ${ATTR_LABEL[e.attribution]}.${hasScene(e) ? ' Opens 3D scene.' : ''}`;
+      return (
+        `${e.actor}: ${e.target_system}. ` +
+        `${e.end === e.start ? fmt(parse(e.start)) : `${fmtY(parse(e.start))} to ${e.end ? fmtY(parse(e.end)) : 'ongoing'}`}. Attribution: ` +
+        `${ATTR_LABEL[e.attribution]}.${hasScene(e) ? ' Opens 3D scene.' : ''}`
+      );
     });
   g.each(function (d) {
     const e = d.e,
@@ -395,8 +403,10 @@ export function drawC(el = document.getElementById('svgC')) {
   addGuide(svg, x, top, yCur);
   if (EXPORTING) return;
   document.getElementById('noteC').innerHTML = zoomedC()
-    ? `<span class="zbadge">Zoomed</span> Axis 1995–2026${stateC.focus === null ? ' (the default on phones)' : ''}: an enlargement of the recent decades, no longer aligned with the Law band above or Charts A and B. Choose “Full span” to return to the shared scale.`
-    : 'Full span 1957–2026, on the same year axis as the Law band and Charts A and B. The ledger’s earliest non-kinetic entry is the 1997 MIRACL laser test, so the left of the chart is empty. Choose “Zoom 1995–2026” to enlarge the recent decades.';
+    ? `<span class="zbadge">Zoomed</span> Axis 1995–2026${stateC.focus === null ? ' (the default on phones)' : ''}: an enlargement of the ` +
+      `recent decades, no longer aligned with the Law band above or Charts A and B. Choose “Full span” to return to the shared scale.`
+    : 'Full span 1957–2026, on the same year axis as the Law band and Charts A and B. The ledger’s earliest non-kinetic entry is the 1997 ' +
+      'MIRACL laser test, so the left of the chart is empty. Choose “Zoom 1995–2026” to enlarge the recent decades.';
   document.getElementById('cFocus').setAttribute('aria-pressed', zoomedC());
   document.getElementById('cFull').setAttribute('aria-pressed', !zoomedC());
   const L = legend('legendC', 26, 16),

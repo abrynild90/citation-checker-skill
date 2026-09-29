@@ -107,11 +107,12 @@ h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 #timeline{position:relative}
 .legal-band{position:relative;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 0 2px}
 @media (min-width:761px){.legal-band{position:sticky;top:0;background:var(--bg)}}
-.legal-band.compact{padding-bottom:8px;border-bottom:1px solid var(--accent);box-shadow:0 8px 16px -6px var(--edge)}
+.legal-band.compact{padding:0 0 2px;border-bottom:1px solid var(--accent);box-shadow:0 8px 16px -6px var(--edge)}
 .legal-band::after{content:'';position:absolute;left:0;right:0;top:100%;height:18px;background:linear-gradient(var(--bg),transparent);pointer-events:none;opacity:0;transition:opacity .12s}
 .legal-band.compact::after{opacity:1}
 .mnum{font:700 10.5px var(--sans);fill:var(--accent);paint-order:stroke;stroke:var(--bg);stroke-width:2.5px;stroke-linejoin:round;pointer-events:none}
 .legal-band.compact .tools{visibility:hidden}
+.legal-band.compact .band-head{display:none}
 .legal-band .band-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);min-height:32px}
 .lbls-hidden{display:none}
 [hidden]{display:none!important}
@@ -181,6 +182,9 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 .band-label{fill:var(--faint);font:600 10.5px var(--sans);letter-spacing:.08em}
 .mark{cursor:pointer}
 .mark:focus{outline:none}
+.mark.ack .hit{stroke:var(--accent);stroke-width:3px;fill:transparent;animation:ackring 1.6s ease-out forwards}
+@keyframes ackring{0%{stroke-opacity:1}70%{stroke-opacity:1}100%{stroke-opacity:0}}
+@media (prefers-reduced-motion:reduce){.mark.ack .hit{animation:none}}
 .mark:focus-visible .hit,.mark.hl .hit{stroke:var(--focus);stroke-width:3px;fill:transparent}
 .hit{fill:transparent;stroke:none}
 .guide{stroke:var(--accent-2);stroke-width:1.5;stroke-dasharray:4 3;pointer-events:none}
@@ -196,9 +200,10 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 .card.pulse{animation:cardpulse .8s ease-out}
 @keyframes cardpulse{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.card.pulse{animation:none;outline:2px solid var(--accent)}}
-.card.dock{left:8px!important;right:8px;top:auto!important;bottom:8px;max-width:none;max-height:46vh;overflow:auto;pointer-events:auto;padding-top:14px}
-.card.dock.on::after{content:'Tap this card to dismiss';display:block;margin-top:8px;font-size:11.5px;color:var(--faint)}
-.card.dock.more.on::after{content:'\2193  Scroll for more \00b7 tap to dismiss';position:sticky;bottom:-10px;margin:8px -12px -10px;padding:22px 12px 10px;text-align:center;font-weight:600;color:var(--accent);background:linear-gradient(to bottom,transparent,var(--surface) 55%)}
+.card.dock{left:8px!important;right:8px;top:auto!important;bottom:8px;max-width:none;max-height:46vh;display:flex;flex-direction:column;overflow:hidden;pointer-events:auto;padding-top:14px}
+.card.dock .cbody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.card.dock.on::after{content:'Tap this card to dismiss';flex:none;margin-top:8px;font-size:11.5px;color:var(--faint)}
+.card.dock.more.on::after{content:'\2193  Scroll for more \00b7 tap to dismiss';flex:none;margin-top:6px;padding-top:6px;border-top:1px solid var(--grid);text-align:center;font-weight:600;color:var(--accent)}
 .howto{margin:12px 0 0;max-width:760px;font-size:14px;color:var(--muted)}
 .howto b{color:var(--text)}
 .legend svg text{font-family:var(--sans)}
@@ -208,6 +213,8 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 .card dd{margin:0}
 .card .src{color:var(--muted);font-size:12px;border-top:1px solid var(--grid);padding-top:6px;margin-top:6px}
 .card .hint{color:var(--accent-2);font-size:12px;margin-top:4px}
+.card.cc h4{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .ack-line{color:var(--accent);font:600 12px var(--sans);margin:0 0 4px}
 
 /* chart B controls */
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}

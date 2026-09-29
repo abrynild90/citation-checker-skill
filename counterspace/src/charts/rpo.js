@@ -9,6 +9,7 @@ import {
   CO,
   DOMAIN,
   EXPORTING,
+  PHONE_MAX,
   REGIME_CO,
   actorKey,
   badge,
@@ -109,7 +110,7 @@ export function drawR(el = document.getElementById('svgR')) {
   const { W, M, x } = layout(el, dom),
     phone = isPhoneNow();
   const k = phone ? 0.95 : 1,
-    rowH = phone ? 18 : 17,
+    rowH = phone ? 24 : 17, // phone rows are 24 px tall so every mark's tap target is at least 24 px and none overlaps the next
     laneHead = 24,
     lanePad = 8,
     top = 4,
@@ -121,23 +122,23 @@ export function drawR(el = document.getElementById('svgR')) {
     CO.filter((e) => lane(e) === li)
       .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.id < b.id ? -1 : 1))
       .forEach((e) => {
-        const X0 = Math.min(PR - 8 - 6.5 * k, Math.max(x0min, x(parse(e.start)))), // a mark's outer edge stays 8 px inside the plot edge (late marks shift a few px left)
+        // a mark's outer edge stays 8 px inside the plot edge (late marks shift a few px left)
+        const X0 = Math.min(PR - 8 - 6.5 * k, Math.max(x0min, x(parse(e.start)))),
           X1 = e.end ? Math.max(X0, x(parse(e.end))) : Math.max(X0, PR - 16), // an end arrow's tip stays 8 px inside the plot edge
           bar = e.activity === 'spaceplane_mission',
           sc = hasScene(e),
           // the cube badge sits right of the mark, or left of it when that would put it within 8 px of the plot edge
           bx = bar ? X0 + 3 : X0 + 12,
           flip = sc && !bar && bx + 5 > PR - 8;
-        const pad = phone ? 6 : 9;
+        const pad = phone ? 12 : 9,
+          tail = Math.max(X1 + (e.end ? 0 : 8), X0 + (bar ? 8 : 0));
+        // Phones: the packing extent IS the tap target (>= 24 px wide, room for the badge on either side), so no two targets in a row overlap.
         const p = {
           e,
           X0,
           X1,
           bx: flip ? X0 - 12 : bx,
-          ext: [
-            X0 - pad - (flip ? 8 : 0),
-            Math.max(X1 + (e.end ? 0 : 8), X0 + (bar ? 8 : 0)) + (sc && !flip ? (phone ? 14 : 17) : phone ? 5 : 8),
-          ],
+          ext: phone ? [X0 - pad - (sc ? 5 : 0), tail + pad + (sc ? 5 : 0)] : [X0 - pad - (flip ? 8 : 0), tail + (sc && !flip ? 17 : 8)],
         };
         let r = rows.findIndex((row) => row.every((q) => p.ext[0] > q.ext[1] || p.ext[1] < q.ext[0]));
         if (r < 0) {
@@ -168,6 +169,7 @@ export function drawR(el = document.getElementById('svgR')) {
   });
   // Cube badges: try the default spot (right, above), then left/below variants, and take the first that touches no other mark or badge; if none is
   // free the badge is left off (the card and the aria-label still say "opens 3D scene", and the export never draws badges).
+  const dyb = phone ? 6.5 : 9; // badge offset from the mark's row centre; on phones the badge stays inside its 24 px tap row
   const box = (p) => [p.X0 - 6.5, p.X1 + (p.e.end ? 0 : 8) + 6.5, p.y - 6.5, p.y + 6.5];
   const boxes = placed.map(box),
     bad = [];
@@ -178,8 +180,8 @@ export function drawR(el = document.getElementById('svgR')) {
       right = bar ? p.X0 + 3 : p.X0 + 12,
       left = p.X0 - 12,
       opts = (p.bx === left ? [left, right] : [right, left]).flatMap((bx) => [
-        [bx, -9],
-        [bx, 9],
+        [bx, -dyb],
+        [bx, dyb],
       ]);
     const ok = opts.find(([bx, dy]) => {
       const q = [bx - 4.8, bx + 4.8, p.y + dy - 5.5, p.y + dy + 5.5];
@@ -206,7 +208,9 @@ export function drawR(el = document.getElementById('svgR')) {
   svg
     .append('desc')
     .text(
-      'Strip chart of co-orbital rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one lane per actor. Marks are placed at the start date of each ledger row; a line or bar runs to the end date. Solid marks are stated plainly by the source, outlined marks are hedged in the source, dashed outlines are unclear or conflicted. A data table follows the chart.',
+      'Strip chart of co-orbital rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one ' +
+        'lane per actor. Marks are placed at the start date of each ledger row; a line or bar runs to the end date. Solid marks are stated ' +
+        'plainly by the source, outlined marks are hedged in the source, dashed outlines are unclear or conflicted. A data table follows the chart.',
     );
   R_LANES.forEach((l, i) => {
     svg
@@ -286,7 +290,10 @@ export function drawR(el = document.getElementById('svgR')) {
     .attr('data-t', (d) => +parse(d.e.start))
     .attr('aria-label', (d) => {
       const e = d.e;
-      return `${e.actor}: ${e.system}${e.target ? ' and ' + e.target : ''}. ${ACTIVITY[e.activity]}. ${coWhen(e)}. Confidence: ${e.confidence}.${hasScene(e) ? ' Opens 3D scene.' : ''}`;
+      return (
+        `${e.actor}: ${e.system}${e.target ? ' and ' + e.target : ''}. ${ACTIVITY[e.activity]}. ${coWhen(e)}. Confidence: ` +
+        `${e.confidence}.${hasScene(e) ? ' Opens 3D scene.' : ''}`
+      );
     });
   g.each(function (d) {
     const e = d.e,
@@ -296,25 +303,30 @@ export function drawR(el = document.getElementById('svgR')) {
       s.append('path')
         .attr('d', `M${d.X1},${d.y - 6}L${d.X1 + 8},${d.y}L${d.X1},${d.y + 6}Z`)
         .style('fill', colorOf(e.actor));
-    if (hasScene(e) && d.bx != null) badge(s, d.bx, d.by ?? d.y - 9);
+    if (hasScene(e) && d.bx != null) badge(s, d.bx, d.by ?? d.y - dyb);
+    // Hit target: the mark, its arrow or bar, and its cube badge (the badge sits outside the mark; a tap on it must count).
+    const hx0 = phone ? d.ext[0] : Math.min(d.X0 - 12, d.bx != null ? d.bx - 8 : Infinity),
+      hx1 = phone ? d.ext[1] : Math.max(d.X1 + 12, d.bx != null ? d.bx + 8 : -Infinity, d.X0 + 12);
     s.append('rect')
       .attr('class', 'hit')
-      .attr('x', d.X0 - 12)
+      .attr('x', hx0)
       .attr('y', d.y - rowH / 2)
-      .attr('width', Math.max(24, d.X1 - d.X0 + 24))
+      .attr('width', hx1 - hx0)
       .attr('height', rowH);
   });
   bindMark(
     g,
-    (d) => coCard(d.e),
+    (d) => coCard(d.e, innerWidth >= PHONE_MAX),
     (d, elx, evt) => activate(d.e, elx, evt),
   );
   rove(g);
   addGuide(svg, x, top, yCur, 'R');
   if (EXPORTING) return;
   document.getElementById('noteR').innerHTML = zoomed
-    ? `<span class="zbadge">Zoomed</span> Axis 2000–2026${stateR.focus === null ? ' (the default on phones)' : ''}: an enlargement, no longer aligned with the Law band above or Charts A to C. Choose “Full span” to return to the shared scale.`
-    : `Full span 1957–2026, on the same year axis as the Law band and Charts A to C. The earliest entry is 2003 (XSS-10) and most rows start after 2005, so the left is empty by design. Choose “Zoom 2000–2026” to enlarge the recent years.`;
+    ? `<span class="zbadge">Zoomed</span> Axis 2000–2026${stateR.focus === null ? ' (the default on phones)' : ''}: an enlargement, no ` +
+      `longer aligned with the Law band above or Charts A to C. Choose “Full span” to return to the shared scale.`
+    : `Full span 1957–2026, on the same year axis as the Law band and Charts A to C. The earliest entry is 2003 (XSS-10) and most rows ` +
+      `start after 2005, so the left is empty by design. Choose “Zoom 2000–2026” to enlarge the recent years.`;
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);
   const L = legend('legendR', 26, 16),

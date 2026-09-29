@@ -57,12 +57,16 @@ export const LAST_DA = KIN.filter((e) => e.type === 'destructive')
   .at(-1);
 
 document.getElementById('asof').innerHTML =
-  `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of ${LEDGER_AS_OF}; debris counts as of Feb. 2026. CSIS <i>Space Threat Assessment 2025</i> was consulted for cross-checking; no row cites it.`;
+  `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of ${LEDGER_AS_OF}; ` +
+  `debris counts as of Feb. 2026. CSIS <i>Space Threat Assessment 2025</i> was consulted for cross-checking; no row cites it.`;
 
 {
   const nDest = KIN.filter((e) => e.type === 'destructive').length;
   document.getElementById('glance').innerHTML =
-    `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Co-orbital RPO and mission rows</dt><dd>${CO.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`;
+    `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}` +
+    `</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Co-orbital RPO and mission ` +
+    `rows</dt><dd>${CO.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive ` +
+    `test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`;
 }
 document.querySelector('#legalPhone summary').textContent = `All ${LEGAL.length} law and policy items, in date order`;
 document.querySelector('.cta-note').textContent = `${SCENES.length} short scenes, or select any cube badge on a chart.`;
