@@ -589,7 +589,7 @@ const C = { tgt: '#ffd166', int: '#ff6b6b', debris: '#ffb38a', iss: '#8cc8ff', g
 const SCENES = [
 { id: 'starfish', date: '1962-07-09', title: 'Starfish Prime (1962)', shells: ['LEO'], duration: 14,
 caption: 'A 1.4-megaton warhead detonates about 400 km above Johnston Island. Electrons from the blast are trapped by Earth’s magnetic field. They spread along field lines and drift around the planet, forming an artificial radiation belt that damaged several satellites in the following months.',
-cite: 'DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962).', related: 'ltbt-1963', event: 'us-1962-starfish-prime',
+cite: 'DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962); SWF 2026, p. 12-05 (satellite damage).', related: 'ltbt-1963', event: 'us-1962-starfish-prime',
 actors: [
 { type: 'site', at: [16.7, -169.5], label: 'Johnston Island', color: C.ground, dx: -84, dy: 40 },
 { type: 'suborbital', from: [16.7, -169.5], to: [16.5, -169.0], apex: 400, t0: 0.02, t1: 0.14, color: C.int, label: 'Thor launch', dx: -96, dy: 4 },
@@ -600,7 +600,7 @@ actors: [
 ], still: 0.7, camDist: 3.5, staticZoom: 1.7, staticCenter: [14, -160], status: [[0, 'Thor rocket climbs toward ~400 km'], [0.14, 'Detonation: electrons trapped on Earth’s field lines'], [0.3, 'Trapped electrons spread in longitude and latitude along field lines'], [0.75, 'Belt has drifted around Earth (illustrative spread)']] },
 { id: 'solwind', date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
 caption: 'An F-15 climbs over the Pacific and releases an ASM-135 missile. The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km and destroys it by collision. SWF counts 285 tracked fragments; all have since decayed.',
-cite: 'SWF 2026, Table 5-1, p. 05-01; Table 1-4, p. 01-24.', related: null, event: 'us-1985-solwind',
+cite: 'SWF 2026, Table 5-1: 285 tracked, 0 still in orbit (p. 05-01); Table 1-4, p. 01-24.', related: null, event: 'us-1985-solwind',
 wideLaunch: 2.5, lookK: 0.95, hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
 actors: [
 { type: 'aircraft', path: [[32.5, -114.0], [35.0, -124.0]], alt: 12, t0: 0.0, t1: 0.24, label: 'F-15 zoom climb', dx: -96, dy: 30 },
@@ -641,7 +641,7 @@ marks: [{ alt: 10000, label: '10,000 km · China’s stated figure', short: '10,
 cameras: [{ name: 'Profile', at: [22, 8, 6.9], look: [0, 90, 0.7], phone: { at: [24, 24, 8.3], look: [0, 96, 0.7] } }, { name: 'Polar', at: [78, 80, 8.4] }, { name: 'Zoom', at: [20, 45, 5.6] }] },
 { id: 'shakti', date: '2019-03-27', title: 'Mission Shakti (2019)', shells: ['LEO'], duration: 12,
 caption: 'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
-cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-03.', related: 'unga-77-41', event: 'in-2019-shakti',
+cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-04.', related: 'unga-77-41', event: 'in-2019-shakti',
 wideLaunch: 2.5, lookK: 0.95, hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
 actors: [
 { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
