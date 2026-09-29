@@ -24,7 +24,7 @@ export const SCENES = [
       { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
       { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14 },
       { type: 'belt', at: [16.5, -169.2], L: [1.12, 1.7], t0: 0.18, t1: 0.9, count: 2600, color: C.belt, size: 0.02, nLon: 12, label: 'Artificial radiation belt', short: 'Radiation belt' },
-      { type: 'ring', alt: 800, inc: 44.8, raan: 40, color: '#8cc8ff', sat: { phase: 0, speed: 2.2, label: 'Satellite in belt', short: 'Satellite' } },
+      { type: 'ring', alt: 800, inc: 44.8, raan: 40, color: '#8cc8ff', sat: { phase: 0, speed: 2.2, label: 'Satellite in belt', short: 'Satellite', dx: 30, dy: 60 } },
     ], still: 0.7, camDist: 3.5, staticZoom: 1.7, staticCenter: [14, -160], stillCam: { at: [28, -128, 4.3], look: [6, -168, 0.5], hideShell: true }, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.14, 'Detonation: electrons trapped on Earth’s field lines'], [0.3, 'Trapped electrons spread in longitude and latitude along field lines'], [0.75, 'Belt has drifted around Earth (illustrative spread)']] },
   { id: 'solwind', date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
     caption: 'An F-15 in a supersonic zoom climb releases an ASM-135 missile. The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km (SWF Table 5-1; its text says 555 km) and destroys it by collision. SWF counts 285 tracked fragments; all have since decayed. The positions and the debris spread are drawn for legibility, not computed.',
@@ -52,7 +52,7 @@ export const SCENES = [
     cite: 'SWF 2026, Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); decay time and 240 km in text, p. 01-24.', related: null, event: 'us-2008-burnt-frost',
     phoneK: 1.15, launchAt: [3.3, 0.95, 0.8], hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
     actors: [
-      { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie' },
+      { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 70 },
       { type: 'target', label: 'USA-193', color: C.tgt, big: 1.5, bright: true, fall: [{ k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 }, { k: 1.25, di: -0.3, dr: -0.012, dw: 1.05 }, { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 }] },
       { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42 },
       { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6' },
@@ -94,10 +94,10 @@ export const SCENES = [
     cite: 'SWF 2026, pp. 02-29 to 02-30; p. 12-05 (downlink jamming has no effect on the satellites).', related: 'icao-2025', event: 'ru-2023-baltic',
     actors: [
       { type: 'constellation', alt: 20200, inc: 55, planes: 6, per: 3, color: C.gps, speed: 0.25, inset: true, label: 'GPS satellites · MEO', opt: true, dx: 60, dy: 40 },
-      { type: 'zone', at: [57.5, 21.0], radius: 6.2, color: C.jam, label: 'Jammer effect zone', dx: 78, dy: -36 },
+      { type: 'zone', at: [57.5, 21.0], radius: 6.2, color: C.jam, label: 'Jammer effect zone', dx: 66, dy: -60 },
       { type: 'aircraft', path: [[53.0, 8.0], [61.0, 32.0]], alt: 11, t0: 0, t1: 1, label: 'Airliner A', gnss: true, dx: -96, dy: -14 },
       { type: 'aircraft', path: [[44.0, 0.0], [46.5, 30.0]], alt: 11, t0: 0, t1: 1, label: 'Airliner B', gnss: true, labelDy: 34, dx: 92 },
-    ], still: 0.45, camDist: 3.5, phoneK: 0.82, focus: [55, 18], inset: 'Context: GPS orbits (top view)',
+    ], still: 0.45, camDist: 3.5, phoneK: 0.82, stillCam: { at: [49, 14, 1.85], look: [51.5, 16, 0.98], hideShell: true }, focus: [55, 18], inset: 'Context: GPS orbits (top view)',
     cameras: [{ name: 'Baltic: airliners and jammer zone', at: [50, 14, 1.45], look: [53, 17, 0.98], phone: { at: [50, 14, 1.65] } }, { name: 'Europe + GPS orbits', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false }], status: [[0, 'Both airliners have GNSS (green) · jammer zone in red · satellites unaffected'], [0.3, 'Inside the zone GNSS is lost (red); outside it stays OK (green). Satellites unaffected']] },
   { id: 'viasat', date: '2022-02-24', title: 'Viasat KA-SAT cyberattack (2022)', shells: ['GEO'], duration: 14,
     caption: 'Within hours of Russian troops crossing into Ukraine in February 2022, attackers pushed destructive “AcidRain” malware through KA-SAT’s ground management network. Tens of thousands of user modems in Ukraine and across Europe went dark. The satellite itself kept working: the attack hit the ground segment.',
@@ -137,7 +137,7 @@ export const SCENES = [
       { type: 'craft', id: 'cg2', anchor: 'g', color: C.dead, scale: 2.2 * PK, minPx: 60, maxPx: 96, label: 'Compass G2 (defunct)', short: 'Compass G2', dx: 60, dy: 34, labelFn: t => t >= 0.40 && t < 0.80 ? null : 'Compass G2 (defunct)',
         arcs: [{ t0: 0.5, t1: 0.76, o: [0.09, 0, 0] }],
         key: [[0, 0, 0, 0], [0.40, 0.03, 0, 0], [0.50, 0.03, 0, 0], [0.76, 0.11, 0.27, 0], [1, 0.135, 0.275, 0.004]] },
-      { type: 'craft', id: 'sj21', anchor: 'g', color: C.cn, bright: true, scale: 2.2 * PK, minPx: 60, maxPx: 96, label: 'SJ-21 (China)', short: 'SJ-21', dx: -50, dy: -40, labelFn: (t, n) => t >= 0.40 && t < 0.80 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : 'SJ-21 (China)',
+      { type: 'craft', id: 'sj21', anchor: 'g', color: C.cn, bright: true, scale: 2.2 * PK, minPx: 60, maxPx: 96, label: 'SJ-21 (China)', short: 'SJ-21', dx: -68, dy: -12, labelFn: (t, n) => t >= 0.40 && t < 0.80 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : 'SJ-21 (China)',
         arcs: [{ t0: 0.5, t1: 0.76, o: [0.09, 0, 0] }, { t0: 0.8, t1: 0.97, o: [0.07, 0.06, 0] }],
         key: [[0, 0.72, 0, 0], [0.20, 0.30, 0, 0], [0.27, 0.26, 0.006, -0.008], [0.34, 0.21, -0.004, 0.006], [0.40, 0.16, 0, 0], [0.50, 0.16, 0, 0], [0.76, 0.24, 0.27, 0], [0.80, 0.29, 0.285, 0.014], [0.97, 0.08, 0.0, 0.0], [1, 0.07, 0, 0]] },
       { type: 'link', a: 'sj21', b: 'cg2', t0: 0.40, t1: 0.80, color: '#fff1c1', width: 0.004 },
@@ -204,7 +204,7 @@ export const SCENES = [
     cite: 'SWF 2026: Table 1-1 (p. 01-08), Figure 1-3 (p. 01-07), pp. 01-04 to 01-09; Table 3-1 (p. 03-08), pp. 03-06 to 03-08.', related: null, event: 'us-2023-otv7',
     inset: 'Context: top view',
     scaleNote: 'Orbits use the compressed radial scale; the distances to the released objects are exaggerated and orbital motion is slowed.',
-    anchors: { us: { orbit: { alt: 350, inc: 45, raan: 288, u0: 0.47, du: 3.4 } }, heo: { ellipse: HEO_ORBIT }, cn: { orbit: { alt: 600, inc: 50, raan: 250, u0: 1.0, du: 0.5 } } },
+    anchors: { us: { orbit: { alt: 350, inc: 45, raan: 288, u0: 0.47, du: 3.4 } }, heo: { ellipse: HEO_ORBIT }, cn: { orbit: { alt: 600, inc: 50, raan: 250, u0: 1.0, du: 2.0 } } },
     acts: [{ t0: 0, t1: 0.3, cam: 1 }, { t0: 0.3, t1: 0.54, cam: 2 }, { t0: 0.54, t1: 1, cam: 3 }],
     actors: [
       // ---- US X-37B, OTV-1 to OTV-6: LEO flights

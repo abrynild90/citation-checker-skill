@@ -210,7 +210,7 @@ export function buildSim(cfg) {
         labelDy: a.dy,
       });
     if (a.type === 'ship')
-      items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label });
+      items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ring') {
       let raan = a.raan,
         phase = a.sat?.phase ?? 0;

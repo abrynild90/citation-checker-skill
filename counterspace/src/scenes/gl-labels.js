@@ -199,7 +199,7 @@ Object.assign(GLHost.prototype, {
         const q = scr(p);
         if (q[3]) continue;
         const u = obj.userData,
-          wr = u.span ? u.span * obj.scale.x * (it.shape === 'ship' ? 0.42 : 0.5) : (u.wr ?? 0.012);
+          wr = u.span ? u.span * obj.scale.x * 0.5 : (u.wr ?? 0.012);
         marks.push({ x: q[0], y: q[1], r: Math.max((wr * sc) / q[2], 3 * k), it });
       } else if (it.kind === 'flash') {
         obj.getWorldPosition(W3);
