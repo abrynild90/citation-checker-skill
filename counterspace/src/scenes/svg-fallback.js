@@ -406,7 +406,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         if (q) grow(unit(q));
       } else if (it.kind === 'beam') {
         const A = it.a(t),
-          B = it.b(t);
+          B = (!opts.panel && it.bStatic?.(t)) || it.b(t);
         if (A && B && it.on(t)) {
           grow(unit(A));
           grow(unit(B));
@@ -885,7 +885,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     }
     if (it.kind === 'beam') {
       const A = it.a(t),
-        B = it.b(t);
+        B = (!opts.panel && it.bStatic?.(t)) || it.b(t);
       if (A && B && it.on(t)) {
         const a = project(A),
           b = project(B);
@@ -905,7 +905,16 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             ],
             role: 'beam',
           });
-        if (!a.hidden && !b.hidden)
+        if (!a.hidden && !b.hidden && it.width && sim.cfg.staticBeamW) {
+          // a crisp tapered beam: thin at the transmitter, widening slightly towards the target, with a bright core
+          const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, w0 = sim.cfg.staticBeamW * 0.25, w1 = sim.cfg.staticBeamW * 0.5;
+          const col = it.colorFn ? it.colorFn(t) : it.color;
+          g.append('polygon')
+            .attr('points', `${a.x + nx * w0},${a.y + ny * w0} ${b.x + nx * w1},${b.y + ny * w1} ${b.x - nx * w1},${b.y - ny * w1} ${a.x - nx * w0},${a.y - ny * w0}`)
+            .attr('fill', col)
+            .attr('fill-opacity', 0.85);
+          g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.coreColor || '#fff').attr('stroke-width', 0.8).attr('stroke-opacity', 0.9);
+        } else if (!a.hidden && !b.hidden)
           g.append('line')
             .attr('x1', a.x)
             .attr('y1', a.y)

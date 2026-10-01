@@ -297,6 +297,7 @@ export function buildSim(cfg) {
         maxPx: a.maxPx,
         bright: !!a.bright,
         pos: (t) => (a.noHit || t <= tgt.t ? tgt.pos(t) : null),
+        staticPos: a.staticK ? (t) => scl(tgt.pos(t), a.staticK) : null,
         glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
       });
     }
@@ -1034,6 +1035,7 @@ export function buildSim(cfg) {
         avoid: true,
         a: () => from,
         b: (t) => tgt.pos(t),
+        bStatic: a.staticK ? (t) => scl(tgt.pos(t), a.staticK) : null,
         on: (t) => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02,
         color: a.color,
         opacity: 0.95,

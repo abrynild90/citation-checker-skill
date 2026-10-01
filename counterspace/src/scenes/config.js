@@ -626,12 +626,13 @@ export const SCENES = [
     hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 },
     lift: 30,
     stillShort: ['MIRACL beam'],
-    staticT: 0.16, // static: the satellite well along its pass, so the beam is drawn at full length
+    staticT: 0.32, // static: the satellite well along its pass, so the beam is drawn at full length
     staticZoom: 2.6,
-    staticCenter: [35, -108],
-    staticCraftMax: 150, // static: MSTI-3 and the beam are the subject
+    staticCenter: [28, -160],
+    staticCraftMax: 70, // static: MSTI-3 and the beam are the subject
     staticCraftMaxPhone: 80,
-    staticBeamW: 9,
+    staticBeamW: 5,
+    staticK: 1.35, // static: MSTI-3 drawn further out in space so it clears the Earth limb
     actors: [
       { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
       { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7, minPx: 46, maxPx: 84, dx: 92, dy: -26 },
