@@ -155,7 +155,7 @@ export const SCENES = [
       { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42 },
       { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, decay: 0.9, color: '#ffd2a6' },
     ],
-    still: 0.56,
+    still: 0.45,
     status: [
       [0, 'F-15 in a supersonic zoom climb'],
       [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
@@ -302,7 +302,7 @@ export const SCENES = [
     ],
     shellLabels: { MEO: null, GEO: null },
     noRing: ['GEO'],
-    staticFit: 1.9,
+    staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
     cameras: [
       { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.92 } },
       { name: 'Profile', at: [22, 8, 7.6], look: [0, 90, 0.7], phone: { at: [24, 24, 8.6], look: [0, 96, 0.7] } },
@@ -428,6 +428,8 @@ export const SCENES = [
     shells: ['LEO', 'MEO'],
     shellLabels: { MEO: null },
     staticShellLabels: { MEO: 'GPS orbit · MEO' },
+    staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
+    staticTextPhone: [[' · GNSS ', ' · ']], // 375 static: "Airliner A · lost"
     duration: 16,
     caption:
       'GPS satellites orbit in medium Earth orbit (MEO), far above the aircraft. A jammer on the ground swamps their weak signals only inside its' +
@@ -777,9 +779,8 @@ export const SCENES = [
     stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
     staticCenter: [25, 72],
     staticCraftMax: 84,
-    staticCraftMaxPhone: 44,
-    staticFit: 1.9,
-    staticFitPhone: 1.7,
+    staticCraftMaxPhone: 38,
+    staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width
   },
   {
     id: 'rpo',
@@ -804,7 +805,7 @@ export const SCENES = [
         title: '1 · GEO, 2025',
         brief: 'SJ-21 + SJ-25 dock, GSSAP flank',
         short: 'SJ-21 + SJ-25',
-        dropPhone: ['GEO belt'],
+        dropPhone: ['GEO belt', 'SJ-21 + SJ-25 docked'], // 375: the panel title already names the docked pair
         status: 'SJ-21 and SJ-25 appear to dock; two' + ' US GSSAP satellites are positioned' + ' “flanking” them',
       },
       { t: 0.6, title: '2 · LEO, 2019–20', brief: 'Cosmos 2543 near USA 245',

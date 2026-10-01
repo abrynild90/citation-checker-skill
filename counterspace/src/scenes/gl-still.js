@@ -187,9 +187,10 @@ const methods = {
     lp.forEach((q, i) => {
       // every label that sits away from its subject gets a leader to the box edge nearest the subject
       const r = rawL[i];
-      if (!q || q.leader || !r) return;
-      const hw = q.w / 2,
-        hh = q.h / 2,
+      if (!q || !r) return; // a placer stub is replaced too: the leader always runs from the referent to the chip edge
+      g.font = `600 ${Math.round(11 * ls)}px system-ui,sans-serif`;
+      const hw = (g.measureText(q.text).width + 12 * ls) / 2, // the drawn chip, not the placer's box: the leader reaches its edge
+        hh = 9 * ls,
         cx = Math.max(q.x - hw, Math.min(q.x + hw, r.px)),
         cy = Math.max(q.y - hh, Math.min(q.y + hh, r.py));
       // ax/ay = the referent, qx/qy = the box edge (as _labelPositions)

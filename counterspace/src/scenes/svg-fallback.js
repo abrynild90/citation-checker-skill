@@ -224,6 +224,8 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
   }
   return k;
 }
+// Icon bounding box in units of the craft size (width, height), for the checker's icon-area rule.
+const CRAFT_BOX = { sat: [1, 0.45], iss: [0.96, 0.64], plane: [0.7, 0.7], aircraft: [0.7, 0.7], ship: [1, 0.2], site: [0.68, 0.8], jammer: [0.9, 0.8] };
 const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45, jammer: 0.7 };
 let earthUpgrade = false,
   pendingStatic = null,
@@ -232,13 +234,23 @@ let earthUpgrade = false,
 function renderPanels(sim, el) {
   const W = el.clientWidth || 640,
     H = el.clientHeight || 420,
-    narrow = W < 760, // stacked rows; three columns only when there is room for their labels
-    phone = W < 520,
+    phone = W < 520, // stacked rows
+    cols = !phone && W >= 760 && W / H >= 1.7, // three columns only on a wide, short stage (the print stage); else 2 + 1 so the panels are not slivers
+    narrow = !cols,
     top = el.getAttribute('aria-hidden') === 'true' ? 4 : phone ? 38 : 40, // the off-screen print stage has no banner to clear
-    gap = 6,
+    gap = phone ? 5 : 6,
     n = sim.cfg.panels.length,
-    pw = narrow ? W - 2 * gap : (W - (n + 1) * gap) / n,
-    ph = narrow ? (H - top - (n + 1) * gap) / n : H - top - 2 * gap;
+    geo = (k) => {
+      // panel k's rectangle: a row of three, a stack of three (phone) or two panels over one full-width panel
+      if (cols) return { x: gap + k * ((W - (n + 1) * gap) / n + gap), y: top + gap, w: (W - (n + 1) * gap) / n, h: H - top - 2 * gap };
+      if (phone) {
+        const h = (H - top - (n + 1) * gap) / n;
+        return { x: gap, y: top + gap + k * (h + gap), w: W - 2 * gap, h };
+      }
+      const h = (H - top - 3 * gap) / 2,
+        w2 = (W - 3 * gap) / 2;
+      return k < 2 ? { x: gap + k * (w2 + gap), y: top + gap, w: w2, h } : { x: gap, y: top + 2 * gap + h, w: W - 2 * gap, h };
+    };
   fitBanner(el);
   const root = d3
     .create('svg')
@@ -257,6 +269,7 @@ function renderPanels(sim, el) {
     const focus = pts.reduce((a, p) => [a[0] + p[0] / pts.length, a[1] + p[1] / pts.length, a[2] + p[2] / pts.length], [0, 0, 0]),
       span = Math.max(0.16, ...pts.map((p) => Math.hypot(p[0] - focus[0], p[1] - focus[1], p[2] - focus[2])));
     sim.flags.all = false;
+    const { x, y, w: pw, h: ph } = geo(k);
     const node = renderSVG(sim, el, pn.t, {
       panel: true,
       phone,
@@ -264,12 +277,10 @@ function renderPanels(sim, el) {
       H: ph,
       view: { focus, span },
       status: phone ? '' : pn.status,
-      title: phone ? `${pn.title} · ${pn.short || pn.brief}` : narrow ? `${pn.title} · ${pn.brief}` : pn.title,
+      title: phone ? `${pn.title} · ${pn.short || pn.brief}` : narrow && pw > 480 ? `${pn.title} · ${pn.brief}` : pn.title,
       keep: true,
       drop: phone ? pn.dropPhone : null,
     });
-    const x = narrow ? gap : gap + k * (pw + gap),
-      y = narrow ? top + gap + k * (ph + gap) : top + gap;
     node.setAttribute('x', x);
     node.setAttribute('y', y);
     node.setAttribute('width', pw);
@@ -374,7 +385,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     y0 = -1.08,
     y1 = 1.08;
   // far orbits (apogees, belts) may run off the frame so the Earth stays large
-  const fitMax = sim.cfg.staticFit && !opts.panel ? (W < 520 && sim.cfg.staticFitPhone) || sim.cfg.staticFit : 0;
+  const fitMax = sim.cfg.staticFit && !sim.cfg.staticFitRing && !opts.panel ? (W < 520 && sim.cfg.staticFitPhone) || sim.cfg.staticFit : 0;
   const grow = (p) => {
     if (!p || p.hidden) return;
     if (fitMax && Math.hypot(p.x, p.y) > fitMax) return;
@@ -389,7 +400,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       if (it.kind === 'curve') {
         if (it.staticKeep === false) continue;
         // On a phone the Earth gets the room: orbit and belt lines run off the frame, only trails and paths of the action set the fit.
-        if (!(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
+        if (sim.cfg.staticFitRing || !(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
       } else if (it.kind === 'point' && !it.liveOnly) {
         const q = (!opts.panel && it.staticPos?.(t)) || it.pos(t);
         if (q) grow(unit(q));
@@ -428,7 +439,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     ftxt = opts.panel ? opts.title || '' : fCands.find((x) => x.length * fFont * 0.56 + 20 <= W - 12) || fCands.at(-1),
     fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * fFont * 0.56 + 20);
   const docked = sim.items.some((i) => i.dockWith && i.dockOn(t)), // a docked pair is two models wide: more side margin
-    fx = 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))),
+    fx = sim.cfg.staticFitRing ? 20 : 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))), // a ring-fit scene: the ring sets the width
     fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
     fBot = stY - 8 - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
   let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
@@ -461,7 +472,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         inDisc++;
         if (x >= 0 && x <= W && y >= 0 && y <= H) inRect++;
       }
-    showGlobe = inRect / inDisc >= 0.45;
+    showGlobe = inRect / inDisc >= 0.45 && !(opts.view && Math.hypot(...opts.view.focus) > 1.5); // a GEO panel always shows the clean limb, never a cropped disc
   }
   // The globe actually drawn: the real one, or (a GEO panel, where the Earth is far outside the frame) a large limb arc on the Earth's side of the panel
   let GX = CX,
@@ -485,7 +496,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       hy = (fBot - fTop) / 2 + 20,
       edge = Math.abs(ux) * hx + Math.abs(uy) * hy,
       depth = Math.max(34, Math.min(190, (fBot - fTop) * 0.4)); // how far the limb reaches into the panel along the Earth direction
-    GR = Math.max(W, fBot - fTop) * 1.05;
+    GR = Math.min(520, Math.max(W, fBot - fTop) * 1.05); // a capped radius keeps the Earth raster sharp in a wide panel
     GX = pcx + ux * (edge - depth + GR);
     GY = pcy + uy * (edge - depth + GR);
     gproj = d3.geoOrthographic().rotate([-cl.lon, -cl.lat]).translate([GX, GY]).scale(GR).clipAngle(90);
@@ -580,7 +591,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     pny = Math.ceil(H / pcell),
     pgrid = new Uint16Array(pnx * pny),
     dPolys = [],
-    dCloud = [];
+    dCloud = [],
+    crafts = [],
+    orbitPts = [];
   const mark = (p, r, n) => {
     if (p && !p.hidden) marks.push({ x: p.x, y: p.y, r, n });
   };
@@ -700,8 +713,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   // A panel that looks at craft far from the Earth (GEO) shows the Earth as a big limb arc on its own side (drawn above, to no scale): name it.
   if (limb) {
     const tw = 128,
-      lx = Math.max(tw / 2 + 8, Math.min(W - tw / 2 - 8, limb.nx)),
-      ly = opts.phone ? fBot - 5 : Math.max(fTop + 40, Math.min(fBot - 12, limb.ny + Math.max(16, limb.depth * 0.42))); // a phone panel: the tag sits at the foot, clear of the craft
+      lx = W - tw / 2 - 8, // a corner tag: bottom-right of the panel's free area, over the limb and clear of the caption's centre
+      ly = fBot - 5;
     svg
       .append('rect')
       .attr('x', lx - tw / 2)
@@ -728,11 +741,13 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     marks.push({ x: lx, y: ly - 4, r: 16, n: 'earth-cue' }, { x: lx - 44, y: ly - 4, r: 12, n: 'earth-cue' }, { x: lx + 44, y: ly - 4, r: 12, n: 'earth-cue' });
   }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
+  const phoneText = (x) => (W < 520 && x && sim.cfg.staticTextPhone ? sim.cfg.staticTextPhone.reduce((a, [f, r]) => a.replace(f, r), x) : x); // cfg.staticTextPhone: [from, to] pairs
   const NARROW = W < 600 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
   shells.forEach((it, i) => {
     const lab = it.staticLabel ?? it.label;
     if (!lab) return;
+    if (W < 520 && sim.cfg.staticDropPhone?.includes(lab)) return; // a phone drops the shell labels that would crowd the subject's
     const tx = it.short && NARROW && !it.staticLabel ? it.short : lab,
       w = labelW(tx);
     // the label sits on the shell line at its preferred angle, or at the nearest angle where that point is inside the frame
@@ -834,6 +849,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           } else cur.push([p.x, p.y]);
         });
         if (cur.length > 1) ringsL.push(cur);
+        orbitPts.push(...pts.filter((q) => !q.hidden).map((q) => [q.x, q.y]));
       }
       if (it.label && it.labelAt && pts.length > 2 && !it.staticHide)
         label(project(it.labelAt), it.short && NARROW ? it.short : it.label, it.color, it.labelDx, it.labelDy, W < 700 ? null : it.staticAt, it.opt);
@@ -913,7 +929,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         const craftShape =
           ['sat', 'plane', 'aircraft', 'ship', 'site', 'jammer'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
         // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
-        const cs = craftShape
+        const cs0 = craftShape
           ? Math.round(
               Math.min(sim.cfg.spin ? 46 : 99, craftBase * (it.iss ? 1.3 : 1)) *
                 (it.small ? 0.72 : 1) *
@@ -921,6 +937,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
                 ((!opts.panel && sim.cfg.staticCraftScale?.[it.craftId]) || 1),
             )
           : 0;
+        // the ISS is context, not the subject: its icon is capped relative to the Earth (never a big shape covering the disc)
+        const cs = it.iss && !opts.panel && !sim.cfg.spin ? Math.min(cs0, Math.max(26, Math.round(R * 0.22))) : cs0;
         // Docked pair: the two models sit side by side, touching (no link is drawn: SWF says docked, not how).
         if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + cs * 0.5 };
         else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - cs * 0.5 };
@@ -939,6 +957,10 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             it.label || it.shape,
           );
         if (craftShape) drawCraft(g, it.iss ? 'iss' : it.shape, p.x, p.y, cs, c, { rot, variant: it.variant });
+        if (craftShape) {
+          const [bw, bh] = CRAFT_BOX[it.iss ? 'iss' : it.shape] || [0.8, 0.8];
+          crafts.push({ x: p.x, y: p.y, w: cs * bw, h: cs * bh, subject: !it.iss && !it.ctx, name: it.label || it.shape });
+        }
         else if (it.shape === 'sat') {
           const q3 = it.small ? 6 : 8;
           g.append('rect')
@@ -962,7 +984,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           const n0 = cands.length;
           label(
             p,
-            (!opts.panel && ((W < 600 && sim.cfg.staticLabelsNarrow?.[it.craftId]) || sim.cfg.staticLabels?.[it.craftId])) || (it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label),
+            (!opts.panel && ((W < 600 && sim.cfg.staticLabelsNarrow?.[it.craftId]) || sim.cfg.staticLabels?.[it.craftId])) ||
+              phoneText(it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label),
             c,
             it.labelDx,
             it.labelDy,
@@ -1142,6 +1165,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           ...[...svg.node().querySelectorAll('text')].map((e) => +e.getAttribute('font-size') || +e.parentNode.getAttribute('font-size') || 11),
         ),
         polys: dPolys,
+        crafts: sim.cfg.spin ? null : crafts, // the hero's ISS marker is a locator, not a scene craft
+        orbitPts: sim.cfg.staticFitRing && !opts.panel ? orbitPts : null, // only a ring-fit scene (DN-2, SJ-21) promises its whole ring inside the frame
         cloud: dCloud,
         domes: [],
       },

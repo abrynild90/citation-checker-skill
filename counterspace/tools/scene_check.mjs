@@ -21,10 +21,13 @@
 //   still-res        a still's Earth is under 1.5x supersampled relative to the viewport it was exported from (checked at 375 too)
 //   burst-edge       default camera: a burst ring / debris point touches the frame edge (4 px margin)
 //   static-font      a static diagram's text is drawn under 9 px (footer note included)
+//   static-ring-clip a ring-fit static diagram (DN-2, SJ-21) has a point of its orbit within 4 px of, or outside, the panel edge
+//   craft-area       a static craft icon covers more of the Earth disc than its cap (context craft such as the ISS 3%, a subject 20%)
 //   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
 //   preset-empty     every camera preset x t in 0.1..0.9: the scene's primary subject(s) (labelled craft, burst, debris cloud) are drawn at that t but none projects
 //                    inside the viewport at >= 8 px (6 px at 375); also checked on stills: subject centred (still-centre) and label font (still-font)
+//   still-earth      an Earth-scale live still (Starfish, Solwind, Fengyun, Burnt Frost, Shakti) has the Earth disc under 62% of the body height
 //   still-empty      a still has an empty band (no content) over more than 20% of its body height or width
 //   still-crop       a still shows a whole-globe composition (multi-tile composites exempt) (disc radius < 55% of the frame) with the Earth partly cropped (50-98.5% visible); a deliberate close-up is exempt
 //   hero-small       hero live at >= 900 px: the outer ring spans under 70% of the stage width
@@ -160,6 +163,16 @@ function check(S) {
     // debris fields of the hit scenes only (the Starfish belt and space-weather clouds fill the frame by design); >= 3 points in the edge band = the cloud is cut, a lone fragment is an outlier
     if (S.hitT != null && e.length >= 3) f('burst-edge', `${e.length} debris point(s) touch the frame edge, first at (${Math.round(e[0][0])},${Math.round(e[0][1])})`);
   }
+  // static ring fit: a ring-fit scene (cfg.staticFitRing) draws its whole orbit inside the panel, with a margin from every edge
+  if (S.kind === 'static' && P.orbitPts) {
+    const m = 4, bad = P.orbitPts.filter(([x, y]) => x < m || y < m || x > W - m || y > H - m);
+    if (bad.length) f('static-ring-clip', `${bad.length} orbit point(s) outside the ${W}x${H} panel (first at ${Math.round(bad[0][0])},${Math.round(bad[0][1])})`);
+  }
+  // craft icon area cap: a context craft (the ISS) is at most 3% of the Earth disc area, any single craft (a subject) at most 20%; limb-only panels exempt
+  if (S.kind === 'static' && P.crafts && P.disc && P.disc.r < 0.8 * Math.max(W, H)) {
+    const da = Math.PI * P.disc.r * P.disc.r;
+    for (const c of P.crafts) { const a = c.w * c.h / da, cap = c.subject ? 0.2 : 0.03; if (a > cap) f('craft-area', `${c.name} icon ${Math.round(c.w)}x${Math.round(c.h)} px is ${(a * 100).toFixed(1)}% of the Earth disc (> ${cap * 100}%)`); }
+  }
   if (S.minFont != null && S.minFont < 9) f('static-font', `smallest text ${S.minFont}px < 9px at ${W}px`);
   if (P.disc0 && P.polys) for (const c of P.polys) {
     if (c.role === 'beam' || c.p.length < 6) continue;
@@ -187,11 +200,16 @@ function check(S) {
     if (P.action) { add(P.action.x0, P.action.y0); add(P.action.x1, P.action.y1); }
     if (whole || !P.action) dsc(d, d.r, whole);
     if (whole) for (const c of P.circles || []) if (c.ring && c.r > 0 && Math.abs(c.cx - W / 2) < W) dsc(c, c.r, whole && c.r < 1.2 * bh);
+    // a ring-framed still (SJ-21: the whole GEO ring is the frame): the ring itself is part of the subject
+    if (S.id === 'sj21-tug') for (const c of P.polys || []) if (c.role === 'line' && c.p.length > 40) for (const [x, y] of c.p) add(x, y);
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     if (Math.abs(cx - W / 2) > 0.06 * W) f('still-centre', `subject centre x ${Math.round(cx)} is ${Math.round(Math.abs(cx - W / 2))} px off the frame centre (${W} wide)`);
     if (Math.abs(cy - (b0 + bh / 2)) > 0.08 * H) f('still-centre', `subject centre y ${Math.round(cy)} off the band centre ${Math.round(b0 + bh / 2)} (${H} high)`);
     // subject bbox fraction: the subject (Earth, shells that fit, action) fills >= 60% of the still body height (50% of a composite's tile)
     const sfr = (Math.min(H, y1) - Math.max(0, y0)) / H;
+    // Earth-scale scenes: the Earth disc itself (not a bbox with orbits and labels) is >= 62% of the still body height
+    if (S.id && ['starfish', 'solwind', 'fengyun', 'burnt-frost', 'shakti'].includes(S.id) && 2 * d.r / H < 0.62) f('still-earth', `Earth disc is ${(200 * d.r / H).toFixed(0)}% of the still body height (< 62%)`);
+    // a ring-framed still (SJ-21, Cosmos 1408): no shell ring is cut by the frame or runs into the caption band
     if (sfr < (tile ? 0.5 : 0.6)) f('still-subject', `subject bbox is ${(sfr * 100).toFixed(0)}% of the still body height (< ${tile ? 50 : 60}%)`);
     if (whole && (x1 - x0 < 0.5 * W && y1 - y0 < 0.5 * bh)) f('still-centre', `subject only ${Math.round((x1 - x0) / W * 100)}% of the still width (too small)`);
   }
@@ -431,7 +449,7 @@ if (MODES.includes('still')) {
     });
     fs.writeFileSync(`${out}/still-live-${id}.png`, Buffer.from(r.url.split(',')[1], 'base64'));
     const eb = await page.evaluate(EMPTY, r.url);
-    const F = r.tiles.flatMap(t => check({ kind: 'still', leadW: t.leadW, u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H), discBig: r.tiles.length > 1 || !!(t.probe && t.probe.disc && t.probe.disc.r >= 0.55 * Math.min(t.W, t.H)) }));
+    const F = r.tiles.flatMap(t => check({ kind: 'still', id, leadW: t.leadW, u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H), discBig: r.tiles.length > 1 || !!(t.probe && t.probe.disc && t.probe.disc.r >= 0.55 * Math.min(t.W, t.H)) }));
     // stills are ~3000 px wide: the pixel rules are scaled by u (label font scale) so the limits mean the same thing as in the live frame
     record(tag('still-live', id), F, { stillT });
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);
