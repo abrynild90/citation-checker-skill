@@ -952,7 +952,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           const n0 = cands.length;
           label(
             p,
-            (!opts.panel && sim.cfg.staticLabels?.[it.craftId]) || (it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label),
+            (!opts.panel && ((W < 600 && sim.cfg.staticLabelsNarrow?.[it.craftId]) || sim.cfg.staticLabels?.[it.craftId])) || (it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label),
             c,
             it.labelDx,
             it.labelDy,

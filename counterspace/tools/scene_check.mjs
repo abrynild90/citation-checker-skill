@@ -118,7 +118,7 @@ function check(S) {
         for (const c of P.polys || []) { for (let k = 0; k + 1 < c.p.length && !near; k++) if (distPtSeg(ax, ay, ...c.p[k], ...c.p[k + 1]) < 4.5) near = true; if (near) break; }
         if (!near) for (const c of P.cloud || []) if (Math.hypot(ax - c[0], ay - c[1]) < 7) { near = true; break; }
         if (!near) for (const d of P.domes || []) if (Math.hypot(ax - d.x, ay - d.y) < d.r) { near = true; break; }
-        if (!near) for (const c of P.circles || []) if (Math.abs(Math.hypot(ax - c.cx, ay - c.cy) - c.r) < 7) { near = true; break; }
+        if (!near) for (const c of P.circles || []) if (Math.abs(Math.hypot(ax - c.cx, ay - c.cy) - c.r) < 7 * (S.kind === 'still' ? Math.max(1, W / 1000) : 1)) { near = true; break; } // the probe circle is a centred fit of an off-axis perspective shell silhouette: its tolerance is in frame pixels, so it scales with the 3000 px still
         if (!near) for (const m of P.marks || []) if (Math.hypot(ax - m.x, ay - m.y) < m.r + 3) { near = true; break; }
         if (!near) f('leader-end', `${L[i].text} ends on ${other ? 'another referent' : 'nothing'} at (${Math.round(ax)},${Math.round(ay)})`);
       }

@@ -801,6 +801,7 @@ export const SCENES = [
         title: '1 · GEO, 2025',
         brief: 'SJ-21 + SJ-25 dock, GSSAP flank',
         short: 'SJ-21 + SJ-25',
+        dropPhone: ['GEO belt'],
         status: 'SJ-21 and SJ-25 appear to dock; two' + ' US GSSAP satellites are positioned' + ' “flanking” them',
       },
       { t: 0.6, title: '2 · LEO, 2019–20', brief: 'Cosmos 2543 near USA 245',
@@ -1310,8 +1311,18 @@ export const SCENES = [
     ],
     cameras: [
       { name: 'Tour (auto)', auto: true, at: [40, -25, 4.4], phone: { at: [40, -25, 5.2] } },
-      { name: 'X-37B: LEO flights', chip: 'X-37B LEO flights', act: 0, fitCraft: { anchor: 'us', ids: ['x37'], dir: [-0.5, 0.55, 0.7], dMin: 1.1, fill: 0.75, t: 0.15 } },
-      { name: 'X-37B OTV-7: follows the craft', chip: 'X-37B OTV-7', act: 1, fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.8, fill: 0.85, t: 0.42 } },
+      {
+        name: 'X-37B: LEO flights',
+        chip: 'X-37B LEO flights',
+        act: 0,
+        fitCraft: { anchor: 'us', ids: ['x37'], dir: [-0.5, 0.55, 0.7], dMin: 1.1, fill: 0.75, t: 0.15 },
+      },
+      {
+        name: 'X-37B OTV-7: follows the craft',
+        chip: 'X-37B OTV-7',
+        act: 1,
+        fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.8, fill: 0.85, t: 0.42 },
+      },
       {
         name: 'China: CSSHQ and released objects',
         chip: 'China CSSHQ',
@@ -1325,6 +1336,7 @@ export const SCENES = [
     staticFitPhone: 1.3,
     staticSnap: { csshq: [0.6], objJ: [0.605], objG: [0.93] },
     staticLabels: { csshq: 'CSSHQ + Obj. J, G' },
+    staticLabelsNarrow: { csshq: 'CSSHQ' }, // the phone key already reads "CSSHQ, Obj. J, G"
     staticNoLabel: ['objJ', 'objG'], // the static key names them: one label for the China group, not three stacked on the limb
     staticCraftScale: { csshq: 0.78 },
     staticKey: [

@@ -191,7 +191,8 @@ const methods = {
         hh = q.h / 2,
         cx = Math.max(q.x - hw, Math.min(q.x + hw, r.px)),
         cy = Math.max(q.y - hh, Math.min(q.y + hh, r.py));
-      if (Math.hypot(cx - r.px, cy - r.py) > 7 * ls) Object.assign(q, { leader: true, ax: cx, ay: cy, qx: r.px, qy: r.py, auto: true });
+      // ax/ay = the referent, qx/qy = the box edge (as _labelPositions)
+      if (Math.hypot(cx - r.px, cy - r.py) > 7 * ls) Object.assign(q, { leader: true, ax: r.px, ay: r.py, qx: cx, qy: cy, auto: true });
     });
     for (const q of lp) {
       if (!q || !q.leader) continue;
