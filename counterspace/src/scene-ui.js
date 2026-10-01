@@ -44,7 +44,8 @@ async function getHost() {
           a = acts && !c.auto ? acts[c.act] : null;
         epi = a ? { a0: a.t0, a1: a.t1, last: a === acts.at(-1), name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
         pick(i);
-        if (epi) host.update(host.t); // bring the time into the episode now (a preset pressed at another episode's time)
+        if (epi)
+          host.update(host.t); // bring the time into the episode now (a preset pressed at another episode's time)
         else syncScrub(host.t);
       };
     }
