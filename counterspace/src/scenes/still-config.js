@@ -14,11 +14,17 @@ export const STILL = {
     fov: 34,
     shift: [0.001, -0.06],
     // labels off the field lines: Thor and Detonation above the belt, Johnston Island below it (fractions of the frame width)
-    // R23: the burst point sits among the field-line arcs, so no leader runs across them: Thor sits just left with a short horizontal leader, Detonation rises straight up
+    // R23: the burst point sits among the field-line arcs, so no leader runs across them: Thor sits just left with a short horizontal leader,
+    // Detonation rises straight up
     // beside the arcs, Johnston drops straight down, and the belt label (short text) sits right of the outer arc it names, on the same line
     off: { Thor: [-0.1, 0], Detonation: [0, -0.0665], Johnston: [0.025, 0.15], Radiation: [0.105, 0] },
   },
-  solwind: { t: 0.45, pos: [-3.274, 2.613, 2.013], look: [-0.531, 0.696, 0.64], fov: 29, shift: [0.062, -0.1],
+  solwind: {
+    t: 0.45,
+    pos: [-3.274, 2.613, 2.013],
+    look: [-0.531, 0.696, 0.64],
+    fov: 29,
+    shift: [0.062, -0.1],
     // labels spread around the debris blob (Solwind left, ASM-135 above, the F-15 below left), leaders short of the 0.17 W limit
     off: { Solwind: [-0.17, -0.045], 'ASM-135': [0.12, -0.16], 'F-15': [-0.09, 0.09] },
   },
@@ -41,7 +47,15 @@ export const STILL = {
   // SJ-21 tug: the whole GEO ring, the Earth and the docked pair with their labels grouped beside it.
   'sj21-tug': { t: 0.78, pos: [3.5, 6.5, -1.6], look: [-0.4, 0, -1.1], fov: 41, shift: [0.075, -0.11] },
   // Spaceplanes: every act at once (OTV-7's 323 x 38,838 km orbit, the X-37B flight orbits, CSSHQ's orbit and craft).
-  spaceplanes: { t: 0.7, all: true, pos: [4.4, 3.9, 5.2], look: [0.4, 0.5, 0], fov: 38, shift: [0.07, 0], hide: ['X-37B (US)', 'X-37B flights', 'Object G', 'Object J'] },
+  spaceplanes: {
+    t: 0.7,
+    all: true,
+    pos: [4.4, 3.9, 5.2],
+    look: [0.4, 0.5, 0],
+    fov: 38,
+    shift: [0.07, 0],
+    hide: ['X-37B (US)', 'X-37B flights', 'Object G', 'Object J'],
+  },
   // RPO: three episodes side by side (each tile uses its act camera); tiles are as tall as the still body.
   rpo: { tileS: 1.85 },
 };

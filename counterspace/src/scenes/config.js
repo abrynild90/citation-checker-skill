@@ -697,8 +697,12 @@ export const SCENES = [
       },
       {
         type: 'site',
-        at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', short: 'Teykovo',
-        color: C.pin, dx: -20, dy: -34,
+        at: [56.86, 40.53],
+        label: 'Peresvet shelters: Teykovo',
+        short: 'Teykovo',
+        color: C.pin,
+        dx: -20,
+        dy: -34,
         pin: true,
         liveOnly: true,
         minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
@@ -706,8 +710,11 @@ export const SCENES = [
       },
       {
         type: 'site',
-        at: [56.63, 47.89], label: 'Yoshkar-Ola',
-        color: C.pin, dx: 14, dy: 40,
+        at: [56.63, 47.89],
+        label: 'Yoshkar-Ola',
+        color: C.pin,
+        dx: 14,
+        dy: 40,
         pin: true,
         liveOnly: true,
         minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
@@ -715,8 +722,11 @@ export const SCENES = [
       },
       {
         type: 'site',
-        at: [55.03, 82.92], label: 'Novosibirsk',
-        color: C.pin, dx: 0, dy: 40,
+        at: [55.03, 82.92],
+        label: 'Novosibirsk',
+        color: C.pin,
+        dx: 0,
+        dy: 40,
         pin: true,
         liveOnly: true,
         minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
@@ -783,7 +793,10 @@ export const SCENES = [
         maxPx: 112,
         label: 'Compass G2 (defunct)',
         short: 'Compass G2',
-        staticKey: [[0, 0.1, 0.72, 0], [1, 0.1, 0.72, 0]], // static: well above the belt line
+        staticKey: [
+          [0, 0.1, 0.72, 0],
+          [1, 0.1, 0.72, 0],
+        ], // static: well above the belt line
         dx: 60,
         dy: 34,
         labelFn: (t) => (t >= 0.4 && t < 0.8 ? null : 'Compass G2 (defunct)'),
@@ -808,7 +821,10 @@ export const SCENES = [
         maxPx: 112,
         label: 'SJ-21 (China)',
         short: 'SJ-21',
-        staticKey: [[0, 0.1, 0.72, 0], [1, 0.1, 0.72, 0]], // static: well above the belt line
+        staticKey: [
+          [0, 0.1, 0.72, 0],
+          [1, 0.1, 0.72, 0],
+        ], // static: well above the belt line
         dx: -68,
         dy: -12,
         labelFn: (t, n) => (t >= 0.4 && t < 0.8 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : 'SJ-21' + ' (China)'),
@@ -881,8 +897,13 @@ export const SCENES = [
         dropPhone: ['GEO belt', 'SJ-21 + SJ-25 docked'], // 375: the panel title already names the docked pair
         status: 'SJ-21 and SJ-25 appear to dock; two' + ' US GSSAP satellites are positioned' + ' “flanking” them',
       },
-      { t: 0.6, title: '2 · LEO, 2019–20', brief: 'Cosmos 2543 near USA 245',
-        short: 'Cosmos 2543', status: 'Cosmos 2542 releases Cosmos 2543, which works near USA 245' },
+      {
+        t: 0.6,
+        title: '2 · LEO, 2019–20',
+        brief: 'Cosmos 2543 near USA 245',
+        short: 'Cosmos 2543',
+        status: 'Cosmos 2542 releases Cosmos 2543, which works near USA 245',
+      },
       {
         t: 0.85,
         title: '3 · GEO, 2025',

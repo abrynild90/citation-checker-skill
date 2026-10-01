@@ -91,8 +91,20 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
   const rect = (a, b, w, h, f, st = dark) =>
     k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
   const shade = (a, b, w, h) => {
-    k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h * 0.42).attr('fill', '#fff').attr('fill-opacity', 0.2);
-    k.append('rect').attr('x', a).attr('y', b + h * 0.58).attr('width', w).attr('height', h * 0.42).attr('fill', '#000').attr('fill-opacity', 0.26);
+    k.append('rect')
+      .attr('x', a)
+      .attr('y', b)
+      .attr('width', w)
+      .attr('height', h * 0.42)
+      .attr('fill', '#fff')
+      .attr('fill-opacity', 0.2);
+    k.append('rect')
+      .attr('x', a)
+      .attr('y', b + h * 0.58)
+      .attr('width', w)
+      .attr('height', h * 0.42)
+      .attr('fill', '#000')
+      .attr('fill-opacity', 0.26);
     k.append('rect')
       .attr('x', a)
       .attr('y', b)
@@ -151,7 +163,13 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
         poly('M-9,15 L-6,24 L-12,24Z M9,15 L12,24 L6,24Z M-2.5,15 L-3.5,26 L3.5,26 L2.5,15Z', '#39415a');
         for (const sg of [-1, 1]) {
           rect(sg * 14 - 1.5, -12, 3, 24, '#eef1f8');
-          k.append('line').attr('x1', sg * 32).attr('x2', sg * 32).attr('y1', -17).attr('y2', 17).attr('stroke', dark).attr('stroke-width', 2);
+          k.append('line')
+            .attr('x1', sg * 32)
+            .attr('x2', sg * 32)
+            .attr('y1', -17)
+            .attr('y2', 17)
+            .attr('stroke', dark)
+            .attr('stroke-width', 2);
         }
       } else if (o.variant === 'navsat') {
         // Compass G2: Earth-facing phased array on the bus, a whip antenna and the apogee-motor bell
@@ -168,10 +186,7 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
     // spaceplane (top view, nose up): swept delta wings in the national colour with a darker underside strip, a white fuselage with a dark cockpit and
     // payload-bay door, twin tail fins and an engine bell
     poly('M0,-44 L8,-14 L44,26 L44,34 L9,26 L6,42 L-6,42 L-9,26 L-44,34 L-44,26 L-8,-14Z', color);
-    k.append('path')
-      .attr('d', 'M8,-14 L44,26 L44,34 L9,26Z M-8,-14 L-44,26 L-44,34 L-9,26Z')
-      .attr('fill', '#000')
-      .attr('fill-opacity', 0.3);
+    k.append('path').attr('d', 'M8,-14 L44,26 L44,34 L9,26Z M-8,-14 L-44,26 L-44,34 L-9,26Z').attr('fill', '#000').attr('fill-opacity', 0.3);
     k.append('path')
       .attr('d', 'M7,-12 L38,22 M-7,-12 L-38,22')
       .attr('stroke', '#fff')
@@ -243,7 +258,8 @@ function localBox(shape, variant) {
 // Icon bounding box in units of the craft size (width, height), for the checker's icon-area rule.
 const CRAFT_BOX = { sat: [1, 0.45], iss: [0.96, 0.64], plane: [0.7, 0.7], aircraft: [0.7, 0.7], ship: [1, 0.2], site: [0.68, 0.8], jammer: [0.9, 0.8] };
 // Global static marker cap in px for a stage W px wide: 22 px on the 798 px stage of the 1440 viewport, proportional with W, 10-24 px.
-const markerCap = (W, print) => (print ? 8 : Math.max(10, Math.min(24, (22 * W) / 798))); // print: the 760 px layout is shown x3.95 in the 3000 px still (about 32 px)
+// print: the 760 px layout is shown x3.95 in the 3000 px still (about 32 px)
+const markerCap = (W, print) => (print ? 8 : Math.max(10, Math.min(24, (22 * W) / 798)));
 const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45, jammer: 0.7 };
 let earthUpgrade = false,
   pendingStatic = null,
@@ -492,7 +508,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         inDisc++;
         if (x >= 0 && x <= W && y >= 0 && y <= H) inRect++;
       }
-    showGlobe = inRect / inDisc >= 0.45 && !(opts.view && Math.hypot(...opts.view.focus) > 1.5); // a GEO panel always shows the clean limb, never a cropped disc
+    // a GEO panel always shows the clean limb, never a cropped disc
+    showGlobe = inRect / inDisc >= 0.45 && !(opts.view && Math.hypot(...opts.view.focus) > 1.5);
   }
   // The globe actually drawn: the real one, or (a GEO panel, where the Earth is far outside the frame) a large limb arc on the Earth's side of the panel
   let GX = CX,
@@ -761,7 +778,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     marks.push({ x: lx, y: ly - 4, r: 16, n: 'earth-cue' }, { x: lx - 44, y: ly - 4, r: 12, n: 'earth-cue' }, { x: lx + 44, y: ly - 4, r: 12, n: 'earth-cue' });
   }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
-  const phoneText = (x) => (W < 520 && x && sim.cfg.staticTextPhone ? sim.cfg.staticTextPhone.reduce((a, [f, r]) => a.replace(f, r), x) : x); // cfg.staticTextPhone: [from, to] pairs
+  // cfg.staticTextPhone: [from, to] pairs
+  const phoneText = (x) => (W < 520 && x && sim.cfg.staticTextPhone ? sim.cfg.staticTextPhone.reduce((a, [f, r]) => a.replace(f, r), x) : x);
   const NARROW = W < 600 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
   shells.forEach((it, i) => {
@@ -804,14 +822,18 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       text,
       color,
       opt,
-      pin: at && pin, // staticPin 'hard': the hint outweighs soft costs (ring lines, disc); staticPin: the slot hint is a strong preference (the placer stays within a few px of it unless it collides)
+      // staticPin 'hard': the hint outweighs soft costs (ring lines, disc).
+      // staticPin: the slot hint is a strong preference (the placer stays within a few px of it unless it collides).
+      pin: at && pin,
     });
   };
   const gapPts = sim.cfg.staticRingGap
-    ? sim.items.filter((i) => i.kind === 'point' && i.prim && !i.liveOnly && (i.staticPos || i.pos)).map((i) => {
-        const q = i.staticPos?.(t) || i.pos(t);
-        return q ? project(q) : { x: -999, y: -999 };
-      })
+    ? sim.items
+        .filter((i) => i.kind === 'point' && i.prim && !i.liveOnly && (i.staticPos || i.pos))
+        .map((i) => {
+          const q = i.staticPos?.(t) || i.pos(t);
+          return q ? project(q) : { x: -999, y: -999 };
+        })
     : [];
   for (const it of sim.items) {
     if (it.kind === 'dome')
@@ -938,13 +960,29 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           });
         if (!a.hidden && !b.hidden && it.width && sim.cfg.staticBeamW) {
           // a crisp tapered beam: thin at the transmitter, widening slightly towards the target, with a bright core
-          const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, w0 = sim.cfg.staticBeamW * 0.25, w1 = sim.cfg.staticBeamW * 0.5;
+          const dx = b.x - a.x,
+            dy = b.y - a.y,
+            L = Math.hypot(dx, dy) || 1,
+            nx = -dy / L,
+            ny = dx / L,
+            w0 = sim.cfg.staticBeamW * 0.25,
+            w1 = sim.cfg.staticBeamW * 0.5;
           const col = it.colorFn ? it.colorFn(t) : it.color;
           g.append('polygon')
-            .attr('points', `${a.x + nx * w0},${a.y + ny * w0} ${b.x + nx * w1},${b.y + ny * w1} ${b.x - nx * w1},${b.y - ny * w1} ${a.x - nx * w0},${a.y - ny * w0}`)
+            .attr(
+              'points',
+              `${a.x + nx * w0},${a.y + ny * w0} ${b.x + nx * w1},${b.y + ny * w1} ${b.x - nx * w1},${b.y - ny * w1} ${a.x - nx * w0},${a.y - ny * w0}`,
+            )
             .attr('fill', col)
             .attr('fill-opacity', 0.85);
-          g.append('line').attr('x1', a.x).attr('y1', a.y).attr('x2', b.x).attr('y2', b.y).attr('stroke', it.coreColor || '#fff').attr('stroke-width', 0.8).attr('stroke-opacity', 0.9);
+          g.append('line')
+            .attr('x1', a.x)
+            .attr('y1', a.y)
+            .attr('x2', b.x)
+            .attr('y2', b.y)
+            .attr('stroke', it.coreColor || '#fff')
+            .attr('stroke-width', 0.8)
+            .attr('stroke-opacity', 0.9);
         } else if (!a.hidden && !b.hidden)
           g.append('line')
             .attr('x1', a.x)
@@ -1005,14 +1043,21 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           for (let n = 0; n < 40 && ext(cs) > 0.95 * sim.cfg.staticCraftCap * Math.PI * R * R; n++) cs *= 0.94;
         }
         // Global marker cap (every static craft/site marker, screen and print): the longer side of the drawn silhouette is at most markerCap(W) px
-        // (22 px on the 798 px stage of the 1440 viewport, scaled with W, 10-24 px). A scene whose subject is the point may raise it: cfg.staticMarkerCap[craftId].
+        // (22 px on the 798 px stage of the 1440 viewport, scaled with W, 10-24 px). A scene whose subject is the point may raise it:
+        // cfg.staticMarkerCap[craftId].
         let capPx = markerCap(W, opts.print);
         const capOvr = (!opts.panel && (sim.cfg.staticMarkerCap?.[it.craftId] ?? sim.cfg.staticMarkerCap?.[it.label])) || 0;
         if (craftShape && capOvr) capPx = (markerCap(W, opts.print) * capOvr) / 22; // override given in px at the 22 px reference stage
         if (craftShape) {
           const b = localBox(it.iss ? 'iss' : it.shape, it.variant),
             a = (rot * Math.PI) / 180,
-            side = (z) => Math.max(Math.abs(Math.cos(a)) * b.width + Math.abs(Math.sin(a)) * b.height, Math.abs(Math.sin(a)) * b.width + Math.abs(Math.cos(a)) * b.height) * z / 100;
+            side = (z) =>
+              (Math.max(
+                Math.abs(Math.cos(a)) * b.width + Math.abs(Math.sin(a)) * b.height,
+                Math.abs(Math.sin(a)) * b.width + Math.abs(Math.cos(a)) * b.height,
+              ) *
+                z) /
+              100;
           for (let n = 0; n < 60 && b.width && side(cs) > capPx; n++) cs = Math.max(2, cs * 0.96);
         }
         const mi = marks.length;
@@ -1039,9 +1084,18 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           } catch (e) {
             /* no layout: nominal box */
           }
-          crafts.push({ x: p.x, y: p.y, w: bw, h: bh, subject: !it.iss && !it.ctx, name: it.label || it.shape, cap: capPx, ovr: !!capOvr, id: it.craftId || it.label });
-        }
-        else if (it.shape === 'sat') {
+          crafts.push({
+            x: p.x,
+            y: p.y,
+            w: bw,
+            h: bh,
+            subject: !it.iss && !it.ctx,
+            name: it.label || it.shape,
+            cap: capPx,
+            ovr: !!capOvr,
+            id: it.craftId || it.label,
+          });
+        } else if (it.shape === 'sat') {
           const q3 = it.small ? 6 : 8;
           g.append('rect')
             .attr('x', p.x - q3 / 2)
@@ -1150,7 +1204,13 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('stroke', 'rgba(223,230,247,0.25)');
     key.forEach((k, i) => {
       const yy = kBox[1] + 8 + i * (kFs + 6) + kFs / 2;
-      g.append('line').attr('x1', kBox[0] + 8).attr('x2', kBox[0] + 24).attr('y1', yy).attr('y2', yy).attr('stroke', k[0]).attr('stroke-width', 3);
+      g.append('line')
+        .attr('x1', kBox[0] + 8)
+        .attr('x2', kBox[0] + 24)
+        .attr('y1', yy)
+        .attr('y2', yy)
+        .attr('stroke', k[0])
+        .attr('stroke-width', 3);
       g.append('text')
         .attr('x', kBox[0] + 30)
         .attr('y', yy + kFs * 0.35)

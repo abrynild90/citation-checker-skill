@@ -300,7 +300,7 @@ const methods = {
           t: pn.t,
           aspect: tileW / tileH,
           full: true,
-          s: tileW / 1000 * (conf.tileS ?? 2.3),
+          s: (tileW / 1000) * (conf.tileS ?? 2.3),
           status: pn.status,
           title: `${pn.title} · ${pn.brief}`,
           cam: conf.panels?.[k],
@@ -392,6 +392,12 @@ export function installGLStill(GLHost) {
   if (window.__cs) wrap(window.__cs);
   else {
     let v;
-    Object.defineProperty(window, '__cs', { configurable: true, get: () => v, set: (x) => { v = wrap(x); } });
+    Object.defineProperty(window, '__cs', {
+      configurable: true,
+      get: () => v,
+      set: (x) => {
+        v = wrap(x);
+      },
+    });
   }
 }

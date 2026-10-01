@@ -184,7 +184,9 @@ export class GLHost {
     this.handEl = document.createElement('div');
     this.handEl.className = 'hlabel';
     this.handEl.style.cssText +=
-      ';left:10px;top:' + (this.el.clientWidth < 520 ? 56 : 44) + 'px;font-size:12px;font-weight:600;color:#0a0f1e;background:#8cc8ff;white-space:nowrap;' +
+      ';left:10px;top:' +
+      (this.el.clientWidth < 520 ? 56 : 44) +
+      'px;font-size:12px;font-weight:600;color:#0a0f1e;background:#8cc8ff;white-space:nowrap;' +
       'transform:none;visibility:hidden;pointer-events:none';
     this.labelLayer.appendChild(this.handEl);
     this.insetEl = null;
