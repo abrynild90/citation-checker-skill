@@ -73,7 +73,8 @@ export function earthRaster(proj, CX, CY, R, win) {
   }
 }
 
-// Land as one MultiPolygon. Ring winding is data-dependent: any ring that d3 reads as "more than a hemisphere" is reversed so it fills land, not the complement.
+// Land as one MultiPolygon. Ring winding is data-dependent: any ring that d3 reads as "more than a hemisphere" is reversed so it fills land,
+// not the complement.
 export function landGeometry() {
   return {
     type: 'MultiPolygon',

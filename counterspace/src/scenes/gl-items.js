@@ -3,7 +3,7 @@
 // (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLItems(GLHost), see app.js.)
 // ============================================================================
 import { beamCanvas, panelCanvas } from './earth.js';
-import { DEG, IS_PHONE, add, ll, norm, scl } from './core.js';
+import { DEG, IS_PHONE, add, ll, scl } from './core.js';
 import { modelMethods } from './gl-models.js';
 
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;

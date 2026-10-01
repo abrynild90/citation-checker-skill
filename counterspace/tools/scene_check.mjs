@@ -1,7 +1,8 @@
 // Scene collision / framing checker for the 13 WebGL scenes, their static SVG diagrams and their PNG stills.
 //   NODE_PATH=tools/node_modules OUT=<dir> PORT=9122 node tools/scene_check.mjs
-// Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.2,0.3,...  MODES=live,static,still,hero  SHOT=1 (save a PNG per
-// state)  QUIET=1
+// Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.2,0.3,...  MODES=live,static,still,hero,stillapi
+//      SHOT=1 (save a PNG per state)  QUIET=1  ROOT=<dir holding the index.html to test, default .>  OUT=<dir>  PORT=<port>
+// (stillapi: every still, live and static, must be exactly 3000x1875.)
 // Every state is (scene x camera preset x t x viewport) for live scenes; static SVG at each viewport; live and static stills at 1440.
 // FAILURES (each is a hard failure, exit code 1 if any):
 //   label-overlap    two label boxes overlap                 label-reserved  a label sits on the banner, status caption or hint chip
@@ -38,7 +39,7 @@
 //   still-crop       a still shows a whole-globe composition (multi-tile composites exempt) (disc radius < 55% of the frame) with the Earth partly cropped
 //                    (50-98.5% visible); a deliberate close-up is exempt
 //   hero-small       hero live at >= 900 px: the outer ring spans under 70% of the stage width
-//   hero-*           hero: ISS marker missing (hero-iss), a shell label more than 40 px from its ring (hero-label), caption strip / heading wrap (page side)
+//   hero-iss         hero live: the ISS marker is missing, or drawn under 12 px while on screen and not behind the Earth
 import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
@@ -182,7 +183,7 @@ const KEY = {
   spaceplanes: [/^X-37B \(US\)/, /^X-37B OTV-7/, /^CSSHQ \(China\)/],
   rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/],
 };
-// Justified per-scene marker-size overrides (px, longer side): the marker IS the scene's subject. Must match cfg.staticMarkerCap in config.js.
+// Justified per-scene marker-size overrides (px, longer side): the marker IS the scene's subject. Must match cfg.staticMarkerCap in src/scenes/configs/*.js.
 const MARKER_OVR = { laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 100, cg2: 100 } };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;
 
