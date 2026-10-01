@@ -26,6 +26,7 @@ export const STARFISH = {
       t1: 0.14,
       color: C.int,
       label: 'Thor launch',
+      labelEnd: 0.4, // the launch is over: its label would only add a leader across the field lines
       opt: true,
       dx: -96,
       dy: 4,

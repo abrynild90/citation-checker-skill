@@ -24,10 +24,27 @@ async function getHost() {
     if (!host) {
       host = new GLHost(THREE);
       // The scrubber mirrors scene time however it changes: playback ticks, scrubbing or programmatic host.update() calls.
-      const upd = host.update.bind(host);
+      const upd = host.update.bind(host),
+        pick = host.pickCam.bind(host);
+      // An episode preset (RPO, Spaceplanes) restricts playback and scrubbing to its episode: epi = {a0, a1, last, name}. A time handed to update()
+      // from outside the episode is mapped (0..1) into it, so a preset never shows another episode; Tour / Whole event clear it.
       host.update = (t) => {
+        if (epi) {
+          const lo = epi.a0 + 0.001,
+            hi = epi.a1 - (epi.last ? 0 : 0.001);
+          if (!(t >= epi.a0 - 1e-6 && t <= hi)) t = lo + Math.max(0, Math.min(1, t)) * (hi - lo);
+        }
         upd(t);
-        syncScrub(t);
+        syncScrub(host.t);
+      };
+      host.pickCam = (i) => {
+        const c = host.sim.cams[i],
+          cc = host.sim.cfg.cameras?.[i],
+          acts = host.sim.cfg.acts,
+          a = acts && !c.auto ? acts[c.act] : null;
+        epi = a ? { a0: a.t0, a1: a.t1, last: a === acts.at(-1), name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
+        pick(i);
+        syncScrub(host.t);
       };
     }
     glOK = true;
@@ -53,7 +70,8 @@ function prefetchEarth() {
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 const overlay = document.getElementById('overlay'),
   view = document.getElementById('sceneView');
-let curSim = null, // the simulation of the open scene (the static still re-draws it at a print-friendly layout width)
+let epi = null, // the locked episode of an episode preset (see getHost)
+  curSim = null, // the simulation of the open scene (the static still re-draws it at a print-friendly layout width)
   cur = null,
   returnFocus = null,
   heroSim = null;
@@ -67,6 +85,7 @@ export async function openScene(id, originEl) {
     returnFocus = originEl || document.activeElement;
   }
   cur = cfg;
+  epi = null;
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -158,6 +177,7 @@ export function closeScene() {
   if (!cur) return;
   const closing = cur;
   cur = null;
+  epi = null;
   setInert(false);
   setStatus('');
   overlay.classList.remove('open');
@@ -183,28 +203,24 @@ function syncCams() {
   if (!host || !cur) return;
   const tour = host.sim.cfg.acts && host.lock == null ? host.sim.cams.findIndex((c) => c.auto) : -1,
     on = tour >= 0 ? tour : host.camIdx;
-  // A locked preset that has handed the camera to another episode is not pressed (the chip names what is on screen); it keeps a dashed outline
-  // ("resumes when the timeline is back in its episode") so the viewer can still see which preset is theirs.
-  const resume = host.lock != null && host._fbAct != null ? host._lockCam : -1;
   [...camsEl.children].forEach((b, i) => {
     b.setAttribute('aria-pressed', String(i === on));
-    if (i === resume && i !== on) {
-      b.dataset.resume = '1';
-      b.title = 'Your preset: it resumes when the timeline returns to its episode';
-    } else {
-      delete b.dataset.resume;
-      b.title = b.dataset.name || '';
-    }
+    b.title = b.dataset.name || '';
   });
 }
 function syncScrub(t) {
   if (!cur) return;
   syncCams();
-  const v = Math.max(0, Math.min(1, t)),
-    dur = cur?.duration || 0;
+  const dur = cur?.duration || 0,
+    a0 = epi ? epi.a0 + 0.001 : 0,
+    a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1,
+    v = Math.max(0, Math.min(1, (t - a0) / (a1 - a0))),
+    len = (a1 - a0) * dur,
+    txt = epi ? `${epi.name}: ${(v * len).toFixed(1)} / ${len.toFixed(1)} s` : `${(v * dur).toFixed(1)} / ${dur} s`;
   scrub.value = Math.round(v * 1000);
-  scrub.setAttribute('aria-valuetext', `${(v * dur).toFixed(1)} of ${dur} seconds`);
-  scTime.textContent = `${(v * dur).toFixed(1)} / ${dur} s`;
+  scrub.setAttribute('aria-valuetext', epi ? txt : `${(v * dur).toFixed(1)} of ${dur} seconds`);
+  scrub.setAttribute('aria-label', epi ? `Time within ${epi.name}` : 'Scene time');
+  scTime.textContent = txt;
 }
 // Static diagrams (reduced motion, no WebGL) have no timeline: hide Play, the scrubber and the camera presets.
 function staticMode(on) {
@@ -218,7 +234,7 @@ scrub.oninput = () => {
   if (host && cur && !scrub.hidden) {
     host.playing = false;
     setPlayBtn(false);
-    host.update(scrub.value / 1000);
+    host.update(epi ? epi.a0 + 0.001 + (scrub.value / 1000) * (epi.a1 - (epi.last ? 0 : 0.001) - epi.a0 - 0.001) : scrub.value / 1000);
   }
 };
 // Play/pause: an icon button (label hidden on phones) whose accessible name is the action it will do; the highlighted style marks "playing".
@@ -303,9 +319,7 @@ function svgToPNG(svg, title, cite) {
         .trim()
         .replace(/[.;,\s]+$/, '')}.`;
       const credit =
-        svg.dataset.earth === 'bluemarble'
-          ? 'Earth imagery: NASA Blue Marble (public domain).'
-          : 'Vector land map: Natural Earth (public domain).';
+        svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
       // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
       let f = Math.round(15 * s);
       for (; f > 10 * s; f -= 0.5 * s) {

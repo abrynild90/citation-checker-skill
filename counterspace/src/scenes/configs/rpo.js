@@ -1,6 +1,9 @@
 // scenes/configs/rpo.js: scene `rpo` (see ../config.js for the list order)
-import { GEO_ALT } from '../core.js';
+import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C, PK } from './shared.js';
+
+const MIN_PX = IS_PHONE ? 54 : 72, // craft model size range (px): larger than before on the desk, kept modest on a phone and in the PNG still
+  MAX_PX = IS_PHONE ? 84 : 108;
 
 export const RPO = {
   id: 'rpo',
@@ -55,15 +58,15 @@ export const RPO = {
     { t0: 0.72, t1: 1, cam: 3 },
   ],
   actors: [
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.004, opacity: 0.6, inset: true, label: 'GEO belt' },
-    { type: 'ring', alt: 600, inc: 97.9, raan: 40, color: '#8fd0ff', thick: 0.0025, opacity: 0.5, inset: true },
+    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.004, opacity: 0.6, inset: true, push: 0.2, label: 'GEO belt' },
+    { type: 'ring', alt: 600, inc: 97.9, raan: 40, color: '#8fd0ff', thick: 0.0025, opacity: 0.5, inset: true, push: 0.08 },
     // ---- 1 · China + US in GEO (SJ-21, SJ-25, USA 270, USA 271), June 2025 to January 2026
     {
       type: 'craft',
       id: 'sj25',
       variant: 'tug',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'g1',
       acts: [0],
       color: C.cn,
@@ -86,8 +89,8 @@ export const RPO = {
       type: 'craft',
       id: 'sj21b',
       variant: 'tug',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'g1',
       acts: [0],
       color: C.cn,
@@ -115,8 +118,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'usa270',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'g1',
       acts: [0],
       color: C.us,
@@ -134,8 +137,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'usa271',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'g1',
       acts: [0],
       color: C.us,
@@ -154,8 +157,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'c2542',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'l1',
       acts: [1],
       color: C.ru,
@@ -173,8 +176,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'c2543',
-      minPx: 40,
-      maxPx: 62,
+      minPx: 50,
+      maxPx: 78,
       anchor: 'l1',
       acts: [1],
       vis: [0.447, 0.72],
@@ -202,8 +205,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'usa245',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'l1',
       acts: [1],
       color: C.us,
@@ -221,8 +224,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'sky',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'g3',
       acts: [2],
       color: '#cfd8ea',
@@ -239,8 +242,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'usa271b',
-      minPx: 52,
-      maxPx: 84,
+      minPx: MIN_PX,
+      maxPx: MAX_PX,
       anchor: 'g3',
       acts: [2],
       color: C.us,

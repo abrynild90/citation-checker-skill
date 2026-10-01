@@ -111,6 +111,7 @@ export function buildSim(cfg) {
         craftId: a.id,
         dockWith: a.dock?.with,
         dockOn: a.dock ? (t) => t >= a.dock.t0 && t <= a.dock.t1 : null,
+        dockT: a.dock ? [a.dock.t0, a.dock.t1] : null,
         minPx: a.minPx,
         maxPx: a.maxPx,
         small: !!a.small,
@@ -203,6 +204,7 @@ export function buildSim(cfg) {
         color: a.color,
         opacity: a.opacity ?? 0.6,
         thick: a.thick,
+        push: a.push,
         label: a.label,
         short: a.short,
         staticHide: a.staticHide,
@@ -253,6 +255,7 @@ export function buildSim(cfg) {
         color: a.color,
         opacity: a.opacity ?? 0.55,
         thick: a.thick,
+        push: a.push,
         label: a.label,
         labelAt: pts[a.sat ? 118 : 45],
       });
@@ -515,16 +518,23 @@ export function buildSim(cfg) {
         COOL = a.lateGlow ? [0.95, 0.45, 0.25] : [0.62, 0.17, 0.12]; // lateGlow: old fragments stay clearly visible
       let kc = 0,
         kb = 1e9;
+      const ranked = [];
       P.forEach((p, k) => {
         const sc = Math.abs(p.dw - 1) * 3 + Math.abs(p.da) / a.spreadAlt + Math.abs(p.du) * 8 + Math.abs(p.di) / a.spreadInc;
+        ranked.push([sc, k]);
         if (sc < kb) {
           kb = sc;
           kc = k;
         }
       });
+      ranked.sort((x, y) => x[0] - y[0]);
       const cloud = {
         kind: 'cloud',
         labelIdx: kc,
+        labelCands: ranked
+          .slice(0, 8)
+          .map((r) => r[1])
+          .concat(P.map((_, k) => k).filter((k) => k % Math.ceil(n / 24) === 0)), // stand-ins for the label particle when it is behind the Earth (gl-labels)
         n,
         color: a.color,
         dynCol: true,
@@ -617,6 +627,7 @@ export function buildSim(cfg) {
         labelDy: a.dy,
         staticAt: a.staticAt,
         labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
+        labelEnd: a.labelEnd,
         pts: (t) => {
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
@@ -647,16 +658,15 @@ export function buildSim(cfg) {
           }),
         );
       }
-      if (a.head)
-        items.push({
-          kind: 'point',
-          shape: 'kv',
-          color: a.color,
-          pos: (t) => {
-            const s = clamp01((t - a.t0) / (a.t1 - a.t0));
-            return s > 0 && s < 1 ? all[Math.round(s * N)] : null;
-          },
-        });
+      if (a.head) {
+        // glowing rocket head: a wide halo in the path colour around a small white-hot core (about 2x the old red dot, much brighter)
+        const headPos = (t) => {
+          const s = clamp01((t - a.t0) / (a.t1 - a.t0));
+          return s > 0 && s < 1 ? all[Math.round(s * N)] : null;
+        };
+        items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.3, kvMin: 28, kvMax: 64, pos: headPos });
+        items.push({ kind: 'point', shape: 'kv', color: a.headColor ?? '#fff1e6', kvSize: 0.14, kvMin: 14, kvMax: 30, pos: headPos });
+      }
       focus = focus || a.from;
     }
     if (a.type === 'flash')

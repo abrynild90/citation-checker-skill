@@ -20,6 +20,7 @@ export const FENGYUN = {
   orbitAt: [26, 74, 4.6],
   phoneK: 1.14,
   noSimCount: true,
+  stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
     { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 100, impactDy: -100 },

@@ -27,9 +27,10 @@ gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 2.2);
 gl_FragColor = vec4(uColor, clamp(0.015 + rim * uGain, 0.0, 1.0)); }`;
-const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; varying float vU;
+const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; varying float vU;
 void main(){ vU = uv.x; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
-float r = min(uR, uMaxPx * d / uScale); gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
+float r = min(uR, uMaxPx * d / uScale);
+vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; varying float vU;
 void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
@@ -97,6 +98,7 @@ const methods = {
           uScale: { value: 800 },
           uMaxPx: { value: maxPx },
           uHead: { value: 0 },
+          uPush: { value: 0 },
         },
       });
     m.userData = { maxPx };
@@ -198,6 +200,7 @@ const methods = {
             it.dynamic ? 1.9 : 1.4,
           ),
         );
+        if (it.push) tube.material.uniforms.uPush.value = it.push; // orbit line pushed back from the camera: craft on it are drawn in front
         if (!it.dynamic && it.orbit) (this.ringPts ||= []).push(pts);
         root.add(tube);
         if (it.dynamic) this.dyn.push({ it: { kind: 'tube', ref: it, segs }, obj: tube });
@@ -234,7 +237,7 @@ const methods = {
         );
         m.scale.setScalar(it.kvSize ?? 0.1);
         // glow heads keep a bounded on-screen size
-        Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: it.kvSize ? 5 : 13, maxPx: it.kvSize ? 22 : 32 });
+        Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: it.kvMin ?? (it.kvSize ? 5 : 13), maxPx: it.kvMax ?? (it.kvSize ? 22 : 32) });
       } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
         m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright, it.variant);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model

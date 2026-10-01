@@ -54,7 +54,7 @@ const methods = {
         raw.push(null);
         continue;
       }
-      if (noBanner && L.item?.impactMark) {
+      if (noBanner && L.item?.impactMark && !this.sim.cfg.stillImpact) {
         raw.push(null); // the still shows the debris and the flash; the impact marker's label is a live-view aid and crowds the print frame
         continue;
       }
@@ -66,17 +66,43 @@ const methods = {
         raw.push(null); // this camera looks elsewhere: labels of objects it does not show are left out
         continue;
       }
-      let p = L.posFn(this.t);
-      if (p && this.sim.cfg.spin && L.cls !== 'shell') {
-        const v = new T.Vector3(...p).applyMatrix4(this.root.matrixWorld);
-        p = [v.x, v.y, v.z];
+      const spin = this.sim.cfg.spin && L.cls !== 'shell',
+        world = (q) => {
+          if (q && spin) {
+            const w3 = new T.Vector3(...q).applyMatrix4(this.root.matrixWorld);
+            return [w3.x, w3.y, w3.z];
+          }
+          return q;
+        },
+        hidden = (q) => {
+          if (!q) return true;
+          const u = new T.Vector3(...q).project(this.camera);
+          return occluded([cam.x, cam.y, cam.z], q) || u.z > 1 || Math.abs(u.x) > 0.985 || Math.abs(u.y) > 0.985;
+        };
+      let p = world(L.posFn(this.t));
+      // a debris cloud labels one of its particles: when that one is behind the Earth (or sits on the disc), a stand-in in view, as far off the disc as
+      // possible carries the print's label (live: the first one in view, kept until it hides).
+      const cl = (L.cloudIt ??= this.dyn.find((d) => d.it.kind === 'cloud' && d.it.label === L.text)?.it || false);
+      if (p && cl?.labelCands && (hidden(p) || noBanner)) {
+        const c0 = new T.Vector3(0, 0, 0).project(this.camera),
+          keep = cl.labelIdx;
+        let best = hidden(p) ? null : { p, d: Math.hypot(...new T.Vector3(...p).project(this.camera).sub(c0).toArray().slice(0, 2)), idx: keep };
+        for (const idx of cl.labelCands) {
+          cl.labelIdx = idx;
+          const q = world(L.posFn(this.t));
+          if (!q || hidden(q)) continue;
+          const d = Math.hypot(...new T.Vector3(...q).project(this.camera).sub(c0).toArray().slice(0, 2));
+          if (!best || d > best.d + 0.02) best = { p: q, d, idx };
+        }
+        cl.labelIdx = best ? best.idx : keep;
+        if (best) p = best.p;
       }
       if (!p) {
         raw.push(null);
         continue;
       }
       const v = new T.Vector3(...p).project(this.camera);
-      if (occluded([cam.x, cam.y, cam.z], p) || v.z > 1 || Math.abs(v.x) > 0.985 || Math.abs(v.y) > 0.985) {
+      if (hidden(p)) {
         raw.push(null);
         continue;
       } // hidden: behind Earth, or its referent is off the stage
@@ -85,7 +111,7 @@ const methods = {
           : L.short && (this.el.clientWidth < 520 || (noBanner && this.sim.cfg.stillShort?.some((h) => L.text.startsWith(h))))
             ? L.short
             : L.text,
-        color = L.item?.labelFn ? L.item.statusColor(this.t) : null;
+        color = L.item?.labelFn ? L.item.statusColor(this.t) : L.hue || null;
       if (!text) {
         raw.push(null);
         continue;
@@ -511,7 +537,9 @@ const methods = {
     d.textContent = text;
     if (this.sim?.cfg.spin) d.style.fontSize = '13.5px';
     this.labelLayer.appendChild(d);
-    this.labels.push({ d, posFn, item, text, dy, dx, short, cls, opt });
+    // hero: each chip takes the colour of its ring, as the static diagram does (LEO blue, MEO violet, GEO gold, ISS its own)
+    const own = this.sim?.cfg.spin ? this.sim.items.find((i) => (i.label === text || i.short === text) && /^#[0-9a-f]{6}$/i.test(i.color || '')) : null;
+    this.labels.push({ d, posFn, item, text, dy, dx, short, cls, opt, hue: own?.color || null });
   },
   _renderLabels() {
     const pos = this._labelPositions(this.el.clientWidth, this.el.clientHeight);
@@ -529,6 +557,10 @@ const methods = {
       L.d.style.top = q.y + 'px';
       if (L.d.textContent !== q.text) L.d.textContent = q.text;
       if (L.item?.labelFn) L.d.style.color = q.color;
+      else if (L.hue) {
+        L.d.style.color = L.hue;
+        L.d.style.boxShadow = `inset 0 0 0 1px ${L.hue}99`;
+      }
       if (!L.ln && this.leaders) {
         L.ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         L.ln.setAttribute('stroke-width', '1');

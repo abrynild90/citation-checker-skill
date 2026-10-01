@@ -49,7 +49,8 @@ export const modelMethods = {
     g.add(dish);
     if (variant === 'tug') {
       // SJ-21 (tug): a third panel segment on each wing with a mid-wing hinge, radiator panels on the bus sides, a second smaller dish on a short
-      // boom and an aft cluster of four small thruster nozzles around a larger main engine bell. No arm or grapple: SWF does not describe one.
+      // boom and an aft cluster of four small thruster nozzles around a larger main engine bell. Plus a generic grapple boom (illustrative: SWF does not
+      // describe any arm on SJ-21) that stows folded and reaches toward its docking partner.
       const dk = this._mat(0x1c2233);
       [-1, 1].forEach((sg) => {
         const p3 = new T.Mesh(new T.BoxGeometry(0.0072, 0.0007, 0.0104), pan);
@@ -76,6 +77,43 @@ export const modelMethods = {
       boom.position.set(0.0042, -0.0066, 0.0035);
       boom.rotation.z = -0.35;
       g.add(boom);
+      const arm = new T.Group(),
+        armM = this._mat(0xd5dae6),
+        seg = (x0, y0, x1, y1, r) => {
+          const L = Math.hypot(x1 - x0, y1 - y0),
+            q = new T.Mesh(new T.CylinderGeometry(r, r, L, 6), armM);
+          q.rotation.z = Math.PI / 2 + Math.atan2(y1 - y0, x1 - x0);
+          q.position.set((x0 + x1) / 2, (y0 + y1) / 2, 0);
+          arm.add(q);
+        };
+      seg(0.006, 0, 0.0135, 0.0036, 0.0007);
+      seg(0.0135, 0.0036, 0.0225, 0, 0.0005);
+      [0.006, 0.0135].forEach((x, i) => {
+        const j = new T.Mesh(new T.BoxGeometry(0.0021, 0.0021, 0.0021), dk);
+        j.position.set(x, i ? 0.0036 : 0, 0);
+        arm.add(j);
+      });
+      [-1, 1].forEach((u) => {
+        const f = new T.Mesh(new T.BoxGeometry(0.0034, 0.0004, 0.0004), dk);
+        f.position.set(0.0243, 0, u * 0.0012);
+        arm.add(f);
+      });
+      g.add(arm);
+      // each frame the boom points at the partner (docked pair: the other model), extending as the dock window nears and folding once it ends
+      arm.updateMatrixWorld = (force) => {
+        const e = (g.userData.armE ||= this.dyn.find((d) => d.obj === g)),
+          B = e?.it.dockWith && this.dyn.find((d) => d.it.craftId === e.it.dockWith);
+        let f = 0.25;
+        if (B) {
+          const [t0, t1] = e.it.dockT,
+            t = this.t;
+          f = Math.max(0.25, Math.min(1, (t - (t0 - 0.12)) / 0.1, (t1 + 0.04 - t) / 0.04));
+          const d = g.worldToLocal(g.parent.localToWorld(B.obj.position.clone())); // the partner, in this model's own (possibly rotated) frame
+          if (d.lengthSq() > 1e-12) arm.quaternion.setFromUnitVectors(new T.Vector3(1, 0, 0), d.normalize());
+        }
+        arm.scale.set(0.5 + 0.45 * f, 1.7, 1.7);
+        T.Group.prototype.updateMatrixWorld.call(arm, force);
+      };
       const dish2 = new T.Mesh(
         new T.SphereGeometry(0.0022, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
         new T.MeshLambertMaterial({ color: 0xe8ecf5, side: T.DoubleSide }),
@@ -179,14 +217,7 @@ export const modelMethods = {
     g.userData.iss = true;
     g.userData.tintMat = main.material;
     const h = new T.Sprite(
-      new T.SpriteMaterial({
-        map: this.spriteTex,
-        color: this._c(color),
-        transparent: true,
-        opacity: 0.3,
-        depthWrite: false,
-        blending: T.AdditiveBlending,
-      }),
+      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.3, depthWrite: false, blending: T.AdditiveBlending }),
     );
     h.scale.setScalar(0.085);
     g.add(h);
@@ -319,14 +350,7 @@ export const modelMethods = {
     g.add(stab);
     g.userData.tintMat = m;
     const h = new T.Sprite(
-      new T.SpriteMaterial({
-        map: this.spriteTex,
-        color: 0xe9edf7,
-        transparent: true,
-        opacity: 0.5,
-        depthWrite: false,
-        blending: T.AdditiveBlending,
-      }),
+      new T.SpriteMaterial({ map: this.spriteTex, color: 0xe9edf7, transparent: true, opacity: 0.5, depthWrite: false, blending: T.AdditiveBlending }),
     );
     h.scale.setScalar(0.06);
     g.add(h);
@@ -354,14 +378,7 @@ export const modelMethods = {
     feed.rotation.x = 0.6;
     g.add(feed);
     const h = new T.Sprite(
-      new T.SpriteMaterial({
-        map: this.spriteTex,
-        color: this._c(color),
-        transparent: true,
-        opacity: 0.16,
-        depthWrite: false,
-        blending: T.AdditiveBlending,
-      }),
+      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.16, depthWrite: false, blending: T.AdditiveBlending }),
     );
     h.scale.setScalar(0.04);
     h.position.y = 0.012;

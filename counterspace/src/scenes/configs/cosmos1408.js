@@ -11,7 +11,7 @@ export const COSMOS1408 = {
   caption:
     'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 at about 470 km. ' +
     'The debris cloud spreads across altitudes that cross the International Space Station’s orbit (drawn schematically), and the ISS crew sheltered in ' +
-    'their docked spacecraft. SWF counts 1,807 cataloged fragments, 5 still in orbit as of February 2026.',
+    'their docked spacecraft. SWF counts more than 1,800 cataloged fragments, 5 still in orbit as of February 2026.',
   cite: 'SWF 2026, Table 5-1, p. 05-01; Table 2-4, p. 02-21.',
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',

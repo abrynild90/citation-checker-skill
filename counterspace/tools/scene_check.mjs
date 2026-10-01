@@ -31,6 +31,7 @@
 //                    declared in MARKER_OVR
 //   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
+//   preset-match     an episode preset (cfg.acts camera with `act`) shows its own episode at every t (host time inside the episode's range)
 //   preset-empty     every camera preset x t in 0.1..0.9: the scene's primary subject(s) (labelled craft, burst, debris cloud) are drawn at that t but none
 //                    projects
 //                    inside the viewport at >= 8 px (6 px at 375); also checked on stills: subject centred (still-centre) and label font (still-font)
@@ -184,7 +185,7 @@ const KEY = {
   rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/],
 };
 // Justified per-scene marker-size overrides (px, longer side): the marker IS the scene's subject. Must match cfg.staticMarkerCap in src/scenes/configs/*.js.
-const MARKER_OVR = { laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 100, cg2: 100 } };
+const MARKER_OVR = { laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 140, cg2: 140 } };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;
 
 // S = {kind, W, H, labels:[{text, x0,y0,x1,y1, leader:[ax,ay,qx,qy]|null, item}], reserved:[{n,x0,y0,x1,y1}], probe, def (default camera), bannerLines}
@@ -783,6 +784,13 @@ if (MODES.includes('live'))
           );
           const q = await page.evaluate(SUBJ),
             F = [];
+          // preset-match: an episode preset shows its own episode at every t (the host maps any t into the episode's range)
+          if (cams[ci].act != null) {
+            const ht = await page.evaluate(() => window.__cs.host().t),
+              a = acts[cams[ci].act];
+            if (!(ht >= a.t0 - 1e-6 && ht <= a.t1 + 1e-6))
+              F.push({ type: 'preset-match', detail: `"${cams[ci].name}" t=${t}: host time ${ht.toFixed(3)} is outside its episode ${a.t0}-${a.t1}` });
+          }
           if (q.drawn && !q.ok)
             F.push({ type: 'preset-empty', detail: `"${cams[ci].name}" t=${t}: subject not in frame (${q.refs.join('; ') || 'no craft'})` });
           record(tag('preset', id, w, 'c' + ci, 't' + t), F, { W: w });
@@ -984,17 +992,19 @@ if (MODES.includes('still')) {
         H: q.H,
         u: q.u,
         leadW: q.leadW,
-        labels: q.labels.filter(Boolean).map((l) => ({
-          text: l.text,
-          x0: l.x - l.w / 2,
-          x1: l.x + l.w / 2,
-          y0: l.y - l.h / 2,
-          y1: l.y + l.h / 2,
-          leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null,
-          ref: [l.ax, l.ay],
-          raw: q.raw && q.raw[q.labels.indexOf(l)],
-          item: -1,
-        })),
+        labels: q.labels
+          .filter(Boolean)
+          .map((l) => ({
+            text: l.text,
+            x0: l.x - l.w / 2,
+            x1: l.x + l.w / 2,
+            y0: l.y - l.h / 2,
+            y1: l.y + l.h / 2,
+            leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null,
+            ref: [l.ax, l.ay],
+            raw: q.raw && q.raw[q.labels.indexOf(l)],
+            item: -1,
+          })),
         reserved: (q.rsv || []).map((r, i) => ({ n: 'rsv' + i, x0: r[0], y0: r[1], x1: r[0] + r[2], y1: r[1] + r[3] })),
         probe: q.probe,
       });

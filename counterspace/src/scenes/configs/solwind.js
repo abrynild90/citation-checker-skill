@@ -44,7 +44,7 @@ export const SOLWIND = {
       big: 1.5,
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
-      impactShort: 'Impact',
+      impactShort: 'Impact: Solwind P78-1',
     },
     { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42 },
     { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, decay: 0.9, color: '#ffd2a6' },

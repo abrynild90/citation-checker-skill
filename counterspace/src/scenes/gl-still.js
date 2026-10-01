@@ -172,7 +172,7 @@ const methods = {
       rsv = [];
     if (sBox) rsv.push([sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s]);
     if (tBox) rsv.push(tBox);
-    const ls = s * (conf.labelK ?? 1.7), // labels are drawn 1.7x the caption size so they read in a 3000 px print
+    const ls = s * (conf.labelK ?? 1.3), // labels are drawn 1.3x the caption size: about 43 px type in a 3000 px print
       lp = this._labelPositions(W, H, ls, true, rsv).map((q) => (q && conf.hide?.some((h) => q.text.startsWith(h)) ? null : q));
     // conf.off: { 'Label text start': [dx, dy] } puts that label at its referent plus a fraction of the frame width (the placer's choice is overridden)
     Object.entries(conf.off || {}).forEach(([n, d]) => {
@@ -275,7 +275,8 @@ const methods = {
       W = panels ? tileW * panels.length : Math.min(targetW, maxDim),
       // every still is exactly W x (W / STILL_ASPECT) in total: header band + body + footer band (40 and 92 units of W / 1000)
       H = Math.round(W / STILL_ASPECT) - Math.round(40 * (W / 1000)) - Math.round(92 * (W / 1000)),
-      tileH = panels ? H : 0;
+      // a multi-episode still shows landscape tiles (title strip above, large caption below, all centred in the body)
+      tileH = panels ? Math.round(H * (conf.tileHK ?? 0.7)) : 0;
     const cam = this.camera,
       keep = {
         pos: cam.position.clone(),
@@ -301,15 +302,37 @@ const methods = {
           aspect: tileW / tileH,
           full: true,
           s: (tileW / 1000) * (conf.tileS ?? 2.3),
-          status: pn.status,
-          title: `${pn.title} · ${pn.brief}`,
+          status: '',
           cam: conf.panels?.[k],
         });
-        bg.drawImage(tile, k * tileW, 0);
+        const sz = 1,
+          ty = Math.round((H - tileH) / 2),
+          wrap = (txt, maxW) => {
+            const out = [];
+            let cur = '';
+            for (const wd of txt.split(' ')) {
+              const nx = cur ? cur + ' ' + wd : wd;
+              if (cur && bg.measureText(nx).width > maxW) (out.push(cur), (cur = wd));
+              else cur = nx;
+            }
+            return cur ? [...out, cur] : out;
+          };
+        bg.drawImage(tile, k * tileW, ty);
         bg.strokeStyle = 'rgba(255,224,138,0.5)';
         bg.lineWidth = Math.max(2, W / 1000);
-        bg.strokeRect(k * tileW + 0.5, 0.5, tileW - 1, tileH - 1);
-        tileLays.push({ ...this.stillLayout, ox: k * tileW });
+        bg.strokeRect(k * tileW + 0.5, ty + 0.5, tileW - 1, tileH - 1);
+        bg.textAlign = 'left';
+        bg.textBaseline = 'top';
+        bg.fillStyle = '#ffe08a';
+        bg.font = `700 ${44 * sz}px system-ui,sans-serif`;
+        wrap(`${pn.title} · ${pn.brief}`, tileW - 36 * sz)
+          .slice(0, 2)
+          .forEach((l, i, a) => bg.fillText(l, k * tileW + 18 * sz, ty - (a.length - i) * 54 * sz - 8 * sz));
+        bg.fillStyle = '#e9edf7';
+        bg.font = `${40 * sz}px system-ui,sans-serif`;
+        if (pn.status) wrap(pn.status, tileW - 36 * sz).forEach((l, i) => bg.fillText(l, k * tileW + 18 * sz, ty + tileH + 16 * sz + i * 52 * sz));
+        bg.textBaseline = 'alphabetic';
+        tileLays.push({ ...this.stillLayout, ox: k * tileW, oy: ty });
       });
       this.update(keep.t);
     } else body = this._stillBody(W, H, {});

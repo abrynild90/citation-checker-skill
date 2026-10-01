@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 58 : 86; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 70 : 112; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -55,11 +55,11 @@ export const SPACEPLANES = {
       dx: 40,
       dy: -30,
     },
-    { type: 'path', fn: (u) => orbitPos(350, 45, 288, u * 2 * Math.PI), N: 120, color: C.us, opacity: 1, thick: 0.0055, acts: [0] },
+    { type: 'path', fn: (u) => orbitPos(350, 45, 288, u * 2 * Math.PI), N: 120, color: C.us, opacity: 1, thick: 0.0055, acts: [0], push: 0.1 },
     {
       type: 'craft',
       id: 'x37',
-      minPx: 50,
+      minPx: 64,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
@@ -86,6 +86,7 @@ export const SPACEPLANES = {
       opacity: 0.7,
       thick: 0.004,
       acts: [1],
+      push: 0.15,
       label: 'GEO ring (35,786 km)',
       short: 'GEO',
       opt: true,
@@ -101,6 +102,7 @@ export const SPACEPLANES = {
       opacity: 0.9,
       thick: 0.004,
       acts: [1],
+      push: 0.15,
       label: 'OTV-7 orbit: 323 × 38,838 km, 59.1°' + ' (Feb. 2024)',
       short: 'OTV-7 orbit',
       labelIdx: 180,
@@ -110,7 +112,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: 50,
+      minPx: 64,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
@@ -137,6 +139,7 @@ export const SPACEPLANES = {
       opacity: 0.55,
       thick: 0.003,
       acts: [2],
+      push: 0.1,
       label: 'CSSHQ orbit: about 600 km, 50° (SWF)',
       short: '~600 km · 50°',
       opt: true,
@@ -149,8 +152,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
-      minPx: 44,
-      maxPx: IS_PHONE ? 46 : 58,
+      minPx: 60,
+      maxPx: IS_PHONE ? 64 : 96,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
@@ -159,8 +162,8 @@ export const SPACEPLANES = {
       scale: 1.45 * PK,
       label: 'CSSHQ (China)',
       short: 'CSSHQ',
-      dx: -50,
-      dy: -34,
+      dx: 36,
+      dy: -66,
       staticAt: [0.1, 0.27],
       labelFn: (t, n) => (t < 0.765 ? (n ? 'CSSHQ flight 2' : 'CSSHQ flight' + ' 2 (China)') : n ? 'CSSHQ flight 3' : 'CSSHQ flight 3 (China)'),
       key: [
@@ -171,8 +174,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'objJ',
-      minPx: 38,
-      maxPx: 60,
+      minPx: 48,
+      maxPx: 72,
       anchor: 'cn',
       acts: [2],
       vis: [0.585, 0.755],
@@ -202,8 +205,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'objG',
-      minPx: 38,
-      maxPx: 60,
+      minPx: 48,
+      maxPx: 72,
       anchor: 'cn',
       acts: [2],
       vis: [0.8, 0.985],

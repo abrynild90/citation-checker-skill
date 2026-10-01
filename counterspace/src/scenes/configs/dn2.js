@@ -77,9 +77,10 @@ export const DN2 = {
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
   cameras: [
-    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.92 } },
+    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.97 } },
     { name: 'Profile', at: [22, 8, 7.6], look: [0, 90, 0.7], phone: { at: [24, 24, 8.6], look: [0, 96, 0.7] } },
     { name: 'Polar', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
-    { name: 'Zoom', at: [20, 45, 5.6], phone: { hide: ['DN-2 path'] } }, // 375: the path label would sit on the disc, crowding Xichang and 10,000 km
+    // Zoom: far enough back that no ring edge is cropped; 375: the path label would sit on the disc, crowding Xichang and 10,000 km
+    { name: 'Zoom', at: [20, 45, 6.8], phone: { at: [20, 45, 8], hide: ['DN-2 path'] } },
   ],
 };
