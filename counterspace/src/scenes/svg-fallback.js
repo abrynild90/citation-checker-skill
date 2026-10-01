@@ -242,6 +242,8 @@ function localBox(shape, variant) {
 }
 // Icon bounding box in units of the craft size (width, height), for the checker's icon-area rule.
 const CRAFT_BOX = { sat: [1, 0.45], iss: [0.96, 0.64], plane: [0.7, 0.7], aircraft: [0.7, 0.7], ship: [1, 0.2], site: [0.68, 0.8], jammer: [0.9, 0.8] };
+// Global static marker cap in px for a stage W px wide: 22 px on the 798 px stage of the 1440 viewport, proportional with W, 10-24 px.
+const markerCap = (W, print) => (print ? 8 : Math.max(10, Math.min(24, (22 * W) / 798))); // print: the 760 px layout is shown x3.95 in the 3000 px still (about 32 px)
 const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45, jammer: 0.7 };
 let earthUpgrade = false,
   pendingStatic = null,
@@ -802,7 +804,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       text,
       color,
       opt,
-      pin: pin && !!at, // staticPin: the slot hint is a strong preference (the placer stays within a few px of it unless it collides)
+      pin: at && pin, // staticPin 'hard': the hint outweighs soft costs (ring lines, disc); staticPin: the slot hint is a strong preference (the placer stays within a few px of it unless it collides)
     });
   };
   const gapPts = sim.cfg.staticRingGap
@@ -955,7 +957,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             .attr('stroke-width', it.width ? sim.cfg.staticBeamW || 5 : 1.2);
         if (it.label) {
           const fr = sim.cfg.staticBeamLabelFrac ?? 0.5; // anchor on the beam: past the middle puts the leader above the limb, clear of the Earth
-          const bt = it.short && NARROW && sim.cfg.staticBeamLabelFrac ? it.short : it.label;
+          const bt = it.short && (NARROW || sim.cfg.staticBeamShort) && sim.cfg.staticBeamLabelFrac ? it.short : it.label;
           label({ x: a.x + (b.x - a.x) * fr, y: a.y + (b.y - a.y) * fr }, bt, it.color, it.sdx, it.sdy);
         }
       }
@@ -1002,6 +1004,17 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           };
           for (let n = 0; n < 40 && ext(cs) > 0.95 * sim.cfg.staticCraftCap * Math.PI * R * R; n++) cs *= 0.94;
         }
+        // Global marker cap (every static craft/site marker, screen and print): the longer side of the drawn silhouette is at most markerCap(W) px
+        // (22 px on the 798 px stage of the 1440 viewport, scaled with W, 10-24 px). A scene whose subject is the point may raise it: cfg.staticMarkerCap[craftId].
+        let capPx = markerCap(W, opts.print);
+        const capOvr = (!opts.panel && (sim.cfg.staticMarkerCap?.[it.craftId] ?? sim.cfg.staticMarkerCap?.[it.label])) || 0;
+        if (craftShape && capOvr) capPx = (markerCap(W, opts.print) * capOvr) / 22; // override given in px at the 22 px reference stage
+        if (craftShape) {
+          const b = localBox(it.iss ? 'iss' : it.shape, it.variant),
+            a = (rot * Math.PI) / 180,
+            side = (z) => Math.max(Math.abs(Math.cos(a)) * b.width + Math.abs(Math.sin(a)) * b.height, Math.abs(Math.sin(a)) * b.width + Math.abs(Math.cos(a)) * b.height) * z / 100;
+          for (let n = 0; n < 60 && b.width && side(cs) > capPx; n++) cs = Math.max(2, cs * 0.96);
+        }
         const mi = marks.length;
         if (it.shape !== 'none')
           mark(
@@ -1026,7 +1039,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           } catch (e) {
             /* no layout: nominal box */
           }
-          crafts.push({ x: p.x, y: p.y, w: bw, h: bh, subject: !it.iss && !it.ctx, name: it.label || it.shape });
+          crafts.push({ x: p.x, y: p.y, w: bw, h: bh, subject: !it.iss && !it.ctx, name: it.label || it.shape, cap: capPx, ovr: !!capOvr, id: it.craftId || it.label });
         }
         else if (it.shape === 'sat') {
           const q3 = it.small ? 6 : 8;
@@ -1052,11 +1065,11 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           label(
             p,
             (!opts.panel && ((W < 600 && sim.cfg.staticLabelsNarrow?.[it.craftId]) || sim.cfg.staticLabels?.[it.craftId])) ||
-              phoneText(it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label),
+              phoneText(it.labelFn ? it.labelFn(t, NARROW) : it.short && (NARROW || (opts.print && it.shortPrint)) ? it.short : it.label),
             c,
             it.labelDx,
             it.labelDy,
-            W < 700 ? null : it.staticAt,
+            W < 700 ? null : (opts.print && it.staticAtPrint) || it.staticAt,
             it.opt,
             it.staticPin,
           );

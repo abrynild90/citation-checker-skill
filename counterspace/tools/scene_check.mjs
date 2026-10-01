@@ -24,6 +24,7 @@
 //   static-ring-clip a ring-fit static diagram (DN-2, SJ-21) has a point of its orbit within 4 px of, or outside, the panel edge
 //   craft-area       a static craft icon (measured silhouette; on screen at every width and in the static-still print layout) is over its share of the disc
 //                    (3% for context craft and every icon in Starfish/Solwind/GNSS; a subject 20%), or covers the Earth centre in those three
+//   marker-size      a static marker (site/airliner/satellite/jammer, craft and site alike) is over the global cap (22 px at W=798, scaled, 10-24) unless declared in MARKER_OVR
 //   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
 //   preset-empty     every camera preset x t in 0.1..0.9: the scene's primary subject(s) (labelled craft, burst, debris cloud) are drawn at that t but none projects
@@ -91,6 +92,8 @@ const EVENTS = { starfish: { t: 0.14, re: /detonation:|detonates/i } };
 const HITRE = /collision|destroys|destroyed|detonat|fragments spread|debris spreads/i;
 const KEY = { viasat: [/KA-SAT/], laser: [/MSTI-3/, /White Sands/], 'sj21-tug': [/SJ-21/, /Compass/], cosmos1408: [/^Cosmos 1408/], shakti: [/Microsat/],
   spaceplanes: [/^X-37B \(US\)/, /^X-37B OTV-7/, /^CSSHQ \(China\)/], rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/] };
+// Justified per-scene marker-size overrides (px, longer side): the marker IS the scene's subject. Must match cfg.staticMarkerCap in config.js.
+const MARKER_OVR = { laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 100, cg2: 100 } };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;
 
 // S = {kind, W, H, labels:[{text, x0,y0,x1,y1, leader:[ax,ay,qx,qy]|null, item}], reserved:[{n,x0,y0,x1,y1}], probe, def (default camera), bannerLines}
@@ -179,6 +182,13 @@ function check(S) {
         f('craft-area', `${S.kind} ${c.name} icon covers the Earth centre`);
     }
   }
+  // marker size: every static marker (site diamond, airliner, satellite, jammer) is at most the global cap (22 px at W=798, the 1440 viewport stage; scaled with W, 10-24 px; 8 px in the 760 px print layout = 32 px in the 3000 px still);
+  // only the scenes in MARKER_OVR (subject is the point) may be larger, up to the stated px, and svg-fallback must report the override.
+  if ((S.kind === 'static' || S.kind === 'static-still') && P.crafts) for (const c of P.crafts) {
+    const base = S.kind === 'static-still' ? 8 : Math.max(10, Math.min(24, 22 * W / 798)), ovr = MARKER_OVR[S.id] && MARKER_OVR[S.id][c.id], lim = (ovr ? base * ovr / 22 : base) + 0.6, sz = Math.max(c.w, c.h);
+    if (c.ovr && !ovr) f('marker-size', `${S.kind} ${c.name}: undeclared cap override (${c.cap} px)`);
+    else if (sz > lim) f('marker-size', `${S.kind} ${c.name} marker ${Math.round(sz)} px > cap ${Math.round(lim)} px at W=${Math.round(W)}`);
+  }
   if (S.minFont != null && S.minFont < 9) f('static-font', `smallest text ${S.minFont}px < 9px at ${W}px`);
   if (P.disc0 && P.polys) for (const c of P.polys) {
     if (c.role === 'beam' || c.p.length < 6) continue;
@@ -242,7 +252,8 @@ const LIVE = (KEYS) => {
   const labels = [];
   h.labels.forEach(Lb => {
     if (Lb.d.style.display === 'none') return;
-    const r = rel(Lb.d), o = { text: Lb.d.textContent, ...r, item: Lb.item ? h.sim.items.indexOf(Lb.item) : -1, leader: null, ref: [Lb.ax, Lb.ay] };
+    const r = rel(Lb.d), o = { text: Lb.d.textContent, ...r, item: Lb.item ? h.sim.items.indexOf(Lb.item) : -1, leader: null, ref: [Lb.ax, Lb.ay],
+      onDisc: W < 520 && !!(h.sim.cfg.phoneOnDisc || []).some(q => Lb.d.textContent.startsWith(q)) }; // cfg.phoneOnDisc: phone labels allowed on the disc
     if (Lb.ln && Lb.ln.style.display !== 'none') o.leader = ['x1', 'y1', 'x2', 'y2'].map(a => +Lb.ln.getAttribute(a));
     labels.push(o);
   });

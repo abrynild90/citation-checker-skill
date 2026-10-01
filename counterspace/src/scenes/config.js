@@ -99,8 +99,9 @@ export const SCENES = [
       },
     ],
     phoneHide: ['Thor launch'],
-    staticDropPhone: ['Thor launch', 'Johnston Is.'], // 375 static: Thor, Johnston and the detonation share one spot: one label names it
-    staticTextPhone: [['Detonation ~400 km', 'Detonation, Johnston Is.']],
+    phoneOnDisc: ['Johnston', 'Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
+    stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)
+    staticDropPhone: ['Thor launch'], // 375 static: Thor shares the burst spot; Detonation and Johnston keep separate labels, placed apart
     still: 0.7,
     camDist: 3.5,
     phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
@@ -303,8 +304,10 @@ export const SCENES = [
             color: '#ffd9a0',
             dx: -20,
             dy: -40,
-            staticAt: [0.62, 0.78],
-            staticPin: true,
+            staticAt: [0.5, 0.75],
+            staticAtPrint: [0.474, 0.79], // print layout: the pill is x3.95 wide and may not sit on the globe, so a short label goes under the globe
+            shortPrint: true,
+            staticPin: 'hard',
           },
           {
             alt: 30000,
@@ -315,10 +318,10 @@ export const SCENES = [
             apex: true,
             dx: 0,
             dy: -68,
-            staticAt: [0.865, 0.6],
-            staticPin: true,
+            staticAt: [0.85, 0.8],
+            staticPin: 'hard',
           },
-          { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46, staticAt: [0.87, 0.69], staticPin: true },
+          { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46, staticAt: [0.88, 0.58], staticPin: 'hard' },
         ],
       },
       { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9, sats: 10 },
@@ -560,6 +563,7 @@ export const SCENES = [
     inset: 'Context: KA-SAT in GEO (top view)',
     date: '2022-02-24',
     title: 'Viasat KA-SAT cyberattack (2022)',
+    staticMarkerCap: { 'KA-SAT (GEO, unaffected)': 48 }, // KA-SAT is the satellite the story is about (48 px at the 22 px reference stage)
     shells: ['GEO'],
     duration: 14,
     caption:
@@ -670,6 +674,8 @@ export const SCENES = [
     staticBeamW: 5,
     staticGlobeY1: 0.75, // static: close-up on the beam, the globe's lower part runs off the frame
     staticRingGap: 22, // static: the orbit line is broken around MSTI-3
+    staticMarkerCap: { 'MSTI-3 (US test target)': 44 }, // the satellite is the target of the beam: 44 px at the 22 px reference stage (global cap 22)
+    staticBeamShort: true, // static: the short "MIRACL beam" pill, so it stays clear of the MSTI-3 pill and the limb
     staticBeamLabelFrac: 0.85, // static: MIRACL label anchored near the satellite end, above the limb
     staticK: 1.9, // static: MSTI-3 drawn further out in space so it clears the Earth limb
     actors: [
@@ -687,7 +693,7 @@ export const SCENES = [
         dy: -26,
         labelOffDisc: true,
         sdx: 120, // static: label to the right of the beam, with a short leader
-        sdy: 0,
+        sdy: -10, // static: raised so the pill clears the globe limb at 375
       },
       {
         type: 'site',
@@ -845,6 +851,7 @@ export const SCENES = [
     stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
     staticCenter: [25, 72],
     staticCraftMax: 84,
+    staticMarkerCap: { sj21: 100, cg2: 100 }, // the docked pair is the subject (100 px at the 22 px reference stage; global cap 22)
     staticCraftMaxPhone: 38,
     staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width
   },

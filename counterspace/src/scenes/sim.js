@@ -637,6 +637,8 @@ export function buildSim(cfg) {
             label: m.label,
             short: m.short,
             staticAt: m.staticAt,
+            staticAtPrint: m.staticAtPrint,
+            shortPrint: m.shortPrint,
             staticPin: m.staticPin,
             labelDx: m.dx ?? 0,
             labelDy: m.dy ?? 0,

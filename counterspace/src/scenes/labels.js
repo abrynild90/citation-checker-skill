@@ -87,7 +87,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)),
         qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)),
         lead = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
-      let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * (c.pin ? 0.6 : c.noLeader ? 0.3 : 0.01);
+      let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * (c.pin === 'hard' ? 3 : c.pin ? 0.6 : c.noLeader ? 0.3 : 0.01);
       if (memo && memo[i]) n += Math.hypot(x - memo[i][0], y - memo[i][1]) * 0.06; // stickiness: keep last frame's slot unless something clearly better exists
       if (lead) {
         const ll0 = Math.hypot(qx - c.px, qy - c.py);

@@ -119,6 +119,7 @@ const methods = {
         color,
         avoidDisc: !!L.item?.offGlobe && (!L.item.stillOnly || noBanner),
         noLeader: !!L.item?.noLeader,
+        onDisc: this.el.clientWidth < 520 && !!this.sim.cfg.phoneOnDisc?.some((h) => text.startsWith(h)), // phone: dark ocean under a label beats a long leader
       });
     }
     // Reserved areas are the real DOM boxes in the live view (banner, status caption); stills pass their own caption box.

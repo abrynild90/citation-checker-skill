@@ -14,7 +14,9 @@ export const STILL = {
     fov: 34,
     shift: [0.001, -0.06],
     // labels off the field lines: Thor and Detonation above the belt, Johnston Island below it (fractions of the frame width)
-    off: { Thor: [-0.158, -0.018], Detonation: [0.19, -0.087], Johnston: [0.025, 0.15], Artificial: [0.06, 0.162] },
+    // R23: the burst point sits among the field-line arcs, so no leader runs across them: Thor sits just left with a short horizontal leader, Detonation rises straight up
+    // beside the arcs, Johnston drops straight down, and the belt label (short text) sits right of the outer arc it names, on the same line
+    off: { Thor: [-0.1, 0], Detonation: [0, -0.0665], Johnston: [0.025, 0.15], Radiation: [0.105, 0] },
   },
   solwind: { t: 0.45, pos: [-3.274, 2.613, 2.013], look: [-0.531, 0.696, 0.64], fov: 29, shift: [0.062, -0.1],
     // labels spread around the debris blob (Solwind left, ASM-135 above, the F-15 below left), leaders short of the 0.17 W limit

@@ -338,7 +338,7 @@ export async function exportStill() {
     tmp.style.cssText = `position:fixed;left:-10000px;top:0;width:${vw}px;height:${vh}px;overflow:hidden`;
     document.body.appendChild(tmp);
     try {
-      const node = renderSVG(curSim, tmp);
+      const node = renderSVG(curSim, tmp, undefined, { print: true });
       if (window.__cs) window.__cs.lastStillLay = node?.__lay; // test hook: the print layout's probe (craft sizes, Earth disc)
       if (node?.viewBox) return await svgToPNG(node, cur.title, cur.cite);
     } catch (e) {
