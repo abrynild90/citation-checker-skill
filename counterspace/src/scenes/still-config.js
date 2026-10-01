@@ -17,7 +17,7 @@ export const STILL = {
     // R23: the burst point sits among the field-line arcs, so no leader runs across them: Thor sits just left with a short horizontal leader,
     // Detonation rises straight up
     // beside the arcs, Johnston drops straight down, and the belt label (short text) sits right of the outer arc it names, on the same line
-    off: { Thor: [-0.1, 0], Detonation: [0, -0.0665], Johnston: [0.025, 0.15], Radiation: [0.105, 0], Satellite: [-0.075, -0.095] },
+    off: { Thor: [-0.1, 0], Detonation: [0, -0.0665], Johnston: [0.025, 0.15], Radiation: [0.105, 0], Satellite: [-0.065, -0.07] },
   },
   solwind: {
     t: 0.45,
@@ -27,9 +27,9 @@ export const STILL = {
     shift: [0.062, -0.1],
     // labels spread around the objects: Solwind up-left over the ocean, ASM-135 up-right beside the missile, the F-15 out right past the limb
     // (leaders short of the 0.17 W limit)
-    off: { Solwind: [-0.11, -0.05], 'ASM-135': [0.08, -0.1], 'F-15': [0.14, 0.06] },
+    off: { Solwind: [-0.11, -0.05], 'ASM-135': [0.025, -0.165], 'F-15': [0.17, -0.14] },
   },
-  fengyun: { t: 0.85, pos: [0.834, 2.523, -4.242], look: [-0.083, 0.305, -0.382], fov: 33, shift: [0.029, -0.039] },
+  fengyun: { t: 0.85, pos: [0.834, 2.523, -4.242], look: [-0.083, 0.305, -0.382], fov: 33, shift: [0.029, -0.039], off: { Impact: [0.17, -0.05] } },
   'burnt-frost': { t: 0.47, pos: [-3.755, 1.807, -0.546], look: [-0.893, 0.526, 0.193], fov: 34, shift: [0.084, -0.097] },
   dn2: { t: 0.62, pos: [7.86, 3.207, -1.046], look: [0, 0, -0.7], fov: 33, shift: [0.06, -0.028], hideShell: false, labelK: 1.2 },
   shakti: { t: 0.43, pos: [1.337, 1.766, -3.995], look: [-0.049, 0.46, -0.977], fov: 34, shift: [0.085, -0.052] },

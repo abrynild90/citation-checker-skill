@@ -54,6 +54,6 @@ export const COSMOS1408 = {
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it (illustrative)', 'Nudol rises toward Cosmos 1408'],
     [0.32, 'Collision at ~470 km: debris cloud spreads across the ISS orbit', 'Collision at ~470 km; debris spreads'],
-    [0.6, 'Cloud crosses the ISS orbit · SWF: 5 of 1,807 pieces still in orbit (Feb. 2026)', 'SWF: 5 of 1,807 pieces still in orbit'],
+    [0.6, 'Cloud crosses the ISS orbit · SWF: 5 of more than 1,800 pieces still in orbit (Feb. 2026)', 'SWF: 5 of more than 1,800 pieces still in orbit'],
   ],
 };

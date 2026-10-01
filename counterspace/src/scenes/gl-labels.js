@@ -84,14 +84,15 @@ const methods = {
       // possible carries the print's label (live: the first one in view, kept until it hides).
       const cl = (L.cloudIt ??= this.dyn.find((d) => d.it.kind === 'cloud' && d.it.label === L.text)?.it || false);
       if (p && cl?.labelCands && (hidden(p) || noBanner)) {
-        const c0 = new T.Vector3(0, 0, 0).project(this.camera),
+        const c0 = noBanner ? new T.Vector3(0, 0, 0).project(this.camera) : new T.Vector3(...p).project(this.camera), // live: stay near the hidden one
+          sgn = noBanner ? 1 : -1,
           keep = cl.labelIdx;
-        let best = hidden(p) ? null : { p, d: Math.hypot(...new T.Vector3(...p).project(this.camera).sub(c0).toArray().slice(0, 2)), idx: keep };
+        let best = hidden(p) ? null : { p, d: sgn * Math.hypot(...new T.Vector3(...p).project(this.camera).sub(c0).toArray().slice(0, 2)), idx: keep };
         for (const idx of cl.labelCands) {
           cl.labelIdx = idx;
           const q = world(L.posFn(this.t));
           if (!q || hidden(q)) continue;
-          const d = Math.hypot(...new T.Vector3(...q).project(this.camera).sub(c0).toArray().slice(0, 2));
+          const d = sgn * Math.hypot(...new T.Vector3(...q).project(this.camera).sub(c0).toArray().slice(0, 2));
           if (!best || d > best.d + 0.02) best = { p: q, d, idx };
         }
         cl.labelIdx = best ? best.idx : keep;
@@ -346,7 +347,9 @@ const methods = {
       } else if (it.kind === 'cloud') {
         const a = obj.geometry.attributes.position.array,
           st = Math.max(1, Math.ceil(it.n / 700));
-        for (let i = 0; i < it.n; i += st) {
+        const idx = [it.labelIdx ?? 0]; // the particle the label points at is always probed
+        for (let i = 0; i < it.n; i += st) idx.push(i);
+        for (const i of idx) {
           const p = [a[3 * i], a[3 * i + 1], a[3 * i + 2]];
           if (!p[0] && !p[1] && !p[2]) continue;
           const q = scr(p);

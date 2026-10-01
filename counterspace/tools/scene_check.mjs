@@ -992,19 +992,17 @@ if (MODES.includes('still')) {
         H: q.H,
         u: q.u,
         leadW: q.leadW,
-        labels: q.labels
-          .filter(Boolean)
-          .map((l) => ({
-            text: l.text,
-            x0: l.x - l.w / 2,
-            x1: l.x + l.w / 2,
-            y0: l.y - l.h / 2,
-            y1: l.y + l.h / 2,
-            leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null,
-            ref: [l.ax, l.ay],
-            raw: q.raw && q.raw[q.labels.indexOf(l)],
-            item: -1,
-          })),
+        labels: q.labels.filter(Boolean).map((l) => ({
+          text: l.text,
+          x0: l.x - l.w / 2,
+          x1: l.x + l.w / 2,
+          y0: l.y - l.h / 2,
+          y1: l.y + l.h / 2,
+          leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null,
+          ref: [l.ax, l.ay],
+          raw: q.raw && q.raw[q.labels.indexOf(l)],
+          item: -1,
+        })),
         reserved: (q.rsv || []).map((r, i) => ({ n: 'rsv' + i, x0: r[0], y0: r[1], x1: r[0] + r[2], y1: r[1] + r[3] })),
         probe: q.probe,
       });
