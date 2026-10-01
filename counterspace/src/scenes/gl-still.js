@@ -56,7 +56,8 @@ const methods = {
       fixed = !!conf.pos;
     if (this.sim.flags) this.sim.flags.all = !!conf.all; // conf.all: every act at once (all episodes' orbits in one frame)
     if (conf.all) this.update(conf.t ?? this.t);
-    if (conf.t != null && o.t == null && (this.t >= 0.98 || this.t <= 0.02)) this.update(conf.t); // untouched scrubber: use the scene's best frame
+    // A fixed still camera is framed for one moment, so it always renders at conf.t; auto-framed stills keep a user-scrubbed time.
+    if (conf.t != null && o.t == null && (fixed || this.t >= 0.98 || this.t <= 0.02)) this.update(conf.t);
     const sf = fixed ? null : this.sim.stillCamFor?.(Math.min(this.t, 1), o.aspect || W / H),
       sc = sf || this.sim.cfg.stillCam;
     if (fixed) {
