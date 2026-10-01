@@ -211,11 +211,12 @@ function renderPanels(sim, el) {
     sim.flags.all = false;
     const node = renderSVG(sim, el, pn.t, {
       panel: true,
+      phone,
       W: pw,
       H: ph,
       view: { focus, span },
       status: phone ? '' : pn.status,
-      title: phone || narrow ? `${pn.title} · ${pn.brief}` : pn.title,
+      title: phone ? `${pn.title} · ${pn.short || pn.brief}` : narrow ? `${pn.title} · ${pn.brief}` : pn.title,
       keep: true,
       drop: phone ? pn.dropPhone : null,
     });
@@ -307,8 +308,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   }
   const nCraft = sim.items.filter((i) => i.kind === 'point' && i.prim && i.shape !== 'none' && !i.ctx && !i.liveOnly && i.pos(t)).length,
     craftBase = opts.panel
-      ? Math.min(W * 0.16, 40)
-      : Math.max(26, Math.min(nCraft <= 2 ? 110 : 64, W * (W < 520 ? (nCraft <= 2 ? 0.14 : 0.07) : nCraft <= 2 ? 0.1 : nCraft <= 4 ? 0.055 : 0.045)));
+      ? Math.min(W * 0.2, opts.phone ? 40 : 52)
+      : Math.max(
+          26,
+          Math.min(
+            sim.cfg.staticCraftMax ?? (nCraft <= 2 ? 110 : 64),
+            W * (W < 520 ? (nCraft <= 2 ? 0.14 : 0.07) : nCraft <= 2 ? 0.1 : nCraft <= 4 ? 0.055 : 0.045),
+          ),
+        );
   const stH = stLines.length * 16 + 10,
     stY = H - (opts.panel ? 6 : 34) - stH,
     stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * 6.6 + 24);
@@ -335,7 +342,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         // On a phone the Earth gets the room: orbit and belt lines run off the frame, only trails and paths of the action set the fit.
         if (!(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
       } else if (it.kind === 'point' && !it.liveOnly) {
-        const q = it.pos(t);
+        const q = (!opts.panel && it.staticPos?.(t)) || it.pos(t);
         if (q) grow(unit(q));
       } else if (it.kind === 'beam') {
         const A = it.a(t),
@@ -371,7 +378,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     ],
     ftxt = opts.panel ? opts.title || '' : fCands.find((x) => x.length * fFont * 0.56 + 20 <= W - 12) || fCands.at(-1),
     fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * fFont * 0.56 + 20);
-  const fx = 14 + (opts.panel ? 0 : Math.round(craftBase * 0.6)),
+  const docked = sim.items.some((i) => i.dockWith && i.dockOn(t)), // a docked pair is two models wide: more side margin
+    fx = 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))),
     fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
     fBot = stY - 8 - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
   let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
@@ -616,9 +624,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     const dx = CX - W / 2,
       dy = CY - (fTop + fBot) / 2,
       dl = Math.hypot(dx, dy) || 1,
-      er = Math.max(19, Math.min(30, W * 0.095)), // a third larger than before
+      er = Math.max(18, Math.min(40, W * 0.127, (fBot - fTop - 30) / 2)), // a third larger than before; always leaves room for its caption
       ex = Math.max(er + 6, Math.min(W - er - 6, W / 2 + (dx / dl) * (W / 2 - er - 8))),
-      ey = Math.max(fTop + er + 4, Math.min(fBot - er - 4, (fTop + fBot) / 2 + (dy / dl) * ((fBot - fTop) / 2 - er - 8)));
+      ey = Math.max(fTop + er + 4, Math.min(fBot - er - 16, (fTop + fBot) / 2 + (dy / dl) * ((fBot - fTop) / 2 - er - 8)));
     const cue = svg.append('g');
     cue
       .append('circle')
@@ -638,7 +646,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('opacity', 0.85);
     cue
       .append('text')
-      .attr('x', Math.max(6 + 40, Math.min(W - 6 - 40, ex)))
+      .attr('x', Math.max(6 + 50, Math.min(W - 6 - 50, ex)))
       .attr('y', ey + er + 12)
       .attr('text-anchor', 'middle')
       .attr('fill', '#a9b3cc')
@@ -825,7 +833,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     if (it.kind === 'point')
       for (const tt of (!opts.panel && sim.cfg.staticSnap?.[it.craftId]) || [t]) {
         const t = tt;
-        const q = it.liveOnly ? null : it.pos(t);
+        const q = it.liveOnly ? null : (!opts.panel && it.staticPos?.(t)) || it.pos(t);
         if (!q) continue;
         let p = project(q);
         if (p.hidden) continue;
@@ -877,7 +885,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           const n0 = cands.length;
           label(
             p,
-            it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label,
+            (!opts.panel && sim.cfg.staticLabels?.[it.craftId]) || (it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label),
             c,
             it.labelDx,
             it.labelDy,
@@ -960,7 +968,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     );
   }
   if (opts.panel) {
-    if (opts.title)
+    if (opts.title) {
+      svg
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', Math.min(W, opts.title.length * 6.6 + 18))
+        .attr('height', 20)
+        .attr('fill', 'rgba(5,8,18,0.88)');
       svg
         .append('text')
         .attr('x', 8)
@@ -970,6 +985,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         .attr('font-weight', 700)
         .attr('font-size', 11)
         .text(opts.title);
+    }
   } else {
     const ft = ftxt;
     svg

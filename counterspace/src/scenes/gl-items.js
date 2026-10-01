@@ -241,30 +241,49 @@ const methods = {
       body = this._mat(color),
       white = this._mat(0xeef1f8),
       dark = this._mat(0x2b3140);
-    const fus = new T.Mesh(new T.CylinderGeometry(0.0021, 0.0052, 0.044, 16), white);
+    const fus = new T.Mesh(new T.CylinderGeometry(0.0026, 0.0056, 0.044, 16), white);
     fus.rotation.x = Math.PI / 2;
     g.add(fus);
-    const nose = new T.Mesh(new T.SphereGeometry(0.0021, 12, 8), white);
+    const nose = new T.Mesh(new T.SphereGeometry(0.0026, 12, 8), white);
     nose.position.z = 0.022;
     g.add(nose);
-    const cockpit = new T.Mesh(new T.BoxGeometry(0.0034, 0.0012, 0.006), dark);
-    cockpit.position.set(0, 0.0036, 0.0128);
+    const cockpit = new T.Mesh(new T.BoxGeometry(0.0036, 0.0013, 0.006), dark);
+    cockpit.position.set(0, 0.0042, 0.0128);
     g.add(cockpit);
-    const bay = new T.Mesh(new T.BoxGeometry(0.0042, 0.0009, 0.014), body);
-    bay.position.set(0, 0.0049, -0.004);
+    const bay = new T.Mesh(new T.BoxGeometry(0.0046, 0.001, 0.014), body);
+    bay.position.set(0, 0.0056, -0.004);
     g.add(bay);
-    const sh = new T.Shape();
-    sh.moveTo(0.004, 0.014);
-    sh.lineTo(0.0215, -0.0125);
-    sh.lineTo(0.0215, -0.0185);
-    sh.lineTo(-0.0215, -0.0185);
-    sh.lineTo(-0.0215, -0.0125);
-    sh.lineTo(-0.004, 0.014);
-    sh.closePath();
-    const wing = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 0.0016, bevelEnabled: false }), body);
+    // Wing: a thick, bevelled slab in a darker shade of the national colour (its underside), with a smaller bright deck on top and a dark leading edge,
+    // so the delta reads as a solid winged body with shading instead of one flat wedge.
+    const shape = (k) => {
+      const q = new T.Shape();
+      q.moveTo(0.004 * k, 0.014 * k);
+      q.lineTo(0.0215 * k, -0.0125 * k);
+      q.lineTo(0.0215 * k, -0.0185 * k);
+      q.lineTo(-0.0215 * k, -0.0185 * k);
+      q.lineTo(-0.0215 * k, -0.0125 * k);
+      q.lineTo(-0.004 * k, 0.014 * k);
+      q.closePath();
+      return q;
+    };
+    const under = this._mat(new T.Color(color).multiplyScalar(0.5).getHex());
+    const wing = new T.Mesh(
+      new T.ExtrudeGeometry(shape(1), { depth: 0.0024, bevelEnabled: true, bevelThickness: 0.0005, bevelSize: 0.0005, bevelSegments: 1 }),
+      under,
+    );
     wing.rotation.x = Math.PI / 2;
-    wing.position.y = -0.0012;
+    wing.position.y = 0.0004;
     g.add(wing);
+    const deck = new T.Mesh(new T.ExtrudeGeometry(shape(0.8), { depth: 0.0006, bevelEnabled: false }), body);
+    deck.rotation.x = Math.PI / 2;
+    deck.position.set(0, 0.0007, -0.0012);
+    g.add(deck);
+    [-1, 1].forEach((s) => {
+      const le = new T.Mesh(new T.BoxGeometry(0.0007, 0.0007, 0.031), dark);
+      le.position.set(s * 0.0125, -0.0004, 0.0004);
+      le.rotation.y = s * 0.67;
+      g.add(le);
+    });
     [-1, 1].forEach((s) => {
       const f = new T.Mesh(new T.BoxGeometry(0.001, 0.009, 0.0095), body);
       f.position.set(s * 0.0042, 0.0075, -0.0165);
@@ -748,7 +767,7 @@ const methods = {
           (t) => {
             const A = it.a(t),
               B = it.b(t);
-            return A && B && it.on(t) ? scl(add(A, B), 0.5) : null;
+            return A && B && it.on(t) ? add(scl(A, 1 - (it.labelFrac ?? 0.5)), scl(B, it.labelFrac ?? 0.5)) : null;
           },
           null,
           it.labelOffDisc ? { offGlobe: true, stillOnly: true } : null,

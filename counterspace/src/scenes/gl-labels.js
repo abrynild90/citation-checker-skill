@@ -2,7 +2,7 @@
 // scenes/gl-labels.js: GLHost mixin: HTML labels, leader lines, screen-space label placement and limb geometry
 // (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLLabels(GLHost), see app.js.)
 // ============================================================================
-import { DEG, ll, occluded } from './core.js';
+import { DEG, add, ll, occluded, scl } from './core.js';
 import { labelW, offDisc, placeLabels } from './labels.js';
 
 const methods = {
@@ -166,7 +166,9 @@ const methods = {
     this._lastObjs = objs;
     this._lastObst = obst;
     const chip = (!noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : []).concat(
-      !noBanner && this.insetEl ? [rel(this.insetEl)] : [],
+      !noBanner && this.handEl && this.handEl.style.visibility === 'visible' ? [rel(this.handEl)] : [],
+    ).concat(
+      !noBanner && this.insetEl && this.insetEl.style.display !== 'none' ? [rel(this.insetEl)] : [],
     );
     this._lastPlace = [raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, null, objs];
     const pl = placeLabels(raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, noBanner ? null : (this._lm ||= {}), objs);
@@ -355,7 +357,10 @@ const methods = {
         const A = it.a(this.t),
           B = it.b(this.t);
         if (A && B) {
-          seg([A, B], 'beam');
+          seg(
+            Array.from({ length: 17 }, (_, k) => add(scl(A, 1 - k / 16), scl(B, k / 16))),
+            'beam',
+          ); // sampled: the part behind the Earth drops out
           if (!it.link)
             for (const p of [A, B]) {
               const q = scr(p);
@@ -410,7 +415,10 @@ const methods = {
   _drawInset() {
     const c = this.insetEl;
     if (!c) return;
-    const phone = this.el.clientWidth < 520,
+    const phone = this.el.clientWidth < 520;
+    c.style.display = phone && this.sim.cfg.insetNoPhone ? 'none' : '';
+    if (c.style.display) return;
+    const
       w = phone ? 128 : 188,
       h = phone ? 104 : 142,
       d = Math.min(devicePixelRatio || 1, 2);
@@ -459,7 +467,7 @@ const methods = {
     for (const { it, obj } of this.dyn)
       if (it.kind === 'point' && obj.visible) {
         const p = obj.position;
-        if (it.prim) dots.push([cx + p.x * sc, cy + p.z * sc, it.statusColor ? it.statusColor(t) : it.color]);
+        if (it.prim) dots.push([cx + p.x * sc, cy + p.z * sc, it.statusColor ? it.statusColor(t) : it.color, it.insetLabel]);
         else if (it.ctx) ctxDots.push([cx + p.x * sc, cy + p.z * sc, it.color]);
       }
     for (const q of ctxDots) {
@@ -485,6 +493,14 @@ const methods = {
       g.beginPath();
       g.arc(q[0], q[1], 2.6, 0, 7);
       g.fill();
+      if (q[3]) {
+        g.fillStyle = '#ffe08a';
+        g.font = '600 9.5px system-ui,sans-serif';
+        g.textBaseline = 'middle';
+        g.textAlign = q[0] > w / 2 ? 'right' : 'left';
+        g.fillText(q[3], q[0] + (q[0] > w / 2 ? -9 : 9), q[1] + 12);
+        g.textAlign = 'left';
+      }
     }
     g.fillStyle = '#c3cbe0';
     g.font = '600 9.5px system-ui,sans-serif';

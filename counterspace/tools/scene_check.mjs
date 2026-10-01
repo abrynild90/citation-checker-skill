@@ -14,6 +14,7 @@
 //   leader-cross     (also) two leaders that touch or run within 2.5 px of each other away from their ends
 //   label-detached   a label with no leader sits more than max(30 px, 0.05 W) from its referent
 //   status-early     the status line describes the collision/detonation before its event time (cfg.hit.t or EVENTS below) + 0.02
+//   status-count     a number in the 375 px status line is missing from the 1440 px status for the same scene/camera/t (viewport-dependent count)
 //   status-wrap      the status caption wraps to a second line (any width)      no-impact  after the hit no impact/debris label survives
 //   key-out          a key object (KEY table: KA-SAT, MSTI-3, White Sands, ...) is off frame, behind Earth or under the caption on the default camera
 //   shell-crop       a shell ring/glow is cut by the frame edge or the footer in a still or the hero (fully inside, or fully covering the frame, only)
@@ -220,7 +221,7 @@ const LIVE = (KEYS) => {
   // Referents (labelled craft / satellites / aircraft) that the sim draws at this t but the camera cannot show.
   const hidden = [], cp = h.camera.position, T = h.T;
   for (const { it, obj } of h.dyn) {
-    if (it.kind !== 'point' || !it.prim || h.sim.cams[h.camIdx].ref === false) continue;
+    if (it.kind !== 'point' || !it.prim || h.sim.cams[h.camIdx].ref === false || (h.sim.cams[h.camIdx].insetRef && it.insetLabel)) continue; // insetRef: the context inset shows it
     const p = it.pos(h.t); if (!p) continue;
     const v = new T.Vector3(...p).project(h.camera), x = (v.x + 1) / 2 * W, y = (1 - v.y) / 2 * H;
     const d = [p[0] - cp.x, p[1] - cp.y, p[2] - cp.z], Ld = Math.hypot(...d), u = d.map(c => c / Ld), b = cp.x * u[0] + cp.y * u[1] + cp.z * u[2], c2 = cp.lengthSq() - 1, disc = b * b - c2;
@@ -236,7 +237,7 @@ const LIVE = (KEYS) => {
   const res = reserved.filter(r => r.n === 'status' || r.n === 'banner');
   for (const Lb of h.labels) {
     const nm = (Lb.text || '') + '|' + (Lb.short || '');
-    if (!KEYS.some(rx => new RegExp(rx).test(nm))) continue;
+    if (!KEYS.some(rx => new RegExp(rx).test(nm)) || (h.sim.cams[h.camIdx].insetRef && Lb.item?.insetLabel)) continue;
     const p = Lb.posFn(h.t); if (!p) continue;
     const v = new T.Vector3(...p).project(h.camera), x = (v.x + 1) / 2 * W, y = (1 - v.y) / 2 * H;
     const d = [p[0] - cp.x, p[1] - cp.y, p[2] - cp.z], Ld = Math.hypot(...d), u = d.map(c => c / Ld), b = cp.x * u[0] + cp.y * u[1] + cp.z * u[2], c2 = cp.lengthSq() - 1, dd = b * b - c2;
@@ -289,7 +290,7 @@ const EMPTY = async (url) => {
 const discVisible = (d, W, H) => { if (!d || !(d.r > 0)) return null; let n = 0, ins = 0; for (let i = 0; i < 48; i++) for (let j = 0; j < 48; j++) { const x = d.cx + ((i + 0.5) / 24 - 1) * d.r, y = d.cy + ((j + 0.5) / 24 - 1) * d.r; if ((x - d.cx) ** 2 + (y - d.cy) ** 2 > d.r * d.r) continue; n++; if (x >= 0 && x <= W && y >= 0 && y <= H) ins++; } return ins / n; };
 
 // ---------------------------------------------------------------- run
-const results = [], failCount = {}, pageErrs = [];
+const results = [], failCount = {}, pageErrs = [], statusByVp = {};
 const record = (tag, F, extra = {}) => { results.push({ tag, F, ...extra }); for (const x of F) { const k = x.type; failCount[k] = (failCount[k] || 0) + 1; } if (F.length && !QUIET) console.log(tag, F.length, F.slice(0, 6).map(x => `${x.type}:${x.detail}`).join(' | ')); };
 const ctxOpts = (w, extra = {}) => ({ viewport: { width: w, height: w <= 400 ? 800 : w <= 900 ? 800 : 900 }, colorScheme: 'dark', ignoreHTTPSErrors: true, isMobile: w < 640, hasTouch: w < 640, ...extra });
 async function boot(w, extra) {
@@ -332,6 +333,7 @@ if (MODES.includes('live')) for (const w of VPS) {
         S.evT = EVENTS[id]?.t ?? S.hitT; S.evRe = EVENTS[id]?.re;
         if (ci !== 0) S.action = undefined; else S.action = S.probe.action;
         const F = check(S);
+        (statusByVp[`${id}|c${ci}|t${t}`] ||= {})[w] = S.status;
         const nm = tag('live', id, w, 'c' + ci, 't' + t);
         record(nm, F, { W: w });
         if (SHOT) await page.locator('#sceneView').screenshot({ path: `${out}/${id}-${w}-c${ci}-t${t}.png` });
@@ -427,6 +429,16 @@ if (MODES.includes('still')) {
   }
   if (errs.length) console.log('console errors still', errs.slice(0, 5));
   await ctx.close();
+}
+// viewport-dependent counts: every number the 375 px status states must also appear in the 1440 px status for the same (scene, camera, t)
+{
+  const nums = (x) => (x || '').replace(/(\d),(\d)/g, '$1$2').match(/\d+(?:\.\d+)?/g) || [];
+  for (const [k, v] of Object.entries(statusByVp)) {
+    const hi = v[Math.max(...Object.keys(v).map(Number))], lo = v[Math.min(...Object.keys(v).map(Number))];
+    if (hi == null || lo == null || Object.keys(v).length < 2) continue;
+    const H = new Set(nums(hi)), bad = nums(lo).filter((n) => !H.has(n));
+    if (bad.length) record('status-count-' + k, [{ type: 'status-count', detail: `375 px says ${bad.join(',')} but 1440 px says "${hi.slice(0, 80)}" vs "${lo.slice(0, 60)}"` }]);
+  }
 }
 fs.writeFileSync(`${out}/results.json`, JSON.stringify(results));
 const total = results.reduce((n, r) => n + r.F.length, 0) + pageErrs.length;

@@ -101,6 +101,8 @@ export function buildSim(cfg) {
         inVis = (t) => flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]),
         pos = (t) => (actOn(t, a.acts) && inVis(t) ? raw(t) : null);
       crafts[a.id] = { raw, pos, anc };
+      // staticKey: the static diagram draws this craft at a fixed, more exaggerated offset (e.g. clearly above the GEO belt, not on its line)
+      if (a.staticKey) a.staticPos = (t) => (actOn(t, a.acts) && inVis(t) ? craftPos(anc, a.staticKey, t) : null);
       const it = {
         kind: 'point',
         shape: a.model || 'sat',
@@ -119,6 +121,7 @@ export function buildSim(cfg) {
         labelDx: a.dx,
         labelDy: a.dy,
         pos,
+        staticPos: a.staticPos,
         orient: (t) => {
           const f = anc.frame(t);
           return { dir: f.along, up: f.rad };
@@ -261,6 +264,11 @@ export function buildSim(cfg) {
           minPx: a.sat.minPx,
           maxPx: a.sat.maxPx,
           scale: a.sat.big,
+          // fail: from this time the satellite is flagged as damaged (a visible end cue; SWF: such tests damaged or destroyed satellites)
+          ...(a.sat.fail && {
+            labelFn: (t, n) => (t >= a.sat.fail.t ? (n ? a.sat.fail.short : a.sat.fail.label) : n ? a.sat.short : a.sat.label),
+            statusColor: (t) => (t >= a.sat.fail.t ? '#ff9a9a' : '#dfe6f7'),
+          }),
           pos: (t) => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed),
         });
       if (a.sats)
@@ -302,6 +310,17 @@ export function buildSim(cfg) {
         labelDx: a.impactDx ?? 70,
         labelDy: a.impactDy ?? -50,
         opt: true,
+        pos: (t) => (t > tgt.t + 0.02 ? tgt.hitPos : null),
+      });
+    if (a.type === 'target' && tgt && a.wreck)
+      // A dim, smaller copy of the satellite stays at the impact point: the wreck marker (its debris is the cloud).
+      items.push({
+        kind: 'point',
+        shape: 'sat',
+        color: '#7c8497',
+        scale: (typeof a.big === 'number' ? a.big : 1.3) * 0.55,
+        minPx: 22,
+        maxPx: 40,
         pos: (t) => (t > tgt.t + 0.02 ? tgt.hitPos : null),
       });
     if (a.type === 'target' && tgt && a.fall) {
@@ -362,6 +381,10 @@ export function buildSim(cfg) {
         label: a.label,
         labelDy: a.labelDy,
         labelDx: a.dx,
+        beamLabel: a.beamLabel,
+        beamShort: a.beamShort,
+        beamDx: a.beamDx,
+        beamDy: a.beamDy,
         pos: (t) => pos(Math.min(t, a.t1)),
       };
       if (!a.gnss) {
@@ -496,7 +519,14 @@ export function buildSim(cfg) {
             if (dt > 0) {
               const alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (alt > 60) {
-                const q = orbitPos(alt, tgt.inc + p.di, tgt.raan + p.dr, tgt.uHit + p.du + tgt.w * (a.drift ?? 1) * dt * p.dw);
+                // optional late phase: the band keeps spreading along and across the orbit (time compressed)
+                const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
+                  q = orbitPos(
+                    alt,
+                    tgt.inc + p.di,
+                    tgt.raan + p.dr * (1 + (a.late?.kr ?? 0) * lt),
+                    tgt.uHit + p.du + tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0)),
+                  );
                 x = q[0];
                 y = q[1];
                 z = q[2];
@@ -780,6 +810,7 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: 'sat',
         prim: true,
+        insetLabel: a.insetLabel,
         color: a.color,
         label: a.label,
         short: a.short,
@@ -901,13 +932,20 @@ export function buildSim(cfg) {
       // Each box is a region [lat0, lat1, lon0, lon1, share, wave]: regions go dark one after another (wave order), terminals within a region over
       // its own window.
       const nw = Math.max(...a.boxes.map((b) => (b[5] ?? 0) + 1));
+      // The sample is canonical (full count, own seeded RNG), so the offline count is a function of t alone; a phone draws the first 60% of each
+      // region's dots, but the stated count still comes from the whole sample.
+      const canon = [];
       a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => {
-        const m = Math.round(a.count * frac * (IS_PHONE ? 0.6 : 1)); // fewer, smaller dots on a phone: the region stays readable instead of one red blob
-        for (let k = 0; k < m; k++)
-          P.push({
-            p: ll(lerp(la0, la1, rnd()), lerp(lo0, lo1, rnd()), 1.004),
-            off: wave == null ? lerp(a.t0, a.t1, bi === 0 ? rnd() * 0.6 : 0.3 + rnd() * 0.7) : lerp(a.t0, a.t1, (wave + rnd() * 0.8) / nw),
-          });
+        const m = Math.round(a.count * frac),
+          mShow = Math.round(m * (IS_PHONE ? 0.6 : 1)),
+          rv = mulberry(4001 + bi * 131);
+        for (let k = 0; k < m; k++) {
+          const la = lerp(la0, la1, rv()),
+            lo = lerp(lo0, lo1, rv()),
+            off = wave == null ? lerp(a.t0, a.t1, bi === 0 ? rv() * 0.6 : 0.3 + rv() * 0.7) : lerp(a.t0, a.t1, (wave + rv() * 0.8) / nw);
+          canon.push(off);
+          if (k < mShow) P.push({ p: ll(la, lo, 1.004), off });
+        }
       });
       const n = P.length;
       items.push({
@@ -921,8 +959,8 @@ export function buildSim(cfg) {
         short: a.short,
         labelAt: ll(49, 30, a.labelOffDisc ? 1.004 : 1.05),
         labelOffDisc: a.labelOffDisc,
-        labelDx: 90,
-        labelDy: -56,
+        labelDx: a.labelDx ?? 90,
+        labelDy: a.labelDy ?? -56,
         colored: true,
         fill(t, out, col) {
           for (let k = 0; k < n; k++) {
@@ -944,8 +982,8 @@ export function buildSim(cfg) {
       // The count is stated against the nominal sample (a.count) at every width: a phone draws fewer dots, but the share offline is the same number.
       const dark = (t) => {
         let d = 0;
-        for (let k = 0; k < n; k++) if (t > P[k].off) d++;
-        return Math.round((d / n) * a.count);
+        for (const o of canon) if (t > o) d++;
+        return Math.round((d / canon.length) * a.count);
       };
       items.push({
         kind: 'status',
@@ -1022,6 +1060,12 @@ export function buildSim(cfg) {
               return s[k][0];
             },
             on: (t) => !!ac.pos(t),
+            label: ac.beamLabel,
+            short: ac.beamShort,
+            labelFrac: 0.14,
+            labelDx: ac.beamDx ?? 40,
+            labelDy: ac.beamDy ?? -20,
+            opt: true,
             colorFn: (t) => (inZone(t) ? C.jam : C.ok),
             dashFn: inZone,
           });
@@ -1251,6 +1295,7 @@ export function buildSim(cfg) {
         act: c.act,
         ref: c.ref,
         hide: c.hide,
+        insetRef: c.insetRef,
         status: c.status,
         pos: ll(...c.at),
         look: c.look ? ll(...c.look) : null,

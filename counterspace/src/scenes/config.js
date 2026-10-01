@@ -81,7 +81,16 @@ export const SCENES = [
         inc: 44.8,
         raan: 40,
         color: '#8cc8ff',
-        sat: { phase: 0, speed: 2.2, label: 'Satellite in belt', short: 'Satellite', dx: 30, dy: 60 },
+        sat: {
+          phase: 1.05,
+          speed: 0.25,
+          big: 1.5,
+          label: 'Satellite in belt',
+          short: 'Satellite',
+          dx: 30,
+          dy: 60,
+          fail: { t: 0.8, label: 'Satellite damaged (SWF: such tests did this)', short: 'Satellite damaged' },
+        },
       },
     ],
     phoneHide: ['Thor launch'],
@@ -96,6 +105,7 @@ export const SCENES = [
       [0.16, 'Detonation: electrons trapped on Earth’s field lines', 'Detonation: electrons trapped'],
       [0.3, 'Trapped electrons spread in longitude and latitude along field lines', 'Electrons spread along field lines'],
       [0.75, 'Belt has drifted around Earth (illustrative spread)', 'Belt drifts around Earth (illustrative)'],
+      [0.82, 'SWF: effects of such tests damaged or destroyed satellites in orbit at the time', 'Satellites in orbit were damaged (SWF)'],
     ],
   },
   {
@@ -172,13 +182,26 @@ export const SCENES = [
       { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
       { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 100, impactDy: -100 },
       { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
-      { type: 'debris', count: 3532, spreadAlt: 260, spreadInc: 1.6, dv: 0.9, decay: 0, color: C.debris, label: 'Debris ring', dx: 70, dy: -50 },
+      {
+        type: 'debris',
+        count: 3532,
+        spreadAlt: 260,
+        spreadInc: 1.6,
+        dv: 0.9,
+        decay: 0,
+        color: C.debris,
+        label: 'Debris ring',
+        dx: 70,
+        dy: -50,
+        late: { t0: 0.6, k: 1.4, kr: 6 },
+      },
     ],
     still: 0.85,
     status: [
       [0, 'SC-19 rises toward Fengyun-1C'],
       [0.32, 'Collision at ~880 km: debris spreads along the old orbit', 'Collision at ~880 km'],
       [0.6, 'Ring forms · SWF: 2,351 of 3,532 cataloged pieces still in orbit (Feb. 2026)', 'SWF: 2,351 of 3,532 still in orbit'],
+      [0.76, 'Time compressed: the ring spreads into a wider, thinner band · SWF: 2,351 of 3,532 still in orbit', 'Time compressed: band spreads wider'],
     ],
   },
   {
@@ -252,7 +275,7 @@ export const SCENES = [
         thick: 0.011,
         label: 'DN-2 path (no target: not an intercept)',
         short: 'DN-2 path · no target',
-        labelIdx: 0.12,
+        labelIdx: 0.17,
         dx: -40,
         dy: -50,
         head: true,
@@ -277,7 +300,7 @@ export const SCENES = [
     shellLabels: { MEO: null, GEO: null },
     noRing: ['GEO'],
     cameras: [
-      { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.3, fill: 0.9 } },
+      { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.92 } },
       { name: 'Profile', at: [22, 8, 7.6], look: [0, 90, 0.7], phone: { at: [24, 24, 8.6], look: [0, 96, 0.7] } },
       { name: 'Polar', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
       { name: 'Zoom', at: [20, 45, 5.6] },
@@ -309,9 +332,10 @@ export const SCENES = [
         minPx: 46,
         maxPx: 86,
         bright: true,
+        wreck: true,
         impactDx: -80,
         impactDy: -30,
-        impactLabel: 'Impact: Microsat-R',
+        impactLabel: 'Impact: Microsat-R (wreck)',
         impactShort: 'Impact',
       },
       { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32 },
@@ -323,9 +347,9 @@ export const SCENES = [
         spreadRaan: 2.6,
         dv: 1.2,
         drift: 0.15,
-        decay: 3.0,
+        decay: 1.5,
         color: '#ffd2a6',
-        size: 0.05,
+        size: 0.075,
         lateGlow: true,
       },
     ],
@@ -420,7 +444,7 @@ export const SCENES = [
         inset: true,
         label: 'GPS satellites · MEO',
         opt: true,
-        dx: 60,
+        dx: -50,
         dy: 40,
       },
       {
@@ -429,8 +453,8 @@ export const SCENES = [
         radius: 6.2,
         color: C.jam,
         label: 'Jammer effect zone',
-        dx: 66,
-        dy: -60,
+        dx: 40,
+        dy: -34,
         jammer: { at: [56.5, 21.0], label: 'Ground jammer (illustrative)', short: 'Jammer', dx: -70, dy: 30 },
       },
       {
@@ -457,6 +481,10 @@ export const SCENES = [
         t0: 0,
         t1: 1,
         label: 'Airliner B',
+        beamLabel: 'GPS signal (from a MEO satellite, off view)',
+        beamShort: 'GPS signal',
+        beamDx: 50,
+        beamDy: 22,
         gnss: true,
         labelDy: 34,
         dx: 92,
@@ -468,12 +496,13 @@ export const SCENES = [
     stillCam: { at: [49, 14, 1.85], look: [51.5, 16, 0.98], hideShell: true },
     focus: [55, 18],
     inset: 'Context: GPS orbits (top view)',
+    insetNoPhone: true, // the phone stage is too small for an inset that would sit on the jammer zone
     cameras: [
       {
         name: 'Baltic: airliners and jammer zone',
         short: 'Baltic zone',
         at: [40, 13, 1.48],
-        look: [52, 18.5, 0.98],
+        look: [52, 23.5, 0.98],
         phone: { at: [38, 12, 1.48] },
       },
       { name: 'Close-up: jammer and airliners', short: 'Close-up', at: [47, 16, 1.7], look: [54, 19, 0.98], phone: { at: [47, 16, 1.95] } },
@@ -486,6 +515,7 @@ export const SCENES = [
   },
   {
     id: 'viasat',
+    inset: 'Context: KA-SAT in GEO (top view)',
     date: '2022-02-24',
     title: 'Viasat KA-SAT cyberattack (2022)',
     shells: ['GEO'],
@@ -499,9 +529,11 @@ export const SCENES = [
     related: 'tallinn-2017',
     event: 'ru-2022-viasat',
     actors: [
+      { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.003, opacity: 0.5, inset: true },
       {
         type: 'geo',
         lon: 9,
+        insetLabel: 'KA-SAT',
         minPx: 26,
         maxPx: 64,
         label: 'KA-SAT (GEO, unaffected)',
@@ -540,6 +572,8 @@ export const SCENES = [
         labelOffDisc: true, // stills: the label sits beside the globe, not on it
         label: 'Ground terminals (modems)',
         short: 'Terminals',
+        labelDx: 120,
+        labelDy: -84,
       },
       // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
       { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
@@ -561,7 +595,8 @@ export const SCENES = [
     staticZoom: 1.5,
     stillCam: { at: [10, 12, 3.9], look: [24, 13, 0.5], hideShell: true },
     cameras: [
-      { name: 'Europe + KA-SAT', short: 'Europe', at: [10, 12, 3.9], look: [24, 13, 0.5], phone: { at: [10, 12, 4.5] } },
+      { name: 'Europe (zoom)', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] }, insetRef: true },
+      { name: 'Europe + KA-SAT', short: 'Wide Europe', at: [10, 12, 3.9], look: [24, 13, 0.5], phone: { at: [10, 12, 4.5] } },
       { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
       { name: 'Wide', at: [30, -6, 6.5] },
     ],
@@ -583,7 +618,7 @@ export const SCENES = [
     hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 },
     lift: 30,
     stillShort: ['MIRACL beam'],
-    staticT: 0.3, // static: the satellite well along its pass, so the beam is drawn at full length
+    staticT: 0.16, // static: the satellite well along its pass, so the beam is drawn at full length
     staticZoom: 2.6,
     staticCenter: [35, -108],
     actors: [
@@ -649,6 +684,7 @@ export const SCENES = [
     related: null,
     event: 'cn-2022-sj21-compass-g2',
     inset: 'Context: top view',
+    insetNoPhone: true, // on a phone the inset would cover the docked pair
     scaleNote: 'Heights above the belt, the spacing between the two spacecraft and their position along the belt are illustrative.',
     anchors: { g: { geo: { lon: 105 } } },
     actors: [
@@ -663,6 +699,7 @@ export const SCENES = [
         maxPx: 112,
         label: 'Compass G2 (defunct)',
         short: 'Compass G2',
+        staticKey: [[0, 0.1, 0.72, 0], [1, 0.1, 0.72, 0]], // static: well above the belt line
         dx: 60,
         dy: 34,
         labelFn: (t) => (t >= 0.4 && t < 0.8 ? null : 'Compass G2 (defunct)'),
@@ -686,6 +723,7 @@ export const SCENES = [
         maxPx: 112,
         label: 'SJ-21 (China)',
         short: 'SJ-21',
+        staticKey: [[0, 0.1, 0.72, 0], [1, 0.1, 0.72, 0]], // static: well above the belt line
         dx: -68,
         dy: -12,
         labelFn: (t, n) => (t >= 0.4 && t < 0.8 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : 'SJ-21' + ' (China)'),
@@ -727,6 +765,7 @@ export const SCENES = [
     ],
     stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
     staticCenter: [25, 72],
+    staticCraftMax: 72,
   },
   {
     id: 'rpo',
@@ -750,13 +789,16 @@ export const SCENES = [
         t: 0.3,
         title: '1 · GEO, 2025',
         brief: 'SJ-21 + SJ-25 dock, GSSAP flank',
+        short: 'SJ-21 + SJ-25',
         status: 'SJ-21 and SJ-25 appear to dock; two' + ' US GSSAP satellites are positioned' + ' “flanking” them',
       },
-      { t: 0.6, title: '2 · LEO, 2019–20', brief: 'Cosmos 2543 near USA 245', status: 'Cosmos 2542 releases Cosmos 2543, which works near USA 245' },
+      { t: 0.6, title: '2 · LEO, 2019–20', brief: 'Cosmos 2543 near USA 245',
+        short: 'Cosmos 2543', status: 'Cosmos 2542 releases Cosmos 2543, which works near USA 245' },
       {
         t: 0.85,
         title: '3 · GEO, 2025',
         brief: 'USA 271 near SKYNET 5A',
+        short: 'USA 271',
         dropPhone: ['GEO belt'],
         status: 'USA 271 and SKYNET 5A: a jointly announced US–UK RPO',
       },
@@ -990,7 +1032,7 @@ export const SCENES = [
       [0.34, '25 Nov.: SJ-25 burns to separate;' + ' imagery on 29 Nov. shows two satellites', '25 Nov.: SJ-25 burns to separate'],
       [0.385, 'Dec.–Jan.: RPOs continue, closest just under 3 km on' + ' 13 Jan.; 130 km apart by 16 Jan.', 'Jan.: closest just under 3 km (13 Jan.)'],
       [0.42, 'LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small subsatellite, Cosmos 2543', 'LEO 2019: Cosmos 2542 releases 2543'],
-      [0.47, 'Cosmos 2543 stays within 2 km of Cosmos 2542 for three days', 'Cosmos 2543 stays within 2 km, 3 days'],
+      [0.47, 'Cosmos 2543 stays within 2 km of Cosmos 2542 for three days', 'Cosmos 2543 stays within 2 km for three days'],
       [0.53, 'It then raises its apogee (590 km by 16 Dec.)'],
       [0.6, 'Amateur analysis “strongly suggests” the aim was to observe USA 245; within 20 km in Jan.' + ' 2020', 'Analysis: aim was to observe USA 245'],
       [0.665, 'Russia’s Foreign Ministry said Cosmos 2543 posed no threat to USA 245', 'Russia: Cosmos 2543 posed no threat'],
@@ -1147,8 +1189,8 @@ export const SCENES = [
       {
         type: 'craft',
         id: 'csshq',
-        minPx: 50,
-        maxPx: IS_PHONE ? 52 : 70,
+        minPx: 44,
+        maxPx: IS_PHONE ? 46 : 58,
         anchor: 'cn',
         acts: [2],
         model: 'plane',
@@ -1159,6 +1201,7 @@ export const SCENES = [
         short: 'CSSHQ',
         dx: -50,
         dy: -34,
+        staticAt: [0.1, 0.27],
         labelFn: (t, n) => (t < 0.765 ? (n ? 'CSSHQ flight 2' : 'CSSHQ flight' + ' 2 (China)') : n ? 'CSSHQ flight 3' : 'CSSHQ flight 3 (China)'),
         key: [
           [0.54, 0, 0, 0],
@@ -1180,6 +1223,7 @@ export const SCENES = [
         short: 'Obj. J',
         dx: 40,
         dy: 34,
+        staticAt: [0.1, 0.46],
         key: [
           [0.585, 0, 0, 0],
           [0.605, 0.1, 0.01, 0.02],
@@ -1210,6 +1254,7 @@ export const SCENES = [
         short: 'Obj. G',
         dx: -46,
         dy: 20,
+        staticAt: [0.1, 0.7],
         key: [
           [0.8, 0, 0, 0],
           [0.815, 0.09, 0.01, 0.03],
@@ -1249,10 +1294,11 @@ export const SCENES = [
     ],
     cameras: [
       { name: 'Tour (auto)', auto: true, at: [40, -25, 4.4], phone: { at: [40, -25, 5.2] } },
-      { name: 'X-37B: LEO flights', act: 0, fitCraft: { anchor: 'us', ids: ['x37'], dir: [-0.5, 0.55, 0.7], dMin: 1.1, fill: 0.75, t: 0.15 } },
-      { name: 'X-37B OTV-7: follows the craft', act: 1, fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.8, fill: 0.85, t: 0.42 } },
+      { name: 'X-37B: LEO flights', chip: 'X-37B LEO flights', act: 0, fitCraft: { anchor: 'us', ids: ['x37'], dir: [-0.5, 0.55, 0.7], dMin: 1.1, fill: 0.75, t: 0.15 } },
+      { name: 'X-37B OTV-7: follows the craft', chip: 'X-37B OTV-7', act: 1, fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.8, fill: 0.85, t: 0.42 } },
       {
         name: 'China: CSSHQ and released objects',
+        chip: 'China CSSHQ',
         act: 2,
         fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], fill: 0.93, dMin: 0.1, t: 0.75 },
       },
@@ -1261,7 +1307,8 @@ export const SCENES = [
     staticCenter: [40, 105],
     staticFit: 1.6,
     staticFitPhone: 1.3,
-    staticSnap: { csshq: [0.6, 0.93], objJ: [0.605], objG: [0.93] },
+    staticSnap: { csshq: [0.6], objJ: [0.605], objG: [0.93] },
+    staticLabels: { csshq: 'CSSHQ (China): flights 2 and 3' },
     staticStatusPhone: 'X-37B: eight flights since 2010 · CSSHQ: three flights, a fourth launched Feb. 2026',
     staticStatus:
       'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and' + ' a fourth launched in Feb. 2026',
@@ -1276,7 +1323,7 @@ export const HERO = {
   shellLabels: { LEO: 'LEO ≤2,000 km', MEO: 'MEO · GPS', GEO: 'GEO ~35,786 km' },
   shellShort: { LEO: 'LEO', MEO: 'MEO · GPS', GEO: 'GEO' },
   shellAng: { LEO: -58, MEO: 42, GEO: 80 },
-  staticShellAng: { LEO: 205, MEO: -28, GEO: 8 },
+  staticShellAng: { LEO: 150, MEO: -28, GEO: 8 },
   shellOff: { LEO: [-30, 34], MEO: [46, 22], GEO: [46, -26] },
   actors: [
     {

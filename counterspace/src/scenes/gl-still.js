@@ -80,6 +80,8 @@ const methods = {
     this.renderer.setPixelRatio(1);
     this.renderer.setSize(W, H, false);
     this._modelBoost = 1.4;
+    const amb0 = this.ambient?.intensity;
+    if (this.ambient) this.ambient.intensity = 0.62; // a lighter night side in the print
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
@@ -116,8 +118,9 @@ const methods = {
       }
     }
     this._modelBoost = 1;
+    if (this.ambient) this.ambient.intensity = amb0;
     // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
-    const s = (W / 1000) * (o.aspect ? 2.1 : 1),
+    const s = (W / 1000) * (o.aspect && !o.full ? 2.1 : 1),
       c = document.createElement('canvas');
     c.width = W;
     c.height = H;
@@ -150,7 +153,9 @@ const methods = {
       rsv = [];
     if (sBox) rsv.push([sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s]);
     if (tBox) rsv.push(tBox);
-    const lp = this._labelPositions(W, H, s, true, rsv);
+    const ls = s * 1.5, // labels are drawn 1.5x the caption size so they read in a 3000 px print
+      lp = this._labelPositions(W, H, ls, true, rsv);
+    lay.u = ls;
     lay.objs = this._lastObjs;
     lay.probe = this._probe(W, H);
     lay.obst = this._lastObst;
@@ -164,7 +169,7 @@ const methods = {
       lay.segs.push({ x1: q.ax, y1: q.ay, x2: q.qx, y2: q.qy, own: q.text });
       g.strokeStyle = q.color || '#dfe6f7';
       g.globalAlpha = 0.75;
-      g.lineWidth = 1.2 * s;
+      g.lineWidth = 1.8 * s;
       g.beginPath();
       g.moveTo(q.ax, q.ay);
       g.lineTo(q.qx, q.qy);
@@ -173,12 +178,12 @@ const methods = {
     }
     for (const q of lp) {
       if (!q) continue;
-      g.font = `600 ${Math.round(11 * s)}px system-ui,sans-serif`;
-      const tw = g.measureText(q.text).width + 12 * s;
-      lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * s, w: tw, h: 18 * s });
+      g.font = `600 ${Math.round(11 * ls)}px system-ui,sans-serif`;
+      const tw = g.measureText(q.text).width + 12 * ls;
+      lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * ls, w: tw, h: 18 * ls });
       g.fillStyle = 'rgba(5,8,18,0.8)';
       g.beginPath();
-      g.roundRect(q.x - tw / 2, q.y - 9 * s, tw, 18 * s, 4 * s);
+      g.roundRect(q.x - tw / 2, q.y - 9 * ls, tw, 18 * ls, 4 * ls);
       g.fill();
       g.textBaseline = 'middle';
       g.fillStyle = q.color || '#dfe6f7';
@@ -220,28 +225,27 @@ const methods = {
       pr = this.renderer.getPixelRatio();
     const maxDim = Math.min(this.maxTex, 4096),
       panels = this.sim.cfg.panels,
-      // a multi-episode still renders each tile at up to 1400 px wide (the composite is wider than a single still: every tile keeps full resolution)
-      tileW = panels ? Math.min(1400, maxDim) : 0,
-      W = panels ? tileW * panels.length : Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
-      H = panels ? Math.round(tileW / 1.25) : Math.round((W * vh) / vw);
+      // a multi-episode still stacks its tiles vertically, each a full-size still (2400 px wide) with its own title strip, labels and caption
+      tileW = panels ? Math.min(2400, maxDim) : 0,
+      W = panels ? tileW : Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
+      H = panels ? Math.round(tileW / 1.6) : Math.round((W * vh) / vw);
     const cam = this.camera,
       keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell, up: cam.up.clone(), t: this.t, aspect: cam.aspect, fov: cam.fov };
     let body,
       tileLays = null;
     if (panels) {
-      const tw = Math.floor(W / panels.length);
       body = document.createElement('canvas');
-      body.width = tw * panels.length;
-      body.height = H;
+      body.width = W;
+      body.height = H * panels.length;
       const bg = body.getContext('2d');
       tileLays = [];
       panels.forEach((pn, k) => {
-        const tile = this._stillBody(tw, H, { t: pn.t, aspect: tw / H, status: pn.status, title: `${pn.title} · ${pn.brief}` });
-        bg.drawImage(tile, k * tw, 0);
+        const tile = this._stillBody(W, H, { t: pn.t, aspect: W / H, full: true, status: pn.status, title: `${pn.title} · ${pn.brief}` });
+        bg.drawImage(tile, 0, k * H);
         bg.strokeStyle = 'rgba(255,224,138,0.5)';
         bg.lineWidth = Math.max(1, W / 1000);
-        bg.strokeRect(k * tw + 0.5, 0.5, tw - 1, H - 1);
-        tileLays.push({ ...this.stillLayout, ox: k * tw });
+        bg.strokeRect(0.5, k * H + 0.5, W - 1, H - 1);
+        tileLays.push({ ...this.stillLayout, oy: k * H });
       });
       this.update(keep.t);
     } else body = this._stillBody(W, H, {});
@@ -252,7 +256,7 @@ const methods = {
       fb = Math.round(92 * s);
     const c = document.createElement('canvas');
     c.width = body.width;
-    c.height = H + hb + fb;
+    c.height = body.height + hb + fb;
     const g = c.getContext('2d');
     g.fillStyle = '#070b17';
     g.fillRect(0, 0, c.width, c.height);
@@ -260,14 +264,14 @@ const methods = {
     g.textAlign = 'left';
     g.fillStyle = '#0b1120';
     g.fillRect(0, 0, W, hb);
-    g.fillRect(0, hb + H, W, fb);
+    g.fillRect(0, hb + body.height, W, fb);
     g.strokeStyle = 'rgba(255,224,138,0.28)';
     g.lineWidth = Math.max(1, s);
     g.beginPath();
     g.moveTo(0, hb - 0.5);
     g.lineTo(W, hb - 0.5);
-    g.moveTo(0, hb + H + 0.5);
-    g.lineTo(W, hb + H + 0.5);
+    g.moveTo(0, hb + body.height + 0.5);
+    g.lineTo(W, hb + body.height + 0.5);
     g.stroke();
     g.textBaseline = 'middle';
     g.fillStyle = '#ffe08a';
@@ -275,7 +279,7 @@ const methods = {
     g.fillText('Illustrative, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
     g.fillStyle = '#e9edf7';
     g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`;
-    g.fillText(title, 16 * s, hb + H + 24 * s);
+    g.fillText(title, 16 * s, hb + body.height + 24 * s);
     // Source line (cite) and imagery credit each on their own line, at a readable size (shrunk only if a line would overflow).
     const credit = earthImg ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
     // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
@@ -289,8 +293,8 @@ const methods = {
     }
     g.font = `${f}px system-ui,sans-serif`;
     g.fillStyle = '#c3cbe0';
-    g.fillText(srcTxt, 16 * s, hb + H + 54 * s);
-    g.fillText(credit, 16 * s, hb + H + 77 * s);
+    g.fillText(srcTxt, 16 * s, hb + body.height + 54 * s);
+    g.fillText(credit, 16 * s, hb + body.height + 77 * s);
     g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
     cam.position.copy(keep.pos);

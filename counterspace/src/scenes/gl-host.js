@@ -114,8 +114,11 @@ export class GLHost {
     // is in daylight and the terminator shows on the limb. Orbiting reveals the night side.
     const sunDir = sunFor(sim.sunRef);
     this.sunDir = sunDir;
-    S.add(new T.AmbientLight(0x9fb4ff, 0.32));
-    const sun = new T.DirectionalLight(0xfff4e0, 2.1);
+    // The hero and the stills lift the night side (ambient up, sun down a little) so the live Earth reads like the static Blue Marble.
+    this.ambient = new T.AmbientLight(0x9fb4ff, sim.cfg.spin ? 0.6 : 0.32);
+    S.add(this.ambient);
+    const sun = new T.DirectionalLight(0xfff4e0, sim.cfg.spin ? 1.85 : 2.1);
+    this.sun = sun;
     sun.position.set(...scl(sunDir, 10));
     S.add(sun);
     const root = new T.Group();
@@ -177,6 +180,13 @@ export class GLHost {
       this.labelLayer.appendChild(c);
       this.chipEl = c;
     }
+    // Handover chip: shown while an episode-locked preset has handed the camera to the episode actually on screen.
+    this.handEl = document.createElement('div');
+    this.handEl.className = 'hlabel';
+    this.handEl.style.cssText +=
+      ';left:10px;top:' + (this.el.clientWidth < 520 ? 56 : 44) + 'px;font-size:12px;font-weight:600;color:#0a0f1e;background:#8cc8ff;white-space:nowrap;' +
+      'transform:none;visibility:hidden;pointer-events:none';
+    this.labelLayer.appendChild(this.handEl);
     this.insetEl = null;
     if (sim.cfg.inset) this._makeInset();
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -218,6 +228,9 @@ export class GLHost {
     map.colorSpace = T.SRGBColorSpace;
     map.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
     mat.map = map;
+    // hero: a gentle self-lit term keeps the night side readable, so the live Earth looks like the static Blue Marble
+    mat.emissiveMap = this.sim?.cfg.spin ? map : null;
+    mat.emissive.set(this.sim?.cfg.spin ? 0x757575 : 0x000000);
     mat.needsUpdate = true;
     old.forEach((t) => t?.dispose());
   }
@@ -289,6 +302,16 @@ export class GLHost {
       } else if (this._fbAct != null) {
         this._fbAct = null;
         this.setCam(this._lockCam);
+      }
+    }
+    {
+      const on = acts && this.lock != null && this._fbAct != null && this.handEl;
+      if (this.handEl) {
+        this.handEl.style.visibility = on ? 'visible' : 'hidden';
+        if (on) {
+          const c = this.sim.cfg.cameras?.[this.camIdx];
+          this.handEl.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
+        }
       }
     }
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.

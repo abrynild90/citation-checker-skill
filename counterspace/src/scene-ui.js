@@ -111,11 +111,15 @@ export async function openScene(id, originEl) {
       const sh = isPhoneNow() && cfg.cameras?.[i]?.short; // phone chips wrap (never cut off), so long preset names have a short form
       b.textContent = sh || c.name;
       if (sh) b.title = c.name;
-      b.onclick = () => h.pickCam(i);
+      b.onclick = () => {
+        h.pickCam(i);
+        syncCams();
+      };
       cams.appendChild(b);
     });
     h.play();
     syncScrub(h.t);
+    h.handEl && (h.handEl.style.visibility = 'hidden');
     requestAnimationFrame(camFade);
   } else {
     renderSVG(sim, view);
@@ -123,7 +127,10 @@ export async function openScene(id, originEl) {
   staticMode(!h);
   setInert(true);
   asideBody.scrollTop = 0;
-  requestAnimationFrame(updateCue);
+  requestAnimationFrame(() => {
+    asideBody.scrollTop = 0; // layout of the new text is settled: a scene never opens scrolled
+    updateCue();
+  });
   setStatus(
     `Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} ` +
       `stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim(),
@@ -168,8 +175,16 @@ export function closeScene() {
 }
 const scrub = document.getElementById('scScrub'),
   scTime = document.getElementById('scTime');
+// The preset chip that matches the camera on screen is pressed: when a locked episode preset hands over, the highlight moves with it.
+function syncCams() {
+  if (!host || !cur) return;
+  const tour = host.sim.cfg.acts && host.lock == null ? host.sim.cams.findIndex((c) => c.auto) : -1,
+    on = tour >= 0 ? tour : host.camIdx;
+  [...camsEl.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === on)));
+}
 function syncScrub(t) {
   if (!cur) return;
+  syncCams();
   const v = Math.max(0, Math.min(1, t)),
     dur = cur?.duration || 0;
   scrub.value = Math.round(v * 1000);
