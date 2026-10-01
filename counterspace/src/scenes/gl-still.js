@@ -30,10 +30,11 @@ const methods = {
       add(Math.min(W, d.cx + d.r), Math.min(H, d.cy + d.r));
     }
     // shells (translucent spheres) belong to the picture too, clipped to the frame
-    for (const c of P.circles || []) if (c.ring && c.r > 0) {
-      add(Math.max(0, c.cx - c.r), Math.max(0, c.cy - c.r));
-      add(Math.min(W, c.cx + c.r), Math.min(H, c.cy + c.r));
-    }
+    for (const c of P.circles || [])
+      if (c.ring && c.r > 0) {
+        add(Math.max(0, c.cx - c.r), Math.max(0, c.cy - c.r));
+        add(Math.min(W, c.cx + c.r), Math.min(H, c.cy + c.r));
+      }
     return x1 > x0 && y1 > y0 ? { x0, y0, x1, y1 } : null;
   },
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
@@ -94,7 +95,8 @@ const methods = {
       }
     }
     this._modelBoost = 1;
-    const s = (W / 1000) * (o.aspect ? 1.55 : 1), // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
+    // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
+    const s = (W / 1000) * (o.aspect ? 1.55 : 1),
       c = document.createElement('canvas');
     c.width = W;
     c.height = H;
@@ -185,7 +187,8 @@ const methods = {
     return c;
   },
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and the illustrative banner, caption and source into the PNG, then
-  // restore the live size. Scenes with cfg.panels (three unrelated episodes) get a composite: one tile per episode, each with its own camera, title and caption.
+  // restore the live size. Scenes with cfg.panels (three unrelated episodes) get a composite: one tile per episode, each with its own camera, title
+  // and caption.
   stillPNG(title, cite, targetW = 3000) {
     const vw = this.el.clientWidth,
       vh = this.el.clientHeight,

@@ -4,8 +4,10 @@
 // ============================================================================
 // Screen-space label de-confliction shared by the live HTML labels, the PNG still and the SVG fallback.
 // list[i] = {x, y (preferred centre), px, py (object point), w, h, fixed} or null.
-// Optional extras: obst = drawn paths (leaders and labels avoid them; .soft paths are only lightly penalised), extra = {marks: sprite circles, rings: ring polylines,
-// parts: particle-count grid, fine: finer fallback search, scale: px scale of the canvas}: a label never sits on those; entries flagged opt are dropped if they cannot be placed cleanly.
+// Optional extras: obst = drawn paths (leaders and labels avoid them; .soft paths are only lightly penalised), extra = {marks: sprite circles, rings:
+// ring polylines,
+// parts: particle-count grid, fine: finer fallback search, scale: px scale of the canvas}: a label never sits on those; entries flagged opt are
+// dropped if they cannot be placed cleanly.
 // Returns placements {x, y, leader, ax, ay, qx, qy}. Fixed labels are placed first; others are nudged
 // up/down/sideways to the nearest free slot, clamped inside the frame, and given a leader line to the object.
 export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], memo = null, extra = null) {
@@ -77,8 +79,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     const { w, h } = c;
     const cx = (x) => Math.max(w / 2 + M, Math.min(W - w / 2 - M, x)),
       cy = (y) => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
-    const hits = (x, y) =>
-      boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
+    const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
     // A leader longer than this (share of the canvas width) is a defect: the label belongs next to its object.
     const lim = W * (W <= 400 ? 0.27 : 0.17);
     const cost = (x, y) => {
@@ -146,8 +147,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       cand.push([w * 0.55 + 14, j * h * 1.12], [-(w * 0.55 + 14), j * h * 1.12]);
     }
     for (const m of [1.4, 2.2, 3.2])
-      for (let a = 0; a < 8; a++)
-        cand.push([Math.cos((a * Math.PI) / 4) * (w * 0.55 + 14) * m, Math.sin((a * Math.PI) / 4) * (h * 1.6) * m]);
+      for (let a = 0; a < 8; a++) cand.push([Math.cos((a * Math.PI) / 4) * (w * 0.55 + 14) * m, Math.sin((a * Math.PI) / 4) * (h * 1.6) * m]);
     let best = null,
       bestN = 1e9;
     const tryAt = (x, y) => {
@@ -347,5 +347,5 @@ export function fitBanner(view) {
   b.style.maxWidth = 'calc(100% - 20px)';
   b.style.fontSize = '';
   const room = view.clientWidth - 20;
-  if (room > 0 && b.scrollWidth > room) b.style.fontSize = Math.max(8.5, Math.floor((11 * room) / b.scrollWidth * 10) / 10) + 'px';
+  if (room > 0 && b.scrollWidth > room) b.style.fontSize = Math.max(8.5, Math.floor(((11 * room) / b.scrollWidth) * 10) / 10) + 'px';
 }

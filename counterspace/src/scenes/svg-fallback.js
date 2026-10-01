@@ -60,8 +60,7 @@ function earthRaster(proj, CX, CY, R) {
           cc = ((iy + 1) * w + ia) * 4,
           dd = ((iy + 1) * w + ib) * 4,
           q = (j * S + i) * 4;
-        for (let ch = 0; ch < 3; ch++)
-          o[q + ch] = (d[a + ch] * (1 - fx) + d[b + ch] * fx) * (1 - fy) + (d[cc + ch] * (1 - fx) + d[dd + ch] * fx) * fy;
+        for (let ch = 0; ch < 3; ch++) o[q + ch] = (d[a + ch] * (1 - fx) + d[b + ch] * fx) * (1 - fy) + (d[cc + ch] * (1 - fx) + d[dd + ch] * fx) * fy;
         o[q + 3] = 255;
       }
     g.putImageData(out, 0, 0);
@@ -74,11 +73,15 @@ function earthRaster(proj, CX, CY, R) {
 // ---------------------------------------------------------------- 2D craft silhouettes (simplified versions of the live models)
 // Each is drawn in a local frame (x right, y down, unit = s px) and centred on (x, y). `s` is the overall width in px.
 function drawCraft(g, shape, x, y, s, color, o = {}) {
-  const k = g.append('g').attr('transform', `translate(${x},${y}) rotate(${o.rot ?? 0}) scale(${s / 100})`).attr('stroke-linejoin', 'round');
+  const k = g
+    .append('g')
+    .attr('transform', `translate(${x},${y}) rotate(${o.rot ?? 0}) scale(${s / 100})`)
+    .attr('stroke-linejoin', 'round');
   const dark = '#070b17',
     panel = '#2a4f9a';
   const sw = 2.2;
-  const rect = (a, b, w, h, f, st = dark) => k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
+  const rect = (a, b, w, h, f, st = dark) =>
+    k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
   const poly = (d, f, st = dark) => k.append('path').attr('d', d).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
   if (shape === 'sat' || shape === 'iss') {
     if (shape === 'iss') {
@@ -95,9 +98,28 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
       for (const sg of [-1, 1]) {
         const x0 = sg < 0 ? -50 : 14;
         rect(x0, -17, 36, 34, panel);
-        for (let i = 1; i < 3; i++) k.append('line').attr('x1', x0 + i * 12).attr('x2', x0 + i * 12).attr('y1', -17).attr('y2', 17).attr('stroke', '#8fb0ee').attr('stroke-width', 1.2);
-        k.append('line').attr('x1', x0).attr('x2', x0 + 36).attr('y1', 0).attr('y2', 0).attr('stroke', '#8fb0ee').attr('stroke-width', 1.2);
-        k.append('line').attr('x1', sg * 14).attr('x2', sg * 15).attr('y1', 0).attr('y2', 0).attr('stroke', '#c3cbe0').attr('stroke-width', 3);
+        for (let i = 1; i < 3; i++)
+          k.append('line')
+            .attr('x1', x0 + i * 12)
+            .attr('x2', x0 + i * 12)
+            .attr('y1', -17)
+            .attr('y2', 17)
+            .attr('stroke', '#8fb0ee')
+            .attr('stroke-width', 1.2);
+        k.append('line')
+          .attr('x1', x0)
+          .attr('x2', x0 + 36)
+          .attr('y1', 0)
+          .attr('y2', 0)
+          .attr('stroke', '#8fb0ee')
+          .attr('stroke-width', 1.2);
+        k.append('line')
+          .attr('x1', sg * 14)
+          .attr('x2', sg * 15)
+          .attr('y1', 0)
+          .attr('y2', 0)
+          .attr('stroke', '#c3cbe0')
+          .attr('stroke-width', 3);
       }
       rect(-14, -15, 28, 30, color);
       k.append('circle').attr('cx', 0).attr('cy', -21).attr('r', 6).attr('fill', '#dfe6f7').attr('stroke', dark).attr('stroke-width', 1.6);
@@ -107,7 +129,11 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
     poly('M0,-48 C6,-30 10,-10 12,8 L42,34 L42,42 L10,34 L6,46 L-6,46 L-10,34 L-42,42 L-42,34 L-12,8 C-10,-10 -6,-30 0,-48Z', color);
     k.append('path').attr('d', 'M0,-46 C3,-30 5,-14 6,4 L-6,4 C-5,-14 -3,-30 0,-46Z').attr('fill', '#f2f4fa').attr('fill-opacity', 0.5);
   } else if (shape === 'aircraft') {
-    poly('M0,-46 C5,-30 6,-10 6,4 L46,26 L46,34 L6,24 L4,38 L14,46 L14,50 L0,46 L-14,50 L-14,46 L-4,38 L-6,24 L-46,34 L-46,26 L-6,4 C-6,-10 -5,-30 0,-46Z', '#f2f4fa', dark);
+    poly(
+      'M0,-46 C5,-30 6,-10 6,4 L46,26 L46,34 L6,24 L4,38 L14,46 L14,50 L0,46 L-14,50 L-14,46 L-4,38 L-6,24 L-46,34 L-46,26 L-6,4 C-6,-10 -5,-30 0,-46Z',
+      '#f2f4fa',
+      dark,
+    );
   } else if (shape === 'ship') {
     poly('M-50,-9 L30,-9 L50,0 L30,9 L-50,9Z', '#8e9bb4');
     rect(-26, -6, 22, 12, '#dfe6f7');
@@ -135,12 +161,20 @@ function renderPanels(sim, el) {
     pw = narrow ? W - 2 * gap : (W - (n + 1) * gap) / n,
     ph = narrow ? (H - top - (n + 1) * gap) / n : H - top - 2 * gap;
   fitBanner(el);
-  const root = d3.create('svg').style('background', '#070b16').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: static diagram, one panel per episode`);
+  const root = d3
+    .create('svg')
+    .style('background', '#070b16')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img')
+    .attr('aria-label', `${sim.cfg.title}: static diagram, one panel per episode`);
   root.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b16');
   const lays = [];
   sim.cfg.panels.forEach((pn, k) => {
     // focus: the middle of the craft visible at this episode's time
-    const pts = sim.items.filter((i) => i.kind === 'point' && i.shape !== 'none' && i.prim).map((i) => i.pos(pn.t)).filter(Boolean);
+    const pts = sim.items
+      .filter((i) => i.kind === 'point' && i.shape !== 'none' && i.prim)
+      .map((i) => i.pos(pn.t))
+      .filter(Boolean);
     const focus = pts.reduce((a, p) => [a[0] + p[0] / pts.length, a[1] + p[1] / pts.length, a[2] + p[2] / pts.length], [0, 0, 0]),
       span = Math.max(0.16, ...pts.map((p) => Math.hypot(p[0] - focus[0], p[1] - focus[1], p[2] - focus[2])));
     sim.flags.all = false;
@@ -164,7 +198,15 @@ function renderPanels(sim, el) {
     lay.ox = x;
     lay.oy = y;
     lays.push(lay);
-    root.append('rect').attr('x', x).attr('y', y).attr('width', pw).attr('height', ph).attr('fill', 'none').attr('stroke', 'rgba(255,224,138,.35)').attr('rx', 6);
+    root
+      .append('rect')
+      .attr('x', x)
+      .attr('y', y)
+      .attr('width', pw)
+      .attr('height', ph)
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(255,224,138,.35)')
+      .attr('rx', 6);
   });
   sim.flags.all = true;
   root.node().__lay = { panels: lays, W, H };
@@ -232,7 +274,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     if (cur) stLines.push(cur);
   }
   const nCraft = sim.items.filter((i) => i.kind === 'point' && i.prim && i.shape !== 'none' && !i.ctx && !i.liveOnly && i.pos(t)).length,
-    craftBase = opts.panel ? Math.min(W * 0.16, 40) : Math.max(26, Math.min(64, W * (W < 520 ? (nCraft <= 2 ? 0.09 : 0.07) : nCraft <= 2 ? 0.075 : nCraft <= 4 ? 0.055 : 0.045)));
+    craftBase = opts.panel
+      ? Math.min(W * 0.16, 40)
+      : Math.max(26, Math.min(nCraft <= 2 ? 110 : 64, W * (W < 520 ? (nCraft <= 2 ? 0.14 : 0.07) : nCraft <= 2 ? 0.1 : nCraft <= 4 ? 0.055 : 0.045)));
   const stH = stLines.length * 16 + 10,
     stY = H - (opts.panel ? 6 : 34) - stH,
     stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * 6.6 + 24);
@@ -242,7 +286,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     x1 = 1.08,
     y0 = -1.08,
     y1 = 1.08;
-  const fitMax = sim.cfg.staticFit && !opts.panel ? (W < 520 && sim.cfg.staticFitPhone) || sim.cfg.staticFit : 0; // far orbits (apogees, belts) may run off the frame so the Earth stays large
+  // far orbits (apogees, belts) may run off the frame so the Earth stays large
+  const fitMax = sim.cfg.staticFit && !opts.panel ? (W < 520 && sim.cfg.staticFitPhone) || sim.cfg.staticFit : 0;
   const grow = (p) => {
     if (!p || p.hidden) return;
     if (fitMax && Math.hypot(p.x, p.y) > fitMax) return;
@@ -257,8 +302,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       if (it.kind === 'curve') {
         // On a phone the Earth gets the room: orbit and belt lines run off the frame, only trails and paths of the action set the fit.
         if (!(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
-      }
-      else if (it.kind === 'point' && !it.liveOnly) {
+      } else if (it.kind === 'point' && !it.liveOnly) {
         const q = it.pos(t);
         if (q) grow(unit(q));
       } else if (it.kind === 'beam') {
@@ -287,7 +331,12 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   }
   // Footer scale note: the longest wording that fits at >= 9.5 px (10 px on a desk); never shrunk below that.
   const fFont = W < 520 ? 9.5 : 10,
-    fCands = [`${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`, 'Compressed radial scale (Earth radius = 1; altitude^0.45)', 'Compressed radial scale · altitude^0.45', 'Radial scale compressed'],
+    fCands = [
+      `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`,
+      'Compressed radial scale (Earth radius = 1; altitude^0.45)',
+      'Compressed radial scale · altitude^0.45',
+      'Radial scale compressed',
+    ],
     ftxt = opts.panel ? opts.title || '' : fCands.find((x) => x.length * fFont * 0.56 + 20 <= W - 12) || fCands.at(-1),
     fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * fFont * 0.56 + 20);
   const fx = 14 + (opts.panel ? 0 : Math.round(craftBase * 0.6)),
@@ -364,12 +413,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   {
     // Land texture: fractal-noise mottling clipped to the land shape (desert/forest/ice tones), so the coastlines are not a flat cartoon fill.
     const f = defs.append('filter').attr('id', `${U}-tex`).attr('x', 0).attr('y', 0).attr('width', 1).attr('height', 1);
-    f.append('feTurbulence')
-      .attr('type', 'fractalNoise')
-      .attr('baseFrequency', 0.014)
-      .attr('numOctaves', 3)
-      .attr('seed', 4)
-      .attr('result', 'n');
+    f.append('feTurbulence').attr('type', 'fractalNoise').attr('baseFrequency', 0.014).attr('numOctaves', 3).attr('seed', 4).attr('result', 'n');
     f.append('feColorMatrix')
       .attr('in', 'n')
       .attr('type', 'matrix')
@@ -432,8 +476,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   shells.forEach((it) => {
     if (it.noRing) return;
     const rp = [];
-    for (let a = 0; a <= 120; a++)
-      rp.push([CX + it.r * R * Math.cos((a / 120) * 2 * Math.PI), CY + it.r * R * Math.sin((a / 120) * 2 * Math.PI)]);
+    for (let a = 0; a <= 120; a++) rp.push([CX + it.r * R * Math.cos((a / 120) * 2 * Math.PI), CY + it.r * R * Math.sin((a / 120) * 2 * Math.PI)]);
     ringsL.push(rp);
   });
   shells.forEach((it) =>
@@ -455,13 +498,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     .attr('cy', CY)
     .attr('r', R * 1.08)
     .attr('fill', `url(#${U}-glow)`);
-  svg
-    .append('path')
-    .datum({ type: 'Sphere' })
-    .attr('d', path)
-    .attr('fill', `url(#${U}-ocean)`)
-    .attr('stroke', '#7fb6ff')
-    .attr('stroke-opacity', 0.6);
+  svg.append('path').datum({ type: 'Sphere' }).attr('d', path).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
   svg.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
   // Ring winding is data-dependent: any ring that d3 reads as "more than a hemisphere" is reversed so it fills land, not the complement.
   const landGeo = {
@@ -551,10 +588,31 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       ex = Math.max(er + 6, Math.min(W - er - 6, W / 2 + (dx / dl) * (W / 2 - er - 8))),
       ey = Math.max(fTop + er + 4, Math.min(fBot - er - 4, (fTop + fBot) / 2 + (dy / dl) * ((fBot - fTop) / 2 - er - 8)));
     const cue = svg.append('g');
-    cue.append('circle').attr('cx', ex).attr('cy', ey).attr('r', er + 4).attr('fill', `url(#${U}-glow)`);
+    cue
+      .append('circle')
+      .attr('cx', ex)
+      .attr('cy', ey)
+      .attr('r', er + 4)
+      .attr('fill', `url(#${U}-glow)`);
     cue.append('circle').attr('cx', ex).attr('cy', ey).attr('r', er).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.7);
-    cue.append('path').attr('d', `M${ex - er * 0.6},${ey - er * 0.2} q${er * 0.3},${-er * 0.5} ${er * 0.6},${-er * 0.1} q${er * 0.2},${er * 0.5} ${-er * 0.1},${er * 0.9} q${-er * 0.5},${er * 0.1} ${-er * 0.5},${-er * 0.8}z`).attr('fill', '#4c7a56').attr('opacity', 0.85);
-    cue.append('text').attr('x', Math.max(6 + 40, Math.min(W - 6 - 40, ex))).attr('y', ey + er + 12).attr('text-anchor', 'middle').attr('fill', '#a9b3cc').attr('font-family', 'system-ui').attr('font-size', 9.5).text('Earth (off scale)');
+    cue
+      .append('path')
+      .attr(
+        'd',
+        `M${ex - er * 0.6},${ey - er * 0.2} q${er * 0.3},${-er * 0.5} ${er * 0.6},${-er * 0.1} q${er * 0.2},${er * 0.5} ${-er * 0.1},${er * 0.9}` +
+        ` q${-er * 0.5},${er * 0.1} ${-er * 0.5},${-er * 0.8}z`,
+      )
+      .attr('fill', '#4c7a56')
+      .attr('opacity', 0.85);
+    cue
+      .append('text')
+      .attr('x', Math.max(6 + 40, Math.min(W - 6 - 40, ex)))
+      .attr('y', ey + er + 12)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#a9b3cc')
+      .attr('font-family', 'system-ui')
+      .attr('font-size', 9.5)
+      .text('Earth (off scale)');
     marks.push({ x: ex, y: ey, r: er + 14, n: 'earth-cue' });
   }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
@@ -611,7 +669,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     if (it.kind === 'curve' && it.staticKeep === false) continue;
     if (it.kind === 'curve') {
       let pts = it.pts(t).map(project);
-      if (it.limbOnly) pts = pts.map((p) => (Math.hypot(p.x - CX, p.y - CY) < R * 1.005 ? { ...p, hidden: true } : p)); // only the part outside the disc: an arch behind the globe, clipped at its limb
+      // only the part outside the disc: an arch behind the globe, clipped at its limb
+      if (it.limbOnly) pts = pts.map((p) => (Math.hypot(p.x - CX, p.y - CY) < R * 1.005 ? { ...p, hidden: true } : p));
       // a panel keeps only the context ring at the altitude of its craft (a GEO belt in a LEO panel, or the reverse, is a stray arc)
       if (opts.panel && it.inset && pts.length) {
         const rr = it.pts(t).reduce((m, q) => m + Math.hypot(...q), 0) / pts.length,
@@ -664,15 +723,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         if (cur.length > 1) ringsL.push(cur);
       }
       if (it.label && it.labelAt && pts.length > 2)
-        label(
-          project(it.labelAt),
-          it.short && NARROW ? it.short : it.label,
-          it.color,
-          it.labelDx,
-          it.labelDy,
-          W < 700 ? null : it.staticAt,
-          it.opt,
-        );
+        label(project(it.labelAt), it.short && NARROW ? it.short : it.label, it.color, it.labelDx, it.labelDy, W < 700 ? null : it.staticAt, it.opt);
     }
     if (it.kind === 'cloud') {
       const arr = new Float32Array(it.n * 3),
@@ -717,7 +768,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           sg.soft = !!it.soft;
           obst.push(sg);
         }
-        if (!a.hidden && !b.hidden) dPolys.push({ p: [[a.x, a.y], [b.x, b.y]], role: 'beam' });
+        if (!a.hidden && !b.hidden)
+          dPolys.push({
+            p: [
+              [a.x, a.y],
+              [b.x, b.y],
+            ],
+            role: 'beam',
+          });
         if (!a.hidden && !b.hidden)
           g.append('line')
             .attr('x1', a.x)
@@ -731,57 +789,71 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color);
       }
     }
-    if (it.kind === 'point') for (const tt of (!opts.panel && sim.cfg.staticSnap?.[it.craftId]) || [t]) {
-      const t = tt;
-      const q = it.liveOnly ? null : it.pos(t);
-      if (!q) continue;
-      let p = project(q);
-      if (p.hidden) continue;
-      const c = it.statusColor ? it.statusColor(t) : it.color;
-      const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
-      // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
-      const cs = craftShape ? Math.round(Math.min(sim.cfg.spin ? 46 : 99, craftBase * (it.iss ? 1.3 : 1)) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1)) : 0;
-      // Docked pair: the two models sit side by side, touching (no link is drawn: SWF says docked, not how).
-      if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + cs * 0.5 };
-      else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - cs * 0.5 };
-      let rot = 0;
-      if (it.shape === 'plane' || it.shape === 'aircraft') {
-        const q2 = it.pos(Math.min(1, t + 0.012)) || q,
-          p2 = project(q2);
-        if (Math.hypot(p2.x - p.x, p2.y - p.y) > 0.3) rot = (Math.atan2(p2.y - p.y, p2.x - p.x) * 180) / Math.PI + 90;
-        else rot = -25;
+    if (it.kind === 'point')
+      for (const tt of (!opts.panel && sim.cfg.staticSnap?.[it.craftId]) || [t]) {
+        const t = tt;
+        const q = it.liveOnly ? null : it.pos(t);
+        if (!q) continue;
+        let p = project(q);
+        if (p.hidden) continue;
+        const c = it.statusColor ? it.statusColor(t) : it.color;
+        const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
+        // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
+        const cs = craftShape
+          ? Math.round(Math.min(sim.cfg.spin ? 46 : 99, craftBase * (it.iss ? 1.3 : 1)) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1))
+          : 0;
+        // Docked pair: the two models sit side by side, touching (no link is drawn: SWF says docked, not how).
+        if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + cs * 0.5 };
+        else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - cs * 0.5 };
+        let rot = 0;
+        if (it.shape === 'plane' || it.shape === 'aircraft') {
+          const q2 = it.pos(Math.min(1, t + 0.012)) || q,
+            p2 = project(q2);
+          if (Math.hypot(p2.x - p.x, p2.y - p.y) > 0.3) rot = (Math.atan2(p2.y - p.y, p2.x - p.x) * 180) / Math.PI + 90;
+          else rot = -25;
+        }
+        const mi = marks.length;
+        if (it.shape !== 'none')
+          mark(
+            p,
+            craftShape ? cs * (it.shape === 'sat' || it.shape === 'ship' ? 0.5 : 0.42) + 2 : it.shape === 'sat' ? 5 : it.shape === 'tick' ? 6 : 5,
+            it.label || it.shape,
+          );
+        if (craftShape) drawCraft(g, it.iss ? 'iss' : it.shape, p.x, p.y, cs, c, { rot });
+        else if (it.shape === 'sat') {
+          const q3 = it.small ? 6 : 8;
+          g.append('rect')
+            .attr('x', p.x - q3 / 2)
+            .attr('y', p.y - q3 / 2)
+            .attr('width', q3)
+            .attr('height', q3)
+            .attr('fill', c)
+            .attr('stroke', '#070b17')
+            .attr('stroke-width', 0.8);
+        } else if (it.shape === 'tick')
+          g.append('path')
+            .attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`)
+            .attr('fill', c)
+            .attr('stroke', '#070b17');
+        else if (it.shape === 'none') {
+          /* label-only anchor */
+        } else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
+        else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
+        if (it.label && !it.ctx && !it.noLeader) {
+          const n0 = cands.length;
+          label(
+            p,
+            it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label,
+            c,
+            it.labelDx,
+            it.labelDy,
+            W < 700 ? null : it.staticAt,
+            it.opt,
+          );
+          if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;
+          if (cands.length > n0 && marks.length > mi) cands.at(-1).mk = mi;
+        }
       }
-      const mi = marks.length;
-      if (it.shape !== 'none')
-        mark(p, craftShape ? cs * (it.shape === 'sat' || it.shape === 'ship' ? 0.5 : 0.42) + 2 : it.shape === 'sat' ? 5 : it.shape === 'tick' ? 6 : 5, it.label || it.shape);
-      if (craftShape) drawCraft(g, it.iss ? 'iss' : it.shape, p.x, p.y, cs, c, { rot });
-      else if (it.shape === 'sat') {
-        const q3 = it.small ? 6 : 8;
-        g.append('rect').attr('x', p.x - q3 / 2).attr('y', p.y - q3 / 2).attr('width', q3).attr('height', q3).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
-      } else if (it.shape === 'tick')
-        g.append('path')
-          .attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`)
-          .attr('fill', c)
-          .attr('stroke', '#070b17');
-      else if (it.shape === 'none') {
-        /* label-only anchor */
-      } else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
-      else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
-      if (it.label && !it.ctx && !it.noLeader) {
-        const n0 = cands.length;
-        label(
-          p,
-          it.labelFn ? it.labelFn(t, NARROW) : it.short && NARROW ? it.short : it.label,
-          c,
-          it.labelDx,
-          it.labelDy,
-          W < 700 ? null : it.staticAt,
-          it.opt,
-        );
-        if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;
-        if (cands.length > n0 && marks.length > mi) cands.at(-1).mk = mi;
-      }
-    }
     if (it.kind === 'flash' && it.big && t >= it.t0 && !it.ringColor) {
       const p = project(it.pos);
       mark(p, 12, it.label || 'flash');
@@ -794,7 +866,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 7).attr('fill', '#fff1c1').attr('fill-opacity', 0.7);
     }
   }
-  const reserved = opts.panel ? [[(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6]] : [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22]];
+  const reserved = opts.panel
+    ? [[(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6]]
+    : [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22]];
   if (opts.panel && opts.title) reserved.push([0, 0, W, 20]);
   cands.forEach((c) => {
     if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, CX, CY, R * 1.08);
@@ -812,13 +886,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     const q = pl[i];
     if (!q) return;
     if (q.leader) {
-      g.append('line')
-        .attr('x1', q.ax)
-        .attr('y1', q.ay)
-        .attr('x2', q.qx)
-        .attr('y2', q.qy)
-        .attr('stroke', c.color)
-        .attr('stroke-opacity', 0.8);
+      g.append('line').attr('x1', q.ax).attr('y1', q.ay).attr('x2', q.qx).attr('y2', q.qy).attr('stroke', c.color).attr('stroke-opacity', 0.8);
       g.append('circle').attr('cx', q.ax).attr('cy', q.ay).attr('r', 2).attr('fill', c.color);
     }
     g.append('rect')
@@ -859,7 +927,15 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   }
   if (opts.panel) {
     if (opts.title)
-      svg.append('text').attr('x', 8).attr('y', 14).attr('fill', '#ffe08a').attr('font-family', 'system-ui').attr('font-weight', 700).attr('font-size', 11).text(opts.title);
+      svg
+        .append('text')
+        .attr('x', 8)
+        .attr('y', 14)
+        .attr('fill', '#ffe08a')
+        .attr('font-family', 'system-ui')
+        .attr('font-weight', 700)
+        .attr('font-size', 11)
+        .text(opts.title);
   } else {
     const ft = ftxt;
     svg
@@ -899,7 +975,19 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     svg.node().__lay = {
       W,
       H,
-      probe: { disc: { cx: CX, cy: CY, r: showGlobe ? R : 0 }, circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })), pts: marks.map((m, i) => ({ x: m.x, y: m.y, r: m.r, i })), rings: ringsL, disc0: showGlobe ? { cx: CX, cy: CY, r: R } : null, minFont: Math.min(...[...svg.node().querySelectorAll('text')].map((e) => +e.getAttribute('font-size') || +e.parentNode.getAttribute('font-size') || 11)), polys: dPolys, cloud: dCloud, domes: [] },
+      probe: {
+        disc: { cx: CX, cy: CY, r: showGlobe ? R : 0 },
+        circles: shells.map((it) => ({ cx: CX, cy: CY, r: it.r * R, ring: !it.noRing })),
+        pts: marks.map((m, i) => ({ x: m.x, y: m.y, r: m.r, i })),
+        rings: ringsL,
+        disc0: showGlobe ? { cx: CX, cy: CY, r: R } : null,
+        minFont: Math.min(
+          ...[...svg.node().querySelectorAll('text')].map((e) => +e.getAttribute('font-size') || +e.parentNode.getAttribute('font-size') || 11),
+        ),
+        polys: dPolys,
+        cloud: dCloud,
+        domes: [],
+      },
       labels: lb,
       marks,
       rings: ringsL,
@@ -931,8 +1019,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         });
       if (!earthUpgrade) {
         earthUpgrade = true;
-        if (sim.cfg.spin && document.readyState !== 'complete')
-          addEventListener('load', () => (window.requestIdleCallback || setTimeout)(go), { once: true });
+        if (sim.cfg.spin && document.readyState !== 'complete') addEventListener('load', () => (window.requestIdleCallback || setTimeout)(go), { once: true });
         else if (sim.cfg.spin) (window.requestIdleCallback || setTimeout)(go);
         else go();
       }

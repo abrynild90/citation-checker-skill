@@ -169,16 +169,7 @@ const methods = {
       !noBanner && this.insetEl ? [rel(this.insetEl)] : [],
     );
     this._lastPlace = [raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, null, objs];
-    const pl = placeLabels(
-      raw,
-      w,
-      h,
-      (status ? banner.concat([status]) : banner).concat(chip),
-      disc,
-      obst,
-      noBanner ? null : (this._lm ||= {}),
-      objs,
-    );
+    const pl = placeLabels(raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, noBanner ? null : (this._lm ||= {}), objs);
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   // Everything drawn that a label must stay off, in screen px for a w x h canvas: sprites (marks, with their drawn radius), dense particle
@@ -355,7 +346,8 @@ const methods = {
       if (it.kind === 'curve') {
         const pl = it.pts(this.t);
         seg(pl, it.role || (it.dynamic ? 'trail' : 'line'));
-        if (it.role === 'action' || it.role === 'orbit' || (it.dynamic && !it.uniformA)) for (const p of pl) {
+        if (it.role === 'action' || it.role === 'orbit' || (it.dynamic && !it.uniformA))
+          for (const p of pl) {
             const q = scr(p);
             if (!q[2]) act.push([q[0], q[1]]);
           }
@@ -364,7 +356,8 @@ const methods = {
           B = it.b(this.t);
         if (A && B) {
           seg([A, B], 'beam');
-          if (!it.link) for (const p of [A, B]) {
+          if (!it.link)
+            for (const p of [A, B]) {
               const q = scr(p);
               if (!q[2]) act.push([q[0], q[1]]);
             }
@@ -383,7 +376,11 @@ const methods = {
       if (pts.shell && this.hideShell) continue;
       let cur = [];
       for (const q0 of pts) {
-        const q = scr(W3.set(...q0).applyMatrix4(this.root.matrixWorld).toArray());
+        const q = scr(
+          W3.set(...q0)
+            .applyMatrix4(this.root.matrixWorld)
+            .toArray(),
+        );
         if (q[2]) {
           if (cur.length > 1) polys.push({ p: cur, role: 'orbit' });
           cur = [];

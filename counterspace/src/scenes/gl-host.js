@@ -72,14 +72,15 @@ export class GLHost {
       dFull = Math.max(R / Math.sin(fv * 0.5 * 0.9), R / Math.sin(fh * 0.5 * 0.95)),
       // A wide stage (desktop): the GEO ring, not the whole glow sphere, sets the framing. The ring spans ~72% of the stage width and the shells' spheres
       // run off the top and the bottom together (sides stay inside), so the Earth and the shells fill the stage instead of a 40% column.
-      dWide = Math.hypot(R, R / (0.72 * Math.tan(fh / 2))),
+      dWide = Math.hypot(R, R / (0.8 * Math.tan(fh / 2))),
       d = this.camera.aspect > 1.7 ? Math.min(dFull, dWide) : dFull,
       p = this.camera.position.clone().sub(this.target);
     p.setLength(d);
     this.camera.position.copy(p.add(this.target));
     this.camera.lookAt(this.target);
   }
-  // Reserve room for the banner (top) and the status caption (bottom): the projection centre moves to the middle of the free band, so subjects never sit under the caption.
+  // Reserve room for the banner (top) and the status caption (bottom): the projection centre moves to the middle of the free band, so subjects never
+  // sit under the caption.
   _applyBands() {
     if (!this.el) return;
     const w = this.el.clientWidth,
@@ -161,7 +162,8 @@ export class GLHost {
     this.statusEl = document.createElement('div');
     this.statusEl.className = 'hlabel';
     this.statusEl.style.cssText +=
-      ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);font-size:12px;color:#ffe08a;white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px);line-height:1.3';
+      ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);font-size:12px;color:#ffe08a;' +
+      'white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px);line-height:1.3';
     this.labelLayer.appendChild(this.statusEl);
     // Hero: an on-canvas hint that the stage is interactive (fades once the visitor drags it).
     this.chipEl = null;
@@ -170,7 +172,8 @@ export class GLHost {
       c.className = 'hlabel';
       c.textContent = '⟲ Drag to rotate · pick an event below';
       c.style.cssText +=
-        ';left:50%;bottom:9px;top:auto;transform:translateX(-50%);font-size:12px;font-weight:500;color:#cfd8ee;background:rgba(5,8,18,.55);white-space:nowrap;transition:opacity .7s';
+        ';left:50%;bottom:9px;top:auto;transform:translateX(-50%);font-size:12px;font-weight:500;color:#cfd8ee;' +
+        'background:rgba(5,8,18,.55);white-space:nowrap;transition:opacity .7s';
       this.labelLayer.appendChild(c);
       this.chipEl = c;
     }
@@ -376,7 +379,10 @@ export class GLHost {
           let cap = Infinity;
           if (it.maxPx) {
             const bh = this.renderer.domElement.height;
-            cap = (it.maxPx * (bh / (this.el?.clientHeight || bh)) * Math.max(0.1, mid.distanceTo(this.camera.position))) / bh / Math.tan((this.camera.fov * DEG) / 2);
+            cap =
+              (it.maxPx * (bh / (this.el?.clientHeight || bh)) * Math.max(0.1, mid.distanceTo(this.camera.position))) /
+              bh /
+              Math.tan((this.camera.fov * DEG) / 2);
           }
           obj.children.forEach((ch) => {
             if (ch.isMesh) ch.scale.set(2 * Math.min(ch.userData.hw, cap), L, 1);
@@ -425,8 +431,15 @@ export class GLHost {
     if (this.sim.cfg.spin) this.root.rotation.y = t * Math.PI * 2;
     this._drawInset();
     if (this.statusEl) {
-      const cst = this.sim.cams[this.camIdx]?.status; // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
-      this.statusEl.textContent = cst ? (this.el.clientWidth < 640 && cst[1] ? cst[1] : cst[0]) : this.status ? this.status.text(t, false, this.el.clientWidth < 640) : '';
+      // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
+      const cst = this.sim.cams[this.camIdx]?.status;
+      this.statusEl.textContent = cst
+        ? this.el.clientWidth < 640 && cst[1]
+          ? cst[1]
+          : cst[0]
+        : this.status
+          ? this.status.text(t, false, this.el.clientWidth < 640)
+          : '';
       this._applyBands();
     }
     this.render();

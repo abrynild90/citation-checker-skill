@@ -6,8 +6,10 @@ import { beamCanvas, panelCanvas } from './earth.js';
 import { DEG, IS_PHONE, add, ll, norm, scl } from './core.js';
 
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
-void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz; vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
-const ATMO_FS = `uniform vec3 uColor; uniform vec3 uSun; uniform float uPow; uniform float uGain; uniform float uBack; varying vec3 vN; varying vec3 vP; varying vec3 vW;
+void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz;
+vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
+const ATMO_FS = `uniform vec3 uColor; uniform vec3 uSun; uniform float uPow; uniform float uGain; uniform float uBack; varying vec3 vN;
+varying vec3 vP; varying vec3 vW;
 void main(){ vec3 v = normalize(-vP); float d = dot(normalize(vN), v);
   // Front: brightest at the limb. Back (halo shell): brightest just outside the limb, 0 at the shell edge.
   float rim = uBack > 0.5 ? pow(clamp(-d * 2.6, 0.0, 1.0), uPow) : pow(clamp(1.0 - d, 0.0, 1.0), uPow);
@@ -15,17 +17,22 @@ void main(){ vec3 v = normalize(-vP); float d = dot(normalize(vN), v);
   gl_FragColor = vec4(uColor, clamp(rim * uGain * day, 0.0, 1.0)); }`;
 
 const PT_VS = `attribute vec4 aCol; uniform float uScale; uniform float uSize; uniform float uMin; uniform float uMax; varying vec4 vC;
-void main(){ vC = aCol; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv; gl_PointSize = clamp(uSize * uScale / max(-mv.z, 0.1), uMin, uMax); }`;
+void main(){ vC = aCol; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv;
+gl_PointSize = clamp(uSize * uScale / max(-mv.z, 0.1), uMin, uMax); }`;
 // Soft gaussian falloff, normal alpha blending: dense clumps saturate to the particle colour, never to white.
 const PT_FS = `uniform float uGain; varying vec4 vC;
-void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r)); gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
+void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r));
+gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
-void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 2.2); gl_FragColor = vec4(uColor, clamp(0.015 + rim * uGain, 0.0, 1.0)); }`;
+void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 2.2);
+gl_FragColor = vec4(uColor, clamp(0.015 + rim * uGain, 0.0, 1.0)); }`;
 const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; varying float vU;
-void main(){ vU = uv.x; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1); float r = min(uR, uMaxPx * d / uScale); gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
+void main(){ vU = uv.x; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
+float r = min(uR, uMaxPx * d / uScale); gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; varying float vU;
-void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0; gl_FragColor = vec4(uColor, uOp * f);\n#include <colorspace_fragment>\n}`;
+void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
+gl_FragColor = vec4(uColor, uOp * f);\n#include <colorspace_fragment>\n}`;
 export const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
 
 const methods = {
@@ -360,7 +367,8 @@ const methods = {
     Object.assign(g.userData, { span: 0.03, minPx: 9, maxPx: 26 });
     return g;
   },
-  // Guided-missile cruiser (Ticonderoga class, about 10:1 hull): pointed-bow hull extrusion, dark deck, forward and aft deckhouses with a mast, two stacks, a gun and a helicopter pad.
+  // Guided-missile cruiser (Ticonderoga class, about 10:1 hull): pointed-bow hull extrusion, dark deck, forward and aft deckhouses with a mast, two
+  // stacks, a gun and a helicopter pad.
   _shipModel(pos) {
     const T = this.T,
       g = new T.Group(),
@@ -416,19 +424,17 @@ const methods = {
     if (it.kind === 'shell') {
       // Shell: fresnel bubble (bright at its limb) + a clear equatorial ring, so LEO / MEO / GEO read as nested layers.
       const c = col(it.color);
-      const glow = (
-        new T.Mesh(
-          new T.SphereGeometry(it.r, 64, 40),
-          new T.ShaderMaterial({
-            vertexShader: ATMO_VS,
-            fragmentShader: SHELL_FS,
-            side: T.FrontSide,
-            transparent: true,
-            depthWrite: false,
-            blending: T.AdditiveBlending,
-            uniforms: { uColor: { value: c }, uGain: { value: it.strong ? 0.5 : it.r > 1.6 ? 0.2 : 0.36 } },
-          }),
-        ),
+      const glow = new T.Mesh(
+        new T.SphereGeometry(it.r, 64, 40),
+        new T.ShaderMaterial({
+          vertexShader: ATMO_VS,
+          fragmentShader: SHELL_FS,
+          side: T.FrontSide,
+          transparent: true,
+          depthWrite: false,
+          blending: T.AdditiveBlending,
+          uniforms: { uColor: { value: c }, uGain: { value: it.strong ? 0.5 : it.r > 1.6 ? 0.2 : 0.36 } },
+        }),
       );
       root.add(glow);
       (this.shellRings ||= []).push(glow); // hidden with the rings when a camera hides the shells
@@ -471,10 +477,7 @@ const methods = {
       if (it.dynamic) {
         // fading trail: per-vertex RGBA, brightest at the head
         g.setAttribute('color', new T.BufferAttribute(new Float32Array(max * 4), 4));
-        line = new T.Line(
-          g,
-          new T.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: T.AdditiveBlending }),
-        );
+        line = new T.Line(g, new T.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
         line.userData.rgb = col(it.color);
       } else line = new T.Line(g, new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: it.opacity ?? 1 }));
       root.add(line);
@@ -511,8 +514,7 @@ const methods = {
       if (it.label)
         this._label(
           it.label,
-          (t) =>
-            it.labelEnd != null && t > it.labelEnd ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt,
+          (t) => (it.labelEnd != null && t > it.labelEnd ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt),
           null,
           null,
           it.labelDy ?? 0,
@@ -540,8 +542,7 @@ const methods = {
       } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
         m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
-      }
-      else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
+      } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
       else if (it.shape === 'aircraft') m = this._aircraftModel();
       else if (it.shape === 'site') m = this._siteModel(it.color, it.pos(0));
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));
@@ -608,9 +609,9 @@ const methods = {
             t < (it.labelFrom ?? -1)
               ? null
               : (typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt) ||
-            (it.fill(t, g.attributes.position.array) > 0
-              ? [3 * (it.labelIdx ?? 0), 3 * (it.labelIdx ?? 0) + 1, 3 * (it.labelIdx ?? 0) + 2].map((i) => g.attributes.position.array[i])
-              : null),
+                (it.fill(t, g.attributes.position.array) > 0
+                  ? [3 * (it.labelIdx ?? 0), 3 * (it.labelIdx ?? 0) + 1, 3 * (it.labelIdx ?? 0) + 2].map((i) => g.attributes.position.array[i])
+                  : null),
           null,
           null,
           it.labelDy ?? 0,
@@ -724,8 +725,7 @@ const methods = {
       m.userData = { core, ring };
       root.add(m);
       this.dyn.push({ it, obj: m });
-      if (it.label)
-        this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
+      if (it.label) this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
     } else if (it.kind === 'status') {
       this.status = it;
     }

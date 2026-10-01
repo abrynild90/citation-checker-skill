@@ -69,9 +69,7 @@ export function makeAnchor(a) {
     a.orbit.raan = o.raan;
     a.orbit.u0 = o.u - a.orbit.du * (a.orbit.tThrough ?? 0.5);
   }
-  const pos = a.orbit
-    ? (t) => orbitPos(a.orbit.alt, a.orbit.inc, a.orbit.raan, a.orbit.u0 + a.orbit.du * t)
-    : (t) => ellipsePos(a.ellipse, t);
+  const pos = a.orbit ? (t) => orbitPos(a.orbit.alt, a.orbit.inc, a.orbit.raan, a.orbit.u0 + a.orbit.du * t) : (t) => ellipsePos(a.ellipse, t);
   const frame = (t) => {
     const p = pos(t),
       q = pos(t + 0.004),
@@ -101,7 +99,8 @@ export function makeAnchor(a) {
     : null;
   return { pos, frame, times };
 }
-// arcs: [{t0, t1, o:[along, rad, cross]}] bend a leg of the path: the offset grows and fades as sin(pi * progress), so a transfer is a curve, not a straight line.
+// arcs: [{t0, t1, o:[along, rad, cross]}] bend a leg of the path: the offset grows and fades as sin(pi * progress), so a transfer is a curve, not a
+// straight line.
 export function craftPos(anc, keys, t, arcs = null) {
   const p = anc.pos(t),
     f = anc.frame(t),

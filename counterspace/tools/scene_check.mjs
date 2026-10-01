@@ -24,7 +24,7 @@
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
 //   still-empty      a still has an empty band (no content) over more than 20% of its body height or width
 //   still-crop       a still shows a whole-globe composition (multi-tile composites exempt) (disc radius < 55% of the frame) with the Earth partly cropped (50-98.5% visible); a deliberate close-up is exempt
-//   hero-small       hero live at >= 900 px: the outer ring spans under 60% of the stage width
+//   hero-small       hero live at >= 900 px: the outer ring spans under 70% of the stage width
 //   hero-*           hero: ISS marker missing (hero-iss), a shell label more than 40 px from its ring (hero-label), caption strip / heading wrap (page side)
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
@@ -172,7 +172,7 @@ function check(S) {
   if (S.emptyBand != null && S.emptyBand > 0.2) f('still-empty', `empty band (gap or lopsided margin) of ${(S.emptyBand * 100).toFixed(0)}% of the still`);
   if (S.emptyArea != null && S.emptyArea < 0.3) f('still-empty', `content fills only ${(S.emptyArea * 100).toFixed(0)}% of the still body`);
   if (S.discVis != null && !S.discBig && S.discVis > 0.5 && S.discVis < 0.985) f('still-crop', `Earth disc ${(S.discVis * 100).toFixed(0)}% inside the still (cropped)`);
-  if (S.kind === 'hero' && W >= 900 && S.heroSpan != null && S.heroSpan < 0.6) f('hero-small', `outer ring spans ${(S.heroSpan * 100).toFixed(0)}% of the stage width`);
+  if (S.kind === 'hero' && W >= 900 && S.heroSpan != null && S.heroSpan < 0.7) f('hero-small', `outer ring spans ${(S.heroSpan * 100).toFixed(0)}% of the stage width`);
   if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
   if (S.status != null && S.evT != null && S.t < S.evT + 0.02 && (S.evRe || HITRE).test(S.status)) f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
   if (S.statusLines > 1) f('status-wrap', `status wraps to ${S.statusLines} lines at ${W}px: "${(S.status || '').slice(0, 60)}"`);

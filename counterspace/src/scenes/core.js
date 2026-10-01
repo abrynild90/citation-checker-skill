@@ -10,11 +10,7 @@ export const IS_PHONE = matchMedia('(max-width: 760px)').matches;
 export const PARTICLE_BUDGET = IS_PHONE ? 1500 : 5000;
 
 // three.js frame: Y = north; X toward lon 0; Z toward lon -90.
-export const ll = (lat, lon, r = 1) => [
-  r * Math.cos(lat * DEG) * Math.cos(lon * DEG),
-  r * Math.sin(lat * DEG),
-  -r * Math.cos(lat * DEG) * Math.sin(lon * DEG),
-];
+export const ll = (lat, lon, r = 1) => [r * Math.cos(lat * DEG) * Math.cos(lon * DEG), r * Math.sin(lat * DEG), -r * Math.cos(lat * DEG) * Math.sin(lon * DEG)];
 export const toLL = (p) => {
   const r = Math.hypot(p[0], p[1], p[2]);
   return { lat: Math.asin(p[1] / r) / DEG, lon: Math.atan2(-p[2], p[0]) / DEG, r };

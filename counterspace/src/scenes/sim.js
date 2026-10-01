@@ -39,8 +39,7 @@ export function buildSim(cfg) {
     anchors = {},
     crafts = {};
   for (const [nm, an] of Object.entries(cfg.anchors || {})) anchors[nm] = makeAnchor(an);
-  const actOn = (t, acts) =>
-    flags.all || !A || !acts || acts.some((i) => t >= A[i].t0 - 1e-9 && (t < A[i].t1 || (i === A.length - 1 && t <= A[i].t1 + 1e-9)));
+  const actOn = (t, acts) => flags.all || !A || !acts || acts.some((i) => t >= A[i].t0 - 1e-9 && (t < A[i].t1 || (i === A.length - 1 && t <= A[i].t1 + 1e-9)));
   const aPos = (a, t) => {
     const an = anchors[a.anchor],
       f = an.frame(t),
@@ -351,8 +350,7 @@ export function buildSim(cfg) {
           lo = lerp(a.path[0][1], a.path[1][1], s);
         return ll(la, lo, r);
       };
-      const pos = (t) =>
-        t >= a.t0 - 1e-6 && t <= a.t1 + 1e-6 ? P(clamp01((t - a.t0) / (a.t1 - a.t0))) : t > a.t1 && !a.gnss ? null : null;
+      const pos = (t) => (t >= a.t0 - 1e-6 && t <= a.t1 + 1e-6 ? P(clamp01((t - a.t0) / (a.t1 - a.t0))) : t > a.t1 && !a.gnss ? null : null);
       const item = {
         kind: 'point',
         shape: 'aircraft',
@@ -526,8 +524,7 @@ export function buildSim(cfg) {
       if (a.decay > 0 && !cfg.status)
         items.push({
           kind: 'status',
-          text: (t) =>
-            t < tgt.t ? 'Approaching intercept' : `Illustrative fragments still aloft: ${cloud.vis} of ${n} (decay time-compressed)`,
+          text: (t) => (t < tgt.t ? 'Approaching intercept' : `Illustrative fragments still aloft: ${cloud.vis} of ${n} (decay time-compressed)`),
         });
     }
     if (a.type === 'suborbital') {
@@ -766,7 +763,21 @@ export function buildSim(cfg) {
     }
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
-      items.push({ kind: 'point', shape: 'sat', prim: true, color: a.color, label: a.label, short: a.short, labelDy: a.dy ?? -30, labelDx: a.dx, scale: 1.7, bright: true, minPx: a.minPx, maxPx: a.maxPx, pos: () => g });
+      items.push({
+        kind: 'point',
+        shape: 'sat',
+        prim: true,
+        color: a.color,
+        label: a.label,
+        short: a.short,
+        labelDy: a.dy ?? -30,
+        labelDx: a.dx,
+        scale: 1.7,
+        bright: true,
+        minPx: a.minPx,
+        maxPx: a.maxPx,
+        pos: () => g,
+      });
       a.beams.forEach((b, bi) => {
         // space side stays bright; only the ground-side segment dims once the ground network is hit
         const e = ll(b[0], b[1], 1.003),
@@ -874,7 +885,8 @@ export function buildSim(cfg) {
     }
     if (a.type === 'terminals') {
       const P = [];
-      // Each box is a region [lat0, lat1, lon0, lon1, share, wave]: regions go dark one after another (wave order), terminals within a region over its own window.
+      // Each box is a region [lat0, lat1, lon0, lon1, share, wave]: regions go dark one after another (wave order), terminals within a region over
+      // its own window.
       const nw = Math.max(...a.boxes.map((b) => (b[5] ?? 0) + 1));
       a.boxes.forEach(([la0, la1, lo0, lo1, frac, wave], bi) => {
         const m = Math.round(a.count * frac * (IS_PHONE ? 0.6 : 1)); // fewer, smaller dots on a phone: the region stays readable instead of one red blob
@@ -1047,7 +1059,10 @@ export function buildSim(cfg) {
   };
   const centroid = (pts) => {
     const v = pts.filter(Boolean); // a craft that is not drawn at this t has no position
-    return scl(v.reduce((q, p) => add(q, p), [0, 0, 0]), 1 / Math.max(1, v.length));
+    return scl(
+      v.reduce((q, p) => add(q, p), [0, 0, 0]),
+      1 / Math.max(1, v.length),
+    );
   };
   const debrisPts = (tk, pct) => {
     const cl = items.find((i) => i.kind === 'cloud' && i.dynCol && !i.colored);
@@ -1057,13 +1072,19 @@ export function buildSim(cfg) {
     const q = [];
     for (let k = 0; k < cl.n; k++) if (arr[3 * k] || arr[3 * k + 1] || arr[3 * k + 2]) q.push([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]);
     if (q.length < 3) return [];
-    const c = scl(q.reduce((a, p) => add(a, p), [0, 0, 0]), 1 / q.length),
+    const c = scl(
+        q.reduce((a, p) => add(a, p), [0, 0, 0]),
+        1 / q.length,
+      ),
       d = q.map((p) => len(add(p, scl(c, -1)))),
       cut = d.slice().sort((x, y) => x - y)[Math.floor((q.length - 1) * pct)];
     const kept = q.filter((p, k) => d[k] <= cut),
       dk = kept.map((p) => len(add(p, scl(c, -1))));
     // an even sample, plus the farthest kept fragments (the frame edge is decided by the extremes, not the bulk)
-    const far = kept.map((p, k) => k).sort((a, b) => dk[b] - dk[a]).slice(0, 12);
+    const far = kept
+      .map((p, k) => k)
+      .sort((a, b) => dk[b] - dk[a])
+      .slice(0, 12);
     return kept.filter((p, k) => k % Math.max(1, Math.floor(kept.length / 40)) === 0 || far.includes(k));
   };
   const dollyCam = () => {
@@ -1086,20 +1107,20 @@ export function buildSim(cfg) {
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
       posesFor = (asp) =>
         (cache[Math.round(asp * 20)] ||= keys.map((tk) => {
-        const P = core.slice();
-        // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
-        if (burst && tk <= ht + 0.16) P.push(...burstPad);
-        if (arc && tk <= ht + 0.05) P.push(arc.to);
-        if (tk <= ht) P.push(tgt.pos(tk));
-        if (tk > ht) P.push(...debrisPts(tk, cfg.fitPct ?? 0.8));
-        return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
-          dMin: cfg.fitMin ?? 0.3,
-          dMax: cfg.fitMax ?? 6.5,
-          fillX: cfg.fitFill ?? 0.9,
-          fillY: (cfg.fitFill ?? 0.9) * 0.8,
-          asp,
-        });
-      }));
+          const P = core.slice();
+          // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
+          if (burst && tk <= ht + 0.16) P.push(...burstPad);
+          if (arc && tk <= ht + 0.05) P.push(arc.to);
+          if (tk <= ht) P.push(tgt.pos(tk));
+          if (tk > ht) P.push(...debrisPts(tk, cfg.fitPct ?? 0.8));
+          return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
+            dMin: cfg.fitMin ?? 0.3,
+            dMax: cfg.fitMax ?? 6.5,
+            fillX: cfg.fitFill ?? 0.9,
+            fillY: (cfg.fitFill ?? 0.9) * 0.8,
+            asp,
+          });
+        }));
     const at = (t, asp = ASPECT) => {
       const poses = posesFor(asp);
       let i = 0;
@@ -1125,7 +1146,10 @@ export function buildSim(cfg) {
             const q = tgt.pos(t),
               P = [site, q],
               look = scl(add(scl(site, 0.5), scl(q, 0.5)), 0.97);
-            return { ...fitPose(P, n, look, { dMin: 0.3, dMax: c.fit.dMax ?? 6, fillX: c.fit.fill ?? 0.86, fillY: (c.fit.fill ?? 0.86) * 0.8, asp }), up: null };
+            return {
+              ...fitPose(P, n, look, { dMin: 0.3, dMax: c.fit.dMax ?? 6, fillX: c.fit.fill ?? 0.86, fillY: (c.fit.fill ?? 0.86) * 0.8, asp }),
+              up: null,
+            };
           };
         return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(tgt.t), hideShell: true };
       }
@@ -1151,7 +1175,11 @@ export function buildSim(cfg) {
           n = norm(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1)))),
           at = (t, asp) => {
             const pl = it.pts(t),
-              P = [all[0], pl.length ? pl[pl.length - 1] : all[1], all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + 0.22) * (all.length - 1)))]];
+              P = [
+                all[0],
+                pl.length ? pl[pl.length - 1] : all[1],
+                all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + 0.22) * (all.length - 1)))],
+              ];
             if (t > (c.trackPath.geoT ?? 0.35)) P.push(scl(up, rAlt(GEO_ALT)));
             const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
             return { ...fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp }), up: null };
@@ -1165,19 +1193,37 @@ export function buildSim(cfg) {
           ids = c.fitCraft.ids,
           at = (t, asp) => {
             const P = [];
-            for (const id of ids)
-              if (crafts[id].pos(t))
-                for (const dt of [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
+            for (const id of ids) if (crafts[id].pos(t)) for (const dt of [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
             const f = an.frame(t),
               d = c.fitCraft.dir,
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
-            return { ...fitPose(P, n, centroid(P), { up: f.rad, dMin: c.fitCraft.dMin ?? 0.14, dMax: 6, fillX: c.fitCraft.fill ?? 0.8, fillY: (c.fitCraft.fill ?? 0.8) * 0.8, asp }), up: f.rad };
+            return {
+              ...fitPose(P, n, centroid(P), {
+                up: f.rad,
+                dMin: c.fitCraft.dMin ?? 0.14,
+                dMax: 6,
+                fillX: c.fitCraft.fill ?? 0.8,
+                fillY: (c.fitCraft.fill ?? 0.8) * 0.8,
+                asp,
+              }),
+              up: f.rad,
+            };
           };
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
       }
       if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, ...frameCam(c.frame) };
-      return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, hide: c.hide, status: c.status, pos: ll(...c.at), look: c.look ? ll(...c.look) : null, hideShell: !!c.look };
+      return {
+        name: c.name,
+        auto: !!c.auto,
+        act: c.act,
+        ref: c.ref,
+        hide: c.hide,
+        status: c.status,
+        pos: ll(...c.at),
+        look: c.look ? ll(...c.look) : null,
+        hideShell: !!c.look,
+      };
     });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) {
@@ -1189,10 +1235,7 @@ export function buildSim(cfg) {
     const look = add(mid, scl(md, -0.03 - (cfg.lookMix ?? 0) * len(mid))),
       launch = {
         name: 'Launch',
-        pos: add(
-          look,
-          add(scl(nrm, 0.78 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)), scl(md, 0.34 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1))),
-        ),
+        pos: add(look, add(scl(nrm, 0.78 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)), scl(md, 0.34 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)))),
         look,
         hideShell: true,
       };
