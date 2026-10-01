@@ -4,7 +4,6 @@
 import { fitBanner } from '../labels.js';
 import { upgradePanelsEarth } from './upgrade.js';
 
-
 export function renderPanels(sim, el, renderSVG) {
   const W = el.clientWidth || 640,
     H = el.clientHeight || 420,

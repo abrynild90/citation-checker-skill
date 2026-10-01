@@ -190,7 +190,8 @@ const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site
 const shapeOf = (it) => (it.iss ? 'iss' : it.shape);
 
 // Is this point drawn as a craft / site silhouette (rather than a plain dot)?
-export const isCraftShape = (it) => ['sat', 'plane', 'aircraft', 'ship', 'site', 'jammer'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
+export const isCraftShape = (it) =>
+  ['sat', 'plane', 'aircraft', 'ship', 'site', 'jammer'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
 
 // Icon width in px. Craft are drawn as silhouettes: the size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is
 // never a speck.
@@ -243,11 +244,7 @@ export function capByMarker(cs, it, rot, capPx) {
   const b = localBox(shapeOf(it), it.variant),
     a = (rot * Math.PI) / 180,
     side = (z) =>
-      (Math.max(
-        Math.abs(Math.cos(a)) * b.width + Math.abs(Math.sin(a)) * b.height,
-        Math.abs(Math.sin(a)) * b.width + Math.abs(Math.cos(a)) * b.height,
-      ) *
-        z) /
+      (Math.max(Math.abs(Math.cos(a)) * b.width + Math.abs(Math.sin(a)) * b.height, Math.abs(Math.sin(a)) * b.width + Math.abs(Math.cos(a)) * b.height) * z) /
       100;
   for (let n = 0; n < 60 && b.width && side(cs) > capPx; n++) cs = Math.max(2, cs * 0.96);
   return cs;
