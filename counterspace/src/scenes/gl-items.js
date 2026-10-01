@@ -367,6 +367,56 @@ const methods = {
     Object.assign(g.userData, { span: 0.03, minPx: 9, maxPx: 26 });
     return g;
   },
+  // Ground jammer: a small truck with a mast and a crossed antenna, and three pulsing emission rings (animated by GLHost.update from the scene time).
+  _jammerModel(color, pos) {
+    const T = this.T,
+      g = new T.Group(),
+      m = this._mat(color),
+      dark = this._mat(0x3a4254),
+      lite = this._mat(0xdde2ee);
+    const bed = new T.Mesh(new T.BoxGeometry(0.016, 0.0055, 0.0065), dark);
+    bed.position.set(-0.0015, 0.004, 0);
+    g.add(bed);
+    const cab = new T.Mesh(new T.BoxGeometry(0.0055, 0.0065, 0.0065), lite);
+    cab.position.set(0.0083, 0.0045, 0);
+    g.add(cab);
+    for (const x of [-0.005, 0.0, 0.0085]) {
+      const w = new T.Mesh(new T.CylinderGeometry(0.0019, 0.0019, 0.0075, 10), dark);
+      w.rotation.x = Math.PI / 2;
+      w.position.set(x, 0.0019, 0);
+      g.add(w);
+    }
+    const mast = new T.Mesh(new T.CylinderGeometry(0.0005, 0.0008, 0.03, 6), lite);
+    mast.position.set(-0.004, 0.022, 0);
+    g.add(mast);
+    for (const [y, w] of [
+      [0.035, 0.012],
+      [0.029, 0.0085],
+    ]) {
+      const bar = new T.Mesh(new T.BoxGeometry(0.0006, 0.0006, w), m);
+      bar.position.set(-0.004, y, 0);
+      g.add(bar);
+    }
+    const tip = new T.Sprite(
+      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.9, depthWrite: false, blending: T.AdditiveBlending }),
+    );
+    tip.scale.setScalar(0.012);
+    tip.position.set(-0.004, 0.037, 0);
+    g.add(tip);
+    const rings = [0, 1, 2].map(() => {
+      const r = new T.Sprite(
+        new T.SpriteMaterial({ map: this.ringTex, color: this._c(color), transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: T.AdditiveBlending }),
+      );
+      r.position.set(-0.004, 0.036, 0);
+      g.add(r);
+      return r;
+    });
+    g.userData.rings = rings;
+    g.userData.tintMat = m;
+    g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
+    Object.assign(g.userData, { span: 0.04, minPx: 40, maxPx: 78 });
+    return g;
+  },
   // Guided-missile cruiser (Ticonderoga class, about 10:1 hull): pointed-bow hull extrusion, dark deck, forward and aft deckhouses with a mast, two
   // stacks, a gun and a helicopter pad.
   _shipModel(pos) {
@@ -546,6 +596,7 @@ const methods = {
       else if (it.shape === 'aircraft') m = this._aircraftModel();
       else if (it.shape === 'site') m = this._siteModel(it.color, it.pos(0));
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));
+      else if (it.shape === 'jammer') m = this._jammerModel(it.color, it.pos(0));
       else {
         let geo;
         if (it.shape === 'sat') geo = new T.OctahedronGeometry(0.018);
@@ -575,7 +626,7 @@ const methods = {
           (t) => it.pos(t),
           null,
           it,
-          it.labelDy ?? (it.shape === 'site' || it.shape === 'ship' ? 28 : 0),
+          it.labelDy ?? (it.shape === 'site' || it.shape === 'ship' || it.shape === 'jammer' ? 28 : 0),
           it.labelDx ?? 0,
           it.short,
           it.opt,

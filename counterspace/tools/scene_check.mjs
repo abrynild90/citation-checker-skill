@@ -22,6 +22,8 @@
 //   static-font      a static diagram's text is drawn under 9 px (footer note included)
 //   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
+//   preset-empty     every camera preset x t in 0.1..0.9: the scene's primary subject(s) (labelled craft, burst, debris cloud) are drawn at that t but none projects
+//                    inside the viewport at >= 8 px (6 px at 375); also checked on stills: subject centred (still-centre) and label font (still-font)
 //   still-empty      a still has an empty band (no content) over more than 20% of its body height or width
 //   still-crop       a still shows a whole-globe composition (multi-tile composites exempt) (disc radius < 55% of the frame) with the Earth partly cropped (50-98.5% visible); a deliberate close-up is exempt
 //   hero-small       hero live at >= 900 px: the outer ring spans under 70% of the stage width
@@ -169,6 +171,20 @@ function check(S) {
     const thr = S.def ? (W >= 900 ? 22 : 18) : S.follow ? (W >= 900 ? 44 : 30) : 0;
     if (thr) for (const r of P.refs) if (r.px < thr && r.x > 0 && r.x < W && r.y > 0 && r.y < H) f('subject-small', `${r.text} ${r.px.toFixed(0)} px < ${thr}`);
   }
+  if (S.kind === 'still' && P.disc) { // label font and subject centring (union of the Earth disc, shells that fit, and the action region)
+    if (u * 11 < 28) f('still-font', `label font ${(u * 11).toFixed(0)} px < 28 px`);
+    const tile = W < 2000, b0 = (tile ? 0.1 : 0.04) * H, bh = (tile ? 0.82 : 0.9) * H - b0, d = P.disc, whole = d.r < 1.3 * bh;
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    const add = (a, b) => { x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, a); y1 = Math.max(y1, b); };
+    const dsc = (c, r, free) => { if (free) { add(c.cx - r, c.cy - r); add(c.cx + r, c.cy + r); } else { add(Math.max(0, c.cx - r), Math.max(0, c.cy - r)); add(Math.min(W, c.cx + r), Math.min(H, c.cy + r)); } };
+    if (P.action) { add(P.action.x0, P.action.y0); add(P.action.x1, P.action.y1); }
+    dsc(d, d.r, whole);
+    for (const c of P.circles || []) if (c.ring && c.r > 0 && Math.abs(c.cx - W / 2) < W) dsc(c, c.r, whole && c.r < 1.2 * bh);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    if (Math.abs(cx - W / 2) > 0.06 * W) f('still-centre', `subject centre x ${Math.round(cx)} is ${Math.round(Math.abs(cx - W / 2))} px off the frame centre (${W} wide)`);
+    if (Math.abs(cy - (b0 + bh / 2)) > 0.08 * H) f('still-centre', `subject centre y ${Math.round(cy)} off the band centre ${Math.round(b0 + bh / 2)} (${H} high)`);
+    if (whole && (x1 - x0 < 0.5 * W && y1 - y0 < 0.5 * bh)) f('still-centre', `subject only ${Math.round((x1 - x0) / W * 100)}% of the still width (too small)`);
+  }
   if (S.emptyBand != null && S.emptyBand > 0.2) f('still-empty', `empty band (gap or lopsided margin) of ${(S.emptyBand * 100).toFixed(0)}% of the still`);
   if (S.emptyArea != null && S.emptyArea < 0.3) f('still-empty', `content fills only ${(S.emptyArea * 100).toFixed(0)}% of the still body`);
   if (S.discVis != null && !S.discBig && S.discVis > 0.5 && S.discVis < 0.985) f('still-crop', `Earth disc ${(S.discVis * 100).toFixed(0)}% inside the still (cropped)`);
@@ -230,6 +246,19 @@ const LIVE = (KEYS) => {
   }
   return { W, H, labels, reserved, probe, hidden, status, statusLines, hitT, keyOut, docked: h.sim.items.some(i => i.dockOn && i.dockOn(h.t)), t: h.t, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), act: h._act };
 };
+// Subjects: what the sim draws at this t (visible primary craft, flash, debris cloud) versus what this camera actually frames.
+const SUBJ = () => {
+  const h = window.__cs.host(), W = h.el.clientWidth, H = h.el.clientHeight, P = h._probe(W, H), thr = W >= 900 ? 8 : 6;
+  let drawn = 0;
+  for (const { it, obj } of h.dyn) {
+    if (!obj.visible) continue;
+    if ((it.kind === 'point' && it.prim && it.shape !== 'none') || (it.kind === 'flash' && it.big) || (it.kind === 'cloud' && it.dynCol !== undefined)) drawn++;
+  }
+  const inF = (x, y, m = 6) => x > m && y > m && x < W - m && y < H - m;
+  const ok = P.refs.filter(r => inF(r.x, r.y) && r.px >= thr).length + P.pts.filter(q => q.shape === 'flash' && inF(q.x, q.y) && q.r >= thr / 2).length
+    + (P.cloud.filter(c => inF(c[0], c[1], 2)).length >= 5 ? 1 : 0);
+  return { drawn, ok, refs: P.refs.map(r => `${r.text} ${Math.round(r.px)}px@${Math.round(r.x)},${Math.round(r.y)}`).slice(0, 4) };
+};
 const SSX = (sel = '#sceneView') => { const v = [...document.querySelectorAll(sel + ' svg[data-ss]')].map(e => +e.dataset.ss).filter(Boolean); return v.length ? Math.min(...v) : null; };
 const STATIC = (sel = '#sceneView') => {
   const svg = document.querySelector(sel + ' > svg'), z = svg && svg.__lay; if (!z) return null;
@@ -282,6 +311,15 @@ if (MODES.includes('live')) for (const w of VPS) {
     curTag = 'open-' + id;
     await page.evaluate(id => window.__cs.openScene(id), id); await page.waitForTimeout(900);
     const { cams, acts } = await camActs(page);
+    for (let ci = 0; ci < cams.length; ci++) { // preset-empty: every preset keeps its subject framed across the whole timeline
+      if (CAMS.length && !CAMS.includes(ci) || cams[ci].ref === false) continue; // ref:false = a map view of ground markers, no craft subject
+      for (const t of [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]) {
+        await page.evaluate(({ ci, t }) => { const h = window.__cs.host(); h.playing = false; h._lm = {}; h.pickCam(ci); h.update(t); h.update(t); }, { ci, t });
+        const q = await page.evaluate(SUBJ), F = [];
+        if (q.drawn && !q.ok) F.push({ type: 'preset-empty', detail: `"${cams[ci].name}" t=${t}: subject not in frame (${q.refs.join('; ') || 'no craft'})` });
+        record(tag('preset', id, w, 'c' + ci, 't' + t), F, { W: w });
+      }
+    }
     for (let ci = 0; ci < cams.length; ci++) {
       const c = cams[ci];
       if (CAMS.length && !CAMS.includes(ci)) continue;

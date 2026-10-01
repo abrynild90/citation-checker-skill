@@ -750,6 +750,17 @@ export function buildSim(cfg) {
     if (a.type === 'zone') {
       items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy });
       items._zone = a;
+      if (a.jammer)
+        items.push({
+          kind: 'point',
+          shape: 'jammer',
+          pos: () => ll(a.jammer.at[0], a.jammer.at[1], 1.003),
+          color: a.color,
+          label: a.jammer.label,
+          short: a.jammer.short,
+          labelDx: a.jammer.dx,
+          labelDy: a.jammer.dy,
+        });
       const c = ll(a.at[0], a.at[1]),
         e1 = norm([c[2], 0, -c[0]]),
         e2 = [c[1] * e1[2] - c[2] * e1[1], c[2] * e1[0] - c[0] * e1[2], c[0] * e1[1] - c[1] * e1[0]],
@@ -927,10 +938,11 @@ export function buildSim(cfg) {
           return n;
         },
       });
+      // The count is stated against the nominal sample (a.count) at every width: a phone draws fewer dots, but the share offline is the same number.
       const dark = (t) => {
         let d = 0;
         for (let k = 0; k < n; k++) if (t > P[k].off) d++;
-        return d;
+        return Math.round((d / n) * a.count);
       };
       items.push({
         kind: 'status',
@@ -938,7 +950,7 @@ export function buildSim(cfg) {
           if (phone) {
             if (t < a.pulse0) return 'Before the attack: modems online';
             if (t < a.t0) return 'Attackers reach the ground network';
-            return t < a.t1 ? `Malware wipes modems · ${dark(t)}/${n} offline` : 'Modems offline · satellite kept working';
+            return t < a.t1 ? `Malware wipes modems · ${dark(t)}/${a.count} offline` : 'Modems offline · satellite kept working';
           }
           const tx =
             t < a.pulse0
@@ -948,7 +960,7 @@ export function buildSim(cfg) {
                 : t < a.t1
                   ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
                   : 'Modems offline (red) · the satellite kept working';
-          return t >= a.t0 ? `${tx} · ${dark(t)} of ${n} simulated terminals offline` : tx;
+          return t >= a.t0 ? `${tx} · ${dark(t)} of ${a.count} simulated terminals offline` : tx;
         },
       });
     }

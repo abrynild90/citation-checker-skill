@@ -6,36 +6,39 @@ import { DEG, ll } from './core.js';
 import { earthImg } from './earth.js';
 
 const methods = {
-  // Bounding box (px) of what a still shows: the Earth disc (clipped to the frame) and every moving / acting point.
-  _contentBox(W, H) {
-    const P = this._probe(W, H);
+  // Extent of the picture for recomposing: like _contentBox, but a whole-globe disc (and shells that fit about 1.2 frames) counts unclipped.
+  _stillExtent(W, H, bandH) {
+    const P = this._probe(W, H),
+      d = P.disc;
+    if (!d || !(d.r > 0)) return null;
+    const whole = d.r < 1.3 * bandH;
     let x0 = 1e9,
       y0 = 1e9,
       x1 = -1e9,
       y1 = -1e9;
     const add = (x, y) => {
-      if (x < -W || x > 2 * W || y < -H || y > 2 * H) return;
       x0 = Math.min(x0, x);
       y0 = Math.min(y0, y);
       x1 = Math.max(x1, x);
       y1 = Math.max(y1, y);
     };
+    const inb = (x, y) => x > -W && x < 2 * W && y > -H && y < 2 * H;
     if (P.action) {
       add(P.action.x0, P.action.y0);
       add(P.action.x1, P.action.y1);
     }
-    const d = P.disc;
-    if (d && d.r > 0) {
-      add(Math.max(0, d.cx - d.r), Math.max(0, d.cy - d.r));
-      add(Math.min(W, d.cx + d.r), Math.min(H, d.cy + d.r));
-    }
-    // shells (translucent spheres) belong to the picture too, clipped to the frame
-    for (const c of P.circles || [])
-      if (c.ring && c.r > 0) {
-        add(Math.max(0, c.cx - c.r), Math.max(0, c.cy - c.r));
-        add(Math.min(W, c.cx + c.r), Math.min(H, c.cy + c.r));
+    const disc = (c, r, free) => {
+      if (free) {
+        add(c.cx - r, c.cy - r);
+        add(c.cx + r, c.cy + r);
+      } else {
+        add(Math.max(0, c.cx - r), Math.max(0, c.cy - r));
+        add(Math.min(W, c.cx + r), Math.min(H, c.cy + r));
       }
-    return x1 > x0 && y1 > y0 ? { x0, y0, x1, y1 } : null;
+    };
+    disc(d, d.r, whole);
+    for (const c of P.circles || []) if (c.ring && c.r > 0 && inb(c.cx, c.cy)) disc(c, c.r, whole && c.r < 1.2 * bandH);
+    return x1 > x0 && y1 > y0 ? { x0, y0, x1, y1, whole } : null;
   },
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
   // the illustrative banner, caption and source into the PNG, then restore the live size.
@@ -78,25 +81,41 @@ const methods = {
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
-    // Recompose: the picture (Earth disc + everything that moves) is centred in the band above the caption, so a still never has a lopsided empty margin.
-    const bb = this._contentBox(W, H);
-    if (bb) {
-      const cl = (v, m) => Math.max(-m, Math.min(m, v));
-      let dx = 0,
-        dy = 0;
-      if (bb.x0 > 0.02 * W || bb.x1 < 0.98 * W) dx = cl(W / 2 - (bb.x0 + bb.x1) / 2, 0.22 * W);
-      if (bb.y0 > 0.02 * H || bb.y1 < 0.9 * H) dy = cl((0.04 * H + 0.9 * H) / 2 - (bb.y0 + bb.y1) / 2, 0.22 * H);
-      if (Math.abs(dx) > 0.01 * W || Math.abs(dy) > 0.01 * H) {
-        cam.setViewOffset(W, H, -dx, -dy, W, H);
+    // Recompose: the picture (Earth disc + everything that moves) is dollied until it fills the band above the caption, then centred in it. A whole-globe
+    // composition (disc under ~1.3 band heights) is always shown whole and centred; a deliberate regional close-up keeps its crop and is only centred.
+    const bandY0 = (o.title ? 0.1 : 0.04) * H, // a tile keeps clear of its title strip above and its (up to two-line) caption below
+      bandH = (o.aspect ? 0.82 : 0.9) * H - bandY0,
+      rerender = () => {
         cam.updateProjectionMatrix();
         this._fitModels();
         this._ptUniforms();
         this.renderer.render(this.scene, this.camera);
+      };
+    for (let it = 0; it < 3; it++) {
+      const ex = this._stillExtent(W, H, bandH);
+      if (!ex || !ex.whole) break;
+      const k = Math.max((ex.x1 - ex.x0) / (0.92 * W), (ex.y1 - ex.y0) / (0.9 * bandH));
+      if (Math.abs(k - 1) < 0.05) break;
+      const kk = Math.max(0.55, Math.min(2.4, k)),
+        v = cam.position.clone().sub(this.target).multiplyScalar(kk);
+      cam.position.copy(this.target).add(v);
+      cam.lookAt(this.target);
+      cam.updateMatrixWorld();
+      rerender();
+    }
+    const ex = this._stillExtent(W, H, bandH);
+    if (ex) {
+      const cl = (v, m) => Math.max(-m, Math.min(m, v)),
+        dx = cl(W / 2 - (ex.x0 + ex.x1) / 2, 0.4 * W),
+        dy = cl(bandY0 + bandH / 2 - (ex.y0 + ex.y1) / 2, 0.4 * H);
+      if (Math.abs(dx) > 0.005 * W || Math.abs(dy) > 0.005 * H) {
+        cam.setViewOffset(W, H, -dx, -dy, W, H);
+        rerender();
       }
     }
     this._modelBoost = 1;
     // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
-    const s = (W / 1000) * (o.aspect ? 1.55 : 1),
+    const s = (W / 1000) * (o.aspect ? 2.1 : 1),
       c = document.createElement('canvas');
     c.width = W;
     c.height = H;
@@ -176,7 +195,11 @@ const methods = {
     if (o.title) {
       g.textAlign = 'left';
       g.textBaseline = 'middle';
-      g.font = `700 ${Math.round(13 * s)}px system-ui,sans-serif`;
+      let fs = 13 * s;
+      for (; fs > 8 * s; fs -= 0.5 * s) {
+        g.font = `700 ${Math.round(fs)}px system-ui,sans-serif`;
+        if (g.measureText(o.title).width + 16 * s <= W) break;
+      }
       const tw = g.measureText(o.title).width + 16 * s;
       g.fillStyle = 'rgba(5,8,18,0.85)';
       g.fillRect(0, 0, Math.min(W, tw), 26 * s);
@@ -194,9 +217,11 @@ const methods = {
       vh = this.el.clientHeight,
       pr = this.renderer.getPixelRatio();
     const maxDim = Math.min(this.maxTex, 4096),
-      W = Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
       panels = this.sim.cfg.panels,
-      H = panels ? Math.round(W / panels.length / 1.25) : Math.round((W * vh) / vw);
+      // a multi-episode still renders each tile at up to 1400 px wide (the composite is wider than a single still: every tile keeps full resolution)
+      tileW = panels ? Math.min(1400, maxDim) : 0,
+      W = panels ? tileW * panels.length : Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
+      H = panels ? Math.round(tileW / 1.25) : Math.round((W * vh) / vw);
     const cam = this.camera,
       keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell, up: cam.up.clone(), t: this.t, aspect: cam.aspect, fov: cam.fov };
     let body,

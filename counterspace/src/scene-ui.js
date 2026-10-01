@@ -108,7 +108,9 @@ export async function openScene(id, originEl) {
       const b = document.createElement('button');
       b.className = 'btn small';
       b.type = 'button';
-      b.textContent = c.name;
+      const sh = isPhoneNow() && cfg.cameras?.[i]?.short; // phone chips wrap (never cut off), so long preset names have a short form
+      b.textContent = sh || c.name;
+      if (sh) b.title = c.name;
       b.onclick = () => h.pickCam(i);
       cams.appendChild(b);
     });

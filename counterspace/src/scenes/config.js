@@ -385,7 +385,16 @@ export const SCENES = [
         dx: 60,
         dy: 40,
       },
-      { type: 'zone', at: [57.5, 21.0], radius: 6.2, color: C.jam, label: 'Jammer effect zone', dx: 66, dy: -60 },
+      {
+        type: 'zone',
+        at: [57.5, 21.0],
+        radius: 6.2,
+        color: C.jam,
+        label: 'Jammer effect zone',
+        dx: 66,
+        dy: -60,
+        jammer: { at: [56.5, 21.0], label: 'Ground jammer (illustrative)', short: 'Jammer', dx: -70, dy: 30 },
+      },
       {
         type: 'aircraft',
         path: [
@@ -422,8 +431,15 @@ export const SCENES = [
     focus: [55, 18],
     inset: 'Context: GPS orbits (top view)',
     cameras: [
-      { name: 'Baltic: airliners and jammer zone', at: [50, 14, 1.45], look: [53, 17, 0.98], phone: { at: [50, 14, 1.65] } },
-      { name: 'Europe + GPS orbits', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false },
+      {
+        name: 'Baltic: airliners and jammer zone',
+        short: 'Baltic zone',
+        at: [32, 14, 2.35],
+        look: [53, 18, 0.98],
+        phone: { at: [32, 14, 2.8] },
+      },
+      { name: 'Close-up: jammer and airliners', short: 'Close-up', at: [47, 16, 1.7], look: [54, 19, 0.98], phone: { at: [47, 16, 1.95] } },
+      { name: 'Europe + GPS orbits', short: 'Europe + GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false },
     ],
     status: [
       [0, 'Both airliners have GNSS (green) ·' + ' jammer zone in red · satellites unaffected', 'Airliners have GNSS (green) · zone in red'],
@@ -506,8 +522,8 @@ export const SCENES = [
     staticZoom: 1.5,
     stillCam: { at: [34, 6, 6.0], look: [6, 9, 0.75], hideShell: true },
     cameras: [
-      { name: 'Europe + KA-SAT', at: [14, 9, 4.3], look: [24, 12, 0.3], phone: { at: [12, 9, 4.6] } },
-      { name: 'Ground network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
+      { name: 'Europe + KA-SAT', short: 'Europe', at: [10, 12, 3.9], look: [24, 13, 0.5], phone: { at: [10, 12, 4.5] } },
+      { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
       { name: 'Wide', at: [30, -6, 6.5] },
     ],
   },

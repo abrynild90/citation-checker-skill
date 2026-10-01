@@ -229,6 +229,7 @@ export class GLHost {
     const c = this.sim.cams[i],
       acts = this.sim.cfg.acts;
     this.lock = null;
+    this._fbAct = null;
     if (acts && c.auto) {
       this._act = null;
       this.update(this.t);
@@ -236,6 +237,7 @@ export class GLHost {
     }
     if (acts && c.act != null) {
       this.lock = c.act;
+      this._lockCam = i;
       const a = acts[c.act];
       if (this.t < a.t0 || this.t >= a.t1) {
         this.setCam(i);
@@ -268,6 +270,25 @@ export class GLHost {
       if (this._act !== ai) {
         this._act = ai;
         this.setCam(acts[ai].cam, true);
+      }
+    } else if (acts) {
+      // A locked episode preset shows only its own episode. Scrubbed outside it, the camera of the episode actually on screen takes over (so a preset never
+      // frames an empty sky under another episode's caption) and the preset returns when the time comes back.
+      const a = acts[this.lock],
+        last = this.lock === acts.length - 1,
+        inside = t >= a.t0 - 1e-6 && (t < a.t1 || last);
+      if (!inside) {
+        const ai = Math.max(
+          0,
+          acts.findIndex((q, k) => t >= q.t0 && (t < q.t1 || k === acts.length - 1)),
+        );
+        if (this._fbAct !== ai) {
+          this._fbAct = ai;
+          this.setCam(acts[ai].cam);
+        }
+      } else if (this._fbAct != null) {
+        this._fbAct = null;
+        this.setCam(this._lockCam);
       }
     }
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
@@ -307,6 +328,12 @@ export class GLHost {
         obj.visible = !!p;
         if (p) obj.position.set(...p);
         const ud = obj.userData;
+        if (it.shape === 'jammer' && ud.rings)
+          ud.rings.forEach((r, k) => {
+            const ph = (t * this.sim.cfg.duration * 0.7 + k / 3) % 1;
+            r.scale.setScalar(0.012 + 0.11 * ph);
+            r.material.opacity = 0.85 * (1 - ph) ** 1.5;
+          });
         if (it.orient && p) {
           const o = it.orient(t);
           obj.up.set(...o.up);

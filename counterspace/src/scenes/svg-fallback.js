@@ -142,10 +142,25 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
   } else if (shape === 'site') {
     poly('M0,-40 L34,0 L0,40 L-34,0Z', color);
     k.append('circle').attr('r', 12).attr('fill', '#fff').attr('fill-opacity', 0.85);
+  } else if (shape === 'jammer') {
+    // truck with a mast, a crossed antenna and emission arcs
+    rect(-40, 12, 50, 20, '#3a4254');
+    rect(12, 16, 22, 16, '#dfe6f7');
+    for (const cx of [-28, -6, 24]) k.append('circle').attr('cx', cx).attr('cy', 34).attr('r', 7).attr('fill', dark).attr('stroke', '#8e9bb4').attr('stroke-width', 2);
+    k.append('line').attr('x1', -14).attr('x2', -14).attr('y1', 12).attr('y2', -34).attr('stroke', '#dfe6f7').attr('stroke-width', 4);
+    k.append('line').attr('x1', -28).attr('x2', 0).attr('y1', -30).attr('y2', -30).attr('stroke', color).attr('stroke-width', 4);
+    k.append('line').attr('x1', -24).attr('x2', -4).attr('y1', -18).attr('y2', -18).attr('stroke', color).attr('stroke-width', 4);
+    for (const r of [18, 32, 46])
+      k.append('path')
+        .attr('d', `M${-14 - r},${-34 - r * 0.2} A${r},${r} 0 0 1 ${-14 + r},${-34 - r * 0.2}`)
+        .attr('fill', 'none')
+        .attr('stroke', color)
+        .attr('stroke-width', 3)
+        .attr('stroke-opacity', 0.85 - r / 80);
   }
   return k;
 }
-const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45 };
+const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45, jammer: 0.7 };
 let earthUpgrade = false,
   pendingStatic = null,
   svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
@@ -797,7 +812,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         let p = project(q);
         if (p.hidden) continue;
         const c = it.statusColor ? it.statusColor(t) : it.color;
-        const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
+        const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site', 'jammer'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
         // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
         const cs = craftShape
           ? Math.round(Math.min(sim.cfg.spin ? 46 : 99, craftBase * (it.iss ? 1.3 : 1)) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1))
