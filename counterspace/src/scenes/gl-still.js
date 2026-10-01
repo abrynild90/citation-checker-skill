@@ -4,6 +4,7 @@
 // ============================================================================
 import { DEG, ll } from './core.js';
 import { earthImg } from './earth.js';
+import { STILL_ASPECT, stillFor } from './still-config.js';
 
 const methods = {
   // Extent of the picture for recomposing: like _contentBox, but a whole-globe disc (and shells that fit about 1.2 frames) counts unclipped.
@@ -51,9 +52,22 @@ const methods = {
       vh = this.el.clientHeight;
     const cam = this.camera;
     if (o.t != null) this.update(o.t);
-    const sf = this.sim.stillCamFor?.(Math.min(this.t, 1), o.aspect || W / H),
+    const conf = { ...stillFor(this.sim.cfg.id), ...(o.cam || {}) },
+      fixed = !!conf.pos;
+    if (this.sim.flags) this.sim.flags.all = !!conf.all; // conf.all: every act at once (all episodes' orbits in one frame)
+    if (conf.all) this.update(conf.t ?? this.t);
+    if (conf.t != null && o.t == null && (this.t >= 0.98 || this.t <= 0.02)) this.update(conf.t); // untouched scrubber: use the scene's best frame
+    const sf = fixed ? null : this.sim.stillCamFor?.(Math.min(this.t, 1), o.aspect || W / H),
       sc = sf || this.sim.cfg.stillCam;
-    if (sf) {
+    if (fixed) {
+      this.hideShell = conf.hideShell ?? true;
+      this._syncShell();
+      this.target.set(...conf.look);
+      cam.position.set(...conf.pos);
+      cam.up.set(...(conf.up || [0, 1, 0]));
+      cam.lookAt(this.target);
+      cam.updateMatrixWorld();
+    } else if (sf) {
       this.hideShell = true;
       this._syncShell();
       this.target.set(...(sf.look || [0, 0, 0]));
@@ -71,10 +85,8 @@ const methods = {
       cam.updateMatrixWorld();
     }
     cam.clearViewOffset();
-    if (o.aspect) {
-      cam.aspect = o.aspect;
-      cam.fov = (2 * Math.atan(Math.tan(20 * DEG) * Math.max(1, 1.1 / o.aspect))) / DEG;
-    }
+    cam.aspect = W / H;
+    cam.fov = conf.fov ?? (2 * Math.atan(Math.tan(20 * DEG) * Math.max(1, 1.1 / cam.aspect))) / DEG;
     cam.updateProjectionMatrix();
     this._viewShift = null;
     this.renderer.setPixelRatio(1);
@@ -95,7 +107,7 @@ const methods = {
         this._ptUniforms();
         this.renderer.render(this.scene, this.camera);
       };
-    for (let it = 0; it < 3; it++) {
+    for (let it = 0; it < 3 && !fixed; it++) {
       const ex = this._stillExtent(W, H, bandH);
       if (!ex || !ex.whole) break;
       const k = Math.max((ex.x1 - ex.x0) / (0.92 * W), (ex.y1 - ex.y0) / (0.9 * bandH));
@@ -107,7 +119,11 @@ const methods = {
       cam.updateMatrixWorld();
       rerender();
     }
-    const ex = this._stillExtent(W, H, bandH);
+    const ex = fixed ? null : this._stillExtent(W, H, bandH);
+    if (fixed && conf.shift) {
+      cam.setViewOffset(W, H, -conf.shift[0] * W, -conf.shift[1] * H, W, H);
+      rerender();
+    }
     if (ex) {
       const cl = (v, m) => Math.max(-m, Math.min(m, v)),
         dx = cl(W / 2 - (ex.x0 + ex.x1) / 2, 0.4 * W),
@@ -117,10 +133,12 @@ const methods = {
         rerender();
       }
     }
+    const vo = cam.view && cam.view.enabled ? [-cam.view.offsetX / W, -cam.view.offsetY / H] : [0, 0];
+    this._stillCam = { pos: cam.position.toArray(), look: this.target.toArray(), fov: cam.fov, shift: vo, hideShell: this.hideShell };
     this._modelBoost = 1;
     if (this.ambient) this.ambient.intensity = amb0;
     // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
-    const s = (W / 1000) * (o.aspect && !o.full ? 2.1 : 1),
+    const s = o.s ?? (W / 1000) * (o.aspect && !o.full ? 2.1 : 1),
       c = document.createElement('canvas');
     c.width = W;
     c.height = H;
@@ -153,8 +171,8 @@ const methods = {
       rsv = [];
     if (sBox) rsv.push([sBox[0] - 3 * s, sBox[1] - 3 * s, sBox[2] + 6 * s, sBox[3] + 6 * s]);
     if (tBox) rsv.push(tBox);
-    const ls = s * 1.5, // labels are drawn 1.5x the caption size so they read in a 3000 px print
-      lp = this._labelPositions(W, H, ls, true, rsv);
+    const ls = s * (conf.labelK ?? 1.7), // labels are drawn 1.7x the caption size so they read in a 3000 px print
+      lp = this._labelPositions(W, H, ls, true, rsv).map((q) => (q && conf.hide?.some((h) => q.text.startsWith(h)) ? null : q));
     lay.u = ls;
     lay.objs = this._lastObjs;
     lay.probe = this._probe(W, H);
@@ -164,6 +182,17 @@ const methods = {
     lay.rsv = rsv;
     g.textAlign = 'center';
     g.lineJoin = 'round';
+    const rawL = this._lastPlace?.[0] || [];
+    lp.forEach((q, i) => {
+      // every label that sits away from its subject gets a leader to the box edge nearest the subject
+      const r = rawL[i];
+      if (!q || q.leader || !r) return;
+      const hw = q.w / 2,
+        hh = q.h / 2,
+        cx = Math.max(q.x - hw, Math.min(q.x + hw, r.px)),
+        cy = Math.max(q.y - hh, Math.min(q.y + hh, r.py));
+      if (Math.hypot(cx - r.px, cy - r.py) > 7 * ls) Object.assign(q, { leader: true, ax: cx, ay: cy, qx: r.px, qy: r.py, auto: true });
+    });
     for (const q of lp) {
       if (!q || !q.leader) continue;
       lay.segs.push({ x1: q.ax, y1: q.ay, x2: q.qx, y2: q.qy, own: q.text });
@@ -225,27 +254,46 @@ const methods = {
       pr = this.renderer.getPixelRatio();
     const maxDim = Math.min(this.maxTex, 4096),
       panels = this.sim.cfg.panels,
-      // a multi-episode still stacks its tiles vertically, each a full-size still (2400 px wide) with its own title strip, labels and caption
-      tileW = panels ? Math.min(2400, maxDim) : 0,
-      W = panels ? tileW : Math.min(targetW, maxDim, Math.floor((maxDim * vw) / vh)),
-      H = panels ? Math.round(tileW / 1.6) : Math.round((W * vh) / vw);
+      conf = stillFor(this.sim.cfg.id),
+      // a multi-episode still lays its tiles side by side (tileW x tileH each, native resolution, no upscaling)
+      tileW = panels ? Math.min(Math.floor(targetW / panels.length), Math.floor(maxDim / panels.length)) : 0,
+      tileH = panels ? Math.round(tileW * (conf.tileAspect ?? 1.3)) : 0,
+      W = panels ? tileW * panels.length : Math.min(targetW, maxDim),
+      H = panels ? tileH : Math.round(W / STILL_ASPECT);
     const cam = this.camera,
-      keep = { pos: cam.position.clone(), tgt: this.target.clone(), hide: this.hideShell, up: cam.up.clone(), t: this.t, aspect: cam.aspect, fov: cam.fov };
+      keep = {
+        pos: cam.position.clone(),
+        tgt: this.target.clone(),
+        hide: this.hideShell,
+        up: cam.up.clone(),
+        all: !!this.sim.flags?.all,
+        t: this.t,
+        aspect: cam.aspect,
+        fov: cam.fov,
+      };
     let body,
       tileLays = null;
     if (panels) {
       body = document.createElement('canvas');
       body.width = W;
-      body.height = H * panels.length;
+      body.height = H;
       const bg = body.getContext('2d');
       tileLays = [];
       panels.forEach((pn, k) => {
-        const tile = this._stillBody(W, H, { t: pn.t, aspect: W / H, full: true, status: pn.status, title: `${pn.title} · ${pn.brief}` });
-        bg.drawImage(tile, 0, k * H);
+        const tile = this._stillBody(tileW, tileH, {
+          t: pn.t,
+          aspect: tileW / tileH,
+          full: true,
+          s: tileW / 1000 * (conf.tileS ?? 2.3),
+          status: pn.status,
+          title: `${pn.title} · ${pn.brief}`,
+          cam: conf.panels?.[k],
+        });
+        bg.drawImage(tile, k * tileW, 0);
         bg.strokeStyle = 'rgba(255,224,138,0.5)';
-        bg.lineWidth = Math.max(1, W / 1000);
-        bg.strokeRect(0.5, k * H + 0.5, W - 1, H - 1);
-        tileLays.push({ ...this.stillLayout, oy: k * H });
+        bg.lineWidth = Math.max(2, W / 1000);
+        bg.strokeRect(k * tileW + 0.5, 0.5, tileW - 1, tileH - 1);
+        tileLays.push({ ...this.stillLayout, ox: k * tileW });
       });
       this.update(keep.t);
     } else body = this._stillBody(W, H, {});
@@ -297,12 +345,17 @@ const methods = {
     g.fillText(credit, 16 * s, hb + body.height + 77 * s);
     g.textBaseline = 'alphabetic';
     const url = c.toDataURL('image/png');
+    if (this.sim.flags) this.sim.flags.all = keep.all;
+    if (this.t !== keep.t || conf.all) this.update(keep.t);
     cam.position.copy(keep.pos);
     this.target.copy(keep.tgt);
     this.hideShell = keep.hide;
     this._syncShell();
     cam.up.copy(keep.up);
     cam.lookAt(this.target);
+    cam.clearViewOffset();
+    cam.fov = keep.fov;
+    cam.aspect = keep.aspect;
     this.renderer.setPixelRatio(pr);
     this.resize();
     return url;
@@ -312,4 +365,17 @@ const methods = {
 // Adds this file's methods to GLHost.prototype. Called once from app.js, after gl-host.js is loaded and before any scene opens.
 export function installGLStill(GLHost) {
   Object.assign(GLHost.prototype, methods);
+  // Reduced motion / no WebGL: there is no GL host, so window.__cs.host() is null and host().stillPNG() threw. Give __cs.host() a static stand-in whose
+  // stillPNG(title, cite) rasterises the SVG diagram (same print layout) through exportStill; it returns a Promise of the PNG data URL.
+  const wrap = (cs) => {
+    const real = cs.host;
+    if (typeof real !== 'function') return cs;
+    cs.host = () => real() || { static: true, stillPNG: () => cs.exportStill() };
+    return cs;
+  };
+  if (window.__cs) wrap(window.__cs);
+  else {
+    let v;
+    Object.defineProperty(window, '__cs', { configurable: true, get: () => v, set: (x) => { v = wrap(x); } });
+  }
 }
