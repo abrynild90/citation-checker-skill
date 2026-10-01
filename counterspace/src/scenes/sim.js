@@ -113,6 +113,7 @@ export function buildSim(cfg) {
         minPx: a.minPx,
         maxPx: a.maxPx,
         small: !!a.small,
+        variant: a.variant,
         scale: a.scale ?? null,
         color: a.color,
         bright: !!a.bright,
@@ -204,6 +205,7 @@ export function buildSim(cfg) {
         label: a.label,
         short: a.short,
         staticHide: a.staticHide,
+        staticKeep: a.staticKeep,
         labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)],
         labelDx: a.dx,
         labelDy: a.dy,
@@ -456,17 +458,36 @@ export function buildSim(cfg) {
         labelAt: bez(0.5),
         labelEnd: tgt.t + 0.03,
         pts: (t) => {
-          const s = clamp01((t - a.t0) / (tgt.t - a.t0));
+          const s = t >= a.t0 - 1e-6 ? Math.max(0.04, clamp01((t - a.t0) / (tgt.t - a.t0))) : 0;
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
       });
+      // The SM-3 is drawn from the first instant of its flight (t0): the head is already clear of the deck (s0) with a short exhaust plume behind it.
+      const s0 = 0.04,
+        sAt = (t) => Math.max(s0, clamp01((t - a.t0) / (tgt.t - a.t0)));
       items.push({
         kind: 'point',
         shape: 'kv',
         color: a.color,
-        pos: (t) => (t > a.t0 && t < tgt.t ? bez(clamp01((t - a.t0) / (tgt.t - a.t0))) : null),
+        pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(sAt(t)) : null),
       });
-      items.push({ kind: 'flash', pos: to, t0: tgt.t, color: '#fff1c1', big: true, size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1), span: 0.16 });
+      items.push({
+        kind: 'point',
+        shape: 'kv',
+        kvSize: 0.07,
+        color: '#ffd9a0',
+        pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(Math.max(0.012, sAt(t) - 0.035)) : null),
+      });
+      items.push({
+        kind: 'flash',
+        pos: to,
+        t0: tgt.t,
+        color: '#fff1c1',
+        big: true,
+        strong: !!a.strong,
+        size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
+        span: a.strong ? 0.2 : 0.16,
+      });
     }
     if (a.type === 'debris' && tgt) {
       const n = Math.min(a.count, PARTICLE_BUDGET);

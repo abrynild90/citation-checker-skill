@@ -305,13 +305,15 @@ export class GLHost {
       }
     }
     {
-      const on = acts && this.lock != null && this._fbAct != null && this.handEl;
+      const on = acts && this.lock != null && this._fbAct != null && this.handEl,
+        c = this.sim.cfg.cameras?.[this.camIdx],
+        tag = !on && c?.tag; // a preset's own note (e.g. "Arm: not shown"), in the same top-left chip slot as the handover chip
       if (this.handEl) {
-        this.handEl.style.visibility = on ? 'visible' : 'hidden';
-        if (on) {
-          const c = this.sim.cfg.cameras?.[this.camIdx];
-          this.handEl.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
-        }
+        this.handEl.style.visibility = on || tag ? 'visible' : 'hidden';
+        this.handEl.style.background = tag ? '#2d3a5c' : '#8cc8ff';
+        this.handEl.style.color = tag ? '#e8eefc' : '#0a0f1e';
+        if (on) this.handEl.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
+        else if (tag) this.handEl.textContent = this.el.clientWidth < 640 && c.tagShort ? c.tagShort : c.tag;
       }
     }
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
@@ -475,6 +477,16 @@ export class GLHost {
           ring.scale.setScalar((it.size ? it.size * 1.7 : it.big ? 0.9 : 0.3) * Math.pow(f, 0.6) + 0.01);
           ring.userData.s0 = ring.scale.x;
           ring.material.opacity = 0.9 * (1 - f);
+          const r2 = obj.userData.ring2;
+          if (r2) {
+            // strong flash: a bigger, longer-lived core and a second white ring
+            core.scale.setScalar(core.scale.x * 1.45);
+            core.userData.s0 = core.scale.x;
+            core.material.opacity = Math.min(1, 1.1 * Math.max(0, 1 - f * 1.05));
+            r2.scale.setScalar((it.size ?? 0.55) * 2.6 * Math.pow(f, 0.5) + 0.01);
+            r2.userData.s0 = r2.scale.x;
+            r2.material.opacity = 0.75 * (1 - f);
+          }
         }
       }
     }
@@ -550,6 +562,8 @@ export class GLHost {
         if (core.userData.s0) {
           core.scale.setScalar(Math.min(core.userData.s0, (110 * k * d) / sc));
           ring.scale.setScalar(Math.min(ring.userData.s0, (190 * k * d) / sc));
+          const r2 = obj.userData.ring2;
+          if (r2?.userData.s0) r2.scale.setScalar(Math.min(r2.userData.s0, (260 * k * d) / sc));
         }
       } else if (it.kind === 'beam' && obj.visible && obj.userData.ends)
         obj.userData.ends.forEach((s) => {

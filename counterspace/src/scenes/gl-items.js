@@ -115,7 +115,7 @@ const methods = {
   // Models are low-poly and exaggerated so they read next to Earth; each carries userData.span (world size at scale 1) and a px range:
   // _fitModels() rescales them every frame so a model is never a giant blob when the camera is close, nor a speck when it is far.
   // Small spacecraft (MSTI-3 class): octagonal foil-wrapped bus, dark sensor aperture, aft ring, yoke + two-segment cell-textured wings, mast and dish.
-  _satModel(color, halo, bright) {
+  _satModel(color, halo, bright, variant) {
     const T = this.T,
       g = new T.Group(),
       foil = this._mat(color),
@@ -155,6 +155,75 @@ const methods = {
     dish.position.set(0, 0.0122, -0.003);
     dish.rotation.x = -0.6;
     g.add(dish);
+    if (variant === 'tug') {
+      // SJ-21 (tug): a third panel segment on each wing with a mid-wing hinge, radiator panels on the bus sides, a second smaller dish on a short
+      // boom and an aft cluster of four small thruster nozzles around a larger main engine bell. No arm or grapple: SWF does not describe one.
+      const dk = this._mat(0x1c2233);
+      [-1, 1].forEach((sg) => {
+        const p3 = new T.Mesh(new T.BoxGeometry(0.0072, 0.0007, 0.0104), pan);
+        p3.position.x = sg * (0.0114 + 0.0075 * 2 + 0.0036);
+        g.add(p3);
+        const hinge = new T.Mesh(new T.BoxGeometry(0.0009, 0.0011, 0.0108), dk);
+        hinge.position.x = sg * 0.0198;
+        g.add(hinge);
+        const rad = new T.Mesh(new T.BoxGeometry(0.0004, 0.009, 0.011), this._mat(0xeef1f8));
+        rad.position.set(sg * 0.0068, 0, 0.0004);
+        g.add(rad);
+        [-1, 1].forEach((u) => {
+          const nz = new T.Mesh(new T.ConeGeometry(0.0011, 0.003, 8), dk);
+          nz.rotation.x = -Math.PI / 2;
+          nz.position.set(sg * 0.0036, u * 0.0036, -0.0102);
+          g.add(nz);
+        });
+      });
+      const bell = new T.Mesh(new T.ConeGeometry(0.0019, 0.0042, 10), dk);
+      bell.rotation.x = -Math.PI / 2;
+      bell.position.set(0, 0, -0.0112);
+      g.add(bell);
+      const boom = new T.Mesh(new T.CylinderGeometry(0.0003, 0.0003, 0.007, 5), gray);
+      boom.position.set(0.0042, -0.0066, 0.0035);
+      boom.rotation.z = -0.35;
+      g.add(boom);
+      const dish2 = new T.Mesh(
+        new T.SphereGeometry(0.0022, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
+        new T.MeshLambertMaterial({ color: 0xe8ecf5, side: T.DoubleSide }),
+      );
+      dish2.position.set(0.0054, -0.0102, 0.0035);
+      dish2.rotation.x = Math.PI + 0.5;
+      g.add(dish2);
+    } else if (variant === 'navsat') {
+      // Compass G2 (defunct navigation satellite): box-like bus with an Earth-facing phased array, two small dishes, a whip antenna, a fourth
+      // panel on each wing and a large apogee-motor bell aft.
+      const dk = this._mat(0x232a3d);
+      const arr = new T.Mesh(new T.BoxGeometry(0.0074, 0.0074, 0.0013), pan);
+      arr.position.set(0, 0, 0.0094);
+      g.add(arr);
+      const frame = new T.Mesh(new T.BoxGeometry(0.0082, 0.0082, 0.0008), dk);
+      frame.position.set(0, 0, 0.0086);
+      g.add(frame);
+      [-1, 1].forEach((sg) => {
+        const p3 = new T.Mesh(new T.BoxGeometry(0.0072, 0.0007, 0.0104), pan);
+        p3.position.x = sg * (0.0114 + 0.0075 * 2 + 0.0036);
+        g.add(p3);
+        const dsh = new T.Mesh(
+          new T.SphereGeometry(0.0021, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
+          new T.MeshLambertMaterial({ color: 0xcfd5e2, side: T.DoubleSide }),
+        );
+        dsh.position.set(sg * 0.0043, 0.0074, 0.0012);
+        dsh.rotation.x = -0.9;
+        g.add(dsh);
+        const sun = new T.Mesh(new T.BoxGeometry(0.0012, 0.0012, 0.0012), dk);
+        sun.position.set(sg * 0.0069, -0.0052, 0.004);
+        g.add(sun);
+      });
+      const whip = new T.Mesh(new T.CylinderGeometry(0.00022, 0.00022, 0.011, 4), gray);
+      whip.position.set(-0.0022, -0.0092, -0.0035);
+      g.add(whip);
+      const bellN = new T.Mesh(new T.CylinderGeometry(0.0012, 0.0032, 0.0058, 12, 1, true), new T.MeshLambertMaterial({ color: 0x8a8f9c, side: T.DoubleSide }));
+      bellN.rotation.x = Math.PI / 2;
+      bellN.position.set(0, 0, -0.0124);
+      g.add(bellN);
+    }
     const h = new T.Sprite(
       new T.SpriteMaterial({
         map: this.spriteTex,
@@ -274,10 +343,22 @@ const methods = {
     wing.rotation.x = Math.PI / 2;
     wing.position.y = 0.0004;
     g.add(wing);
-    const deck = new T.Mesh(new T.ExtrudeGeometry(shape(0.8), { depth: 0.0006, bevelEnabled: false }), body);
+    const deck = new T.Mesh(
+      new T.ExtrudeGeometry(shape(0.8), { depth: 0.0006, bevelEnabled: false }),
+      this._mat(new T.Color(color).lerp(new T.Color(0xffffff), 0.28).getHex()),
+    );
     deck.rotation.x = Math.PI / 2;
     deck.position.set(0, 0.0007, -0.0012);
     g.add(deck);
+    // thermal-tile seams across the wing deck and a white dorsal spine: the delta reads as a shaded, panelled surface rather than one flat wedge
+    [-0.002, -0.0085].forEach((z) => {
+      const seam = new T.Mesh(new T.BoxGeometry(0.0285 + z * 1.6, 0.0004, 0.0004), dark);
+      seam.position.set(0, 0.0012, z);
+      g.add(seam);
+    });
+    const spine = new T.Mesh(new T.BoxGeometry(0.0016, 0.0008, 0.026), white);
+    spine.position.set(0, 0.0063, 0.0);
+    g.add(spine);
     [-1, 1].forEach((s) => {
       const le = new T.Mesh(new T.BoxGeometry(0.0007, 0.0007, 0.031), dark);
       le.position.set(s * 0.0125, -0.0004, 0.0004);
@@ -630,7 +711,7 @@ const methods = {
         // glow heads keep a bounded on-screen size
         Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: it.kvSize ? 5 : 13, maxPx: it.kvSize ? 22 : 32 });
       } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
-        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright);
+        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright, it.variant);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
       } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
       else if (it.shape === 'aircraft') m = this._aircraftModel();
@@ -814,6 +895,22 @@ const methods = {
       );
       m.add(core, ring);
       m.userData = { core, ring };
+      if (it.strong) {
+        // a second, white shock ring (it.strong): a clearly visible intercept, not a faint puff
+        const ring2 = new T.Sprite(
+          new T.SpriteMaterial({
+            map: this.ringTex,
+            color: col('#ffffff'),
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+            depthTest: false,
+            blending: T.AdditiveBlending,
+          }),
+        );
+        m.add(ring2);
+        m.userData.ring2 = ring2;
+      }
       root.add(m);
       this.dyn.push({ it, obj: m });
       if (it.label) this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);

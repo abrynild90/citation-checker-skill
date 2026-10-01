@@ -110,6 +110,7 @@ export async function openScene(id, originEl) {
       b.type = 'button';
       const sh = isPhoneNow() && cfg.cameras?.[i]?.short; // phone chips wrap (never cut off), so long preset names have a short form
       b.textContent = sh || c.name;
+      b.dataset.name = sh ? c.name : '';
       if (sh) b.title = c.name;
       b.onclick = () => {
         h.pickCam(i);
@@ -180,7 +181,19 @@ function syncCams() {
   if (!host || !cur) return;
   const tour = host.sim.cfg.acts && host.lock == null ? host.sim.cams.findIndex((c) => c.auto) : -1,
     on = tour >= 0 ? tour : host.camIdx;
-  [...camsEl.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === on)));
+  // A locked preset that has handed the camera to another episode is not pressed (the chip names what is on screen); it keeps a dashed outline
+  // ("resumes when the timeline is back in its episode") so the viewer can still see which preset is theirs.
+  const resume = host.lock != null && host._fbAct != null ? host._lockCam : -1;
+  [...camsEl.children].forEach((b, i) => {
+    b.setAttribute('aria-pressed', String(i === on));
+    if (i === resume && i !== on) {
+      b.dataset.resume = '1';
+      b.title = 'Your preset: it resumes when the timeline returns to its episode';
+    } else {
+      delete b.dataset.resume;
+      b.title = b.dataset.name || '';
+    }
+  });
 }
 function syncScrub(t) {
   if (!cur) return;

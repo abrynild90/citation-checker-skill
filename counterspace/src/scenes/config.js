@@ -30,6 +30,9 @@ const PK = IS_PHONE ? 1.5 : 1;
 const MX = IS_PHONE ? 58 : 86; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
 
+// SJ-21 presets that show the docked pair carry this note: SWF says SJ-21 "docked" with Compass G2 but does not describe any arm or grapple.
+const ARM_TAG = { tag: 'Arm: not shown (SWF does not describe the mechanism)', tagShort: 'Arm: not shown (not in SWF)' };
+
 export const SCENES = [
   {
     id: 'starfish',
@@ -96,7 +99,7 @@ export const SCENES = [
     phoneHide: ['Thor launch'],
     still: 0.7,
     camDist: 3.5,
-    phoneK: 1.22, // 375: zoomed out so the whole belt (L up to 1.7) and the globe fit
+    phoneK: 1.8, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
     staticZoom: 1.7,
     staticCenter: [35, -205],
     stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
@@ -238,7 +241,7 @@ export const SCENES = [
           { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
         ],
       },
-      { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42 },
+      { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42, strong: true },
       { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.046, lateGlow: true },
     ],
     still: 0.47,
@@ -299,11 +302,12 @@ export const SCENES = [
     ],
     shellLabels: { MEO: null, GEO: null },
     noRing: ['GEO'],
+    staticFit: 1.9,
     cameras: [
       { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.92 } },
       { name: 'Profile', at: [22, 8, 7.6], look: [0, 90, 0.7], phone: { at: [24, 24, 8.6], look: [0, 96, 0.7] } },
       { name: 'Polar', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
-      { name: 'Zoom', at: [20, 45, 5.6] },
+      { name: 'Zoom', at: [20, 45, 5.6], phone: { hide: ['DN-2 path'] } }, // 375: the path label would sit on the disc, crowding Xichang and 10,000 km
     ],
   },
   {
@@ -382,7 +386,7 @@ export const SCENES = [
     phoneK: 1.16,
     noSimCount: true,
     actors: [
-      { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground, dx: -84, dy: 30 },
+      { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground, dx: -110, dy: -16 },
       {
         type: 'ring',
         alt: 420,
@@ -393,7 +397,7 @@ export const SCENES = [
         opacity: 0.85,
         sat: { speed: 0.16, label: 'ISS (illustrative orbit)', short: 'ISS (illustrative)', iss: true, big: 1.3, minPx: 44, maxPx: 90, dx: 96, dy: 14 },
       },
-      { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: -60, impactDy: 50, dx: -40, dy: 62 },
+      { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: -40, impactDy: 64, dx: -40, dy: 62 },
       { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol' },
       {
         type: 'debris',
@@ -495,18 +499,20 @@ export const SCENES = [
     phoneK: 0.82,
     stillCam: { at: [49, 14, 1.85], look: [51.5, 16, 0.98], hideShell: true },
     focus: [55, 18],
-    inset: 'Context: GPS orbits (top view)',
+    inset: 'GPS orbits (top view)',
+    insetCorner: 'bl',
+    insetSize: [150, 116],
     insetNoPhone: true, // the phone stage is too small for an inset that would sit on the jammer zone
     cameras: [
       {
         name: 'Baltic: airliners and jammer zone',
         short: 'Baltic zone',
-        at: [40, 13, 1.48],
-        look: [52, 23.5, 0.98],
+        at: [41, 13, 1.56],
+        look: [53.4, 22.6, 0.98],
         phone: { at: [38, 12, 1.48] },
       },
       { name: 'Close-up: jammer and airliners', short: 'Close-up', at: [47, 16, 1.7], look: [54, 19, 0.98], phone: { at: [47, 16, 1.95] } },
-      { name: 'Europe + GPS orbits', short: 'Europe + GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false, hide: ['Ground jammer'] },
+      { name: 'Europe + GPS orbits', short: 'Europe + GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false, hide: ['Ground jammer', 'Jammer effect'] },
     ],
     status: [
       [0, 'Both airliners have GNSS (green) ·' + ' jammer zone in red · satellites unaffected', 'Airliners have GNSS (green) · zone in red'],
@@ -598,7 +604,7 @@ export const SCENES = [
       { name: 'Europe (zoom)', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] }, insetRef: true },
       { name: 'Europe + KA-SAT', short: 'Wide Europe', at: [10, 12, 3.9], look: [24, 13, 0.5], phone: { at: [10, 12, 4.5] } },
       { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
-      { name: 'Wide', at: [30, -6, 6.5] },
+      { name: 'Wide', at: [30, -6, 6.5], hide: ['Ground management'] }, // its label would need a leader across the whole globe
     ],
   },
   {
@@ -692,6 +698,7 @@ export const SCENES = [
       {
         type: 'craft',
         id: 'cg2',
+        variant: 'navsat',
         anchor: 'g',
         color: C.dead,
         scale: 2.2 * PK,
@@ -715,6 +722,7 @@ export const SCENES = [
       {
         type: 'craft',
         id: 'sj21',
+        variant: 'tug',
         anchor: 'g',
         color: C.cn,
         bright: true,
@@ -757,15 +765,18 @@ export const SCENES = [
       [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
     ],
     cameras: [
-      { name: 'Follow the pair (tight + context inset)', fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93 } },
+      { name: 'Follow the pair (tight + context inset)', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93 } },
       { name: 'Whole event (Earth + GEO belt)', short: 'Whole event', at: [36, 104, 3.9], look: [0, 106, 1.9], phone: { at: [36, 104, 4.8] } },
-      { name: 'Approach and docking', fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.9, 0.3, 0.55], fill: 0.7, dMin: 0.5, t: 0.3 } },
+      { name: 'Approach and docking', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.9, 0.3, 0.55], fill: 0.7, dMin: 0.5, t: 0.3 } },
       { name: 'Pull (angled)', fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.7, 0.55, 0.45], fill: 0.7, dMin: 0.5, t: 0.6 } },
       { name: 'GEO belt (wide)', at: [26, 70, 7.4] },
     ],
     stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
     staticCenter: [25, 72],
-    staticCraftMax: 72,
+    staticCraftMax: 54,
+    staticCraftMaxPhone: 44,
+    staticFit: 1.9,
+    staticFitPhone: 1.7,
   },
   {
     id: 'rpo',
@@ -821,6 +832,7 @@ export const SCENES = [
       {
         type: 'craft',
         id: 'sj25',
+        variant: 'tug',
         minPx: 52,
         maxPx: 84,
         anchor: 'g1',
@@ -844,6 +856,7 @@ export const SCENES = [
       {
         type: 'craft',
         id: 'sj21b',
+        variant: 'tug',
         minPx: 52,
         maxPx: 84,
         anchor: 'g1',
@@ -1080,7 +1093,7 @@ export const SCENES = [
     ],
     actors: [
       // ---- US X-37B, OTV-1 to OTV-6: LEO flights
-      { type: 'path', fn: (u) => orbitPos(350, 38, 288, u * 2 * Math.PI), N: 120, color: '#8fd0ff', opacity: 0.8, thick: 0.0034, acts: [0] },
+      { type: 'path', fn: (u) => orbitPos(350, 38, 288, u * 2 * Math.PI), N: 120, color: '#8fd0ff', opacity: 0.8, thick: 0.0034, acts: [0], staticKeep: false },
       {
         type: 'path',
         fn: (u) => orbitPos(350, 54, 288, u * 2 * Math.PI),
@@ -1093,6 +1106,7 @@ export const SCENES = [
         short: '300–400 km · 38°–54°',
         opt: true,
         staticHide: true,
+        staticKeep: false,
         labelIdx: 20,
         dx: 40,
         dy: -30,
@@ -1131,6 +1145,7 @@ export const SCENES = [
         label: 'GEO ring (35,786 km)',
         short: 'GEO',
         opt: true,
+        staticHide: true,
         labelIdx: 92,
         dx: 20,
         dy: 20,
@@ -1182,6 +1197,7 @@ export const SCENES = [
         short: '~600 km · 50°',
         opt: true,
         staticHide: true,
+        staticKeep: false,
         labelIdx: 30,
         dx: 30,
         dy: -30,
@@ -1308,7 +1324,14 @@ export const SCENES = [
     staticFit: 1.6,
     staticFitPhone: 1.3,
     staticSnap: { csshq: [0.6], objJ: [0.605], objG: [0.93] },
-    staticLabels: { csshq: 'CSSHQ (China): flights 2 and 3' },
+    staticLabels: { csshq: 'CSSHQ + Obj. J, G' },
+    staticNoLabel: ['objJ', 'objG'], // the static key names them: one label for the China group, not three stacked on the limb
+    staticCraftScale: { csshq: 0.78 },
+    staticKey: [
+      [C.us, 'US X-37B: LEO flights, OTV-7 orbit', 'X-37B orbits'],
+      [C.geo, 'GEO ring (35,786 km)', 'GEO ring'],
+      [C.cn, 'China: CSSHQ and released objects J, G', 'CSSHQ, Obj. J, G'],
+    ],
     staticStatusPhone: 'X-37B: eight flights since 2010 · CSSHQ: three flights, a fourth launched Feb. 2026',
     staticStatus:
       'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and' + ' a fourth launched in Feb. 2026',

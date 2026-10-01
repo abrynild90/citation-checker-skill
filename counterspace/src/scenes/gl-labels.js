@@ -418,21 +418,20 @@ const methods = {
     const phone = this.el.clientWidth < 520;
     c.style.display = phone && this.sim.cfg.insetNoPhone ? 'none' : '';
     if (c.style.display) return;
-    const
-      w = phone ? 128 : 188,
-      h = phone ? 104 : 142,
+    const bl = this.sim.cfg.insetCorner === 'bl', // bottom-left, above the caption (scenes whose action fills the top right)
+      sz = this.sim.cfg.insetSize,
+      w = phone ? 128 : sz ? sz[0] : 188,
+      h = phone ? 104 : sz ? sz[1] : 142,
       d = Math.min(devicePixelRatio || 1, 2);
     if (c.width !== Math.round(w * d)) {
       c.width = Math.round(w * d);
       c.height = Math.round(h * d);
       c.style.width = w + 'px';
       c.style.height = h + 'px';
-      c.style.top = (phone ? 40 : 42) + 'px';
     }
-    {
-      c.style.left = Math.round(this.el.clientWidth - w - 8) + 'px';
-      c.style.right = 'auto';
-    }
+    c.style.top = (bl ? Math.round(this.el.clientHeight - h - (this.statusEl?.offsetHeight || 20) - 24) : phone ? 40 : 42) + 'px';
+    c.style.left = bl ? '8px' : Math.round(this.el.clientWidth - w - 8) + 'px';
+    c.style.right = 'auto';
     const g = c.getContext('2d'),
       t = this.t;
     g.setTransform(d, 0, 0, d, 0, 0);

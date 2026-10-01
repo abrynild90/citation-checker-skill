@@ -32,7 +32,7 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 
-const root = path.resolve('.'), out = process.env.OUT || 'scene_check_out', PORT = +(process.env.PORT || 9122);
+const root = path.resolve(process.env.ROOT || '.'), out = process.env.OUT || 'scene_check_out', PORT = +(process.env.PORT || 9122);
 const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const VPS = (process.env.VPS || '1440,900,375').split(',').map(Number);
 const TS = (process.env.TS || '0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.85,0.9').split(',').map(Number);
@@ -440,9 +440,34 @@ if (MODES.includes('still')) {
     if (bad.length) record('status-count-' + k, [{ type: 'status-count', detail: `375 px says ${bad.join(',')} but 1440 px says "${hi.slice(0, 80)}" vs "${lo.slice(0, 60)}"` }]);
   }
 }
+if (MODES.includes('stillapi')) await stillApiCheck();
 fs.writeFileSync(`${out}/results.json`, JSON.stringify(results));
 const total = results.reduce((n, r) => n + r.F.length, 0) + pageErrs.length;
 console.log('page errors', pageErrs.length, pageErrs.slice(0, 5));
 console.log(`\nstates ${results.length}, failing states ${results.filter(r => r.F.length).length}, failures ${total}`, JSON.stringify(failCount));
 await browser.close(); srv.close();
 process.exit(total ? 1 : 0);
+
+// ---- still API check (MODES=stillapi): window.__cs.host().stillPNG works in reduced motion (static) and live stills are native-resolution landscape frames
+async function stillApiCheck() {
+  const dims = async (page, url) =>
+    page.evaluate(u => new Promise(r => { const i = new Image(); i.onload = () => r([i.width, i.height]); i.src = u; }), url);
+  for (const [mode, extra] of [['static', { reducedMotion: 'reduce' }], ['live', {}]]) {
+    const { ctx, page } = await boot(1440, extra);
+    for (const id of await ids(page)) {
+      await page.evaluate(id => window.__cs.openScene(id), id); await page.waitForTimeout(mode === 'static' ? 1500 : 700);
+      const url = await page.evaluate(async () => {
+        try { return await window.__cs.host().stillPNG('Title', 'Cite'); } catch (e) { return 'ERR ' + e.message; }
+      });
+      const F = [];
+      if (!url || url.startsWith('ERR')) F.push({ type: 'still-api', detail: String(url) });
+      else {
+        const [w, h] = await dims(page, url);
+        if (w < 3000 || h < 1000) F.push({ type: 'still-api', detail: `still ${w}x${h} under 3000 wide or 1000 high` });
+      }
+      record(tag('still-api-' + mode, id), F, {});
+      await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);
+    }
+    await ctx.close();
+  }
+}
