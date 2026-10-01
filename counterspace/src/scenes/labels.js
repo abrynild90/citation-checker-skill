@@ -80,7 +80,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     const hits = (x, y) =>
       boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 3 && Math.abs(y - b.y) < (h + b.h) / 2 + 2 ? 1 : 0), 0);
     // A leader longer than this (share of the canvas width) is a defect: the label belongs next to its object.
-    const lim = W * (W <= 400 ? 0.3 : 0.22);
+    const lim = W * (W <= 400 ? 0.27 : 0.17);
     const cost = (x, y) => {
       let soft = 0;
       const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)),
@@ -91,7 +91,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       if (lead) {
         const ll0 = Math.hypot(qx - c.px, qy - c.py);
         if (ll0 > lim * 0.92) n += 330 + (ll0 - lim * 0.92) * 2;
-        n += ll0 * 0.04;
+        n += ll0 * 0.12;
         for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600;
         for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500;
       }

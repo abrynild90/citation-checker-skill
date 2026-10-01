@@ -460,7 +460,8 @@ export class GLHost {
       v.setFromMatrixPosition(obj.matrixWorld);
       const d = Math.max(0.15, v.distanceTo(cp)),
         px = (u.span * u.base * sc) / d,
-        f = Math.min(Math.max(px, u.minPx * k), u.maxPx * k) / px;
+        b = this._modelBoost || 1, // print stills draw craft a little larger relative to the frame
+        f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       obj.scale.setScalar(u.base * f);
     }
     // Docked pairs (it.dockWith): the two models sit side by side, touching, along the camera's right vector, whatever the zoom.

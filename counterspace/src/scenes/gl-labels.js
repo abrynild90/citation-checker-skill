@@ -82,7 +82,7 @@ const methods = {
       } // hidden: behind Earth, or its referent is off the stage
       const text = L.item?.labelFn
           ? L.item.labelFn(this.t, this.el.clientWidth < 520)
-          : L.short && this.el.clientWidth < 520
+          : L.short && (this.el.clientWidth < 520 || (noBanner && this.sim.cfg.stillShort?.some((h) => L.text.startsWith(h))))
             ? L.short
             : L.text,
         color = L.item?.labelFn ? L.item.statusColor(this.t) : null;
@@ -97,7 +97,7 @@ const methods = {
       const hu = this.sim.cfg.spin ? 1.22 : 1,
         lw = labelW(text, u * hu * (noBanner ? 1.1 : 1)),
         lh = 19 * u * hu;
-      if (L.item?.offGlobe) {
+      if (L.item?.offGlobe && (!L.item.stillOnly || noBanner)) {
         const c0 = new T.Vector3(0, 0, 0).project(this.camera),
           lm = this._limb(1, 0),
           c1 = new T.Vector3(...lm).project(this.camera),
@@ -117,7 +117,7 @@ const methods = {
         opt: !!L.opt,
         text,
         color,
-        avoidDisc: !!L.item?.offGlobe,
+        avoidDisc: !!L.item?.offGlobe && (!L.item.stillOnly || noBanner),
         noLeader: !!L.item?.noLeader,
       });
     }

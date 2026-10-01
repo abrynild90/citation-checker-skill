@@ -678,7 +678,7 @@ const methods = {
             return A && B && it.on(t) ? scl(add(A, B), 0.5) : null;
           },
           null,
-          null,
+          it.labelOffDisc ? { offGlobe: true, stillOnly: true } : null,
           it.labelDy ?? 0,
           it.labelDx ?? 0,
           it.short,

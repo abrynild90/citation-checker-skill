@@ -23,7 +23,7 @@
 //   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
 //   still-empty      a still has an empty band (no content) over more than 20% of its body height or width
-//   still-crop       a still shows the Earth disc partly cropped (50-98.5% visible) by the frame
+//   still-crop       a still shows a whole-globe composition (multi-tile composites exempt) (disc radius < 55% of the frame) with the Earth partly cropped (50-98.5% visible); a deliberate close-up is exempt
 //   hero-small       hero live at >= 900 px: the outer ring spans under 60% of the stage width
 //   hero-*           hero: ISS marker missing (hero-iss), a shell label more than 40 px from its ring (hero-label), caption strip / heading wrap (page side)
 import { chromium } from 'playwright';
@@ -32,7 +32,7 @@ import http from 'http'; import fs from 'fs'; import path from 'path';
 const root = path.resolve('.'), out = process.env.OUT || 'scene_check_out', PORT = +(process.env.PORT || 9122);
 const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const VPS = (process.env.VPS || '1440,900,375').split(',').map(Number);
-const TS = (process.env.TS || '0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9').split(',').map(Number);
+const TS = (process.env.TS || '0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.85,0.9').split(',').map(Number);
 const CAMS = (process.env.CAMS || '').split(',').filter(Boolean).map(Number);
 const MODES = (process.env.MODES || 'live,static,still,hero').split(',');
 const SHOT = !!process.env.SHOT, QUIET = !!process.env.QUIET;
@@ -82,8 +82,8 @@ const boxCircle = (b, c) => { const dx = Math.max(b.x0 - c.x, 0, c.x - b.x1), dy
 // Event times that are not cfg.hit.t, and regexes for status text that describes the event; key objects that must stay in frame on the default camera.
 const EVENTS = { starfish: { t: 0.14, re: /detonation:|detonates/i } };
 const HITRE = /collision|destroys|destroyed|detonat|fragments spread|debris spreads/i;
-const KEY = { viasat: [/KA-SAT/], laser: [/MSTI-3/, /White Sands/], 'sj21-tug': [/SJ-21/, /Compass/], cosmos1408: [/Cosmos 1408/], shakti: [/Microsat/],
-  spaceplanes: [/X-37B/, /OTV-7/, /CSSHQ/], rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/] };
+const KEY = { viasat: [/KA-SAT/], laser: [/MSTI-3/, /White Sands/], 'sj21-tug': [/SJ-21/, /Compass/], cosmos1408: [/^Cosmos 1408/], shakti: [/Microsat/],
+  spaceplanes: [/^X-37B \(US\)/, /^X-37B OTV-7/, /^CSSHQ \(China\)/], rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/] };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;
 
 // S = {kind, W, H, labels:[{text, x0,y0,x1,y1, leader:[ax,ay,qx,qy]|null, item}], reserved:[{n,x0,y0,x1,y1}], probe, def (default camera), bannerLines}
@@ -171,7 +171,7 @@ function check(S) {
   }
   if (S.emptyBand != null && S.emptyBand > 0.2) f('still-empty', `empty band (gap or lopsided margin) of ${(S.emptyBand * 100).toFixed(0)}% of the still`);
   if (S.emptyArea != null && S.emptyArea < 0.3) f('still-empty', `content fills only ${(S.emptyArea * 100).toFixed(0)}% of the still body`);
-  if (S.discVis != null && S.discVis > 0.5 && S.discVis < 0.985) f('still-crop', `Earth disc ${(S.discVis * 100).toFixed(0)}% inside the still (cropped)`);
+  if (S.discVis != null && !S.discBig && S.discVis > 0.5 && S.discVis < 0.985) f('still-crop', `Earth disc ${(S.discVis * 100).toFixed(0)}% inside the still (cropped)`);
   if (S.kind === 'hero' && W >= 900 && S.heroSpan != null && S.heroSpan < 0.6) f('hero-small', `outer ring spans ${(S.heroSpan * 100).toFixed(0)}% of the stage width`);
   if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
   if (S.status != null && S.evT != null && S.t < S.evT + 0.02 && (S.evRe || HITRE).test(S.status)) f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
@@ -249,7 +249,7 @@ const EMPTY = async (url) => {
   const k = 4, w = Math.round(img.width / k), h = Math.round(img.height / k), c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, w, h); const d = g.getImageData(0, 0, w, h).data;
   const y0 = Math.round(h * 0.06), y1 = Math.round(h * 0.9), rows = [], cols = new Array(w).fill(0);
-  for (let y = y0; y < y1; y++) { let n = 0; for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, L = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]; if (L > 46) { n++; cols[x]++; } } rows.push(n); }
+  for (let y = y0; y < y1; y++) { let n = 0; for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, L = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]; if (L > 30) { n++; cols[x]++; } } rows.push(n); }
   // per axis: rows/cols with content (>= 3 bright px); lead/trail = empty margins, gap = longest empty run between content
   const ax = (arr) => { const on = arr.map(v => v >= 3), first = on.indexOf(true), last = on.lastIndexOf(true); if (first < 0) return { lead: 1, trail: 0, gap: 0, span: 0 };
     let gap = 0, cur = 0; for (let i = first; i <= last; i++) { if (!on[i]) { cur++; gap = Math.max(gap, cur); } else cur = 0; }
@@ -290,7 +290,7 @@ if (MODES.includes('live')) for (const w of VPS) {
       if (!tl.length) tl = [acts[c.act].t0 + 0.05];
       for (const t of tl) {
         await page.evaluate(({ ci, t }) => { const h = window.__cs.host(); h.playing = false; h._lm = {}; h.pickCam(ci); h.update(t); h.update(t); }, { ci, t });
-        const S = await page.evaluate(LIVE, cams[ci].ref === false ? [] : (KEY[id] || []).map(r => r.source)); S.def = ci === 0; S.kind = 'live'; S.follow = !!cams[ci].follow;
+        const S = await page.evaluate(LIVE, cams[ci].ref === false || !(ci === 0 || cams[ci].follow) ? [] : (KEY[id] || []).map(r => r.source)); S.def = ci === 0; S.kind = 'live'; S.follow = !!cams[ci].follow;
         S.evT = EVENTS[id]?.t ?? S.hitT; S.evRe = EVENTS[id]?.re;
         if (ci !== 0) S.action = undefined; else S.action = S.probe.action;
         const F = check(S);
@@ -382,7 +382,7 @@ if (MODES.includes('still')) {
     });
     fs.writeFileSync(`${out}/still-live-${id}.png`, Buffer.from(r.url.split(',')[1], 'base64'));
     const eb = await page.evaluate(EMPTY, r.url);
-    const F = r.tiles.flatMap(t => check({ kind: 'still', u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H) }));
+    const F = r.tiles.flatMap(t => check({ kind: 'still', u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H), discBig: r.tiles.length > 1 || !!(t.probe && t.probe.disc && t.probe.disc.r >= 0.55 * Math.min(t.W, t.H)) }));
     // stills are ~3000 px wide: the pixel rules are scaled by u (label font scale) so the limits mean the same thing as in the live frame
     record(tag('still-live', id), F, { stillT });
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);

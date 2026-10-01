@@ -766,7 +766,7 @@ export function buildSim(cfg) {
     }
     if (a.type === 'geo') {
       const g = ll(0, a.lon, rAlt(GEO_ALT));
-      items.push({ kind: 'point', shape: 'sat', prim: true, color: a.color, label: a.label, short: a.short, labelDy: a.dy ?? -30, labelDx: a.dx, scale: 1.7, bright: true, pos: () => g });
+      items.push({ kind: 'point', shape: 'sat', prim: true, color: a.color, label: a.label, short: a.short, labelDy: a.dy ?? -30, labelDx: a.dx, scale: 1.7, bright: true, minPx: a.minPx, maxPx: a.maxPx, pos: () => g });
       a.beams.forEach((b, bi) => {
         // space side stays bright; only the ground-side segment dims once the ground network is hit
         const e = ll(b[0], b[1], 1.003),
@@ -955,6 +955,7 @@ export function buildSim(cfg) {
         maxPx: 15,
         coreColor: '#ffe3f9',
         ends: 0.05,
+        labelOffDisc: a.labelOffDisc,
         label: a.label,
         short: a.short,
         labelDx: a.dx,

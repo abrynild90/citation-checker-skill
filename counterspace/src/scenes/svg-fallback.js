@@ -218,7 +218,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   };
   // Status text is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
-    stTxt = opts.panel ? opts.status || '' : sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
+    stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
     maxCh = Math.floor((W - (opts.panel ? 14 : 40)) / (opts.panel ? 6 : 6.6)),
     stLines = [];
   if (opts.panel ? stTxt : st) {
@@ -242,7 +242,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     x1 = 1.08,
     y0 = -1.08,
     y1 = 1.08;
-  const fitMax = sim.cfg.staticFit && !opts.panel ? sim.cfg.staticFit : 0; // far orbits (apogees, belts) may run off the frame so the Earth stays large
+  const fitMax = sim.cfg.staticFit && !opts.panel ? (W < 520 && sim.cfg.staticFitPhone) || sim.cfg.staticFit : 0; // far orbits (apogees, belts) may run off the frame so the Earth stays large
   const grow = (p) => {
     if (!p || p.hidden) return;
     if (fitMax && Math.hypot(p.x, p.y) > fitMax) return;
@@ -558,7 +558,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     marks.push({ x: ex, y: ey, r: er + 14, n: 'earth-cue' });
   }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
-  const NARROW = W < 520 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
+  const NARROW = W < 600 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
   // Labels are collected, de-conflicted, then drawn as pills with leader lines to their objects.
   shells.forEach((it, i) => {
     const lab = it.staticLabel ?? it.label;
@@ -612,6 +612,12 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     if (it.kind === 'curve') {
       let pts = it.pts(t).map(project);
       if (it.limbOnly) pts = pts.map((p) => (Math.hypot(p.x - CX, p.y - CY) < R * 1.005 ? { ...p, hidden: true } : p)); // only the part outside the disc: an arch behind the globe, clipped at its limb
+      // a panel keeps only the context ring at the altitude of its craft (a GEO belt in a LEO panel, or the reverse, is a stray arc)
+      if (opts.panel && it.inset && pts.length) {
+        const rr = it.pts(t).reduce((m, q) => m + Math.hypot(...q), 0) / pts.length,
+          fr = opts.view ? Math.hypot(...opts.view.focus) : rr;
+        if (Math.abs(rr - fr) > 0.6) continue;
+      }
       // a panel that shows no globe drops low-orbit context rings (they would be a stray arc with nothing to orbit)
       if (opts.panel && !showGlobe && it.inset && pts.length && Math.min(...it.pts(t).map((q) => Math.hypot(...q))) < 1.6) continue;
       let seg = [];
@@ -664,7 +670,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           it.color,
           it.labelDx,
           it.labelDy,
-          W < 520 ? null : it.staticAt,
+          W < 700 ? null : it.staticAt,
           it.opt,
         );
     }
@@ -734,7 +740,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       const c = it.statusColor ? it.statusColor(t) : it.color;
       const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
       // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
-      const cs = craftShape ? Math.round(craftBase * (it.iss ? 1.3 : 1) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1)) : 0;
+      const cs = craftShape ? Math.round(Math.min(sim.cfg.spin ? 46 : 99, craftBase * (it.iss ? 1.3 : 1)) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1)) : 0;
       // Docked pair: the two models sit side by side, touching (no link is drawn: SWF says docked, not how).
       if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + cs * 0.5 };
       else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - cs * 0.5 };
@@ -748,7 +754,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       const mi = marks.length;
       if (it.shape !== 'none')
         mark(p, craftShape ? cs * (it.shape === 'sat' || it.shape === 'ship' ? 0.5 : 0.42) + 2 : it.shape === 'sat' ? 5 : it.shape === 'tick' ? 6 : 5, it.label || it.shape);
-      if (craftShape) drawCraft(g, it.shape, p.x, p.y, cs, c, { rot });
+      if (craftShape) drawCraft(g, it.iss ? 'iss' : it.shape, p.x, p.y, cs, c, { rot });
       else if (it.shape === 'sat') {
         const q3 = it.small ? 6 : 8;
         g.append('rect').attr('x', p.x - q3 / 2).attr('y', p.y - q3 / 2).attr('width', q3).attr('height', q3).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 0.8);
@@ -769,7 +775,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           c,
           it.labelDx,
           it.labelDy,
-          W < 520 ? null : it.staticAt,
+          W < 700 ? null : it.staticAt,
           it.opt,
         );
         if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;

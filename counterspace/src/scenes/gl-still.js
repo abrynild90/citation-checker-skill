@@ -6,6 +6,36 @@ import { DEG, ll } from './core.js';
 import { earthImg } from './earth.js';
 
 const methods = {
+  // Bounding box (px) of what a still shows: the Earth disc (clipped to the frame) and every moving / acting point.
+  _contentBox(W, H) {
+    const P = this._probe(W, H);
+    let x0 = 1e9,
+      y0 = 1e9,
+      x1 = -1e9,
+      y1 = -1e9;
+    const add = (x, y) => {
+      if (x < -W || x > 2 * W || y < -H || y > 2 * H) return;
+      x0 = Math.min(x0, x);
+      y0 = Math.min(y0, y);
+      x1 = Math.max(x1, x);
+      y1 = Math.max(y1, y);
+    };
+    if (P.action) {
+      add(P.action.x0, P.action.y0);
+      add(P.action.x1, P.action.y1);
+    }
+    const d = P.disc;
+    if (d && d.r > 0) {
+      add(Math.max(0, d.cx - d.r), Math.max(0, d.cy - d.r));
+      add(Math.min(W, d.cx + d.r), Math.min(H, d.cy + d.r));
+    }
+    // shells (translucent spheres) belong to the picture too, clipped to the frame
+    for (const c of P.circles || []) if (c.ring && c.r > 0) {
+      add(Math.max(0, c.cx - c.r), Math.max(0, c.cy - c.r));
+      add(Math.min(W, c.cx + c.r), Math.min(H, c.cy + c.r));
+    }
+    return x1 > x0 && y1 > y0 ? { x0, y0, x1, y1 } : null;
+  },
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
   // the illustrative banner, caption and source into the PNG, then restore the live size.
   // One frame of the still: the render, its labels with leaders and the status caption, drawn into a W x H canvas (no bands). `o.t` picks the scene time and
@@ -43,9 +73,27 @@ const methods = {
     this._viewShift = null;
     this.renderer.setPixelRatio(1);
     this.renderer.setSize(W, H, false);
+    this._modelBoost = 1.4;
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
+    // Recompose: the picture (Earth disc + everything that moves) is centred in the band above the caption, so a still never has a lopsided empty margin.
+    const bb = this._contentBox(W, H);
+    if (bb) {
+      const cl = (v, m) => Math.max(-m, Math.min(m, v));
+      let dx = 0,
+        dy = 0;
+      if (bb.x0 > 0.02 * W || bb.x1 < 0.98 * W) dx = cl(W / 2 - (bb.x0 + bb.x1) / 2, 0.22 * W);
+      if (bb.y0 > 0.02 * H || bb.y1 < 0.9 * H) dy = cl((0.04 * H + 0.9 * H) / 2 - (bb.y0 + bb.y1) / 2, 0.22 * H);
+      if (Math.abs(dx) > 0.01 * W || Math.abs(dy) > 0.01 * H) {
+        cam.setViewOffset(W, H, -dx, -dy, W, H);
+        cam.updateProjectionMatrix();
+        this._fitModels();
+        this._ptUniforms();
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+    this._modelBoost = 1;
     const s = (W / 1000) * (o.aspect ? 1.55 : 1), // tiles of a multi-episode still are 1000 px wide inside a 3000 px image: their text is scaled up so it reads at the same size
       c = document.createElement('canvas');
     c.width = W;

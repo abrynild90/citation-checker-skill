@@ -33,7 +33,7 @@ export const SCENES = [
         label: 'Artificial radiation belt', short: 'Radiation belt' },
       { type: 'ring', alt: 800, inc: 44.8, raan: 40, color: '#8cc8ff', sat: { phase: 0, speed: 2.2, label: 'Satellite in belt',
         short: 'Satellite', dx: 30, dy: 60 } },
-    ], phoneHide: ['Thor launch'], still: 0.7, camDist: 3.5, staticZoom: 1.7, staticCenter: [35, -205], stillCam: { at: [14, -150, 4.2], look: [0, 0, 0], hideShell: true }, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.16, 'Detonation: electrons trapped on Earth’s field lines',
+    ], phoneHide: ['Thor launch'], still: 0.7, camDist: 3.5, staticZoom: 1.7, staticCenter: [35, -205], stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true }, status: [[0, 'Thor rocket climbs toward ~400 km'], [0.16, 'Detonation: electrons trapped on Earth’s field lines',
       'Detonation: electrons trapped'], [0.3, 'Trapped electrons spread in longitude and latitude along field lines', 'Electrons spread along field lines'],
       [0.75, 'Belt has drifted around Earth (illustrative spread)', 'Belt drifts around Earth (illustrative)']] },
   { id: 'solwind', fitPct: 0.99, date: '1985-09-13', title: 'ASM-135 vs. Solwind (1985)', shells: ['LEO'], duration: 12,
@@ -59,7 +59,7 @@ export const SCENES = [
     hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 }, launchCam: 'second', orbitAt: [26, 74, 4.6], phoneK: 1.14, noSimCount: true,
     actors: [
       { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-      { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 150, impactDy: -140 },
+      { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 100, impactDy: -100 },
       { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
       { type: 'debris', count: 3532, spreadAlt: 260, spreadInc: 1.6, dv: 0.9, decay: 0, color: C.debris, label: 'Debris ring', dx: 70, dy: -50 },
     ], still: 0.85,
@@ -126,7 +126,7 @@ export const SCENES = [
       { type: 'ring', alt: 420, inc: 51.6, color: C.iss, crossHit: 0.55, thick: 0.0032, opacity: 0.85, sat: { speed: 0.16,
         label: 'ISS (illustrative orbit)', short: 'ISS (illustrative)', iss: true, big: 1.3, minPx: 44, maxPx: 90, dx: 96,
         dy: 14 } },
-      { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: -60, impactDy: 50 },
+      { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: -60, impactDy: 50, dx: -40, dy: 62 },
       { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol' },
       { type: 'debris', count: 1807, spreadAlt: 150, spreadInc: 5, spreadRaan: 2.2, dv: 1.0, decay: 0.25, color: C.debris,
         label: 'Debris of Cosmos 1408', short: 'Cosmos 1408 debris', dx: 60, dy: -34 },
@@ -159,7 +159,7 @@ export const SCENES = [
         ' the ground segment.',
     cite: 'SWF 2026, pp. 15-06 to 15-07 (attributed to Russia by the US, UK and EU, May 2022).', related: 'tallinn-2017', event: 'ru-2022-viasat',
     actors: [
-      { type: 'geo', lon: 9, label: 'KA-SAT (GEO, unaffected)', short: 'KA-SAT (GEO)', dx: 0, dy: -50, color: C.geo, dimT0: 0.4,
+      { type: 'geo', lon: 9, minPx: 26, maxPx: 64, label: 'KA-SAT (GEO, unaffected)', short: 'KA-SAT (GEO)', dx: 0, dy: -50, color: C.geo, dimT0: 0.4,
         dimT1: 0.7, hub: [46, 8], hubLabel: 'Ground management network (illustrative)', hubShort: 'Ground network', hubDx: -60,
         hubDy: 40, pulse: [0.1, 0.3], beams: [[50, 30], [48, 10], [52, 0], [46, 20], [55, 15]] },
       { type: 'terminals', boxes: [[44, 52, 22, 40, 0.34, 0], [47, 55, 6, 22, 0.28, 1], [43, 50, -6, 8, 0.2, 2], [54, 60,
@@ -182,12 +182,12 @@ export const SCENES = [
           'beam can dazzle a sensor; a high-power' +
         ' beam could damage it. SWF describes Russia’s Peresvet as a mobile laser dazzler (Russia view: shelter sites only).',
     cite: 'SWF 2026, p. 01-35 (MIRACL); pp. 02-35 to 02-36 (Peresvet shelter sites; site markers approximate).', related: null, event: 'us-1997-miracl',
-    hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 }, lift: 30, staticZoom: 2.6, staticCenter: [35, -108],
+    hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 }, lift: 30, stillShort: ['MIRACL beam'], staticZoom: 2.6, staticCenter: [35, -108],
     actors: [
       { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
       { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.5, minPx: 34, maxPx: 70, dx: 92, dy: -26 },
       { type: 'beam', from: [32.4, -106.4], window: 0.42, color: C.laser, label: 'MIRACL beam (illustrative)', short: 'MIRACL beam',
-        width: 0.034, dx: 96, dy: 34 },
+        width: 0.034, dx: 96, dy: -20, labelOffDisc: true },
       { type: 'site', at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', short: 'Teykovo', color: '#ffb0f0', dx: 0, dy: 30, small: true, liveOnly: true },
       { type: 'site', at: [56.63, 47.89], label: 'Yoshkar-Ola', color: '#ffb0f0', dx: 40, dy: -18, small: true, liveOnly: true },
       { type: 'site', at: [55.03, 82.92], label: 'Novosibirsk', color: '#ffb0f0', dx: 0, dy: 26, small: true, liveOnly: true },
@@ -196,7 +196,7 @@ export const SCENES = [
       'MIRACL beam tracks the satellite'], [0.8, 'Same principle: SWF describes Russia’s Peresvet (named in 2018) as a mobile laser dazzler',
       'SWF: Russia’s Peresvet is a laser dazzler']], cameras: [{ name: 'Follow the satellite', fit: { site: [32.4, -106.4],
       tilt: 55 } }, { name: 'Side view', fit: { site: [32.4, -106.4], tilt: 58, side: -1, fill: 0.72 } }, { name: 'Zoom on MSTI-3',
-      fit: { site: [32.4, -106.4], tilt: 10, fill: 0.95, dMax: 3 } }, { name: 'Russia: Peresvet sites (SWF)', at: [50, 55,
+      fit: { site: [32.4, -106.4], tilt: 10, fill: 0.8, dMax: 4.6 }, phone: { fit: { site: [32.4, -106.4], tilt: 10, fill: 0.7, dMax: 4.6 } } }, { name: 'Russia: Peresvet sites (SWF)', at: [50, 55,
       2.3], look: [56, 58, 1.0], ref: false, hide: ['MSTI-3', 'MIRACL', 'White Sands'],
       status: ['SWF: Russia’s Peresvet is a mobile laser dazzler; pins mark its shelter sites', 'Peresvet shelter sites (approx.)'] }] },
   // ---------------------------------------------------------------- co-orbital scenes (SWF 2026): sj21-tug, rpo, spaceplanes
@@ -403,7 +403,7 @@ export const SCENES = [
       { name: 'China: CSSHQ and released objects', act: 2, fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3,
         0.6, 0.75], fill: 0.93, dMin: 0.1, t: 0.75 } },
       { name: 'Wide: Earth and X-37B LEO orbits', at: [40, -25, 4.4], phone: { at: [40, -25, 5.2] }, ref: false }],
-    staticCenter: [40, 105], staticFit: 1.6, staticSnap: { csshq: [0.625, 0.86], objJ: [0.625], objG: [0.86] }, staticStatus: 'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and' +
+    staticCenter: [40, 105], staticFit: 1.6, staticFitPhone: 1.3, staticSnap: { csshq: [0.6, 0.93], objJ: [0.605], objG: [0.93] }, staticStatusPhone: 'X-37B: eight flights since 2010 · CSSHQ: three flights, a fourth launched Feb. 2026', staticStatus: 'US X-37B: eight flights since 2010 (OTV-7 in an orbit reaching 38,838 km) · China’s CSSHQ: three flights and' +
         ' a fourth launched in Feb. 2026' },
 ];
 export const HERO = { id: 'hero', title: 'Overview', shells: ['LEO', 'MEO', 'GEO'], duration: 40, spin: true,
