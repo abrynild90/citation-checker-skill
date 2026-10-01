@@ -275,7 +275,7 @@ const methods = {
   },
   // Layout probe for QA (tools/scene_check.mjs): what is drawn, in screen px for a w x h canvas: Earth disc, sprite marks (with the item index),
   // curve/beam polylines, particle samples, dome discs, referent sizes and the action-region box (referents + trails + debris).
-  _probe(w, h) {
+  _probe(w, h, free = false) {
     const T = this.T,
       cam = this.camera,
       cp = cam.position,
@@ -389,7 +389,8 @@ const methods = {
       if (cur.length > 1) polys.push({ p: cur, role: 'orbit' });
     }
     let action = null;
-    const inb = act.filter((p) => p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h);
+    // free: stills recompose on everything that acts, even where the camera now cuts it off (within two frames of the view)
+    const inb = act.filter((p) => (free ? p[0] > -w && p[0] < 2 * w && p[1] > -h && p[1] < 2 * h : p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h));
     if (inb.length > 1) {
       const xs = inb.map((p) => p[0]),
         ys = inb.map((p) => p[1]);

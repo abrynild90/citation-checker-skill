@@ -200,6 +200,7 @@ export function buildSim(cfg) {
         thick: a.thick,
         label: a.label,
         short: a.short,
+        staticHide: a.staticHide,
         labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)],
         labelDx: a.dx,
         labelDy: a.dy,
@@ -211,6 +212,7 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: 'site',
         liveOnly: a.liveOnly,
+        offGlobe: a.offGlobe,
         scale: a.small ? 1.7 : null,
         pos: () => ll(a.at[0], a.at[1], 1.003),
         color: a.color,
@@ -295,12 +297,12 @@ export function buildSim(cfg) {
         shape: 'tick',
         impactMark: true,
         color: '#fff1c1',
-        label: 'Impact',
-        short: 'Impact',
+        label: a.impactLabel ?? 'Impact',
+        short: a.impactShort ?? 'Impact',
         labelDx: a.impactDx ?? 70,
         labelDy: a.impactDy ?? -50,
         opt: true,
-        pos: (t) => (t > tgt.t + 0.06 ? tgt.hitPos : null),
+        pos: (t) => (t > tgt.t + 0.02 ? tgt.hitPos : null),
       });
     if (a.type === 'target' && tgt && a.fall) {
       // after the hit the body breaks into larger pieces that sink and burn up (illustrative)
@@ -460,7 +462,7 @@ export function buildSim(cfg) {
       // Fragments start hot (pale orange) and cool to dim red with age; each has its own tint and brightness. Soft sprites, normal blending: no white clipping.
       const HOT = [1, 0.8, 0.5],
         MID = [1, 0.5, 0.2],
-        COOL = [0.62, 0.17, 0.12];
+        COOL = a.lateGlow ? [0.95, 0.45, 0.25] : [0.62, 0.17, 0.12]; // lateGlow: old fragments stay clearly visible
       let kc = 0,
         kb = 1e9;
       P.forEach((p, k) => {
@@ -507,7 +509,7 @@ export function buildSim(cfg) {
             if (colr) {
               const age = clamp01(dt * (a.decay > 0 ? 2.2 : 0.8) + p.cj),
                 c = age < 0.4 ? lerp3(HOT, MID, age / 0.4) : lerp3(MID, COOL, (age - 0.4) / 0.6),
-                fade = 1 - 0.45 * age,
+                fade = 1 - (a.lateGlow ? 0.2 : 0.45) * age,
                 k4 = 4 * k;
               colr[k4] = c[0] * p.br;
               colr[k4 + 1] = c[1] * p.br;
@@ -917,7 +919,8 @@ export function buildSim(cfg) {
         dynCol: true,
         label: a.label,
         short: a.short,
-        labelAt: ll(49, 30, 1.05),
+        labelAt: ll(49, 30, a.labelOffDisc ? 1.004 : 1.05),
+        labelOffDisc: a.labelOffDisc,
         labelDx: 90,
         labelDy: -56,
         colored: true,
@@ -1102,7 +1105,8 @@ export function buildSim(cfg) {
   const dollyCam = () => {
     const ht = tgt.t,
       arc = items._arc,
-      keys = [0, ht, ht + 0.1, 0.6, 1],
+      // earlyKey: the camera is already tight on the intercept at mid-approach
+      keys = cfg.earlyKey ? [0, ht * 0.45, ht, ht + 0.1, 0.6, 1] : [0, ht, ht + 0.1, 0.6, 1],
       core = [tgt.hitPos].concat(arc ? [arc.from] : [], aircraftPos ? [aircraftPos(0)] : []),
       c0 = centroid(core),
       cn = norm(c0);
@@ -1179,24 +1183,40 @@ export function buildSim(cfg) {
       }
       if (c.trackPath) {
         // Camera that follows a suborbital path: fitted at every t to the launch site, the head of the path and (later) the GEO ring above the apogee.
+        // trackPath.lift raises the view direction toward the pole, so the equatorial GEO ring is seen as an open ellipse
         const it = items.find((i) => i.trackable),
           all = it.all,
           up = norm(all[all.length >> 1]),
           sd = norm(cross3(up, [0, 1, 0])),
           tilt = (c.trackPath.tilt ?? 30) * DEG,
-          n = norm(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1)))),
-          at = (t, asp) => {
+          n = norm(add(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1))), [0, c.trackPath.lift ?? 0, 0])),
+          pose = (t, asp, geo, ring) => {
             const pl = it.pts(t),
               P = [
                 all[0],
                 pl.length ? pl[pl.length - 1] : all[1],
                 all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + 0.22) * (all.length - 1)))],
               ];
-            if (t > (c.trackPath.geoT ?? 0.35)) P.push(scl(up, rAlt(GEO_ALT)));
+            if (geo) P.push(scl(up, rAlt(GEO_ALT)));
+            // trackPath.ring: the whole GEO ring (8 points in the equatorial plane) and the arc's apex stay in frame
+            if (ring) {
+              const R = rAlt(GEO_ALT);
+              for (let k = 0; k < 8; k++) P.push([R * Math.cos((k * Math.PI) / 4), 0, R * Math.sin((k * Math.PI) / 4)]);
+              P.push(all[all.length >> 1]);
+            }
             const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
             return { ...fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp }), up: null };
+          },
+          at = (t, asp) => {
+            const g0 = c.trackPath.geoT ?? 0.35;
+            if (!c.trackPath.ring) return pose(t, asp, t > g0, false);
+            // the ring framing is blended in over the 0.14 before geoT + 0.14, so the camera glides out instead of jumping
+            const w = smooth((t - (g0 - 0.1)) / 0.2),
+              A = pose(t, asp, false, false),
+              B = pose(t, asp, true, true);
+            return { pos: add(scl(A.pos, 1 - w), scl(B.pos, w)), look: add(scl(A.look, 1 - w), scl(B.look, w)), up: null };
           };
-        return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(0), hideShell: true };
+        return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(0), hideShell: true, ringFrame: !!c.trackPath.ring };
       }
       if (c.fitCraft) {
         // Tight follow camera on a set of craft: the view direction is given in the anchor's local frame [along, radial, cross-track] and stays fixed;

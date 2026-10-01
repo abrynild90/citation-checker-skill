@@ -149,7 +149,7 @@ function check(S) {
   }
   if (S.def && P.refs) for (const r of P.refs) if (r.px < 6) f('ref-small', `${r.text} ${r.px.toFixed(1)} px`);
   // action region: each side counts at least 40% of the frame, so a long trail across the frame qualifies
-  if (S.def && S.action !== undefined && !S.docked) { // a docked pair is one object: the action region is that single spot, so it is exempt while docked
+  if (S.def && S.action !== undefined && !S.docked && !S.ringFrame) { // a ring-framed default camera (DN-2: the whole arc and the whole GEO ring) shows the action small by design; a docked pair is one object: the action region is that single spot, so it is exempt while docked
     const a = S.action; const fr = a ? Math.max((a.x1 - a.x0) / W, 0.4) * Math.max((a.y1 - a.y0) / H, 0.4) : 0; if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`); }
   // burst-edge: on the default camera no burst ring / hit point / debris may touch the frame edge (it must sit inside with margin)
   if (S.def && S.kind === 'live') {
@@ -173,13 +173,13 @@ function check(S) {
   }
   if (S.kind === 'still' && P.disc) { // label font and subject centring (union of the Earth disc, shells that fit, and the action region)
     if (u * 11 < 28) f('still-font', `label font ${(u * 11).toFixed(0)} px < 28 px`);
-    const tile = W < 2000, b0 = (tile ? 0.1 : 0.04) * H, bh = (tile ? 0.82 : 0.9) * H - b0, d = P.disc, whole = d.r < 1.3 * bh;
+    const tile = W < 2000, b0 = (tile ? 0.17 : 0.04) * H, bh = (tile ? 0.82 : 0.9) * H - b0, d = P.disc, whole = d.r < 1.3 * bh; // a regional close-up (disc over 1.3 bands) is framed on its action only
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     const add = (a, b) => { x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, a); y1 = Math.max(y1, b); };
     const dsc = (c, r, free) => { if (free) { add(c.cx - r, c.cy - r); add(c.cx + r, c.cy + r); } else { add(Math.max(0, c.cx - r), Math.max(0, c.cy - r)); add(Math.min(W, c.cx + r), Math.min(H, c.cy + r)); } };
     if (P.action) { add(P.action.x0, P.action.y0); add(P.action.x1, P.action.y1); }
-    dsc(d, d.r, whole);
-    for (const c of P.circles || []) if (c.ring && c.r > 0 && Math.abs(c.cx - W / 2) < W) dsc(c, c.r, whole && c.r < 1.2 * bh);
+    if (whole || !P.action) dsc(d, d.r, whole);
+    if (whole) for (const c of P.circles || []) if (c.ring && c.r > 0 && Math.abs(c.cx - W / 2) < W) dsc(c, c.r, whole && c.r < 1.2 * bh);
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     if (Math.abs(cx - W / 2) > 0.06 * W) f('still-centre', `subject centre x ${Math.round(cx)} is ${Math.round(Math.abs(cx - W / 2))} px off the frame centre (${W} wide)`);
     if (Math.abs(cy - (b0 + bh / 2)) > 0.08 * H) f('still-centre', `subject centre y ${Math.round(cy)} off the band centre ${Math.round(b0 + bh / 2)} (${H} high)`);
@@ -244,7 +244,7 @@ const LIVE = (KEYS) => {
     const under = res.some(r => x > r.x0 - 18 && x < r.x1 + 18 && y > r.y0 - 18 && y < r.y1 + 18); // 18 px pad: a model half-hidden by the caption counts
     if (x < 10 || y < 10 || x > W - 10 || y > H - 10 || v.z > 1 || occ || under) keyOut.push(`${Lb.text} ${occ ? 'behind Earth' : under ? 'under the caption/banner' : 'off frame'} (${Math.round(x)},${Math.round(y)})`);
   }
-  return { W, H, labels, reserved, probe, hidden, status, statusLines, hitT, keyOut, docked: h.sim.items.some(i => i.dockOn && i.dockOn(h.t)), t: h.t, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), act: h._act };
+  return { W, H, labels, reserved, probe, hidden, ringFrame: !!h.sim.cams[h.camIdx]?.ringFrame, status, statusLines, hitT, keyOut, docked: h.sim.items.some(i => i.dockOn && i.dockOn(h.t)), t: h.t, bannerLines: tb > 32 ? 2 : 1, audit: window.__cs.audit().filter(a => /scene/.test(a.chart || '')), act: h._act };
 };
 // Subjects: what the sim draws at this t (visible primary craft, flash, debris cloud) versus what this camera actually frames.
 const SUBJ = () => {

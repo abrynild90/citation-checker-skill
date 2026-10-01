@@ -8,7 +8,7 @@ import { earthImg } from './earth.js';
 const methods = {
   // Extent of the picture for recomposing: like _contentBox, but a whole-globe disc (and shells that fit about 1.2 frames) counts unclipped.
   _stillExtent(W, H, bandH) {
-    const P = this._probe(W, H),
+    const P = this._probe(W, H, true),
       d = P.disc;
     if (!d || !(d.r > 0)) return null;
     const whole = d.r < 1.3 * bandH;
@@ -36,9 +36,11 @@ const methods = {
         add(Math.min(W, c.cx + r), Math.min(H, c.cy + r));
       }
     };
-    disc(d, d.r, whole);
-    for (const c of P.circles || []) if (c.ring && c.r > 0 && inb(c.cx, c.cy)) disc(c, c.r, whole && c.r < 1.2 * bandH);
-    return x1 > x0 && y1 > y0 ? { x0, y0, x1, y1, whole } : null;
+    if (whole || !P.action) disc(d, d.r, whole);
+    for (const c of whole ? P.circles || [] : []) if (c.ring && c.r > 0 && inb(c.cx, c.cy)) disc(c, c.r, whole && c.r < 1.2 * bandH);
+    // a craft is a few hundred px wide with its glow: pad the box so nothing sits on the frame edge
+    const pad = 0.05;
+    return x1 > x0 && y1 > y0 ? { x0: x0 - pad * W, y0: y0 - pad * H, x1: x1 + pad * W, y1: y1 + pad * H, whole } : null;
   },
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
   // the illustrative banner, caption and source into the PNG, then restore the live size.
@@ -83,7 +85,7 @@ const methods = {
     this.renderer.render(this.scene, this.camera);
     // Recompose: the picture (Earth disc + everything that moves) is dollied until it fills the band above the caption, then centred in it. A whole-globe
     // composition (disc under ~1.3 band heights) is always shown whole and centred; a deliberate regional close-up keeps its crop and is only centred.
-    const bandY0 = (o.title ? 0.1 : 0.04) * H, // a tile keeps clear of its title strip above and its (up to two-line) caption below
+    const bandY0 = (o.title ? 0.17 : 0.04) * H, // a tile keeps clear of its title strip above and its (up to two-line) caption below
       bandH = (o.aspect ? 0.82 : 0.9) * H - bandY0,
       rerender = () => {
         cam.updateProjectionMatrix();

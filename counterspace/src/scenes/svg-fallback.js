@@ -82,6 +82,19 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
   const sw = 2.2;
   const rect = (a, b, w, h, f, st = dark) =>
     k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
+  const shade = (a, b, w, h) => {
+    k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h * 0.42).attr('fill', '#fff').attr('fill-opacity', 0.2);
+    k.append('rect').attr('x', a).attr('y', b + h * 0.58).attr('width', w).attr('height', h * 0.42).attr('fill', '#000').attr('fill-opacity', 0.26);
+    k.append('rect')
+      .attr('x', a)
+      .attr('y', b)
+      .attr('width', w)
+      .attr('height', h)
+      .attr('fill', 'none')
+      .attr('stroke', '#fff')
+      .attr('stroke-opacity', 0.25)
+      .attr('stroke-width', 1.2);
+  };
   const poly = (d, f, st = dark) => k.append('path').attr('d', d).attr('fill', f).attr('stroke', st).attr('stroke-width', sw);
   if (shape === 'sat' || shape === 'iss') {
     if (shape === 'iss') {
@@ -98,6 +111,7 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
       for (const sg of [-1, 1]) {
         const x0 = sg < 0 ? -50 : 14;
         rect(x0, -17, 36, 34, panel);
+        shade(x0, -17, 36, 34); // light from the top left: a lit upper half and a shaded lower half, like the 3D model
         for (let i = 1; i < 3; i++)
           k.append('line')
             .attr('x1', x0 + i * 12)
@@ -122,6 +136,7 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
           .attr('stroke-width', 3);
       }
       rect(-14, -15, 28, 30, color);
+      shade(-14, -15, 28, 30);
       k.append('circle').attr('cx', 0).attr('cy', -21).attr('r', 6).attr('fill', '#dfe6f7').attr('stroke', dark).attr('stroke-width', 1.6);
     }
   } else if (shape === 'plane') {
@@ -146,7 +161,8 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
     // truck with a mast, a crossed antenna and emission arcs
     rect(-40, 12, 50, 20, '#3a4254');
     rect(12, 16, 22, 16, '#dfe6f7');
-    for (const cx of [-28, -6, 24]) k.append('circle').attr('cx', cx).attr('cy', 34).attr('r', 7).attr('fill', dark).attr('stroke', '#8e9bb4').attr('stroke-width', 2);
+    for (const cx of [-28, -6, 24])
+      k.append('circle').attr('cx', cx).attr('cy', 34).attr('r', 7).attr('fill', dark).attr('stroke', '#8e9bb4').attr('stroke-width', 2);
     k.append('line').attr('x1', -14).attr('x2', -14).attr('y1', 12).attr('y2', -34).attr('stroke', '#dfe6f7').attr('stroke-width', 4);
     k.append('line').attr('x1', -28).attr('x2', 0).attr('y1', -30).attr('y2', -30).attr('stroke', color).attr('stroke-width', 4);
     k.append('line').attr('x1', -24).attr('x2', -4).attr('y1', -18).attr('y2', -18).attr('stroke', color).attr('stroke-width', 4);
@@ -201,6 +217,7 @@ function renderPanels(sim, el) {
       status: phone ? '' : pn.status,
       title: phone || narrow ? `${pn.title} · ${pn.brief}` : pn.title,
       keep: true,
+      drop: phone ? pn.dropPhone : null,
     });
     const x = narrow ? gap : gap + k * (pw + gap),
       y = narrow ? top + gap + k * (ph + gap) : top + gap;
@@ -599,7 +616,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     const dx = CX - W / 2,
       dy = CY - (fTop + fBot) / 2,
       dl = Math.hypot(dx, dy) || 1,
-      er = Math.max(14, Math.min(22, W * 0.07)),
+      er = Math.max(19, Math.min(30, W * 0.095)), // a third larger than before
       ex = Math.max(er + 6, Math.min(W - er - 6, W / 2 + (dx / dl) * (W / 2 - er - 8))),
       ey = Math.max(fTop + er + 4, Math.min(fBot - er - 4, (fTop + fBot) / 2 + (dy / dl) * ((fBot - fTop) / 2 - er - 8)));
     const cue = svg.append('g');
@@ -626,7 +643,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('text-anchor', 'middle')
       .attr('fill', '#a9b3cc')
       .attr('font-family', 'system-ui')
-      .attr('font-size', 9.5)
+      .attr('font-size', 10.5)
       .text('Earth (off scale)');
     marks.push({ x: ex, y: ey, r: er + 14, n: 'earth-cue' });
   }
@@ -659,6 +676,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   });
   const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false) => {
     if (!p || p.hidden || !text || p.x < 4 || p.y < 4 || p.x > W - 4 || p.y > H - 4) return;
+    if (opts.drop?.includes(text)) return; // a panel's own label dropped where it would cross another on a phone
     if (opt && W < 520 && sim.cfg.acts && !opts.panel) return; // the busy multi-act composite drops its secondary labels on a phone
     cands.push({
       x: at ? at[0] * W : p.x + dx,
@@ -737,7 +755,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         });
         if (cur.length > 1) ringsL.push(cur);
       }
-      if (it.label && it.labelAt && pts.length > 2)
+      if (it.label && it.labelAt && pts.length > 2 && !it.staticHide)
         label(project(it.labelAt), it.short && NARROW ? it.short : it.label, it.color, it.labelDx, it.labelDy, W < 700 ? null : it.staticAt, it.opt);
     }
     if (it.kind === 'cloud') {
@@ -812,7 +830,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
         let p = project(q);
         if (p.hidden) continue;
         const c = it.statusColor ? it.statusColor(t) : it.color;
-        const craftShape = ['sat', 'plane', 'aircraft', 'ship', 'site', 'jammer'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
+        const craftShape =
+          ['sat', 'plane', 'aircraft', 'ship', 'site', 'jammer'].includes(it.shape) && (it.prim || (it.label && !it.ctx && !it.small) || it.iss);
         // craft drawn as silhouettes: size follows the panel (bigger on the desk, still readable on a phone), and the subject of a scene is never a speck
         const cs = craftShape
           ? Math.round(Math.min(sim.cfg.spin ? 46 : 99, craftBase * (it.iss ? 1.3 : 1)) * (it.small ? 0.72 : 1) * (CRAFT_PX[it.iss ? 'iss' : it.shape] || 1))

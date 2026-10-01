@@ -233,36 +233,48 @@ const methods = {
     Object.assign(g.userData, { span: 0.11, minPx: 24, maxPx: 62 });
     return g;
   },
-  // Spaceplane (X-37B / CSSHQ class): delta planform, short fuselage, one canted fin pair; span about 0.05 (exaggerated).
+  // Spaceplane (X-37B / CSSHQ class): tapered fuselage with a rounded nose, a dark cockpit and payload-bay door, swept delta wings, twin canted tail fins and
+  // an engine bell; span about 0.046 (exaggerated). Nose along +z, up is +y.
   _planeModel(color, bright) {
     const T = this.T,
       g = new T.Group(),
       body = this._mat(color),
+      white = this._mat(0xeef1f8),
       dark = this._mat(0x2b3140);
-    const sh = new T.Shape();
-    sh.moveTo(0, 0.026);
-    sh.lineTo(0.021, -0.014);
-    sh.lineTo(0.008, -0.019);
-    sh.lineTo(-0.008, -0.019);
-    sh.lineTo(-0.021, -0.014);
-    sh.closePath();
-    const wing = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 0.0035, bevelEnabled: false }), body);
-    wing.rotation.x = Math.PI / 2;
-    wing.position.y = 0.0018;
-    g.add(wing);
-    const belly = new T.Mesh(new T.BoxGeometry(0.011, 0.0025, 0.03), dark);
-    belly.position.set(0, -0.0018, 0.002);
-    g.add(belly);
-    const nose = new T.Mesh(new T.ConeGeometry(0.0052, 0.012, 8), body);
-    nose.rotation.x = Math.PI / 2;
-    nose.position.set(0, 0.0015, 0.027);
+    const fus = new T.Mesh(new T.CylinderGeometry(0.0021, 0.0052, 0.044, 16), white);
+    fus.rotation.x = Math.PI / 2;
+    g.add(fus);
+    const nose = new T.Mesh(new T.SphereGeometry(0.0021, 12, 8), white);
+    nose.position.z = 0.022;
     g.add(nose);
+    const cockpit = new T.Mesh(new T.BoxGeometry(0.0034, 0.0012, 0.006), dark);
+    cockpit.position.set(0, 0.0036, 0.0128);
+    g.add(cockpit);
+    const bay = new T.Mesh(new T.BoxGeometry(0.0042, 0.0009, 0.014), body);
+    bay.position.set(0, 0.0049, -0.004);
+    g.add(bay);
+    const sh = new T.Shape();
+    sh.moveTo(0.004, 0.014);
+    sh.lineTo(0.0215, -0.0125);
+    sh.lineTo(0.0215, -0.0185);
+    sh.lineTo(-0.0215, -0.0185);
+    sh.lineTo(-0.0215, -0.0125);
+    sh.lineTo(-0.004, 0.014);
+    sh.closePath();
+    const wing = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 0.0016, bevelEnabled: false }), body);
+    wing.rotation.x = Math.PI / 2;
+    wing.position.y = -0.0012;
+    g.add(wing);
     [-1, 1].forEach((s) => {
-      const f = new T.Mesh(new T.BoxGeometry(0.0012, 0.0085, 0.008), body);
-      f.position.set(s * 0.006, 0.0068, -0.014);
-      f.rotation.z = -s * 0.35;
+      const f = new T.Mesh(new T.BoxGeometry(0.001, 0.009, 0.0095), body);
+      f.position.set(s * 0.0042, 0.0075, -0.0165);
+      f.rotation.z = -s * 0.38;
       g.add(f);
     });
+    const bell = new T.Mesh(new T.CylinderGeometry(0.0026, 0.0032, 0.003, 12), dark);
+    bell.rotation.x = Math.PI / 2;
+    bell.position.z = -0.0235;
+    g.add(bell);
     g.userData.body = wing;
     g.userData.sat = true;
     const h = new T.Sprite(
@@ -278,7 +290,7 @@ const methods = {
     h.scale.setScalar(0.07);
     g.add(h);
     g.userData.halo = h;
-    Object.assign(g.userData, { span: 0.052, minPx: 22, maxPx: 60 });
+    Object.assign(g.userData, { span: 0.046, minPx: 22, maxPx: 60 });
     return g;
   },
   _aircraftModel() {
@@ -405,7 +417,15 @@ const methods = {
     g.add(tip);
     const rings = [0, 1, 2].map(() => {
       const r = new T.Sprite(
-        new T.SpriteMaterial({ map: this.ringTex, color: this._c(color), transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: T.AdditiveBlending }),
+        new T.SpriteMaterial({
+          map: this.ringTex,
+          color: this._c(color),
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+          depthTest: false,
+          blending: T.AdditiveBlending,
+        }),
       );
       r.position.set(-0.004, 0.036, 0);
       g.add(r);
@@ -588,7 +608,8 @@ const methods = {
           }),
         );
         m.scale.setScalar(it.kvSize ?? 0.1);
-        Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: 5, maxPx: 22 }); // glow heads keep a bounded on-screen size
+        // glow heads keep a bounded on-screen size
+        Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: it.kvSize ? 5 : 13, maxPx: it.kvSize ? 22 : 32 });
       } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
         m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
@@ -664,7 +685,7 @@ const methods = {
                   ? [3 * (it.labelIdx ?? 0), 3 * (it.labelIdx ?? 0) + 1, 3 * (it.labelIdx ?? 0) + 2].map((i) => g.attributes.position.array[i])
                   : null),
           null,
-          null,
+          it.labelOffDisc ? { offGlobe: true, stillOnly: true } : null,
           it.labelDy ?? 0,
           it.labelDx ?? 0,
           it.short,
