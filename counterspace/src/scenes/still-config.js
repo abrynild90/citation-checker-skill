@@ -21,8 +21,8 @@ export const STILL = {
     t: 0.3,
     pos: [2.146, 1.145, 2.307],
     look: [-0.182, 0.315, 0.668],
-    fov: 18,
-    shift: [0.1, 0],
+    fov: 14,
+    shift: [0.2, 0.15],
     hide: ['Peresvet', 'Yoshkar', 'Novosibirsk', 'Teykovo'],
   },
   // SJ-21 tug: the whole GEO ring, the Earth and the docked pair with their labels grouped beside it.
