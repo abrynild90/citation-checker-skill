@@ -53,7 +53,8 @@ function prefetchEarth() {
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 const overlay = document.getElementById('overlay'),
   view = document.getElementById('sceneView');
-let cur = null,
+let curSim = null, // the simulation of the open scene (the static still re-draws it at a print-friendly layout width)
+  cur = null,
   returnFocus = null,
   heroSim = null;
 export function setHeroSim(s) {
@@ -93,6 +94,7 @@ export async function openScene(id, originEl) {
   document.getElementById('sceneStepsBox').open = !isPhoneNow();
   document.getElementById('sceneStepsBox').hidden = !(cfg.status || cfg.steps || []).length;
   const sim = buildSim(cfg);
+  curSim = sim;
   const cams = document.getElementById('scCams');
   cams.innerHTML = '';
   const h = await getHost();
@@ -324,6 +326,25 @@ export async function exportStill() {
   if (host && glOK) return host.stillPNG(cur.title, cur.cite);
   const svg = view.querySelector(':scope > svg');
   if (!svg) throw new Error('No diagram to export');
+  // The diagram is laid out afresh in an off-screen stage 760 px wide (about 5:4, so the Earth fills more of the frame): its 11 px labels then
+  // come out at about 43 px in the 3000 px print, instead of the 25 to 30 px a wide desktop stage would give. Same layout engine as on screen.
+  if (curSim) {
+    const vw = 760,
+      // never wider than 5:4
+      vh = Math.round(Math.max(vw * 0.8, Math.min(900, (vw * (view.clientHeight || 500)) / (view.clientWidth || 800)))),
+      tmp = document.createElement('div');
+    tmp.setAttribute('aria-hidden', 'true');
+    tmp.style.cssText = `position:fixed;left:-10000px;top:0;width:${vw}px;height:${vh}px;overflow:hidden`;
+    document.body.appendChild(tmp);
+    try {
+      const node = renderSVG(curSim, tmp);
+      if (node?.viewBox) return await svgToPNG(node, cur.title, cur.cite);
+    } catch (e) {
+      /* fall back to the on-screen diagram */
+    } finally {
+      tmp.remove();
+    }
+  }
   return svgToPNG(svg, cur.title, cur.cite);
 }
 function setStatus(msg, quiet) {

@@ -99,7 +99,7 @@ export const SCENES = [
     phoneHide: ['Thor launch'],
     still: 0.7,
     camDist: 3.5,
-    phoneK: 1.8, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
+    phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
     staticZoom: 1.7,
     staticCenter: [35, -205],
     stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
@@ -507,7 +507,7 @@ export const SCENES = [
       {
         name: 'Baltic: airliners and jammer zone',
         short: 'Baltic zone',
-        at: [41, 13, 1.56],
+        at: [41, 13, 1.5],
         look: [53.4, 22.6, 0.98],
         phone: { at: [38, 12, 1.48] },
       },
