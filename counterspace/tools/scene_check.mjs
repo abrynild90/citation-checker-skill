@@ -22,7 +22,8 @@
 //   burst-edge       default camera: a burst ring / debris point touches the frame edge (4 px margin)
 //   static-font      a static diagram's text is drawn under 9 px (footer note included)
 //   static-ring-clip a ring-fit static diagram (DN-2, SJ-21) has a point of its orbit within 4 px of, or outside, the panel edge
-//   craft-area       a static craft icon covers more of the Earth disc than its cap (context craft such as the ISS 3%, a subject 20%)
+//   craft-area       a static craft icon (measured silhouette; on screen at every width and in the static-still print layout) is over its share of the disc
+//                    (3% for context craft and every icon in Starfish/Solwind/GNSS; a subject 20%), or covers the Earth centre in those three
 //   orbit-thru-centre  a static orbit drawn as a thin straight chord through the Earth's centre (edge-on ring: the plane must be viewed obliquely)
 //   subject-small    a labelled craft is drawn under 22 px (default camera) or under 44 px (follow camera, 30 px at 375)
 //   preset-empty     every camera preset x t in 0.1..0.9: the scene's primary subject(s) (labelled craft, burst, debris cloud) are drawn at that t but none projects
@@ -169,9 +170,14 @@ function check(S) {
     if (bad.length) f('static-ring-clip', `${bad.length} orbit point(s) outside the ${W}x${H} panel (first at ${Math.round(bad[0][0])},${Math.round(bad[0][1])})`);
   }
   // craft icon area cap: a context craft (the ISS) is at most 3% of the Earth disc area, any single craft (a subject) at most 20%; limb-only panels exempt
-  if (S.kind === 'static' && P.crafts && P.disc && P.disc.r < 0.8 * Math.max(W, H)) {
-    const da = Math.PI * P.disc.r * P.disc.r;
-    for (const c of P.crafts) { const a = c.w * c.h / da, cap = c.subject ? 0.2 : 0.03; if (a > cap) f('craft-area', `${c.name} icon ${Math.round(c.w)}x${Math.round(c.h)} px is ${(a * 100).toFixed(1)}% of the Earth disc (> ${cap * 100}%)`); }
+  if ((S.kind === 'static' || S.kind === 'static-still') && P.crafts && P.disc && P.disc.r < 0.8 * Math.max(W, H)) {
+    const da = Math.PI * P.disc.r * P.disc.r, ctxScene = ['starfish', 'solwind', 'gnss'].includes(S.id); // those scenes: every icon is context (3%)
+    for (const c of P.crafts) {
+      const a = c.w * c.h / da, cap = ctxScene || !c.subject ? 0.03 : 0.2;
+      if (a > cap) f('craft-area', `${S.kind} ${c.name} icon ${Math.round(c.w)}x${Math.round(c.h)} px is ${(a * 100).toFixed(1)}% of disc (> ${cap * 100}%)`);
+      if (ctxScene && Math.abs(c.x - P.disc.cx) < c.w / 2 && Math.abs(c.y - P.disc.cy) < c.h / 2)
+        f('craft-area', `${S.kind} ${c.name} icon covers the Earth centre`);
+    }
   }
   if (S.minFont != null && S.minFont < 9) f('static-font', `smallest text ${S.minFont}px < 9px at ${W}px`);
   if (P.disc0 && P.polys) for (const c of P.polys) {
@@ -379,7 +385,7 @@ if (MODES.includes('static')) for (const w of VPS) {
     await page.waitForTimeout(300);
     const S = await page.evaluate(STATIC);
     if (!S) { record(tag('static', id, w), [{ type: 'audit', detail: 'no static svg' }]); continue; }
-    S.kind = 'static'; S.def = false; S.action = undefined; S.resX = await page.evaluate(SSX);
+    S.kind = 'static'; S.id = id; S.def = false; S.action = undefined; S.resX = await page.evaluate(SSX);
     const parts = S.panels ? S.panels.map(p => ({ ...S, ...p, kind: 'static', def: false, action: undefined, audit: null })) : [S];
     if (S.panels) parts.forEach((p, i) => { if (i) p.resX = null; });
     if (S.panels && S.audit) parts[0].audit = S.audit;
@@ -388,6 +394,11 @@ if (MODES.includes('static')) for (const w of VPS) {
     if (w === 1440) {
       const url = await page.evaluate(() => window.__cs.exportStill());
       fs.writeFileSync(`${out}/still-static-${id}.png`, Buffer.from(url.split(',')[1], 'base64'));
+      const sl = await page.evaluate(() => {
+        const z = window.__cs.lastStillLay;
+        return z && z.probe ? { W: z.W, H: z.H, probe: { crafts: z.probe.crafts, disc: z.probe.disc } } : null;
+      });
+      if (sl) record(tag('still-static-craft', id), check({ kind: 'static-still', id, W: sl.W, H: sl.H, labels: [], reserved: [], probe: sl.probe }), { W: w });
       const eb = await page.evaluate(EMPTY, url); record(tag('still-static', id), check({ kind: 'still', W: 1000, H: 1000, labels: [], reserved: [], emptyBand: eb.band, emptyArea: eb.area }), { W: w });
     }
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);

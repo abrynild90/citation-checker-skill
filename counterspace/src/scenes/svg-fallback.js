@@ -224,6 +224,22 @@ function drawCraft(g, shape, x, y, s, color, o = {}) {
   }
   return k;
 }
+// Real drawn extent of a craft silhouette in its own 100-unit frame (measured once in a throwaway attached SVG: the diagram's own SVG is detached while built).
+const boxCache = {};
+function localBox(shape, variant) {
+  const key = shape + '|' + variant;
+  if (boxCache[key]) return boxCache[key];
+  const host = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  host.setAttribute('style', 'position:fixed;left:-9999px;top:0;width:10px;height:10px');
+  document.body.appendChild(host);
+  let b = { width: 0, height: 0 };
+  try {
+    b = drawCraft(d3.select(host), shape, 0, 0, 100, '#fff', { variant }).node().getBBox();
+  } finally {
+    host.remove();
+  }
+  return (boxCache[key] = { width: b.width, height: b.height });
+}
 // Icon bounding box in units of the craft size (width, height), for the checker's icon-area rule.
 const CRAFT_BOX = { sat: [1, 0.45], iss: [0.96, 0.64], plane: [0.7, 0.7], aircraft: [0.7, 0.7], ship: [1, 0.2], site: [0.68, 0.8], jammer: [0.9, 0.8] };
 const CRAFT_PX = { sat: 1, iss: 1.15, plane: 0.8, aircraft: 0.7, ship: 0.9, site: 0.45, jammer: 0.7 };
@@ -383,12 +399,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   let x0 = -1.08,
     x1 = 1.08,
     y0 = -1.08,
-    y1 = 1.08;
+    // a close-up (staticGlobeY1) keeps the action large: the globe's lower part runs off the frame
+    y1 = (!opts.panel && ((W < 520 && sim.cfg.staticGlobeY1Phone) || sim.cfg.staticGlobeY1)) || 1.08;
   // far orbits (apogees, belts) may run off the frame so the Earth stays large
   const fitMax = sim.cfg.staticFit && !sim.cfg.staticFitRing && !opts.panel ? (W < 520 && sim.cfg.staticFitPhone) || sim.cfg.staticFit : 0;
   const grow = (p) => {
     if (!p || p.hidden) return;
     if (fitMax && Math.hypot(p.x, p.y) > fitMax) return;
+    if (y1 < 1 && p.y > y1) return; // close-up (staticGlobeY1): what lies below the crop line does not set the fit
     x0 = Math.min(x0, p.x);
     x1 = Math.max(x1, p.x);
     y0 = Math.min(y0, p.y);
@@ -769,8 +787,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       o = (w / 2) * Math.abs(Math.cos(a)) + 9.5 * Math.abs(Math.sin(a)) + 7; // the pill sits just outside its dashed shell line, never on it
     cands.push({ x: px + Math.cos(a) * o, y: py - Math.sin(a) * o, px, py, w, h: 19, fixed: true, text: tx, color: it.color });
   });
-  const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false) => {
+  const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false, pin = false) => {
     if (!p || p.hidden || !text || p.x < 4 || p.y < 4 || p.x > W - 4 || p.y > H - 4) return;
+    if (W < 520 && !opts.panel && sim.cfg.staticDropPhone?.includes(text)) return; // a phone drops the labels that would crowd the subject
     if (opts.drop?.includes(text)) return; // a panel's own label dropped where it would cross another on a phone
     if (opt && W < 520 && sim.cfg.acts && !opts.panel) return; // the busy multi-act composite drops its secondary labels on a phone
     cands.push({
@@ -783,8 +802,15 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       text,
       color,
       opt,
+      pin: pin && !!at, // staticPin: the slot hint is a strong preference (the placer stays within a few px of it unless it collides)
     });
   };
+  const gapPts = sim.cfg.staticRingGap
+    ? sim.items.filter((i) => i.kind === 'point' && i.prim && !i.liveOnly && (i.staticPos || i.pos)).map((i) => {
+        const q = i.staticPos?.(t) || i.pos(t);
+        return q ? project(q) : { x: -999, y: -999 };
+      })
+    : [];
   for (const it of sim.items) {
     if (it.kind === 'dome')
       g.append('path')
@@ -807,6 +833,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       }
       // a panel that shows no globe drops low-orbit context rings (they would be a stray arc with nothing to orbit)
       if (opts.panel && !showGlobe && it.inset && pts.length && Math.min(...it.pts(t).map((q) => Math.hypot(...q))) < 1.6) continue;
+      // staticRingGap: the orbit line is broken around each craft icon (the ring runs behind it, never through it)
+      if (sim.cfg.staticRingGap && !opts.panel)
+        pts = pts.map((p) => (!p.hidden && gapPts.some((q) => Math.hypot(p.x - q.x, p.y - q.y) < sim.cfg.staticRingGap) ? { ...p, hidden: true } : p));
       let seg = [];
       const flush = () => {
         if (seg.length > 1) dPolys.push({ p: seg.slice(), role: it.role || 'line' });
@@ -924,7 +953,11 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             .attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8))
             .attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null)
             .attr('stroke-width', it.width ? sim.cfg.staticBeamW || 5 : 1.2);
-        if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color, it.sdx, it.sdy);
+        if (it.label) {
+          const fr = sim.cfg.staticBeamLabelFrac ?? 0.5; // anchor on the beam: past the middle puts the leader above the limb, clear of the Earth
+          const bt = it.short && NARROW && sim.cfg.staticBeamLabelFrac ? it.short : it.label;
+          label({ x: a.x + (b.x - a.x) * fr, y: a.y + (b.y - a.y) * fr }, bt, it.color, it.sdx, it.sdy);
+        }
       }
     }
     if (it.kind === 'point')
@@ -947,7 +980,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             )
           : 0;
         // the ISS is context, not the subject: its icon is capped relative to the Earth (never a big shape covering the disc)
-        const cs = it.iss && !opts.panel && !sim.cfg.spin ? Math.min(cs0, Math.max(26, Math.round(R * 0.22))) : cs0;
+        let cs = it.iss && !opts.panel && !sim.cfg.spin ? Math.min(cs0, Math.max(26, Math.round(R * 0.22))) : cs0;
         // Docked pair: the two models sit side by side, touching (no link is drawn: SWF says docked, not how).
         if (it.dockWith && it.dockOn(t)) p = { ...p, x: p.x + cs * 0.5 };
         else if (it.craftId && sim.items.some((o) => o.dockWith === it.craftId && o.dockOn(t))) p = { ...p, x: p.x - cs * 0.5 };
@@ -958,6 +991,17 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
           if (Math.hypot(p2.x - p.x, p2.y - p.y) > 0.3) rot = (Math.atan2(p2.y - p.y, p2.x - p.x) * 180) / Math.PI + 90;
           else rot = -25;
         }
+        // staticCraftCap: every icon's drawn (rotated) silhouette is at most this share of the Earth disc area, at every width and in the print layout
+        if (craftShape && !opts.panel && sim.cfg.staticCraftCap) {
+          const ext = (z) => {
+            const b = localBox(it.iss ? 'iss' : it.shape, it.variant),
+              a = (rot * Math.PI) / 180,
+              hw = (b.width * z) / 200,
+              hh = (b.height * z) / 200;
+            return 4 * (Math.abs(Math.cos(a)) * hw + Math.abs(Math.sin(a)) * hh) * (Math.abs(Math.sin(a)) * hw + Math.abs(Math.cos(a)) * hh);
+          };
+          for (let n = 0; n < 40 && ext(cs) > 0.95 * sim.cfg.staticCraftCap * Math.PI * R * R; n++) cs *= 0.94;
+        }
         const mi = marks.length;
         if (it.shape !== 'none')
           mark(
@@ -965,10 +1009,24 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             craftShape ? cs * (it.shape === 'sat' || it.shape === 'ship' ? 0.5 : 0.42) + 2 : it.shape === 'sat' ? 5 : it.shape === 'tick' ? 6 : 5,
             it.label || it.shape,
           );
-        if (craftShape) drawCraft(g, it.iss ? 'iss' : it.shape, p.x, p.y, cs, c, { rot, variant: it.variant });
+        const ck = craftShape ? drawCraft(g, it.iss ? 'iss' : it.shape, p.x, p.y, cs, c, { rot, variant: it.variant }) : null;
         if (craftShape) {
-          const [bw, bh] = CRAFT_BOX[it.iss ? 'iss' : it.shape] || [0.8, 0.8];
-          crafts.push({ x: p.x, y: p.y, w: cs * bw, h: cs * bh, subject: !it.iss && !it.ctx, name: it.label || it.shape });
+          // measured silhouette (rotated, incl. wings and strokes), not the nominal box: the checker's area rule sees what is drawn
+          let [bw, bh] = (CRAFT_BOX[it.iss ? 'iss' : it.shape] || [0.8, 0.8]).map((v) => v * cs);
+          try {
+            const b = localBox(it.iss ? 'iss' : it.shape, it.variant),
+              a = (rot * Math.PI) / 180,
+              k = cs / 100,
+              hw = (b.width * k) / 2,
+              hh = (b.height * k) / 2;
+            if (b.width) {
+              bw = 2 * (Math.abs(Math.cos(a)) * hw + Math.abs(Math.sin(a)) * hh);
+              bh = 2 * (Math.abs(Math.sin(a)) * hw + Math.abs(Math.cos(a)) * hh);
+            }
+          } catch (e) {
+            /* no layout: nominal box */
+          }
+          crafts.push({ x: p.x, y: p.y, w: bw, h: bh, subject: !it.iss && !it.ctx, name: it.label || it.shape });
         }
         else if (it.shape === 'sat') {
           const q3 = it.small ? 6 : 8;
@@ -1000,6 +1058,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             it.labelDy,
             W < 700 ? null : it.staticAt,
             it.opt,
+            it.staticPin,
           );
           if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;
           if (cands.length > n0 && marks.length > mi) cands.at(-1).mk = mi;
@@ -1010,7 +1069,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       mark(p, 12, it.label || 'flash');
       g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 11).attr('fill', '#fff3c4').attr('fill-opacity', 0.35);
       g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 5).attr('fill', '#fff3c4');
-      label(p, it.label, '#fff3c4', it.labelDx, it.labelDy);
+      label(p, phoneText(it.label), '#fff3c4', it.labelDx, it.labelDy);
     }
     if (it.kind === 'flash' && !it.big && t >= it.t0 && t < it.t0 + (it.span ?? 0.14)) {
       const p = project(it.pos);
@@ -1032,7 +1091,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     : [bRes, [(W - stW) / 2 - 3, stY - 3, stW + 6, stH + 6], [6, H - 27, fw + 2, 22], ...(kBox ? [[kBox[0] - 3, kBox[1] - 3, kBox[2] + 6, kBox[3] + 6]] : [])];
   if (opts.panel && opts.title) reserved.push([0, 0, W, 20]);
   cands.forEach((c) => {
-    if (c.off) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, GX, GY, GR * 1.08);
+    if (c.off && !c.pin) [c.x, c.y] = offDisc(c.px, c.py, c.w, c.h, GX, GY, GR * 1.08);
   });
   cands.forEach((c) => {
     c.avoidDisc = !!c.off;

@@ -99,11 +99,14 @@ export const SCENES = [
       },
     ],
     phoneHide: ['Thor launch'],
+    staticDropPhone: ['Thor launch', 'Johnston Is.'], // 375 static: Thor, Johnston and the detonation share one spot: one label names it
+    staticTextPhone: [['Detonation ~400 km', 'Detonation, Johnston Is.']],
     still: 0.7,
     camDist: 3.5,
     phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
     staticZoom: 1.7,
     staticCenter: [35, -205],
+    staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
     staticCraftMax: 54, // static: the satellite icon stays small (it must not cover the Earth's centre)
     stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
     status: [
@@ -132,6 +135,7 @@ export const SCENES = [
     launchPhoneK: 1.2,
     launchAt: [3.3, 0.95, 0.8],
     staticCenter: [-10, -130],
+    staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
     staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
     staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
     hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
@@ -291,9 +295,30 @@ export const SCENES = [
         apexT: 0.47,
         staticAt: [0.6, 0.09],
         marks: [
-          { alt: 10000, label: '10,000 km · China’s stated figure', short: '10,000 km', opt: true, color: '#ffd9a0', dx: -20, dy: -40 },
-          { alt: 30000, label: 'Apogee ≥30,000 km (SWF-cited)', short: '≥30,000 km (SWF)', opt: true, color: '#ff9c9c', apex: true, dx: 0, dy: -68 },
-          { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46 },
+          {
+            alt: 10000,
+            label: '10,000 km · China’s stated figure',
+            short: '10,000 km',
+            opt: true,
+            color: '#ffd9a0',
+            dx: -20,
+            dy: -40,
+            staticAt: [0.62, 0.78],
+            staticPin: true,
+          },
+          {
+            alt: 30000,
+            label: 'Apogee ≥30,000 km (SWF-cited)',
+            short: '≥30,000 km (SWF)',
+            opt: true,
+            color: '#ff9c9c',
+            apex: true,
+            dx: 0,
+            dy: -68,
+            staticAt: [0.865, 0.6],
+            staticPin: true,
+          },
+          { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46, staticAt: [0.87, 0.69], staticPin: true },
         ],
       },
       { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9, sats: 10 },
@@ -433,6 +458,8 @@ export const SCENES = [
     title: 'GNSS jamming over the Baltic',
     shells: ['LEO', 'MEO'],
     shellLabels: { MEO: null },
+    staticCenter: [70, 30], // static: centred north of the Baltic so neither airliner sits on the Earth's centre
+    staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
     staticCraftMax: 52, // static: airliner icons small enough to leave the Baltic readable
     staticShellLabels: { MEO: 'GPS orbit · MEO' },
     staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
@@ -635,14 +662,19 @@ export const SCENES = [
     stillShort: ['MIRACL beam'],
     staticT: 0.7, // static: the satellite well along its pass, so the beam is drawn at full length
     staticZoom: 2.6,
-    staticCenter: [14, -100],
+    staticCenter: [14, -80], // static: off the orbit's ground track so the edge-on orbit line is not a chord through the centre
     staticCraftMax: 36, // static: MSTI-3 and the beam are the subject
-    staticCraftMaxPhone: 56,
+    staticCraftMaxPhone: 40,
+    staticGlobeY1Phone: 0.4,
+    staticStatusPhone: 'MIRACL beam tracks the satellite',
     staticBeamW: 5,
+    staticGlobeY1: 0.75, // static: close-up on the beam, the globe's lower part runs off the frame
+    staticRingGap: 22, // static: the orbit line is broken around MSTI-3
+    staticBeamLabelFrac: 0.85, // static: MIRACL label anchored near the satellite end, above the limb
     staticK: 1.9, // static: MSTI-3 drawn further out in space so it clears the Earth limb
     actors: [
       { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
-      { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7, minPx: 46, maxPx: 84, dx: 92, dy: -26 },
+      { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7, minPx: 46, maxPx: 84, dx: 30, dy: 50 },
       {
         type: 'beam',
         from: [32.4, -106.4],
@@ -663,8 +695,8 @@ export const SCENES = [
         color: C.pin, dx: -20, dy: -34,
         pin: true,
         liveOnly: true,
-        minPx: 38,
-        maxPx: 66,
+        minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
+        maxPx: IS_PHONE ? 32 : 66,
       },
       {
         type: 'site',
@@ -672,8 +704,8 @@ export const SCENES = [
         color: C.pin, dx: 14, dy: 40,
         pin: true,
         liveOnly: true,
-        minPx: 38,
-        maxPx: 66,
+        minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
+        maxPx: IS_PHONE ? 32 : 66,
       },
       {
         type: 'site',
@@ -681,8 +713,8 @@ export const SCENES = [
         color: C.pin, dx: 0, dy: 40,
         pin: true,
         liveOnly: true,
-        minPx: 38,
-        maxPx: 66,
+        minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
+        maxPx: IS_PHONE ? 32 : 66,
       },
     ],
     still: 0.5,

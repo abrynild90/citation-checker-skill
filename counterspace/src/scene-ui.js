@@ -339,6 +339,7 @@ export async function exportStill() {
     document.body.appendChild(tmp);
     try {
       const node = renderSVG(curSim, tmp);
+      if (window.__cs) window.__cs.lastStillLay = node?.__lay; // test hook: the print layout's probe (craft sizes, Earth disc)
       if (node?.viewBox) return await svgToPNG(node, cur.title, cur.cite);
     } catch (e) {
       /* fall back to the on-screen diagram */

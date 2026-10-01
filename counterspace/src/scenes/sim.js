@@ -637,6 +637,7 @@ export function buildSim(cfg) {
             label: m.label,
             short: m.short,
             staticAt: m.staticAt,
+            staticPin: m.staticPin,
             labelDx: m.dx ?? 0,
             labelDy: m.dy ?? 0,
             pos: (t) => (m.apex && t < tApex ? null : scl(d, rAlt(m.alt))),
