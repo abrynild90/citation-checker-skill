@@ -234,7 +234,7 @@ function renderPanels(sim, el) {
     H = el.clientHeight || 420,
     narrow = W < 760, // stacked rows; three columns only when there is room for their labels
     phone = W < 520,
-    top = phone ? 38 : 40,
+    top = el.getAttribute('aria-hidden') === 'true' ? 4 : phone ? 38 : 40, // the off-screen print stage has no banner to clear
     gap = 6,
     n = sim.cfg.panels.length,
     pw = narrow ? W - 2 * gap : (W - (n + 1) * gap) / n,
@@ -356,7 +356,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   }
   const nCraft = sim.items.filter((i) => i.kind === 'point' && i.prim && i.shape !== 'none' && !i.ctx && !i.liveOnly && i.pos(t)).length,
     craftBase = opts.panel
-      ? Math.min(W * 0.2, opts.phone ? 40 : 52)
+      ? Math.min(W * 0.17, opts.phone ? 40 : 52)
       : Math.max(
           26,
           Math.min(
@@ -437,7 +437,9 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   if (opts.view) {
     // Panel: the craft fill the panel (span = their half-extent); the Earth is drawn wherever it falls.
     const f = unit(opts.view.focus);
-    R = Math.max(30, Math.min((W - 16) / (2 * opts.view.span * 1.5), (fBot - fTop) / (2 * opts.view.span * 1.5)));
+    const fitR = (k) => Math.min((W - 16) / (2 * opts.view.span * k), (fBot - fTop) / (2 * opts.view.span * k)),
+      sp = fitR(1.5) < 0.2 * W ? 1.12 : 1.5; // a tiny Earth (panel 1) gets the craft packed closer to the panel edge: the Earth comes out larger
+    R = Math.max(30, fitR(sp));
     CX = W / 2 - f.x * R;
     CY = (fTop + fBot) / 2 - f.y * R;
   }
@@ -482,7 +484,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     const hx = W / 2,
       hy = (fBot - fTop) / 2 + 20,
       edge = Math.abs(ux) * hx + Math.abs(uy) * hy,
-      depth = Math.max(34, Math.min(190, (fBot - fTop) * 0.3)); // how far the limb reaches into the panel along the Earth direction
+      depth = Math.max(34, Math.min(190, (fBot - fTop) * 0.4)); // how far the limb reaches into the panel along the Earth direction
     GR = Math.max(W, fBot - fTop) * 1.05;
     GX = pcx + ux * (edge - depth + GR);
     GY = pcy + uy * (edge - depth + GR);
@@ -697,9 +699,17 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   }
   // A panel that looks at craft far from the Earth (GEO) shows the Earth as a big limb arc on its own side (drawn above, to no scale): name it.
   if (limb) {
-    const tw = 112,
+    const tw = 128,
       lx = Math.max(tw / 2 + 8, Math.min(W - tw / 2 - 8, limb.nx)),
-      ly = Math.max(fTop + 40, Math.min(fBot - 12, limb.ny + Math.max(16, limb.depth * 0.42)));
+      ly = opts.phone ? fBot - 5 : Math.max(fTop + 40, Math.min(fBot - 12, limb.ny + Math.max(16, limb.depth * 0.42))); // a phone panel: the tag sits at the foot, clear of the craft
+    svg
+      .append('rect')
+      .attr('x', lx - tw / 2)
+      .attr('y', ly - 14)
+      .attr('width', tw)
+      .attr('height', 20)
+      .attr('rx', 4)
+      .attr('fill', 'rgba(5,8,18,0.78)'); // a dark pill: the tag stays readable over bright land
     svg
       .append('text')
       .attr('x', lx)
@@ -708,14 +718,14 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
       .attr('fill', '#dfe9ff')
       .attr('fill-opacity', 0.9)
       .attr('font-family', 'system-ui')
-      .attr('font-size', 10.5)
+      .attr('font-size', 12)
       .attr('font-style', 'italic')
       .attr('stroke', '#050812')
       .attr('stroke-opacity', 0.7)
       .attr('stroke-width', 3)
       .attr('paint-order', 'stroke')
       .text('Earth (not to scale)');
-    marks.push({ x: lx, y: ly - 4, r: 16, n: 'earth-cue' }, { x: lx - 38, y: ly - 4, r: 12, n: 'earth-cue' }, { x: lx + 38, y: ly - 4, r: 12, n: 'earth-cue' });
+    marks.push({ x: lx, y: ly - 4, r: 16, n: 'earth-cue' }, { x: lx - 44, y: ly - 4, r: 12, n: 'earth-cue' }, { x: lx + 44, y: ly - 4, r: 12, n: 'earth-cue' });
   }
   const g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
   const NARROW = W < 600 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
@@ -888,7 +898,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             .attr('stroke', it.colorFn ? it.colorFn(t) : it.color)
             .attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8))
             .attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null)
-            .attr('stroke-width', it.width ? 5 : 1.2);
+            .attr('stroke-width', it.width ? sim.cfg.staticBeamW || 5 : 1.2);
         if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color);
       }
     }
@@ -977,7 +987,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   }
   // Legend-style key (cfg.staticKey: [colour, text] rows) instead of a label per orbit or object: bottom-left, above the caption
   const key = !opts.panel && sim.cfg.staticKey,
-    kFs = W < 520 ? 9.5 : 10.5,
+    kFs = W < 900 ? 9.5 : 10.5, // the print stage (760 wide) and phones get the smaller legend
     kBox = key
       ? (() => {
           const kw = Math.max(...key.map((k) => (W < 520 && k[2]) || k[1]).map((x) => x.length)) * kFs * 0.57 + 36,

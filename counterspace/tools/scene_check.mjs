@@ -173,8 +173,14 @@ function check(S) {
     if (thr) for (const r of P.refs) if (r.px < thr && r.x > 0 && r.x < W && r.y > 0 && r.y < H) f('subject-small', `${r.text} ${r.px.toFixed(0)} px < ${thr}`);
   }
   if (S.kind === 'still' && P.disc) { // label font and subject centring (union of the Earth disc, shells that fit, and the action region)
+    if (S.leadW != null && S.leadW < 4) f('still-leader', `leader line weight ${S.leadW.toFixed(1)} px < 4 px`);
+    L.forEach((l) => { // every label that sits off its subject carries a leader
+      if (l.leader || !l.raw) return;
+      const dx = Math.max(l.x0 - l.raw[0], 0, l.raw[0] - l.x1), dy = Math.max(l.y0 - l.raw[1], 0, l.raw[1] - l.y1);
+      if (Math.hypot(dx, dy) > 1.5 * u) f('still-leader', `${l.text} sits ${Math.round(Math.hypot(dx, dy))} px from its subject with no leader`);
+    });
     if (u * 11 < 28) f('still-font', `label font ${(u * 11).toFixed(0)} px < 28 px`);
-    const tile = W < 2000, b0 = (tile ? 0.17 : 0.04) * H, bh = (tile ? 0.82 : 0.9) * H - b0, d = P.disc, whole = d.r < 1.3 * bh; // a regional close-up (disc over 1.3 bands) is framed on its action only
+    const tile = W < 2000, b0 = (tile ? 0.1 : 0.04) * H, bh = (tile ? 0.9 : 0.9) * H - b0, d = P.disc, whole = d.r < 1.3 * bh; // a regional close-up (disc over 1.3 bands) is framed on its action only
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     const add = (a, b) => { x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, a); y1 = Math.max(y1, b); };
     const dsc = (c, r, free) => { if (free) { add(c.cx - r, c.cy - r); add(c.cx + r, c.cy + r); } else { add(Math.max(0, c.cx - r), Math.max(0, c.cy - r)); add(Math.min(W, c.cx + r), Math.min(H, c.cy + r)); } };
@@ -184,6 +190,9 @@ function check(S) {
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     if (Math.abs(cx - W / 2) > 0.06 * W) f('still-centre', `subject centre x ${Math.round(cx)} is ${Math.round(Math.abs(cx - W / 2))} px off the frame centre (${W} wide)`);
     if (Math.abs(cy - (b0 + bh / 2)) > 0.08 * H) f('still-centre', `subject centre y ${Math.round(cy)} off the band centre ${Math.round(b0 + bh / 2)} (${H} high)`);
+    // subject bbox fraction: the subject (Earth, shells that fit, action) fills >= 60% of the still body height (50% of a composite's tile)
+    const sfr = (Math.min(H, y1) - Math.max(0, y0)) / H;
+    if (sfr < (tile ? 0.5 : 0.6)) f('still-subject', `subject bbox is ${(sfr * 100).toFixed(0)}% of the still body height (< ${tile ? 50 : 60}%)`);
     if (whole && (x1 - x0 < 0.5 * W && y1 - y0 < 0.5 * bh)) f('still-centre', `subject only ${Math.round((x1 - x0) / W * 100)}% of the still width (too small)`);
   }
   if (S.emptyBand != null && S.emptyBand > 0.2) f('still-empty', `empty band (gap or lopsided margin) of ${(S.emptyBand * 100).toFixed(0)}% of the still`);
@@ -415,14 +424,14 @@ if (MODES.includes('still')) {
     const r = await page.evaluate(async () => {
       const h = window.__cs.host(); h.playing = false; h._lm = {}; h.update(h.sim.still);
       const url = h.stillPNG('Title', 'SWF 2026, Table 5-1, p. 05-01.'), z = h.stillLayout;
-      const conv = q => ({ W: q.W, H: q.H, u: q.u,
-        labels: q.labels.filter(Boolean).map(l => ({ text: l.text, x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h / 2, y1: l.y + l.h / 2, leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null, ref: [l.ax, l.ay], item: -1 })),
+      const conv = q => ({ W: q.W, H: q.H, u: q.u, leadW: q.leadW,
+        labels: q.labels.filter(Boolean).map(l => ({ text: l.text, x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h / 2, y1: l.y + l.h / 2, leader: l.leader ? [l.ax, l.ay, l.qx, l.qy] : null, ref: [l.ax, l.ay], raw: q.raw && q.raw[q.labels.indexOf(l)], item: -1 })),
         reserved: (q.rsv || []).map((r, i) => ({ n: 'rsv' + i, x0: r[0], y0: r[1], x1: r[0] + r[2], y1: r[1] + r[3] })), probe: q.probe });
       return { url, tiles: (z.tiles || [z]).map(conv) };
     });
     fs.writeFileSync(`${out}/still-live-${id}.png`, Buffer.from(r.url.split(',')[1], 'base64'));
     const eb = await page.evaluate(EMPTY, r.url);
-    const F = r.tiles.flatMap(t => check({ kind: 'still', u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H), discBig: r.tiles.length > 1 || !!(t.probe && t.probe.disc && t.probe.disc.r >= 0.55 * Math.min(t.W, t.H)) }));
+    const F = r.tiles.flatMap(t => check({ kind: 'still', leadW: t.leadW, u: t.u ?? t.W / 1000, W: t.W, H: t.H, labels: t.labels, reserved: t.reserved, probe: t.probe, def: false, shellCrop: shellCrop(t.probe && t.probe.circles, t.W, t.H), emptyBand: eb.band, emptyArea: eb.area, discVis: discVisible(t.probe && t.probe.disc, t.W, t.H), discBig: r.tiles.length > 1 || !!(t.probe && t.probe.disc && t.probe.disc.r >= 0.55 * Math.min(t.W, t.H)) }));
     // stills are ~3000 px wide: the pixel rules are scaled by u (label font scale) so the limits mean the same thing as in the live frame
     record(tag('still-live', id), F, { stillT });
     await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);
@@ -448,7 +457,7 @@ console.log(`\nstates ${results.length}, failing states ${results.filter(r => r.
 await browser.close(); srv.close();
 process.exit(total ? 1 : 0);
 
-// ---- still API check (MODES=stillapi): window.__cs.host().stillPNG works in reduced motion (static) and live stills are native-resolution landscape frames
+// ---- still API check (MODES=stillapi): window.__cs.host().stillPNG works in reduced motion (static) and every still is exactly 3000x1875
 async function stillApiCheck() {
   const dims = async (page, url) =>
     page.evaluate(u => new Promise(r => { const i = new Image(); i.onload = () => r([i.width, i.height]); i.src = u; }), url);
@@ -463,7 +472,7 @@ async function stillApiCheck() {
       if (!url || url.startsWith('ERR')) F.push({ type: 'still-api', detail: String(url) });
       else {
         const [w, h] = await dims(page, url);
-        if (w < 3000 || h < 1000) F.push({ type: 'still-api', detail: `still ${w}x${h} under 3000 wide or 1000 high` });
+        if (w !== 3000 || h !== 1875) F.push({ type: 'still-api', detail: `still ${w}x${h}, every still (live, RPO composite and static) must be exactly 3000x1875` });
       }
       record(tag('still-api-' + mode, id), F, {});
       await page.evaluate(() => window.__cs.closeScene()); await page.waitForTimeout(100);

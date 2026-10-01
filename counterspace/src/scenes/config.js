@@ -627,6 +627,9 @@ export const SCENES = [
     staticT: 0.16, // static: the satellite well along its pass, so the beam is drawn at full length
     staticZoom: 2.6,
     staticCenter: [35, -108],
+    staticCraftMax: 150, // static: MSTI-3 and the beam are the subject
+    staticCraftMaxPhone: 80,
+    staticBeamW: 9,
     actors: [
       { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
       { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7, minPx: 46, maxPx: 84, dx: 92, dy: -26 },
@@ -773,7 +776,7 @@ export const SCENES = [
     ],
     stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
     staticCenter: [25, 72],
-    staticCraftMax: 54,
+    staticCraftMax: 84,
     staticCraftMaxPhone: 44,
     staticFit: 1.9,
     staticFitPhone: 1.7,

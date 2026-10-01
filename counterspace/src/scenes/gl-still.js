@@ -40,7 +40,7 @@ const methods = {
     if (whole || !P.action) disc(d, d.r, whole);
     for (const c of whole ? P.circles || [] : []) if (c.ring && c.r > 0 && inb(c.cx, c.cy)) disc(c, c.r, whole && c.r < 1.2 * bandH);
     // a craft is a few hundred px wide with its glow: pad the box so nothing sits on the frame edge
-    const pad = 0.05;
+    const pad = W < 2000 ? 0.07 : 0.05; // a tile of a composite pads more: its craft sprites are a large share of its width
     return x1 > x0 && y1 > y0 ? { x0: x0 - pad * W, y0: y0 - pad * H, x1: x1 + pad * W, y1: y1 + pad * H, whole } : null;
   },
   // Print-resolution still: re-render at ~3000 px wide (capped by the GPU), draw labels and
@@ -99,8 +99,8 @@ const methods = {
     this.renderer.render(this.scene, this.camera);
     // Recompose: the picture (Earth disc + everything that moves) is dollied until it fills the band above the caption, then centred in it. A whole-globe
     // composition (disc under ~1.3 band heights) is always shown whole and centred; a deliberate regional close-up keeps its crop and is only centred.
-    const bandY0 = (o.title ? 0.17 : 0.04) * H, // a tile keeps clear of its title strip above and its (up to two-line) caption below
-      bandH = (o.aspect ? 0.82 : 0.9) * H - bandY0,
+    const bandY0 = (o.title ? 0.1 : 0.04) * H, // a tile keeps clear of its title strip above and its (up to two-line) caption below
+      bandH = (o.aspect ? 0.9 : 0.9) * H - bandY0,
       rerender = () => {
         cam.updateProjectionMatrix();
         this._fitModels();
@@ -110,7 +110,7 @@ const methods = {
     for (let it = 0; it < 3 && !fixed; it++) {
       const ex = this._stillExtent(W, H, bandH);
       if (!ex || !ex.whole) break;
-      const k = Math.max((ex.x1 - ex.x0) / (0.92 * W), (ex.y1 - ex.y0) / (0.9 * bandH));
+      const k = Math.max((ex.x1 - ex.x0) / (0.92 * W), (ex.y1 - ex.y0) / (0.96 * bandH));
       if (Math.abs(k - 1) < 0.05) break;
       const kk = Math.max(0.55, Math.min(2.4, k)),
         v = cam.position.clone().sub(this.target).multiplyScalar(kk);
@@ -178,6 +178,7 @@ const methods = {
     lay.probe = this._probe(W, H);
     lay.obst = this._lastObst;
     lay.labels = lp;
+    lay.raw = lp.map((q, i) => (q && this._lastPlace?.[0]?.[i] ? [this._lastPlace[0][i].px, this._lastPlace[0][i].py] : null));
     lay.sBox = sBox;
     lay.rsv = rsv;
     g.textAlign = 'center';
@@ -192,18 +193,23 @@ const methods = {
         cx = Math.max(q.x - hw, Math.min(q.x + hw, r.px)),
         cy = Math.max(q.y - hh, Math.min(q.y + hh, r.py));
       // ax/ay = the referent, qx/qy = the box edge (as _labelPositions)
-      if (Math.hypot(cx - r.px, cy - r.py) > 7 * ls) Object.assign(q, { leader: true, ax: r.px, ay: r.py, qx: cx, qy: cy, auto: true });
+      if (Math.hypot(cx - r.px, cy - r.py) > 1.2 * ls) Object.assign(q, { leader: true, ax: r.px, ay: r.py, qx: cx, qy: cy, auto: true });
     });
     for (const q of lp) {
       if (!q || !q.leader) continue;
       lay.segs.push({ x1: q.ax, y1: q.ay, x2: q.qx, y2: q.qy, own: q.text });
       g.strokeStyle = q.color || '#dfe6f7';
-      g.globalAlpha = 0.75;
-      g.lineWidth = 1.8 * s;
+      g.globalAlpha = 0.92;
+      g.lineWidth = Math.max(4.4, 2.1 * s); // visible weight: >= 4 px in a 3000 px still (the checker enforces it)
+      lay.leadW = g.lineWidth;
       g.beginPath();
       g.moveTo(q.ax, q.ay);
       g.lineTo(q.qx, q.qy);
       g.stroke();
+      g.beginPath();
+      g.arc(q.ax, q.ay, g.lineWidth * 1.1, 0, 2 * Math.PI);
+      g.fillStyle = q.color || '#dfe6f7';
+      g.fill();
       g.globalAlpha = 1;
     }
     for (const q of lp) {
@@ -258,9 +264,10 @@ const methods = {
       conf = stillFor(this.sim.cfg.id),
       // a multi-episode still lays its tiles side by side (tileW x tileH each, native resolution, no upscaling)
       tileW = panels ? Math.min(Math.floor(targetW / panels.length), Math.floor(maxDim / panels.length)) : 0,
-      tileH = panels ? Math.round(tileW * (conf.tileAspect ?? 1.3)) : 0,
       W = panels ? tileW * panels.length : Math.min(targetW, maxDim),
-      H = panels ? tileH : Math.round(W / STILL_ASPECT);
+      // every still is exactly W x (W / STILL_ASPECT) in total: header band + body + footer band (40 and 92 units of W / 1000)
+      H = Math.round(W / STILL_ASPECT) - Math.round(40 * (W / 1000)) - Math.round(92 * (W / 1000)),
+      tileH = panels ? H : 0;
     const cam = this.camera,
       keep = {
         pos: cam.position.clone(),

@@ -272,14 +272,15 @@ function svgToPNG(svg, title, cite) {
       const s = PRINT_W / 1000,
         hb = Math.round(40 * s),
         fb = Math.round(92 * s),
-        H = Math.round(vb.height * k);
+        H = Math.round(PRINT_W * 0.625) - hb - fb; // the same 3000 x 1875 total as the live stills (the diagram is laid out at this aspect)
       const c = document.createElement('canvas'),
         g = c.getContext('2d');
       c.width = PRINT_W;
       c.height = H + hb + fb;
       g.fillStyle = '#060912';
       g.fillRect(0, 0, c.width, c.height);
-      g.drawImage(img, 0, hb, PRINT_W, H);
+      const fit = Math.min(PRINT_W / vb.width, H / vb.height); // contain (exact fit for the off-screen stage laid out at this aspect)
+      g.drawImage(img, (PRINT_W - vb.width * fit) / 2, hb + (H - vb.height * fit) / 2, vb.width * fit, vb.height * fit);
       g.fillStyle = '#0b1120';
       g.fillRect(0, 0, PRINT_W, hb);
       g.fillRect(0, hb + H, PRINT_W, fb);
@@ -326,12 +327,12 @@ export async function exportStill() {
   if (host && glOK) return host.stillPNG(cur.title, cur.cite);
   const svg = view.querySelector(':scope > svg');
   if (!svg) throw new Error('No diagram to export');
-  // The diagram is laid out afresh in an off-screen stage 760 px wide (about 5:4, so the Earth fills more of the frame): its 11 px labels then
+  // The diagram is laid out afresh in an off-screen stage 760 px wide (so the Earth fills more of the frame): its 11 px labels then
   // come out at about 43 px in the 3000 px print, instead of the 25 to 30 px a wide desktop stage would give. Same layout engine as on screen.
   if (curSim) {
+    // The diagram is laid out at the live still's body aspect (3000 x 1479: the whole still is 3000 x 1875 with its bands), so both sets match.
     const vw = 760,
-      // never wider than 5:4
-      vh = Math.round(Math.max(vw * 0.8, Math.min(900, (vw * (view.clientHeight || 500)) / (view.clientWidth || 800)))),
+      vh = Math.round((vw * 1479) / 3000),
       tmp = document.createElement('div');
     tmp.setAttribute('aria-hidden', 'true');
     tmp.style.cssText = `position:fixed;left:-10000px;top:0;width:${vw}px;height:${vh}px;overflow:hidden`;
