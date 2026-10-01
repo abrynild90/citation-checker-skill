@@ -1,0 +1,57 @@
+// scenes/configs/shakti.js: scene `shakti` (see ../config.js for the list order)
+import { C } from './shared.js';
+
+export const SHAKTI = {
+  id: 'shakti',
+  date: '2019-03-27',
+  title: 'Mission Shakti (2019)',
+  shells: ['LEO'],
+  duration: 12,
+  caption:
+    'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. ' +
+    'Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
+  cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-04.',
+  related: 'unga-77-41',
+  event: 'in-2019-shakti',
+  launchAt: [2.67, 1.55, 0.5],
+  earlyKey: true,
+  camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
+  hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
+  actors: [
+    { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
+    {
+      type: 'target',
+      label: 'Microsat-R',
+      color: C.tgt,
+      big: 1.7,
+      minPx: 46,
+      maxPx: 86,
+      bright: true,
+      wreck: true,
+      impactDx: -80,
+      impactDy: -30,
+      impactLabel: 'Impact: Microsat-R (wreck)',
+      impactShort: 'Impact',
+    },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32 },
+    {
+      type: 'debris',
+      count: 130,
+      spreadAlt: 170,
+      spreadInc: 3.6,
+      spreadRaan: 2.6,
+      dv: 1.2,
+      drift: 0.15,
+      decay: 1.5,
+      color: '#ffd2a6',
+      size: 0.075,
+      lateGlow: true,
+    },
+  ],
+  still: 0.43,
+  status: [
+    [0, 'PDV Mk-II rises from Abdul Kalam Island'],
+    [0.4, 'Collision at ~300 km; fragments spread and decay quickly', 'Collision at ~300 km'],
+    [0.65, 'Time compressed: SWF counts 130 cataloged pieces, none still in orbit', 'SWF: 130 pieces, none in orbit'],
+  ],
+};
