@@ -174,6 +174,12 @@ const methods = {
     if (tBox) rsv.push(tBox);
     const ls = s * (conf.labelK ?? 1.7), // labels are drawn 1.7x the caption size so they read in a 3000 px print
       lp = this._labelPositions(W, H, ls, true, rsv).map((q) => (q && conf.hide?.some((h) => q.text.startsWith(h)) ? null : q));
+    // conf.off: { 'Label text start': [dx, dy] } puts that label at its referent plus a fraction of the frame width (the placer's choice is overridden)
+    Object.entries(conf.off || {}).forEach(([n, d]) => {
+      const i = lp.findIndex((q) => q && q.text.startsWith(n)),
+        r = this._lastPlace?.[0]?.[i];
+      if (i >= 0 && r) Object.assign(lp[i], { x: r.px + d[0] * W, y: r.py + d[1] * W });
+    });
     lay.u = ls;
     lay.objs = this._lastObjs;
     lay.probe = this._probe(W, H);

@@ -19,6 +19,7 @@ export const C = {
   jam: '#ff5d5d',
   ok: '#6ee7a8',
   laser: '#ff4fd8',
+  pin: '#ff8ae8',
   geo: '#ffcf6e',
   belt: '#b28cff',
   ground: '#e9edf7',
@@ -92,6 +93,7 @@ export const SCENES = [
           short: 'Satellite',
           dx: 30,
           dy: 60,
+          staticPh: -0.75, // static: drawn further along its orbit, off the Earth's centre
           fail: { t: 0.8, label: 'Satellite damaged (SWF: such tests did this)', short: 'Satellite damaged' },
         },
       },
@@ -102,6 +104,7 @@ export const SCENES = [
     phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
     staticZoom: 1.7,
     staticCenter: [35, -205],
+    staticCraftMax: 54, // static: the satellite icon stays small (it must not cover the Earth's centre)
     stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
     status: [
       [0, 'Thor rocket climbs toward ~400 km'],
@@ -128,6 +131,9 @@ export const SCENES = [
     event: 'us-1985-solwind',
     launchPhoneK: 1.2,
     launchAt: [3.3, 0.95, 0.8],
+    staticCenter: [-10, -130],
+    staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
+    staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
     hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
     actors: [
       {
@@ -241,7 +247,7 @@ export const SCENES = [
           { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
         ],
       },
-      { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42, strong: true },
+      { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42, strong: true, hold: 0.07 },
       { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.046, lateGlow: true },
     ],
     still: 0.47,
@@ -427,6 +433,7 @@ export const SCENES = [
     title: 'GNSS jamming over the Baltic',
     shells: ['LEO', 'MEO'],
     shellLabels: { MEO: null },
+    staticCraftMax: 52, // static: airliner icons small enough to leave the Baltic readable
     staticShellLabels: { MEO: 'GPS orbit · MEO' },
     staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
     staticTextPhone: [[' · GNSS ', ' · ']], // 375 static: "Airliner A · lost"
@@ -626,13 +633,13 @@ export const SCENES = [
     hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 },
     lift: 30,
     stillShort: ['MIRACL beam'],
-    staticT: 0.32, // static: the satellite well along its pass, so the beam is drawn at full length
+    staticT: 0.7, // static: the satellite well along its pass, so the beam is drawn at full length
     staticZoom: 2.6,
-    staticCenter: [20, -212],
+    staticCenter: [14, -100],
     staticCraftMax: 36, // static: MSTI-3 and the beam are the subject
-    staticCraftMaxPhone: 80,
+    staticCraftMaxPhone: 56,
     staticBeamW: 5,
-    staticK: 2.6, // static: MSTI-3 drawn further out in space so it clears the Earth limb
+    staticK: 1.9, // static: MSTI-3 drawn further out in space so it clears the Earth limb
     actors: [
       { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, NM', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
       { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7, minPx: 46, maxPx: 84, dx: 92, dy: -26 },
@@ -644,13 +651,39 @@ export const SCENES = [
         label: 'MIRACL beam (illustrative)',
         short: 'MIRACL beam',
         width: 0.034,
-        dx: 96,
-        dy: -20,
+        dx: 70,
+        dy: -26,
         labelOffDisc: true,
+        sdx: 120, // static: label to the right of the beam, with a short leader
+        sdy: 0,
       },
-      { type: 'site', at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', short: 'Teykovo', color: '#ffb0f0', dx: 0, dy: 30, small: true, liveOnly: true },
-      { type: 'site', at: [56.63, 47.89], label: 'Yoshkar-Ola', color: '#ffb0f0', dx: 40, dy: -18, small: true, liveOnly: true },
-      { type: 'site', at: [55.03, 82.92], label: 'Novosibirsk', color: '#ffb0f0', dx: 0, dy: 26, small: true, liveOnly: true },
+      {
+        type: 'site',
+        at: [56.86, 40.53], label: 'Peresvet shelters: Teykovo', short: 'Teykovo',
+        color: C.pin, dx: -20, dy: -34,
+        pin: true,
+        liveOnly: true,
+        minPx: 38,
+        maxPx: 66,
+      },
+      {
+        type: 'site',
+        at: [56.63, 47.89], label: 'Yoshkar-Ola',
+        color: C.pin, dx: 14, dy: 40,
+        pin: true,
+        liveOnly: true,
+        minPx: 38,
+        maxPx: 66,
+      },
+      {
+        type: 'site',
+        at: [55.03, 82.92], label: 'Novosibirsk',
+        color: C.pin, dx: 0, dy: 40,
+        pin: true,
+        liveOnly: true,
+        minPx: 38,
+        maxPx: 66,
+      },
     ],
     still: 0.5,
     status: [

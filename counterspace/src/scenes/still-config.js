@@ -7,8 +7,16 @@
 export const STILL_ASPECT = 1.6; // total still (bands included): 3000 x 1875
 export const STILL = {
   // Starfish: whole belt (field-line shells) and the Earth, seen from the Pacific side.
-  starfish: { t: 0.7, pos: [-4.158, 1.269, 1.514], look: [0, 0, 0], fov: 34, shift: [0.001, -0.06] },
-  solwind: { t: 0.45, pos: [-3.274, 2.613, 2.013], look: [-0.531, 0.696, 0.64], fov: 34, shift: [0.062, -0.08] },
+  starfish: {
+    t: 0.7,
+    pos: [-4.158, 1.269, 1.514],
+    look: [0, 0, 0],
+    fov: 34,
+    shift: [0.001, -0.06],
+    // labels off the field lines: Thor and Detonation above the belt, Johnston Island below it (fractions of the frame width)
+    off: { Thor: [-0.215, -0.085], Detonation: [0.225, -0.13], Johnston: [0.121, 0.066] },
+  },
+  solwind: { t: 0.45, pos: [-3.274, 2.613, 2.013], look: [-0.531, 0.696, 0.64], fov: 29, shift: [0.062, -0.1] },
   fengyun: { t: 0.85, pos: [0.834, 2.523, -4.242], look: [-0.083, 0.305, -0.382], fov: 33, shift: [0.029, -0.039] },
   'burnt-frost': { t: 0.47, pos: [-3.755, 1.807, -0.546], look: [-0.893, 0.526, 0.193], fov: 34, shift: [0.084, -0.097] },
   dn2: { t: 0.62, pos: [7.86, 3.207, -1.046], look: [0, 0, -0.7], fov: 33, shift: [0.06, -0.028], hideShell: false, labelK: 1.45 },

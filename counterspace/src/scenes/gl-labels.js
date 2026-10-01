@@ -547,7 +547,9 @@ const methods = {
           L.ln.setAttribute('x2', q.qx);
           L.ln.setAttribute('y2', q.qy);
           L.ln.setAttribute('stroke', c);
-          L.ln.setAttribute('stroke-opacity', '0.75');
+          const long = Math.hypot(q.qx - q.ax, q.qy - q.ay) > 60; // a long leader is drawn stronger so it still reads
+          L.ln.setAttribute('stroke-width', long ? '1.6' : '1');
+          L.ln.setAttribute('stroke-opacity', long ? '0.95' : '0.75');
           L.dot.setAttribute('cx', q.ax);
           L.dot.setAttribute('cy', q.ay);
           L.dot.setAttribute('fill', c);

@@ -479,6 +479,30 @@ const methods = {
     Object.assign(g.userData, { span: 0.03, minPx: 9, maxPx: 26 });
     return g;
   },
+  // Map pin (Peresvet shelter sites): a flat ring on the ground, a stem and a bright head, clearly bigger than a dish and with no beam implied.
+  _pinModel(color, pos) {
+    const T = this.T,
+      g = new T.Group(),
+      m = new T.MeshBasicMaterial({ color: this._c(color), side: T.DoubleSide }),
+      w = new T.MeshBasicMaterial({ color: 0xffffff, side: T.DoubleSide });
+    const ring = new T.Mesh(new T.RingGeometry(0.014, 0.019, 28), m);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.0005;
+    g.add(ring);
+    const stem = new T.Mesh(new T.CylinderGeometry(0.0016, 0.0016, 0.03, 6), w);
+    stem.position.y = 0.015;
+    g.add(stem);
+    const head = new T.Mesh(new T.SphereGeometry(0.0085, 14, 10), m);
+    head.position.y = 0.036;
+    g.add(head);
+    const core = new T.Mesh(new T.SphereGeometry(0.0034, 10, 8), w);
+    core.position.y = 0.036;
+    g.add(core);
+    g.userData.tintMat = m;
+    g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
+    Object.assign(g.userData, { span: 0.046, minPx: 38, maxPx: 66 });
+    return g;
+  },
   // Ground jammer: a small truck with a mast and a crossed antenna, and three pulsing emission rings (animated by GLHost.update from the scene time).
   _jammerModel(color, pos) {
     const T = this.T,
@@ -715,7 +739,7 @@ const methods = {
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
       } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
       else if (it.shape === 'aircraft') m = this._aircraftModel();
-      else if (it.shape === 'site') m = this._siteModel(it.color, it.pos(0));
+      else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0));
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));
       else if (it.shape === 'jammer') m = this._jammerModel(it.color, it.pos(0));
       else {

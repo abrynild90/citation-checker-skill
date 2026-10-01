@@ -924,7 +924,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
             .attr('stroke-opacity', it.opFn ? it.opFn(t) : (it.opacity ?? 0.8))
             .attr('stroke-dasharray', it.dashFn?.(t) ? '3 3' : null)
             .attr('stroke-width', it.width ? sim.cfg.staticBeamW || 5 : 1.2);
-        if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color);
+        if (it.label) label({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, it.label, it.color, it.sdx, it.sdy);
       }
     }
     if (it.kind === 'point')

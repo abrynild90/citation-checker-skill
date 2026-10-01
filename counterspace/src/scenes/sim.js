@@ -219,6 +219,9 @@ export function buildSim(cfg) {
         liveOnly: a.liveOnly,
         offGlobe: a.offGlobe,
         scale: a.small ? 1.7 : null,
+        minPx: a.minPx,
+        maxPx: a.maxPx,
+        pin: a.pin,
         pos: () => ll(a.at[0], a.at[1], 1.003),
         color: a.color,
         label: a.label,
@@ -272,6 +275,7 @@ export function buildSim(cfg) {
             statusColor: (t) => (t >= a.sat.fail.t ? '#ff9a9a' : '#dfe6f7'),
           }),
           pos: (t) => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed),
+          staticPos: a.sat.staticPh != null ? (t) => orbitPos(a.alt, a.inc, raan, phase + a.sat.staticPh + t * 2 * Math.PI * a.sat.speed) : null,
         });
       if (a.sats)
         for (let s = 0; s < a.sats; s++) {
@@ -297,7 +301,7 @@ export function buildSim(cfg) {
         maxPx: a.maxPx,
         bright: !!a.bright,
         pos: (t) => (a.noHit || t <= tgt.t ? tgt.pos(t) : null),
-        staticPos: a.staticK ? (t) => scl(tgt.pos(t), a.staticK) : null,
+        staticPos: (a.staticK ?? cfg.staticK) ? (t) => scl(tgt.pos(t), a.staticK ?? cfg.staticK) : null,
         glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
       });
     }
@@ -457,7 +461,7 @@ export function buildSim(cfg) {
         width: 2,
         label: a.label,
         labelAt: bez(0.5),
-        labelEnd: tgt.t + 0.03,
+        labelEnd: tgt.t + (a.hold ?? 0.03), // a.hold: the label outlives the hit (the still is taken just after it)
         pts: (t) => {
           const s = t >= a.t0 - 1e-6 ? Math.max(0.04, clamp01((t - a.t0) / (tgt.t - a.t0))) : 0;
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
@@ -1035,7 +1039,7 @@ export function buildSim(cfg) {
         avoid: true,
         a: () => from,
         b: (t) => tgt.pos(t),
-        bStatic: a.staticK ? (t) => scl(tgt.pos(t), a.staticK) : null,
+        bStatic: (a.staticK ?? cfg.staticK) ? (t) => scl(tgt.pos(t), a.staticK ?? cfg.staticK) : null,
         on: (t) => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02,
         color: a.color,
         opacity: 0.95,
@@ -1048,6 +1052,8 @@ export function buildSim(cfg) {
         short: a.short,
         labelDx: a.dx,
         labelDy: a.dy,
+        sdx: a.sdx,
+        sdy: a.sdy,
       });
     }
   }
