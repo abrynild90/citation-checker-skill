@@ -120,7 +120,10 @@ const methods = {
       } // hidden: behind Earth, or its referent is off the stage
       const text = L.item?.labelFn
           ? L.item.labelFn(this.t, this.el.clientWidth < 520)
-          : L.short && (this.el.clientWidth < 520 || (noBanner && this.sim.cfg.stillShort?.some((h) => L.text.startsWith(h))))
+          : L.short &&
+          (this.el.clientWidth < 520 ||
+            (noBanner && this.sim.cfg.stillShort?.some((h) => L.text.startsWith(h))) ||
+            (!noBanner && this.sim.cfg.liveShort?.some((h) => L.text.startsWith(h)))) // cfg.liveShort: labels that take their short text on screen too
             ? L.short
             : L.text,
         color = L.item?.labelFn ? L.item.statusColor(this.t) : L.hue || null;

@@ -73,6 +73,10 @@ export const DN2 = {
     [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)', 'SWF-cited analysis: apogee ≥30,000 km'],
     [0.8, 'US officials: upper stages re-entered “over the Indian Ocean” · no target, not an intercept', 'Re-entry over Indian Ocean (US officials)'],
   ],
+  // live desktop, default camera (px from their referents): 10,000 km sits under its own marker and Apogee just below that row, each with a short
+  // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
+  liveShort: ['GEO'],
+  liveOff: { 'DN-2 path': [8, -72], '10,000': [-22, 34], Apogee: [-110, 14], GEO: [10, 34] },
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
