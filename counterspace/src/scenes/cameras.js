@@ -186,7 +186,10 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               P.push(all[all.length >> 1]);
             }
             const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
-            return { ...fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp }), up: null };
+            const q = fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp });
+            // trackPath.zoom: with the ring in frame, move in by that factor: the Earth gets larger and the far side of the ring is cropped on purpose
+            if (ring && c.trackPath.zoom) q.pos = add(look, scl(add(q.pos, scl(look, -1)), 1 / c.trackPath.zoom));
+            return { ...q, up: null };
           },
           at = (t, asp) => {
             const g0 = c.trackPath.geoT ?? 0.35;

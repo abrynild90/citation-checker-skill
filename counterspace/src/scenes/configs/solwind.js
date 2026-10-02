@@ -41,7 +41,7 @@ export const SOLWIND = {
       type: 'target',
       label: 'Solwind P78-1',
       color: C.tgt,
-      big: 1.5,
+      big: 2.0, // the satellite reads at t=0.2, before the intercept
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',

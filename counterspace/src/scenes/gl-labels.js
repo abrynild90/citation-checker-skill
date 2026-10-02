@@ -209,6 +209,21 @@ const methods = {
       .concat(!noBanner && this.insetEl && this.insetEl.style.display !== 'none' ? [rel(this.insetEl)] : []);
     this._lastPlace = [raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, null, objs];
     const pl = placeLabels(raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, noBanner ? null : (this._lm ||= {}), objs);
+    // cfg.liveOff: { 'Label text start': [dx, dy] } fixes that label at its referent plus [dx, dy] px (live, default camera, desktop width only:
+    // where the placer's own slot lands on a dense field of lines). The leader runs from the referent to the nearest edge of the chip.
+    if (!noBanner && w >= 520 && this.camIdx === 0 && this.sim.cfg.liveOff)
+      Object.entries(this.sim.cfg.liveOff).forEach(([n, d]) => {
+        const i = raw.findIndex((r) => r && r.text.startsWith(n));
+        if (i < 0 || !pl[i]) return;
+        const r = raw[i],
+          x = r.px + d[0] * Math.min(1, w / 798),
+          y = r.py + d[1] * Math.min(1, w / 798),
+          qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
+          qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
+        // the placer's own slot stays when the fixed one would land on another label (it knows nothing of this override)
+        if (pl.some((q, j) => j !== i && q && raw[j] && Math.abs(q.x - x) < (raw[j].w + r.w) / 2 && Math.abs(q.y - y) < (raw[j].h + r.h) / 2)) return;
+        Object.assign(pl[i], { x, y, leader: true, ax: r.px, ay: r.py, qx, qy });
+      });
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   // Everything drawn that a label must stay off, in screen px for a w x h canvas: sprites (marks, with their drawn radius), dense particle

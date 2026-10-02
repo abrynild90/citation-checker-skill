@@ -42,6 +42,7 @@ async function getHost() {
           cc = host.sim.cfg.cameras?.[i],
           acts = host.sim.cfg.acts,
           a = acts && !c.auto ? acts[c.act] : null;
+        wideSel = acts && !c.auto && c.act == null ? i : -1; // an episode scene's Wide preset: its chip is the pressed one, not the Tour's
         epi = a ? { a0: a.t0, a1: a.t1, last: a === acts.at(-1), name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
         pick(i);
         if (epi)
@@ -72,7 +73,8 @@ function prefetchEarth() {
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 const overlay = document.getElementById('overlay'),
   view = document.getElementById('sceneView');
-let epi = null, // the locked episode of an episode preset (see getHost)
+let wideSel = -1,
+  epi = null, // the locked episode of an episode preset (see getHost)
   curSim = null, // the simulation of the open scene (the static still re-draws it at a print-friendly layout width)
   cur = null,
   returnFocus = null,
@@ -127,6 +129,7 @@ export async function openScene(id, originEl) {
     h.load(sim);
     h.playing = true;
     setPlayBtn(true);
+    wideSel = -1;
     sim.cams.forEach((c, i) => {
       const b = document.createElement('button');
       b.className = 'btn small';
@@ -204,7 +207,7 @@ const scrub = document.getElementById('scScrub'),
 function syncCams() {
   if (!host || !cur) return;
   const tour = host.sim.cfg.acts && host.lock == null ? host.sim.cams.findIndex((c) => c.auto) : -1,
-    on = tour >= 0 ? tour : host.camIdx;
+    on = wideSel >= 0 && host.lock == null ? wideSel : tour >= 0 ? tour : host.camIdx;
   [...camsEl.children].forEach((b, i) => {
     b.setAttribute('aria-pressed', String(i === on));
     b.title = b.dataset.name || '';
@@ -218,7 +221,9 @@ function syncScrub(t) {
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1,
     v = Math.max(0, Math.min(1, (t - a0) / (a1 - a0))),
     len = (a1 - a0) * dur,
-    txt = epi ? `${epi.name}: ${(v * len).toFixed(1)} / ${len.toFixed(1)} s` : `${(v * dur).toFixed(1)} / ${dur} s`;
+    range = epi ? `scene time ${(a0 * dur).toFixed(1)} to ${(epi.a1 * dur).toFixed(1)} of ${dur} s` : '', // the locked episode's span of the whole event
+    txt = epi ? `${epi.name}: ${(v * len).toFixed(1)} / ${len.toFixed(1)} s${isPhoneNow() ? '' : ' (' + range + ')'}` : `${(v * dur).toFixed(1)} / ${dur} s`;
+  scrub.title = range;
   scrub.value = Math.round(v * 1000);
   scrub.setAttribute('aria-valuetext', epi ? txt : `${(v * dur).toFixed(1)} of ${dur} seconds`);
   scrub.setAttribute('aria-label', epi ? `Time within ${epi.name}` : 'Scene time');
