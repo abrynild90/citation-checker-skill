@@ -327,7 +327,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
           ['end', 5],
           ['start', -5],
         ]) {
-          const q = p2.textRect(d._cx + dx, 11, anchor, w, 11);
+          const q = p2.textRect(d._cx + dx, 13, anchor, w, 11);
           if (p2.free(q, [], 6)) {
             p2.add(q);
             cLabels.push({ d, s, tx: d._cx + dx, anchor });
@@ -426,7 +426,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     lg
       .append('text')
       .attr('x', tx)
-      .attr('y', yMark + 11)
+      .attr('y', yMark + 13)
       .attr('text-anchor', anchor)
       .style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)')
       .style('font', '600 11px var(--sans)')
