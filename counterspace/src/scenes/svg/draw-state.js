@@ -37,6 +37,7 @@ export function createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY
   const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false, pin = false) => {
     if (!p || p.hidden || !text || p.x < 4 || p.y < 4 || p.x > W - 4 || p.y > H - 4) return;
     if (W < 520 && !opts.panel && sim.cfg.staticDropPhone?.includes(text)) return; // a phone drops the labels that would crowd the subject
+    if (!opts.panel && sim.cfg.staticDrop?.includes(text)) return; // cfg.staticDrop: labels the static diagram leaves out at every width
     if (opts.drop?.includes(text)) return; // a panel's own label dropped where it would cross another on a phone
     if (opt && W < 520 && sim.cfg.acts && !opts.panel) return; // the busy multi-act composite drops its secondary labels on a phone
     cands.push({

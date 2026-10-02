@@ -1,5 +1,8 @@
 // scenes/configs/starfish.js: scene `starfish` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
+
+const PH = IS_PHONE ? 1.5 : 1; // phoneK, the distance factor of the 375 stage
 
 export const STARFISH = {
   id: 'starfish',
@@ -16,7 +19,17 @@ export const STARFISH = {
   related: 'ltbt-1963',
   event: 'us-1962-starfish-prime',
   actors: [
-    { type: 'site', at: [16.7, -169.5], label: 'Johnston Island', short: 'Johnston Is.', color: C.ground, dx: -84, dy: 40 },
+    {
+      type: 'site',
+      at: [16.7, -169.5],
+      label: 'Johnston Island',
+      short: 'Johnston Is.',
+      color: C.ground,
+      dx: -84,
+      dy: 40,
+      staticAt: [0.78, 0.4], // static (screen and print): up and right of the burst, so its leader leaves the Earth by the short way and crosses no other label
+      staticPin: 'hard',
+    },
     {
       type: 'suborbital',
       from: [16.7, -169.5],
@@ -66,13 +79,27 @@ export const STARFISH = {
     },
   ],
   liveLabelK: 1.25, // live at desktop width: the labels carry the story, so the type is 25% larger than the default 11 px
-  // live desktop (px from their referents, default camera): Detonation and Johnston sit just left of the burst with short (25-55 px) leaders that
-  // pass between the field-line arcs; the belt label hangs a short step above the arc it names
-  liveOff: { Thor: [-100, 74], Detonation: [-134, -20], Johnston: [-85, 22], Artificial: [-60, -36] },
+  // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
+  // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
+  // above the belt point it names
+  liveOff: { Detonation: [-178, -42], Johnston: [-142, 4], Thor: [-166, 58], Artificial: [-48, -21] },
+  // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
+  // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
+  camOff: {
+    1: { Detonation: [-70, -95], Thor: [-120, -34] },
+    2: { Artificial: [-48, -22], 'Satellite in': [-95, 0], Johnston: [-125, -12], Detonation: [128, -8], Thor: [-112, 40] },
+  },
+  // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
+  cameras: [
+    { name: 'Wide', at: [20.02, 165.5, 3.5 * PH] },
+    { name: 'Near', at: [16.7, -177.5, Math.max(2.3, 3.5 * PH * 0.55)] },
+    { name: 'Polar', at: [42, -169.5, 4.3 * PH] },
+  ],
   phoneHide: ['Thor launch'],
   phoneOnDisc: ['Johnston', 'Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
   stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)
   staticDropPhone: ['Thor launch'], // 375 static: Thor shares the burst spot; Detonation and Johnston keep separate labels, placed apart
+  staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
   still: 0.7,
   camDist: 3.5,
   phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
