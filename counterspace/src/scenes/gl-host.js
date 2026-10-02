@@ -341,9 +341,11 @@ export class GLHost {
         const c = obj.geometry.attributes.color,
           rgb = obj.userData.rgb;
         if (c && rgb) {
+          const tailN = it.tail ? Math.max(2, Math.round(it.tail * (it.all.length - 1))) : 0; // capped wake: only the last tailN points show
           for (let k = 0; k < n; k++) {
-            const f = n > 1 ? k / (n - 1) : 1;
-            c.array.set([rgb.r, rgb.g, rgb.b, it.uniformA ?? 0.12 + 0.88 * f * f], 4 * k);
+            const f = n > 1 ? k / (n - 1) : 1,
+              cap = tailN ? Math.max(0, 1 - (n - 1 - k) / tailN) : 1;
+            c.array.set([rgb.r, rgb.g, rgb.b, (it.uniformA ?? 0.12 + 0.88 * f * f) * cap * (it.wakeOp ?? 1)], 4 * k);
           }
           c.needsUpdate = true;
         }
@@ -545,6 +547,27 @@ export class GLHost {
         f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       obj.scale.setScalar(u.base * f);
     }
+    // Dazzle glare on a target while a beam is on: about 120 px across on screen, pulsing.
+    for (const { it, obj } of this.dyn) {
+      if (it.kind !== 'glare') continue;
+      const p = it.on(this.t) && it.pos(this.t);
+      obj.visible = !!p && !occluded([cp.x, cp.y, cp.z], p);
+      if (!p) continue;
+      obj.position.set(...p);
+      const d = Math.max(0.15, obj.position.distanceTo(cp)),
+        pulse = 0.85 + 0.15 * Math.sin(this.t * this.sim.cfg.duration * 9);
+      obj.scale.setScalar((120 * k * d * pulse) / sc);
+      obj.material.rotation = this.t * 3;
+    }
+    // Orbit lines that fade out around their craft (it.gapIds): the line never runs through a model.
+    for (const { mat, ids } of this.gapRings || []) {
+      ids.slice(0, 2).forEach((id, k) => {
+        const e = this.dyn.find((d) => d.it.craftId === id),
+          g = mat.uniforms['uGap' + k].value;
+        if (e && e.obj.visible) g.set(e.obj.position.x, e.obj.position.y, e.obj.position.z, 0.6 * (e.obj.userData.span || 0) * e.obj.scale.x);
+        else g.w = 0;
+      });
+    }
     // Docked pairs (it.dockWith): the two models sit side by side, touching, along the camera's right vector, whatever the zoom.
     for (const { it, obj } of this.dyn) {
       if (!it.dockWith || !obj.visible || !it.dockOn(this.t)) continue;
@@ -628,6 +651,7 @@ export class GLHost {
       this.spriteTex = this.ringTex = this.beamTex = this._pt = null;
       this.ptMats = [];
       this.tubeMats = [];
+      this.gapRings = [];
       this.scene.clear();
       this.scene = null;
       this.earthMat = null;

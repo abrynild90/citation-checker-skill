@@ -392,5 +392,12 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       sdx: a.sdx,
       sdy: a.sdy,
     });
+    // dazzle: a flaring glare on the target while the beam is on (the sensor is overwhelmed, nothing is destroyed)
+    items.push({
+      kind: 'glare',
+      pos: (t) => tgt.pos(t),
+      on: (t) => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02,
+      color: a.glareColor || '#ffd6f6',
+    });
   }
 }

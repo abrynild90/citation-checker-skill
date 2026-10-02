@@ -27,14 +27,46 @@ gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 2.2);
 gl_FragColor = vec4(uColor, clamp(0.015 + rim * uGain, 0.0, 1.0)); }`;
-const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; varying float vU;
-void main(){ vU = uv.x; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
+const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; varying float vU; varying vec3 vP;
+void main(){ vU = uv.x; vP = position; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
 float r = min(uR, uMaxPx * d / uScale);
 vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
-const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; varying float vU;
+const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail;
+uniform vec4 uGap0; uniform vec4 uGap1; varying float vU; varying vec3 vP;
+// uTail > 0: only the last uTail of the tube length behind the head is visible (a capped wake)
 void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
+if (uTail > 0.0) f *= clamp((vU - (uHead - uTail)) / uTail, 0.0, 1.0);
+// uGap*: the line fades out around a craft (xyz, radius w), so an orbit never runs through a model
+if (uGap0.w > 0.0) f *= smoothstep(uGap0.w * 0.7, uGap0.w * 1.5, distance(vP, uGap0.xyz));
+if (uGap1.w > 0.0) f *= smoothstep(uGap1.w * 0.7, uGap1.w * 1.5, distance(vP, uGap1.xyz));
 gl_FragColor = vec4(uColor, uOp * f);\n#include <colorspace_fragment>\n}`;
+// Glare texture: soft round core plus four thin spikes (a camera-style dazzle flare).
+function glareCanvas() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const core = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  core.addColorStop(0, 'rgba(255,255,255,1)');
+  core.addColorStop(0.12, 'rgba(255,255,255,0.85)');
+  core.addColorStop(0.35, 'rgba(255,255,255,0.22)');
+  core.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = core;
+  g.fillRect(0, 0, 128, 128);
+  for (const a of [0, Math.PI / 2]) {
+    g.save();
+    g.translate(64, 64);
+    g.rotate(a);
+    const sp = g.createLinearGradient(-64, 0, 64, 0);
+    sp.addColorStop(0, 'rgba(255,255,255,0)');
+    sp.addColorStop(0.5, 'rgba(255,255,255,0.95)');
+    sp.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = sp;
+    g.fillRect(-64, -1.6, 128, 3.2);
+    g.restore();
+  }
+  return c;
+}
 export const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
 
 const methods = {
@@ -98,6 +130,9 @@ const methods = {
           uScale: { value: 800 },
           uMaxPx: { value: maxPx },
           uHead: { value: 0 },
+          uTail: { value: 0 },
+          uGap0: { value: new T.Vector4(0, 0, 0, 0) },
+          uGap1: { value: new T.Vector4(0, 0, 0, 0) },
           uPush: { value: 0 },
         },
       });
@@ -194,12 +229,14 @@ const methods = {
           geo,
           this._tubeMat(
             col(it.color),
-            it.dynamic ? 0.9 : (it.opacity ?? 1),
+            it.dynamic ? (it.wakeOp ?? 0.9) : (it.opacity ?? 1),
             it.dynamic ? T.AdditiveBlending : T.NormalBlending,
             it.thick,
             it.dynamic ? 1.9 : 1.4,
           ),
         );
+        if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds });
+        if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
         if (it.push) tube.material.uniforms.uPush.value = it.push; // orbit line pushed back from the camera: craft on it are drawn in front
         if (!it.dynamic && it.orbit) (this.ringPts ||= []).push(pts);
         root.add(tube);
@@ -442,6 +479,22 @@ const methods = {
       root.add(m);
       this.dyn.push({ it, obj: m });
       if (it.label) this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
+    } else if (it.kind === 'glare') {
+      // Dazzle glare: a bright core with four diffraction spikes, pulsing; sized in screen px by _fitModels
+      const m = new T.Sprite(
+        new T.SpriteMaterial({
+          map: (this.glareTex ||= new T.CanvasTexture(glareCanvas())),
+          color: col(it.color),
+          transparent: true,
+          opacity: 0.9,
+          depthWrite: false,
+          depthTest: false,
+          blending: T.AdditiveBlending,
+        }),
+      );
+      m.visible = false;
+      root.add(m);
+      this.dyn.push({ it, obj: m });
     } else if (it.kind === 'status') {
       this.status = it;
     }

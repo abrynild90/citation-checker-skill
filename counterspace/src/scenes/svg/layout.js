@@ -116,7 +116,9 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
   const docked = sim.items.some((i) => i.dockWith && i.dockOn(t)), // a docked pair is two models wide: more side margin
     fx = sim.cfg.staticFitRing ? 20 : 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))), // a ring-fit scene: the ring sets the width
     fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
-    fBot = stY - 8 - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
+    // staticKeyClearPhone: on a phone the Earth sits above the legend key (the key never lies on the globe)
+    keyH = !opts.panel && W < 520 && sim.cfg.staticKeyClearPhone && sim.cfg.staticKey ? sim.cfg.staticKey.length * 15.5 + 14 : 0,
+    fBot = stY - 8 - keyH - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
   let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
   let CX = W / 2 - ((x0 + x1) / 2) * R,
     CY = (fTop + fBot) / 2 - ((y0 + y1) / 2) * R;

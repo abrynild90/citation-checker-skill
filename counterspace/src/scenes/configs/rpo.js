@@ -8,7 +8,7 @@ const MIN_PX = IS_PHONE ? 54 : 72, // craft model size range (px): larger than b
 export const RPO = {
   id: 'rpo',
   date: '2025-06-13',
-  title: 'Proximity operations: China, the US and Russia (2019–2025)',
+  title: 'Proximity operations: China, the US and Russia (2019–2026)',
   shells: [],
   duration: 32,
   caption:
@@ -186,8 +186,8 @@ export const RPO = {
       scale: 1.6 * PK,
       label: 'Cosmos 2543',
       short: 'Cosmos 2543',
-      dx: 6,
-      dy: 34,
+      dx: 14,
+      dy: -46, // above the craft (sky), not on the Earth limb below it
       labelFn: (t, n) => (n ? 'Cosmos 2543' : 'Cosmos 2543 (subsatellite)'),
       arcs: [{ t0: 0.53, t1: 0.6, o: [0, 0.07, 0] }],
       key: [
@@ -291,6 +291,6 @@ export const RPO = {
     { name: 'China + US in GEO', act: 0, fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.2 } },
     { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: 0.88, t: 0.57 } },
     { name: 'US + UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85 } },
-    { name: 'Wide: Earth and the whole GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false }, // unlocked from the tour
+    { name: 'Wide: Earth and the whole GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: ['USA 245'] }, // unlocked from the tour
   ],
 };

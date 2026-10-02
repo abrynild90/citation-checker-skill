@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 70 : 112; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 50 : 76; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -59,7 +59,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: 64,
+      minPx: 40,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
@@ -112,7 +112,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: 64,
+      minPx: 40,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
@@ -152,8 +152,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
-      minPx: 60,
-      maxPx: IS_PHONE ? 64 : 96,
+      minPx: 38,
+      maxPx: IS_PHONE ? 46 : 68,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
@@ -227,9 +227,9 @@ export const SPACEPLANES = {
         [0.96, 0.08, 0.005, 0.02],
       ],
     },
-    { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0025 },
-    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, color: '#ffe9a8', acts: [2], thick: 0.0022 },
-    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: '#ffe9a8', acts: [2], thick: 0.0022 },
+    { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0025, tail: 0.14, wakeOp: 0.34 }, // wake capped in length and brightness
+    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, color: '#ffe9a8', acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
+    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: '#ffe9a8', acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
   ],
   still: 0.5,
   stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
@@ -275,11 +275,12 @@ export const SPACEPLANES = {
       act: 2,
       fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], fill: 0.93, dMin: 0.1, t: 0.75 },
     },
-    { name: 'Wide: Earth, LEO orbits and the GEO ring', at: [32, -25, 7.2], phone: { at: [32, -25, 10] }, ref: false }, // unlocked from the tour
+    { name: 'Wide: Earth and every orbit', at: [32, -25, 7.2], phone: { at: [32, -25, 10] }, ref: false, hide: ['OTV-7 orbit'] }, // unlocked from the tour
   ],
   staticCenter: [40, 105],
   staticFit: 1.6,
   staticFitPhone: 1.3,
+  staticKeyClearPhone: true, // 375 static: the legend key sits below the Earth, not on it
   staticSnap: { csshq: [0.6], objJ: [0.605], objG: [0.93] },
   staticLabels: { csshq: 'CSSHQ + Obj. J, G' },
   staticLabelsNarrow: { csshq: 'CSSHQ' }, // the phone key already reads "CSSHQ, Obj. J, G"

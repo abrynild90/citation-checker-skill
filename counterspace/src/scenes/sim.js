@@ -170,6 +170,8 @@ export function buildSim(cfg) {
         dynamic: true,
         all,
         thick: a.thick ?? 0.0035,
+        tail: a.tail, // capped wake length (fraction of the whole path) and brightness
+        wakeOp: a.wakeOp,
         color: a.color,
         width: 2,
         pts: (t) => {
@@ -258,6 +260,7 @@ export function buildSim(cfg) {
         opacity: a.opacity ?? 0.55,
         thick: a.thick,
         push: a.push,
+        gapIds: a.gapCrafts,
         label: a.label,
         labelAt: pts[a.sat ? 118 : 45],
       });

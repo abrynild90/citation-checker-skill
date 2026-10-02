@@ -238,6 +238,12 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
       }
       if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, ...frameCam(c.frame) };
+      // c.drift = [dLon of the camera, dLon of the target] in degrees over the whole timeline: a slow pan, so the view differs at every t
+      const drifted = (t) => ({
+        pos: ll(c.at[0], c.at[1] + c.drift[0] * (t - 0.5), c.at[2]),
+        look: c.look ? ll(c.look[0], c.look[1] + c.drift[1] * (t - 0.5), c.look[2]) : null,
+        up: null,
+      });
       return {
         name: c.name,
         auto: !!c.auto,
@@ -249,6 +255,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         pos: ll(...c.at),
         look: c.look ? ll(...c.look) : null,
         hideShell: !!c.look,
+        ...(c.drift ? { follow: drifted, ...drifted(0.5) } : {}),
       };
     });
   else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];

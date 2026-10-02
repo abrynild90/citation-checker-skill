@@ -109,7 +109,12 @@ export const KEY = {
   rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/],
 };
 // Justified per-scene marker-size overrides (px, longer side): the marker IS the scene's subject. Must match cfg.staticMarkerCap in src/scenes/configs/*.js.
-const MARKER_OVR = { solwind: { 'Solwind P78-1': 64 }, laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 280, cg2: 280 } };
+const MARKER_OVR = {
+  solwind: { 'Solwind P78-1': 64 },
+  laser: { 'MSTI-3 (US test target)': 44 },
+  viasat: { 'KA-SAT (GEO, unaffected)': 48 },
+  'sj21-tug': { sj21: 280, cg2: 280 },
+};
 // scenes whose static subject pair may take a bigger share of the Earth disc area than the default 20% (the pair is the point of the diagram)
 const AREA_OVR = { 'sj21-tug': 0.8 };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;

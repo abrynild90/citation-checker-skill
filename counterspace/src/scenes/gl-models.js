@@ -78,7 +78,7 @@ export const modelMethods = {
       boom.rotation.z = -0.35;
       g.add(boom);
       const arm = new T.Group(),
-        armM = this._mat(0xd5dae6),
+        armM = this._mat(0xffeaa8, { emissive: 0x6b5a1e }), // a light, warm boom that stands out from the grey bus
         seg = (x0, y0, x1, y1, r) => {
           const L = Math.hypot(x1 - x0, y1 - y0),
             q = new T.Mesh(new T.CylinderGeometry(r, r, L, 6), armM);
@@ -86,10 +86,10 @@ export const modelMethods = {
           q.position.set((x0 + x1) / 2, (y0 + y1) / 2, 0);
           arm.add(q);
         };
-      seg(0.006, 0, 0.0135, 0.0036, 0.0007);
-      seg(0.0135, 0.0036, 0.0225, 0, 0.0005);
+      seg(0.006, 0, 0.0135, 0.0036, 0.0011);
+      seg(0.0135, 0.0036, 0.0225, 0, 0.0008);
       [0.006, 0.0135].forEach((x, i) => {
-        const j = new T.Mesh(new T.BoxGeometry(0.0021, 0.0021, 0.0021), dk);
+        const j = new T.Mesh(new T.BoxGeometry(0.003, 0.003, 0.003), dk);
         j.position.set(x, i ? 0.0036 : 0, 0);
         arm.add(j);
       });
@@ -111,7 +111,7 @@ export const modelMethods = {
           const d = g.worldToLocal(g.parent.localToWorld(B.obj.position.clone())); // the partner, in this model's own (possibly rotated) frame
           if (d.lengthSq() > 1e-12) arm.quaternion.setFromUnitVectors(new T.Vector3(1, 0, 0), d.normalize());
         }
-        arm.scale.set(0.5 + 0.45 * f, 1.7, 1.7);
+        arm.scale.set(0.5 + 0.45 * f, 2.1, 2.1);
         T.Group.prototype.updateMatrixWorld.call(arm, force);
       };
       const dish2 = new T.Mesh(

@@ -28,7 +28,19 @@ export const SJ21_TUG = {
   scaleNote: 'Heights above the belt, the spacing between the two spacecraft and their position along the belt are illustrative.',
   anchors: { g: { geo: { lon: 105 } } },
   actors: [
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.005, opacity: 0.85, inset: true, push: 1.4, label: 'GEO belt (35,786 km)' },
+    {
+      type: 'ring',
+      alt: GEO_ALT,
+      inc: 0,
+      raan: 0,
+      color: C.geo,
+      thick: 0.005,
+      opacity: 0.85,
+      inset: true,
+      push: 1.4,
+      gapCrafts: ['sj21', 'cg2'],
+      label: 'GEO belt (35,786 km)',
+    },
     {
       type: 'craft',
       id: 'cg2',

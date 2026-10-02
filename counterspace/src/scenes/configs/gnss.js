@@ -94,7 +94,7 @@ export const GNSS = {
     {
       name: 'Baltic: airliners and jammer zone',
       short: 'Baltic zone',
-      at: [41, 13, 1.58],
+      at: [41, 13, 1.46],
       look: [52.2, 22.2, 0.98],
       phone: { at: [38, 12, 1.48] },
     },

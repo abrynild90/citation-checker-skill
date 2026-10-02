@@ -106,6 +106,7 @@ export const LASER = {
       name: 'Russia: Peresvet sites (SWF)',
       at: [50, 55, 2.3],
       look: [56, 58, 1.0],
+      drift: [22, 12], // a slow pan east across the shelter sites: the view differs at every t
       ref: false,
       hide: ['MSTI-3', 'MIRACL', 'White Sands'],
       status: ['SWF: Russia’s Peresvet is a mobile laser dazzler; pins mark its shelter sites', 'Peresvet shelter sites (approx.)'],
