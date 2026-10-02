@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------- simulator
 // Items: {kind, ...} with time functions. Kinds: shell, curve, point, cloud, beam, dome, flash.
 import {
+  DEG,
   GEO_ALT,
   IS_PHONE,
   PARTICLE_BUDGET,
