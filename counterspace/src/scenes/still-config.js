@@ -13,6 +13,7 @@ export const STILL = {
     look: [0, 0, 0],
     fov: 34,
     shift: [0.001, -0.06],
+    hide: ['Thor launch'], // the live Near chip stays on at every t; the print keeps the single Detonation chip
     // labels off the field lines: Thor and Detonation above the belt, Johnston Island below it (fractions of the frame width)
     // R23: the burst point sits among the field-line arcs, so no leader runs across them: Thor sits just left with a short horizontal leader,
     // Detonation rises straight up
@@ -24,7 +25,7 @@ export const STILL = {
     pos: [-3.274, 2.613, 2.013],
     look: [-0.531, 0.696, 0.64],
     fov: 19.5,
-    shift: [0.11, -0.05],
+    shift: [0.11, -0.12],
     // labels spread around the objects: Solwind up-left over the ocean, ASM-135 up-right beside the missile, the F-15 out right past the limb
     // (leaders short of the 0.17 W limit)
     off: { Solwind: [-0.11, -0.05], 'ASM-135': [-0.025, -0.07], 'F-15': [0.17, -0.14] },
