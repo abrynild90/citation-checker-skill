@@ -3,6 +3,7 @@
 // note, and the probe (`__lay`) that scene_check reads
 // ============================================================================
 import { offDisc, placeLabels } from '../labels.js';
+import { SANS } from '../../fonts.js';
 
 // Legend-style key (cfg.staticKey: [colour, text] rows) instead of a label per orbit or object: bottom-left, above the caption
 export function legendBox(sim, opts, W, stY) {
@@ -141,7 +142,7 @@ export function drawChrome(S, fit) {
         .attr('x', 8)
         .attr('y', 14)
         .attr('fill', '#ffe08a')
-        .attr('font-family', 'system-ui')
+        .attr('font-family', SANS)
         .attr('font-weight', 700)
         .attr('font-size', 11)
         .text(opts.title);
@@ -162,7 +163,7 @@ export function drawChrome(S, fit) {
       .attr('y', H - 12)
       .attr('fill', '#a9b3cc')
       .attr('font-size', fFont)
-      .attr('font-family', 'system-ui')
+      .attr('font-family', SANS)
       .text(ft);
   }
 }

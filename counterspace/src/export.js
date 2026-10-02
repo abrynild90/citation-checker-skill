@@ -12,6 +12,7 @@ import { drawL } from './charts/lag.js';
 import { ABBR_NOTE, drawLegal } from './charts/legal.js';
 import { hooks } from './shared.js';
 import { guides } from './ui.js';
+import { SANS } from './fonts.js';
 const STYLE_PROPS = [
   'fill',
   'fill-opacity',
@@ -23,6 +24,7 @@ const STYLE_PROPS = [
   'font-family',
   'font-size',
   'font-weight',
+  'font-variant-numeric',
   'letter-spacing',
   'text-anchor',
   'display',
@@ -34,10 +36,7 @@ const EXPORT_SPEC = {
     draw: () => drawA,
     legend: () => ({
       head: 'Country:',
-      items: [...new Set(KIN.map((e) => actorKey(e.state) || e.state))].map((s) => ({
-        c: colorOf(s),
-        t: s === 'Russia' ? 'USSR / Russia' : s,
-      })),
+      items: [...new Set(KIN.map((e) => actorKey(e.state) || e.state))].map((s) => ({ c: colorOf(s), t: s === 'Russia' ? 'USSR / Russia' : s })),
     }),
     bubbles: true, // frameExport adds a size key (debris bubble area) under the colour key
     title: 'Chart A · Kinetic tests: altitude over time',
@@ -131,10 +130,19 @@ const EXPORT_SPEC = {
   },
 };
 const EXPORT_W = 1200,
-  SANS_EXPORT = 'system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
+  SANS_EXPORT = SANS;
 const SOURCE_LINE =
   `Source: Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment (9th ed., Apr. 2026) and ` +
   `the primary sources cited in the ledger. Data as of ${AS_OF}. Companion to Space Security Law: Governance Beyond the Atmosphere.`;
+// A standalone SVG has no page stylesheet, so it carries the subset IBM Plex Sans faces it uses (400 and 600; a 700 request resolves to 600) as
+// base64 @font-face rules, copied from the page's <style id="cs-fonts"> (written by tools/build_page.py). Roughly 36 KB added per file.
+function fontFaceCSS() {
+  const css = document.getElementById('cs-fonts')?.textContent || '';
+  return css
+    .split('\n')
+    .filter((r) => r.includes('font-family:"IBM Plex Sans"') && r.includes('font-style:normal') && /font-weight:(400|600);/.test(r))
+    .join('\n');
+}
 // Copy computed presentation properties onto the clone so the file renders the same without the page's stylesheet.
 function inlineStyles(src, clone) {
   const a = src.querySelectorAll('*'),
@@ -198,6 +206,7 @@ function frameExport(spec, clone, box) {
     return e;
   };
   mk('title', {}, spec.title);
+  mk('defs', {}).appendChild(document.createElementNS(ns, 'style')).textContent = fontFaceCSS();
   mk('desc', {}, spec.key);
   mk('rect', { width: EW, height: HT, style: `fill:${bg}` });
   mk('text', { x: 16, y: 26, style: `fill:${fg};font:600 17px ${SANS_EXPORT}` }, spec.title);
@@ -240,9 +249,7 @@ function frameExport(spec, clone, box) {
       'Debris bubble area = cataloged fragments (as of Feb. 2026); labels give fragment counts.',
     );
   }
-  foot.forEach((t, i) =>
-    mk('text', { x: 16, y: HDR + vb[3] + LEGH + BK + 18 + i * 14, style: `fill:${muted};font:10.5px ${SANS_EXPORT}` }, t),
-  );
+  foot.forEach((t, i) => mk('text', { x: 16, y: HDR + vb[3] + LEGH + BK + 18 + i * 14, style: `fill:${muted};font:10.5px ${SANS_EXPORT}` }, t));
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(out);
 }
 // Redraw a chart off-screen at the fixed export width (desktop layout) and serialise it.

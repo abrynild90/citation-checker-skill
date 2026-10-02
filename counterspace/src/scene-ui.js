@@ -12,6 +12,7 @@ import { renderSVG } from './scenes/svg-fallback.js';
 import { setGuide } from './ui.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
+import { SANS, SERIF, fontsReady } from './fonts.js';
 export let THREE = null,
   host = null,
   glOK = null;
@@ -317,10 +318,10 @@ function svgToPNG(svg, title, cite) {
       g.stroke();
       g.textBaseline = 'middle';
       g.fillStyle = '#ffe08a';
-      g.font = `600 ${Math.round(14 * s)}px system-ui,sans-serif`;
+      g.font = `600 ${Math.round(14 * s)}px ${SANS}`;
       g.fillText('Illustrative static diagram, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
       g.fillStyle = '#e9edf7';
-      g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`;
+      g.font = `600 ${Math.round(25 * s)}px ${SERIF}`;
       g.fillText(title, 16 * s, hb + H + 24 * s);
       const srcTxt = `Source: ${String(cite || '')
         .trim()
@@ -330,10 +331,10 @@ function svgToPNG(svg, title, cite) {
       // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
       let f = Math.round(15 * s);
       for (; f > 10 * s; f -= 0.5 * s) {
-        g.font = `${f}px system-ui,sans-serif`;
+        g.font = `${f}px ${SANS}`;
         if (Math.max(g.measureText(srcTxt).width, g.measureText(credit).width) <= PRINT_W - 32 * s) break;
       }
-      g.font = `${f}px system-ui,sans-serif`;
+      g.font = `${f}px ${SANS}`;
       g.fillStyle = '#c3cbe0';
       g.fillText(srcTxt, 16 * s, hb + H + 54 * s);
       g.fillText(credit, 16 * s, hb + H + 77 * s);
@@ -345,6 +346,7 @@ function svgToPNG(svg, title, cite) {
 }
 export async function exportStill() {
   if (!cur) return null;
+  await fontsReady; // the print layout measures and draws text on canvas
   if (host && glOK) return host.stillPNG(cur.title, cur.cite);
   const svg = view.querySelector(':scope > svg');
   if (!svg) throw new Error('No diagram to export');

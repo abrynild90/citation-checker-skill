@@ -9,6 +9,7 @@
   name="description"
   content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere."
 >
+<style id="cs-fonts">/*__FONTS__*/</style>
 <style>
 :root, .xbox.xdark{
   color-scheme: dark;
@@ -21,8 +22,9 @@
   --c-kp:#FF9ECF; --c-il:#C3CDDE; --c-iq:#D9C38A; --c-multi:#B9C2D6;
   --cat-da:#FF8C5A; --cat-co:#F0C24B; --cat-ew:#56B4E9; --cat-de:#CFA3E6; --cat-cy:#3FD0A0;
   --shadow:0 10px 30px rgba(0,0,0,.45); --edge:rgba(0,0,0,.6);
-  --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
-  --sans: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif: Newsreader,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans: "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono: "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
@@ -52,7 +54,7 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);font-synthesis:none;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
@@ -85,10 +87,10 @@ header.top{padding:20px 0 4px}
   }
 }
 .kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
-h1{font:600 clamp(28px,4.4vw,42px)/1.1 var(--serif);margin:8px 0 8px;letter-spacing:-.01em}
-h2{font:600 clamp(21px,2.6vw,28px)/1.2 var(--serif);margin:0 0 6px}
+h1{font:600 clamp(28px,4.7vw,46px)/1.08 var(--serif);margin:8px 0 10px;letter-spacing:-.018em;text-wrap:balance}
+h2{font:600 clamp(22px,2.7vw,30px)/1.2 var(--serif);margin:0 0 6px;letter-spacing:-.01em}
 h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
-.lede{max-width:760px;color:var(--muted);font-size:17px;margin:0}
+.lede{max-width:760px;color:var(--muted);font:400 19.5px/1.5 var(--serif);margin:0}.lede strong{font-weight:600;color:var(--text)}
 .cta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:12px 0 0}
 .cta-note{font-size:13px;color:var(--muted)}
 .btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding:10px 16px}
@@ -340,7 +342,11 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 .chip-off-note{font-size:12.5px;color:var(--faint);align-self:center}
 #expDark{margin:0}
 .chart-head .tools{padding-right:2px}
-td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap}
+td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap;font:400 11.5px/1.5 var(--mono)}
+table,.glance,.legal-list,.tm,.count,.card,svg text,.hlabel{font-variant-numeric:tabular-nums}
+em,i{font-style:italic}
+.chart-head p,#sceneCaption{font-family:var(--serif);font-size:17px;line-height:1.5}
+#sceneCaption{font-size:16px}
 @media (max-width:640px) {
   td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i] {
     white-space:normal
@@ -371,7 +377,7 @@ footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
 .panel{width:min(1120px,100%);height:min(760px,100%);background:#0b1122;color:#e9edf7;border:1px solid #2a3558;border-radius:16px;
   display:grid;grid-template-columns:1fr 320px;grid-template-rows:auto 1fr auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .panel header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #2a3558}
-.panel header h2{font-size:20px;margin:0;min-width:0}
+.panel header h2{font-size:22px;margin:0;min-width:0}
 .panel header .hd{min-width:0;flex:1}
 .panel header .nav{display:flex;gap:6px;align-items:center;flex:none}
 .panel .count{font:12px var(--sans);color:#a9b3cc;min-width:38px;text-align:center}

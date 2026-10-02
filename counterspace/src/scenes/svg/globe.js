@@ -4,6 +4,7 @@
 // ============================================================================
 import { DEG, mulberry, sunFor, toLL } from '../core.js';
 import { earthRaster, landGeometry, lastSS } from './earth-raster.js';
+import { SANS } from '../../fonts.js';
 
 // A panel shows the whole Earth only when enough of the disc falls inside it.
 export function panelShowsGlobe(opts, CX, CY, R, W, H) {
@@ -233,7 +234,7 @@ export function drawLimbTag(svg, W, fBot, marks) {
     .attr('text-anchor', 'middle')
     .attr('fill', '#dfe9ff')
     .attr('fill-opacity', 0.9)
-    .attr('font-family', 'system-ui')
+    .attr('font-family', SANS)
     .attr('font-size', 12)
     .attr('font-style', 'italic')
     .attr('stroke', '#050812')

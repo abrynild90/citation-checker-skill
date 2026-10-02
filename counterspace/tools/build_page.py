@@ -4,7 +4,7 @@ src/boot.js is the entry of a real ES-module graph: every module imports what it
 minifies the template's <style> block. Data JSON (data/*.json) and src/land.json go in as inert script blobs.
 esbuild comes from tools/node_modules (run `npm install` in tools/); there is no fallback build.
 OUTFILE=path writes the page elsewhere than ./index.html."""
-import json, re, pathlib, os, subprocess
+import json, re, pathlib, os, subprocess, base64
 
 R = pathlib.Path(__file__).resolve().parent.parent
 ESB = R / 'tools/node_modules/.bin/esbuild'
@@ -35,6 +35,30 @@ def slim_events(events):
     return out, table
 
 
+# Embedded fonts: fonts/*.woff2 (Latin subsets, SIL OFL; see fonts/OFL-*.txt) become base64 @font-face rules in <style id="cs-fonts">, so the
+# page stays one self-contained file. src/export.js copies the IBM Plex Sans rules into exported SVGs (it matches the exact `font-family:"IBM Plex
+# Sans"` text written here), and src/fonts.js loads every face before the first text measurement.
+# (family, file, weight or range, style, unicode-range-free: the subsets are already Latin + the page's symbols)
+FONT_FACES = (
+    ('Newsreader', 'Newsreader-opsz.woff2', '400 600', 'normal'),
+    ('Newsreader', 'Newsreader-opsz-italic.woff2', '400 600', 'italic'),
+    ('IBM Plex Sans', 'IBMPlexSans-400.woff2', '400', 'normal'),
+    ('IBM Plex Sans', 'IBMPlexSans-500.woff2', '500', 'normal'),
+    ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '600', 'normal'),
+    ('IBM Plex Sans', 'IBMPlexSans-400-italic.woff2', '400', 'italic'),
+    ('IBM Plex Mono', 'IBMPlexMono-400.woff2', '400', 'normal'),
+)
+
+
+def font_css():
+    rules = []
+    for fam, f, wt, st in FONT_FACES:
+        b64 = base64.b64encode((R / 'fonts' / f).read_bytes()).decode()
+        rules.append(f'@font-face{{font-family:"{fam}";font-style:{st};font-weight:{wt};font-display:swap;'
+                     f'src:url(data:font/woff2;base64,{b64}) format("woff2")}}')
+    return '\n'.join(rules)
+
+
 def esbuild(args, text=None):
     r = subprocess.run([str(ESB), *args], input=text, capture_output=True, text=True, cwd=R / 'src')
     if r.returncode:
@@ -57,6 +81,7 @@ def main():
     tpl = re.sub(r'(<style>)(.*?)(</style>)', lambda m: m.group(1) + esbuild(['--loader=css', '--minify'], m.group(2)) + m.group(3),
                  tpl, count=1, flags=re.S)
     # land.json sits in its own script tag so it is parsed only when a scene or the hero needs it
+    tpl = tpl.replace('/*__FONTS__*/', font_css())
     html = tpl.replace('/*__DATA__*/', script_json(data)).replace('/*__LAND__*/', script_json(read_json('src/land.json'))).replace('/*__APP__*/', js)
     out = pathlib.Path(os.environ['OUTFILE']) if os.environ.get('OUTFILE') else R / 'index.html'
     out.write_text(html)

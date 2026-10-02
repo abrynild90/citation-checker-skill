@@ -11,6 +11,7 @@ import { drawItems } from './svg/items.js';
 import { attachProbe, drawChrome, drawLegend, drawStatus, legendBox, placeAndDrawLabels } from './svg/label-layer.js';
 import { renderPanels } from './svg/panels.js';
 import { upgradeDiagramEarth } from './svg/upgrade.js';
+import { SANS } from '../fonts.js';
 
 // A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,
 // with the same screen-space label de-confliction (pills + leader lines) as the live scene.
@@ -67,7 +68,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   drawShells(S);
   drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb });
   if (limb) drawLimbTag(svg, W, fBot, S.marks);
-  S.g = svg.append('g').attr('font-family', 'system-ui').attr('font-size', 11);
+  S.g = svg.append('g').attr('font-family', SANS).attr('font-size', 11);
   Object.assign(S, { GX, GY, GR });
   queueShellLabels(S, fTop, stY);
   drawItems(S);

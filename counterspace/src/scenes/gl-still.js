@@ -5,6 +5,7 @@
 import { DEG, ll } from './core.js';
 import { earthImg } from './earth.js';
 import { STILL_ASPECT, stillFor } from './still-config.js';
+import { SANS, SERIF, fontsReady } from '../fonts.js';
 
 const methods = {
   // Extent of the picture for recomposing: like _contentBox, but a whole-globe disc (and shells that fit about 1.2 frames) counts unclipped.
@@ -153,7 +154,7 @@ const methods = {
       sBox = null;
     // the caption is drawn at the size of the static still's (12 px in a 760 px diagram, about 47 px at 3000 px): 1.32 x the base unit
     const cs = s * 1.32;
-    g.font = `${Math.round(12 * cs)}px system-ui,sans-serif`;
+    g.font = `${Math.round(12 * cs)}px ${SANS}`;
     if (status) {
       const maxW = Math.min(W - 40 * s, 640 * cs);
       let cur = '';
@@ -197,7 +198,7 @@ const methods = {
       // every label that sits away from its subject gets a leader to the box edge nearest the subject
       const r = rawL[i];
       if (!q || !r) return; // a placer stub is replaced too: the leader always runs from the referent to the chip edge
-      g.font = `600 ${Math.round(11 * ls)}px system-ui,sans-serif`;
+      g.font = `600 ${Math.round(11 * ls)}px ${SANS}`;
       const hw = (g.measureText(q.text).width + 12 * ls) / 2, // the drawn chip, not the placer's box: the leader reaches its edge
         hh = 9 * ls,
         cx = Math.max(q.x - hw, Math.min(q.x + hw, r.px)),
@@ -224,7 +225,7 @@ const methods = {
     }
     for (const q of lp) {
       if (!q) continue;
-      g.font = `600 ${Math.round(11 * ls)}px system-ui,sans-serif`;
+      g.font = `600 ${Math.round(11 * ls)}px ${SANS}`;
       const tw = g.measureText(q.text).width + 12 * ls;
       lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * ls, w: tw, h: 18 * ls });
       g.fillStyle = 'rgba(5,8,18,0.8)';
@@ -237,7 +238,7 @@ const methods = {
       g.textBaseline = 'alphabetic';
     }
     if (sBox) {
-      g.font = `${Math.round(12 * cs)}px system-ui,sans-serif`;
+      g.font = `${Math.round(12 * cs)}px ${SANS}`;
       g.fillStyle = 'rgba(5,8,18,0.78)';
       g.fillRect(sBox[0], sBox[1], sBox[2], sBox[3]);
       g.fillStyle = '#ffe08a';
@@ -250,7 +251,7 @@ const methods = {
       g.textBaseline = 'middle';
       let fs = 13 * s;
       for (; fs > 8 * s; fs -= 0.5 * s) {
-        g.font = `700 ${Math.round(fs)}px system-ui,sans-serif`;
+        g.font = `700 ${Math.round(fs)}px ${SANS}`;
         if (g.measureText(o.title).width + 16 * s <= W) break;
       }
       const tw = g.measureText(o.title).width + 16 * s;
@@ -266,6 +267,8 @@ const methods = {
   // restore the live size. Scenes with cfg.panels (three unrelated episodes) get a composite: one tile per episode, each with its own camera, title
   // and caption.
   stillPNG(title, cite, targetW = 3000) {
+    // Canvas text must not be measured with fallback metrics: if the faces are still loading (only possible in the first moments), wait.
+    if (document.fonts && document.fonts.status !== 'loaded') return fontsReady.then(() => this.stillPNG(title, cite, targetW));
     const vw = this.el.clientWidth,
       vh = this.el.clientHeight,
       pr = this.renderer.getPixelRatio();
@@ -326,12 +329,12 @@ const methods = {
         bg.textAlign = 'left';
         bg.textBaseline = 'top';
         bg.fillStyle = '#ffe08a';
-        bg.font = `700 ${44 * sz}px system-ui,sans-serif`;
+        bg.font = `700 ${44 * sz}px ${SANS}`;
         wrap(`${pn.title} · ${pn.brief}`, tileW - 36 * sz)
           .slice(0, 2)
           .forEach((l, i, a) => bg.fillText(l, k * tileW + 18 * sz, ty - (a.length - i) * 54 * sz - 8 * sz));
         bg.fillStyle = '#e9edf7';
-        bg.font = `${40 * sz}px system-ui,sans-serif`;
+        bg.font = `${40 * sz}px ${SANS}`;
         if (pn.status) wrap(pn.status, tileW - 36 * sz).forEach((l, i) => bg.fillText(l, k * tileW + 18 * sz, ty + tileH + 16 * sz + i * 52 * sz));
         bg.textBaseline = 'alphabetic';
         tileLays.push({ ...this.stillLayout, ox: k * tileW, oy: ty });
@@ -364,10 +367,10 @@ const methods = {
     g.stroke();
     g.textBaseline = 'middle';
     g.fillStyle = '#ffe08a';
-    g.font = `600 ${Math.round(14 * s)}px system-ui,sans-serif`;
+    g.font = `600 ${Math.round(14 * s)}px ${SANS}`;
     g.fillText('Illustrative, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
     g.fillStyle = '#e9edf7';
-    g.font = `600 ${Math.round(22 * s)}px system-ui,sans-serif`;
+    g.font = `600 ${Math.round(25 * s)}px ${SERIF}`;
     g.fillText(title, 16 * s, hb + body.height + 24 * s);
     // Source line (cite) and imagery credit each on their own line, at a readable size (shrunk only if a line would overflow).
     const credit = earthImg ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
@@ -377,10 +380,10 @@ const methods = {
       .replace(/[.;,\s]+$/, '')}.`;
     let f = Math.round(15 * s);
     for (; f > 10 * s; f -= 0.5 * s) {
-      g.font = `${f}px system-ui,sans-serif`;
+      g.font = `${f}px ${SANS}`;
       if (Math.max(g.measureText(srcTxt).width, g.measureText(credit).width) <= W - 32 * s) break;
     }
-    g.font = `${f}px system-ui,sans-serif`;
+    g.font = `${f}px ${SANS}`;
     g.fillStyle = '#c3cbe0';
     g.fillText(srcTxt, 16 * s, hb + body.height + 54 * s);
     g.fillText(credit, 16 * s, hb + body.height + 77 * s);

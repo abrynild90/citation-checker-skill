@@ -22,6 +22,7 @@ import { exportSVG } from './export.js';
 import { audit } from './audit.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
+import { fontsReady } from './fonts.js';
 document.getElementById('themeBtn').onclick = () => {
   const root = document.documentElement;
   const now = root.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -71,28 +72,32 @@ function drawAll(lazy = false) {
     1500,
   ); // the sources section waits for the viewport (or audit/export)
 }
-timed('first-draw', () => {
-  chipsB();
-  drawLegalKey();
-  drawAll(true);
+// Charts and labels are laid out by measuring text, so the first draw waits for the embedded faces (data: URIs, a local decode: a few ms).
+fontsReady.then(() => {
+  performance.mark('cs:fonts-ready');
+  timed('first-draw', () => {
+    chipsB();
+    drawLegalKey();
+    drawAll(true);
+  });
+  performance.mark('cs:first-draw-done');
+  // Hero: a static diagram (vector map, ~57 KB of land data) is drawn straight away and is all that loads before the reader interacts. three.js (~1.3 MB)
+  // and the Earth JPG (~1.5 MB) are fetched only on intent: pointer enter or touch on the hero, the "Rotate the globe" button, keyboard focus on it, or
+  // opening a scene. Reduced motion (and no WebGL) keep the static diagram, and the button is then not offered.
+  {
+    ensureLand();
+    const s = buildSim(HERO);
+    setHeroSim(s);
+    renderSVG(s, heroStage, 0.2);
+  }
 });
-performance.mark('cs:first-draw-done');
-// Hero: a static diagram (vector map, ~57 KB of land data) is drawn straight away and is all that loads before the reader interacts. three.js (~1.3 MB)
-// and the Earth JPG (~1.5 MB) are fetched only on intent: pointer enter or touch on the hero, the "Rotate the globe" button, keyboard focus on it, or
-// opening a scene. Reduced motion (and no WebGL) keep the static diagram, and the button is then not offered.
-{
-  ensureLand();
-  const s = buildSim(HERO);
-  setHeroSim(s);
-  renderSVG(s, heroStage, 0.2);
-}
 const heroRot = document.getElementById('heroRot');
 heroRot.hidden = REDUCED;
 const upgradeHero = () => {
   if (REDUCED || heroStage.dataset.gl) return;
   heroStage.dataset.gl = '1';
   heroRot.hidden = true;
-  startHero();
+  fontsReady.then(startHero);
 };
 ['pointerenter', 'pointerdown', 'touchstart'].forEach((t) => heroStage.addEventListener(t, upgradeHero, { once: true, passive: true }));
 heroRot.addEventListener('click', upgradeHero);
@@ -122,6 +127,7 @@ window.__cs = {
           .map((m) => [m.name, +m.startTime.toFixed(1)]),
       ),
   earthReady,
+  fontsReady,
   EARTH_URL,
   exportSVG,
   audit,

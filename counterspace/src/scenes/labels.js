@@ -10,6 +10,7 @@
 // dropped if they cannot be placed cleanly.
 // Returns placements {x, y, leader, ax, ay, qx, qy}. Fixed labels are placed first; others are nudged
 // up/down/sideways to the nearest free slot, clamped inside the frame, and given a leader line to the object.
+import { SANS } from '../fonts.js';
 export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], memo = null, extra = null) {
   const ex = extra || {},
     marks = ex.marks || [],
@@ -120,7 +121,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
           dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0);
         if (Math.hypot(dx0, dy0) < disc.r) {
           if (c.avoidDisc) n += 900;
-          else if (!c.onDisc) soft += 320; // a label prefers open sky to the planet whenever a slot is within reach
+          else if (!c.onDisc) soft += 520; // a label prefers open sky to the planet whenever a slot is within reach
         }
       }
       m.soft = soft;
@@ -330,7 +331,7 @@ export const labelW = (text, u = 1) => {
   if (w == null) {
     try {
       _mctx ||= document.createElement('canvas').getContext('2d');
-      _mctx.font = '600 11px system-ui,sans-serif';
+      _mctx.font = `600 11px ${SANS}`;
       w = _mctx.measureText(text).width;
     } catch (e) {
       w = text.length * 6.6;
