@@ -151,9 +151,11 @@ const methods = {
     this.stillLayout = lay;
     let sLines = [],
       sBox = null;
-    g.font = `${Math.round(12 * s)}px system-ui,sans-serif`;
+    // the caption is drawn at the size of the static still's (12 px in a 760 px diagram, about 47 px at 3000 px): 1.32 x the base unit
+    const cs = s * 1.32;
+    g.font = `${Math.round(12 * cs)}px system-ui,sans-serif`;
     if (status) {
-      const maxW = Math.min(W - 40 * s, 640 * s);
+      const maxW = Math.min(W - 40 * s, 640 * cs);
       let cur = '';
       for (const wd of status.split(' ')) {
         const nx = cur ? cur + ' ' + wd : wd;
@@ -163,8 +165,8 @@ const methods = {
         } else cur = nx;
       }
       if (cur) sLines.push(cur);
-      const tw = Math.max(...sLines.map((l) => g.measureText(l).width)) + 24 * s,
-        th = sLines.length * 16 * s + 10 * s;
+      const tw = Math.max(...sLines.map((l) => g.measureText(l).width)) + 24 * cs,
+        th = sLines.length * 16 * cs + 10 * cs;
       sBox = [W / 2 - tw / 2, H - 12 * s - th, tw, th];
       lay.boxes.push({ n: 'STATUS', x: sBox[0], y: sBox[1], w: sBox[2], h: sBox[3] });
     }
@@ -235,12 +237,12 @@ const methods = {
       g.textBaseline = 'alphabetic';
     }
     if (sBox) {
-      g.font = `${Math.round(12 * s)}px system-ui,sans-serif`;
+      g.font = `${Math.round(12 * cs)}px system-ui,sans-serif`;
       g.fillStyle = 'rgba(5,8,18,0.78)';
       g.fillRect(sBox[0], sBox[1], sBox[2], sBox[3]);
       g.fillStyle = '#ffe08a';
       g.textBaseline = 'middle';
-      sLines.forEach((l, k) => g.fillText(l, W / 2, sBox[1] + 5 * s + 8 * s + k * 16 * s));
+      sLines.forEach((l, k) => g.fillText(l, W / 2, sBox[1] + 5 * cs + 8 * cs + k * 16 * cs));
       g.textBaseline = 'alphabetic';
     }
     if (o.title) {

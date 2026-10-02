@@ -42,6 +42,11 @@ const methods = {
     }
     return null;
   },
+  // Live label type scale: the hero's chips are 1.22x; a scene may raise its own at desktop width (cfg.liveLabelK: its labels are the story). Stills: 1.
+  _liveK(still = false) {
+    const c = this.sim?.cfg;
+    return c?.spin ? 1.22 : !still && c?.liveLabelK && this.el.clientWidth >= 520 ? c.liveLabelK : 1;
+  },
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
   _labelPositions(w, h, u = 1, noBanner = false, statusBox = null) {
@@ -127,7 +132,7 @@ const methods = {
         py = ((1 - v.y) / 2) * h;
       let lx = px + L.dx * k,
         ly = py + (L.dy - 12) * k;
-      const hu = this.sim.cfg.spin ? 1.22 : 1,
+      const hu = this._liveK(noBanner),
         lw = labelW(text, u * hu * (noBanner ? 1.1 : 1)),
         lh = 19 * u * hu;
       if (L.item?.offGlobe && (!L.item.stillOnly || noBanner)) {
@@ -560,6 +565,7 @@ const methods = {
         return;
       }
       L.d.style.display = '';
+      if (!this.sim.cfg.spin) L.d.style.fontSize = this._liveK() > 1 ? 11 * this._liveK() + 'px' : '';
       L.ax = q.ax; // the referent's screen position (read by tools/scene_check.mjs)
       L.ay = q.ay;
       L.d.style.left = q.x + 'px';

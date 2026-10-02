@@ -53,7 +53,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
-header.top{padding:28px 0 8px}
+header.top{padding:20px 0 4px}
 .top-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:8px 32px;align-items:start}
 .toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .glance{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
@@ -61,17 +61,21 @@ header.top{padding:28px 0 8px}
 .glance div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--muted)}
 .glance dt{margin:0}.glance dd{margin:0;color:var(--text);font:600 15px var(--sans);text-align:right}
 .glance h2{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-2);margin:0}
-@media (max-width:860px){.top-grid{grid-template-columns:1fr}.toolbar{justify-content:flex-start;order:-1}}
+@media (max-width:860px){.top-grid{grid-template-columns:1fr}.top-grid .top-main{order:1}.top-grid .jump{order:2}.top-grid .meta{order:3}.top-grid>div:nth-child(2){order:4}.toolbar{justify-content:flex-start}}
 .kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
-h1{font:600 clamp(28px,4.4vw,46px)/1.1 var(--serif);margin:10px 0 10px;letter-spacing:-.01em}
+h1{font:600 clamp(28px,4.4vw,42px)/1.1 var(--serif);margin:8px 0 8px;letter-spacing:-.01em}
 h2{font:600 clamp(21px,2.6vw,28px)/1.2 var(--serif);margin:0 0 6px}
 h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .lede{max-width:760px;color:var(--muted);font-size:17px;margin:0}
-.cta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:16px 0 0}
+.cta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:12px 0 0}
 .cta-note{font-size:13px;color:var(--muted)}
 .btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding:10px 16px}
 .btn.primary:hover{filter:brightness(1.08)}
-.jump{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0 0;max-width:780px}
+.top-grid .jump,.top-grid .meta{grid-column:1/-1}
+.top-grid .jump{margin-top:2px}
+.top-grid .meta{margin-top:0;max-width:none}
+.jump{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 0}
+@media (min-width:1100px){.jump{grid-template-columns:repeat(7,minmax(0,1fr))}}
 .jump a{display:flex;flex-direction:column;gap:2px;padding:9px 11px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);text-decoration:none}
 .jump a:hover{border-color:var(--accent)}
 .jump b{font:600 13.5px/1.25 var(--sans)}
@@ -87,7 +91,7 @@ h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
 .btn.small{padding:6px 9px;font-size:12px;min-height:30px}
 
 /* hero */
-.hero{position:relative;margin:18px 0 8px;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+.hero{position:relative;margin:12px 0 8px;border:1px solid var(--line);border-radius:16px;overflow:hidden;
   background:radial-gradient(120% 90% at 70% 40%,#16224a 0%,#070b17 70%);display:flex;flex-direction:column}
 .hero .stage{position:relative;height:min(52vh,460px);min-height:300px}
 .hero .stage canvas,.hero .stage svg{width:100%;height:100%;display:block}
@@ -366,11 +370,19 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 <body>
 <a class="skip" href="#timeline">Skip to timeline</a>
 <header class="top wrap">
-  <div class="top-grid"><div>
+  <div class="top-grid"><div class="top-main">
   <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
   <h1>Counterspace, 1957–2026: the weapons and the law that trailed them</h1>
   <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military operations” (Executive Summary, p. xxiii). This page puts the technology and the law on a single year axis.</p>
   <div class="cta"><button class="btn primary" id="tourBtn" type="button">▶ Start the 3D scene tour</button><span class="cta-note">10 short scenes, or select any cube badge on a chart.</span></div>
+  </div>
+  <div>
+    <div class="toolbar" role="toolbar" aria-label="Page controls">
+      <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
+      <label class="btn small" for="expDark" title="SVG exports use the light palette (print-ready) unless this is checked"><input type="checkbox" id="expDark"> Dark SVG exports</label>
+    </div>
+    <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
+  </div>
   <nav class="jump" aria-label="Jump to a section">
     <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
     <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
@@ -382,13 +394,6 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   </nav>
   <p class="meta" id="asof"></p>
   </div>
-  <div>
-    <div class="toolbar" role="toolbar" aria-label="Page controls">
-      <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
-      <label class="btn small" for="expDark" title="SVG exports use the light palette (print-ready) unless this is checked"><input type="checkbox" id="expDark"> Dark SVG exports</label>
-    </div>
-    <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
-  </div></div>
 </header>
 
 <main>
