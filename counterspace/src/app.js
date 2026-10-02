@@ -18,7 +18,7 @@ import { setLand, loadEarth, earthReady, EARTH_URL } from './scenes/earth.js';
 
 performance.mark('cs:module-start');
 export const D = JSON.parse(document.getElementById('cs-data').textContent);
-// Land polygons (~30 KB, delta-packed by tools/build_page.py pack_land) sit in their own script tag and are parsed on first use (hero, scene or static diagram), see ensureLand().
+// Land polygons (~24 KB, delta-packed by pack_land in tools/build_page.py) sit in their own script tag and are parsed on first use (see ensureLand()).
 const unpackLand = (rings) =>
   rings.map((r) => {
     const o = r.slice(0, 2);
