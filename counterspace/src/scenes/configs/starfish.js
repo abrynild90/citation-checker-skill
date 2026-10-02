@@ -66,9 +66,9 @@ export const STARFISH = {
     },
   ],
   liveLabelK: 1.25, // live at desktop width: the labels carry the story, so the type is 25% larger than the default 11 px
-  // live desktop (px from their referents, default camera): Detonation and Johnston sit just left of the burst with short (25-45 px) leaders that
+  // live desktop (px from their referents, default camera): Detonation and Johnston sit just left of the burst with short (25-55 px) leaders that
   // pass between the field-line arcs; the belt label hangs a short step above the arc it names
-  liveOff: { Thor: [-100, 74], Detonation: [-122, -20], Johnston: [-85, 22], Artificial: [-60, -36] },
+  liveOff: { Thor: [-100, 74], Detonation: [-134, -20], Johnston: [-85, 22], Artificial: [-60, -36] },
   phoneHide: ['Thor launch'],
   phoneOnDisc: ['Johnston', 'Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
   stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)

@@ -73,10 +73,16 @@ export const DN2 = {
     [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)', 'SWF-cited analysis: apogee ≥30,000 km'],
     [0.8, 'US officials: upper stages re-entered “over the Indian Ocean” · no target, not an intercept', 'Re-entry over Indian Ocean (US officials)'],
   ],
-  // live desktop, default camera (px from their referents): 10,000 km sits under its own marker and Apogee just below that row, each with a short
+  // live desktop, default camera (px from their referents): 10,000 km sits above its own marker and Apogee just below it, left of the head's glow,
+  // each with a short
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
-  liveOff: { 'DN-2 path': [8, -72], '10,000': [-22, 34], Apogee: [-110, 14], GEO: [10, 34] },
+  liveText: { '10,000': '10,000 km (China)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
+  liveOff: { 'DN-2 path': [-6, -72], '10,000': [-12, -34], Apogee: [-152, 14], GEO: [24, 38] },
+  // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
+  // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
+  phoneHide: ['DN-2 path', 'GEO'],
+  phoneOff: { '10,000': [-24, 24], '≥30,000': [-40, 70] },
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)

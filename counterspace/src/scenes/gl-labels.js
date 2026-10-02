@@ -118,14 +118,18 @@ const methods = {
         raw.push(null);
         continue;
       } // hidden: behind Earth, or its referent is off the stage
-      const text = L.item?.labelFn
+      // cfg.liveShort: labels that take their short text on screen too; cfg.liveText: { 'label start': 'text' } a mid-length text for the live desktop view
+      const liveAlt = !noBanner && this.el.clientWidth >= 520 ? Object.entries(this.sim.cfg.liveText || {}).find(([h]) => L.text.startsWith(h)) : null,
+        text = L.item?.labelFn
           ? L.item.labelFn(this.t, this.el.clientWidth < 520)
-          : L.short &&
-          (this.el.clientWidth < 520 ||
-            (noBanner && this.sim.cfg.stillShort?.some((h) => L.text.startsWith(h))) ||
-            (!noBanner && this.sim.cfg.liveShort?.some((h) => L.text.startsWith(h)))) // cfg.liveShort: labels that take their short text on screen too
-            ? L.short
-            : L.text,
+          : liveAlt
+            ? liveAlt[1]
+            : L.short &&
+                (this.el.clientWidth < 520 ||
+                  (noBanner && this.sim.cfg.stillShort?.some((h) => L.text.startsWith(h))) ||
+                  (!noBanner && this.sim.cfg.liveShort?.some((h) => L.text.startsWith(h))))
+              ? L.short
+              : L.text,
         color = L.item?.labelFn ? L.item.statusColor(this.t) : L.hue || null;
       if (!text) {
         raw.push(null);
@@ -212,15 +216,19 @@ const methods = {
       .concat(!noBanner && this.insetEl && this.insetEl.style.display !== 'none' ? [rel(this.insetEl)] : []);
     this._lastPlace = [raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, null, objs];
     const pl = placeLabels(raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, noBanner ? null : (this._lm ||= {}), objs);
-    // cfg.liveOff: { 'Label text start': [dx, dy] } fixes that label at its referent plus [dx, dy] px (live, default camera, desktop width only:
+    // cfg.liveOff: { 'Label text start': [dx, dy] } fixes that label at its referent plus [dx, dy] px (live, default camera, desktop width only
+    // (stage >= 700 px):
     // where the placer's own slot lands on a dense field of lines). The leader runs from the referent to the nearest edge of the chip.
-    if (!noBanner && w >= 520 && this.camIdx === 0 && this.sim.cfg.liveOff)
-      Object.entries(this.sim.cfg.liveOff).forEach(([n, d]) => {
+    // cfg.phoneOff: the same at phone width (default camera), in raw px
+    const offs = w >= 700 ? this.sim.cfg.liveOff : w < 520 ? this.sim.cfg.phoneOff : null,
+      offK = w >= 700 ? Math.min(1, w / 798) : 1;
+    if (!noBanner && this.camIdx === 0 && offs)
+      Object.entries(offs).forEach(([n, d]) => {
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
         const r = raw[i],
-          x = r.px + d[0] * Math.min(1, w / 798),
-          y = r.py + d[1] * Math.min(1, w / 798),
+          x = r.px + d[0] * offK,
+          y = r.py + d[1] * offK,
           qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
           qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
         // the placer's own slot stays when the fixed one would land on another label (it knows nothing of this override)

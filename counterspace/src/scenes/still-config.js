@@ -17,7 +17,7 @@ export const STILL = {
     // R23: the burst point sits among the field-line arcs, so no leader runs across them: Thor sits just left with a short horizontal leader,
     // Detonation rises straight up
     // beside the arcs, Johnston drops straight down, and the belt label (short text) sits right of the outer arc it names, on the same line
-    off: { Thor: [-0.1, 0], Detonation: [-0.13, -0.045], Johnston: [-0.13, 0.045], Radiation: [0.105, 0], Satellite: [-0.065, -0.07] },
+    off: { Thor: [-0.1, 0], Detonation: [-0.1, -0.022], Johnston: [-0.075, 0.024], Radiation: [0.105, 0], Satellite: [-0.065, -0.07] },
   },
   solwind: {
     t: 0.45,
@@ -62,6 +62,7 @@ export const STILL = {
     look: [0.4, 0.5, 0],
     fov: 38,
     shift: [0.07, 0],
+    off: { GEO: [-0.1, -0.025] }, // the ring label sits left of its marker, clear of the caption band
     modelBoost: 2, // X-37B and CSSHQ read as >= 12 px icons in the print
     hide: ['X-37B (US)', 'X-37B flights', 'Object G', 'Object J'],
   },
