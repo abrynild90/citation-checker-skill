@@ -69,7 +69,7 @@ const crossesCircle = (b, c) => {
     fy = Math.max(Math.abs(b.y0 - c.cy), Math.abs(b.y1 - c.cy));
   return Math.hypot(dx0, dy0) < c.r + 2 && Math.hypot(fx, fy) > c.r - 2;
 };
-const shellCrop = (circles, W, H, hero) => {
+export const shellCrop = (circles, W, H, hero) => {
   const out = [];
   for (const c of circles || []) {
     if (!c.ring) continue;

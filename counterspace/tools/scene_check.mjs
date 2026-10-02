@@ -45,7 +45,7 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { check, KEY, EVENTS } from './scene_check/rules.mjs';
+import { check, shellCrop, KEY, EVENTS } from './scene_check/rules.mjs';
 import { LIVE, SUBJ, SSX, STATIC, EMPTY, discVisible } from './scene_check/collectors.mjs';
 
 const root = path.resolve(process.env.ROOT || '.'),
