@@ -18,13 +18,19 @@ import { setLand, loadEarth, earthReady, EARTH_URL } from './scenes/earth.js';
 
 performance.mark('cs:module-start');
 export const D = JSON.parse(document.getElementById('cs-data').textContent);
-// Land polygons (~57 KB) sit in their own script tag and are parsed on first use (hero, scene or static diagram), see ensureLand().
+// Land polygons (~30 KB, delta-packed by tools/build_page.py pack_land) sit in their own script tag and are parsed on first use (hero, scene or static diagram), see ensureLand().
+const unpackLand = (rings) =>
+  rings.map((r) => {
+    const o = r.slice(0, 2);
+    for (let i = 2; i < r.length; i++) o[i] = o[i - 2] + r[i];
+    return o.map((n) => n / 10);
+  });
 let landDone = false;
 export function ensureLand() {
   if (landDone) return;
   landDone = true;
   performance.mark('cs:land-parse');
-  setLand(JSON.parse(document.getElementById('cs-land').textContent));
+  setLand(unpackLand(JSON.parse(document.getElementById('cs-land').textContent)));
 }
 D.events.forEach((e) => Object.assign(e, D.sources[e.s])); // rows carry a source index; the three source fields are stored once (tools/build_page.py)
 export const EVENTS = D.events,

@@ -24,7 +24,6 @@
   --shadow:0 10px 30px rgba(0,0,0,.45); --edge:rgba(0,0,0,.6);
   --serif: Newsreader,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --sans: "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --mono: "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
@@ -54,7 +53,7 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);font-synthesis:none;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);font-synthesis:style;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
@@ -343,7 +342,7 @@ th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
 .chip-off-note{font-size:12.5px;color:var(--faint);align-self:center}
 #expDark{margin:0}
 .chart-head .tools{padding-right:2px}
-td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap;font:400 11.5px/1.5 var(--mono)}
+td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap;font:400 11.5px/1.5 var(--sans)}
 table,.glance,.legal-list,.tm,.count,.card,svg text,.hlabel{font-variant-numeric:tabular-nums}
 em,i{font-style:italic}
 .chart-head p,#sceneCaption{font-family:var(--serif);font-size:17px;line-height:1.5}

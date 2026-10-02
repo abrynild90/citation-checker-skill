@@ -35,6 +35,18 @@ def slim_events(events):
     return out, table
 
 
+def pack_land(rings):
+    """src/land.json is one flat [lon,lat,...] ring per polygon, in tenths of a degree. Embed each ring as integers, the first pair absolute and
+    every later value as the difference from the value two places before it (small ints are about half the bytes). app.js `unpackLand` reverses it
+    exactly: n/10 gives the same double as parsing the original decimal."""
+    out = []
+    for ring in rings:
+        v = [round(c * 10) for c in ring]
+        assert all(abs(c * 10 - x) < 1e-6 for c, x in zip(ring, v)), 'land.json holds more than 1 decimal: widen pack_land'
+        out.append(v[:2] + [v[i] - v[i - 2] for i in range(2, len(v))])
+    return out
+
+
 # Embedded fonts: fonts/*.woff2 (Latin subsets, SIL OFL; see fonts/OFL-*.txt) become base64 @font-face rules in <style id="cs-fonts">, so the
 # page stays one self-contained file. src/export.js copies the IBM Plex Sans rules into exported SVGs (it matches the exact `font-family:"IBM Plex
 # Sans"` text written here), and src/fonts.js loads every face before the first text measurement.
@@ -44,8 +56,6 @@ FONT_FACES = (
     ('Newsreader', 'Newsreader-italic-400.woff2', '400', 'italic'),
     ('IBM Plex Sans', 'IBMPlexSans-400.woff2', '400', 'normal'),
     ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '500 600', 'normal'),
-    ('IBM Plex Sans', 'IBMPlexSans-400-italic.woff2', '400', 'italic'),
-    ('IBM Plex Mono', 'IBMPlexMono-400.woff2', '400', 'normal'),
 )
 
 
@@ -75,13 +85,14 @@ def main():
                 schema={k: schema[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'co_scope_rule', 'page_strings')})
     # NOMIN=1: unminified bundle with an inline source map (readable stack traces when chasing a page error)
     nomin = bool(os.environ.get('NOMIN'))
-    js = esbuild(['--bundle', '--format=iife', '--legal-comments=none', 'boot.js'] + (['--sourcemap=inline'] if nomin else ['--minify']))
+    js = esbuild(['--bundle', '--format=iife', '--legal-comments=none', '--charset=utf8', 'boot.js']
+                 + (['--sourcemap=inline'] if nomin else ['--minify']))
     tpl = (R / 'src/template.html').read_text()
     tpl = re.sub(r'(<style>)(.*?)(</style>)', lambda m: m.group(1) + esbuild(['--loader=css', '--minify'], m.group(2)) + m.group(3),
                  tpl, count=1, flags=re.S)
     # land.json sits in its own script tag so it is parsed only when a scene or the hero needs it
     tpl = tpl.replace('/*__FONTS__*/', font_css())
-    html = tpl.replace('/*__DATA__*/', script_json(data)).replace('/*__LAND__*/', script_json(read_json('src/land.json'))).replace('/*__APP__*/', js)
+    html = tpl.replace('/*__DATA__*/', script_json(data)).replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json')))).replace('/*__APP__*/', js)
     out = pathlib.Path(os.environ['OUTFILE']) if os.environ.get('OUTFILE') else R / 'index.html'
     out.write_text(html)
     print(out, len(html.encode()) // 1024, 'KB (esbuild module graph, src/boot.js)')

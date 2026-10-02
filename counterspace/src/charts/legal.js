@@ -120,7 +120,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   const phone = isPhoneNow() && !zoom && !strip,
     compact = legalCompact && !phone && !EXPORTING && !zoom,
     small = phone || compact;
-  const FS = 10.5,
+  const FS = 11,
     PITCH = 13,
     TP = phone ? 16 : compact ? 11 : 25,
     SEP = phone ? 20 : compact ? 16 : 32,
@@ -172,7 +172,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       when: fmtMY(parse(d.start)),
     }));
     ents.forEach((e) => {
-      e.w = 17 + tw(e.t, FS, 600) + 8 + tw(e.when, FS - 1);
+      e.w = 17 + tw(e.t, FS, 600) + 8 + tw(e.when, FS);
       cw[e.col] = Math.max(cw[e.col], e.w);
     });
     const total = cw[0] + (cw[1] ? cw[1] + 20 : 0),
@@ -455,7 +455,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         .attr('y', yy)
         .attr('text-anchor', 'end')
         .style('fill', 'var(--muted)')
-        .style('font', `${FS - 0.5}px var(--sans)`)
+        .style('font', `${FS}px var(--sans)`)
         .text(e.when);
     });
   }
