@@ -29,7 +29,14 @@ export const STILL = {
     // (leaders short of the 0.17 W limit)
     off: { Solwind: [-0.11, -0.05], 'ASM-135': [0.025, -0.165], 'F-15': [0.17, -0.14] },
   },
-  fengyun: { t: 0.85, pos: [0.834, 2.523, -4.242], look: [-0.083, 0.305, -0.382], fov: 33, shift: [0.029, -0.039], off: { Impact: [0.17, -0.05] } },
+  fengyun: {
+    t: 0.85,
+    pos: [0.834, 2.523, -4.242],
+    look: [-0.083, 0.305, -0.382],
+    fov: 33,
+    shift: [0.029, -0.039],
+    off: { Impact: [0.17, -0.05] },
+  },
   'burnt-frost': { t: 0.47, pos: [-3.755, 1.807, -0.546], look: [-0.893, 0.526, 0.193], fov: 34, shift: [0.084, -0.097] },
   dn2: { t: 0.62, pos: [7.86, 3.207, -1.046], look: [0, 0, -0.7], fov: 33, shift: [0.06, -0.028], hideShell: false, labelK: 1.2 },
   shakti: { t: 0.43, pos: [1.337, 1.766, -3.995], look: [-0.049, 0.46, -0.977], fov: 34, shift: [0.085, -0.052] },
@@ -55,10 +62,11 @@ export const STILL = {
     look: [0.4, 0.5, 0],
     fov: 38,
     shift: [0.07, 0],
+    modelBoost: 2, // X-37B and CSSHQ read as >= 12 px icons in the print
     hide: ['X-37B (US)', 'X-37B flights', 'Object G', 'Object J'],
   },
-  // RPO: three episodes side by side (each tile uses its act camera); tiles are as tall as the still body.
-  rpo: { tileS: 1.85, labelK: 1.8, tileHK: 0.7 },
+  // RPO: three episodes side by side (each tile uses its act camera); tiles are as tall as the still body. Cosmos 2542's chip sits below its craft.
+  rpo: { tileS: 1.85, labelK: 1.6, tileHK: 0.7, modelBoost: 1.6, off: { 'Cosmos 2542': [0.17, 0.185] } },
 };
 // Runtime override for tuning: globalThis.__stillCfg = { id: {...} }.
 export const stillFor = (id) => ({ ...(STILL[id] || {}), ...(globalThis.__stillCfg?.[id] || {}) });

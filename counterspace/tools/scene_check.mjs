@@ -185,7 +185,9 @@ const KEY = {
   rpo: [/SJ-2/, /USA 2/, /Cosmos 254/, /SKYNET/],
 };
 // Justified per-scene marker-size overrides (px, longer side): the marker IS the scene's subject. Must match cfg.staticMarkerCap in src/scenes/configs/*.js.
-const MARKER_OVR = { laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 140, cg2: 140 } };
+const MARKER_OVR = { laser: { 'MSTI-3 (US test target)': 44 }, viasat: { 'KA-SAT (GEO, unaffected)': 48 }, 'sj21-tug': { sj21: 280, cg2: 280 } };
+// scenes whose static subject pair may take a bigger share of the Earth disc area than the default 20% (the pair is the point of the diagram)
+const AREA_OVR = { 'sj21-tug': 0.8 };
 const IMPACT = /impact|debris|collision|fragment|pieces|detonation|burst/i;
 
 // S = {kind, W, H, labels:[{text, x0,y0,x1,y1, leader:[ax,ay,qx,qy]|null, item}], reserved:[{n,x0,y0,x1,y1}], probe, def (default camera), bannerLines}
@@ -202,7 +204,10 @@ function check(S) {
   for (let i = 0; i < L.length; i++) {
     for (let j = i + 1; j < L.length; j++) if (boxHit(B[i], B[j], -0.5)) f('label-overlap', `${L[i].text} / ${L[j].text}`);
     for (const r of S.reserved || []) if (boxHit(B[i], r, -1)) f('label-reserved', `${L[i].text} on ${r.n}`);
-    if (P.pts) for (const m of P.pts) if (boxCircle(B[i], m) && m.i !== L[i].item) f('label-mark', `${L[i].text} covers a sprite`);
+    if (P.pts)
+      for (const m of P.pts)
+        if (boxCircle(B[i], m) && m.i !== L[i].item)
+          f('label-mark', `${L[i].text} covers a sprite at ${Math.round(m.x)},${Math.round(m.y)} r${Math.round(m.r)}`);
     if (B[i].x0 < 7.5 * u || B[i].y0 < 7.5 * u || B[i].x1 > W - 7.5 * u || B[i].y1 > H - 7.5 * u)
       f('label-edge', `${L[i].text} (${Math.round(B[i].x0)},${Math.round(B[i].y0)})-(${Math.round(B[i].x1)},${Math.round(B[i].y1)})`);
     const ld = L[i].leader;
@@ -355,7 +360,7 @@ function check(S) {
       ctxScene = ['starfish', 'solwind', 'gnss'].includes(S.id); // those scenes: every icon is context (3%)
     for (const c of P.crafts) {
       const a = (c.w * c.h) / da,
-        cap = ctxScene || !c.subject ? 0.03 : 0.2;
+        cap = ctxScene || !c.subject ? 0.03 : (AREA_OVR[S.id] ?? 0.2);
       if (a > cap) f('craft-area', `${S.kind} ${c.name} icon ${Math.round(c.w)}x${Math.round(c.h)} px is ${(a * 100).toFixed(1)}% of disc (> ${cap * 100}%)`);
       if (ctxScene && Math.abs(c.x - P.disc.cx) < c.w / 2 && Math.abs(c.y - P.disc.cy) < c.h / 2)
         f('craft-area', `${S.kind} ${c.name} icon covers the Earth centre`);

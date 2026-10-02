@@ -206,22 +206,31 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           ids = c.fitCraft.ids,
           at = (t, asp) => {
             const P = [];
+            // fitCraft.lock: the target stays on the craft itself (a fast eccentric orbit would leave it at the frame edge or off a portrait stage)
             for (const id of ids) if (crafts[id].pos(t)) for (const dt of [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
             const f = an.frame(t),
               d = c.fitCraft.dir,
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
-            return {
-              ...fitPose(P, n, centroid(P), {
-                up: f.rad,
-                dMin: c.fitCraft.dMin ?? 0.14,
-                dMax: 6,
-                fillX: c.fitCraft.fill ?? 0.8,
-                fillY: (c.fitCraft.fill ?? 0.8) * 0.8,
-                asp,
-              }),
+            const pose = fitPose(P, n, c.fitCraft.lock ? add(scl(centroid(P), 0.65), scl(centroid(ids.map((id) => crafts[id].raw(t))), 0.35)) : centroid(P), {
               up: f.rad,
-            };
+              dMin: c.fitCraft.dMin ?? 0.14,
+              dMax: 6,
+              fillX: c.fitCraft.fill ?? 0.8,
+              fillY: (c.fitCraft.fill ?? 0.8) * 0.8,
+              asp,
+            });
+            if (c.fitCraft.lock) {
+              // slide the view so the craft sits left of and below the middle (clear of the context inset in the top right corner), whatever the stage shape
+              const fw = norm(add(pose.look, scl(pose.pos, -1))),
+                r = norm(cross3(fw, f.rad)),
+                u = cross3(r, fw),
+                D = Math.hypot(...add(pose.look, scl(pose.pos, -1))),
+                [tH, tV] = tanFor(asp ?? ASPECT),
+                sh = add(scl(r, 0.14 * tH * D), scl(u, 0.12 * tV * D));
+              return { pos: add(pose.pos, sh), look: add(pose.look, sh), up: f.rad };
+            }
+            return { ...pose, up: f.rad };
           };
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
       }

@@ -92,7 +92,7 @@ const methods = {
     this._viewShift = null;
     this.renderer.setPixelRatio(1);
     this.renderer.setSize(W, H, false);
-    this._modelBoost = 1.4;
+    this._modelBoost = conf.modelBoost ?? 1.4; // print stills draw craft larger; a scene may raise it (conf.modelBoost)
     const amb0 = this.ambient?.intensity;
     if (this.ambient) this.ambient.intensity = 0.62; // a lighter night side in the print
     this._fitModels();

@@ -50,59 +50,77 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
       rect(-16, -9, 32, 18, color);
       rect(-9, -16, 18, 32, '#dfe6f7');
     } else {
-      // bus with two solar wings (cell grid) and a small dish
+      // bus with two solar wings (cell grid) and a small dish. SJ-21 and Compass G2 (the static pair's subjects) get a bigger bus block, a visible gap between
+      // the bus and each wing (a strut) and two separate wing panels, so the pair reads as a body with wings, not as a thin strip
+      const det = o.variant === 'tug' || o.variant === 'navsat',
+        bw = det ? 15 : 14,
+        bh = det ? 19 : 15,
+        wx = det ? 21 : 14,
+        ww = det ? 31 : 36,
+        wh = det ? 17 : 17;
       for (const sg of [-1, 1]) {
-        const x0 = sg < 0 ? -50 : 14;
-        rect(x0, -17, 36, 34, panel);
-        shade(x0, -17, 36, 34); // light from the top left: a lit upper half and a shaded lower half, like the 3D model
-        for (let i = 1; i < 3; i++)
+        const x0 = sg < 0 ? -wx - ww : wx;
+        const pieces = det
+          ? [
+              [x0, 14.5],
+              [x0 + 16.5, 14.5],
+            ]
+          : [[x0, ww]];
+        for (const [px, pw] of pieces) {
+          rect(px, -wh, pw, wh * 2, panel);
+          shade(px, -wh, pw, wh * 2);
+          for (let i = 1; i < (det ? 2 : 3); i++)
+            k.append('line')
+              .attr('x1', px + (i * pw) / (det ? 2 : 3))
+              .attr('x2', px + (i * pw) / (det ? 2 : 3))
+              .attr('y1', -wh)
+              .attr('y2', wh)
+              .attr('stroke', '#8fb0ee')
+              .attr('stroke-width', 1.2);
           k.append('line')
-            .attr('x1', x0 + i * 12)
-            .attr('x2', x0 + i * 12)
-            .attr('y1', -17)
-            .attr('y2', 17)
+            .attr('x1', px)
+            .attr('x2', px + pw)
+            .attr('y1', 0)
+            .attr('y2', 0)
             .attr('stroke', '#8fb0ee')
             .attr('stroke-width', 1.2);
+        }
         k.append('line')
-          .attr('x1', x0)
-          .attr('x2', x0 + 36)
-          .attr('y1', 0)
-          .attr('y2', 0)
-          .attr('stroke', '#8fb0ee')
-          .attr('stroke-width', 1.2);
-        k.append('line')
-          .attr('x1', sg * 14)
-          .attr('x2', sg * 15)
+          .attr('x1', sg * bw)
+          .attr('x2', sg * (det ? wx + 0.5 : 15))
           .attr('y1', 0)
           .attr('y2', 0)
           .attr('stroke', '#c3cbe0')
-          .attr('stroke-width', 3);
+          .attr('stroke-width', det ? 4 : 3);
       }
-      rect(-14, -15, 28, 30, color);
-      shade(-14, -15, 28, 30);
-      k.append('circle').attr('cx', 0).attr('cy', -21).attr('r', 6).attr('fill', '#dfe6f7').attr('stroke', dark).attr('stroke-width', 1.6);
+      rect(-bw, -bh, bw * 2, bh * 2, color);
+      shade(-bw, -bh, bw * 2, bh * 2);
+      k.append('circle')
+        .attr('cx', 0)
+        .attr('cy', -bh - 6)
+        .attr('r', 6)
+        .attr('fill', '#dfe6f7')
+        .attr('stroke', dark)
+        .attr('stroke-width', 1.6);
       if (o.variant === 'tug') {
-        // SJ-21: aft thruster nozzles, radiator strips on the bus sides and a hinge line across each wing
-        poly('M-9,15 L-6,24 L-12,24Z M9,15 L12,24 L6,24Z M-2.5,15 L-3.5,26 L3.5,26 L2.5,15Z', '#39415a');
-        for (const sg of [-1, 1]) {
-          rect(sg * 14 - 1.5, -12, 3, 24, '#eef1f8');
-          k.append('line')
-            .attr('x1', sg * 32)
-            .attr('x2', sg * 32)
-            .attr('y1', -17)
-            .attr('y2', 17)
-            .attr('stroke', dark)
-            .attr('stroke-width', 2);
-        }
+        // SJ-21: aft thruster nozzles, radiator strips on the bus sides and a short grapple boom (as in the live model: two segments with an elbow, pointing
+        // at the partner on the left of the static pair, ending in a small jaw)
+        poly('M-9,19 L-6,28 L-12,28Z M9,19 L12,28 L6,28Z M-2.5,19 L-3.5,30 L3.5,30 L2.5,19Z', '#39415a');
+        for (const sg of [-1, 1]) rect(sg * bw - 1.5, -bh + 4, 3, bh * 2 - 8, '#eef1f8');
+        const bm = 'M-9,-19 L-20,-36 L-40,-30';
+        k.append('path').attr('d', bm).attr('fill', 'none').attr('stroke', dark).attr('stroke-width', 5).attr('stroke-linecap', 'round');
+        k.append('path').attr('d', bm).attr('fill', 'none').attr('stroke', '#d5dae6').attr('stroke-width', 2.6).attr('stroke-linecap', 'round');
+        k.append('circle').attr('cx', -20).attr('cy', -36).attr('r', 2.6).attr('fill', '#39415a');
+        k.append('path').attr('d', 'M-40,-30 L-46,-34 M-40,-30 L-46,-25').attr('stroke', dark).attr('stroke-width', 2).attr('fill', 'none');
       } else if (o.variant === 'navsat') {
         // Compass G2: Earth-facing phased array on the bus, a whip antenna and the apogee-motor bell
-        rect(-9, -10, 18, 14, '#27324f');
+        rect(-10, -13, 20, 17, '#27324f');
         const gl = (x1, y1, x2, y2) =>
           k.append('line').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2).attr('stroke', '#8fb0ee').attr('stroke-width', 0.9);
         for (let i = 1; i < 4; i++) gl(-9 + i * 4.5, -10, -9 + i * 4.5, 4);
         for (let i = 1; i < 3; i++) gl(-9, -10 + i * 4.7, 9, -10 + i * 4.7);
-        k.append('line').attr('x1', -9).attr('x2', -15).attr('y1', -15).attr('y2', -30).attr('stroke', '#c3cbe0').attr('stroke-width', 1.6);
-        poly('M-6,15 L-9,25 L9,25 L6,15Z', '#8a8f9c');
+        k.append('line').attr('x1', -9).attr('x2', -15).attr('y1', -bh).attr('y2', -34).attr('stroke', '#c3cbe0').attr('stroke-width', 1.6);
+        poly('M-6,19 L-9,29 L9,29 L6,19Z', '#8a8f9c');
       }
     }
   } else if (shape === 'plane') {

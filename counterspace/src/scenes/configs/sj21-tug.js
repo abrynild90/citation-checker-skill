@@ -41,8 +41,8 @@ export const SJ21_TUG = {
       label: 'Compass G2 (defunct)',
       short: 'Compass G2',
       staticKey: [
-        [0, -0.5, 0.7, 0],
-        [1, -0.5, 0.7, 0],
+        [0, -1.75, 1.05, 0],
+        [1, -1.75, 1.05, 0],
       ], // static: well above the belt line, left of its tug with a clear gap
       dx: 60,
       dy: 34,
@@ -69,8 +69,8 @@ export const SJ21_TUG = {
       label: 'SJ-21 (China)',
       short: 'SJ-21',
       staticKey: [
-        [0, 0.12, 1.15, 0],
-        [1, 0.12, 1.15, 0],
+        [0, -0.1, 1.15, 0],
+        [1, -0.1, 1.15, 0],
       ], // static: the tug beside and a little higher than G2 (no overlap), both clear of the ring
       dx: -68,
       dy: -12,
@@ -96,7 +96,7 @@ export const SJ21_TUG = {
   still: 0.78,
   staticT: 0.805, // static: just after the docked window, so the two craft are drawn apart (a gap, each at full size) above the belt
   staticStatus: 'SJ-21 pulls Compass G2 above the GEO belt (height and spacing exaggerated)',
-  staticCraftScale: { sj21: 1.45, cg2: 1.45 },
+  staticCraftScale: { sj21: 2.2, cg2: 2.2 },
   status: [
     [0, 'SJ-21 (China) approaches Compass G2, a defunct Chinese navigation satellite (25 Dec. 2021)', 'SJ-21 approaches defunct Compass G2'],
     [0.2, 'For several weeks SJ-21 keeps in tight proximity to Compass G2', 'SJ-21 stays close to G2 for weeks'],
@@ -127,7 +127,7 @@ export const SJ21_TUG = {
   stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
   staticCenter: [25, 72],
   staticCraftMax: 120,
-  staticMarkerCap: { sj21: 140, cg2: 140 }, // the docked pair is the subject (100 px at the 22 px reference stage; global cap 22)
-  staticCraftMaxPhone: 58,
+  staticMarkerCap: { sj21: 280, cg2: 280 }, // the pair is the subject (280 px at the 22 px reference stage; global cap 22)
+  staticCraftMaxPhone: 38,
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width
 };

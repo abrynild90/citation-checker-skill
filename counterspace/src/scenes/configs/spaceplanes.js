@@ -267,7 +267,7 @@ export const SPACEPLANES = {
       name: 'X-37B OTV-7: follows the craft',
       chip: 'X-37B OTV-7',
       act: 1,
-      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.8, fill: 0.85, t: 0.42 },
+      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.7, fill: 0.95, t: 0.42, lock: true },
     },
     {
       name: 'China: CSSHQ and released objects',
