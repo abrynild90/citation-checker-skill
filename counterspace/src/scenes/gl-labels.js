@@ -4,6 +4,7 @@
 // ============================================================================
 import { DEG, add, ll, occluded, scl } from './core.js';
 import { labelW, offDisc, placeLabels } from './labels.js';
+import { SANS } from '../fonts.js';
 
 const methods = {
   _placeLabels: placeLabels, // exposed for tools/scene_check.mjs debugging
@@ -561,7 +562,7 @@ const methods = {
       g.fill();
       if (q[3]) {
         g.fillStyle = '#ffe08a';
-        g.font = '600 9.5px system-ui,sans-serif';
+        g.font = `600 9.5px ${SANS}`;
         g.textBaseline = 'middle';
         g.textAlign = q[0] > w / 2 ? 'right' : 'left';
         g.fillText(q[3], q[0] + (q[0] > w / 2 ? -9 : 9), q[1] + 12);
@@ -569,7 +570,7 @@ const methods = {
       }
     }
     g.fillStyle = '#c3cbe0';
-    g.font = '600 9.5px system-ui,sans-serif';
+    g.font = `600 9.5px ${SANS}`;
     g.textBaseline = 'top';
     g.fillText(this.sim.cfg.inset, 6, 4, w - 10);
   },

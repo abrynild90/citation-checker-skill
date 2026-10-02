@@ -20,6 +20,7 @@ export const COSMOS1408 = {
   launchCam: 'second',
   orbitAt: [52, 28, 4.5],
   phoneK: 1.16,
+  liveText: { 'ISS (illustrative orbit)': 'ISS (illustrative)' }, // the shorter text keeps its leader within the limit at 900 px
   noSimCount: true,
   actors: [
     { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground, dx: -110, dy: -16 },
@@ -33,7 +34,7 @@ export const COSMOS1408 = {
       opacity: 0.85,
       sat: { speed: 0.16, label: 'ISS (illustrative orbit)', short: 'ISS (illustrative)', iss: true, big: 1.3, minPx: 44, maxPx: 90, dx: 96, dy: 14 },
     },
-    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: -40, impactDy: 64, dx: -40, dy: 62 },
+    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: 40, impactDy: -110, dx: -40, dy: 62 },
     { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol' },
     {
       type: 'debris',

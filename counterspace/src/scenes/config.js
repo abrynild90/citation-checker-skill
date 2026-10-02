@@ -45,6 +45,7 @@ export const HERO = {
     { type: 'constellation', alt: 20200, inc: 55, planes: 6, per: 3, color: C.gps, speed: 0.4 },
     { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, sats: 14 },
   ],
+  liveText: { 'ISS (illustrative orbit)': 'ISS (illustrative)' }, // the longer text leaves the live ISS label a long leader around the shell labels
   still: 0.2,
   camDist: 7.2,
   focus: [22, -30],

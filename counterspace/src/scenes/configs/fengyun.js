@@ -35,7 +35,7 @@ export const FENGYUN = {
       color: C.debris,
       label: 'Debris ring',
       dx: 70,
-      dy: -50,
+      dy: 24,
       late: { t0: 0.6, k: 1.4, kr: 6 },
     },
   ],

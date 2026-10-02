@@ -81,6 +81,7 @@ export const VIASAT = {
   camDist: 5.6,
   focus: [33, 12],
   shellLabels: { GEO: null },
+  liveShort: ['Ground terminals'], // the full text puts a corner of the label on the Earth at 900 px on the wide camera
   staticZoom: 1.5,
   stillCam: { at: [10, 12, 3.9], look: [24, 13, 0.5], hideShell: true },
   cameras: [

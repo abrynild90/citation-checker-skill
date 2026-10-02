@@ -121,7 +121,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
           dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0);
         if (Math.hypot(dx0, dy0) < disc.r) {
           if (c.avoidDisc) n += 900;
-          else if (!c.onDisc) soft += 520; // a label prefers open sky to the planet whenever a slot is within reach
+          else if (!c.onDisc) soft += 320; // a label prefers open sky to the planet whenever a slot is within reach
         }
       }
       m.soft = soft;
