@@ -83,16 +83,22 @@ const methods = {
       // a debris cloud labels one of its particles: when that one is behind the Earth (or sits on the disc), a stand-in in view, as far off the disc as
       // possible carries the print's label (live: the first one in view, kept until it hides).
       const cl = (L.cloudIt ??= this.dyn.find((d) => d.it.kind === 'cloud' && d.it.label === L.text)?.it || false);
-      if (p && cl?.labelCands && (hidden(p) || noBanner)) {
+      if (p && cl?.labelCands && (hidden(p) || noBanner || cl.labelEdge)) {
         const c0 = noBanner ? new T.Vector3(0, 0, 0).project(this.camera) : new T.Vector3(...p).project(this.camera), // live: stay near the hidden one
           sgn = noBanner ? 1 : -1,
+          // labelEdge (live): the fragment highest in the picture (inside the frame margin), so the label above the cloud has a short leader
+          sc = (q) => {
+            const u = new T.Vector3(...q).project(this.camera);
+            if (cl.labelEdge && !noBanner) return Math.abs(u.x) < 0.75 && Math.abs(u.y) < 0.75 ? u.y : -9;
+            return sgn * Math.hypot(u.x - c0.x, u.y - c0.y);
+          },
           keep = cl.labelIdx;
-        let best = hidden(p) ? null : { p, d: sgn * Math.hypot(...new T.Vector3(...p).project(this.camera).sub(c0).toArray().slice(0, 2)), idx: keep };
+        let best = hidden(p) ? null : { p, d: sc(p), idx: keep };
         for (const idx of cl.labelCands) {
           cl.labelIdx = idx;
           const q = world(L.posFn(this.t));
           if (!q || hidden(q)) continue;
-          const d = sgn * Math.hypot(...new T.Vector3(...q).project(this.camera).sub(c0).toArray().slice(0, 2));
+          const d = sc(q);
           if (!best || d > best.d + 0.02) best = { p: q, d, idx };
         }
         cl.labelIdx = best ? best.idx : keep;

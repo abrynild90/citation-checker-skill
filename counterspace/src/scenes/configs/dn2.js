@@ -16,7 +16,7 @@ export const DN2 = {
   related: null,
   event: 'cn-2013-dn2',
   actors: [
-    { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground, offGlobe: true },
+    { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground, offGlobe: true, staticAt: [0.78, 0.47], staticPin: 'hard' },
     {
       type: 'suborbital',
       from: [28.2, 102.0],

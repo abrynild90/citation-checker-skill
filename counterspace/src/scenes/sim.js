@@ -230,6 +230,8 @@ export function buildSim(cfg) {
         label: a.label,
         short: a.short,
         labelDx: a.dx,
+        staticAt: a.staticAt,
+        staticPin: a.staticPin,
         labelDy: a.dy,
       });
     if (a.type === 'ship')
@@ -531,6 +533,7 @@ export function buildSim(cfg) {
       const cloud = {
         kind: 'cloud',
         labelIdx: kc,
+        labelEdge: a.labelEdge,
         labelCands: ranked
           .slice(0, 8)
           .map((r) => r[1])

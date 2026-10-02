@@ -46,8 +46,9 @@ export const COSMOS1408 = {
       color: C.debris,
       label: 'Debris of Cosmos 1408',
       short: 'Cosmos 1408 debris',
-      dx: 60,
+      dx: 0,
       dy: -34,
+      labelEdge: true, // live: the label points at a fragment on the cloud's outer edge, not one deep inside it
     },
   ],
   still: 0.8,
