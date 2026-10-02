@@ -2,11 +2,14 @@
 npm i @fontsource-variable/newsreader @ibm/plex-sans @ibm/plex-mono   (usage: python3 tools/subset_fonts.py <node_modules dir>).
 Plex comes from @ibm/* because the @fontsource latin subsets lack → ≤ ≥ ✓. Plex keeps its TrueType hinting (unhinted, Linux Chromium spaces glyphs
 unevenly at 10-12 px). Newsreader (variable, opsz + wght) is limited to wght 400-600 and to ASCII plus typographic punctuation."""
-import subprocess, sys, pathlib
+import subprocess, sys, pathlib, tempfile
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 
+if len(sys.argv) != 2:
+    sys.exit('usage: python3 tools/subset_fonts.py <node_modules dir>')
 NM = pathlib.Path(sys.argv[1])
+TMP = pathlib.Path(tempfile.mkdtemp()) / '_nr.ttf'
 OUT = pathlib.Path(__file__).resolve().parent.parent / 'fonts'
 U = lambda xs: ','.join('U+%04X' % u for u in xs)
 PUNCT = [0x2013, 0x2014, 0x2018, 0x2019, 0x201c, 0x201d, 0x2026, 0x2212, 0x2264, 0x2265]
@@ -24,8 +27,8 @@ for name, f in (('Newsreader-opsz.woff2', 'normal'), ('Newsreader-opsz-italic.wo
     src = NM / f'@fontsource-variable/newsreader/files/newsreader-latin-opsz-{f}.woff2'
     font = instancer.instantiateVariableFont(TTFont(src), {'wght': (400, 600)})
     font.flavor = None
-    font.save('/tmp/_nr.ttf')
-    sub('/tmp/_nr.ttf', name, NEWS, 'kern,liga,calt,ccmp,locl,mark,mkmk,lnum,pnum,case', ['--no-hinting', '--desubroutinize'])
+    font.save(TMP)
+    sub(str(TMP), name, NEWS, 'kern,liga,calt,ccmp,locl,mark,mkmk,lnum,pnum,case', ['--no-hinting', '--desubroutinize'])
 P = NM / '@ibm/plex-sans/fonts/complete/woff2'
 for w, n in ((400, 'Regular'), (500, 'Medium'), (600, 'SemiBold')):
     sub(P / f'IBMPlexSans-{n}.woff2', f'IBMPlexSans-{w}.woff2', PLEX, PF)

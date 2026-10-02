@@ -38,7 +38,7 @@ def slim_events(events):
 # Embedded fonts: fonts/*.woff2 (Latin subsets, SIL OFL; see fonts/OFL-*.txt) become base64 @font-face rules in <style id="cs-fonts">, so the
 # page stays one self-contained file. src/export.js copies the IBM Plex Sans rules into exported SVGs (it matches the exact `font-family:"IBM Plex
 # Sans"` text written here), and src/fonts.js loads every face before the first text measurement.
-# (family, file, weight or range, style, unicode-range-free: the subsets are already Latin + the page's symbols)
+# Each entry: (family, file, weight or weight range, style). No unicode-range is needed: the subsets already hold only Latin plus the page's symbols.
 FONT_FACES = (
     ('Newsreader', 'Newsreader-opsz.woff2', '400 600', 'normal'),
     ('Newsreader', 'Newsreader-opsz-italic.woff2', '400 600', 'italic'),
