@@ -134,13 +134,14 @@ const EXPORT_W = 1200,
 const SOURCE_LINE =
   `Source: Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment (9th ed., Apr. 2026) and ` +
   `the primary sources cited in the ledger. Data as of ${AS_OF}. Companion to Space Security Law: Governance Beyond the Atmosphere.`;
-// A standalone SVG has no page stylesheet, so it carries the subset IBM Plex Sans faces it uses (400 and 600; a 700 request resolves to 600) as
-// base64 @font-face rules, copied from the page's <style id="cs-fonts"> (written by tools/build_page.py). Roughly 36 KB added per file.
+// A standalone SVG has no page stylesheet, so it carries the subset IBM Plex Sans faces it uses (400 and 600; the 600 face is declared
+// "500 600", and a 700 request resolves to 600) as base64 @font-face rules, copied from the page's <style id="cs-fonts"> (written by
+// tools/build_page.py). Roughly 36 KB added per file.
 function fontFaceCSS() {
   const css = document.getElementById('cs-fonts')?.textContent || '';
   return css
     .split('\n')
-    .filter((r) => r.includes('font-family:"IBM Plex Sans"') && r.includes('font-style:normal') && /font-weight:(400|600);/.test(r))
+    .filter((r) => r.includes('font-family:"IBM Plex Sans"') && r.includes('font-style:normal') && /font-weight:(400|500 600);/.test(r))
     .join('\n');
 }
 // Copy computed presentation properties onto the clone so the file renders the same without the page's stylesheet.

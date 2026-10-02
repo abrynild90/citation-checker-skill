@@ -147,9 +147,9 @@ export function drawA(el = document.getElementById('svgA')) {
   svg
     .append('text')
     .attr('class', 'ann-sub')
-    .attr('transform', `translate(${phone ? 9.5 : 12},${top + plotH / 2}) rotate(-90)`)
+    .attr('transform', `translate(${phone ? 10.5 : 12},${top + plotH / 2}) rotate(-90)`)
     .attr('text-anchor', 'middle')
-    .style('font-size', phone ? '10px' : null)
+    .style('font-size', phone ? '11px' : null)
     .text('Altitude, km (log)');
   // strip for unreported altitudes
   const sy = top + plotH + capH,

@@ -41,10 +41,9 @@ def slim_events(events):
 # Each entry: (family, file, weight or weight range, style). No unicode-range is needed: the subsets already hold only Latin plus the page's symbols.
 FONT_FACES = (
     ('Newsreader', 'Newsreader-opsz.woff2', '400 600', 'normal'),
-    ('Newsreader', 'Newsreader-opsz-italic.woff2', '400 600', 'italic'),
+    ('Newsreader', 'Newsreader-italic-400.woff2', '400', 'italic'),
     ('IBM Plex Sans', 'IBMPlexSans-400.woff2', '400', 'normal'),
-    ('IBM Plex Sans', 'IBMPlexSans-500.woff2', '500', 'normal'),
-    ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '600', 'normal'),
+    ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '500 600', 'normal'),
     ('IBM Plex Sans', 'IBMPlexSans-400-italic.woff2', '400', 'italic'),
     ('IBM Plex Mono', 'IBMPlexMono-400.woff2', '400', 'normal'),
 )

@@ -1,7 +1,9 @@
 """Regenerate fonts/*.woff2 (Latin + the symbols the page uses; SIL OFL). Needs: pip install fonttools brotli, and in a scratch dir
 npm i @fontsource-variable/newsreader @ibm/plex-sans @ibm/plex-mono   (usage: python3 tools/subset_fonts.py <node_modules dir>).
 Plex comes from @ibm/* because the @fontsource latin subsets lack → ≤ ≥ ✓. Plex keeps its TrueType hinting (unhinted, Linux Chromium spaces glyphs
-unevenly at 10-12 px). Newsreader (variable, opsz + wght) is limited to wght 400-600 and to ASCII plus typographic punctuation."""
+unevenly at 10-12 px). Newsreader roman (variable) is limited to wght 400-600 and opsz 17-46 (the serif sizes the page uses: 17 px captions to
+the 46 px h1) and to ASCII plus typographic punctuation. Newsreader italic is only a few italic words in 17 px captions, so it is a static
+instance (wght 400, opsz 17) of ASCII plus punctuation. Plex Sans has no 500 face: the only 500 text (.btn) is set at 600."""
 import subprocess, sys, pathlib, tempfile
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
@@ -23,14 +25,17 @@ def sub(src, out, uni, feats, extra=()):
                            '--output-file=' + str(OUT / out)])
 
 
-for name, f in (('Newsreader-opsz.woff2', 'normal'), ('Newsreader-opsz-italic.woff2', 'italic')):
+NF = 'kern,liga,calt,ccmp,locl,mark,mkmk,lnum,pnum,case'
+ITAL = list(range(0x20, 0x7f)) + [0xa0] + PUNCT[:7]
+for name, f, axes, uni in (('Newsreader-opsz.woff2', 'normal', {'wght': (400, 600), 'opsz': (17, 46)}, NEWS),
+                           ('Newsreader-italic-400.woff2', 'italic', {'wght': 400, 'opsz': 17}, ITAL)):
     src = NM / f'@fontsource-variable/newsreader/files/newsreader-latin-opsz-{f}.woff2'
-    font = instancer.instantiateVariableFont(TTFont(src), {'wght': (400, 600)})
+    font = instancer.instantiateVariableFont(TTFont(src), axes)
     font.flavor = None
     font.save(TMP)
-    sub(str(TMP), name, NEWS, 'kern,liga,calt,ccmp,locl,mark,mkmk,lnum,pnum,case', ['--no-hinting', '--desubroutinize'])
+    sub(str(TMP), name, uni, NF, ['--no-hinting', '--desubroutinize'])
 P = NM / '@ibm/plex-sans/fonts/complete/woff2'
-for w, n in ((400, 'Regular'), (500, 'Medium'), (600, 'SemiBold')):
+for w, n in ((400, 'Regular'), (600, 'SemiBold')):
     sub(P / f'IBMPlexSans-{n}.woff2', f'IBMPlexSans-{w}.woff2', PLEX, PF)
 sub(P / 'IBMPlexSans-Italic.woff2', 'IBMPlexSans-400-italic.woff2', PLEX, PF)
 sub(NM / '@ibm/plex-mono/fonts/complete/woff2/IBMPlexMono-Regular.woff2', 'IBMPlexMono-400.woff2', PLEX, PF)

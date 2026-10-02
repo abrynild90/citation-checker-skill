@@ -321,13 +321,13 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .reverse()
       .forEach((d) => {
         const s = SHORT[d.id] || ABBR[d.id] || d.label,
-          w = tw(s, 10, 600);
+          w = tw(s, 11, 600);
         for (const [anchor, dx] of [
           ['middle', 0],
           ['end', 5],
           ['start', -5],
         ]) {
-          const q = p2.textRect(d._cx + dx, 11, anchor, w, 10);
+          const q = p2.textRect(d._cx + dx, 11, anchor, w, 11);
           if (p2.free(q, [], 6)) {
             p2.add(q);
             cLabels.push({ d, s, tx: d._cx + dx, anchor });
@@ -429,7 +429,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .attr('y', yMark + 11)
       .attr('text-anchor', anchor)
       .style('fill', d.soft_law ? 'var(--accent-2)' : 'var(--text)')
-      .style('font', '600 10px var(--sans)')
+      .style('font', '600 11px var(--sans)')
       .text(s),
   );
   if (key) {
