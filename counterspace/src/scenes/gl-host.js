@@ -1,6 +1,6 @@
 // ============================================================================
 // scenes/gl-host.js: GLHost core: renderer, scene loading, cameras, update loop, playback and disposal (mixins: gl-items, gl-labels, gl-still)
-// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes.js.)
+// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
 import { DEG, IS_PHONE, mulberry, norm, occluded, scl, sunFor } from './core.js';
 import { fitBanner } from './labels.js';

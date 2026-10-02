@@ -1,6 +1,6 @@
 // ============================================================================
 // scenes/sim.js: simulator: interprets a scene config into time-parameterised items and cameras (renderer-independent)
-// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes.js.)
+// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
 // ---------------------------------------------------------------- simulator
 // Items: {kind, ...} with time functions. Kinds: shell, curve, point, cloud, beam, dome, flash.

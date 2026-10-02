@@ -1,6 +1,6 @@
 // ============================================================================
 // scenes/earth.js: Earth textures: vector land canvas, NASA Blue Marble loader, sprite canvases
-// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes.js.)
+// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
 import { IS_PHONE } from './core.js';
 

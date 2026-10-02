@@ -1,6 +1,6 @@
 // ============================================================================
 // scenes/co-sim.js: helpers for the co-orbital scenes: orbit anchors with a local frame, keyframed offsets, Kepler ellipse, act windows
-// (ES module; imported by sim.js. See src/scenes.js for the module map.)
+// (ES module; imported by sim.js. See src/scenes/README.md for the module map.)
 // ============================================================================
 // A scene may define anchors (a GEO longitude, a circular orbit or an ellipse). A craft is an anchor position plus keyframed offsets in the
 // anchor's local frame [along-track, radial, cross-track] in Earth radii. Offsets are exaggerated on purpose (spacecraft that are metres or

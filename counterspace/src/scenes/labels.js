@@ -1,6 +1,6 @@
 // ============================================================================
 // scenes/labels.js: screen-space label placement shared by live HTML labels, the PNG still and the SVG fallback
-// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes.js.)
+// (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
 // Screen-space label de-confliction shared by the live HTML labels, the PNG still and the SVG fallback.
 // list[i] = {x, y (preferred centre), px, py (object point), w, h, fixed} or null.
