@@ -26,7 +26,8 @@ Illustrative only.
 
 | File | Role |
 |---|---|
-| `sim.js` | `buildSim(cfg)`: items (one builder per actor type) |
+| `sim.js` | `buildSim(cfg)`: shells, status line, craft / site / ring / target / aircraft / intercept / debris / suborbital actors, GNSS links; calls `sim-space.js` |
+| `sim-space.js` | `buildSpaceActor()`: the belt, field, constellation, zone, geo, terminals and beam actors |
 | `cameras.js` | `buildCameras()`: wide / polar / frame / follow / dolly camera presets and the still-frame camera |
 
 ## WebGL renderer
