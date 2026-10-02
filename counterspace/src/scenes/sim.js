@@ -723,7 +723,7 @@ export function buildSim(cfg) {
             on: (t) => !!ac.pos(t),
             label: ac.beamLabel,
             short: ac.beamShort,
-            labelFrac: 0.14,
+            labelFrac: ac.beamFrac ?? 0.14,
             labelDx: ac.beamDx ?? 40,
             labelDy: ac.beamDy ?? -20,
             opt: true,

@@ -82,7 +82,10 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
   // Status text is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
     stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
-    maxCh = Math.floor((W - (opts.panel ? 14 : 40)) / (opts.panel ? 6 : 6.6)),
+    stFs = !opts.panel && W >= 700 ? 14 : 12, // the caption matches the live caption: 14 px on a desktop stage
+    stCw = stFs * 0.55, // px per character
+    stLh = stFs + 4,
+    maxCh = Math.floor((W - (opts.panel ? 14 : 40)) / (opts.panel ? 6 : stCw)),
     hasStatus = !!(opts.panel ? stTxt : st),
     stLines = hasStatus ? wrapStatus(stTxt, maxCh) : [];
   const nCraft = sim.items.filter((i) => i.kind === 'point' && i.prim && i.shape !== 'none' && !i.ctx && !i.liveOnly && i.pos(t)).length,
@@ -95,9 +98,9 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
             W * (W < 520 ? (nCraft <= 2 ? 0.14 : 0.07) : nCraft <= 2 ? 0.1 : nCraft <= 4 ? 0.055 : 0.045),
           ),
         );
-  const stH = stLines.length * 16 + 10,
+  const stH = stLines.length * stLh + 10,
     stY = H - (opts.panel ? 6 : 34) - stH,
-    stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * 6.6 + 24);
+    stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * stCw + 24);
   const { x0, x1, y0, y1 } = fitExtent(sim, opts, t, W, unit);
   const bRes = bannerBox(el, opts, W);
   // Footer scale note: the longest wording that fits at >= 9.5 px (10 px on a desk); never shrunk below that.
@@ -126,5 +129,5 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
     CX = W / 2 - f.x * R;
     CY = (fTop + fBot) / 2 - f.y * R;
   }
-  return { stTxt, hasStatus, stLines, nCraft, craftBase, stH, stY, stW, bRes, fFont, ftxt, fw, fTop, fBot, R, CX, CY };
+  return { stFs, stLh, stTxt, hasStatus, stLines, nCraft, craftBase, stH, stY, stW, bRes, fFont, ftxt, fw, fTop, fBot, R, CX, CY };
 }

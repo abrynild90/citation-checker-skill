@@ -64,8 +64,8 @@ export const GNSS = {
     {
       type: 'aircraft',
       path: [
-        [43.0, 2.0],
-        [44.0, 30.0],
+        [44.2, 8.0],
+        [45.2, 30.0],
       ],
       alt: 11,
       t0: 0,
@@ -73,8 +73,9 @@ export const GNSS = {
       label: 'Airliner B',
       beamLabel: 'GPS signal (from a MEO satellite, off view)',
       beamShort: 'GPS signal',
-      beamDx: 50,
-      beamDy: 22,
+      beamFrac: 0.22, // the label sits on the beam's midpoint (the visible part), not beside the aircraft
+      beamDx: 0,
+      beamDy: 0,
       gnss: true,
       labelDy: 34,
       dx: 92,
@@ -93,11 +94,18 @@ export const GNSS = {
     {
       name: 'Baltic: airliners and jammer zone',
       short: 'Baltic zone',
-      at: [41, 13, 1.5],
-      look: [53.4, 22.6, 0.98],
+      at: [41, 13, 1.58],
+      look: [52.2, 22.2, 0.98],
       phone: { at: [38, 12, 1.48] },
     },
-    { name: 'Close-up: jammer and airliners', short: 'Close-up', at: [47, 16, 1.7], look: [54, 19, 0.98], phone: { at: [47, 16, 1.95] } },
+    {
+      name: 'Close-up: jammer zone and Airliner A',
+      short: 'Close-up',
+      at: [51, 18.5, 1.3],
+      look: [56.2, 21, 0.98],
+      phone: { at: [51, 18.5, 1.55] },
+      ref: false, // a close-up of the dome: Airliner B is outside this frame by design
+    },
     { name: 'Europe + GPS orbits', short: 'Europe + GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false, hide: ['Ground jammer', 'Jammer effect'] },
   ],
   status: [

@@ -18,8 +18,10 @@ export const SOLWIND = {
   event: 'us-1985-solwind',
   launchPhoneK: 1.2,
   launchAt: [3.3, 0.95, 0.8],
-  staticCenter: [-10, -130],
+  staticCenter: [-14, -122],
+  staticGlobeY1: 0.8, // static: close-up toward the impact, the globe's lower part runs off the frame
   staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
+  staticMarkerCap: { 'Solwind P78-1': 64 }, // the satellite is the subject: clearly visible (declared in tools/scene_check/rules.mjs MARKER_OVR)
   staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
@@ -41,7 +43,7 @@ export const SOLWIND = {
       type: 'target',
       label: 'Solwind P78-1',
       color: C.tgt,
-      big: 2.0, // the satellite reads at t=0.2, before the intercept
+      big: 3.4, // the satellite reads at t=0.2, before the intercept
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',

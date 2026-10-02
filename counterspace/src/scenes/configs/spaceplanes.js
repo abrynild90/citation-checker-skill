@@ -275,7 +275,7 @@ export const SPACEPLANES = {
       act: 2,
       fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], fill: 0.93, dMin: 0.1, t: 0.75 },
     },
-    { name: 'Wide: Earth and X-37B LEO orbits', at: [40, -25, 4.4], phone: { at: [40, -25, 5.2] }, ref: false },
+    { name: 'Wide: Earth, LEO orbits and the GEO ring', at: [32, -25, 7.2], phone: { at: [32, -25, 10] }, ref: false }, // unlocked from the tour
   ],
   staticCenter: [40, 105],
   staticFit: 1.6,

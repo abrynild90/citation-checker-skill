@@ -102,7 +102,7 @@ export function drawLegend(S, legend) {
 // The status caption: a dark box with the wrapped lines.
 export function drawStatus(S, fit) {
   const { opts, W, g } = S;
-  const { hasStatus, stLines, stH, stY, stW } = fit;
+  const { hasStatus, stLines, stH, stY, stW, stFs, stLh } = fit;
   if (hasStatus) {
     g.append('rect')
       .attr('x', (W - stW) / 2)
@@ -115,10 +115,10 @@ export function drawStatus(S, fit) {
       g
         .append('text')
         .attr('x', W / 2)
-        .attr('y', stY + (opts.panel ? 15 : 17) + k * 16)
+        .attr('y', stY + (opts.panel ? 15 : stFs + 5) + k * stLh)
         .attr('text-anchor', 'middle')
         .attr('fill', '#ffe08a')
-        .attr('font-size', opts.panel ? 10 : 12)
+        .attr('font-size', opts.panel ? 10 : stFs)
         .text(l),
     );
   }

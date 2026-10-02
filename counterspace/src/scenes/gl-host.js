@@ -165,7 +165,7 @@ export class GLHost {
     this.statusEl = document.createElement('div');
     this.statusEl.className = 'hlabel';
     this.statusEl.style.cssText +=
-      ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);font-size:12px;color:#ffe08a;' +
+      ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);font-size:14px;color:#ffe08a;' +
       'white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px);line-height:1.3';
     this.labelLayer.appendChild(this.statusEl);
     // Hero: an on-canvas hint that the stage is interactive (fades once the visitor drags it).
@@ -245,6 +245,7 @@ export class GLHost {
       acts = this.sim.cfg.acts;
     this.lock = null;
     this._fbAct = null;
+    this._pinned = !!acts && !c.auto && c.act == null; // an episode scene's Wide preset stays put at every t (the acts do not cut away from it)
     if (acts && c.auto) {
       this._act = null;
       this.update(this.t);
@@ -279,7 +280,9 @@ export class GLHost {
     const T = this.T;
     this.t = t;
     const acts = this.sim.cfg.acts;
-    if (acts && this.lock == null) {
+    if (acts && this._pinned) {
+      // pinned Wide preset: the camera never cuts to an act's camera
+    } else if (acts && this.lock == null) {
       let ai = acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1));
       ai = Math.max(0, ai);
       if (this._act !== ai) {
@@ -497,6 +500,7 @@ export class GLHost {
     if (this.statusEl) {
       // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
       const cst = this.sim.cams[this.camIdx]?.status;
+      this.statusEl.style.fontSize = this.el.clientWidth >= 700 ? '14px' : '12px'; // desktop: same size as the static caption
       this.statusEl.textContent = cst
         ? this.el.clientWidth < 640 && cst[1]
           ? cst[1]
