@@ -23,11 +23,11 @@ export const STILL = {
     t: 0.45,
     pos: [-3.274, 2.613, 2.013],
     look: [-0.531, 0.696, 0.64],
-    fov: 29,
-    shift: [0.062, -0.1],
+    fov: 19.5,
+    shift: [0.11, -0.05],
     // labels spread around the objects: Solwind up-left over the ocean, ASM-135 up-right beside the missile, the F-15 out right past the limb
     // (leaders short of the 0.17 W limit)
-    off: { Solwind: [-0.11, -0.05], 'ASM-135': [0.0, -0.07], 'F-15': [0.17, -0.14] },
+    off: { Solwind: [-0.11, -0.05], 'ASM-135': [-0.025, -0.07], 'F-15': [0.17, -0.14] },
   },
   fengyun: { t: 0.85, pos: [0.834, 2.523, -4.242], look: [-0.083, 0.305, -0.382], fov: 33, shift: [0.029, -0.039], off: { Impact: [0.17, -0.05] } },
   'burnt-frost': { t: 0.47, pos: [-3.755, 1.807, -0.546], look: [-0.893, 0.526, 0.193], fov: 34, shift: [0.084, -0.097], labelK: 1.2 },

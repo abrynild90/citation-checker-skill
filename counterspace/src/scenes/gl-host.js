@@ -70,9 +70,9 @@ export class GLHost {
       fv = this.camera.fov * DEG,
       fh = 2 * Math.atan(Math.tan(fv / 2) * this.camera.aspect),
       dFull = Math.max(R / Math.sin(fv * 0.5 * 0.9), R / Math.sin(fh * 0.5 * 0.95)),
-      // A wide stage (desktop): the GEO ring, not the whole glow sphere, sets the framing. The ring spans ~72% of the stage width and the shells' spheres
+      // A wide stage (desktop): the GEO ring, not the whole glow sphere, sets the framing. The ring spans ~82% of the stage width and the shells' spheres
       // run off the top and the bottom together (sides stay inside), so the Earth and the shells fill the stage instead of a 40% column.
-      dWide = Math.hypot(R, R / (0.8 * Math.tan(fh / 2))),
+      dWide = Math.hypot(R, R / (0.83 * Math.tan(fh / 2))),
       d = this.camera.aspect > 1.7 ? Math.min(dFull, dWide) : dFull,
       p = this.camera.position.clone().sub(this.target);
     p.setLength(d);

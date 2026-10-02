@@ -39,7 +39,7 @@ export const STARFISH = {
       t1: 0.14,
       color: C.int,
       label: 'Thor launch',
-      labelEnd: 0.3, // the launch is over: its label would only add a leader across the field lines
+      labelEnd: 1, // Near keeps the Thor chip at every t (Wide and Polar place it clear of the field lines via liveOff / camOff)
       opt: true,
       dx: -96,
       dy: 4,
@@ -82,12 +82,12 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -112], Johnston: [-160, 6], Thor: [-150, 92], Artificial: [-60, -21] },
+  liveOff: { Detonation: [-150, -112], Johnston: [-160, 6], Thor: [30, 70], Artificial: [-60, -21] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
     1: { Detonation: [-140, -36], Johnston: [-120, 45], Thor: [-132, 4] },
-    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 42], Detonation: [120, 36], Thor: [-112, 40] },
+    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 22], Detonation: [120, 36], Thor: [-125, 58] },
   },
   // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
   cameras: [
