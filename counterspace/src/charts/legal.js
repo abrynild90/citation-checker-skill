@@ -360,7 +360,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   const laneP = phone ? 9 : compact ? 6 : 18,
     lane0 = yMark + (small ? (compact ? 19 : 14) : Math.max(28, dnSpace + 18));
   const yAx = lane0 + (lanes.length - 1) * laneP + (compact ? 8 : 10),
-    H = yAx + (compact ? 16 : 22);
+    H = yAx + (compact ? 21 : 22);
   const svg = d3
     .select(el)
     .append('svg')
@@ -480,8 +480,8 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     .style('opacity', 0.55);
   sg.append('rect')
     .attr('class', 'hit')
-    .attr('x', (d) => d._a - 2)
-    .attr('width', (d) => Math.max(10, d._b - d._a + 4))
+    .attr('x', (d) => Math.min(d._a - 2, (d._a + d._b) / 2 - 12))
+    .attr('width', (d) => Math.max(24, d._b - d._a + 4))
     .attr('y', (d) => lane0 + d._lane * laneP - (compact ? 2 : 10))
     .attr('height', compact ? 10 : 24);
   if (!small)

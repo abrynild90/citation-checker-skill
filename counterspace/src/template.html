@@ -341,7 +341,7 @@ button,input,select,textarea{font-family:inherit}
 .chips.mode-kin .chip{opacity:.5;text-decoration:none;border-style:dotted;color:var(--muted)}
 .chips.mode-kin .chip i{background:var(--faint)!important}
 .chip-off-note{font-size:12.5px;color:var(--faint);align-self:center}
-#expDark{margin:0}
+#expDark{margin:0;width:18px;height:18px}
 .chart-head .tools{padding-right:2px}
 td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap;font:400 11.5px/1.5 var(--sans)}
 table,.glance,.legal-list,.tm,.count,.card,svg text,.hlabel{font-variant-numeric:tabular-nums}
@@ -513,7 +513,14 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
   .tscroll tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:4px 0;background:var(--surface)}
   .tscroll td{display:grid;grid-template-columns:38% 1fr;gap:8px;border-bottom:1px solid var(--grid);padding:5px 10px;overflow-wrap:anywhere}
   .tscroll td:last-child{border-bottom:0}
+  .tscroll td a{display:inline-block;align-self:center;min-height:24px;line-height:24px}
   .tscroll td::before{content:attr(data-label);color:var(--muted);font-weight:600}
+}
+/* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene overlay keeps its denser 30 px buttons, which meet the 24 px AA minimum. */
+@media (pointer:coarse){
+  main .btn,main .btn.small,main .chip{min-height:44px}
+  main details.table summary,main .about summary{padding-block:13px}
+  .skip{min-height:44px}
 }
 @media (prefers-reduced-motion: reduce){
   *{transition:none!important;animation:none!important}

@@ -30,7 +30,12 @@ function pairOverlaps(items, chart) {
 function textClips(ts, sr, chart) {
   return ts
     .filter((a) => a.x0 < sr.left - 0.5 || a.x1 > sr.right + 0.5 || a.y0 < sr.top - 0.5 || a.y1 > sr.bottom + 0.5)
-    .map((a) => ({ chart, kind: 'clip', a: a.s }));
+    .map((a) => ({
+      chart,
+      kind: 'clip',
+      a: a.s,
+      over: [sr.left - a.x0, a.x1 - sr.right, sr.top - a.y0, a.y1 - sr.bottom].map((v) => Math.max(0, Math.round(v * 10) / 10)),
+    }));
 }
 function textOnMarks(svg, ts, chart) {
   const shapes = [...svg.querySelectorAll('.mark circle:not(.hit), .mark path, .mark rect:not(.hit), .mark polygon')]
