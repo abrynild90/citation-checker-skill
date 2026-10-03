@@ -1,6 +1,6 @@
 // Scene collision / framing checker for the 13 WebGL scenes, their static SVG diagrams and their PNG stills.
 //   NODE_PATH=tools/node_modules OUT=<dir> PORT=9122 node tools/scene_check.mjs
-// Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.2,0.3,...  MODES=live,static,still,hero,stillapi
+// Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.08,0.2,0.3,...  MODES=live,static,still,hero,stillapi
 //      SHOT=1 (save a PNG per state)  QUIET=1  ROOT=<dir holding the index.html to test, default .>  OUT=<dir>  PORT=<port>
 // (stillapi: every still, live and static, must be exactly 3000x1875.)
 // Every state is (scene x camera preset x t x viewport) for live scenes; static SVG at each viewport; live and static stills at 1440.
@@ -53,7 +53,7 @@ const root = path.resolve(process.env.ROOT || '.'),
   PORT = +(process.env.PORT || 9122);
 const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const VPS = (process.env.VPS || '1440,900,375').split(',').map(Number);
-const TS = (process.env.TS || '0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.85,0.9').split(',').map(Number);
+const TS = (process.env.TS || '0.08,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.85,0.9').split(',').map(Number);
 const CAMS = (process.env.CAMS || '').split(',').filter(Boolean).map(Number);
 const MODES = (process.env.MODES || 'live,static,still,hero').split(',');
 const SHOT = !!process.env.SHOT,

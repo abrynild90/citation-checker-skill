@@ -255,8 +255,9 @@ export function check(S) {
     }
   }
   if (S.def && P.refs) for (const r of P.refs) if (r.px < 6) f('ref-small', `${r.text} ${r.px.toFixed(1)} px`);
-  // action region: each side counts at least 40% of the frame, so a long trail across the frame qualifies
-  if (S.def && S.action !== undefined && !S.docked && !S.ringFrame) {
+  // action region (from t=0.15: before that the scene is still setting up): each side counts at least 40% of the frame,
+  // so a long trail across the frame qualifies
+  if (S.def && S.action !== undefined && !S.docked && !S.ringFrame && S.t >= 0.15) {
     // a ring-framed default camera (DN-2: the whole arc and the whole GEO ring) shows the action small by design; a docked pair is one object: the action
     // region is that single spot, so it is exempt while docked
     const a = S.action;

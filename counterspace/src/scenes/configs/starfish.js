@@ -87,7 +87,7 @@ export const STARFISH = {
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
     1: { Detonation: [-140, -36], Johnston: [-120, 45], Thor: [-132, 4] },
-    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 22], Detonation: [120, 36], Thor: [-125, 58] },
+    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 22], Detonation: [120, 36], Thor: [-150, 62] },
   },
   // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
   cameras: [

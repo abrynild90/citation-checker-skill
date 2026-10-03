@@ -230,8 +230,9 @@ const methods = {
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
         const r = raw[i],
-          x = r.px + d[0] * offK,
-          y = r.py + d[1] * offK,
+          // the override must not push the chip past the frame when its referent is near an edge (DN-2's GEO label early in the scene)
+          x = Math.max(r.w / 2 + 9, Math.min(w - r.w / 2 - 9, r.px + d[0] * offK)),
+          y = Math.max(r.h / 2 + 9, Math.min(h - r.h / 2 - 9, r.py + d[1] * offK)),
           qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
           qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
         // the placer's own slot stays when the fixed one would land on another label (it knows nothing of this override)
