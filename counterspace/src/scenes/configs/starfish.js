@@ -1,0 +1,118 @@
+// scenes/configs/starfish.js: scene `starfish` (see ../config.js for the list order)
+import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
+
+const PH = IS_PHONE ? 1.5 : 1; // phoneK, the distance factor of the 375 stage
+
+export const STARFISH = {
+  id: 'starfish',
+  date: '1962-07-09',
+  title: 'Starfish Prime (1962)',
+  shells: ['LEO'],
+  duration: 14,
+  caption:
+    'A 1.4-megaton warhead detonates about 400 km above Johnston Island. Electrons from the blast are trapped by Earth’s magnetic field. ' +
+    'They spread along field lines and drift around the planet, forming an artificial radiation belt. ' +
+    'SWF says such tests are known to have generated effects that damaged or destroyed satellites in orbit at the time. ' +
+    'The belt’s spread in the animation is drawn for legibility, not computed.',
+  cite: 'DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962); SWF 2026, p. 12-05 (effects that damaged or destroyed satellites in orbit at the time).',
+  related: 'ltbt-1963',
+  event: 'us-1962-starfish-prime',
+  actors: [
+    {
+      type: 'site',
+      at: [16.7, -169.5],
+      label: 'Johnston Island',
+      short: 'Johnston Is.',
+      color: C.ground,
+      dx: -84,
+      dy: 40,
+      staticAt: [0.78, 0.4], // static (screen and print): up and right of the burst, so its leader leaves the Earth by the short way and crosses no other label
+      staticPin: 'hard',
+    },
+    {
+      type: 'suborbital',
+      from: [16.7, -169.5],
+      to: [16.5, -169.0],
+      apex: 400,
+      t0: 0.02,
+      t1: 0.14,
+      color: C.int,
+      label: 'Thor launch',
+      labelEnd: 1, // Near keeps the Thor chip at every t (Wide and Polar place it clear of the field lines via liveOff / camOff)
+      opt: true,
+      dx: -96,
+      dy: 4,
+    },
+    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
+    { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14 },
+    {
+      type: 'belt',
+      at: [16.5, -169.2],
+      L: [1.12, 1.7],
+      t0: 0.18,
+      t1: 0.9,
+      count: 2600,
+      color: C.belt,
+      size: 0.02,
+      nLon: 12,
+      label: 'Artificial radiation belt',
+      short: 'Radiation belt',
+    },
+    {
+      type: 'ring',
+      alt: 800,
+      inc: 44.8,
+      raan: 40,
+      color: '#8cc8ff',
+      sat: {
+        phase: 1.05,
+        speed: 0.25,
+        big: 1.5,
+        label: 'Satellite in belt',
+        short: 'Satellite',
+        dx: 30,
+        dy: 60,
+        staticPh: -0.75, // static: drawn further along its orbit, off the Earth's centre
+        fail: { t: 0.8, label: 'Satellite damaged (SWF: such tests did this)', short: 'Satellite damaged' },
+      },
+    },
+  ],
+  liveLabelK: 1.25, // live at desktop width: the labels carry the story, so the type is 25% larger than the default 11 px
+  // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
+  // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
+  // above the belt point it names
+  liveOff: { Detonation: [-150, -112], Johnston: [-160, 6], Thor: [30, 70], Artificial: [-60, -21] },
+  // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
+  // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
+  camOff: {
+    1: { Detonation: [-140, -36], Johnston: [-120, 45], Thor: [-132, 4] },
+    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 22], Detonation: [120, 36], Thor: [-150, 62] },
+  },
+  // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
+  cameras: [
+    { name: 'Wide', at: [20.02, 165.5, 3.5 * PH] },
+    { name: 'Near', at: [16.7, -177.5, Math.max(2.3, 3.5 * PH * 0.55)] },
+    { name: 'Polar', at: [42, -169.5, 4.3 * PH] },
+  ],
+  phoneHide: ['Thor launch'],
+  phoneOnDisc: ['Johnston', 'Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
+  stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)
+  staticDropPhone: ['Thor launch'], // 375 static: Thor shares the burst spot; Detonation and Johnston keep separate labels, placed apart
+  staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
+  still: 0.7,
+  camDist: 3.5,
+  phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
+  staticZoom: 1.7,
+  staticCenter: [35, -205],
+  staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
+  staticCraftMax: 54, // static: the satellite icon stays small (it must not cover the Earth's centre)
+  stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
+  status: [
+    [0, 'Thor rocket climbs toward ~400 km'],
+    [0.16, 'Detonation: electrons trapped on Earth’s field lines', 'Detonation: electrons trapped'],
+    [0.3, 'Trapped electrons spread in longitude and latitude along field lines', 'Electrons spread along field lines'],
+    [0.75, 'Belt has drifted around Earth (illustrative spread)', 'Belt drifts around Earth (illustrative)'],
+    [0.82, 'SWF: effects of such tests damaged or destroyed satellites in orbit at the time', 'Satellites in orbit were damaged (SWF)'],
+  ],
+};

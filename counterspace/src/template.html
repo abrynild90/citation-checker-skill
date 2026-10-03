@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counterspace Timeline</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<meta
+  name="description"
+  content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere."
+>
+<style id="cs-fonts">/*__FONTS__*/</style>
+<style>
+:root, .xbox.xdark{
+  color-scheme: dark;
+  --bg:#0a0f1e; --surface:#10172c; --surface-2:#172040; --line:#2a3558; --grid:#212b4a;
+  --text:#e9edf7; --muted:#a9b3cc; --faint:#7d88a6; --accent:#8cc8ff; --accent-2:#ffcf6e;
+  --warn:#ff9b7a; --focus:#ffd24d;
+  --leo:rgba(120,170,255,.10); --meo:rgba(160,130,255,.08); --geo:rgba(255,200,110,.13);
+  --recon:rgba(255,255,255,.035);
+  --c-us:#56B4E9; --c-ru:#FF8C5A; --c-cn:#F0C24B; --c-in:#3FD0A0; --c-ir:#CFA3E6;
+  --c-kp:#FF9ECF; --c-il:#C3CDDE; --c-iq:#D9C38A; --c-multi:#B9C2D6;
+  --cat-da:#FF8C5A; --cat-co:#F0C24B; --cat-ew:#56B4E9; --cat-de:#CFA3E6; --cat-cy:#3FD0A0;
+  --shadow:0 10px 30px rgba(0,0,0,.45); --edge:rgba(0,0,0,.6);
+  --serif: Newsreader,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans: "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
+    --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
+    --warn:#b2401c; --focus:#b36b00;
+    --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
+    --recon:rgba(0,0,0,.035);
+    --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
+    --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
+    --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
+    --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
+  }
+}
+:root[data-theme="light"], .xbox.xlight{
+  color-scheme: light;
+  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
+  --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
+  --warn:#b2401c; --focus:#b36b00;
+  --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
+  --recon:rgba(0,0,0,.035);
+  --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
+  --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
+  --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
+  --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);font-synthesis:style;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{padding:20px 16px 4px}
+.top-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:8px 32px;align-items:start}
+.toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.glance{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.glance dl{display:grid;gap:8px;margin:10px 0 0}
+.glance div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--muted)}
+.glance dt{margin:0}.glance dd{margin:0;color:var(--text);font:600 15px var(--sans);text-align:right}
+.glance h2{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-2);margin:0}
+@media (max-width:860px) {
+  .top-grid {
+    grid-template-columns:1fr
+  }
+  .top-grid .top-main {
+    order:1
+  }
+  .top-grid .jump {
+    order:2
+  }
+  .top-grid .meta {
+    order:3
+  }
+  .top-grid>div:nth-child(2) {
+    order:4
+  }
+  .toolbar {
+    justify-content:flex-start
+  }
+}
+.kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
+h1{font:600 clamp(28px,4.7vw,46px)/1.08 var(--serif);margin:8px 0 10px;letter-spacing:-.018em;text-wrap:balance}
+h2{font:600 clamp(22px,2.7vw,30px)/1.2 var(--serif);margin:0 0 6px;letter-spacing:-.01em}
+h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
+.nb{white-space:nowrap}
+.lede{max-width:760px;color:var(--muted);font:400 19.5px/1.5 var(--serif);margin:0}.lede strong{font-weight:600;color:var(--text)}
+.cta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:12px 0 0}
+.cta-note{font-size:13px;color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding:10px 16px}
+.btn.primary:hover{filter:brightness(1.08)}
+.top-grid .jump,.top-grid .meta{grid-column:1/-1}
+.top-grid .jump{margin-top:2px}
+.top-grid .meta{margin-top:0;max-width:none}
+.jump{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 0}
+@media (min-width:1100px){.jump{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.jump a {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  padding:9px 11px;
+  min-height:44px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text);
+  text-decoration:none
+}
+.jump a:hover{border-color:var(--accent)}
+.jump b{font:600 13.5px/1.25 var(--sans)}
+.jump span{font-size:12px;line-height:1.3;color:var(--muted)}
+@media (max-width:640px){.jump{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta{margin:14px 0 0;font-size:13px;color:var(--muted)}
+.meta{max-width:760px;line-height:1.45}
+.btn{font:500 13px/1 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:34px}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn.small{padding:6px 9px;font-size:12px;min-height:30px}
+
+/* hero */
+.hero{position:relative;margin:12px 0 8px;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  background:radial-gradient(120% 90% at 70% 40%,#16224a 0%,#070b17 70%);display:flex;flex-direction:column}
+.hero .stage{position:relative;height:min(52vh,460px);min-height:300px}
+.hero .stage canvas,.hero .stage svg{width:100%;height:100%;display:block}
+.hero>.illus{position:relative;top:auto;left:auto;max-width:none;border:0;border-radius:0;border-bottom:1px solid rgba(255,224,138,.25);padding:7px 14px}
+.hero .hero-rot{position:absolute;right:12px;top:44px;z-index:3;background:rgba(5,8,18,.8);color:#ffe08a;border-color:rgba(255,224,138,.5)}
+.hero .hero-rot:hover{background:#ffe08a;color:#070b17}
+.hero .copy{padding:14px 20px 16px;background:#070b17;border-top:1px solid #1d2748;color:#e9edf7}
+.hero .copy p{margin:0;max-width:640px;font-size:15px;color:#cfd6e8}
+.hero .prompt svg{flex:none}
+.hero .prompt{display:inline-flex;white-space:nowrap;gap:8px;align-items:center;font-weight:600;color:#ffe08a;margin-bottom:6px}
+.illus{position:absolute;top:10px;left:10px;font:600 11px/1.2 var(--sans);letter-spacing:.04em;background:rgba(5,8,18,.75);
+  color:#ffe08a;
+  border:1px solid rgba(255,224,138,.45);
+  border-radius:6px;
+  padding:5px 8px;
+  z-index:2;
+  max-width:calc(100% - 20px);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+  }
+.hlabel{position:absolute;font:600 11px/1 var(--sans);color:#dfe6f7;background:rgba(5,8,18,.6);padding:3px 6px;border-radius:4px;
+  pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
+
+/* timeline */
+#timeline{position:relative}
+.legal-band{position:relative;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 0 2px}
+@media (min-width:761px){.legal-band{position:sticky;top:0;background:var(--bg)}}
+.legal-band.compact{padding:0 0 2px;border-bottom:1px solid var(--accent);box-shadow:0 8px 16px -6px var(--edge)}
+.legal-band::after {
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:100%;
+  height:18px;
+  background:linear-gradient(var(--bg),transparent);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .12s
+}
+.legal-band.compact::after{opacity:1}
+.mnum{font:700 10.5px var(--sans);fill:var(--accent);paint-order:stroke;stroke:var(--bg);stroke-width:2.5px;stroke-linejoin:round;pointer-events:none}
+.legal-band.compact .tools{visibility:hidden}
+.legal-band.compact .band-head{display:none}
+.legal-band .band-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);min-height:32px}
+.lbls-hidden{display:none}
+[hidden]{display:none!important}
+.break-line{stroke:var(--accent);stroke-opacity:.55;stroke-width:1.5;stroke-dasharray:2 3}.break-tick{stroke:var(--text);stroke-width:1.5;fill:none}
+.whisker{stroke:var(--text);stroke-width:1.4;fill:none}.range-label{fill:var(--text);font:600 10.5px var(--sans)}
+.zoombox{fill:var(--accent);fill-opacity:.06;stroke:var(--accent);stroke-opacity:.4;stroke-dasharray:3 3}
+.legal-zoom{margin:12px 0 0;padding:8px 10px 2px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.legal-zoom .zoom-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:12.5px;color:var(--muted)}
+.legal-zoom .zoom-head b{color:var(--text);font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.legal-zoom svg{display:block;width:100%}
+.legal-list{list-style:none;margin:6px 0 0;padding:0;font-size:13.5px}
+.legal-list li{padding:7px 0;border-bottom:1px solid var(--grid);color:var(--muted)}
+.legal-list .ld{display:inline-block;min-width:64px;color:var(--accent-2);font-weight:600}
+.legal-list b{color:var(--text)}
+.legal-list .ls{display:block;margin-left:0}
+@media (min-width:641px){.legal-list .ls{display:inline;margin-left:8px}.legal-list .ls::before{content:'— '}}
+.lsep{flex-basis:100%;height:0;margin:0}
+.legend li.lhead{flex-basis:100%;font:600 11px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:4px}
+.legend li.lhead:first-child{margin-top:0}
+.legend li b{color:var(--text);font-weight:600}
+.legend li{min-width:0;max-width:100%}
+.legend li.wide{flex-basis:100%;align-items:flex-start;padding-right:16px;box-sizing:border-box}
+.legend li.wide span{flex:1 1 0;min-width:0;overflow-wrap:anywhere}
+.only-phone{display:none}
+.phone-only-btn{display:none}
+@media (max-width:640px){.phone-only-btn{display:inline-flex}}
+.show-phone{display:none}
+@media (max-width:640px){.hide-phone{display:none}.show-phone{display:inline}}
+@media (max-width:640px){.only-phone{display:block}}
+.xbox{color:var(--text);background:var(--bg)}
+.xbox svg{display:block;width:100%}
+#legalKey{margin:8px 0 0}
+.note.block{margin:8px 0 0;max-width:820px}
+.legal-band .band-head b{color:var(--text);font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.legal-band svg{display:block;width:100%}
+.legal-tap{margin:6px 0 4px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13px;color:var(--muted)}
+.legal-tap b{color:var(--text)}
+.strip-pos{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.strip-pos .track{display:block;position:relative;height:5px;margin-top:4px;border-radius:3px;background:var(--grid)}
+.strip-pos .track i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--accent)}
+.lbls text{paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+.legal-tap .btn{margin-left:4px}
+section.chart{padding:26px 0 8px;border-bottom:1px solid var(--grid);scroll-margin-top:8px}
+@media (min-width:761px){section.chart{scroll-margin-top:var(--band-h,172px)}}
+#codingRules,#hS{scroll-margin-top:16px}
+.chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:flex-end}
+.chart-head p{margin:2px 0 0;color:var(--muted);max-width:760px;font-size:15px}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.svgbox{position:relative;margin-top:10px}
+.svgbox svg{display:block;width:100%;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin:10px 0 0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:6px}
+.legend svg{flex:none}
+.note{font-size:13px;color:var(--faint)}
+details.table{margin:10px 0 4px}
+details.table summary{cursor:pointer;font-size:13px;color:var(--accent);padding:6px 0}
+.tscroll{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
+th{position:sticky;top:0;background:var(--surface-2);font-weight:600}
+.axis text{fill:var(--muted);font:11px var(--sans)}
+.axis path,.axis line{stroke:var(--line)}
+.gridline line{stroke:var(--grid)}
+.gridline path{display:none}
+.ann{fill:var(--text);font:600 12px var(--sans)}
+.ann-sub{fill:var(--muted);font:11.5px var(--sans)}
+.band-label{fill:var(--faint);font:600 10.5px var(--sans);letter-spacing:.08em}
+.mark{cursor:pointer}
+.mark:focus{outline:none}
+.mark.ack .hit{stroke:var(--accent);stroke-width:3px;fill:transparent;animation:ackring 1.6s ease-out forwards}
+@keyframes ackring{0%{stroke-opacity:1}70%{stroke-opacity:1}100%{stroke-opacity:0}}
+@media (prefers-reduced-motion:reduce){.mark.ack .hit{animation:none}}
+.mark:focus-visible .hit,.mark.hl .hit{stroke:var(--focus);stroke-width:3px;fill:transparent}
+.hit{fill:transparent;stroke:none}
+.guide{stroke:var(--accent-2);stroke-width:1.5;stroke-dasharray:4 3;pointer-events:none}
+.handoff line{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:2 3}
+.handoff text{fill:var(--warn);font:600 11px var(--sans)}
+.badge3d path{fill:var(--bg);stroke:var(--text);stroke-width:1.1}
+.badge3d path.top{fill:var(--text)}
+
+/* tooltip card */
+.card{position:fixed;z-index:60;max-width:320px;background:var(--surface);color:var(--text);border:1px solid var(--line);
+  border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;font-size:13px;pointer-events:none;opacity:0;transition:opacity .12s}
+.card.on{opacity:1}
+.card.pulse{animation:cardpulse .8s ease-out}
+@keyframes cardpulse{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.card.pulse{animation:none;outline:2px solid var(--accent)}}
+.card.dock {
+  left:8px!important;
+  right:8px;
+  top:auto!important;
+  bottom:8px;
+  max-width:none;
+  max-height:46vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  pointer-events:auto;
+  padding-top:14px
+}
+.card.dock .cbody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.card.dock.on::after{content:'Tap this card to dismiss';flex:none;margin-top:8px;font-size:11.5px;color:var(--faint)}
+.card.dock.more.on::after {
+  content:'\2193  Scroll for more \00b7 tap to dismiss';
+  flex:none;
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid var(--grid);
+  text-align:center;
+  font-weight:600;
+  color:var(--accent)
+}
+.howto{margin:12px 0 0;max-width:760px;font-size:14px;color:var(--muted)}
+.howto b{color:var(--text)}
+.legend svg text{font-family:var(--sans)}
+.card h4{margin:0 0 4px;font:600 14px/1.3 var(--sans)}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:6px 0}
+.card dt{color:var(--faint)}
+.card dd{margin:0}
+.card .src{color:var(--muted);font-size:12px;border-top:1px solid var(--grid);padding-top:6px;margin-top:6px}
+.card .hint{color:var(--accent-2);font-size:12px;margin-top:4px}
+.card.cc h4{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .ack-line{color:var(--accent);font:600 12px var(--sans);margin:0 0 4px}
+
+/* chart B controls */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--surface-2)}
+button,input,select,textarea{font-family:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface-2);color:var(--text);cursor:pointer;min-height:30px}
+.chip[aria-pressed="false"]{opacity:.72;text-decoration:line-through;color:var(--muted);border-style:dashed}
+.chip:disabled{opacity:.55;cursor:not-allowed}
+@media (max-width:640px) {
+  .chips {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px
+  }
+  .chip {
+    font-size:12.5px;
+    padding:5px 9px;
+    min-height:36px;
+    border-radius:10px
+  }
+}
+.chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+.zbadge {
+  display:inline-block;
+  font:700 11px/1 var(--sans);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  background:var(--accent-2);
+  color:var(--bg);
+  border-radius:4px;
+  padding:3px 6px;
+  margin-right:6px
+}
+.zoom-flag{fill:var(--accent-2);font:600 11px var(--sans)}
+.about{margin:6px 0 0;max-width:820px;font-size:13px;color:var(--muted)}
+.about summary{cursor:pointer;color:var(--accent);padding:4px 0}
+.about p{margin:4px 0 0}
+.kinkey{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--text)}
+.kinkey span{display:inline-flex;align-items:center;gap:7px}
+.kinkey i{width:16px;height:12px;border-radius:2px;display:inline-block}
+.chips.mode-kin .chip{opacity:.5;text-decoration:none;border-style:dotted;color:var(--muted)}
+.chips.mode-kin .chip i{background:var(--faint)!important}
+.chip-off-note{font-size:12.5px;color:var(--faint);align-self:center}
+#expDark{margin:0;width:18px;height:18px}
+.chart-head .tools{padding-right:2px}
+td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i]{white-space:nowrap;font:400 11.5px/1.5 var(--sans)}
+table,.glance,.legal-list,.tm,.count,.card,svg text,.hlabel{font-variant-numeric:tabular-nums}
+em,i{font-style:italic}
+.chart-head p,#sceneCaption{font-family:var(--serif);font-size:17px;line-height:1.5}
+#sceneCaption{font-size:16px}
+@media (max-width:640px) {
+  td[data-label="Date"],td[data-label="Start"],td[data-label="End"],td[data-label$="date" i] {
+    white-space:normal
+  }
+  .legal-band .band-head {
+    min-height:46px;
+    margin-bottom:6px
+  }
+}
+/* lag + sources */
+.lag-list{display:grid;gap:10px;margin-top:14px}
+.prose{max-width:820px}
+.prose p,.prose li{color:var(--muted)}
+.cites{font-size:13.5px}
+.cites li{margin-bottom:6px;overflow-wrap:anywhere;word-break:normal}
+.cites{padding-left:22px}
+#methodBody ul.sub{margin:4px 0 2px;padding-left:18px}
+#methodBody details.rule{border:1px solid var(--grid);border-radius:8px;margin:8px 0;background:var(--surface)}
+#methodBody details.rule summary{cursor:pointer;padding:9px 12px;font-weight:600;font-size:14.5px;color:var(--text)}
+#methodBody details.rule .rb{padding:0 12px 8px}
+#methodBody details.rule .rb p{margin:4px 0}
+#methodBody ul.sub li{margin:3px 0}
+footer{padding:30px 0 60px;color:var(--faint);font-size:13px}
+
+/* scene overlay */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(3,5,12,.72);display:none;align-items:center;justify-content:center;padding:24px}
+.overlay.open{display:flex}
+.panel{width:min(1120px,100%);height:min(760px,100%);background:#0b1122;color:#e9edf7;border:1px solid #2a3558;border-radius:16px;
+  display:grid;grid-template-columns:1fr 320px;grid-template-rows:auto 1fr auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.panel header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #2a3558}
+.panel header h2{font-size:22px;margin:0;min-width:0}
+.panel header .hd{min-width:0;flex:1}
+.panel header .nav{display:flex;gap:6px;align-items:center;flex:none}
+.panel .count{font:12px var(--sans);color:#a9b3cc;min-width:38px;text-align:center}
+.panel .kicker{display:none}
+.panel .tm{font:12px var(--sans);color:#a9b3cc;min-width:70px;text-align:right}
+.panel .static-note{font-size:12.5px;color:#a9b3cc}
+.panel .view{position:relative;background:radial-gradient(120% 90% at 60% 40%,#16224a 0%,#060912 70%);min-height:0}
+.panel .view canvas,.panel .view>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.panel aside{border-left:1px solid #2a3558;display:flex;flex-direction:column;min-height:0;overflow:hidden;font-size:14px;color:#cdd5e8}
+.panel .steps{margin:0 0 10px;font-size:13.5px}.panel .steps summary{cursor:pointer;color:#fff;font-weight:600;min-height:24px}
+.panel .steps ol{margin:6px 0 0;padding-left:20px}.panel .steps li{margin:0 0 5px}.panel .steps .st{color:#a9b3cc;font-size:12px;white-space:nowrap}
+.panel .aside-body:focus-visible{outline-offset:-3px}
+.aside-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.panel .aside-body{flex:1;min-height:0;overflow:auto;padding:14px 14px 36px;scroll-padding-bottom:36px;scrollbar-width:thin;scrollbar-color:#5f70a3 #0b1122}
+.panel .aside-body::-webkit-scrollbar {
+  width:9px
+}
+.panel .aside-body::-webkit-scrollbar-track {
+  background:#0b1122
+}
+.panel .aside-body::-webkit-scrollbar-thumb {
+  background:#5f70a3;
+  border-radius:6px
+}
+.scroll-cue {
+  flex:none;
+  height:24px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 14px;
+  border-top:1px solid #2a3558;
+  background:#0b1122;
+  font:600 11.5px var(--sans);
+  color:#8cc8ff;
+  pointer-events:none;
+  visibility:hidden
+}
+.aside-wrap.scrollable .scroll-cue{visibility:visible}
+.aside-wrap:not(.more) .scroll-cue{color:#a9b3cc}
+.cue-track{position:relative;flex:1;height:4px;border-radius:3px;background:#22305a}
+.cue-track i{position:absolute;top:0;bottom:0;border-radius:3px;background:#8cc8ff;min-width:6px}
+.panel .scalenote{margin:8px 0 0;font-size:12.5px}.panel .scalenote summary{cursor:pointer;color:#a9b3cc}.panel .scalenote p{margin:4px 0 0}
+.panel .aside-body p:first-child{margin-top:0}
+.panel .aside-law{flex:none;padding:8px 14px;border-top:1px solid #2a3558}
+.panel .aside-law .btn{width:100%;justify-content:flex-start;text-align:left;line-height:1.25;height:auto;min-height:36px}
+.panel a{color:#8cc8ff}
+.panel .pin-src {
+  flex:none;
+  margin:0;
+  padding:6px 14px;
+  border-top:1px solid #2a3558;
+  font-size:12px;
+  line-height:1.35;
+  max-height:8.5em;
+  overflow:auto;
+  overflow-wrap:anywhere
+}
+.panel .aside-law.none{display:none} /* no related law: the note is one inline phrase at the end of the source line */
+.panel .pin-src .nolaw{color:#a9b3cc;white-space:nowrap}
+#scCams{scrollbar-width:none}#scCams::-webkit-scrollbar{display:none}
+.lbl-s{display:none}
+.panel .aside-law.none .btn{min-height:0;width:auto;border:0;background:transparent;padding:0;font-size:12px;color:#a9b3cc;opacity:1;cursor:default}
+.panel aside h3{color:#fff;margin-top:6px}
+.panel aside .src{font-size:12.5px;color:#a9b3cc}
+.panel .ctrl{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid #2a3558}
+.panel .btn{background:#172040;color:#e9edf7;border-color:#2e3a63}
+.panel .btn.playing,.panel .btn[aria-pressed="true"]{background:#8cc8ff;color:#0a0f1e}
+.panel .btn[data-resume]{border-style:dashed;border-color:#8cc8ff}
+.panel input[type=range]{flex:1;min-width:120px;accent-color:#8cc8ff}
+.panel .spacer{flex:1}
+.skip {
+  position:absolute;
+  left:8px;
+  top:-60px;
+  z-index:200;
+  background:var(--surface);
+  color:var(--text);
+  border:2px solid var(--focus);
+  border-radius:8px;
+  padding:8px 12px;
+  font:600 14px var(--sans)
+}
+.skip:focus{top:8px}
+#timeline:focus{outline:none}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.flash-hl{animation:flash 1.6s ease 2}
+@keyframes flash{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px var(--focus))}}
+
+@media (max-width:760px){
+  .panel{grid-template-columns:1fr;grid-template-rows:auto minmax(45vh,45vh) minmax(0,1fr) auto;height:100vh;height:100dvh;border-radius:0}
+  .overlay{align-items:stretch}
+  .overlay{padding:0}
+  .panel aside{border-left:0;border-top:1px solid #2a3558;max-height:none}
+  .panel .ctrl{gap:6px 8px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}
+  .panel .ctrl .lbl{display:none}
+  .panel .ctrl .btn{min-width:40px;justify-content:center}
+  .panel .ctrl input[type=range]{min-width:0;width:100%}
+  #scCams{grid-column:1/3;flex-wrap:wrap;min-width:0}
+  #scCams{gap:4px!important}
+  #scCams .btn{flex:none;white-space:nowrap;padding:6px 7px;font-size:11.5px}
+  #scStatus:not(.sr){grid-column:1/-1}
+  #scStatic{grid-column:1/3}
+  #scExport{grid-column:3}
+  .panel .ctrl #scExport .lbl-s{display:inline}
+  #scCams.fade-r {
+    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)
+  }
+  .panel .pin-src{padding:5px 12px}
+  .panel .aside-law.none{padding:4px 12px}
+  .panel .ctrl .btn{min-height:34px}
+  .panel .aside-body{padding:10px 12px 34px;scroll-padding-bottom:34px}
+  .panel .aside-law{padding:6px 12px}
+  .panel header{padding:8px 10px}
+  .panel header h2{font-size:15px;line-height:1.2}
+  .panel header .lbl{display:none}
+  .panel header .btn{min-width:38px;justify-content:center}
+  .panel .ctrl{padding:8px 10px}
+  .hero .stage{height:400px;min-height:0}
+  .lede{font-size:16px}
+  .chart-head p{font-size:14.5px}
+}
+#legalSvg[role="region"] svg{width:auto;max-width:none}
+#legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
+caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:var(--muted)}
+/* data tables become stacked cards on phones: no sideways scrolling */
+@media (max-width:640px){
+  .tscroll{overflow:visible;border:0}
+  .tscroll table,.tscroll tbody,.tscroll tr,.tscroll td,.tscroll caption{display:block;width:100%}
+  .tscroll thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tscroll tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:4px 0;background:var(--surface)}
+  .tscroll td{display:grid;grid-template-columns:38% 1fr;gap:8px;border-bottom:1px solid var(--grid);padding:5px 10px;overflow-wrap:anywhere}
+  .tscroll td:last-child{border-bottom:0}
+  .tscroll td a{display:inline-block;align-self:center;min-height:24px;line-height:24px}
+  .tscroll td::before{content:attr(data-label);color:var(--muted);font-weight:600}
+}
+/* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene overlay keeps its denser 30 px buttons, which meet the 24 px AA minimum. */
+@media (pointer:coarse){
+  .btn:not(.panel .btn),.btn.small:not(.panel .btn),.btn.primary:not(.panel .btn),main .chip{min-height:44px}
+  main details.table summary,main .about summary{padding-block:13px}
+  .skip{min-height:44px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+@media print{
+  .legal-band{position:static}
+  .tools,.overlay,.hero .copy .prompt{display:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#timeline">Skip to timeline</a>
+<header class="top wrap">
+  <div class="top-grid"><div class="top-main">
+  <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
+  <h1>Counterspace, <span class="nb">1957–2026</span>: the weapons and the law that trailed them</h1>
+  <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations
+    have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military
+    operations” (Executive Summary, p. xxiii). This page puts the technology and the law on a single year axis.</p>
+  <div class="cta"><button class="btn primary" id="tourBtn" type="button">▶ Start the 3D scene tour</button><span class="cta-note">10 short scenes, or
+    select any cube badge on a chart.</span></div>
+  </div>
+  <div>
+    <div class="toolbar" role="toolbar" aria-label="Page controls">
+      <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
+      <label class="btn small" for="expDark" title="SVG exports use the light palette (print-ready) unless this is checked"><input type="checkbox"
+        id="expDark"> Dark SVG exports</label>
+    </div>
+    <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
+  </div>
+  <nav class="jump" aria-label="Jump to a section">
+    <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
+    <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
+    <a href="#chartC"><b>C · Non-kinetic</b><span>Jamming, lasers and cyber</span></a>
+    <a href="#chartR"><b>RPO · Co-orbital</b><span>Proximity operations, docking, spaceplanes</span></a>
+    <a href="#chartB"><b>B · Capabilities</b><span>States holding each, by decade</span></a>
+    <a href="#lag"><b>Chronology</b><span>Years from capability to a later legal step</span></a>
+    <a href="#sources"><b>Sources</b><span>Citations and method</span></a>
+  </nav>
+  <p class="meta" id="asof"></p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <section class="hero" aria-label="Overview scene: Earth with LEO, MEO and GEO shells">
+    <div class="illus">Illustrative<span class="hide-phone">, not orbit-propagated</span> · compressed radial scale</div>
+    <button class="btn small hero-rot" id="heroRot" type="button" aria-label="Rotate the globe: load the interactive 3D overview">⟳ Rotate the globe</button>
+    <div class="stage" id="heroStage"></div>
+    <div class="copy">
+      <div class="prompt"><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><g class="badge3d" style="--x:0"><path
+        d="M0,-7 L6,-3.5 L0,0 L-6,-3.5Z" class="top" fill="#ffe08a"/><path d="M-6,-3.5 L0,0 L0,7 L-6,3.5Z" fill="none" stroke="#ffe08a"/><path
+        d="M6,-3.5 L0,0 L0,7 L6,3.5Z" fill="none" stroke="#ffe08a"/></g></svg><span><span class="hide-phone">Select any event with a 3D badge to explore
+        it</span><span class="show-phone">Select a 3D badge to explore</span></span></div>
+      <p>Low Earth orbit (to ~2,000 km) holds imaging satellites, the ISS and broadband constellations. GPS sits in medium Earth orbit (~20,200 km).
+        Broadcast and communications satellites sit in the geostationary belt (~35,786 km). Every destructive intercept so far has been in LEO.</p>
+    </div>
+  </section>
+</div>
+
+<div id="timeline" tabindex="-1">
+  <div class="legal-band" id="legalBand" role="region" aria-label="Legal and policy responses, on the shared year axis">
+    <div class="wrap">
+      <div class="band-head"><b>Law &amp; policy</b><span class="tools"><button class="btn small" data-export="legal" type="button">Export
+        SVG</button></span></div>
+      <div id="legalSvg"></div>
+      <div class="strip-pos" id="stripPos" hidden><span class="lab"></span><span class="track" aria-hidden="true"><i></i></span></div>
+      <div class="legal-tap" id="legalTap" role="status" hidden>Tap a mark for its label.</div>
+    </div>
+  </div>
+  <div class="wrap">
+    <ul class="legend" id="legendLegal" aria-label="Legal band key"></ul>
+    <div class="legal-zoom" id="legalZoomBox">
+      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged so the crowded 2022–25 items can carry fuller
+        labels. On wide screens the main band numbers these marks and keys them beside the window; a thin stem runs from each down to its true date on
+        the axis. Tap or focus a mark for its citation.</span></div>
+      <div id="legalZoom"></div>
+    </div>
+    <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list"
+      id="legalList"></ul></details>
+    <p class="note block hide-phone" id="abbrLegal"></p>
+    <details class="table" id="legalKey"><summary>Legal items and abbreviations (table)</summary><p class="note block" id="abbrLegal2"></p><div
+      class="tscroll" id="tableLegal"></div></details>
+  </div>
+
+  <div class="wrap">
+    <section class="chart" id="chartA" aria-labelledby="hA">
+      <div class="chart-head">
+        <div><h2 id="hA">A · Kinetic tests: altitude over time</h2>
+        <p>Direct-ascent anti-satellite (DA-ASAT) tests and one high-altitude nuclear test. The log scale runs from 10 km (rocket-only tests) to
+          beyond GEO. Tests with no reported altitude sit in a strip below the axis, at their true dates. For destructive tests, bubble <em>area</em> is
+          proportional to the number of cataloged fragments.</p></div>
+        <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button">Zoom to 2004–2026</button><button
+          class="btn small" data-export="A" type="button">Export SVG</button></div>
+      </div>
+      <div class="svgbox" id="svgA"></div>
+      <ul class="legend" id="legendA"></ul>
+      <details class="table"><summary>Data table: Chart A</summary><div class="tscroll" id="tableA"></div></details>
+    </section>
+
+    <section class="chart" id="chartC" aria-labelledby="hC">
+      <div class="chart-head">
+        <div><h2 id="hC">C · Non-kinetic operations</h2>
+        <p>Jamming, spoofing, lasers and cyber operations, drawn as sustained campaigns (bars) or discrete events (points). Fill style shows how
+          strongly the source attributes the activity.</p></div>
+        <div class="tools">
+          <span class="seg" role="group" aria-label="Chart C year range">
+            <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+            <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
+          </span>
+          <button class="btn small" data-export="C" type="button">Export SVG</button></div>
+      </div>
+      <p class="note block" id="noteC"></p>
+      <div class="svgbox" id="svgC"></div>
+      <ul class="legend" id="legendC"></ul>
+      <details class="table"><summary>Data table: Chart C</summary><div class="tscroll" id="tableC"></div></details>
+    </section>
+
+    <section class="chart" id="chartR" aria-labelledby="hR">
+      <div class="chart-head">
+        <div><h2 id="hR">Co-orbital proximity operations (RPO)</h2>
+        <p>Rendezvous, docking, capture, release and spaceplane-mission rows from SWF’s co-orbital tables, one lane per actor. Each mark sits at the
+          start date of a ledger row; shape shows the activity and colour the actor.</p></div>
+        <div class="tools">
+          <span class="seg" role="group" aria-label="Co-orbital chart year range">
+            <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+            <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
+          </span>
+          <button class="btn small" data-export="R" type="button">Export SVG</button></div>
+      </div>
+      <p class="note block" id="noteR0"><b>A proximity operation is not an attack.</b> Most rows are inspection, servicing or technology
+        demonstrations, and SWF’s wording on intent is hedged (“possibly”, “appeared to”, “likely”).
+        The ledger records that an operation happened,
+        not
+        why; outlined marks show where SWF itself hedges.</p>
+      <p class="note block" id="noteR"></p>
+      <div class="svgbox" id="svgR"></div>
+      <ul class="legend" id="legendR"></ul>
+      <details class="table"><summary>Data table: co-orbital rows</summary><div class="tscroll" id="tableR"></div></details>
+    </section>
+
+    <section class="chart" id="chartB" aria-labelledby="hB">
+      <div class="chart-head">
+        <div><h2 id="hB">B · Capability diffusion</h2>
+        <p>Number of states holding each counterspace capability, by decade, on a zero baseline. Solid bands are demonstrated; hatched are developing
+          or latent; faded decades are reconstructed, not SWF-assessed.</p></div>
+        <div class="tools">
+          <span class="seg" role="group" aria-label="Grouping">
+            <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
+            <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic vs non-kinetic</button>
+          </span>
+          <button class="btn small" data-export="B" type="button">Export SVG</button>
+        </div>
+      </div>
+      <p class="note block" id="noteB" aria-live="polite"></p>
+      <details class="about" id="aboutB"><summary>About the coding</summary>
+        <p>The number above each decade is a range: demonstrated only, to demonstrated plus developing (the whisker). In the 2020s the states are
+          SWF-assessed, but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part. Dotted bands are
+          developing entries where SWF’s country matrix shows no data. Decades before 2020 are reconstructed from SWF’s test tables and country
+          chapters. See the <a href="#codingRules">coding rules</a>.</p></details>
+      <div class="kinkey" id="kinKeyB" hidden></div>
+      <div class="chips" id="chipsB" role="group" aria-label="Filter categories"></div>
+      <div class="svgbox" id="svgB"></div>
+      <ul class="legend" id="legendB"></ul>
+      <details class="table"><summary>Data table: Chart B</summary><div class="tscroll" id="tableB"></div></details>
+    </section>
+
+    <section class="chart" id="lag" aria-labelledby="hL">
+      <div class="chart-head">
+        <div><h2 id="hL">Chronology: capability, then law</h2>
+        <p>Time between a capability milestone and a later legal or policy step. This is chronology, not causation: each pair shows which came first,
+          not that one caused or answered the other. An open ring means the ledger pairs no later legal item with that event; it does not claim that no
+          rule exists.</p></div>
+        <div class="tools"><button class="btn small" data-export="L" type="button">Export SVG</button></div>
+      </div>
+      <div class="svgbox" id="svgL"></div>
+      <ul class="legend" id="legendL"></ul>
+      <details class="table"><summary>Data table: chronology pairs</summary><div class="tscroll" id="tableL"></div></details>
+    </section>
+  </div>
+</div>
+
+<div class="wrap prose" id="sources">
+  <section class="chart" aria-labelledby="hS" style="border:0">
+    <h2 id="hS">Sources and methodology</h2>
+    <div id="methodBody"></div>
+  </section>
+</div>
+</main>
+<footer class="wrap" aria-label="Page footer">Built for teaching. SWF material is used for facts only under CC BY-NC 4.0; no SWF or CSIS figures,
+  graphics or prose are reproduced. No data is stored in your browser. Type: Newsreader (Production Type) and IBM Plex
+  (IBM Corp.), both under the SIL Open Font License 1.1.</footer>
+
+<div class="card" id="card" role="tooltip" aria-hidden="true"></div>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
+    <header>
+      <div class="hd"><h2 id="sceneTitle">Scene</h2></div>
+      <div class="nav">
+        <button class="btn small" id="scPrev" type="button" aria-label="Previous scene">◀<span class="lbl"> Previous</span></button>
+        <span class="count" id="sceneDate" aria-label="Scene number"></span>
+        <button class="btn small" id="scNext" type="button" aria-label="Next scene"><span class="lbl">Next </span>▶</button>
+        <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕<span class="lbl"> Close</span></button>
+      </div>
+    </header>
+    <div class="view" id="sceneView" role="group" aria-label="Scene visual (illustrative)" aria-describedby="sceneCaption sceneSteps"><div
+      class="illus">Illustrative<span class="hide-phone">, not orbit-propagated</span> · compressed radial scale</div></div>
+    <aside>
+      <div class="aside-wrap" id="asideWrap">
+      <div class="aside-body" id="asideBody" tabindex="0" role="region" aria-label="Scene description">
+        <p id="sceneCaption"></p>
+        <details class="steps" id="sceneStepsBox"><summary>What happens in this scene</summary>
+          <ol id="sceneSteps"></ol></details>
+        <details class="scalenote"><summary>Scale and imagery note</summary><p class="src" id="sceneScale"></p></details>
+      </div>
+      <div class="scroll-cue" id="scrollCue" aria-hidden="true"><span id="cueTxt">▾ Scroll for more</span><span class="cue-track"><i
+        id="scrollProg"></i></span></div>
+      <p class="src pin-src" id="sceneSrc"></p>
+      </div>
+      <div class="aside-law" id="asideLaw"><button class="btn small" id="scRelated" type="button">⚖ Related law</button></div>
+    </aside>
+    <div class="ctrl">
+      <button class="btn small" id="scPlay" type="button" aria-label="Pause">❚❚<span class="lbl"> Pause</span></button>
+      <label class="sr" for="scScrub">Scene time</label>
+      <input type="range" id="scScrub" min="0" max="1000" value="0">
+      <span class="tm" id="scTime" aria-hidden="true"></span>
+      <span class="static-note" id="scStatic" hidden>Static diagram: no timeline (reduced motion or no WebGL).</span>
+      <span id="scCams" style="display:flex;gap:6px"></span>
+      <span class="static-note" id="scStatus" role="status" aria-live="polite"></span>
+      <button class="btn small" id="scExport" type="button" aria-label="Export still image (PNG)">⤓<span class="lbl"> Export still (PNG)</span><span
+        class="lbl-s"> PNG</span></button>
+    </div>
+  </div>
+</div>
+
+<script id="cs-data" type="application/json">/*__DATA__*/</script>
+<script id="cs-land" type="application/json">/*__LAND__*/</script>
+<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script type="module">
+/*__APP__*/
+</script>
+</body>
+</html>
