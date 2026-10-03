@@ -57,7 +57,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
-header.top{padding:20px 0 4px}
+header.top{padding:20px 16px 4px}
 .top-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:8px 32px;align-items:start}
 .toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .glance{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
@@ -518,7 +518,7 @@ caption{caption-side:top;text-align:left;padding:6px 8px;font-size:12px;color:va
 }
 /* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene overlay keeps its denser 30 px buttons, which meet the 24 px AA minimum. */
 @media (pointer:coarse){
-  main .btn,main .btn.small,main .chip{min-height:44px}
+  .btn:not(.panel .btn),.btn.small:not(.panel .btn),.btn.primary:not(.panel .btn),main .chip{min-height:44px}
   main details.table summary,main .about summary{padding-block:13px}
   .skip{min-height:44px}
 }
