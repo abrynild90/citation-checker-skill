@@ -390,7 +390,8 @@ export function check(S) {
     f('still-crop', `Earth disc ${(S.discVis * 100).toFixed(0)}% inside the still (cropped)`);
   if (S.kind === 'hero' && W >= 900 && S.heroSpan != null && S.heroSpan < 0.7)
     f('hero-small', `outer ring spans ${(S.heroSpan * 100).toFixed(0)}% of the stage width`);
-  if (S.hidden) for (const h of S.hidden) f('ref-hidden', h);
+  // From t=0.1: in the first second a craft may still be arriving from outside the shot (SJ-21 on the pull camera), which is the approach itself.
+  if (S.hidden && S.t >= 0.1) for (const h of S.hidden) f('ref-hidden', h);
   if (S.status != null && S.evT != null && S.t < S.evT + 0.02 && (S.evRe || HITRE).test(S.status))
     f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
   if (S.statusLines > 1) f('status-wrap', `status wraps to ${S.statusLines} lines at ${W}px: "${(S.status || '').slice(0, 60)}"`);
