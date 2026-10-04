@@ -140,7 +140,7 @@ const EXPORT_SPEC = {
     sub: 'The time from a capability to the next legal step our records link to it.',
     legend: () => ({
       items: [
-        { head: 'The weapon or attack' },
+        { head: 'Weapon or attack' },
         { g: `<path d="M0,-8L6.9,-4L6.9,4L0,8L-6.9,4L-6.9,-4Z" style="fill:var(--cat-da)"/>`, t: 'Physical attack (kinetic)', gw: 20 },
         { g: `<path d="M0,-8L6.9,-4L6.9,4L0,8L-6.9,4L-6.9,-4Z" style="fill:var(--cat-ew)"/>`, t: 'Jamming, laser or cyber (non-kinetic)', gw: 20 },
         { head: 'Later legal step' },
