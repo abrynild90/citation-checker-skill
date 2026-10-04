@@ -56,7 +56,7 @@
 
 ## How to read the tables
 
-**Scope and selection.** Scope rule: every direct-ascent (DA-ASAT) test row that SWF 2026 lists in Table 1-4 (US), Tables 2-4 and 16-2 (Russia), Tables 3-3 and 16-3 (China) and Tables 4-1 and 16-4 (India) is a row in this ledger, including failures, rocket-only tests and tests against a star or no target. Exclusions, all disclosed: co-orbital tests (Table 1-4 also lists the US Delta 180 co-orbital intercept of 5 Sep 1986, which SWF's text calls a co-orbital experiment; Table 16-2's Soviet IS, Naryad, Polyot and Cosmos 2521/2536 entries), and the Table 16-3 line 'Apr. 15, 2023' (treated as a date variant of the 14 Apr 2023 test, see that row's conflicts). Starfish Prime (not an SWF DA-ASAT table row) is the one added nuclear marker. The US Table 1-4 has 33 rows; 32 are ledger rows and the one omitted row is the co-orbital Delta 180 test. 3 rows give SWF's month only (`date_precision: month`).
+**Scope and selection.** Scope rule: every direct-ascent anti-satellite (DA-ASAT) test that SWF 2026 lists in Table 1-4 (US), Tables 2-4 and 16-2 (Russia), Tables 3-3 and 16-3 (China) and Tables 4-1 and 16-4 (India) is an entry on this page, including failures, rocket-only tests and tests against a star or no target. Exclusions, all disclosed: co-orbital tests (Table 1-4 also lists the US Delta 180 co-orbital intercept of 5 Sep 1986, which SWF's text calls a co-orbital experiment; Table 16-2's Soviet IS, Naryad, Polyot and Cosmos 2521/2536 entries), and the Table 16-3 line 'Apr. 15, 2023' (treated as a date variant of the 14 Apr 2023 test; the conflict is noted in that test's entry). Starfish Prime (not a direct-ascent test in SWF's tables) is the one nuclear test added here. The US Table 1-4 has 33 rows; 32 are ledger rows and the one omitted row is the co-orbital Delta 180 test. 3 rows give SWF's month only (`date_precision: month`).
 
 **Pins.** An SWF pin gives the table or passage, the printed section-page (for example `p. 05-01`) and the PDF page index (`PDF p. 212`). A non-SWF pin names the passage and starts with the source key in brackets, for example `[iq-2003-gps]`; the full cite is under [Sources](#sources). Where a row cites several places, all are listed.
 
@@ -112,7 +112,7 @@
 | `medium` | Source is hedged ('likely', 'possible'), a value is missing, or a date conflict was resolved by a builder rule. |
 | `low` | SWF itself marks the value with '?', only one SWF table lists the row, or the report is an anonymous-source press account. |
 
-**Co-orbital rows.** Co-orbital rule: every line of SWF 2026 Table 1-3 (US RPOs), Table 2-3 (Russian RPOs) and Table 3-2 (Chinese RPOs), and every flight in Table 1-1 (X-37B) and Table 3-1 (Chinese reusable experimental spacecraft), is a row with domain co_orbital, dated from the table (or from SWF's text where the row says so and gives the reason). Two exceptions, both disclosed: (a) the Jan. 2022 USA 270 / Shiyan-12 approach is listed in both Table 1-3 and Table 3-2 and is one row; (b) where SWF's text dates separate steps that a table folds into one line (SJ-21 with Compass G2; SJ-21 with SJ-25; the Cosmos 2542 release of Cosmos 2543; the SY-7 release of Payload A Debris; the GSSAP 'flanking' of SJ-21 and SJ-25), the text-dated step is its own row and the row says so. RPO rows record that a proximity operation happened as SWF reports it; they are not attacks, and SWF's wording on intent is hedged and kept in the row.
+**Co-orbital rows.** Co-orbital rule: every line of SWF 2026 Table 1-3 (US close approaches), Table 2-3 (Russian close approaches) and Table 3-2 (Chinese close approaches), and every flight in Table 1-1 (X-37B) and Table 3-1 (Chinese reusable experimental spacecraft), is a row dated from the table (or from SWF's text where the entry says so and gives the reason). Two exceptions, both disclosed: (a) the Jan. 2022 USA 270 / Shiyan-12 approach is listed in both Table 1-3 and Table 3-2 and is one entry; (b) where SWF's text dates separate steps that a table folds into one line (SJ-21 with Compass G2; SJ-21 with SJ-25; the Cosmos 2542 release of Cosmos 2543; the SY-7 release of Payload A Debris; the GSSAP 'flanking' of SJ-21 and SJ-25), the text-dated step is its own entry and the entry says so. RPO rows record that a close approach happened as SWF reports it; they are not attacks, and SWF's wording on intent is hedged and kept in the entry.
 
 | field | meaning |
 |---|---|
@@ -363,23 +363,23 @@ Counts per calendar year (kinetic by test date; non-kinetic, co-orbital and lega
 |---|---|---|---|---|---|
 | 1963-08-05 | - | ltbt-1963 | treaty | Limited Test Ban Treaty | Treaty Banning Nuclear Weapon Tests in the Atmosphere, in Outer Space and Under Water, Aug. 5, 1963, 14 U.S.T. 1313, 480 U.N.T.S. 43. For context, see Office of the Historian, U.S. Dep't of State, Milestones: 1961-1968, The Limited Test Ban Treaty, 1963, https://history.state.gov/milestones/1961-1968/limited-ban. |
 | 1967-01-27 | - | ost-1967 | treaty | Outer Space Treaty | Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer Space, Jan. 27, 1967, 18 U.S.T. 2410, 610 U.N.T.S. 205. |
-| 1972-05-26 | - | abm-1972 | treaty | ABM Treaty Art. XII | Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, May 26, 1972, 23 U.S.T. 3435. |
-| 1981-12-09 | - | paros-1981 | negotiation_span | PAROS (UNGA agenda item) | G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981). |
-| 1985-03-29 | 1994-08-23 | cd-paros-committee | negotiation_span | CD Ad Hoc Committee on PAROS | Conference on Disarmament, Report of the Ad Hoc Committee on Prevention of an Arms Race in Outer Space, CD/1271 (Aug. 24, 1994); see UNIDIR, The Conference on Disarmament and the Prevention of an Arms Race in Outer Space. |
-| 1992-12-22 | - | itu-1992 | treaty | ITU Constitution Arts. 45 & 48 | Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, 1825 U.N.T.S. 331, 361-62. |
-| 2008-02-12 | - | ppwt-2008 | negotiation_span | PPWT draft (Russia-China) | Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) (tabled at the CD Feb. 12, 2008). |
-| 2014-06-10 | - | ppwt-2014 | negotiation_span | PPWT updated draft | Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014). |
+| 1972-05-26 | - | abm-1972 | treaty | Anti-Ballistic Missile (ABM) Treaty, Article XII | Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, May 26, 1972, 23 U.S.T. 3435. |
+| 1981-12-09 | - | paros-1981 | negotiation_span | Prevention of an Arms Race in Outer Space (PAROS) | G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981). |
+| 1985-03-29 | 1994-08-23 | cd-paros-committee | negotiation_span | Conference on Disarmament Ad Hoc Committee on PAROS | Conference on Disarmament, Report of the Ad Hoc Committee on Prevention of an Arms Race in Outer Space, CD/1271 (Aug. 24, 1994); see UNIDIR, The Conference on Disarmament and the Prevention of an Arms Race in Outer Space. |
+| 1992-12-22 | - | itu-1992 | treaty | ITU Constitution, Articles 45 and 48 | Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, 1825 U.N.T.S. 331, 361-62. |
+| 2008-02-12 | - | ppwt-2008 | negotiation_span | Draft treaty on weapons in space (PPWT), Russia and China | Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) (tabled at the CD Feb. 12, 2008). |
+| 2014-06-10 | - | ppwt-2014 | negotiation_span | Updated draft treaty on weapons in space (PPWT) | Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014). |
 | 2017-02-01 | - | tallinn-2017 | unilateral (soft law) | Tallinn Manual 2.0 (soft law) | Tallinn Manual 2.0 on the International Law Applicable to Cyber Operations (Michael N. Schmitt ed., Cambridge Univ. Press 2017). |
-| 2020-12-07 | - | unga-75-36 | resolution | UNGA 75/36 | G.A. Res. 75/36 (Dec. 7, 2020). |
-| 2022-04-18 | - | us-moratorium-2022 | unilateral | US DA-ASAT test moratorium | The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space (Apr. 18, 2022); SWF 2026, p. 01-50. |
-| 2022-05-09 | 2023-09-01 | oewg-2022 | negotiation_span | OEWG on space threats | G.A. Res. 76/231 (Dec. 24, 2021) (establishing OEWG, 2022-2023). |
-| 2022-07-01 | - | milamos-2022 | unilateral (soft law) | McGill (MILAMOS) Manual Vol. I (soft law) | McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules (Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022). |
-| 2022-12-07 | - | unga-77-41 | resolution | UNGA 77/41 (DA-ASAT tests) | G.A. Res. 77/41 (Dec. 7, 2022). |
+| 2020-12-07 | - | unga-75-36 | resolution | UN General Assembly resolution 75/36 | G.A. Res. 75/36 (Dec. 7, 2020). |
+| 2022-04-18 | - | us-moratorium-2022 | unilateral | US moratorium on destructive anti-satellite missile tests | The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space (Apr. 18, 2022); SWF 2026, p. 01-50. |
+| 2022-05-09 | 2023-09-01 | oewg-2022 | negotiation_span | Open-ended working group on space threats (OEWG) | G.A. Res. 76/231 (Dec. 24, 2021) (establishing OEWG, 2022-2023). |
+| 2022-07-01 | - | milamos-2022 | unilateral (soft law) | McGill Manual on military uses of outer space (MILAMOS), Vol. I (soft law) | McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules (Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022). |
+| 2022-12-07 | - | unga-77-41 | resolution | UN General Assembly resolution 77/41 (destructive anti-satellite tests) | G.A. Res. 77/41 (Dec. 7, 2022). |
 | 2024-01-01 | - | woomera-2024 | unilateral (soft law) | Woomera Manual (soft law) | The Woomera Manual on the International Law of Military Space Operations (Jack Beard & Dale Stephens eds., Oxford Univ. Press 2024). |
 | 2024-04-24 | - | unsc-veto-2024 | veto | Russian veto: nuclear weapons in orbit | U.N. SCOR, 79th Sess., 9616th mtg., U.N. Doc. S/PV.9616 (Apr. 24, 2024); draft S/2024/302. |
-| 2024-07-01 | - | itu-rrb-2024 | resolution | ITU RRB: 'grave concern' (Sweden, France) | ITU Radio Regulations Board, 96th Meeting (June 24-28, 2024), Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145). |
-| 2025-10-03 | - | icao-2025 | resolution | ICAO: GNSS interference an 'infraction' of the Chicago Convention | ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06. |
-| 2025-11-10 | - | itu-rrb-2025 | resolution | ITU RRB 100th meeting: urges Russia to cease RNSS interference | ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245. |
+| 2024-07-01 | - | itu-rrb-2024 | resolution | ITU Radio Regulations Board: 'grave concern' (Sweden, France) | ITU Radio Regulations Board, 96th Meeting (June 24-28, 2024), Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145). |
+| 2025-10-03 | - | icao-2025 | resolution | ICAO: interference with satellite navigation an 'infraction' of the Chicago Convention | ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06. |
+| 2025-11-10 | - | itu-rrb-2025 | resolution | ITU Radio Regulations Board, 100th meeting: urges Russia to stop interference with satellite navigation | ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245. |
 
 ## Conflicts inside the sources
 
@@ -529,129 +529,129 @@ Where SWF (or a source) disagrees with itself, the row keeps one value under a s
 
 <a id="n61"></a>**61. cn-2023-dn3** (2023-04-14). Likely intercept test. Table 3-3 and prose give 14 April 2023; Appendix Table 16-3 lists both 14 and 15 April 2023. 14 April used.
 
-<a id="n62"></a>**62. us-1997-miracl** (1997-10-17). SWF gives October 1997 only. The exact day (17 Oct) is from FlightGlobal (Oct. 1997) and Arms Control Association reporting. The laser was fired at White Sands Missile Range, NM (SWF fn. 259 cites the WSMR High Energy Laser Systems Test Facility); MSTI-3 was a USAF experimental satellite that had completed its mission.
+<a id="n62"></a>**62. us-1997-miracl** (1997-10-17). The Secure World Foundation (SWF) gives only October 1997. The exact day, 17 Oct., comes from FlightGlobal (Oct. 1997) and Arms Control Association reporting. The laser was fired at White Sands Missile Range, New Mexico (SWF footnote 259 cites the range's High Energy Laser Systems Test Facility). MSTI-3 was a US Air Force experimental satellite that had completed its mission.
 
-<a id="n63"></a>**63. ir-2003-telstar12** (2003-01-01). SWF: Iran 'has been accused'; the Telstar 12 jamming from Havana 'started in 2003' and similar jamming occurred from Bulgaria and Libya in 2005/2006. Attribution kept at 'alleged'. Day/month not given; span uses whole years (2006 end year = last year SWF dates for these third-country sites).
+<a id="n63"></a>**63. ir-2003-telstar12** (2003-01-01). The Secure World Foundation (SWF) says Iran 'has been accused', so the claim is shown as alleged. SWF says the Telstar 12 jamming from Havana 'started in 2003' and that similar jamming occurred from Bulgaria and Libya in 2005 and 2006. SWF gives no day or month, so the span runs over whole years. The end year, 2006, is the last year SWF dates for the Bulgarian and Libyan sites.
 
-<a id="n64"></a>**64. iq-2003-gps** (2003-03-20). Not covered in SWF 2026 (Iraq is not one of SWF's 13 countries). Excluded from Chart B.
+<a id="n64"></a>**64. iq-2003-gps** (2003-03-20). The Secure World Foundation (SWF) 2026 report does not cover this case, because Iraq is not one of the 13 countries SWF assesses. It is left out of the 'Who can do what' chart.
 
-<a id="n65"></a>**65. cn-2006-laser** (2006-01-01). Point event (year only). Anonymous-source press report; kept low confidence and 'alleged'.
+<a id="n65"></a>**65. cn-2006-laser** (2006-01-01). The event is dated by year only. It rests on a press report from anonymous sources, so confidence is low and the claim is shown as alleged.
 
-<a id="n66"></a>**66. ir-2009-eutelsat** (2009-01-01). Attribution coded 'multi_government' because an intergovernmental body (ITU) located the source in Iranian territory; ITU did not find the Iranian state responsible. SWF dates only the 2010 ITU action and Eutelsat's Oct. 2022 report of renewed jamming from Iran; the 2009 start follows Eutelsat's appeals from May 2009 (Eutelsat/HRW) and the 2012 end is the last year of the first documented phase, so the span understates the 2022 episode.
+<a id="n66"></a>**66. ir-2009-eutelsat** (2009-01-01). The attribution is shown as coming from several governments because an intergovernmental body, the ITU, located the source in Iranian territory. The ITU did not find the Iranian state responsible. The Secure World Foundation (SWF) dates only the 2010 ITU action and Eutelsat's October 2022 report of renewed jamming from Iran. The 2009 start follows Eutelsat's appeals from May 2009 (Eutelsat and Human Rights Watch). The 2012 end is the last year of the first documented phase, so the span understates the 2022 episode.
 
-<a id="n67"></a>**67. kp-2010-gps** (2010-08-23). Terrestrial jamming of receivers, not an attack on GPS satellites (SWF p. 12-05: 'no impact on the GPS satellites themselves'). Campaign span, not individual incidents. SWF does not date the first episode; start is the first publicly known incident, 23 Aug 2010 (GPS World, Inside GNSS). Treated as ongoing (SWF p. 12-06: Nov. 2024 interference; Oct. 2025 ICAO finding).
+<a id="n67"></a>**67. kp-2010-gps** (2010-08-23). This is jamming of receivers from the ground, not an attack on GPS satellites. The Secure World Foundation (SWF) says there is 'no impact on the GPS satellites themselves' (p. 12-05). The entry covers a campaign, not individual incidents. SWF does not date the first episode, so the start is the first publicly known incident, 23 Aug. 2010 (GPS World, Inside GNSS). It is treated as ongoing (SWF p. 12-06: November 2024 interference; October 2025 ICAO finding).
 
-<a id="n68"></a>**68. ru-2014-ukraine** (2014-03-01). Attribution level follows the C4ADS open-source report SWF relies on (p. 02-28: nearly 10,000 suspected incidents in Russia, Crimea and Syria); governments have also blamed Russia, but the source for the span is OSINT. Covers jamming and spoofing. SWF's cited pages do not date the start: the March 2014 start is from external reporting that Russia has jammed GPS in eastern Ukraine since the 2014 Crimea conflict (Breaking Defense; Foreign Policy, Oct. 2015).
+<a id="n68"></a>**68. ru-2014-ukraine** (2014-03-01). The attribution follows the C4ADS report, based on open sources, that the Secure World Foundation (SWF) relies on (p. 02-28). Governments have also blamed Russia, but the source for the time span is open-source research. The entry covers jamming and spoofing. SWF's cited pages do not date the start. The March 2014 start comes from outside reporting that Russia has jammed GPS in eastern Ukraine since the 2014 Crimea conflict (Breaking Defense; Foreign Policy, Oct. 2015).
 
-<a id="n69"></a>**69. ru-2016-syria** (2016-02-01). SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The ledger uses 2016 at medium confidence.
+<a id="n69"></a>**69. ru-2016-syria** (2016-02-01). The Secure World Foundation (SWF), p. 02-28: 'The spoofing began in 2016, peaked in 2017'. This page uses 2016 as the start, with medium confidence.
 
-<a id="n70"></a>**70. ru-2018-peresvet** (2018-03-01). Named in Putin's 1 March 2018 speech (SWF p. 02-36); SWF describes it as appearing designed to protect mobile ICBMs from being imaged. Self-declared by the Russian government; no public evidence of use against a satellite. Attribution level 'official_government' here records the Russian government's own announcement of a system (a self-declaration); it is kept in the directed-energy lane as a capability announcement, not as an operation against a satellite.
+<a id="n70"></a>**70. ru-2018-peresvet** (2018-03-01). Putin named the system in his 1 March 2018 speech (SWF p. 02-36). SWF describes it as appearing designed to protect mobile intercontinental ballistic missiles (ICBMs) from being imaged. The Russian government declared the system itself, and there is no public evidence of its use against a satellite. The attribution 'official government' here records only that announcement. The entry sits in the directed-energy (laser) group as a capability announcement, not as an operation against a satellite.
 
-<a id="n71"></a>**71. ru-2018-trident** (2018-10-25). SWF does not name the exercise or give dates: it says (Nov. 2018) media reported jamming in Norway and Finland during a major NATO exercise, and that Norway's government claimed in March 2019 it had proof of Russian interference. Dates 25 Oct - 7 Nov 2018 are the Trident Juncture exercise window (NATO; Norway's ministry put the jamming at 16 Oct - 7 Nov). Coded 'official_government' on Norway's claim; Finland only expressed concern (external reporting).
+<a id="n71"></a>**71. ru-2018-trident** (2018-10-25). The Secure World Foundation (SWF) does not name the exercise or give dates. It says that media reported jamming in Norway and Finland in November 2018, during a major exercise of the North Atlantic Treaty Organization (NATO), and that Norway's government claimed in March 2019 it had proof of Russian interference. The dates, 25 Oct. to 7 Nov. 2018, are those of the NATO exercise Trident Juncture. Norway's ministry put the jamming at 16 Oct. to 7 Nov. The attribution is 'official government' because of Norway's claim. Finland only expressed concern (outside reporting).
 
-<a id="n72"></a>**72. ru-2022-viasat** (2022-02-24). Timing: SWF p. 15-06 says 'within hours' of Russian troops crossing the border; p. 15-07 adds that independent analysts noted it began one hour before the first troops crossed. Publicly attributed to the GRU by the United States, United Kingdom and European Union in May 2022 (p. 15-07).
+<a id="n72"></a>**72. ru-2022-viasat** (2022-02-24). On timing, the Secure World Foundation (SWF) says (p. 15-06) that the attack came 'within hours' of Russian troops crossing the border. It adds (p. 15-07) that independent analysts noted it began one hour before the first troops crossed. The United States, United Kingdom and European Union publicly attributed the attack to the GRU, Russia's military intelligence service, in May 2022 (p. 15-07).
 
-<a id="n73"></a>**73. ru-2022-starlink** (2022-03-01). SWF notes no independent validation of the type or magnitude of the jamming; coded 'alleged'.
+<a id="n73"></a>**73. ru-2022-starlink** (2022-03-01). The Secure World Foundation (SWF) notes that there is no independent validation of the type or size of the jamming, so the claim is shown as alleged.
 
-<a id="n74"></a>**74. mideast-2023-gnss** (2023-10-07). Attribution rests on the IDF's own public statement (SWF p. 10-02), so it is coded 'official_government' for Israel and for jamming only. SWF also reports regional jamming and spoofing after the 7 Oct. 2023 Hamas attack and says it is hard to tell from open sources whether Israel, Hamas or other actors conduct the EW; no other actor is attributed, so no second row is coded (dropped, not 'alleged': SWF makes no allegation against a named actor). The spoofing reports are therefore not attributed to anyone here. SWF p. 10-01 also reports interference in spring 2023 (20% of regional aircraft in April 2023), before this row's start; start is set to 7 Oct. 2023, the attack SWF names as the trigger of the escalation. Lebanon's claim is a government claim about Israel, not proof.
+<a id="n74"></a>**74. mideast-2023-gnss** (2023-10-07). The Secure World Foundation (SWF) reports the IDF's own public statement (p. 10-02), so the attribution is recorded as official government, for Israel and for jamming only. SWF also reports regional jamming and spoofing after the 7 Oct. 2023 Hamas attack. It says it is hard to tell from open sources whether Israel, Hamas or other actors carry out the electronic warfare. No other actor is attributed, so there is no second entry (left out, and not marked 'alleged', because SWF makes no allegation against a named actor). The spoofing reports are therefore not attributed to anyone here. SWF p. 10-01 also reports interference in spring 2023 (20% of regional aircraft in April 2023), before this entry's start. The start is set to 7 Oct. 2023, the attack SWF names as the trigger of the escalation. Lebanon's claim is a government claim about Israel, not proof.
 
-<a id="n75"></a>**75. ru-2023-baltic** (2023-12-01). SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). Terrestrial jamming of receivers, not attacks on satellites.
+<a id="n75"></a>**75. ru-2023-baltic** (2023-12-01). The Secure World Foundation (SWF) says the interference 'picked up in late 2023 and early 2024'; the start is set to December 2023. The attribution is shown as coming from several governments because it rests on the October 2025 resolution of the International Civil Aviation Organization (ICAO) and on findings of the Radio Regulations Board (RRB) of the International Telecommunication Union (ITU) in November 2025. This is jamming of receivers from the ground, not attacks on satellites.
 
-<a id="n76"></a>**76. ru-2024-eu-sats** (2024-03-01). SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It described origin locations but made no state-responsibility finding; coded 'multi_government' because the ITU, an intergovernmental body, located the source.
+<a id="n76"></a>**76. ru-2024-eu-sats** (2024-03-01). The Secure World Foundation (SWF) reports (p. 02-32) that several European countries complained in spring 2024. The Board described where the interference seemed to come from but made no finding that a state was responsible. The attribution is shown as coming from several governments because the ITU, an intergovernmental body, located the source.
 
-<a id="n77"></a>**77. us-2003-xss10** (2003-01-01). Regime coded from the table's 800 x 800 km orbit (SWF's LEO limit is 2,000 km).
+<a id="n77"></a>**77. us-2003-xss10** (2003-01-01). The Secure World Foundation (SWF) table gives an orbit of 800 by 800 km, which counts as low Earth orbit (LEO). SWF's limit for LEO is 2,000 km.
 
-<a id="n78"></a>**78. us-2005-dart** (2005-04-01). SWF cites this event as the model for the possible bump between SJ-12 and SJ-06F in 2010 (p. 03-02).
+<a id="n78"></a>**78. us-2005-dart** (2005-04-01). The Secure World Foundation (SWF) cites this event as the model for the possible bump between SJ-12 and SJ-06F in 2010 (p. 03-02).
 
-<a id="n79"></a>**79. us-2007-astro-nextsat** (2007-03-01). Servicing demonstration between two US satellites; the pair is each other's target.
+<a id="n79"></a>**79. us-2007-astro-nextsat** (2007-03-01). A demonstration of in-orbit servicing between two US satellites. Each satellite is the other's target.
 
-<a id="n80"></a>**80. cn-2008-bx1-sz7** (2008-09-01). The table's orbit cell is a dash.
+<a id="n80"></a>**80. cn-2008-bx1-sz7** (2008-09-01). The source table gives no orbit.
 
-<a id="n81"></a>**81. us-2008-dsp23-mitex** (2008-12-23). Text-based reading: the two MiTEx satellites drifted from their GSO parking slots toward DSP 23 (hobbyist observations).
+<a id="n81"></a>**81. us-2008-dsp23-mitex** (2008-12-23). This reading comes from the text, not the table: the two MiTEx satellites drifted from their parking slots in geosynchronous orbit toward DSP 23 (hobbyist observations).
 
-<a id="n82"></a>**82. us-2009-pan** (2009-09-08). The table dates the row 2009-2013 and lists 'Yahsat 1B, others unknown, PAN'; the ledger starts at PAN's launch date (text) and takes Yahsat 1B as one target. SWF calls the SIGINT purpose 'presumed'.
+<a id="n82"></a>**82. us-2009-pan** (2009-09-08). SWF's table dates this entry 2009 to 2013 and lists 'Yahsat 1B, others unknown, PAN'. This entry starts at PAN's launch date, from the text, and takes Yahsat 1B as one target. SWF calls the signals-intelligence purpose 'presumed'.
 
-<a id="n83"></a>**83. us-2010-otv1** (2010-04-22). SWF p. 01-09: to date the X-37B has not approached or rendezvoused with any other space object. Regime coded LEO from SWF's statement that earlier flights 'stayed well within LEO' (p. 01-06).
+<a id="n83"></a>**83. us-2010-otv1** (2010-04-22). SWF says (p. 01-09) that to date the X-37B has not approached or rendezvoused with any other space object. The orbit counts as low Earth orbit (LEO) because SWF states that earlier flights 'stayed well within LEO' (p. 01-06).
 
-<a id="n84"></a>**84. cn-2010-sj12-sj06f** (2010-06-12). Start = first maneuver (12 June 2010) and end = closest approach (19 Aug. 2010) from the text; the table gives Jun.-Aug. 2010. Orbit 570-600 km, 97.6 degrees.
+<a id="n84"></a>**84. cn-2010-sj12-sj06f** (2010-06-12). The entry starts at the first maneuver (12 June 2010) and ends at the closest approach (19 Aug. 2010), both from SWF's text; its table gives June to August 2010. The orbit was 570 to 600 km up, tilted 97.6 degrees to the equator.
 
-<a id="n85"></a>**85. cn-2013-sy7-sj15-cx3** (2013-07-19). SWF p. 03-02 says the SY-7 likely carried a robotic arm and that 2014 code-repository material described a teleoperated arm interacting with the separating subsatellite. Start = launch of the three payloads (19 Jul. 2013). Approx. 670 km, 98 degrees.
+<a id="n85"></a>**85. cn-2013-sy7-sj15-cx3** (2013-07-19). SWF says (p. 03-02) that SY-7 likely carried a robotic arm and that material posted in 2014 on a software-sharing website described a remotely operated arm interacting with the small satellite as it separated. The entry starts at the launch of the three payloads (19 July 2013). The orbit was about 670 km up and tilted 98 degrees.
 
-<a id="n86"></a>**86. cn-2013-sy7-release** (2013-10-18). The 'joined' reports are unconfirmed per SWF. The same page says a US-official claim that one satellite 'grabbed' another could not be confirmed and did not involve SY-7.
+<a id="n86"></a>**86. cn-2013-sy7-release** (2013-10-18). SWF treats the 'joined' reports as unconfirmed. The same page says a US official's claim that one satellite 'grabbed' another could not be confirmed and did not involve SY-7.
 
-<a id="n87"></a>**87. ru-2014-cosmos2499** (2014-06-01). Table orbit: 1501 x 1480 km, 82.4 degrees.
+<a id="n87"></a>**87. ru-2014-cosmos2499** (2014-06-01). The orbit was between 1,480 and 1,501 km up, tilted 82.4 degrees to the equator.
 
-<a id="n88"></a>**88. us-2014-angels** (2014-07-01). The table's regime cell says 'GSO'; the text places the RPO in the disposal region several hundred km above GSO. Coded GEO (belt and its immediate vicinity).
+<a id="n88"></a>**88. us-2014-angels** (2014-07-01). The source table says the orbit is geosynchronous (GSO); the text places the close approaches in the disposal region several hundred km above the GSO belt. The entry counts it as GEO, meaning the belt and its immediate surroundings.
 
-<a id="n89"></a>**89. us-2014-clio** (2014-09-01). The word 'multiple' is in quotation marks in SWF's table.
+<a id="n89"></a>**89. us-2014-clio** (2014-09-01). SWF's table puts the word 'multiple' in quotes.
 
-<a id="n90"></a>**90. ru-2014-luch-olymp** (2014-10-01). SWF cites Kratos and Russian sources for a likely signals-intelligence mission, done by parking close enough to intercept uplinked signals (p. 02-13). That is SWF's assessment, not an observed fact.
+<a id="n90"></a>**90. ru-2014-luch-olymp** (2014-10-01). The Secure World Foundation (SWF) cites Kratos and Russian sources for a likely signals-intelligence mission, done by parking close enough to pick up the signals that ground stations send up to satellites (p. 02-13). That is SWF's assessment, not an observed fact.
 
-<a id="n91"></a>**91. ru-2015-cosmos2504-briz** (2015-04-01). Table orbit: 1507 x 1172 km, 82.5 degrees.
+<a id="n91"></a>**91. ru-2015-cosmos2504-briz** (2015-04-01). The orbit was between 1,172 and 1,507 km up, tilted 82.5 degrees to the equator.
 
-<a id="n92"></a>**92. cn-2016-sj17-chinasat** (2016-11-01). SWF p. 03-08 reports US Space Command testimony that SJ-17 also carried a robotic arm 'that could be used for dual use capabilities'; SWF gives no arm operation.
+<a id="n92"></a>**92. cn-2016-sj17-chinasat** (2016-11-01). SWF reports (p. 03-08) testimony from US Space Command that SJ-17 also carried a robotic arm 'that could be used for dual use capabilities'. SWF describes no operation of the arm.
 
-<a id="n93"></a>**93. ru-2017-cosmos2504-fy1c** (2017-03-01). Table orbit: 1507 x 848 km, 82.6 degrees.
+<a id="n93"></a>**93. ru-2017-cosmos2504-fy1c** (2017-03-01). The orbit was between 848 and 1,507 km up, tilted 82.6 degrees to the equator.
 
-<a id="n94"></a>**94. ru-2017-cosmos2521-2519** (2017-08-01). Table orbit: 670 x 650 km, 97.9 degrees. SWF (p. 02-10) says the US military considers the Cosmos 2523 separation a weapons test.
+<a id="n94"></a>**94. ru-2017-cosmos2521-2519** (2017-08-01). The orbit was between 650 and 670 km up, tilted 97.9 degrees to the equator. The Secure World Foundation (SWF) says (p. 02-10) that the US military considers the Cosmos 2523 separation a weapons test.
 
-<a id="n95"></a>**95. us-2017-otv5** (2017-09-07). SWF's inference that the cubesats were deployed by the X-37B is its own conclusion from the catalog record, not an official statement of the deployment.
+<a id="n95"></a>**95. us-2017-otv5** (2017-09-07). SWF's inference that the small satellites (cubesats) were deployed by the X-37B is its own conclusion from the catalog record, not an official statement of the deployment.
 
-<a id="n96"></a>**96. ru-2018-cosmos2521-2519** (2018-03-01). The table's orbit cell is blank; LEO from the previous line for the same pair.
+<a id="n96"></a>**96. ru-2018-cosmos2521-2519** (2018-03-01). The source table leaves the orbit blank, so the entry uses low Earth orbit (LEO) from the previous line for the same pair.
 
-<a id="n97"></a>**97. cn-2019-tjs3-roaming** (2019-05-01). SWF's Russia section says Luch (Olymp) approached TJS-3 and its AKM within 30 km in spring 2019 (p. 02-13).
+<a id="n97"></a>**97. cn-2019-tjs3-roaming** (2019-05-01). SWF's Russia section says Luch (Olymp) approached TJS-3 and its apogee kick motor within 30 km in spring 2019 (p. 02-13).
 
-<a id="n98"></a>**98. ru-2019-cosmos2535-2536** (2019-08-01). Table orbit: 623 x 621 km, 97.88 degrees. Debris objects were released near the pair before and during the RPOs (SWF p. 02-09).
+<a id="n98"></a>**98. ru-2019-cosmos2535-2536** (2019-08-01). The orbit was between 621 and 623 km up, tilted 97.88 degrees to the equator. The Secure World Foundation (SWF) reports (p. 02-09) that debris objects were released near the pair before and during the close approaches.
 
-<a id="n99"></a>**99. ru-2019-cosmos2542-2543-usa245** (2019-12-01). SWF says the purpose 'strongly suggests' observing USA 245 (amateur analysis) and the table says 'likely for the purpose of surveillance'. Table orbit: 859 x 590 km, 97.9 degrees.
+<a id="n99"></a>**99. ru-2019-cosmos2542-2543-usa245** (2019-12-01). The Secure World Foundation (SWF) says the purpose 'strongly suggests' observing USA 245 (an amateur analysis) and its table says 'likely for the purpose of surveillance'. The orbit was between 590 and 859 km up, tilted 97.9 degrees to the equator.
 
-<a id="n100"></a>**100. ru-2019-cosmos2542-release** (2019-12-06). Text-derived row; Table 2-3 folds the release into the 'Dec. 2019 - Mar. 2020' line.
+<a id="n100"></a>**100. ru-2019-cosmos2542-release** (2019-12-06). This entry comes from the text of the Secure World Foundation (SWF). Its Table 2-3 folds the release into the 'Dec. 2019 - Mar. 2020' line.
 
-<a id="n101"></a>**101. us-2020-otv6** (2020-05-17). The Russian claim of a release in Oct. 2021 (an object keeping about 200 m away for a day) is a report SWF cites; SWF does not confirm it. The service module separated before landing.
+<a id="n101"></a>**101. us-2020-otv6** (2020-05-17). The Russian claim of a release in Oct. 2021 (an object keeping about 200 m away for a day) is a report the Secure World Foundation (SWF) cites. SWF does not confirm it. The service module separated before landing.
 
-<a id="n102"></a>**102. ru-2020-cosmos2543-2535** (2020-06-01). SWF: USSPACECOM called the July 2020 object release a space-based weapons test; Russia's Foreign Ministry denied that. The table's orbit cell is blank; LEO from the neighboring lines.
+<a id="n102"></a>**102. ru-2020-cosmos2543-2535** (2020-06-01). The Secure World Foundation (SWF) says US Space Command called the July 2020 object release a space-based weapons test and that Russia's Foreign Ministry denied that. The source table leaves the orbit blank, so the entry uses low Earth orbit (LEO) from the neighboring lines.
 
-<a id="n103"></a>**103. cn-2020-csshq1** (2020-09-04). SWF: the mission of the small satellite is unknown. The spaceplane and the object were not registered with the UN as of Feb. 2026.
+<a id="n103"></a>**103. cn-2020-csshq1** (2020-09-04). The Secure World Foundation (SWF) says the mission of the small satellite is unknown. The spaceplane and the object were not registered with the UN as of Feb. 2026.
 
-<a id="n104"></a>**104. cn-2022-sj21-compass-g2** (2021-12-25). SWF does not describe how SJ-21 captured or docked with Compass G2, and does not describe the separation. SWF's table says SJ-21 pulled Compass G2 'well past graveyard orbit'. Dates are hedged in the text ('at some point', 'around January 21'). End date = the 27 Jan. observation of the higher orbit. Table 3-2 orbit: 35,876 km, 8 degrees.
+<a id="n104"></a>**104. cn-2022-sj21-compass-g2** (2021-12-25). SWF does not describe how SJ-21 captured or docked with Compass G2, and does not describe the separation. SWF's table says SJ-21 pulled Compass G2 'well past graveyard orbit', the disposal region above the GEO belt. The dates are hedged in the text ('at some point', 'around January 21'). The end date is the 27 Jan. observation of the higher orbit. The orbit in Table 3-2 is 35,876 km up, tilted 8 degrees to the equator.
 
-<a id="n105"></a>**105. us-2022-usa270-sy12** (2022-01-01). Listed in both Table 1-3 (US) and Table 3-2 (China); one row, with the US satellite as chaser. The text dates the approach 'late January 2022'.
+<a id="n105"></a>**105. us-2022-usa270-sy12** (2022-01-01). Listed in both Table 1-3 (US) and Table 3-2 (China); this is one entry, with the US satellite as the approaching satellite (the chaser). SWF's text dates the approach 'late January 2022'.
 
-<a id="n106"></a>**106. ru-2022-cosmos2558-usa326** (2022-08-01). Low confidence: the table's end date carries a '?' and its start date disagrees with the text. SWF says the pair is 'not in an actual proximity orbit'.
+<a id="n106"></a>**106. ru-2022-cosmos2558-usa326** (2022-08-01). Confidence is low: the source table's end date carries a '?' and its start date disagrees with the text. The Secure World Foundation (SWF) says the pair is 'not in an actual proximity orbit'.
 
-<a id="n107"></a>**107. cn-2022-pts2-object-j** (2022-11-01). Dates are the LeoLabs RPO windows in SWF's text (Nov.-Dec. 2022, Jan. 2023, Feb.-Mar. 2023). SWF prints LeoLabs' description as “least two and possibly three capture/docking operations” (the word 'at' is missing in SWF's text).
+<a id="n107"></a>**107. cn-2022-pts2-object-j** (2022-11-01). The dates are the periods of close approaches given by LeoLabs in SWF's text (Nov.–Dec. 2022, Jan. 2023, Feb.–Mar. 2023). SWF prints LeoLabs' description as “least two and possibly three capture/docking operations” (the word 'at' is missing in SWF's text).
 
-<a id="n108"></a>**108. ru-2022-cosmos2562-resurs-p3** (2022-11-01). Table orbit: 400 x 385 km, 97.2 degrees.
+<a id="n108"></a>**108. ru-2022-cosmos2562-resurs-p3** (2022-11-01). The orbit was between 385 and 400 km up, tilted 97.2 degrees to the equator.
 
-<a id="n109"></a>**109. us-2023-otv7** (2023-12-28). SWF says it is unclear whether OTV-7 went back to HEO or stayed in LEO after the aerobraking. The 38,838 km apogee is a hobbyist tracking figure quoted by SWF; a USSF image gave 38,318 km on 30 Jan. 2024 near apogee.
+<a id="n109"></a>**109. us-2023-otv7** (2023-12-28). The Secure World Foundation (SWF) says it is unclear whether OTV-7 went back to a highly elliptical orbit (HEO) or stayed in low Earth orbit (LEO) after the aerobraking. The 38,838 km apogee (highest point) is a hobbyist tracking figure quoted by SWF. A US Space Force image gave 38,318 km on 30 Jan. 2024 near apogee.
 
-<a id="n110"></a>**110. cn-2024-sj23-akm** (2024-01-01). The table dates the row Jan.-Feb. 2024. SWF's text puts the launch on 8 Jan. 2023, the apparent release around 15 Jan. 2023 and the within-10-km analysis in Feb. 2024. The row uses the table's dates.
+<a id="n110"></a>**110. cn-2024-sj23-akm** (2024-01-01). The source table dates this entry Jan.–Feb. 2024. The Secure World Foundation's (SWF) text puts the launch on 8 Jan. 2023, the apparent release around 15 Jan. 2023 and the within-10-km analysis in Feb. 2024. The entry uses the table's dates.
 
-<a id="n111"></a>**111. cn-2024-sy24c-sj6** (2024-03-01). Non-contiguous: March-April, September and December 2024. A USSF fact sheet quoted by SWF describes the March-April activity; the row is not a finding on intent.
+<a id="n111"></a>**111. cn-2024-sy24c-sj6** (2024-03-01). The activity was not continuous: March to April, September and December 2024. A US Space Force fact sheet quoted by the Secure World Foundation (SWF) describes the March to April activity. This entry is not a finding on intent.
 
-<a id="n112"></a>**112. us-2024-ldpe3a-sj23** (2024-10-01). SWF's table lists only 'SJ-23' in the systems cell; its text and table note name LDPE 3A as the approaching vehicle.
+<a id="n112"></a>**112. us-2024-ldpe3a-sj23** (2024-10-01). The Secure World Foundation's (SWF) table lists only 'SJ-23' for the spacecraft involved; its text and a table note name LDPE 3A as the approaching vehicle.
 
-<a id="n113"></a>**113. ru-2025-cosmos2581-2583** (2025-02-01). Table orbit: 82-degree-inclined, about 595 x 578 km at launch.
+<a id="n113"></a>**113. ru-2025-cosmos2581-2583** (2025-02-01). At launch the orbit was about 578 to 595 km up and tilted 82 degrees to the equator.
 
-<a id="n114"></a>**114. us-2025-us-france-first-rpo** (2025-04-01). The table's orbit cell is '?'. Low confidence because SWF cannot identify the satellites or the target.
+<a id="n114"></a>**114. us-2025-us-france-first-rpo** (2025-04-01). The source table gives '?' for the orbit. Confidence is low because SWF cannot identify the satellites or the target.
 
-<a id="n115"></a>**115. ru-2025-cosmos2558-object-c** (2025-06-01). Low confidence because the table marks the end with '?'. Table orbit: about 450 km.
+<a id="n115"></a>**115. ru-2025-cosmos2558-object-c** (2025-06-01). Confidence is low because the source table's end date carries a '?'. The orbit was about 450 km up.
 
-<a id="n116"></a>**116. ru-2025-cosmos2589-2590** (2025-06-01). Table orbit: highly elliptical, apogee 51,200 km, perigee 20,374 km.
+<a id="n116"></a>**116. ru-2025-cosmos2589-2590** (2025-06-01). The orbit was highly elliptical (very elongated): the highest point (apogee) was 51,200 km and the lowest point (perigee) was 20,374 km.
 
-<a id="n117"></a>**117. us-2025-gssap-flank-sj21-sj25** (2025-06-09). Text-derived row, not a Table 1-3 line. The date is that of the COMSPOC observation cited in SWF note 116 (9 June 2025). SWF's own word is 'most likely' for the monitoring purpose.
+<a id="n117"></a>**117. us-2025-gssap-flank-sj21-sj25** (2025-06-09). This entry comes from SWF's text, not from a line of its Table 1-3. The date is that of the COMSPOC observation cited in SWF note 116 (9 June 2025). SWF's own words for the monitoring purpose are 'most likely'.
 
-<a id="n118"></a>**118. cn-2025-sj21-sj25-rpo** (2025-06-13). Text-derived split of SWF's single Table 3-2 line (Jun. 2025 - Jan. 2026) into dated steps. SJ-25's declared purpose: 'satellite fuel replenishment and life extension service technology verification' (SWF p. 03-12).
+<a id="n118"></a>**118. cn-2025-sj21-sj25-rpo** (2025-06-13). This entry splits the Secure World Foundation's (SWF) single Table 3-2 line (Jun. 2025–Jan. 2026) into dated steps, using SWF's text. SJ-25's declared purpose was 'satellite fuel replenishment and life extension service technology verification' (SWF p. 03-12).
 
-<a id="n119"></a>**119. cn-2025-sj21-sj25-docking** (2025-06-30). SWF hedges the early dates ('appeared', 'thought to have docked') and then says they 'remained docked'. SWF says the Chinese government has released no information about them. End date = the SJ-25 separation burn (25 Nov.). Analysts quoted by SWF believe SJ-25 served as a gas station for SJ-21; SWF does not present that as confirmed.
+<a id="n119"></a>**119. cn-2025-sj21-sj25-docking** (2025-06-30). The Secure World Foundation (SWF) hedges the early dates ('appeared', 'thought to have docked') and then says they 'remained docked'. SWF says the Chinese government has released no information about them. The end date is the SJ-25 separation burn (engine firing) on 25 Nov. Analysts quoted by SWF believe SJ-25 served as a gas station for SJ-21; SWF does not present that as confirmed.
 
-<a id="n120"></a>**120. us-2025-otv8** (2025-08-21). SWF gives no orbit for OTV-8; the USSF release did not describe the mission.
+<a id="n120"></a>**120. us-2025-otv8** (2025-08-21). SWF gives no orbit for OTV-8. The US Space Force release did not describe the mission.
 
-<a id="n121"></a>**121. us-2025-usa271-skynet5a** (2025-09-05). Announced by both governments as a joint operation. Longitude and closest distance are from COMSPOC data as reported by SWF.
+<a id="n121"></a>**121. us-2025-usa271-skynet5a** (2025-09-05). Both governments announced it as a joint operation. The longitude and the closest distance come from data from COMSPOC, a commercial space-tracking company, as reported by the Secure World Foundation (SWF).
 
-<a id="n122"></a>**122. us-2025-usa324-syracuse3a** (2025-11-11). Both governments acknowledged the maneuvers without specifics; the satellites were identified by COMSPOC.
+<a id="n122"></a>**122. us-2025-usa324-syracuse3a** (2025-11-11). Both governments acknowledged the maneuvers without specifics. The satellites were identified by COMSPOC, a commercial space-tracking company.
 
-<a id="n123"></a>**123. cn-2026-csshq4** (2026-02-06). SWF's text says the flight started 'in February 2026'; Table 3-1 gives 6 Feb. 2026.
+<a id="n123"></a>**123. cn-2026-csshq4** (2026-02-06). SWF's text says the flight started 'in February 2026'. Its Table 3-1 gives 6 Feb. 2026.
 
 ## Capability coding (Chart B)
 

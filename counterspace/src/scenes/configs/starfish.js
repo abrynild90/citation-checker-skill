@@ -7,13 +7,18 @@ const PH = IS_PHONE ? 1.5 : 1; // phoneK, the distance factor of the 375 stage
 export const STARFISH = {
   id: 'starfish',
   date: '1962-07-09',
-  title: 'Starfish Prime (1962)',
+  title: 'Starfish Prime: a nuclear explosion in space (1962)',
   shells: ['LEO'],
   duration: 14,
   caption:
-    'A 1.4-megaton nuclear warhead detonates about 400 km above Johnston Island. Electrons from the blast are trapped by Earth’s magnetic field. ' +
-    'They spread along the field lines and drift around the planet, forming an artificial radiation belt. ' +
-    'The Secure World Foundation (SWF) says such tests are known to have produced effects that damaged or destroyed satellites in orbit at the time. ' +
+    'On 9 July 1962 the United States detonated a 1.4-megaton nuclear warhead (equal to ' +
+    '1.4 million tonnes of TNT) about 400 km above Johnston Island in the Pacific Ocean. ' +
+    'Electrons from the blast were trapped by Earth’s magnetic field. ' +
+    'They spread along the field lines and drifted around the planet, forming an artificial radiation belt. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, says such tests are known ' +
+    'to have produced effects that damaged or destroyed satellites in orbit at the time. ' +
+    'The Limited Test Ban Treaty of 1963 bans nuclear tests in outer space. ' +
+    'It followed Starfish Prime. ' +
     'The belt’s spread is drawn to show the idea. It is not a calculation.',
   cite:
     'US Department of Energy, DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962); ' +
@@ -112,7 +117,7 @@ export const STARFISH = {
   stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
   status: [
     [0, 'Thor rocket climbs toward about 400 km'],
-    [0.16, 'Detonation: electrons trapped by Earth’s magnetic field', 'Detonation: electrons trapped'],
+    [0.16, 'Detonation: electrons caught in Earth’s magnetic field', 'Detonation: electrons trapped'],
     [0.3, 'Trapped electrons spread north, south, east and west along field lines', 'Electrons spread along field lines'],
     [0.75, 'The belt has drifted around Earth', 'Belt drifts around Earth'],
     [0.82, 'SWF: tests like this damaged or destroyed satellites then in orbit', 'SWF: such tests damaged or destroyed satellites'],

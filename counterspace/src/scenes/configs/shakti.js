@@ -4,13 +4,17 @@ import { C } from './shared.js';
 export const SHAKTI = {
   id: 'shakti',
   date: '2019-03-27',
-  title: 'Mission Shakti (2019)',
+  title: 'Mission Shakti: India destroys a satellite (2019)',
   shells: ['LEO'],
   duration: 12,
   caption:
-    'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. ' +
-    'Indian officials said the debris would re-enter within 45 days. ' +
-    'The Secure World Foundation (SWF) counts 130 tracked fragments, none still in orbit.',
+    'On 27 March 2019 India fired a PDV Mk-II interceptor, a missile built to hit a target, from ' +
+    'Abdul Kalam Island and destroyed the Microsat-R satellite about 300 km above the Earth. ' +
+    'Indian officials said the debris would re-enter, meaning fall back into the atmosphere, within 45 days. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, counts 130 tracked fragments, none still in orbit. ' +
+    'In 2022 the UN General Assembly called on states not to conduct destructive “direct-ascent” ' +
+    'anti-satellite missile tests, meaning tests launched from Earth (resolution 77/41). ' +
+    'The call is not binding.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; p. 04-04.',
   related: 'unga-77-41',
   event: 'in-2019-shakti',

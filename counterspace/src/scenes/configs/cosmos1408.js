@@ -5,14 +5,19 @@ export const COSMOS1408 = {
   id: 'cosmos1408',
   fitPct: 0.92,
   date: '2021-11-15',
-  title: 'Nudol vs. Cosmos 1408 (2021)',
+  title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',
   shells: ['LEO'],
   duration: 16,
   caption:
-    'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 satellite at about 470 km. ' +
-    'The debris cloud spreads across heights that cross the orbit of the International Space Station (ISS), which is drawn schematically. ' +
-    'The ISS crew sheltered in their docked spacecraft. ' +
-    'The Secure World Foundation (SWF) counts more than 1,800 tracked fragments, 5 of them still in orbit as of February 2026.',
+    'On 15 November 2021 Russia fired a Nudol missile from Plesetsk and destroyed ' +
+    'Cosmos 1408, a defunct Russian satellite, about 470 km above the Earth. ' +
+    'The debris cloud spread across heights that include the orbit of the International Space Station ' +
+    '(ISS), which is drawn schematically, and the ISS crew sheltered in their docked spacecraft. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, counts more ' +
+    'than 1,800 tracked fragments, 5 of them still in orbit as of February 2026. ' +
+    'In April 2022 the United States pledged not to conduct destructive ' +
+    '“direct-ascent” anti-satellite missile tests, meaning tests launched from Earth. ' +
+    'It is a unilateral pledge, not a treaty. Other states followed; SWF counts 38 countries in all.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; Table 2-4, p. 02-21.',
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',

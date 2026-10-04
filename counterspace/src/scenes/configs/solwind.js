@@ -5,14 +5,17 @@ export const SOLWIND = {
   id: 'solwind',
   fitPct: 0.99,
   date: '1985-09-13',
-  title: 'ASM-135 vs. Solwind (1985)',
+  title: 'Solwind: a US missile destroys a satellite (1985)',
   shells: ['LEO'],
   duration: 12,
   caption:
-    'An F-15 fighter climbs steeply at supersonic speed (a “zoom climb”) and releases an ASM-135 missile. ' +
-    'The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km and destroys it by collision. ' +
-    'The Secure World Foundation (SWF) gives that height as 530 km in its Table 5-1 and 555 km in its text. ' +
-    'SWF counts 285 tracked fragments; all have since fallen out of orbit. ' +
+    'On 13 September 1985 a US F-15 fighter fired an ASM-135 anti-satellite missile ' +
+    'that destroyed the Solwind P78-1 satellite, about 530 km above the Earth. ' +
+    'The F-15 climbed steeply at supersonic speed (a “zoom climb”) before it released the missile. ' +
+    'The missile’s miniature homing vehicle, which steers itself to its target, then rose to meet the satellite and destroyed it by collision. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, gives the height as 530 km in its Table 5-1 and 555 km in its text. ' +
+    'SWF counts 285 tracked fragments of debris; all have since fallen out of orbit. ' +
+    'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons. ' +
     'The positions and the debris spread are drawn to show the idea. They are not calculated.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (285 tracked, 0 still in orbit); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
   related: null,
