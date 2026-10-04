@@ -87,9 +87,22 @@ const RULES = [
   ['not-just', 'warn', /\bnot (just|only|merely|simply) [^.;]{1,70}(,| but| it)/i, 'state the point directly'],
   ['exclaim', 'warn', /!/, 'no exclamation marks'],
   ['simulation-talk', 'warn', /\b(simulated|simulation|time compressed|illustrative)\b/i, 'say "drawn for illustration" once per scene, not in every label'],
-  ['em-dash', 'warn', /(?<![\d-] )\w—\w|\w — \w{2,}/, 'prefer a full stop, comma or colon'],
+  ['em-dash', 'error', /(?<![\d-] )\w—\w|\w — \w{2,}/, 'no em dashes in prose: use a full stop, comma or colon'],
+  [
+    'forced-contrast',
+    'error',
+    /(^|[.!?]\s)(Not|No) (a|an|the|just|only)\b[^.!?]{1,60}[.!?]\s+(It|This|That|A|An|The)\b/,
+    'state the point directly, not as a slogan contrast',
+  ],
+  [
+    'marketing',
+    'error',
+    /\b(supercharge\w*|world-class|game-chang\w+|revolutioni[sz]\w+|unleash\w*|next-level|best-in-class|cutting-edge|state-of-the-art|elevate[sd]?)\b/i,
+    'say what it does',
+  ],
+  ['theater', 'error', /\b\w+ theat(er|re)\b/i, 'name what is ineffective and why'],
+  ['caps-long', 'warn', /^(?:[A-Z0-9&'’.,:;\/()+-]+ ){3,}[A-Z0-9&'’.,:;\/()+-]+$/, 'uppercase only for labels of at most three words'],
   ['double-space', 'warn', /\S {2,}\S/, 'single spaces'],
-  ['screaming', 'warn', 'sentence case'],
 ];
 
 const harvest = new Map(); // key: source + '\u0001' + text
