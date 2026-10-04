@@ -39,7 +39,7 @@ export const VIASAT = {
       dimT0: 0.4,
       dimT1: 0.7,
       hub: [46, 8],
-      hubLabel: 'Ground management network',
+      hubLabel: 'Ground management network (drawn for illustration)',
       hubShort: 'Ground network',
       hubDx: -60,
       hubDy: 40,
