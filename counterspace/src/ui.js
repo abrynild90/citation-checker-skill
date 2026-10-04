@@ -185,7 +185,8 @@ export function kinCard(e) {
     `<dd>${CONFIDENCE[e.confidence] || e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? hint3d() : ''}`
   );
 }
-export { nkCard, coWhen, coCard } from './cards2.js';
+import { nkCard, coWhen, coCard } from './cards2.js';
+export { nkCard, coWhen, coCard };
 // What kind of legal item this is, in words (the data stores it as a code; the draft treaties share the "negotiation_span" code with the bars).
 export const LEGAL_KIND = {
   treaty: 'Treaty',

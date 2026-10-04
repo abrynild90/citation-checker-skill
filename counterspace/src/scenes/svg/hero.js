@@ -8,7 +8,7 @@ import { pillSize } from './pill.js';
 // Wording of the hero's labels (the scene data keeps the short technical names).
 export const HERO_SAY = { 'ISS (illustrative orbit)': 'International Space Station', ISS: 'ISS' };
 const SHELL_SAY = { LEO: ['Low Earth orbit, up to 2,000 km', 'LEO'], MEO: ['Medium Earth orbit, GPS', 'MEO'], GEO: ['Geostationary orbit, 35,786 km', 'GEO'] };
-const shellKey = (it) => (/^LEO/.test(it.label) ? 'LEO' : /^MEO/.test(it.label) ? 'MEO' : 'GEO');
+const shellKey = (it) => (/^(LEO|Low)/.test(it.label) ? 'LEO' : /^(MEO|Medium)/.test(it.label) ? 'MEO' : 'GEO');
 // Where each shell's label likes to sit: the direction on screen, from the planet, of the point on the shell the leader points at.
 const SHELL_DIR = { LEO: [-0.8, 0.6], MEO: [0.78, 0.62], GEO: [0.95, -0.3] };
 

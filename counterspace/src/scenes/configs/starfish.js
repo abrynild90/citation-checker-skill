@@ -81,7 +81,7 @@ export const STARFISH = {
         dx: 30,
         dy: 60,
         staticPh: -0.75, // static: drawn further along its orbit, off the Earth's centre
-        fail: { t: 0.8, label: 'Satellite damaged (SWF: such tests did this)', short: 'Satellite damaged' },
+        fail: { t: 0.8, label: 'Satellite damaged (per SWF)', short: 'Satellite damaged' },
       },
     },
   ],
@@ -89,12 +89,12 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -112], Johnston: [-160, 6], Thor: [30, 70], Artificial: [-60, -21] },
+  liveOff: { Detonation: [-165, -100], Johnston: [-160, 6], Thor: [-150, 50], Artificial: [-60, -21] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
     1: { Detonation: [-140, -36], Johnston: [-120, 45], Thor: [-132, 4] },
-    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 22], Detonation: [120, 36], Thor: [-150, 62] },
+    2: { Artificial: [-60, -22], 'Satellite in': [-95, 0], 'Satellite damaged': [-190, 0], Johnston: [-120, 22], Detonation: [120, 36], Thor: [-150, 78] },
   },
   // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
   cameras: [

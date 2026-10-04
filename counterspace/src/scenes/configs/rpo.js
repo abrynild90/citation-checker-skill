@@ -103,7 +103,7 @@ export const RPO = {
       short: 'SJ-21',
       dx: 30,
       dy: -44,
-      labelFn: (t, n) => (t >= 0.27 && t < 0.335 ? (n ? 'SJ-21 + SJ-25 docked' : 'SJ-21 + SJ-25' + ' (docked)') : 'SJ-21 (China)'),
+      labelFn: (t, n) => (t >= 0.27 && t < 0.335 ? (n ? 'SJ-21 + SJ-25' : 'SJ-21 + SJ-25' + ' (docked)') : 'SJ-21 (China)'),
       dock: { with: 'sj25', t0: 0.27, t1: 0.335 },
       key: [
         [0, 0.62, 0, 0.01],

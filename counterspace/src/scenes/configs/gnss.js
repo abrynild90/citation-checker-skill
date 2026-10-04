@@ -12,7 +12,7 @@ export const GNSS = {
   staticCraftMax: 52, // static: airliner icons small enough to leave the Baltic readable
   staticShellLabels: { MEO: 'GPS orbit · MEO' },
   staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
-  staticTextPhone: [[' · GNSS ', ' · ']], // 375 static: "Airliner 1 · lost"
+  staticTextPhone: [[' · GPS signal ', ' · ']], // 375 static: "Airliner 1 · lost"
   duration: 16,
   caption:
     'Since late 2023, jamming from the ground has repeatedly cut satellite navigation ' +
