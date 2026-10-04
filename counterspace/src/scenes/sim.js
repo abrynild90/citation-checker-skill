@@ -90,7 +90,7 @@ export function buildSim(cfg) {
         const s = phone && e[2] ? e[2] : e[1],
           c = items._decayCloud;
         if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + 0.02) return s;
-        return phone ? `${s} · ${c.vis}/${c.n} aloft` : `${s} · ${c.vis} of ${c.n} simulated pieces aloft`;
+        return phone ? `${s} · ${c.vis}/${c.n} in orbit` : `${s} · ${c.vis} of ${c.n} pieces still in orbit`;
       },
     });
   for (const a of cfg.actors) {
@@ -371,9 +371,9 @@ export function buildSim(cfg) {
           shape: 'kv',
           kvSize: 0.055,
           color: '#ffb872',
-          label: i === 0 ? 'Larger pieces falling (illustrative)' : null,
+          label: i === 0 ? 'Larger pieces falling' : null,
           opt: true,
-          short: 'Pieces falling (illustr.)',
+          short: 'Pieces falling',
           labelDx: 60,
           labelDy: 16,
           pos,
@@ -600,7 +600,7 @@ export function buildSim(cfg) {
       if (a.decay > 0 && !cfg.status)
         items.push({
           kind: 'status',
-          text: (t) => (t < tgt.t ? 'Approaching intercept' : `Illustrative fragments still aloft: ${cloud.vis} of ${n} (decay time-compressed)`),
+          text: (t) => (t < tgt.t ? 'Approaching intercept' : `${cloud.vis} of ${n} fragments still in orbit (decay sped up)`),
         });
     }
     if (a.type === 'suborbital') {
@@ -706,7 +706,7 @@ export function buildSim(cfg) {
         };
         ac.state = true; // the airliner's colour is the story (GNSS lost or fine): its model keeps a glow in that colour
         ac.statusColor = (t) => (inZone(t) ? C.jam : C.ok);
-        ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GNSS lost' : ac.label + ' · GNSS OK');
+        ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GPS signal lost' : ac.label + ' · GPS signal fine');
         for (let k = 0; k < 1; k++)
           items.push({
             kind: 'beam',

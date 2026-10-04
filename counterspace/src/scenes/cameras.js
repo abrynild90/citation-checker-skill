@@ -10,8 +10,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
   const A = cfg.acts || null;
   const f = focus || [20, 0];
   const dist = (cfg.camDist || 4.2) * (IS_PHONE ? (cfg.phoneK ?? 1) : 1);
-  const wide = { name: 'Wide', pos: ll(cfg.wideLat != null && !IS_PHONE ? cfg.wideLat : f[0] * 0.6 + 10, f[1] - 25, dist) },
-    polar = { name: 'Polar', pos: ll(80, f[1], dist * 1.05) };
+  const wide = { name: 'Whole scene', pos: ll(cfg.wideLat != null && !IS_PHONE ? cfg.wideLat : f[0] * 0.6 + 10, f[1] - 25, dist) },
+    polar = { name: 'From the pole', pos: ll(80, f[1], dist * 1.05) };
   let cams;
   // Frame camera: position and target given in an anchor's local frame [along, radial, cross-track] in Earth radii. `follow: true` re-solves it at every t,
   // so the camera rides with a moving craft and the craft is always in frame.
@@ -258,7 +258,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         ...(c.drift ? { follow: drifted, ...drifted(0.5) } : {}),
       };
     });
-  else if (H && !items._arc) cams = [{ name: 'Zoom', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
+  else if (H && !items._arc) cams = [{ name: 'Close up', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
   else if (items._arc) {
     // launch site through the intercept: a side-on camera looking at the middle of the arc
     const { from, to, mid } = items._arc,
@@ -267,7 +267,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       nrm = norm([md[1] * e1[2] - md[2] * e1[1], md[2] * e1[0] - md[0] * e1[2], md[0] * e1[1] - md[1] * e1[0]]);
     const look = add(mid, scl(md, -0.03 - (cfg.lookMix ?? 0) * len(mid))),
       launch = {
-        name: 'Launch',
+        name: 'From the launch site',
         pos: add(look, add(scl(nrm, 0.78 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)), scl(md, 0.34 * (cfg.camScale || 1) * (IS_PHONE ? 0.8 : 1)))),
         look,
         hideShell: true,
@@ -283,14 +283,14 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       launch.look = scl(md, cfg.lookK ?? 0.3);
     }
     const orbit = {
-      name: 'Orbit',
+      name: 'From orbit',
       pos: cfg.orbitAt
         ? ll(cfg.orbitAt[0], cfg.orbitAt[1], cfg.orbitAt[2] * (IS_PHONE ? (cfg.phoneK ?? 1) : 1))
         : ll(f[0] * 0.5 + 12, f[1] - 30, Math.max(3.2, dist * 0.8)),
     };
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
     if (H && cfg.dolly !== false) cams.unshift(dollyCam());
-  } else cams = [wide, { name: 'Near', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
+  } else cams = [wide, { name: 'Close up', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
   // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.
   const stillCamFor = (t, asp) => {
     if (A && !cfg.stillCam) {

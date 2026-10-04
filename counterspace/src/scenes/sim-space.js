@@ -362,7 +362,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           t < a.pulse0
             ? 'Before the attack: user modems online (green), KA-SAT serving Europe'
             : t < a.t0
-              ? 'Attackers reach the ground management network and push malicious commands (illustrative network)'
+              ? 'Attackers reach the ground network and push malicious commands'
               : t < a.t1
                 ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
                 : 'Modems offline (red) · the satellite kept working';
