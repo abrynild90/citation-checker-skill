@@ -4,7 +4,7 @@ import { C } from './shared.js';
 export const GNSS = {
   id: 'gnss',
   date: '2023-12-01',
-  title: 'GNSS jamming over the Baltic',
+  title: 'Jamming satellite navigation (GNSS) over the Baltic',
   shells: ['LEO', 'MEO'],
   shellLabels: { MEO: null },
   staticCenter: [70, 30], // static: centred north of the Baltic so neither airliner sits on the Earth's centre
@@ -12,14 +12,22 @@ export const GNSS = {
   staticCraftMax: 52, // static: airliner icons small enough to leave the Baltic readable
   staticShellLabels: { MEO: 'GPS orbit · MEO' },
   staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
-  staticTextPhone: [[' · GNSS ', ' · ']], // 375 static: "Airliner A · lost"
+  staticTextPhone: [[' · GNSS ', ' · ']], // 375 static: "Airliner 1 · lost"
   duration: 16,
   caption:
-    'GPS satellites orbit in medium Earth orbit (MEO), far above the aircraft. ' +
-    'A jammer on the ground swamps their weak signals only inside its local effect zone. ' +
-    'Aircraft crossing the zone lose their position fix, while aircraft outside it and the satellites themselves are unaffected. ' +
-    'This is interference with receivers, not an attack on a satellite.',
-  cite: 'SWF 2026, pp. 02-29 to 02-30; p. 12-05 (downlink jamming has no effect on the satellites).',
+    'Since late 2023, jamming from the ground has repeatedly cut satellite navigation ' +
+    'signals (GNSS), such as GPS, for aircraft and ships around the Baltic Sea. ' +
+    'Jamming means drowning out a signal with radio noise. ' +
+    'In April 2024 Finnair paused its flights to Tartu. ' +
+    'GPS satellites orbit in medium Earth orbit (MEO), about 20,000 km up, far above the aircraft. ' +
+    'A jammer on the ground swamps their weak signals, but only inside its local effect zone. ' +
+    'Aircraft that cross the zone lose their position fix. Aircraft outside it, and the satellites themselves, are unaffected. ' +
+    'The jammer interferes with receivers. It does not attack any satellite. ' +
+    'In October 2025 the International Civil Aviation Organization (ICAO) endorsed a finding that recurring interference with ' +
+    'satellite navigation from North Korea and from Russian territory is an “infraction” of the 1944 Chicago Convention. ' +
+    'This is a finding by an international body, not a court judgment, and it carries no enforcement. ' +
+    'The jammer’s position is drawn for illustration.',
+  cite: 'Secure World Foundation, 2026: pp. 02-29 to 02-30; p. 12-05 (jamming of receivers has no effect on the satellites).',
   related: 'icao-2025',
   event: 'ru-2023-baltic',
   actors: [
@@ -32,7 +40,7 @@ export const GNSS = {
       color: C.gps,
       speed: 0.25,
       inset: true,
-      label: 'GPS satellites · MEO',
+      label: 'GPS satellites (MEO)',
       opt: true,
       dx: -50,
       dy: 40,
@@ -45,7 +53,7 @@ export const GNSS = {
       label: 'Jammer effect zone',
       dx: 40,
       dy: -34,
-      jammer: { at: [56.5, 21.0], label: 'Ground jammer (illustrative)', short: 'Jammer', dx: -70, dy: 30 },
+      jammer: { at: [56.5, 21.0], label: 'Ground jammer', short: 'Jammer', dx: -70, dy: 30 },
     },
     {
       type: 'aircraft',
@@ -56,7 +64,7 @@ export const GNSS = {
       alt: 11,
       t0: 0,
       t1: 1,
-      label: 'Airliner A',
+      label: 'Airliner 1',
       gnss: true,
       dx: -96,
       dy: -14,
@@ -70,8 +78,8 @@ export const GNSS = {
       alt: 11,
       t0: 0,
       t1: 1,
-      label: 'Airliner B',
-      beamLabel: 'GPS signal (from a MEO satellite, off view)',
+      label: 'Airliner 2',
+      beamLabel: 'GPS signal (from a MEO satellite, out of view)',
       beamShort: 'GPS signal',
       beamFrac: 0.22, // the label sits on the beam's midpoint (the visible part), not beside the aircraft
       beamDx: 0,
@@ -99,17 +107,17 @@ export const GNSS = {
       phone: { at: [38, 12, 1.48] },
     },
     {
-      name: 'Close-up: jammer zone and Airliner A',
-      short: 'Close-up',
+      name: 'Close up: jammer zone and Airliner 1',
+      short: 'Close up',
       at: [51, 18.5, 1.3],
       look: [56.2, 21, 0.98],
       phone: { at: [51, 18.5, 1.55] },
-      ref: false, // a close-up of the dome: Airliner B is outside this frame by design
+      ref: false, // a close-up of the dome: Airliner 2 is outside this frame by design
     },
-    { name: 'Europe + GPS orbits', short: 'Europe + GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false, hide: ['Ground jammer', 'Jammer effect'] },
+    { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false, hide: ['Ground jammer', 'Jammer effect'] },
   ],
   status: [
-    [0, 'Both airliners have GNSS (green) ·' + ' jammer zone in red · satellites unaffected', 'Airliners have GNSS (green) · zone in red'],
-    [0.3, 'Inside the zone GNSS is lost (red); outside it' + ' stays OK (green). Satellites unaffected', 'Inside the zone GNSS is lost (red)'],
+    [0, 'Both airliners have GNSS (green); the jammer zone is red', 'Airliners have GNSS (green); zone is red'],
+    [0.3, 'Inside the zone GNSS is lost (red); outside it, OK (green). Satellites unaffected', 'Inside the zone GNSS is lost (red)'],
   ],
 };
