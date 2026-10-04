@@ -48,6 +48,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+  await page.addStyleTag({ content: '#sceneView > :not(canvas) { visibility: hidden !important; }' }); // pictures without labels, caption or inset
   for (const id of only) {
     const t = +(process.env['T_' + id.replace(/-/g, '_')] ?? POSTER_T[id] ?? 0.5);
     await page.evaluate((id) => window.__cs.openScene(id), id);
