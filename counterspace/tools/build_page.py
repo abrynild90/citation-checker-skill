@@ -86,6 +86,19 @@ def earth_json():
     return out
 
 
+def earth_hd_json():
+    """Full-resolution pictures for the live 3D views (NASA imagery from the three-globe package, public domain): the 4096 px day and night images, the water
+    mask and the relief map. They go in their own script tag so the small pictures above stay cheap to parse; src/scenes/earth.js decodes them only when a 3D
+    view starts. A missing file is skipped (the 3D views then fetch the day and night images from jsDelivr instead)."""
+    out = {}
+    for key, f, mime in (('day', 'earth-day-4k.jpg', 'image/jpeg'), ('night', 'earth-night-4k.jpg', 'image/jpeg'),
+                         ('water', 'earth-water.png', 'image/png'), ('relief', 'earth-relief.png', 'image/png')):
+        p = R / 'src/assets' / f
+        if p.exists():
+            out[key] = f'data:{mime};base64,' + base64.b64encode(p.read_bytes()).decode()
+    return out
+
+
 def posters_json():
     """One 16:9 WebP picture per 3D explainer (src/assets/posters/<id>.webp, made by tools/make_posters.mjs), embedded as data URLs for
     <script id="cs-posters">. src/scenes/posters.js reads them: an instant picture while a scene loads, and the gallery cards."""
@@ -124,7 +137,7 @@ def main():
     tpl = tpl.replace('/*__FONTS__*/', font_css())
     html = (tpl.replace('/*__DATA__*/', script_json(data))
             .replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json'))))
-            .replace('/*__EARTH__*/', script_json(earth_json()))
+            .replace('/*__EARTH__*/', script_json(earth_json()) + '</script><script id="cs-earth-hd" type="application/json">' + script_json(earth_hd_json()))
             .replace('/*__POSTERS__*/', script_json(posters_json()))
             .replace('/*__APP__*/', js))
     out = pathlib.Path(os.environ['OUTFILE']) if os.environ.get('OUTFILE') else R / 'index.html'

@@ -2,7 +2,7 @@
 // scenes/earth.js: Earth textures: vector land canvas, NASA Blue Marble loader, sprite canvases
 // (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
-import { IS_PHONE } from './core.js';
+import { IS_PHONE, mulberry } from './core.js';
 
 export let LAND = null,
   landCanvas = null;
@@ -49,64 +49,110 @@ export function getLandCanvas() {
   return landCanvas;
 }
 
-// NASA Blue Marble (public domain), pinned on jsDelivr. Fetched lazily after the page has rendered (never part of the initial page); the embedded
-// pictures below are used until it arrives or if it fails. Decoded pixels are cached on the CPU side only; each scene creates its own GPU texture and
-// disposes it on close.
+// NASA Blue Marble and Black Marble (public domain) at 4096 x 2048, with the water mask and a relief map, are embedded in the page (<script id="cs-earth-hd">,
+// see tools/build_page.py) and decoded the first time a 3D view needs them, so a scene never waits for a download. If they are missing the same day and night
+// images are fetched from jsDelivr. Decoded pixels are cached on the CPU side; the GL host keeps one set of GPU textures for the life of the page.
 export const EARTH_URL = 'https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-blue-marble.jpg';
-// The matching night image (city lights), fetched on request once a 3D view exists. Only jsDelivr is used.
 export const EARTH_NIGHT_URL = 'https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-night.jpg';
 export let earthPromise = null,
   earthImg = null,
   earthNightImg = null,
+  earthWaterImg = null,
+  earthReliefImg = null,
   nightPromise = null,
+  hdPromise = null,
   oceanMask = null;
-// Fetch one image; large ones are downscaled on phones or GPUs that cannot hold a 4096 px texture.
+// Large pictures are downscaled on phones or GPUs that cannot hold a 4096 px texture.
+function fit(img, maxTex) {
+  const w = Math.min(img.naturalWidth, IS_PHONE ? 2048 : maxTex);
+  if (w >= img.naturalWidth) return img;
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = w / 2;
+  c.getContext('2d').drawImage(img, 0, 0, w, w / 2);
+  return c;
+}
+// Fetch one image from jsDelivr (the fallback when the embedded copies are missing).
 function fetchImage(url, maxTex) {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.decoding = 'async';
-    img.onload = () => {
-      const w = Math.min(img.naturalWidth, IS_PHONE ? 2048 : maxTex);
-      if (w < img.naturalWidth) {
-        const c = document.createElement('canvas');
-        c.width = w;
-        c.height = w / 2;
-        c.getContext('2d').drawImage(img, 0, 0, w, w / 2);
-        resolve(c);
-      } else resolve(img);
-    };
+    img.onload = () => resolve(fit(img, maxTex));
     img.onerror = () => resolve(null);
     img.src = url;
   });
 }
+const decodeUrl = (src) =>
+  new Promise((res) => {
+    const im = new Image();
+    im.decoding = 'async';
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+// Decode the embedded full-resolution pictures (once). Resolves true when the day picture is there.
+export function loadEmbeddedHD(maxTex = 4096) {
+  if (hdPromise) return hdPromise;
+  const el = document.getElementById('cs-earth-hd');
+  let data = null;
+  try {
+    data = el && el.textContent.trim() ? JSON.parse(el.textContent) : null;
+  } catch (e) {
+    data = null;
+  }
+  hdPromise = data?.day
+    ? Promise.all([data.day, data.night, data.water, data.relief].map((u) => (u ? decodeUrl(u) : null))).then(([d, n, w, r]) => {
+        if (d) earthImg = fit(d, maxTex);
+        if (n) earthNightImg = fit(n, maxTex);
+        earthWaterImg = w;
+        earthReliefImg = r;
+        return !!d;
+      })
+    : Promise.resolve(false);
+  return hdPromise;
+}
 export function loadEarth(maxTex = 4096) {
   if (earthPromise) return earthPromise;
-  earthPromise = fetchImage(EARTH_URL, maxTex).then((im) => {
-    if (!im) {
-      console.warn('Earth imagery unavailable; using the embedded picture');
-      return false;
-    }
-    earthImg = im;
-    return true;
+  earthPromise = loadEmbeddedHD(maxTex).then((ok) => {
+    if (ok) return true;
+    return fetchImage(EARTH_URL, maxTex).then((im) => {
+      if (!im) {
+        console.warn('Earth imagery unavailable; using the embedded small picture');
+        return false;
+      }
+      earthImg = im;
+      return true;
+    });
   });
   return earthPromise;
 }
 export function loadEarthNight(maxTex = 4096) {
-  nightPromise ||= fetchImage(EARTH_NIGHT_URL, maxTex).then((im) => {
-    earthNightImg = im;
-    nightArrived.forEach((f) => f());
-    return !!im;
+  nightPromise ||= loadEmbeddedHD(maxTex).then(() => {
+    if (earthNightImg) return true;
+    return fetchImage(EARTH_NIGHT_URL, maxTex).then((im) => {
+      earthNightImg = im;
+      return !!im;
+    });
   });
   return nightPromise;
 }
-// Hosts that want to know when the full night image lands (the day image has its own promise).
-const nightArrived = new Set();
-export const onNightArrived = (f) => (nightArrived.add(f), () => nightArrived.delete(f));
+// Start decoding as soon as a visitor shows intent to open a 3D view (pointer over the hero, the tour button, a keyboard visit), so the first frame of
+// the first view is already sharp. Nothing is decoded before that.
+if (typeof document !== 'undefined')
+  for (const [id, evs] of [
+    ['heroStage', ['pointerenter', 'touchstart', 'pointerdown']],
+    ['heroRot', ['pointerenter', 'focus', 'click']],
+    ['tourBtn', ['pointerenter', 'focus', 'touchstart']],
+  ]) {
+    const el = document.getElementById(id);
+    el && evs.forEach((e) => el.addEventListener(e, () => loadEmbeddedHD(), { once: true, passive: true }));
+  }
 export const earthReady = () => !!earthImg;
-// Water mask (for the sun glint on the sea): blue-dominant pixels of the day picture are water. Built once from whichever picture is available first;
-// the embedded one is enough (the glint is soft), so the mask never needs to be rebuilt when the full image arrives.
+// Water mask (for the sun glint on the sea): the embedded water picture when it is there (white is water), otherwise blue-dominant pixels of the day
+// picture, built once from whichever picture is available first.
 export function oceanMaskSource() {
+  if (earthWaterImg) return earthWaterImg;
   if (oceanMask) return oceanMask;
   const src = earthImg || earthLow;
   if (!src) return null;
@@ -125,6 +171,64 @@ export function oceanMaskSource() {
   g.putImageData(d, 0, 0);
   oceanMask = m;
   return m;
+}
+
+// City lights: the warm pixels of a night picture as one 8-bit channel (row 0 is the south pole, ready for an un-flipped data texture), with its own mip
+// levels where each texel is the brightest of its 2 x 2 block. Averaging would dim the lights as the Earth gets smaller; this keeps them crisp at any
+// size without a glow. Built once per picture in slices, so the page never stalls.
+const lightsCache = new Map(),
+  lightsDone = new Map();
+export const lightsIfReady = (img) => (img ? lightsDone.get(img) || null : null);
+const idle = () => new Promise((r) => setTimeout(r, 0));
+export function lightsFor(img) {
+  if (!img) return Promise.resolve(null);
+  if (lightsCache.has(img)) return lightsCache.get(img);
+  const job = (async () => {
+    const W = img.naturalWidth || img.width,
+      H = img.naturalHeight || img.height,
+      c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    const px = g.getImageData(0, 0, W, H).data,
+      base = new Uint8Array(W * H),
+      rows = Math.max(16, Math.floor(1_000_000 / W));
+    for (let y0 = 0; y0 < H; y0 += rows) {
+      for (let y = y0; y < Math.min(H, y0 + rows); y++) {
+        let o = 4 * y * W,
+          q = (H - 1 - y) * W;
+        for (let x = 0; x < W; x++, o += 4, q++) {
+          const v = (1.25 * px[o] - 0.75 * px[o + 2] + 0.25 * px[o + 1]) / 255 - 0.012;
+          base[q] = v <= 0 ? 0 : Math.min(255, Math.pow(v, 0.72) * 3 * 255);
+        }
+      }
+      await idle();
+    }
+    const levels = [{ data: base, width: W, height: H }];
+    for (let w = W, h = H, prev = base; w > 1 || h > 1;) {
+      const nw = Math.max(1, w >> 1),
+        nh = Math.max(1, h >> 1),
+        out = new Uint8Array(nw * nh);
+      for (let y = 0; y < nh; y++)
+        for (let x = 0; x < nw; x++) {
+          const x0 = Math.min(w - 1, 2 * x),
+            x1 = Math.min(w - 1, 2 * x + 1),
+            y0 = Math.min(h - 1, 2 * y),
+            y1 = Math.min(h - 1, 2 * y + 1);
+          out[y * nw + x] = Math.max(prev[y0 * w + x0], prev[y0 * w + x1], prev[y1 * w + x0], prev[y1 * w + x1]);
+        }
+      levels.push({ data: out, width: nw, height: nh });
+      prev = out;
+      w = nw;
+      h = nh;
+      if (levels.length % 3 === 0) await idle();
+    }
+    lightsDone.set(img, levels);
+    return levels;
+  })();
+  lightsCache.set(img, job);
+  return job;
 }
 
 // Small day and night images of the Earth are embedded in the page (<script id="cs-earth">, about 120 KB), so the first picture of the planet never waits
@@ -205,29 +309,87 @@ export function beamCanvas() {
   g.fillRect(0, 0, 64, 4);
   return beamCv;
 }
-// Solar-panel cell texture for the satellite models.
+// Solar-panel cell texture for the satellite models: a framed panel of silicon cells with thin bus bars and a centre spine (one panel, portrait).
 let panelCv = null;
 export function panelCanvas() {
   if (panelCv) return panelCv;
+  const W = 128,
+    H = 192,
+    cols = 6,
+    rows = 9,
+    fr = 5;
   panelCv = document.createElement('canvas');
-  panelCv.width = 64;
-  panelCv.height = 32;
+  panelCv.width = W;
+  panelCv.height = H;
   const g = panelCv.getContext('2d');
-  g.fillStyle = '#2c5db0';
-  g.fillRect(0, 0, 64, 32);
-  g.strokeStyle = 'rgba(190,215,255,0.65)';
-  g.lineWidth = 1;
-  for (let x = 0; x <= 64; x += 8) {
-    g.beginPath();
-    g.moveTo(x + 0.5, 0);
-    g.lineTo(x + 0.5, 32);
-    g.stroke();
-  }
-  for (let y = 0; y <= 32; y += 8) {
-    g.beginPath();
-    g.moveTo(0, y + 0.5);
-    g.lineTo(64, y + 0.5);
-    g.stroke();
-  }
+  g.fillStyle = '#c5cad4';
+  g.fillRect(0, 0, W, H);
+  g.fillStyle = '#0e2154';
+  g.fillRect(fr, fr, W - 2 * fr, H - 2 * fr);
+  const cw = (W - 2 * fr) / cols,
+    ch = (H - 2 * fr) / rows;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const x = fr + c * cw + 1,
+        y = fr + r * ch + 1,
+        gr = g.createLinearGradient(x, y, x + cw, y + ch);
+      gr.addColorStop(0, '#1d3f8e');
+      gr.addColorStop(1, '#16316f');
+      g.fillStyle = gr;
+      g.fillRect(x, y, cw - 2, ch - 2);
+      g.strokeStyle = 'rgba(120,160,235,0.55)';
+      g.lineWidth = 1;
+      g.strokeRect(x + 0.5, y + 0.5, cw - 3, ch - 3);
+      g.strokeStyle = 'rgba(190,205,240,0.38)';
+      for (const f of [0.33, 0.66]) {
+        g.beginPath();
+        g.moveTo(x + cw * f, y + 1);
+        g.lineTo(x + cw * f, y + ch - 3);
+        g.stroke();
+      }
+    }
+  g.fillStyle = '#aeb6c4';
+  g.fillRect(W / 2 - 1, fr, 2, H - 2 * fr);
   return panelCv;
+}
+// Crumpled-foil bump map for the gold and coloured thermal blankets: grey with many short random creases.
+let foilCv = null;
+export function foilCanvas() {
+  if (foilCv) return foilCv;
+  foilCv = document.createElement('canvas');
+  foilCv.width = foilCv.height = 128;
+  const g = foilCv.getContext('2d'),
+    rnd = mulberry(77);
+  g.fillStyle = '#808080';
+  g.fillRect(0, 0, 128, 128);
+  for (let k = 0; k < 520; k++) {
+    const x = rnd() * 128,
+      y = rnd() * 128,
+      a = rnd() * Math.PI,
+      l = 5 + rnd() * 18,
+      v = rnd() < 0.5 ? 40 + rnd() * 50 : 170 + rnd() * 70;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.22 + rnd() * 0.3})`;
+    g.lineWidth = 0.8 + rnd() * 1.6;
+    for (const o of [-128, 0, 128]) {
+      g.beginPath();
+      g.moveTo(x + o, y);
+      g.lineTo(x + o + Math.cos(a) * l, y + Math.sin(a) * l);
+      g.stroke();
+    }
+  }
+  return foilCv;
+}
+
+// A crisp round dot for small satellites on the hero's rings.
+let dotCv = null;
+export function dotCanvas() {
+  if (dotCv) return dotCv;
+  dotCv = document.createElement('canvas');
+  dotCv.width = dotCv.height = 32;
+  const g = dotCv.getContext('2d');
+  g.fillStyle = 'rgba(255,255,255,1)';
+  g.beginPath();
+  g.arc(16, 16, 12, 0, 7);
+  g.fill();
+  return dotCv;
 }

@@ -133,6 +133,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           ctx: true,
           color: a.color,
           pos,
+          trailOf: a.trail && s === 0 ? { pts, u0: ph, speed: a.speed, len: a.trail } : null,
           label: p === 0 && s === 0 ? a.label : null,
           opt: p === 0 && s === 0 ? !!a.opt : false,
           labelDx: a.dx ?? 50,
@@ -227,6 +228,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         shape: 'site',
         pos: () => ll(hub[0], hub[1], 1.004),
         color: '#7fd6ff',
+        state: true,
         statusColor: (t) => (t >= pulse[0] ? '#ff6b6b' : '#7fd6ff'),
         scale: 1.5,
         label: a.hubLabel,
@@ -271,6 +273,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           small: true,
           scale: 1.3,
           color: '#7fd6ff',
+          state: true,
           statusColor: (t) => (t >= arr ? '#ff5d5d' : '#7fd6ff'),
           pos: () => all[N],
         });
@@ -360,7 +363,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           t < a.pulse0
             ? 'Before the attack: user modems online (green), KA-SAT serving Europe'
             : t < a.t0
-              ? 'Attackers reach the ground management network and push malicious commands (illustrative network)'
+              ? 'Attackers reach the ground network and push malicious commands'
               : t < a.t1
                 ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
                 : 'Modems offline (red) · the satellite kept working';

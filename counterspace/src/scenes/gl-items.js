@@ -2,7 +2,7 @@
 // scenes/gl-items.js: GLHost mixin: atmosphere shaders and the per-kind item builders (shell, curve, point, cloud, beam, dome, flash)
 // (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLItems(GLHost), see app.js.)
 // ============================================================================
-import { beamCanvas, panelCanvas } from './earth.js';
+import { beamCanvas, dotCanvas, panelCanvas } from './earth.js';
 import { DEG, IS_PHONE, add, ll, scl } from './core.js';
 import { modelMethods } from './gl-models.js';
 import { earthMethods } from './gl-earth.js';
@@ -22,6 +22,13 @@ gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 5.0);
 gl_FragColor = vec4(uColor, clamp(rim * uGain, 0.0, 1.0)); }`;
+const TRAIL_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uU; uniform float uLen; varying float vF;
+void main(){ float lag = mod(uU - uv.x * 6.2831853, 6.2831853); vF = lag < uLen ? 1.0 - lag / uLen : 0.0;
+vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
+float r = min(uR, uMaxPx * d / uScale) * (0.2 + 0.8 * vF);
+gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
+const TRAIL_FS = `uniform vec3 uColor; uniform float uOp; varying float vF;
+void main(){ if (vF <= 0.003) discard; gl_FragColor = vec4(uColor, uOp * pow(vF, 1.5)); }`;
 const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; varying float vU; varying vec3 vP;
 void main(){ vU = uv.x; vP = position; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
 float r = min(uR, uMaxPx * d / uScale);
@@ -112,36 +119,58 @@ const methods = {
     (this.tubeMats ||= []).push(m);
     return m;
   },
+  // Craft materials: painted panel, wrapped foil (the item's colour), and the solar-cell glass. All read the scene's generated environment map.
   _mat(c, o = {}) {
-    return new this.T.MeshLambertMaterial({ color: c, ...o });
+    return new this.T.MeshStandardMaterial({ color: c, metalness: 0.12, roughness: 0.58, ...o });
+  },
+  _foil(c, o = {}) {
+    return new this.T.MeshStandardMaterial({ color: c, metalness: 0.9, roughness: 0.34, bumpMap: this._foilBump(), bumpScale: 1.6, ...o });
+  },
+  _panelMat(o = {}) {
+    return new this.T.MeshStandardMaterial({ map: this._panelTexture(), color: 0x9fb0d8, metalness: 0.2, roughness: 0.6, emissive: 0x040a1a, emissiveIntensity: 1, ...o });
   },
   _panelTexture() {
     if (!this._pt) {
       this._pt = new this.T.CanvasTexture(panelCanvas());
       this._pt.colorSpace = this.T.SRGBColorSpace;
+      this._pt.anisotropy = 4;
     }
     return this._pt;
+  },
+  // A comet-style trail behind a satellite on a circular orbit: the whole orbit as a tube whose brightness and width fall from the satellite back along the
+  // path (the shader needs only the satellite's current angle), so nothing is rebuilt per frame.
+  _trail(it, root) {
+    const T = this.T,
+      { pts, u0, speed, len } = it.trailOf,
+      vp = pts.slice(0, -1).map((q) => new T.Vector3(...q)),
+      geo = new T.TubeGeometry(new T.CatmullRomCurve3(vp, true), Math.max(120, vp.length), it.iss ? 0.006 : 0.004, 5, true),
+      m = new T.ShaderMaterial({
+        vertexShader: TRAIL_VS,
+        fragmentShader: TRAIL_FS,
+        transparent: true,
+        depthWrite: false,
+        blending: T.AdditiveBlending,
+        uniforms: {
+          uColor: { value: new T.Color(it.color) },
+          uOp: { value: it.iss ? 0.9 : 0.6 },
+          uR: { value: it.iss ? 0.006 : 0.004 },
+          uScale: { value: 800 },
+          uMaxPx: { value: it.iss ? 2.4 : 1.6 },
+          uU: { value: 0 },
+          uLen: { value: len },
+        },
+      });
+    m.userData = { maxPx: it.iss ? 2.4 : 1.6 };
+    (this.tubeMats ||= []).push(m);
+    root.add(new T.Mesh(geo, m));
+    (this.trails ||= []).push({ m, u0, speed });
   },
   // Models are low-poly and exaggerated so they read next to Earth; each carries userData.span (world size at scale 1) and a px range:
   _buildItem(it, root, col) {
     const T = this.T;
     if (it.kind === 'shell') {
-      // Shell: fresnel bubble (bright at its limb) + a clear equatorial ring, so LEO / MEO / GEO read as nested layers.
+      // Shell: a thin ring in the equatorial plane (and, in the hero, a soft halo around it), so LEO / MEO / GEO read as nested layers.
       const c = col(it.color);
-      const glow = new T.Mesh(
-        new T.SphereGeometry(it.r, 64, 40),
-        new T.ShaderMaterial({
-          vertexShader: ATMO_VS,
-          fragmentShader: SHELL_FS,
-          side: T.FrontSide,
-          transparent: true,
-          depthWrite: false,
-          blending: T.AdditiveBlending,
-          uniforms: { uColor: { value: c }, uGain: { value: it.strong ? 0.5 : it.r > 1.6 ? 0.2 : 0.36 } },
-        }),
-      );
-      root.add(glow);
-      (this.shellRings ||= []).push(glow); // hidden with the rings when a camera hides the shells
       if (!it.noRing) {
         const ring = new T.Mesh(
           new T.TorusGeometry(it.r, it.strong ? 0.0075 : 0.0055, 6, 200),
@@ -149,7 +178,13 @@ const methods = {
         );
         ring.rotation.x = Math.PI / 2;
         root.add(ring);
-        (this.shellRings ||= []).push(ring);
+        (this.shellRings ||= []).push(ring); // hidden with the labels when a camera hides the shells
+        if (it.strong) {
+          const halo = new T.Mesh(new T.TorusGeometry(it.r, 0.02, 6, 200), this._tubeMat(c, 0.2, T.AdditiveBlending, 0.02, 6, false));
+          halo.rotation.x = Math.PI / 2;
+          root.add(halo);
+          this.shellRings.push(halo);
+        }
         {
           const rp = [];
           for (let a = 0; a <= 120; a++) rp.push([it.r * Math.cos((a / 120) * 2 * Math.PI), 0, it.r * Math.sin((a / 120) * 2 * Math.PI)]);
@@ -228,6 +263,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.color, place: !!(it.orbit || it.gate) },
         );
     } else if (it.kind === 'point') {
       let m;
@@ -248,27 +284,24 @@ const methods = {
         // glow heads keep a bounded on-screen size
         Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: it.kvMin ?? (it.kvSize ? 5 : 13), maxPx: it.kvMax ?? (it.kvSize ? 22 : 32) });
       } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
-        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright, it.variant);
+        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, !!(it.state || it.glow), it.bright, it.variant);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
-      } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
-      else if (it.shape === 'aircraft') m = this._aircraftModel();
-      else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0));
+      } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright, !!(it.state || it.glow));
+      else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state);
+      else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0), !!it.state);
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));
       else if (it.shape === 'jammer') m = this._jammerModel(it.color, it.pos(0));
       else {
-        let geo;
-        if (it.shape === 'sat') geo = new T.OctahedronGeometry(0.018);
-        else if (it.shape === 'tick') geo = new T.OctahedronGeometry(0.03);
-        else geo = new T.CylinderGeometry(0.012, 0.012, 0.03, 10);
-        m = new T.Mesh(geo, new T.MeshBasicMaterial({ color: col(it.color) }));
-        Object.assign(
-          m.userData,
-          it.shape === 'sat'
-            ? { span: 0.036, minPx: 6, maxPx: 10 }
-            : it.shape === 'tick'
-              ? { span: 0.06, minPx: 7, maxPx: 12 }
-              : { span: 0.03, minPx: 6, maxPx: 12 },
-        );
+        if (it.shape === 'sat') {
+          // a small satellite is a crisp dot in its colour, kept a few pixels across
+          m = new T.Sprite(new T.SpriteMaterial({ map: this._gtex(dotCanvas(), () => new T.CanvasTexture(dotCanvas())), color: col(it.color), transparent: true, depthWrite: false }));
+          m.scale.setScalar(0.03);
+          Object.assign(m.userData, { span: 1, baseScale: 0.03, minPx: 5, maxPx: 8 });
+        } else {
+          const geo = it.shape === 'tick' ? new T.OctahedronGeometry(0.03) : new T.CylinderGeometry(0.012, 0.012, 0.03, 10);
+          m = new T.Mesh(geo, new T.MeshBasicMaterial({ color: col(it.color) }));
+          Object.assign(m.userData, it.shape === 'tick' ? { span: 0.06, minPx: 7, maxPx: 12 } : { span: 0.03, minPx: 6, maxPx: 12 });
+        }
       }
       if (m.userData.span) {
         if (it.minPx) m.userData.minPx = it.minPx;
@@ -278,6 +311,7 @@ const methods = {
       } else if (it.scale) m.scale.setScalar(it.scale);
       root.add(m);
       this.dyn.push({ it, obj: m });
+      if (it.trailOf) this._trail(it, root);
       if (it.label)
         this._label(
           it.label,
@@ -288,6 +322,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.color, place: (it.shape === 'site' && !it.ctx) || it.shape === 'none' },
         );
     } else if (it.kind === 'cloud') {
       const n = it.n,
@@ -327,6 +362,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.hue || it.color },
         );
     } else if (it.kind === 'beam') {
       // Beam = thin bright core ribbon + soft halo ribbon, both camera-facing gradient quads; optional glow at the ends.
@@ -393,6 +429,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.color },
         );
     } else if (it.kind === 'dome') {
       const c = ll(it.at[0], it.at[1]);
@@ -403,7 +440,7 @@ const methods = {
       m.position.set(...c);
       m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...c));
       root.add(m);
-      this._label(it.label, () => scl(c, 1.12), null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt);
+      this._label(it.label, () => scl(c, 1.12), null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt, { place: true });
     } else if (it.kind === 'flash') {
       // Explosion: warm core sprite (fast fade) + expanding shock ring (slower).
       const m = new T.Group();
@@ -450,7 +487,8 @@ const methods = {
       }
       root.add(m);
       this.dyn.push({ it, obj: m });
-      if (it.label) this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
+      if (it.label)
+        this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt, { hue: it.color });
     } else if (it.kind === 'glare') {
       // Dazzle glare: a bright core with four diffraction spikes, pulsing; sized in screen px by _fitModels
       const m = new T.Sprite(

@@ -90,7 +90,7 @@ export function buildSim(cfg) {
         const s = phone && e[2] ? e[2] : e[1],
           c = items._decayCloud;
         if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + 0.02) return s;
-        return phone ? `${s} · ${c.vis}/${c.n} aloft` : `${s} · ${c.vis} of ${c.n} simulated pieces aloft`;
+        return phone ? `${s} · ${c.vis}/${c.n} in orbit` : `${s} · ${c.vis} of ${c.n} pieces still in orbit`;
       },
     });
   for (const a of cfg.actors) {
@@ -275,11 +275,13 @@ export function buildSim(cfg) {
           labelDy: a.sat.dy,
           offGlobe: a.sat.offGlobe,
           iss: !!a.sat.iss,
+          trailOf: a.sat.trail ? { pts, u0: phase, speed: a.sat.speed, len: a.sat.trail } : null,
           minPx: a.sat.minPx,
           maxPx: a.sat.maxPx,
           scale: a.sat.big,
           // fail: from this time the satellite is flagged as damaged (a visible end cue; SWF: such tests damaged or destroyed satellites)
           ...(a.sat.fail && {
+            state: true, // its colour changes when it is damaged: the model keeps a glow that shows the change
             labelFn: (t, n) => (t >= a.sat.fail.t ? (n ? a.sat.fail.short : a.sat.fail.label) : n ? a.sat.short : a.sat.label),
             statusColor: (t) => (t >= a.sat.fail.t ? '#ff9a9a' : '#dfe6f7'),
           }),
@@ -370,9 +372,9 @@ export function buildSim(cfg) {
           shape: 'kv',
           kvSize: 0.055,
           color: '#ffb872',
-          label: i === 0 ? 'Larger pieces falling (illustrative)' : null,
+          label: i === 0 ? 'Larger pieces falling' : null,
           opt: true,
-          short: 'Pieces falling (illustr.)',
+          short: 'Pieces falling',
           labelDx: 60,
           labelDy: 16,
           pos,
@@ -599,7 +601,7 @@ export function buildSim(cfg) {
       if (a.decay > 0 && !cfg.status)
         items.push({
           kind: 'status',
-          text: (t) => (t < tgt.t ? 'Approaching intercept' : `Illustrative fragments still aloft: ${cloud.vis} of ${n} (decay time-compressed)`),
+          text: (t) => (t < tgt.t ? 'Approaching intercept' : `${cloud.vis} of ${n} fragments still in orbit (decay sped up)`),
         });
     }
     if (a.type === 'suborbital') {
@@ -703,8 +705,9 @@ export function buildSim(cfg) {
           const p = ac.pos(t);
           return p && Math.acos(Math.min(1, dot(norm(p), zc))) / DEG < z.radius;
         };
+        ac.state = true; // the airliner's colour is the story (GNSS lost or fine): its model keeps a glow in that colour
         ac.statusColor = (t) => (inZone(t) ? C.jam : C.ok);
-        ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GNSS lost' : ac.label + ' · GNSS OK');
+        ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GPS signal lost' : ac.label + ' · GPS signal fine');
         for (let k = 0; k < 1; k++)
           items.push({
             kind: 'beam',
