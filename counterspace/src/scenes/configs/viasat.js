@@ -4,17 +4,23 @@ import { C } from './shared.js';
 
 export const VIASAT = {
   id: 'viasat',
-  inset: 'Context: KA-SAT in GEO (top view)',
+  inset: 'Top view: KA-SAT in GEO',
   date: '2022-02-24',
-  title: 'Viasat KA-SAT cyberattack (2022)',
+  title: 'Viasat KA-SAT: a cyberattack on a satellite network (2022)',
   staticMarkerCap: { 'KA-SAT (GEO, unaffected)': 48 }, // KA-SAT is the satellite the story is about (48 px at the 22 px reference stage)
   shells: ['GEO'],
   duration: 14,
   caption:
-    'Within hours of Russian troops crossing into Ukraine in February 2022, attackers pushed destructive “AcidRain” malware through KA-SAT’s ground ' +
-    'management network. Tens of thousands of user modems in Ukraine and across Europe went dark. ' +
-    'The satellite itself kept working: the attack hit the ground segment.',
-  cite: 'SWF 2026, pp. 15-06 to 15-07 (attributed to Russia by the US, UK and EU, May 2022).',
+    'On 24 February 2022, within hours of Russian troops crossing into Ukraine, attackers later ' +
+    'attributed to Russia wiped tens of thousands of satellite modems in Ukraine and across Europe. ' +
+    'They sent destructive “AcidRain” malware, harmful software that erases the data ' +
+    'on a device, through the ground management network of the KA-SAT satellite. ' +
+    'KA-SAT is a communications satellite in geostationary orbit (GEO), about 36,000 km up. ' +
+    'The satellite itself kept working. The attack hit the network on the ground. ' +
+    'The Tallinn Manual 2.0 is an expert manual on how international law applies to cyber operations. ' +
+    'It is soft law, meaning it is not binding, and it dates from 2017, before the attack. ' +
+    'The ground network and the order in which regions go dark are drawn for illustration.',
+  cite: 'Secure World Foundation, 2026, pp. 15-06 to 15-07 (Viasat case study).',
   related: 'tallinn-2017',
   event: 'ru-2022-viasat',
   actors: [
@@ -33,7 +39,7 @@ export const VIASAT = {
       dimT0: 0.4,
       dimT1: 0.7,
       hub: [46, 8],
-      hubLabel: 'Ground management network (illustrative)',
+      hubLabel: 'Ground management network',
       hubShort: 'Ground network',
       hubDx: -60,
       hubDy: 40,
@@ -71,11 +77,11 @@ export const VIASAT = {
     { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
   ],
   steps: [
-    [0, 'Network normal: KA-SAT serves user modems across Ukraine and Europe'],
-    [0.1, 'Attackers push AcidRain wiper malware through the ground' + ' management network'],
-    [0.3, 'Commands reach user modems region by region; modems are wiped and go offline'],
-    [0.62, 'Tens of thousands of modems offline; the satellite itself keeps operating'],
-    [0.8, 'Attributed to Russia (GRU) by the US, UK and EU in May 2022 (SWF' + ' 15-07)'],
+    [0, 'The network works normally: KA-SAT serves user modems across Ukraine and Europe'],
+    [0.1, 'Attackers send AcidRain, a data-erasing program, into the ground management network'],
+    [0.3, 'Commands reach user modems region by region; the modems are wiped and go offline'],
+    [0.62, 'Tens of thousands of modems are offline; the satellite itself keeps operating'],
+    [0.8, 'Attributed to Russia’s military intelligence (GRU) by the US, UK and EU in May 2022 (SWF, p. 15-07)'],
   ],
   still: 0.75,
   camDist: 5.6,
@@ -85,9 +91,9 @@ export const VIASAT = {
   staticZoom: 1.5,
   stillCam: { at: [10, 12, 3.9], look: [24, 13, 0.5], hideShell: true },
   cameras: [
-    { name: 'Europe (zoom)', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] }, insetRef: true },
-    { name: 'Europe + KA-SAT', short: 'Wide Europe', at: [10, 12, 3.9], look: [24, 13, 0.5], phone: { at: [10, 12, 4.5] } },
+    { name: 'Europe close up', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] }, insetRef: true },
+    { name: 'Europe and KA-SAT', short: 'Wider Europe', at: [10, 12, 3.9], look: [24, 13, 0.5], phone: { at: [10, 12, 4.5] } },
     { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
-    { name: 'Wide', at: [30, -6, 6.5], hide: ['Ground management'] }, // its label would need a leader across the whole globe
+    { name: 'Whole scene', at: [30, -6, 6.5], hide: ['Ground management'] }, // its label would need a leader across the whole globe
   ],
 };
