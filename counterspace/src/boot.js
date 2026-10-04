@@ -41,7 +41,7 @@ themeBtn.onclick = () => {
 lightQuery.addEventListener?.('change', nameThemeButton);
 nameThemeButton();
 
-// "Dark colours in downloads" sits in the top bar; on phones the bar has no room for its words, so the switch moves to the footer.
+// "Save charts with a dark background" sits in the top bar; on phones the bar has no room for its words, so the switch moves to the footer.
 {
   const option = document.getElementById('dlOption'),
     barSlot = document.getElementById('barSlot'),

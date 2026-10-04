@@ -183,7 +183,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('class', 'axis-title')
     .attr('x', phone ? 0 : 12)
     .attr('y', 14)
-    .text(kin ? 'States in each group' : 'Pairs of a state and a capability');
+    .text(kin ? 'States in each group' : 'Capabilities held, counted by state');
   // decade boundaries share the other charts' year ticks
   const gx = svg.append('g').attr('class', 'gridline');
   bandsX.slice(1).forEach(([xa]) =>
@@ -368,12 +368,9 @@ export function drawB(el = document.getElementById('svgB')) {
     `(DA-ASAT) capability, meaning a missile launched from Earth that can hit a satellite, has stayed at ${WORD[da20.length] ?? da20.length} states: ` +
     `${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('noteB').textContent = kin
-    ? 'Each bar counts states in each group, so a state that holds both kinds appears in both and the groups can add up to more than the number of states. ' +
-      'Kinetic means missiles launched from Earth to hit a satellite and satellites that maneuver close to another; non-kinetic means electronic warfare ' +
-      '(jamming and spoofing), directed energy (lasers) and cyber attacks.'
-    : 'Each bar counts pairs of a state and a capability, so a state that holds two capabilities is counted twice. The five kinds are direct-ascent ' +
-      'anti-satellite weapons (missiles launched from Earth to hit a satellite), co-orbital systems (satellites that maneuver close to another), electronic ' +
-      'warfare (jamming and spoofing), directed energy (lasers and similar beams) and cyber (attacks through computers and networks).';
+    ? 'A state that holds both kinds appears in both groups. Kinetic means missiles and satellites that maneuver close to another; non-kinetic means ' +
+      'jamming, lasers and cyber attacks.'
+    : 'A state that holds two capabilities is counted twice. What each kind means is explained under “How we classified these”.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   setKey(

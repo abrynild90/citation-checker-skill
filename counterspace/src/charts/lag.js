@@ -138,7 +138,7 @@ export function drawL(el = document.getElementById('svgL')) {
     kx += wd;
     return at;
   });
-  const top = ky + 26;
+  const top = EXPORTING ? 6 : ky + 26;
   // Geometry of each row: the words first, then a track from 0 to 16 years with the bar on it.
   info.forEach((r) => {
     const runs = [
@@ -172,11 +172,12 @@ export function drawL(el = document.getElementById('svgL')) {
         'passed, with the number of years or months at its end. It shows the order of events and says nothing about cause. An open ring means our ' +
         'records link no later legal step to the capability.',
     );
-  keyAt.forEach((k) => {
-    const g = svg.append('g').attr('class', 'lag-key').attr('aria-hidden', 'true').attr('transform', `translate(${k.x},${k.y})`);
-    g.append('g').attr('transform', 'translate(8,0)').append('g').attr('class', 'glyph').html(k.m);
-    g.append('text').attr('x', 22).attr('y', 4.5).text(k.label);
-  });
+  if (!EXPORTING)
+    keyAt.forEach((k) => {
+      const g = svg.append('g').attr('class', 'lag-key').attr('aria-hidden', 'true').attr('transform', `translate(${k.x},${k.y})`);
+      g.append('g').attr('transform', 'translate(8,0)').append('g').attr('class', 'glyph').html(k.m);
+      g.append('text').attr('x', 22).attr('y', 4.5).text(k.label);
+    });
   svg
     .append('g')
     .attr('class', 'gridline')

@@ -358,16 +358,101 @@ export function exportSVG(which) {
 }
 export function download(name, data, type) {
   const a = document.createElement('a');
-  a.href = data.startsWith('data:') ? data : URL.createObjectURL(new Blob([data], { type }));
+  a.href = data instanceof Blob ? URL.createObjectURL(data) : data.startsWith('data:') ? data : URL.createObjectURL(new Blob([data], { type }));
   a.download = name;
   document.body.appendChild(a);
   a.click();
   a.remove();
 }
-document
-  .querySelectorAll('[data-export]')
-  .forEach(
-    (b) =>
-      (b.onclick = () =>
-        download(`counterspace-timeline-${EXPORT_FILES[b.dataset.export] || b.dataset.export}.svg`, exportSVG(b.dataset.export), 'image/svg+xml')),
-  );
+// A SVG string drawn onto a canvas at twice its size, saved as a PNG (the fonts travel inside the file, so the picture matches the drawing).
+function svgToPng(svg) {
+  return new Promise((resolve, reject) => {
+    const m = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/),
+      w = m ? +m[1] : EXPORT_W,
+      h = m ? +m[2] : 800,
+      url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })),
+      img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = w * 2;
+      c.height = h * 2;
+      const g = c.getContext('2d');
+      g.scale(2, 2);
+      g.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      c.toBlob((b) => (b ? resolve(b) : reject(new Error('no picture'))), 'image/png');
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('The chart could not be turned into a picture'));
+    };
+    img.src = url;
+  });
+}
+// Each "Download chart" button opens a small menu: a picture for slides and documents, or a drawing that stays sharp when enlarged.
+const menus = [];
+const closeMenus = (except) =>
+  menus.forEach((m) => {
+    if (m.pop !== except && !m.pop.hidden) {
+      m.pop.hidden = true;
+      m.btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+document.querySelectorAll('[data-export]').forEach((btn) => {
+  const which = btn.dataset.export,
+    base = `counterspace-timeline-${EXPORT_FILES[which] || which}`,
+    wrap = document.createElement('span'),
+    pop = document.createElement('div'),
+    note = document.createElement('span');
+  wrap.className = 'dl-wrap';
+  btn.replaceWith(wrap);
+  wrap.append(btn, pop);
+  btn.setAttribute('aria-haspopup', 'true');
+  btn.setAttribute('aria-expanded', 'false');
+  pop.className = 'dl-menu';
+  pop.hidden = true;
+  note.className = 'sr';
+  note.setAttribute('role', 'status');
+  const item = (label, hint, run) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = `<b>${label}</b><span>${hint}</span>`;
+    b.onclick = async () => {
+      closeMenus();
+      btn.focus();
+      try {
+        await run();
+      } catch (e) {
+        note.textContent = 'The chart could not be saved. Try the other kind of file.';
+      }
+    };
+    pop.appendChild(b);
+  };
+  item('Picture', 'For slides and documents', async () => download(`${base}.png`, await svgToPng(exportSVG(which))));
+  item('Sharp drawing', 'Stays crisp at any size', () => download(`${base}.svg`, exportSVG(which), 'image/svg+xml'));
+  wrap.appendChild(note);
+  menus.push({ btn, pop });
+  btn.onclick = () => {
+    closeMenus(pop);
+    pop.hidden = !pop.hidden;
+    btn.setAttribute('aria-expanded', String(!pop.hidden));
+    if (!pop.hidden) pop.firstElementChild.focus();
+  };
+  pop.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeMenus();
+      btn.focus();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const all = [...pop.children];
+      all[(all.indexOf(document.activeElement) + (e.key === 'ArrowDown' ? 1 : -1) + all.length) % all.length].focus();
+    }
+  });
+});
+document.addEventListener('pointerdown', (e) => {
+  if (!e.target.closest?.('.dl-wrap')) closeMenus();
+});
+document.addEventListener('focusin', (e) => {
+  if (!e.target.closest?.('.dl-wrap')) closeMenus();
+});
