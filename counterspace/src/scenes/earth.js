@@ -2,7 +2,7 @@
 // scenes/earth.js: Earth textures: vector land canvas, NASA Blue Marble loader, sprite canvases
 // (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
-import { IS_PHONE } from './core.js';
+import { IS_PHONE, mulberry } from './core.js';
 
 export let LAND = null,
   landCanvas = null;
@@ -309,29 +309,73 @@ export function beamCanvas() {
   g.fillRect(0, 0, 64, 4);
   return beamCv;
 }
-// Solar-panel cell texture for the satellite models.
+// Solar-panel cell texture for the satellite models: a framed panel of silicon cells with thin bus bars and a centre spine (one panel, portrait).
 let panelCv = null;
 export function panelCanvas() {
   if (panelCv) return panelCv;
+  const W = 128,
+    H = 192,
+    cols = 6,
+    rows = 9,
+    fr = 5;
   panelCv = document.createElement('canvas');
-  panelCv.width = 64;
-  panelCv.height = 32;
+  panelCv.width = W;
+  panelCv.height = H;
   const g = panelCv.getContext('2d');
-  g.fillStyle = '#2c5db0';
-  g.fillRect(0, 0, 64, 32);
-  g.strokeStyle = 'rgba(190,215,255,0.65)';
-  g.lineWidth = 1;
-  for (let x = 0; x <= 64; x += 8) {
-    g.beginPath();
-    g.moveTo(x + 0.5, 0);
-    g.lineTo(x + 0.5, 32);
-    g.stroke();
-  }
-  for (let y = 0; y <= 32; y += 8) {
-    g.beginPath();
-    g.moveTo(0, y + 0.5);
-    g.lineTo(64, y + 0.5);
-    g.stroke();
-  }
+  g.fillStyle = '#c5cad4';
+  g.fillRect(0, 0, W, H);
+  g.fillStyle = '#0e2154';
+  g.fillRect(fr, fr, W - 2 * fr, H - 2 * fr);
+  const cw = (W - 2 * fr) / cols,
+    ch = (H - 2 * fr) / rows;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const x = fr + c * cw + 1,
+        y = fr + r * ch + 1,
+        gr = g.createLinearGradient(x, y, x + cw, y + ch);
+      gr.addColorStop(0, '#1d3f8e');
+      gr.addColorStop(1, '#16316f');
+      g.fillStyle = gr;
+      g.fillRect(x, y, cw - 2, ch - 2);
+      g.strokeStyle = 'rgba(120,160,235,0.55)';
+      g.lineWidth = 1;
+      g.strokeRect(x + 0.5, y + 0.5, cw - 3, ch - 3);
+      g.strokeStyle = 'rgba(190,205,240,0.38)';
+      for (const f of [0.33, 0.66]) {
+        g.beginPath();
+        g.moveTo(x + cw * f, y + 1);
+        g.lineTo(x + cw * f, y + ch - 3);
+        g.stroke();
+      }
+    }
+  g.fillStyle = '#aeb6c4';
+  g.fillRect(W / 2 - 1, fr, 2, H - 2 * fr);
   return panelCv;
+}
+// Crumpled-foil bump map for the gold and coloured thermal blankets: grey with many short random creases.
+let foilCv = null;
+export function foilCanvas() {
+  if (foilCv) return foilCv;
+  foilCv = document.createElement('canvas');
+  foilCv.width = foilCv.height = 128;
+  const g = foilCv.getContext('2d'),
+    rnd = mulberry(77);
+  g.fillStyle = '#808080';
+  g.fillRect(0, 0, 128, 128);
+  for (let k = 0; k < 520; k++) {
+    const x = rnd() * 128,
+      y = rnd() * 128,
+      a = rnd() * Math.PI,
+      l = 5 + rnd() * 18,
+      v = rnd() < 0.5 ? 40 + rnd() * 50 : 170 + rnd() * 70;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.22 + rnd() * 0.3})`;
+    g.lineWidth = 0.8 + rnd() * 1.6;
+    for (const o of [-128, 0, 128]) {
+      g.beginPath();
+      g.moveTo(x + o, y);
+      g.lineTo(x + o + Math.cos(a) * l, y + Math.sin(a) * l);
+      g.stroke();
+    }
+  }
+  return foilCv;
 }

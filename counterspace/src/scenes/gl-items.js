@@ -117,15 +117,16 @@ const methods = {
     return new this.T.MeshStandardMaterial({ color: c, metalness: 0.12, roughness: 0.58, ...o });
   },
   _foil(c, o = {}) {
-    return new this.T.MeshStandardMaterial({ color: c, metalness: 0.9, roughness: 0.34, ...o });
+    return new this.T.MeshStandardMaterial({ color: c, metalness: 0.9, roughness: 0.34, bumpMap: this._foilBump(), bumpScale: 1.6, ...o });
   },
   _panelMat(o = {}) {
-    return new this.T.MeshStandardMaterial({ map: this._panelTexture(), metalness: 0.5, roughness: 0.3, emissive: 0x0b1c42, emissiveIntensity: 0.7, ...o });
+    return new this.T.MeshStandardMaterial({ map: this._panelTexture(), color: 0x9fb0d8, metalness: 0.2, roughness: 0.6, emissive: 0x040a1a, emissiveIntensity: 1, ...o });
   },
   _panelTexture() {
     if (!this._pt) {
       this._pt = new this.T.CanvasTexture(panelCanvas());
       this._pt.colorSpace = this.T.SRGBColorSpace;
+      this._pt.anisotropy = 4;
     }
     return this._pt;
   },
