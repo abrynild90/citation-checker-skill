@@ -378,12 +378,12 @@ export const earthMethods = {
       }
     })();
   },
-  // Per frame: clouds thin out as the camera comes close to the surface (they would hide the ground the scene is about).
+  // Per frame: clouds fade out as the camera comes close to the surface (they would hide the ground the scene is about, and the small cloud map looks soft up close).
   _earthFrame() {
     const u = this._eu;
     if (!u) return;
     const alt = this.camera.position.length() - 1;
-    u.uCloudAmt.value = (this.sim.cfg.cloudK ?? 0.6) * Math.min(1, Math.max(0, (alt - 0.3) / 1.4));
+    u.uCloudAmt.value = (this.sim.cfg.cloudK ?? 0.6) * Math.min(1, Math.max(0, (alt - 0.6) / 1.6));
   },
   // The textures belong to the host for the life of the page; only the running fade stops with the scene.
   _disposeEarth() {

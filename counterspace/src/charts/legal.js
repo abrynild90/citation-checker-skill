@@ -195,8 +195,8 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     maxExt = 0; // how far above the symbol line the highest label reaches
   const zx0 = x(ZOOM[0]),
     zx1 = x(ZOOM[1]);
-  // On the full band the 2021 to 2026 crowd is named in the zoom panel (and in the saved image), so it carries no labels here.
-  const crowd = (d) => !zoom && !strip && d._cx >= zx0 - 2;
+  // The 2021 to 2026 crowd is named in the zoom panel (and in the saved image), so it carries no labels on the band, on a phone too.
+  const crowd = (d) => !zoom && d._cx >= zx0 - 2;
   if (!compact) {
     pts.forEach((d) => {
       pl.add([d._cx - 9.5, -d._t * TP - 10 - (hasScene(d) ? 9 : 0), d._cx + (hasScene(d) ? 16 : 9.5), -d._t * TP + 10], 'G');
