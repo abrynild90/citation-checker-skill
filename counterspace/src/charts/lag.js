@@ -281,13 +281,13 @@ export function drawL(el = document.getElementById('svgL')) {
   // ---- key
   const K = legend('legendL', 22, 18),
     li = K.item;
-  K.group('Capability');
-  li(hexMarkup('var(--cat-da)'), 'Kinetic: a physical attack such as a missile test');
-  li(hexMarkup('var(--cat-ew)'), 'Non-kinetic: jamming, a laser or a cyber operation');
+  K.group('The weapon or attack');
+  li(hexMarkup('var(--cat-da)'), 'Physical attack, such as a missile test (kinetic)');
+  li(hexMarkup('var(--cat-ew)'), 'Jamming, a laser or a cyber operation (non-kinetic)');
   K.group('Later legal step');
   li(glyphMarkup('treaty'), 'Treaty (binding)');
-  li(glyphMarkup('resolution'), 'Resolution or body finding (not binding)');
-  li(glyphMarkup('unilateral'), 'Unilateral pledge');
+  li(glyphMarkup('resolution'), 'Resolution or finding by an international body (not binding)');
+  li(glyphMarkup('unilateral'), 'Pledge by one country');
   K.group('No later step');
   li(ringMarkup(), 'Open ring: our records link no later legal step to it. This does not mean that no rule applies.');
   K.done();

@@ -3,7 +3,7 @@
 // Provides: bindMark(), showCard(), rove(), addGuide(), setOnce(), legend(), table(), hint3d().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { EXPORTING, LAST_DA, PHONE_MAX, TYPE_LABEL, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
+import { EXPORTING, LAST_DA, PHONE_MAX, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
 import { hooks } from './shared.js';
 const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
@@ -157,6 +157,15 @@ export const hint3d = (what = 'the 3D explainer') =>
 const srcLine = (r) => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
 const ALT_KIND = { intercept: 'intercept', apogee: 'its highest point', detonation: 'detonation' };
 const CONFIDENCE = { high: 'High', medium: 'Medium', low: 'Low' };
+// What each kind of test was, in everyday words (the data stores a code; cards, the table and screen-reader labels all use these).
+export const KIND_PLAIN = {
+  destructive: 'Destroyed a satellite',
+  non_destructive: 'Test that did not destroy its target',
+  flyby: 'Passed a satellite without hitting it',
+  midcourse_intercept: 'Intercepted a ballistic missile in flight',
+  nuclear: 'Nuclear explosion in space',
+  apogee_only: 'Flew to its highest point with no target',
+};
 // "None" and "None known" are stored values; the card says it in words.
 export const targetWords = (t) => (/^none known$/i.test(t) ? 'No target known' : /^none$/i.test(t) ? 'No target' : t.replace(/^None \(/, 'No target ('));
 export function kinCard(e) {
@@ -172,7 +181,7 @@ export function kinCard(e) {
       : '';
   return (
     `<p class="card-title">${esc(e.system)}</p><p class="when">${esc(e.state)} · ${fmtD(e)}</p><dl><dt>Target</dt><dd>${esc(targetWords(e.target))}</dd>` +
-    `<dt>Kind of test</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>How sure we are</dt>` +
+    `<dt>What happened</dt><dd>${KIND_PLAIN[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>How sure we are</dt>` +
     `<dd>${CONFIDENCE[e.confidence] || e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? hint3d() : ''}`
   );
 }
@@ -180,9 +189,9 @@ export { nkCard, coWhen, coCard } from './cards2.js';
 // What kind of legal item this is, in words (the data stores it as a code; the draft treaties share the "negotiation_span" code with the bars).
 export const LEGAL_KIND = {
   treaty: 'Treaty',
-  resolution: 'Resolution or body finding',
-  unilateral: 'Unilateral pledge',
-  veto: 'Veto',
+  resolution: 'Resolution or finding (not binding)',
+  unilateral: 'Pledge by one country',
+  veto: 'Veto in the UN Security Council',
   draft: 'Draft treaty put forward',
   span: 'Negotiation period',
 };
