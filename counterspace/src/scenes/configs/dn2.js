@@ -5,14 +5,23 @@ import { C } from './shared.js';
 export const DN2 = {
   id: 'dn2',
   date: '2013-05-13',
-  title: 'DN-2 “high-altitude science” launch (2013)',
+  title: 'DN-2: China’s “high-altitude science” rocket launch (2013)',
   shells: ['LEO', 'MEO', 'GEO'],
   duration: 14,
   caption:
-    'A rocket from Xichang climbs on a suborbital path toward the geostationary belt and falls back to Earth. China said it reached 10,000 km. ' +
-    'The US military said it went “nearly to GEO”, and US officials said the upper stages re-entered “over the Indian Ocean”. ' +
-    'SWF cites an analysis putting the apogee at 30,000 km or more. There was no target. The launch showed reach, not an intercept.',
-  cite: 'SWF 2026, pp. 03-20, 03-22.',
+    'On 13 May 2013 China launched a DN-2 rocket from Xichang on a suborbital path, a ' +
+    'flight that reaches space and falls back to Earth without completing an orbit. ' +
+    'It climbed toward geostationary orbit (GEO), the ring about 36,000 km above ' +
+    'the equator where a satellite stays above the same point on the Earth. ' +
+    'China said it reached 10,000 km. ' +
+    'The US military said it went “nearly to GEO”, and US officials said the ' +
+    'rocket’s upper stages re-entered the atmosphere “over the Indian Ocean”. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, cites an analysis ' +
+    'that puts the highest point of the flight, its apogee, at 30,000 km or more. ' +
+    'There was no target, so this was not an intercept (a missile hitting its target). ' +
+    'The launch showed how far the rocket could reach. ' +
+    'No treaty or resolution on this page’s law timeline is tied to this launch.',
+  cite: 'Secure World Foundation, 2026, pp. 03-20, 03-22.',
   related: null,
   event: 'cn-2013-dn2',
   actors: [
@@ -26,7 +35,7 @@ export const DN2 = {
       t1: 0.9,
       color: '#ff7a7a',
       thick: 0.011,
-      label: 'DN-2 path (no target: not an intercept)',
+      label: 'DN-2 path: no target, not an intercept',
       short: 'DN-2 path · no target',
       labelIdx: 0.17,
       dx: -40,
@@ -69,9 +78,9 @@ export const DN2 = {
   camDist: 7.5,
   stillCam: { at: [22, 8, 7.9], look: [0, 90, 0.7] },
   status: [
-    [0, 'Rocket climbs from Xichang on a suborbital path'],
+    [0, 'The DN-2 rocket climbs from Xichang toward GEO'],
     [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)', 'SWF-cited analysis: apogee ≥30,000 km'],
-    [0.8, 'US officials: upper stages re-entered “over the Indian Ocean” · no target, not an intercept', 'Re-entry over Indian Ocean (US officials)'],
+    [0.8, 'Re-entry “over the Indian Ocean”, say US officials', 'US officials: re-entry “over the Indian Ocean”'],
   ],
   // live desktop, default camera (px from their referents): 10,000 km sits above its own marker and Apogee just below it, left of the head's glow,
   // each with a short
@@ -88,10 +97,10 @@ export const DN2 = {
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
   cameras: [
     { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.97, zoom: 1.3 } },
-    // Profile: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
-    { name: 'Profile', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
-    { name: 'Polar', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
-    // Zoom: far enough back that no ring edge is cropped; 375: the path label would sit on the disc, crowding Xichang and 10,000 km
-    { name: 'Zoom', at: [20, 45, 6.8], phone: { at: [20, 45, 8], hide: ['DN-2 path'] } },
+    // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
+    { name: 'Side view', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
+    { name: 'From the pole', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
+    // Whole scene: far enough back that no ring edge is cropped; 375: the path label would sit on the disc, crowding Xichang and 10,000 km
+    { name: 'Whole scene', at: [20, 45, 6.8], phone: { at: [20, 45, 8], hide: ['DN-2 path'] } },
   ],
 };
