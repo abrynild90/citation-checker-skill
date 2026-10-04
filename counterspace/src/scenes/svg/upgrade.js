@@ -86,7 +86,7 @@ export function requestFullEarth(sim) {
   if (earthImg || fullPending) return;
   fullPending = true;
   const go = () =>
-    loadEarth(2048).then((ok) => {
+    loadEarth(4096).then((ok) => {
       fullPending = false;
       if (ok) refreshEarth();
     });

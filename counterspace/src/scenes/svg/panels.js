@@ -3,8 +3,9 @@
 // ============================================================================
 import { fitBanner } from '../labels.js';
 import { requestFullEarth, wantsFullEarth } from './upgrade.js';
+import { fontFaceCSS, rememberSim } from './still-frame.js';
 
-export function renderPanels(sim, el, renderSVG) {
+export function renderPanels(sim, el, renderSVG, popts = {}) {
   const W = el.clientWidth || 640,
     H = el.clientHeight || 420,
     phone = W < 520, // stacked rows
@@ -31,6 +32,7 @@ export function renderPanels(sim, el, renderSVG) {
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('role', 'img')
     .attr('aria-label', `${sim.cfg.title}: static diagram, one panel per episode`);
+  if (popts.print) root.append('defs').append('style').text(fontFaceCSS()); // the saved image draws this SVG as an image: it carries its fonts
   root.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b16');
   const lays = [];
   sim.cfg.panels.forEach((pn, k) => {
@@ -53,6 +55,7 @@ export function renderPanels(sim, el, renderSVG) {
       title: phone ? `${pn.title} · ${pn.short || pn.brief}` : narrow && pw > 480 ? `${pn.title} · ${pn.brief}` : pn.title,
       keep: true,
       drop: phone ? pn.dropPhone : null,
+      syncEarth: !!popts.print, // a saved image needs each panel's Earth now, drawn on this thread
     });
     node.setAttribute('x', x);
     node.setAttribute('y', y);
@@ -70,13 +73,14 @@ export function renderPanels(sim, el, renderSVG) {
       .attr('width', pw)
       .attr('height', ph)
       .attr('fill', 'none')
-      .attr('stroke', 'rgba(255,224,138,.35)')
+      .attr('stroke', 'rgba(150,175,230,.35)')
       .attr('rx', 6);
   });
   sim.flags.all = true;
   root.node().__lay = { panels: lays, W, H };
   root.node().dataset.earth = root.node().querySelector('svg')?.dataset.earth || 'vector';
   root.node().dataset.ss = root.node().querySelector('svg[data-ss]')?.dataset.ss || '';
+  rememberSim(root.node(), sim);
   const full = wantsFullEarth(el, sim);
   root.node()
     .querySelectorAll('svg')

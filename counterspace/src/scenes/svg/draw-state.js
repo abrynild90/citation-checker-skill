@@ -2,6 +2,7 @@
 // scenes/svg/draw-state.js: the working state of one static diagram: label candidates, obstacles, marks, the debris grid, and the helpers that fill them
 // ============================================================================
 import { DEG } from '../core.js';
+import { HERO_SAY } from './hero.js';
 import { labelFs, pillSize } from './pill.js';
 
 // Everything the item, label and probe passes share. `g` (the content group) and the globe geometry are added by renderSVG once they exist.
@@ -42,6 +43,7 @@ export function createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY
     if (!opts.panel && sim.cfg.staticDrop?.includes(text)) return; // cfg.staticDrop: labels the static diagram leaves out at every width
     if (opts.drop?.includes(text)) return; // a panel's own label dropped where it would cross another on a phone
     if (opt && W < 520 && sim.cfg.acts && !opts.panel) return; // the busy multi-act composite drops its secondary labels on a phone
+    text = (sim.cfg.spin && HERO_SAY[text]) || text; // the hero says it in plain words
     const dot = kind === 'item',
       { w, h } = pillSize(text, { dot, fs });
     cands.push({

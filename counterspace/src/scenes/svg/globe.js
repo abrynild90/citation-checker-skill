@@ -73,7 +73,7 @@ export function drawStars(svg, W, H, keep) {
   const rs = mulberry(99),
     n = Math.round((W * H) / 2300),
     TINTS = ['#dfe8ff', '#cfdcff', '#fff0da'],
-    SIZES = [0.55, 0.8, 1.15, 1.6],
+    SIZES = [0.7, 1, 1.4, 1.9],
     buckets = {};
   for (let k = 0; k < n; k++) {
     const x = rs() * W,
@@ -81,7 +81,7 @@ export function drawStars(svg, W, H, keep) {
       pick = rs(),
       si = pick < 0.6 ? 0 : pick < 0.86 ? 1 : pick < 0.97 ? 2 : 3,
       ti = rs() < 0.62 ? 0 : rs() < 0.5 ? 1 : 2,
-      b = 0.22 + rs() * 0.5 + si * 0.08;
+      b = 0.3 + rs() * 0.5 + si * 0.08;
     if (keep && Math.hypot(x - keep.cx, y - keep.cy) < keep.r) continue;
     const key = `${si}|${ti}|${Math.round(b * 4)}`;
     (buckets[key] ||= { si, ti, op: Math.min(0.95, Math.round(b * 4) / 4 + 0.1), d: '' }).d += `M${x.toFixed(1)},${y.toFixed(1)}h0`;
@@ -111,8 +111,8 @@ function drawAtmosphere(svg, defs, U, GX, GY, GR) {
   stop(lg, 0, '#ecf6ff', 1);
   stop(lg, 0.3, '#a9d6ff', 0.9);
   stop(lg, 0.58, '#5b9cf2', 0.5);
-  stop(lg, 0.82, '#3a68c4', 0.26);
-  stop(lg, 1, '#2a4c9a', 0.16);
+  stop(lg, 0.82, '#3a68c4', 0.4);
+  stop(lg, 1, '#34589f', 0.34);
   const band = Math.max(2, Math.min(GR * 0.03, 7)),
     pad = band * 4,
     f = defs
@@ -156,7 +156,7 @@ export function drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gpath, lim
   const win = limb && { x0: 0, y0: 0, x1: W, y1: H };
   // The saved image needs its picture now (drawn on this thread); a diagram on the page takes one a worker has already drawn for this view, or paints it a
   // moment later.
-  const ras = print ? earthRasterSync(rot, GX, GY, GR, win, ss) : cachedEarth(rot, GX, GY, GR, win, ss);
+  const ras = print ? earthRasterSync(rot, GX, GY, GR, win, ss, true) : cachedEarth(rot, GX, GY, GR, win, ss);
   node.__earth = { rot, GX, GY, GR, win, ss, layer: layer.node(), full: false, level: 0, busy: 0, image: null, vec: null, fade: !print };
   if (ras) {
     const level = print ? (earthImg ? 2 : 1) : ras.level;

@@ -43,7 +43,8 @@ function fitExtent(sim, opts, t, W, unit) {
       if (it.kind === 'curve') {
         if (it.staticKeep === false) continue;
         // On a phone the Earth gets the room: orbit and belt lines run off the frame, only trails and paths of the action set the fit.
-        if (sim.cfg.staticFitRing || !(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
+        // (the hero keeps every ring inside its picture at any width)
+        if (sim.cfg.staticFitRing || sim.cfg.spin || !(W < 520 && (it.orbit || it.gate || it.role === 'orbit'))) it.pts(t).forEach((q) => grow(unit(q)));
       } else if (it.kind === 'point' && !it.liveOnly) {
         const q = (!opts.panel && it.staticPos?.(t)) || it.pos(t);
         if (q) grow(unit(q));
@@ -108,12 +109,19 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
   const tt = opts.panel && opts.title ? pillSize(opts.title, { dot: false, fs: labelFs(W, opts) }) : null,
     titleW = tt ? tt.w + 6 : 0,
     titleH = tt ? tt.h + 6 : 0;
-  const docked = sim.items.some((i) => i.dockWith && i.dockOn(t)), // a docked pair is two models wide: more side margin
-    fx = sim.cfg.staticFitRing ? 20 : 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))), // a ring-fit scene: the ring sets the width
-    fTop = opts.panel ? (opts.title ? titleH + 6 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
+  const hero = !!sim.cfg.spin && !opts.panel, // the first picture: no caption, no banner, a calm margin all round
+    docked = sim.items.some((i) => i.dockWith && i.dockOn(t)), // a docked pair is two models wide: more side margin
+    fx = hero ? Math.max(16, Math.round(W * 0.03)) : sim.cfg.staticFitRing ? 20 : 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))), // a ring-fit scene: the ring sets the width
+    fTop = hero
+      ? Math.max(16, Math.round(H * 0.04))
+      : opts.panel
+        ? opts.title
+          ? titleH + 6
+          : 6
+        : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
     // staticKeyClearPhone: on a phone the Earth sits above the legend key (the key never lies on the globe)
     keyH = !opts.panel && W < 520 && sim.cfg.staticKeyClearPhone && sim.cfg.staticKey ? sim.cfg.staticKey.length * 20 + 20 : 0,
-    fBot = stY - 8 - keyH - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
+    fBot = hero ? H - Math.max(16, Math.round(H * 0.04)) : stY - 8 - keyH - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
   let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
   let CX = W / 2 - ((x0 + x1) / 2) * R,
     CY = (fTop + fBot) / 2 - ((y0 + y1) / 2) * R;
