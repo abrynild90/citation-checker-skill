@@ -35,7 +35,7 @@ export const DN2 = {
       t1: 0.9,
       color: '#ff7a7a',
       thick: 0.011,
-      label: 'DN-2 path: no target, not an intercept',
+      label: 'DN-2 path: no intercept',
       short: 'DN-2 path · no target',
       labelIdx: 0.17,
       dx: -40,
@@ -75,6 +75,7 @@ export const DN2 = {
     { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9, sats: 10 },
   ],
   still: 0.62,
+  stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it
   camDist: 7.5,
   stillCam: { at: [22, 8, 7.9], look: [0, 90, 0.7] },
   status: [
@@ -87,11 +88,12 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km (China)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [-6, -72], '10,000': [-12, -34], Apogee: [-152, 14], GEO: [24, 38] },
+  liveOff: { 'DN-2 path': [6, -72], '10,000': [-12, -34], Apogee: [-160, 14], GEO: [38, 58] },
+  camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
   phoneHide: ['DN-2 path', 'GEO'],
-  phoneOff: { '10,000': [-24, 24], '≥30,000': [-40, 70] },
+  phoneOff: { '≥30,000': [14, -44] },
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)

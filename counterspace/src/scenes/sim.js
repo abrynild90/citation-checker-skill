@@ -131,7 +131,7 @@ export function buildSim(cfg) {
         },
       };
       if (a.labelFn) {
-        it.labelFn = (t, narrow) => (actOn(t, a.acts) && inVis(t) ? a.labelFn(t, narrow) : null);
+        it.labelFn = (t, narrow, still) => (actOn(t, a.acts) && inVis(t) ? a.labelFn(t, narrow, still) : null);
         it.statusColor = () => a.color;
         it.label = a.label || 'x';
       }

@@ -118,7 +118,7 @@ const methods = {
       // cfg.liveShort: labels that take their short text on screen too; cfg.liveText: { 'label start': 'text' } a mid-length text for the live desktop view
       const liveAlt = !noBanner && this.el.clientWidth >= 520 ? Object.entries(this.sim.cfg.liveText || {}).find(([h]) => L.text.startsWith(h)) : null,
         text = L.item?.labelFn
-          ? L.item.labelFn(this.t, this.el.clientWidth < 520)
+          ? L.item.labelFn(this.t, this.el.clientWidth < 520, noBanner)
           : liveAlt
             ? liveAlt[1]
             : L.short &&
@@ -217,9 +217,9 @@ const methods = {
     // cfg.phoneOff: the same at phone width (default camera), in raw px
     // cfg.camOff: { camera index: { 'Label text start': [dx, dy] } } the same for another preset (desktop width only)
     const camOffs = w >= 700 ? this.sim.cfg.camOff?.[this.camIdx] : null,
-      offs = camOffs || (this.camIdx === 0 ? (w >= 700 ? this.sim.cfg.liveOff : w < 520 ? this.sim.cfg.phoneOff : null) : null),
-      offK = w >= 700 ? Math.min(1, w / 798) : 1;
-    if (!noBanner && offs)
+      offs = noBanner ? this.sim.cfg.stillOff : camOffs || (this.camIdx === 0 ? (w >= 700 ? this.sim.cfg.liveOff : w < 520 ? this.sim.cfg.phoneOff : null) : null),
+      offK = noBanner ? w / 1000 : w >= 700 ? Math.min(1, w / 798) : 1; // cfg.stillOff (PNG stills): px at a 1000 px wide frame
+    if (offs)
       Object.entries(offs).forEach(([n, d]) => {
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
