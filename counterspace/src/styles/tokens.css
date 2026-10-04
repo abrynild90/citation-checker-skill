@@ -33,7 +33,7 @@
   --r-3: 22px;
   --r-pill: 999px;
   --container: 1240px;
-  --measure: 66ch;
+  --measure: 54ch; /* about 70 characters a line in either family */
   --gutter: 24px;
   --chapter-gap: 96px;
   /* motion: one authored moment (the hero entrance) and short functional transitions, all easing out fast */
