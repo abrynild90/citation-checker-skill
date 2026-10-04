@@ -2,9 +2,9 @@
 // scenes/gl-host.js: GLHost core: renderer, scene loading, cameras, update loop, playback and disposal (mixins: gl-items, gl-labels, gl-still)
 // (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
-import { DEG, IS_PHONE, mulberry, norm, occluded, scl, sunFor } from './core.js';
+import { DEG, IS_PHONE, norm, occluded, scl, sunFor } from './core.js';
 import { fitBanner } from './labels.js';
-import { earthImg, earthPromise, getLandCanvas, loadEarth, oceanMask, ringCanvas, spriteCanvas } from './earth.js';
+import { ringCanvas, spriteCanvas } from './earth.js';
 
 // ---------------------------------------------------------------- WebGL host (single shared renderer)
 export class GLHost {
@@ -110,11 +110,10 @@ export class GLHost {
     this.shellRings = [];
     this.beamTex = null;
     this._pt = null;
-    // Sun fixed in world space, set ~50 deg east of the opening camera so the event region
-    // is in daylight and the terminator shows on the limb. Orbiting reveals the night side.
+    // One sun for every picture (SUN_VIEW in core.js), fixed in space: orbiting the camera or turning the hero reveals the night side.
     const sunDir = sunFor(sim.sunRef);
     this.sunDir = sunDir;
-    // The hero and the stills lift the night side (ambient up, sun down a little) so the live Earth reads like the static Blue Marble.
+    // The hero and the stills lift the night side (ambient up, sun down a little) so craft stay readable there.
     this.ambient = new T.AmbientLight(0x9fb4ff, sim.cfg.spin ? 0.6 : 0.32);
     S.add(this.ambient);
     const sun = new T.DirectionalLight(0xfff4e0, sim.cfg.spin ? 1.85 : 2.1);
@@ -124,40 +123,9 @@ export class GLHost {
     const root = new T.Group();
     S.add(root);
     this.root = root;
-    // Starfield (background only; not part of the per-scene particle budget).
-    {
-      const n = IS_PHONE ? 500 : 1200,
-        rnd = mulberry(99),
-        a = new Float32Array(n * 3),
-        c = new Float32Array(n * 3);
-      for (let k = 0; k < n; k++) {
-        const u = rnd() * 2 - 1,
-          th = rnd() * 2 * Math.PI,
-          s = Math.sqrt(1 - u * u);
-        a.set([40 * s * Math.cos(th), 40 * u, 40 * s * Math.sin(th)], 3 * k);
-        const b = 0.35 + rnd() * 0.65;
-        c.set([b * (0.85 + rnd() * 0.15), b * 0.92, b], 3 * k);
-      }
-      const g = new T.BufferGeometry();
-      g.setAttribute('position', new T.BufferAttribute(a, 3));
-      g.setAttribute('color', new T.BufferAttribute(c, 3));
-      S.add(new T.Points(g, new T.PointsMaterial({ size: 1.4, sizeAttenuation: false, vertexColors: true, depthWrite: false })));
-    }
-    // Earth: Blue Marble when available, vector land map otherwise (swapped in when it arrives).
-    const earthMat = new T.MeshPhongMaterial({ shininess: 18, specular: 0x6b87a8 });
-    this.earthMat = earthMat;
-    this._applyEarth(earthMat);
-    // Event scenes fetch the imagery at once if needed; the hero waits for the idle prefetch (app.js).
-    if (!earthImg) {
-      const p = earthPromise || (sim.cfg.spin ? null : loadEarth(this.maxTex));
-      p?.then((ok) => {
-        if (ok && this.scene === S) this.refreshEarth();
-      });
-    }
-    root.add(new T.Mesh(new T.SphereGeometry(1, 96, 64), earthMat));
-    // Atmosphere: thin inner rim + outer halo, brighter on the day side.
-    this._atmo(root, 1.004, T.FrontSide, 3.2, 0.9, 0, sunDir);
-    this._atmo(root, 1.07, T.BackSide, 2.4, 0.75, 1, sunDir);
+    this._buildSpace(S);
+    // Earth: embedded pictures at once, the full-size ones cross-faded in when they arrive; atmosphere glow around it.
+    this._buildEarth(root, sunDir);
     this.spriteTex = new T.CanvasTexture(spriteCanvas());
     this.ringTex = new T.CanvasTexture(ringCanvas());
     const col = (c) => new T.Color(c);
@@ -201,40 +169,8 @@ export class GLHost {
     this.t = 0;
     this.update(0);
   }
-  refreshEarth() {
-    if (this.earthMat && earthImg && this.earthMat.map?.image !== earthImg) {
-      this._applyEarth(this.earthMat);
-      this.render();
-    }
-  }
   get maxTex() {
     return this.renderer.capabilities.maxTextureSize || 4096;
-  }
-  _applyEarth(mat) {
-    const T = this.T,
-      old = [mat.map, mat.specularMap];
-    let map;
-    if (earthImg) {
-      map = new T.Texture(earthImg);
-      map.needsUpdate = true;
-      const spec = new T.CanvasTexture(oceanMask);
-      mat.specularMap = spec;
-      mat.shininess = 1;
-      mat.specular.set(0x000000);
-    } else {
-      map = new T.CanvasTexture(getLandCanvas());
-      mat.specularMap = null;
-      mat.specular.set(0x223344);
-      mat.shininess = 8;
-    }
-    map.colorSpace = T.SRGBColorSpace;
-    map.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
-    mat.map = map;
-    // hero: a gentle self-lit term keeps the night side readable, so the live Earth looks like the static Blue Marble
-    mat.emissiveMap = this.sim?.cfg.spin ? map : null;
-    mat.emissive.set(this.sim?.cfg.spin ? 0x757575 : 0x000000);
-    mat.needsUpdate = true;
-    old.forEach((t) => t?.dispose());
   }
   _syncShell() {
     for (const r of this.shellRings || []) r.visible = !this.hideShell;
@@ -605,6 +541,8 @@ export class GLHost {
   }
   render() {
     if (!this.scene) return;
+    this._earthFrame();
+    this._spaceFrame();
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
@@ -649,6 +587,8 @@ export class GLHost {
       this.beamTex?.dispose();
       this._pt?.dispose();
       this.spriteTex = this.ringTex = this.beamTex = this._pt = null;
+      this._disposeEarth();
+      this._disposeSpace();
       this.ptMats = [];
       this.tubeMats = [];
       this.gapRings = [];

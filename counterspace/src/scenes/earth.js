@@ -49,56 +49,83 @@ export function getLandCanvas() {
   return landCanvas;
 }
 
-// NASA Blue Marble (public domain), pinned on jsDelivr. Fetched lazily after the page
-// has rendered (never part of the initial page); the vector land map is used until
-// it arrives or if it fails. Decoded pixels are cached on the CPU side only; each scene
-// creates its own GPU texture and disposes it on close.
+// NASA Blue Marble (public domain), pinned on jsDelivr. Fetched lazily after the page has rendered (never part of the initial page); the embedded
+// pictures below are used until it arrives or if it fails. Decoded pixels are cached on the CPU side only; each scene creates its own GPU texture and
+// disposes it on close.
 export const EARTH_URL = 'https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-blue-marble.jpg';
+// The matching night image (city lights), fetched on request once a 3D view exists. Only jsDelivr is used.
+export const EARTH_NIGHT_URL = 'https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-night.jpg';
 export let earthPromise = null,
   earthImg = null,
+  earthNightImg = null,
+  nightPromise = null,
   oceanMask = null;
-export function loadEarth(maxTex = 4096) {
-  if (earthPromise) return earthPromise;
-  earthPromise = new Promise((resolve) => {
+// Fetch one image; large ones are downscaled on phones or GPUs that cannot hold a 4096 px texture.
+function fetchImage(url, maxTex) {
+  return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.decoding = 'async';
     img.onload = () => {
-      // Downscale on phones or GPUs that cannot hold a 4096 px texture.
       const w = Math.min(img.naturalWidth, IS_PHONE ? 2048 : maxTex);
       if (w < img.naturalWidth) {
         const c = document.createElement('canvas');
         c.width = w;
         c.height = w / 2;
         c.getContext('2d').drawImage(img, 0, 0, w, w / 2);
-        earthImg = c;
-      } else earthImg = img;
-      // Low-res ocean mask (for sun glint): blue-dominant pixels are water.
-      const m = document.createElement('canvas');
-      m.width = 1024;
-      m.height = 512;
-      const g = m.getContext('2d');
-      g.drawImage(img, 0, 0, 1024, 512);
-      const d = g.getImageData(0, 0, 1024, 512),
-        p = d.data;
-      for (let k = 0; k < p.length; k += 4) {
-        const water = p[k + 2] > p[k] * 1.25 && p[k + 2] > p[k + 1] * 1.05 && p[k] < 150;
-        const v = water ? 200 : 18;
-        p[k] = p[k + 1] = p[k + 2] = v;
-      }
-      g.putImageData(d, 0, 0);
-      oceanMask = m;
-      resolve(true);
+        resolve(c);
+      } else resolve(img);
     };
-    img.onerror = () => {
-      console.warn('Earth imagery unavailable; using vector map');
-      resolve(false);
-    };
-    img.src = EARTH_URL;
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+export function loadEarth(maxTex = 4096) {
+  if (earthPromise) return earthPromise;
+  earthPromise = fetchImage(EARTH_URL, maxTex).then((im) => {
+    if (!im) {
+      console.warn('Earth imagery unavailable; using the embedded picture');
+      return false;
+    }
+    earthImg = im;
+    return true;
   });
   return earthPromise;
 }
+export function loadEarthNight(maxTex = 4096) {
+  nightPromise ||= fetchImage(EARTH_NIGHT_URL, maxTex).then((im) => {
+    earthNightImg = im;
+    nightArrived.forEach((f) => f());
+    return !!im;
+  });
+  return nightPromise;
+}
+// Hosts that want to know when the full night image lands (the day image has its own promise).
+const nightArrived = new Set();
+export const onNightArrived = (f) => (nightArrived.add(f), () => nightArrived.delete(f));
 export const earthReady = () => !!earthImg;
+// Water mask (for the sun glint on the sea): blue-dominant pixels of the day picture are water. Built once from whichever picture is available first;
+// the embedded one is enough (the glint is soft), so the mask never needs to be rebuilt when the full image arrives.
+export function oceanMaskSource() {
+  if (oceanMask) return oceanMask;
+  const src = earthImg || earthLow;
+  if (!src) return null;
+  const m = document.createElement('canvas');
+  m.width = 1024;
+  m.height = 512;
+  const g = m.getContext('2d', { willReadFrequently: true });
+  g.drawImage(src, 0, 0, 1024, 512);
+  const d = g.getImageData(0, 0, 1024, 512),
+    p = d.data;
+  for (let k = 0; k < p.length; k += 4) {
+    const water = p[k + 2] > p[k] * 1.25 && p[k + 2] > p[k + 1] * 1.05 && p[k] < 150;
+    const v = water ? 200 : 18;
+    p[k] = p[k + 1] = p[k + 2] = v;
+  }
+  g.putImageData(d, 0, 0);
+  oceanMask = m;
+  return m;
+}
 
 // Small day and night images of the Earth are embedded in the page (<script id="cs-earth">, about 120 KB), so the first picture of the planet never waits
 // for the network. earthLow / earthNightLow are decoded images (null until loadEmbeddedEarth() resolves); the full-size NASA images above replace them
@@ -128,6 +155,7 @@ export function loadEmbeddedEarth() {
   return embeddedPromise;
 }
 export const earthSource = () => earthImg || earthLow;
+export const earthNightSource = () => earthNightImg || earthNightLow;
 
 // Soft round sprite + shock-ring sprite, drawn once on the CPU.
 let spriteCv = null,
