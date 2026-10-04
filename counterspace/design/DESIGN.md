@@ -5,9 +5,14 @@ checked by looking at the page or by running a tool in `tools/`.
 
 ## 1. What "excellent" means here
 
-A visitor is a law student, a lecturer or a policy reader who owns the book. They are not engineers. In the first ten seconds they should think: this
-is a carefully made piece of editorial design about something serious. In the next ten minutes they should understand, without effort, what the
-charts show, which events have a 3D explainer, and where every fact comes from.
+The main visitor is a member of the general public or a journalist with no space-law background (confirmed by the product owner); readers of the book are a
+secondary audience. They are not engineers. Their first job is to see law and weapons on one timeline. In the first ten seconds they should think: this is a
+carefully made piece of editorial design about something serious. In the first minute they should see how weapons and law line up in time. In the next ten
+minutes they should understand, without effort, what the charts show, which events have a 3D explainer, and where every fact comes from. Explain everything
+from scratch: spell out acronyms, say what a thing is before why it matters, never assume the reader knows the law.
+
+`PRODUCT.md` (project root) holds the product truth. This guide holds the visual and wording rules. Where the Impeccable design skill's rules (next section)
+conflict with anything below, the Impeccable rules win.
 
 A reviewer scoring from screenshots and by clicking around gives 97 or more only when all of this is true:
 
@@ -23,6 +28,33 @@ A reviewer scoring from screenshots and by clicking around gives 97 or more only
 6. **It works everywhere.** Light and dark themes both look designed (not inverted). 390 px, 900 px and 1440 px all look intentional. Text never
    clips. Touch targets are comfortable. Reduced motion is respected.
 7. **The words are plain.** No software jargon, no internal vocabulary, no stock phrases. See section 3.
+
+## 1b. Impeccable rules (the design skill the product owner asked us to follow)
+
+Source: impeccable.style (skill files `SKILL.md`, `reference/craft-floor.md` and the command references). The detector (`impeccable detect`) applies 61 rules to the built page; it is
+a gate, not a verdict. These are bans and floors, not tastes.
+
+Bans:
+- No kicker or eyebrow label above a heading. No section numbers (01, 02). No badge above the headline.
+- No hero-metric template (big number, small label, supporting stats). Facts live in sentences and in the contents list.
+- No colour border-left or border-right wider than 1px on cards, list items, callouts or alerts.
+- No gradient text. No glass or blur as decoration. No zero-offset coloured halos. No hard offset shadows. No hairline border together with a wide soft shadow on the same card.
+- No same-size icon-heading-text card grids as page structure. Never nested cards.
+- No unicode glyphs or emoji as icons (one drawn icon set only).
+- No cream or beige page background by reflex; no purple-to-cyan "AI" palette; no neon glow on dark.
+- No identical scroll-in on every section. No bounce or elastic easing. No animation of layout properties. No pulsing, blinking or auto-scrolling decoration.
+- Copy: no em dashes in prose, no "Not X. Y." slogan contrasts, no generic marketing words, no repeated text inside one container.
+
+Floors:
+- Contrast 4.5:1 for text (3:1 for large text). Body measure 65 to 75 characters. Body text 16px or more; nothing under 12px. Line height at least 1.3 for multi-line text.
+- Display type at most 96px; tracking never tighter than -0.04em (we stay above -0.02em). Balanced headings. Obvious scale and weight steps.
+- Motion: one authored moment (the hero), functional transitions elsewhere, exponential ease-out (`cubic-bezier(.16,1,.3,1)`), content visible by default, a real `prefers-reduced-motion` alternative.
+- States for every control (hover, focus, active, disabled, loading, empty, error). Browser surfaces (selection, caret, scrollbars, focus ring, underline offset, tabular numerals) carry the design.
+- Light or dark is chosen from the use scene, not by category: readers look at the page in daylight and in the evening, so both themes are first-class; the hero and the 3D viewer are dark because the subject is space.
+
+Process (in order): critique (two isolated assessments: design review and detector with browser evidence), audit (accessibility, performance, theming, responsive, implementation integrity; 0 to 4 each),
+then the refine commands that fit the findings (typeset, layout, colorize, animate, delight, adapt, harden, optimize, clarify, distill), then polish. Verify in bounded passes: build, inspect once with desktop and mobile
+together, fix in one batch, confirm once, stop.
 
 ## 2. Look and feel
 
@@ -62,7 +94,7 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 | Body prose | Newsreader 400, 18 px, line 1.6 (reading width 66ch) |
 | Interface text | Plex Sans 400/500/600, 14-15 px |
 | Small | Plex Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
-| Eyebrow label | Plex Sans 600, 12.5 px, uppercase, tracking 0.14em |
+| Short label (key group names, table headers) | Plex Sans 600, 12.5 px, uppercase only when 1 to 3 words, tracking 0.08em |
 | Numerals | Plex Sans with tabular figures |
 
 ### 2.3 Space, shape, depth, motion
@@ -82,8 +114,8 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 - **Icons.** One set only: the sprite in `src/partials/icons.html`, used as `<svg class="ico"><use href="#i-name"/></svg>`. Never use text glyphs
   (`▶ ◀ ⟳ ⤓ ⚖ ✕ ◐`) or emoji as icons. Add new icons to the sprite in the same style (24 px grid, 1.8 px stroke, round caps).
 - **Hover cards.** Small, calm, serif title, a short definition list, a quiet source line. Same card on every chart.
-- **Key.** A single line of swatch and label pairs at 13.5 px, grouped under small eyebrow labels. Hidden behind "How to read this" when long.
-- **Callout** ("What to notice"): a 3 px accent rule on the left and one or two sentences of serif text.
+- **Key.** A single line of swatch and label pairs at 13.5 px, grouped under short plain group names. Hidden behind "How to read this" when long.
+- **Callout** (the one thing to notice): a tinted block with an icon at the start and one or two sentences of serif text. No side stripe.
 - **Tables.** Tidy, 14 px, zebra-free, sticky header, comfortable padding. On a phone each row becomes a labelled card.
 
 ## 3. Words
@@ -114,15 +146,15 @@ then why it matters. Never explain the software.
 
 ### 3.2 Chapter names (use these exact words in the page, navigation, section titles and cards)
 
-| No. | Name | Title of the section |
-|---|---|---|
-| 01 | Law and policy | Law and policy on one timeline |
-| 02 | Anti-satellite tests | How high anti-satellite tests have reached, and the debris they left |
-| 03 | Jamming, lasers and cyber | Attacks that leave satellites in orbit |
-| 04 | Close approaches | Satellites that fly close to other satellites |
-| 05 | Who can do what | Which states hold which counterspace capabilities, by decade |
-| 06 | Capability, then law | How long the law took to follow |
-| 07 | Sources and method | Where every fact comes from |
+| Name | Title of the section |
+|---|---|
+| Law and policy | Law and policy on one timeline |
+| Anti-satellite tests | How high anti-satellite tests have reached, and the debris they left |
+| Jamming, lasers and cyber | Attacks that leave satellites in orbit |
+| Close approaches | Satellites that fly close to other satellites |
+| Who can do what | Which states hold which counterspace capabilities, by decade |
+| Capability, then law | How long the law took to follow |
+| Sources and method | Where every fact comes from |
 
 Spell out acronyms on first use in each section (anti-satellite, ASAT; low Earth orbit, LEO). SWF means the Secure World Foundation: say so the
 first time it appears on the page. Domain terms the book itself uses (GEO, GNSS, co-orbital) stay, with a short gloss on first use.
@@ -138,14 +170,15 @@ no wording errors.
 
 ## 4. Page anatomy
 
-1. **Hero.** Full width, dark in both themes. Large display title and lede on the left, the Earth large on the right (the photographic Earth, lit,
-   with the three orbit shells and their labels). One primary action ("Take the 3D tour") and one secondary ("Jump to the charts"). A slim row of five
-   large figures underneath (tests, destructive intercepts, jamming and cyber operations, close approaches, laws and policies). Before any interaction
-   no 3D library is loaded: the first picture is drawn from the embedded Earth image.
-2. **Chapter navigation.** Seven numbered chapters (section 3.2). Sticky on scroll without competing with the sticky law timeline.
-3. **Chapters.** Each has: eyebrow (`02  Anti-satellite tests`), title, one plain-language sentence saying what to look for, the chart, a one-line key,
-   an optional callout, and a "Show the data" disclosure.
-4. **Law and policy timeline** (chapter 01) stays in view as the reader scrolls, so every chart can be read against it.
+1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede on the left, the Earth large on the right (the photographic Earth, lit, with the three
+   orbit shells and their labels). One primary action ("Take the 3D tour") and one secondary ("Jump to the charts"). No big-number strip. Under the lede, a contents list of seven
+   plain rows (not cards): the chapter name as a link and one factual sentence that carries the relevant count. Before any interaction no 3D library is loaded: the first picture
+   is drawn from the embedded Earth image. The hero is the page's one authored motion moment (a short entrance, then the live globe).
+2. **Chapter navigation.** The contents list in the hero, plus on screens at least 1360 px wide a slim rail on the right edge with seven dots (the name shows on hover and focus). It does
+   not compete with the sticky law timeline and shows no numbers.
+3. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, a one-line key, an optional callout, and a "Show the data" disclosure. No label above
+   the title, no number.
+4. **Law and policy timeline** (the first chapter) stays in view as the reader scrolls, so every chart can be read against it.
 5. **Sources and method.** Readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
 6. **Footer.** Three short columns: about this page, data and licence, type and images.
 
