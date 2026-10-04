@@ -33,18 +33,20 @@ Use transform and opacity only. The sweep must not delay or block the title, the
 
 ## Layout
 
-- Desktop (900 px and wider): the title block (title, lede, the two buttons) occupies the upper left; the picture runs the full width of the hero (full-bleed, about 380 to 440 px tall) beneath it, so title and
-  picture are both inside the first 900 px of height at 1440 x 900. The contents list (seven rows, already built by track P) moves below the picture.
-- Phone (390 px): the picture is a compact version (about 360 px tall): fewer annotations (two), the same bands, the limb, the ticks; the title block above it; no horizontal scroll; labels at least 12 px.
+- Desktop (900 px and wider): the hero is one full-bleed picture that fills the first viewport under the top bar (about 100vh minus the bar, between 620 and 800 px tall). The title, lede and the two buttons sit in the empty
+  sky at the upper left: the first decades of the space age happened low, so the upper left of a log-altitude picture is naturally empty. Keep the marks clear of the text block (the block ends about 45% down and
+  50% across; choose the altitude scale so the 1960s and 1970s marks stay below it) and never put a mark under text. The contents list (seven rows, already built by track P) follows the hero, after the fold.
+- Phone (390 px): the title block comes first, the picture below it as a compact version (about 380 px tall): two annotations, the same bands, the limb, the ticks; no horizontal scroll; labels at least 12 px.
 - The picture is `role="img"` with a text alternative that says what it shows in two or three sentences, plus a visually hidden list of the plotted events for screen readers (or a link to the data table of the
-  anti-satellite chapter). The marks are not individually focusable here (the charts below carry the keyboard and hover cards); the picture says so in the caption.
-- The "Rotate the globe" live 3D hero and its button are retired from the hero. The 3D orbit overview stays available as an explainer: open it from a plain link under the picture ("See the orbit regions in 3D")
+  anti-satellite chapter). The marks are not individually focusable here (the charts below carry the keyboard and hover cards); the caption says so.
+- The "Rotate the globe" live 3D hero and its button are retired from the hero. The 3D orbit overview stays available as an explainer: open it from a plain link under the title block ("See the orbit regions in 3D")
   using `window.__cs.openScene` with the hero overview scene (read `src/scenes/config.js` for `HERO` and how `scene-ui.js` starts it; if it cannot open as a normal scene, report what is needed).
+- The static picture from track S3 (`src/scenes/svg/globe.js`, the stage-shaped Earth with three shells) is no longer the hero picture; keep its code working for the viewer and reuse its Earth drawing for the limb where useful.
 
 ## Rules that bind this work (Impeccable)
 
 No kicker or eyebrow, no section numbers, no big-number hero metrics, no gradient text, no glow or halo, no glass, no cards. One edge treatment per surface. Text at least 12 px (labels), body 16 px or more,
-contrast at least 4.5:1 on whatever is behind it (check over the photographic limb: put a flat dark band under the law labels). Display type at most 56 px for the title here. Motion only as above.
+contrast at least 4.5:1 on whatever is behind it (check over the photographic limb: put a flat dark band under the law labels). Display type at most 56 px for the title here (48 px on tablets, 36 px on phones). Motion only as above.
 Wording: plain, no em dashes, no slogan contrasts, no jargon (say "anti-satellite test", not "kinetic event"; "altitude", not "apogee", unless explained).
 
 ## Files you may touch
