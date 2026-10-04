@@ -3,9 +3,46 @@
 // (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLStill(GLHost), see app.js.)
 // ============================================================================
 import { DEG, ll } from './core.js';
-import { earthImg } from './earth.js';
 import { STILL_ASPECT, stillFor } from './still-config.js';
-import { SANS, SERIF, fontsReady } from '../fonts.js';
+import { SANS, fontsReady } from '../fonts.js';
+import { renderSVG } from './svg-fallback.js';
+import { bandHeight, drawBand, simOf, stillFileName, stillFromSVG, stillMeta } from './svg/still-frame.js';
+
+// A label pill in the box the placer gave it (w x h), in the shared look: hairline border, a dot of the item's colour at the left, text in ink. The type is
+// sized from the box, so it follows whatever label scale the placer used, and shrinks only if the text would not fit.
+function canvasPill(g, x, y, w, h, text, { color, dot, quiet }) {
+  const sc = h / 23,
+    padX = 9 * sc,
+    dotD = dot ? 7 * sc : 0,
+    gap = dot ? 6 * sc : 0;
+  g.font = `600 100px ${SANS}`;
+  const per = g.measureText(text).width / 100,
+    fs = Math.min(12.5 * sc, (w - 2 * padX - dotD - gap) / per),
+    cw = dotD + gap + per * fs;
+  g.save();
+  if (quiet) g.globalAlpha = 0.85;
+  g.fillStyle = 'rgba(8,13,28,.72)';
+  g.strokeStyle = 'rgba(150,175,230,.35)';
+  g.lineWidth = Math.max(1.5, sc);
+  g.beginPath();
+  g.roundRect(x - w / 2, y - h / 2, w, h, 8 * sc);
+  g.fill();
+  g.stroke();
+  let tx = x - cw / 2;
+  if (dot) {
+    g.fillStyle = color;
+    g.beginPath();
+    g.arc(tx + dotD / 2, y, dotD / 2, 0, 2 * Math.PI);
+    g.fill();
+    tx += dotD + gap;
+  }
+  g.font = `600 ${fs}px ${SANS}`;
+  g.fillStyle = '#eef2fb';
+  g.textAlign = 'left';
+  g.textBaseline = 'middle';
+  g.fillText(text, tx, y + fs * 0.04);
+  g.restore();
+}
 
 const methods = {
   // Extent of the picture for recomposing: like _contentBox, but a whole-globe disc (and shells that fit about 1.2 frames) counts unclipped.
@@ -209,39 +246,38 @@ const methods = {
     for (const q of lp) {
       if (!q || !q.leader) continue;
       lay.segs.push({ x1: q.ax, y1: q.ay, x2: q.qx, y2: q.qy, own: q.text });
-      g.strokeStyle = q.color || '#dfe6f7';
-      g.globalAlpha = 0.92;
+      g.strokeStyle = 'rgba(238,242,251,.6)';
       g.lineWidth = Math.max(4.4, 2.1 * s); // visible weight: >= 4 px in a 3000 px still (the checker enforces it)
       lay.leadW = g.lineWidth;
+      g.lineCap = 'round';
       g.beginPath();
       g.moveTo(q.ax, q.ay);
       g.lineTo(q.qx, q.qy);
       g.stroke();
       g.beginPath();
       g.arc(q.ax, q.ay, g.lineWidth * 1.1, 0, 2 * Math.PI);
-      g.fillStyle = q.color || '#dfe6f7';
+      g.fillStyle = 'rgba(238,242,251,.6)';
       g.fill();
-      g.globalAlpha = 1;
     }
-    for (const q of lp) {
-      if (!q) continue;
-      g.font = `600 ${Math.round(11 * ls)}px ${SANS}`;
-      const tw = g.measureText(q.text).width + 12 * ls;
-      lay.boxes.push({ n: q.text, x: q.x - tw / 2, y: q.y - 9 * ls, w: tw, h: 18 * ls });
-      g.fillStyle = 'rgba(5,8,18,0.8)';
-      g.beginPath();
-      g.roundRect(q.x - tw / 2, q.y - 9 * ls, tw, 18 * ls, 4 * ls);
-      g.fill();
-      g.textBaseline = 'middle';
-      g.fillStyle = q.color || '#dfe6f7';
-      g.fillText(q.text, q.x, q.y);
-      g.textBaseline = 'alphabetic';
-    }
+    // the shared label look: a pill with a hairline border and a dot of the item's colour (places and orbit names carry no dot and are a little quieter)
+    lp.forEach((q, i) => {
+      if (!q) return;
+      const L = this.labels[i],
+        quiet = L?.cls === 'shell' || L?.item?.shape === 'site' || !!L?.item?.orbit;
+      lay.boxes.push({ n: q.text, x: q.x - q.w / 2, y: q.y - q.h / 2, w: q.w, h: q.h });
+      canvasPill(g, q.x, q.y, q.w, q.h, q.text, { color: q.color || '#dfe6f7', dot: !quiet, quiet });
+    });
     if (sBox) {
-      g.font = `${Math.round(12 * cs)}px ${SANS}`;
-      g.fillStyle = 'rgba(5,8,18,0.78)';
-      g.fillRect(sBox[0], sBox[1], sBox[2], sBox[3]);
-      g.fillStyle = '#ffe08a';
+      // the caption: one pill in the warm accent
+      g.fillStyle = 'rgba(8,13,28,.72)';
+      g.strokeStyle = 'rgba(150,175,230,.35)';
+      g.lineWidth = Math.max(2, 0.9 * s);
+      g.beginPath();
+      g.roundRect(sBox[0], sBox[1], sBox[2], sBox[3], 8 * s * 1.3);
+      g.fill();
+      g.stroke();
+      g.font = `500 ${Math.round(12 * cs)}px ${SANS}`;
+      g.fillStyle = '#ffc86b';
       g.textBaseline = 'middle';
       sLines.forEach((l, k) => g.fillText(l, W / 2, sBox[1] + 5 * cs + 8 * cs + k * 16 * cs));
       g.textBaseline = 'alphabetic';
@@ -251,14 +287,19 @@ const methods = {
       g.textBaseline = 'middle';
       let fs = 13 * s;
       for (; fs > 8 * s; fs -= 0.5 * s) {
-        g.font = `700 ${Math.round(fs)}px ${SANS}`;
-        if (g.measureText(o.title).width + 16 * s <= W) break;
+        g.font = `600 ${Math.round(fs)}px ${SANS}`;
+        if (g.measureText(o.title).width + 24 * s <= W) break;
       }
-      const tw = g.measureText(o.title).width + 16 * s;
-      g.fillStyle = 'rgba(5,8,18,0.85)';
-      g.fillRect(0, 0, Math.min(W, tw), 26 * s);
-      g.fillStyle = '#ffe08a';
-      g.fillText(o.title, 8 * s, 13 * s);
+      const tw = g.measureText(o.title).width + 24 * s;
+      g.fillStyle = 'rgba(8,13,28,.72)';
+      g.strokeStyle = 'rgba(150,175,230,.35)';
+      g.lineWidth = Math.max(2, 0.9 * s);
+      g.beginPath();
+      g.roundRect(6 * s, 4 * s, Math.min(W - 12 * s, tw), 22 * s, 8 * s);
+      g.fill();
+      g.stroke();
+      g.fillStyle = '#eef2fb';
+      g.fillText(o.title, 18 * s, 15 * s);
       g.textBaseline = 'alphabetic';
     }
     return c;
@@ -278,8 +319,8 @@ const methods = {
       // a multi-episode still lays its tiles side by side (tileW x tileH each, native resolution, no upscaling)
       tileW = panels ? Math.min(Math.floor(targetW / panels.length), Math.floor(maxDim / panels.length)) : 0,
       W = panels ? tileW * panels.length : Math.min(targetW, maxDim),
-      // every still is exactly W x (W / STILL_ASPECT) in total: header band + body + footer band (40 and 92 units of W / 1000)
-      H = Math.round(W / STILL_ASPECT) - Math.round(40 * (W / 1000)) - Math.round(92 * (W / 1000)),
+      // every still is exactly W x (W / STILL_ASPECT) in total: the picture, then the band (title, context, source, credit)
+      H = Math.round(W / STILL_ASPECT) - bandHeight(W),
       // a multi-episode still shows landscape tiles (title strip above, large caption below, all centred in the body)
       tileH = panels ? Math.round(H * (conf.tileHK ?? 0.7)) : 0;
     const cam = this.camera,
@@ -323,17 +364,17 @@ const methods = {
             return cur ? [...out, cur] : out;
           };
         bg.drawImage(tile, k * tileW, ty);
-        bg.strokeStyle = 'rgba(255,224,138,0.5)';
+        bg.strokeStyle = 'rgba(150,175,230,.35)';
         bg.lineWidth = Math.max(2, W / 1000);
         bg.strokeRect(k * tileW + 0.5, ty + 0.5, tileW - 1, tileH - 1);
         bg.textAlign = 'left';
         bg.textBaseline = 'top';
-        bg.fillStyle = '#ffe08a';
-        bg.font = `700 ${44 * sz}px ${SANS}`;
+        bg.fillStyle = '#eef2fb';
+        bg.font = `600 ${44 * sz}px ${SANS}`;
         wrap(`${pn.title} · ${pn.brief}`, tileW - 36 * sz)
           .slice(0, 2)
           .forEach((l, i, a) => bg.fillText(l, k * tileW + 18 * sz, ty - (a.length - i) * 54 * sz - 8 * sz));
-        bg.fillStyle = '#e9edf7';
+        bg.fillStyle = '#b3bdd6';
         bg.font = `${40 * sz}px ${SANS}`;
         if (pn.status) wrap(pn.status, tileW - 36 * sz).forEach((l, i) => bg.fillText(l, k * tileW + 18 * sz, ty + tileH + 16 * sz + i * 52 * sz));
         bg.textBaseline = 'alphabetic';
@@ -343,51 +384,14 @@ const methods = {
     } else body = this._stillBody(W, H, {});
     const lay = this.stillLayout;
     if (tileLays) lay.tiles = tileLays;
-    const s = W / 1000,
-      hb = Math.round(40 * s),
-      fb = Math.round(92 * s);
     const c = document.createElement('canvas');
     c.width = body.width;
-    c.height = body.height + hb + fb;
+    c.height = body.height + bandHeight(W);
     const g = c.getContext('2d');
     g.fillStyle = '#070b17';
     g.fillRect(0, 0, c.width, c.height);
-    g.drawImage(body, 0, hb);
-    g.textAlign = 'left';
-    g.fillStyle = '#0b1120';
-    g.fillRect(0, 0, W, hb);
-    g.fillRect(0, hb + body.height, W, fb);
-    g.strokeStyle = 'rgba(255,224,138,0.28)';
-    g.lineWidth = Math.max(1, s);
-    g.beginPath();
-    g.moveTo(0, hb - 0.5);
-    g.lineTo(W, hb - 0.5);
-    g.moveTo(0, hb + body.height + 0.5);
-    g.lineTo(W, hb + body.height + 0.5);
-    g.stroke();
-    g.textBaseline = 'middle';
-    g.fillStyle = '#ffe08a';
-    g.font = `600 ${Math.round(14 * s)}px ${SANS}`;
-    g.fillText('Illustrative, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
-    g.fillStyle = '#e9edf7';
-    g.font = `600 ${Math.round(25 * s)}px ${SERIF}`;
-    g.fillText(title, 16 * s, hb + body.height + 24 * s);
-    // Source line (cite) and imagery credit each on their own line, at a readable size (shrunk only if a line would overflow).
-    const credit = earthImg ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
-    // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
-    const srcTxt = `Source: ${String(cite || '')
-      .trim()
-      .replace(/[.;,\s]+$/, '')}.`;
-    let f = Math.round(15 * s);
-    for (; f > 10 * s; f -= 0.5 * s) {
-      g.font = `${f}px ${SANS}`;
-      if (Math.max(g.measureText(srcTxt).width, g.measureText(credit).width) <= W - 32 * s) break;
-    }
-    g.font = `${f}px ${SANS}`;
-    g.fillStyle = '#c3cbe0';
-    g.fillText(srcTxt, 16 * s, hb + body.height + 54 * s);
-    g.fillText(credit, 16 * s, hb + body.height + 77 * s);
-    g.textBaseline = 'alphabetic';
+    g.drawImage(body, 0, 0);
+    drawBand(g, W, body.height, stillMeta(this.sim.cfg, title, cite));
     const url = c.toDataURL('image/png');
     if (this.sim.flags) this.sim.flags.all = keep.all;
     if (this.t !== keep.t || conf.all) this.update(keep.t);
@@ -411,10 +415,32 @@ export function installGLStill(GLHost) {
   Object.assign(GLHost.prototype, methods);
   // Reduced motion / no WebGL: there is no GL host, so window.__cs.host() is null and host().stillPNG() threw. Give __cs.host() a static stand-in whose
   // stillPNG(title, cite) rasterises the SVG diagram (same print layout) through exportStill; it returns a Promise of the PNG data URL.
+  // The saved image of an open still diagram is laid out afresh for the picture area (a 760 px stage, so its labels come out large in the 3000 px image) and
+  // framed like the live save. The page's own save button calls src/scene-ui.js, which should hand its diagram to stillFromSVG the same way.
+  const diagramStill = async () => {
+    const node = document.querySelector('#sceneView > svg'),
+      sim = node && simOf(node);
+    if (!sim || !document.getElementById('overlay')?.classList.contains('open')) return null;
+    const tmp = document.createElement('div');
+    tmp.setAttribute('aria-hidden', 'true');
+    tmp.style.cssText = 'position:fixed;left:-10000px;top:0;width:760px;height:375px;overflow:hidden';
+    document.body.appendChild(tmp);
+    try {
+      const printed = renderSVG(sim, tmp, undefined, { print: true });
+      if (window.__cs) window.__cs.lastStillLay = printed?.__lay; // test hook: the print layout's probe (craft sizes, Earth disc)
+      return await stillFromSVG(printed, sim.cfg.title, sim.cfg.cite);
+    } finally {
+      tmp.remove();
+    }
+  };
   const wrap = (cs) => {
-    const real = cs.host;
+    const real = cs.host,
+      realExport = cs.exportStill;
     if (typeof real !== 'function') return cs;
     cs.host = () => real() || { static: true, stillPNG: () => cs.exportStill() };
+    cs.exportStill = async () => (real() ? realExport() : ((await diagramStill()) ?? realExport()));
+    cs.stillFromSVG = stillFromSVG; // for the page's save button
+    cs.stillFileName = stillFileName;
     return cs;
   };
   if (window.__cs) wrap(window.__cs);

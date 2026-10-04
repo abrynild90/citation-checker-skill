@@ -73,7 +73,7 @@ export function renderPanels(sim, el, renderSVG, popts = {}) {
       .attr('width', pw)
       .attr('height', ph)
       .attr('fill', 'none')
-      .attr('stroke', 'rgba(255,224,138,.35)')
+      .attr('stroke', 'rgba(150,175,230,.35)')
       .attr('rx', 6);
   });
   sim.flags.all = true;

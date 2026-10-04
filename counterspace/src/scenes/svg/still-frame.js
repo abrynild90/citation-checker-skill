@@ -21,6 +21,7 @@ const BAND_BG = '#0c1222',
 const sims = new WeakMap();
 // The diagram remembers its scene, so its saved image can say what it shows.
 export const rememberSim = (node, sim) => sims.set(node, sim);
+export const simOf = (node) => sims.get(node);
 
 // What the band says, from the scene: the title, one line of context, the source line (with the imagery credit) and the picture note.
 export function stillMeta(cfg, title, cite) {
@@ -120,7 +121,7 @@ export function drawBand(g, W, y0, m) {
     if (g.measureText(m.title).width <= textW) break;
   }
   g.fillStyle = INK;
-  const titleBase = y0 + 40 * u + px * 0.8;
+  const titleBase = y0 + 50 * u + px * 0.8;
   g.fillText(m.title, mx, titleBase);
   // one line of context, as large as fits (never under 36 px at 3000 wide, the size of 12 px on the page)
   let cp = 44 * u;
