@@ -107,8 +107,11 @@ const overlay = $('overlay'),
   stateEl = $('sceneState'),
   stateTxt = $('sceneStateTxt'),
   hintEl = $('sceneHint');
-const COMPACT = matchMedia('(max-width: 760px)'), // the phone layout of scenes.css
-  STACKED = matchMedia('(max-width: 760px), (max-width: 900px) and (max-aspect-ratio: 1/1)'), // picture above story
+// The same queries as scenes.css: the phone layout, the layout with the picture above the story, and the short and wide layout (a phone on its side).
+const PHONE = '(max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px)',
+  COMPACT = matchMedia(PHONE),
+  STACKED = matchMedia(PHONE + ', (max-width: 900px) and (max-aspect-ratio: 1/1)'),
+  SHORT = matchMedia('(max-height: 540px) and (min-aspect-ratio: 11/10) and (min-width: 600px)'),
   KEYBOARD = matchMedia('(hover: hover) and (pointer: fine)'),
   CLOSE_MS = 220; // the closing fade in scenes.css (--dur-2) with a little margin
 let wideSel = -1,
@@ -129,18 +132,18 @@ let wideSel = -1,
   camOn = -2,
   ttlTxt = '',
   lblTxt = '',
-  lastUserScroll = 0,
+  lastUserScroll = -Infinity, // when the reader last scrolled the story themselves
   stillOnly = false; // the open scene shows a still diagram (animation off or 3D unavailable)
 export function setHeroSim(s) {
   heroSim = s;
 }
 
 // ---------------------------------------------------------------- small helpers
-const sec = (s) => `${Math.round(s)} s`;
+const sec = (s, fine) => `${fine ? String(+s.toFixed(1)) : Math.round(s)} s`;
 const slug = (s) =>
   String(s)
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/\p{M}/gu, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
@@ -221,7 +224,7 @@ export async function openScene(id, originEl) {
   curSim = sim;
   camsEl.textContent = '';
   view.querySelector(':scope > svg')?.remove();
-  if (!host && !REDUCED && glOK !== false) setState('loading', 'Loading the 3D view');
+  if (!host && !REDUCED && glOK !== false) setState('loading', 'Loading the 3D view. You can read the story while you wait.');
   else setState(null);
   if (!wasOpen) panel.focus({ preventScroll: true });
   const h = await getHost();
@@ -244,13 +247,14 @@ export async function openScene(id, originEl) {
       setState(null);
     } catch (e) {
       console.warn('Still diagram failed', e);
-      setState('error', 'The picture could not be drawn. The story still tells what happened.');
+      setState('error', 'The picture could not be drawn. Reload the page to try again, or read the story.');
     }
   }
   stillOnly = !h;
   staticMode(!h);
   syncScrub(h ? h.t : 0);
   asideBody.scrollTop = 0;
+  panel.scrollTop = 0; // a short window scrolls the whole panel
   requestAnimationFrame(() => {
     asideBody.scrollTop = 0; // layout of the new text is settled: a scene never opens scrolled
     updateFades();
@@ -263,7 +267,8 @@ export async function openScene(id, originEl) {
 // Text of the open scene: title, count, story, source, related law, picture note and the steps.
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
-  titleEl.textContent = cfg.title;
+  // Names such as X-37B or SJ-21 stay on one line instead of breaking at their hyphen.
+  titleEl.innerHTML = esc(cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   captionEl.textContent = cfg.caption;
@@ -333,18 +338,19 @@ export function closeScene() {
 function renderSteps(cfg) {
   const dur = cfg.duration || 0;
   steps = (cfg.status || cfg.steps || []).map(([t, text]) => ({ t, text }));
+  const fine = steps.some((s, i) => i && Math.round(s.t * dur) === Math.round(steps[i - 1].t * dur)); // two steps would read the same: show tenths
   stepIdx = -1;
   stepsSection.hidden = !steps.length;
   stepsEl.innerHTML = steps
     .map(
       (s, i) =>
-        `<li data-i="${i}"><button type="button" class="step"><span class="st-time">${dur ? sec(s.t * dur) : ''}</span>` +
+        `<li data-i="${i}"><button type="button" class="step"><span class="st-time">${dur ? sec(s.t * dur, fine) : ''}</span>` +
         `<span class="st-rail" aria-hidden="true"></span><span class="st-text">${esc(s.text)}</span></button></li>`,
     )
     .join('');
   stepsBox.open = !COMPACT.matches;
   stepNow.textContent = '';
-  lastUserScroll = 0;
+  lastUserScroll = -Infinity;
   ticksFor = undefined; // forces the scrubber ticks to be drawn for this scene
 }
 function stepAt(t) {
@@ -378,7 +384,7 @@ function followStep(li) {
   if (performance.now() - lastUserScroll < 4000) return;
   const box = asideBody.getBoundingClientRect(),
     r = li.getBoundingClientRect();
-  if (!r.height) return; // the list is folded away (phone)
+  if (!stepsBox.open || !r.height) return; // the list is folded away (phone)
   const top = box.top + 56,
     bottom = box.bottom - 96;
   let dy = 0;
@@ -412,7 +418,7 @@ stepsEl.addEventListener('click', (e) => {
 const storyEl = $('sceneStory'),
   footEl = $('sceneFoot');
 function placeFoot() {
-  const into = STACKED.matches ? asideBody : storyEl;
+  const into = STACKED.matches || SHORT.matches ? asideBody : storyEl;
   if (footEl.parentElement !== into) into.appendChild(footEl);
   updateFades();
 }
@@ -421,6 +427,7 @@ COMPACT.addEventListener('change', () => {
   updateFades();
 });
 STACKED.addEventListener('change', placeFoot);
+SHORT.addEventListener('change', placeFoot);
 placeFoot();
 
 // ---------------------------------------------------------------- scrubber, time and views
@@ -443,7 +450,7 @@ function syncCams() {
   camOn = on;
   [...camsEl.children].forEach((b, i) => {
     b.setAttribute('aria-pressed', String(i === on));
-    b.title = b.dataset.name || '';
+    b.title = `${b.dataset.name ? b.dataset.name + ' ' : ''}(key ${i + 1})`;
   });
 }
 function syncScrub(t) {
@@ -477,8 +484,8 @@ function staticMode(on) {
   staticEl.hidden = !on;
   if (on) {
     staticTxt.textContent = REDUCED
-      ? 'Animation is switched off on this device. This is a still diagram.'
-      : 'The 3D view could not start on this device. This is a still diagram.';
+      ? 'Animation is switched off on this device, so this is a still diagram. Turn animation on in your device settings to watch it move.'
+      : 'The 3D view could not start here, so this is a still diagram. Reload the page to try again.';
     setPlayBtn(false);
   } else setPlayBtn(true);
   stepsNote.textContent = on ? 'Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
@@ -575,7 +582,7 @@ if ('ResizeObserver' in window) new ResizeObserver(updateFades).observe(asideBod
 
 // ---------------------------------------------------------------- keyboard hint, shown once per visit
 function showHint() {
-  if (hintShown || !KEYBOARD.matches || COMPACT.matches) return;
+  if (hintShown || stillOnly || !KEYBOARD.matches || COMPACT.matches || SHORT.matches) return;
   hintShown = true;
   hintEl.classList.add('on');
   hintTimer = setTimeout(hideHint, 9000);
