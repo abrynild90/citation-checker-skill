@@ -1,10 +1,12 @@
 // ============================================================================
-// scenes/svg/globe.js: the globe of the static diagram: which globe is drawn (the real disc or a limb arc), gradients and filters, star field, Earth raster or
-// vector land, sun lighting and the "Earth (not to scale)" tag
+// scenes/svg/globe.js: the globe of the still diagram: which globe is drawn (the real disc or a limb arc), the star field, the Earth (the lit photograph
+// projected onto the disc), its thin atmosphere and the "Earth, not to scale" tag
 // ============================================================================
-import { DEG, mulberry, sunFor, toLL } from '../core.js';
-import { earthRaster, landGeometry, lastSS } from './earth-raster.js';
-import { SANS } from '../../fonts.js';
+import { mulberry } from '../core.js';
+import { SUN_VIEW, cachedEarth, earthRasterSync, hasEmbeddedEarth, landGeometry } from './earth-raster.js';
+import { trackEarth } from './upgrade.js';
+import { earthImg } from '../earth.js';
+import { drawPill, pillSize } from './pill.js';
 
 // A panel shows the whole Earth only when enough of the disc falls inside it.
 export function panelShowsGlobe(opts, CX, CY, R, W, H) {
@@ -56,191 +58,139 @@ export function pickGlobe(opts, W, cl, CX, CY, R, fTop, fBot, proj, path, showGl
   return { GX, GY, GR, gproj, gpath, limb };
 }
 
-// Gradients, filters and the sphere clip path (ids carry the per-SVG prefix U).
-export function addDefs(svg, U, { GX, GY, GR, gpath }) {
+const stop = (g, offset, color, opacity = 1) => g.append('stop').attr('offset', offset).attr('stop-color', color).attr('stop-opacity', opacity);
+
+// The sphere's clip path (ids carry the per-SVG prefix U). The limb of every globe is this one clean circle.
+export function addDefs(svg, U, { gpath }) {
   const defs = svg.append('defs');
-  const bg = defs.append('radialGradient').attr('id', `${U}-bg`).attr('cx', '50%').attr('cy', '50%').attr('r', '75%');
-  bg.append('stop').attr('offset', 0).attr('stop-color', '#0f1a33');
-  bg.append('stop').attr('offset', 1).attr('stop-color', '#070b16');
-  const gl = defs.append('radialGradient').attr('id', `${U}-glow`);
-  gl.append('stop').attr('offset', 0.9).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0.5);
-  gl.append('stop').attr('offset', 1).attr('stop-color', '#5fa8ff').attr('stop-opacity', 0);
-  const oc = defs.append('radialGradient').attr('id', `${U}-ocean`).attr('cx', '38%').attr('cy', '35%').attr('r', '80%');
-  oc.append('stop').attr('offset', 0).attr('stop-color', '#245c98');
-  oc.append('stop').attr('offset', 0.6).attr('stop-color', '#123a68');
-  oc.append('stop').attr('offset', 1).attr('stop-color', '#071a34');
-  // Lit globe: soft sphere shading + a blurred night side, from the same sun direction as the live scene.
-  const sh = defs
-    .append('radialGradient')
-    .attr('id', `${U}-shade`)
-    .attr('gradientUnits', 'userSpaceOnUse')
-    .attr('cx', GX - 0.28 * GR)
-    .attr('cy', GY - 0.3 * GR)
-    .attr('r', 1.55 * GR);
-  sh.append('stop').attr('offset', 0).attr('stop-color', '#fff').attr('stop-opacity', 0.16);
-  sh.append('stop').attr('offset', 0.45).attr('stop-color', '#fff').attr('stop-opacity', 0);
-  sh.append('stop').attr('offset', 0.45).attr('stop-color', '#000').attr('stop-opacity', 0);
-  sh.append('stop').attr('offset', 1).attr('stop-color', '#000').attr('stop-opacity', 0.5);
-  defs
-    .append('filter')
-    .attr('id', `${U}-blur`)
-    .attr('x', '-20%')
-    .attr('y', '-20%')
-    .attr('width', '140%')
-    .attr('height', '140%')
-    .append('feGaussianBlur')
-    .attr('stdDeviation', Math.max(4, GR * 0.05));
-  {
-    // Land texture: fractal-noise mottling clipped to the land shape (desert/forest/ice tones), so the coastlines are not a flat cartoon fill.
-    const f = defs.append('filter').attr('id', `${U}-tex`).attr('x', 0).attr('y', 0).attr('width', 1).attr('height', 1);
-    f.append('feTurbulence').attr('type', 'fractalNoise').attr('baseFrequency', 0.014).attr('numOctaves', 3).attr('seed', 4).attr('result', 'n');
-    f.append('feColorMatrix')
-      .attr('in', 'n')
-      .attr('type', 'matrix')
-      .attr('values', '0 0 0 0 0.86  0 0 0 0 0.74  0 0 0 0 0.5  0 0 0 1.1 -0.42')
-      .attr('result', 't');
-    f.append('feComposite').attr('in', 't').attr('in2', 'SourceGraphic').attr('operator', 'in').attr('result', 'tl');
-    const m = f.append('feMerge');
-    m.append('feMergeNode').attr('in', 'SourceGraphic');
-    m.append('feMergeNode').attr('in', 'tl');
-  }
-  const sc = defs
-    .append('radialGradient')
-    .attr('id', `${U}-sheen`)
-    .attr('gradientUnits', 'userSpaceOnUse')
-    .attr('cx', GX - 0.32 * GR)
-    .attr('cy', GY - 0.34 * GR)
-    .attr('r', 0.5 * GR);
-  sc.append('stop').attr('offset', 0).attr('stop-color', '#cfe6ff').attr('stop-opacity', 0.2);
-  sc.append('stop').attr('offset', 1).attr('stop-color', '#cfe6ff').attr('stop-opacity', 0);
   defs.append('clipPath').attr('id', `${U}-clip`).append('path').datum({ type: 'Sphere' }).attr('d', gpath);
   return defs;
 }
 
-export function drawStars(svg, W, H) {
-  const rs = mulberry(99);
-  for (let k = 0; k < 90; k++) {
+// A fine star field: many faint pinpoints, some brighter, in cool and warm whites. Stars sharing a size, tint and brightness are one path of zero-length
+// round-capped segments, so a dense sky stays a handful of elements. Nothing is drawn inside `keep` (the Earth and its atmosphere).
+export function drawStars(svg, W, H, keep) {
+  const rs = mulberry(99),
+    n = Math.round((W * H) / 2300),
+    TINTS = ['#dfe8ff', '#cfdcff', '#fff0da'],
+    SIZES = [0.55, 0.8, 1.15, 1.6],
+    buckets = {};
+  for (let k = 0; k < n; k++) {
     const x = rs() * W,
       y = rs() * H,
-      b = 0.25 + rs() * 0.5;
-    svg
-      .append('circle')
-      .attr('cx', x)
-      .attr('cy', y)
-      .attr('r', rs() < 0.15 ? 1.1 : 0.7)
-      .attr('fill', '#dfe8ff')
-      .attr('fill-opacity', b);
+      pick = rs(),
+      si = pick < 0.6 ? 0 : pick < 0.86 ? 1 : pick < 0.97 ? 2 : 3,
+      ti = rs() < 0.62 ? 0 : rs() < 0.5 ? 1 : 2,
+      b = 0.22 + rs() * 0.5 + si * 0.08;
+    if (keep && Math.hypot(x - keep.cx, y - keep.cy) < keep.r) continue;
+    const key = `${si}|${ti}|${Math.round(b * 4)}`;
+    (buckets[key] ||= { si, ti, op: Math.min(0.95, Math.round(b * 4) / 4 + 0.1), d: '' }).d += `M${x.toFixed(1)},${y.toFixed(1)}h0`;
   }
+  const gStars = svg.append('g').attr('class', 'stars').attr('fill', 'none').attr('stroke-linecap', 'round');
+  for (const q of Object.values(buckets))
+    gStars.append('path').attr('d', q.d).attr('stroke', TINTS[q.ti]).attr('stroke-width', SIZES[q.si]).attr('stroke-opacity', q.op);
 }
 
-// Glow, sphere, graticule, Earth (raster or vector land), sun lighting and outline.
-export function drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb }) {
+// The atmosphere is part of the planet: a hairline ring on the limb and a narrow soft band just outside it, brightest where the sun lights it (a gradient
+// along the sun axis, pale blue-white to deep blue) and almost gone on the dark side. Its width follows the planet's size and is capped in px, so a huge limb
+// arc in a panel gets a thin horizon line. No halo, no outer glow.
+function drawAtmosphere(svg, defs, U, GX, GY, GR) {
+  const ux = SUN_VIEW[0],
+    uy = -SUN_VIEW[1],
+    ul = Math.hypot(ux, uy) || 1,
+    dx = ux / ul,
+    dy = uy / ul;
+  const lg = defs
+    .append('linearGradient')
+    .attr('id', `${U}-atm`)
+    .attr('gradientUnits', 'userSpaceOnUse')
+    .attr('x1', GX + dx * GR)
+    .attr('y1', GY + dy * GR)
+    .attr('x2', GX - dx * GR)
+    .attr('y2', GY - dy * GR);
+  stop(lg, 0, '#ecf6ff', 1);
+  stop(lg, 0.3, '#a9d6ff', 0.9);
+  stop(lg, 0.58, '#5b9cf2', 0.5);
+  stop(lg, 0.82, '#3a68c4', 0.26);
+  stop(lg, 1, '#2a4c9a', 0.16);
+  const band = Math.max(2, Math.min(GR * 0.03, 7)),
+    pad = band * 4,
+    f = defs
+      .append('filter')
+      .attr('id', `${U}-atmblur`)
+      .attr('filterUnits', 'userSpaceOnUse')
+      .attr('x', GX - GR - pad)
+      .attr('y', GY - GR - pad)
+      .attr('width', 2 * (GR + pad))
+      .attr('height', 2 * (GR + pad));
+  f.append('feGaussianBlur').attr('stdDeviation', band * 0.45);
   svg
     .append('circle')
     .attr('cx', GX)
     .attr('cy', GY)
-    .attr('r', GR * 1.08)
-    .attr('fill', `url(#${U}-glow)`);
-  svg.append('path').datum({ type: 'Sphere' }).attr('d', gpath).attr('fill', `url(#${U}-ocean)`).attr('stroke', '#7fb6ff').attr('stroke-opacity', 0.6);
-  svg.append('path').datum(d3.geoGraticule10()).attr('d', gpath).attr('fill', 'none').attr('stroke', 'rgba(140,190,255,0.16)');
-  const landGeo = landGeometry();
-  const ras = earthRaster(gproj, GX, GY, GR, limb && { x0: 0, y0: 0, x1: W, y1: H });
-  if (ras)
-    svg
-      .append('image')
-      .attr('href', ras.url)
-      .attr('x', ras.x)
-      .attr('y', ras.y)
-      .attr('width', ras.w)
-      .attr('height', ras.h)
-      .attr('preserveAspectRatio', 'none')
-      .attr('clip-path', `url(#${U}-clip)`);
-  else
-    svg
-      .append('path')
-      .datum(landGeo)
-      .attr('d', gpath)
-      .attr('fill', '#4c7a56')
-      .attr('filter', `url(#${U}-tex)`)
-      .attr('stroke', '#8fb98a')
-      .attr('stroke-width', 0.5)
-      .attr('stroke-opacity', 0.55);
-  svg.node().dataset.earth = ras ? 'bluemarble' : 'vector';
-  svg.node().dataset.ss = ras ? lastSS.toFixed(2) : '';
-  {
-    // Sun direction in the view basis; the terminator crosses the view axis at a = -sz (units of GR), night is on the far side.
-    const sd = toLL(sunFor(sim.sunRef)),
-      [slo, sla] = rot([sd.lon, sd.lat]),
-      sx = Math.cos(sla * DEG) * Math.sin(slo * DEG),
-      sy = Math.sin(sla * DEG),
-      sz = Math.cos(sla * DEG) * Math.cos(slo * DEG),
-      pm = Math.hypot(sx, sy) || 1e-6;
-    const ux = sx / pm,
-      uy = -sy / pm,
-      cx = GX,
-      cyy = GY,
-      at = (a) => [cx + ux * a * GR, cyy + uy * a * GR];
-    const [x1, y1] = at(-sz - 0.55),
-      [x2, y2] = at(-sz + 0.25);
-    const ng = defs
-      .append('linearGradient')
-      .attr('id', `${U}-night`)
-      .attr('gradientUnits', 'userSpaceOnUse')
-      .attr('x1', x1)
-      .attr('y1', y1)
-      .attr('x2', x2)
-      .attr('y2', y2);
-    ng.append('stop').attr('offset', 0).attr('stop-color', '#01030a').attr('stop-opacity', 0.78);
-    ng.append('stop').attr('offset', 1).attr('stop-color', '#01030a').attr('stop-opacity', 0);
-    const cg = svg.append('g').attr('clip-path', `url(#${U}-clip)`);
-    cg.append('path').datum({ type: 'Sphere' }).attr('d', gpath).attr('fill', `url(#${U}-shade)`);
-    cg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-sheen)`);
-    cg.append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', W)
-      .attr('height', H)
-      .attr('fill', `url(#${U}-night)`)
-      .attr('opacity', limb ? 0.3 : pm < 0.06 && sz > 0 ? 0 : 1);
-    svg
-      .append('path')
-      .datum({ type: 'Sphere' })
-      .attr('d', gpath)
-      .attr('fill', 'none')
-      .attr('stroke', '#8cc8ff')
-      .attr('stroke-opacity', 0.55)
-      .attr('stroke-width', 1.2);
+    .attr('r', GR + band * 0.45)
+    .attr('fill', 'none')
+    .attr('stroke', `url(#${U}-atm)`)
+    .attr('stroke-width', band)
+    .attr('opacity', 0.55)
+    .attr('filter', `url(#${U}-atmblur)`);
+  svg
+    .append('circle')
+    .attr('cx', GX)
+    .attr('cy', GY)
+    .attr('r', GR + 0.4)
+    .attr('fill', 'none')
+    .attr('stroke', `url(#${U}-atm)`)
+    .attr('stroke-width', Math.max(1.2, Math.min(GR * 0.006, 2.4)));
+}
+
+// The Earth: the lit photograph (day and night images by the sun) as soon as imagery exists. Until then, for a few milliseconds, a flat dark disc that the
+// photograph dissolves into (upgrade.js). The vector coastline map is drawn only when the page carries no imagery at all.
+export function drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gpath, limb, print }) {
+  const node = svg.node(),
+    embedded = hasEmbeddedEarth(),
+    layer = svg.append('g').attr('class', 'earth').attr('clip-path', `url(#${U}-clip)`);
+  const base = layer.append('path').datum({ type: 'Sphere' }).attr('d', gpath).attr('fill', '#0b1830');
+  // supersampling: a print layout is shown 3.95 times larger in the saved image; the hero draws lean (it must be on screen within ~150 ms); else 2x or the device ratio
+  const ss = print ? 3.95 : sim.cfg.spin ? Math.max(1.6, Math.min(devicePixelRatio || 1, 2.5)) : Math.max(2, Math.min(devicePixelRatio || 1, 3));
+  const win = limb && { x0: 0, y0: 0, x1: W, y1: H };
+  // The saved image needs its picture now (drawn on this thread); a diagram on the page takes one a worker has already drawn for this view, or paints it a
+  // moment later.
+  const ras = print ? earthRasterSync(rot, GX, GY, GR, win, ss) : cachedEarth(rot, GX, GY, GR, win, ss);
+  node.__earth = { rot, GX, GY, GR, win, ss, layer: layer.node(), full: false, level: 0, busy: 0, image: null, vec: null, fade: !print };
+  if (ras) {
+    const level = print ? (earthImg ? 2 : 1) : ras.level;
+    const im = layer.append('image').attr('href', ras.url).attr('x', ras.x).attr('y', ras.y).attr('width', ras.w).attr('height', ras.h);
+    im.attr('preserveAspectRatio', 'none');
+    Object.assign(node.__earth, { image: im.node(), level });
+    node.dataset.earth = level >= 2 ? 'bluemarble' : 'embedded';
+    node.dataset.ss = ras.ss.toFixed(2);
+    base.remove();
+    if (!print) trackEarth(node);
+  } else {
+    node.__earth.vec = base.node();
+    node.dataset.ss = '';
+    if (embedded) {
+      node.dataset.earth = 'pending';
+      trackEarth(node);
+    } else {
+      // no imagery in the page: real coastlines from the land data over a flat ocean
+      node.dataset.earth = 'vector';
+      layer.append('path').datum({ type: 'Sphere' }).attr('d', gpath).attr('fill', '#123e70');
+      layer.append('path').datum(landGeometry()).attr('d', gpath).attr('fill', '#4c7a56').attr('stroke', '#8fb98a').attr('stroke-width', 0.5).attr('stroke-opacity', 0.55);
+    }
   }
+  drawAtmosphere(svg, defs, U, GX, GY, GR);
 }
 
 // A panel that looks at craft far from the Earth (GEO) shows the Earth as a big limb arc on its own side (drawn above, to no scale): name it.
-// (a dark pill keeps it readable over bright land; its marks keep labels off it)
-export function drawLimbTag(svg, W, fBot, marks) {
-  const tw = 128,
-    lx = W - tw / 2 - 8, // a corner tag: bottom-right of the panel's free area, over the limb and clear of the caption's centre
-    ly = fBot - 5;
-  svg
-    .append('rect')
-    .attr('x', lx - tw / 2)
-    .attr('y', ly - 14)
-    .attr('width', tw)
-    .attr('height', 20)
-    .attr('rx', 4)
-    .attr('fill', 'rgba(5,8,18,0.78)'); // a dark pill: the tag stays readable over bright land
-  svg
-    .append('text')
-    .attr('x', lx)
-    .attr('y', ly)
-    .attr('text-anchor', 'middle')
-    .attr('fill', '#dfe9ff')
-    .attr('fill-opacity', 0.9)
-    .attr('font-family', SANS)
-    .attr('font-size', 12)
-    .attr('font-style', 'italic')
-    .attr('stroke', '#050812')
-    .attr('stroke-opacity', 0.7)
-    .attr('stroke-width', 3)
-    .attr('paint-order', 'stroke')
-    .text('Earth (not to scale)');
-  marks.push({ x: lx, y: ly - 4, r: 16, n: 'earth-cue' }, { x: lx - 44, y: ly - 4, r: 12, n: 'earth-cue' }, { x: lx + 44, y: ly - 4, r: 12, n: 'earth-cue' });
+// A secondary label in the shared pill look; its marks keep other labels off it.
+export function drawLimbTag(svg, W, fBot, marks, fs) {
+  const text = 'Earth, not to scale',
+    { w, h } = pillSize(text, { dot: false, fs }),
+    lx = W - w / 2 - 8, // a corner tag: bottom-right of the panel's free area, over the limb and clear of the caption's centre
+    ly = fBot - h / 2 - 2;
+  drawPill(svg, { x: lx, y: ly, w, h, text, dot: false, secondary: true, fs });
+  // the tag as a row of small circles: labels placed by the shared placer stay off it
+  for (let cx = lx - w / 2 + h / 2; cx < lx + w / 2; cx += h * 0.9) marks.push({ x: Math.min(cx, lx + w / 2 - h / 2), y: ly, r: h / 2 + 1, n: 'earth-cue' });
 }

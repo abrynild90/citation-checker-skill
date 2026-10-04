@@ -1,8 +1,8 @@
 // ============================================================================
 // scenes/svg/draw-state.js: the working state of one static diagram: label candidates, obstacles, marks, the debris grid, and the helpers that fill them
 // ============================================================================
-import { labelW } from '../labels.js';
 import { DEG } from '../core.js';
+import { labelFs, pillSize } from './pill.js';
 
 // Everything the item, label and probe passes share. `g` (the content group) and the globe geometry are added by renderSVG once they exist.
 export function createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY, R, showGlobe, craftBase }) {
@@ -34,19 +34,25 @@ export function createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY
   // cfg.staticTextPhone: [from, to] pairs
   const phoneText = (x) => (W < 520 && x && sim.cfg.staticTextPhone ? sim.cfg.staticTextPhone.reduce((a, [f, r]) => a.replace(f, r), x) : x);
   const NARROW = W < 600 || !!sim.cfg.acts; // short label texts on a phone, and in the busy multi-act composite (spaceplanes) at any width
-  const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false, pin = false) => {
+  const fs = labelFs(W, opts);
+  // kind: 'item' (a craft, an event, a beam: the pill carries a dot of the item's colour) or 'place' (a site or an orbit name: no dot, a little quieter)
+  const label = (p, text, color = '#dfe6f7', dx = 0, dy = 0, at = null, opt = false, pin = false, kind = 'item') => {
     if (!p || p.hidden || !text || p.x < 4 || p.y < 4 || p.x > W - 4 || p.y > H - 4) return;
     if (W < 520 && !opts.panel && sim.cfg.staticDropPhone?.includes(text)) return; // a phone drops the labels that would crowd the subject
     if (!opts.panel && sim.cfg.staticDrop?.includes(text)) return; // cfg.staticDrop: labels the static diagram leaves out at every width
     if (opts.drop?.includes(text)) return; // a panel's own label dropped where it would cross another on a phone
     if (opt && W < 520 && sim.cfg.acts && !opts.panel) return; // the busy multi-act composite drops its secondary labels on a phone
+    const dot = kind === 'item',
+      { w, h } = pillSize(text, { dot, fs });
     cands.push({
       x: at ? at[0] * W : p.x + dx,
-      y: at ? at[1] * H : p.y - 14 + dy,
+      y: at ? at[1] * H : p.y - 16 + dy,
       px: p.x,
       py: p.y,
-      w: labelW(text),
-      h: 19,
+      w,
+      h,
+      fs,
+      dot,
       text,
       color,
       opt,
@@ -95,42 +101,42 @@ export function createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY
     NARROW,
     phoneText,
     label,
+    fs,
     gapPts,
   };
 }
 
-// The dashed shell rings: their points are obstacles for label placement, the circles are drawn under the globe.
+// The shell rings: their points are obstacles for label placement; each is drawn as a fine dotted circle under the globe (a boundary, not a path).
 export function drawShells(S) {
-  const { svg, shells, ringsL, CX, CY, R, W, H } = S;
+  const { svg, shells, ringsL, CX, CY, R } = S;
   shells.forEach((it) => {
     if (it.noRing) return;
     const rp = [];
     for (let a = 0; a <= 120; a++) rp.push([CX + it.r * R * Math.cos((a / 120) * 2 * Math.PI), CY + it.r * R * Math.sin((a / 120) * 2 * Math.PI)]);
     ringsL.push(rp);
-  });
-  shells.forEach((it) =>
     svg
       .append('circle')
       .attr('cx', CX)
       .attr('cy', CY)
       .attr('r', it.r * R)
-      .attr('fill', it.color)
-      .attr('fill-opacity', it.r * R > 0.62 * Math.min(W, H) ? 0 : 0.05)
+      .attr('fill', 'none')
       .attr('stroke', it.color)
-      .attr('stroke-opacity', it.noRing ? 0 : 0.55)
-      .attr('stroke-dasharray', '3 4'),
-  );
+      .attr('stroke-opacity', 0.62)
+      .attr('stroke-width', 1.5)
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-dasharray', '0.1 6.5');
+  });
 }
 
 // Shell labels sit on the shell line at their preferred angle, or at the nearest angle where that point is inside the frame.
 export function queueShellLabels(S, fTop, stY) {
-  const { sim, shells, cands, CX, CY, R, W, NARROW } = S;
+  const { sim, shells, cands, CX, CY, R, W, NARROW, fs } = S;
   shells.forEach((it, i) => {
     const lab = it.staticLabel ?? it.label;
     if (!lab) return;
     if (W < 520 && sim.cfg.staticDropPhone?.includes(lab)) return; // a phone drops the shell labels that would crowd the subject's
     const tx = it.short && NARROW && !it.staticLabel ? it.short : lab,
-      w = labelW(tx);
+      { w, h } = pillSize(tx, { dot: false, fs });
     // the label sits on the shell line at its preferred angle, or at the nearest angle where that point is inside the frame
     let a = (it.staticAng ?? it.ang ?? 35 + i * 14) * DEG,
       shown = false;
@@ -147,7 +153,7 @@ export function queueShellLabels(S, fTop, stY) {
     if (!shown) return;
     const px = CX + it.r * R * Math.cos(a),
       py = CY - it.r * R * Math.sin(a),
-      o = (w / 2) * Math.abs(Math.cos(a)) + 9.5 * Math.abs(Math.sin(a)) + 7; // the pill sits just outside its dashed shell line, never on it
-    cands.push({ x: px + Math.cos(a) * o, y: py - Math.sin(a) * o, px, py, w, h: 19, fixed: true, text: tx, color: it.color });
+      o = (w / 2) * Math.abs(Math.cos(a)) + (h / 2) * Math.abs(Math.sin(a)) + 7; // the pill sits just outside its shell line, never on it
+    cands.push({ x: px + Math.cos(a) * o, y: py - Math.sin(a) * o, px, py, w, h, fs, dot: false, fixed: true, text: tx, color: it.color });
   });
 }

@@ -77,7 +77,18 @@ function drawCurve(S, it) {
     orbitPts.push(...pts.filter((q) => !q.hidden).map((q) => [q.x, q.y]));
   }
   if (it.label && it.labelAt && pts.length > 2 && !it.staticHide)
-    label(project(it.labelAt), it.short && NARROW ? it.short : it.label, it.color, it.labelDx, it.labelDy, W < 700 ? null : it.staticAt, it.opt);
+    // an orbit's name is a quiet label; the name of a path or an action (an interceptor, a rocket) carries a dot like any other item
+    label(
+      project(it.labelAt),
+      it.short && NARROW ? it.short : it.label,
+      it.color,
+      it.labelDx,
+      it.labelDy,
+      W < 700 ? null : it.staticAt,
+      it.opt,
+      false,
+      it.orbit || it.gate ? 'place' : 'item',
+    );
 }
 
 // A particle cloud (debris, belt): a sample of its points, counted into the debris grid.
@@ -250,6 +261,7 @@ function drawPoint(S, it) {
         W < 700 ? null : (opts.print && it.staticAtPrint) || it.staticAt,
         it.opt,
         it.staticPin,
+        it.shape === 'site' ? 'place' : 'item', // a place name is a quiet label
       );
       if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;
       if (cands.length > n0 && marks.length > mi) cands.at(-1).mk = mi;

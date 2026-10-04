@@ -1,12 +1,14 @@
 // ============================================================================
-// scenes/svg/layout.js: frame fit for the static diagram: status caption, craft base size, banner/footer reservations, and the globe's size and centre
+// scenes/svg/layout.js: frame fit for the static diagram: caption, craft base size, banner and key reservations, and the globe's size and centre
 // ============================================================================
-// Wrap the status caption to maxCh characters per line (its height is part of the fit).
-function wrapStatus(text, maxCh) {
+import { PILL, labelFs, pillSize, textW } from './pill.js';
+
+// Wrap the caption to maxW px (measured with the caption's own type); its height is part of the fit.
+function wrapStatus(text, maxW, fs) {
   const lines = [];
   let cur = '';
   for (const wd of text.split(' ')) {
-    if ((cur + ' ' + wd).trim().length > maxCh && cur) {
+    if (cur && textW((cur + ' ' + wd).trim(), fs, 500) > maxW) {
       lines.push(cur);
       cur = wd;
     } else cur = (cur + ' ' + wd).trim();
@@ -64,7 +66,7 @@ function fitExtent(sim, opts, t, W, unit) {
   return { x0, x1, y0, y1 };
 }
 
-// Real banner box (the page's "illustrative" note sits over the diagram), as [x, y, w, h]; the footer strip is reserved separately.
+// Real banner box (the viewer's caption chip sits over the diagram), as [x, y, w, h].
 function bannerBox(el, opts, W) {
   let bRes = opts.panel ? [-20, -20, 1, 1] : [8, 8, Math.min(W - 16, 380), W < 520 ? 40 : 26];
   if (!opts.panel) {
@@ -76,18 +78,17 @@ function bannerBox(el, opts, W) {
   return bRes;
 }
 
-// Everything that sets where the globe goes: status caption box, craft base size, banner and footer reservations, and the solved radius and centre
+// Everything that sets where the globe goes: caption box, craft base size, banner and key reservations, and the solved radius and centre
 // (R, CX, CY, in px). `unit` projects a 3D point onto the unit globe.
 export function fitFrame(sim, el, t, opts, W, H, unit) {
-  // Status text is wrapped first: its height is part of the fit.
+  // The caption is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
     stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
     stFs = !opts.panel && W >= 700 ? 14 : 12, // the caption matches the live caption: 14 px on a desktop stage
-    stCw = stFs * 0.55, // px per character
-    stLh = stFs + 4,
-    maxCh = Math.floor((W - (opts.panel ? 14 : 40)) / (opts.panel ? 6 : stCw)),
+    stLh = Math.round(stFs * 1.35),
+    maxW = W - (opts.panel ? 16 : 32) - 2 * PILL.padX,
     hasStatus = !!(opts.panel ? stTxt : st),
-    stLines = hasStatus ? wrapStatus(stTxt, maxCh) : [];
+    stLines = hasStatus ? wrapStatus(stTxt, maxW, stFs) : [];
   const nCraft = sim.items.filter((i) => i.kind === 'point' && i.prim && i.shape !== 'none' && !i.ctx && !i.liveOnly && i.pos(t)).length,
     craftBase = opts.panel
       ? Math.min(W * 0.17, opts.phone ? 40 : 52)
@@ -98,26 +99,20 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
             W * (W < 520 ? (nCraft <= 2 ? 0.14 : 0.07) : nCraft <= 2 ? 0.1 : nCraft <= 4 ? 0.055 : 0.045),
           ),
         );
-  const stH = stLines.length * stLh + 10,
-    stY = H - (opts.panel ? 6 : 34) - stH,
-    stW = Math.min(W - 16, Math.max(...stLines.map((l) => l.length), 1) * stCw + 24);
+  const stH = stLines.length * stLh + 14,
+    stY = H - (opts.panel ? 6 : 12) - stH,
+    stW = Math.min(W - (opts.panel ? 12 : 16), Math.max(...stLines.map((l) => textW(l, stFs, 500)), 1) + 2 * PILL.padX + 6);
   const { x0, x1, y0, y1 } = fitExtent(sim, opts, t, W, unit);
   const bRes = bannerBox(el, opts, W);
-  // Footer scale note: the longest wording that fits at >= 9.5 px (10 px on a desk); never shrunk below that.
-  const fFont = W < 520 ? 9.5 : 10,
-    fCands = [
-      `${sim.cfg.title} · compressed radial scale (Earth radius = 1; altitude^0.45)`,
-      'Compressed radial scale (Earth radius = 1; altitude^0.45)',
-      'Compressed radial scale · altitude^0.45',
-      'Radial scale compressed',
-    ],
-    ftxt = opts.panel ? opts.title || '' : fCands.find((x) => x.length * fFont * 0.56 + 20 <= W - 12) || fCands.at(-1),
-    fw = opts.panel ? 0 : Math.min(W - 12, ftxt.length * fFont * 0.56 + 20);
+  // A panel's title is a pill at its top left corner: its size is part of the fit (and reserved for the label placer).
+  const tt = opts.panel && opts.title ? pillSize(opts.title, { dot: false, fs: labelFs(W, opts) }) : null,
+    titleW = tt ? tt.w + 6 : 0,
+    titleH = tt ? tt.h + 6 : 0;
   const docked = sim.items.some((i) => i.dockWith && i.dockOn(t)), // a docked pair is two models wide: more side margin
     fx = sim.cfg.staticFitRing ? 20 : 14 + (opts.panel ? 0 : Math.round(craftBase * (docked ? 1.15 : 0.6))), // a ring-fit scene: the ring sets the width
-    fTop = opts.panel ? (opts.title ? 22 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
+    fTop = opts.panel ? (opts.title ? titleH + 6 : 6) : Math.max(W < 520 ? 56 : 42, bRes[1] + bRes[3] + 4) + (nCraft ? Math.round(craftBase * 0.3) : 0),
     // staticKeyClearPhone: on a phone the Earth sits above the legend key (the key never lies on the globe)
-    keyH = !opts.panel && W < 520 && sim.cfg.staticKeyClearPhone && sim.cfg.staticKey ? sim.cfg.staticKey.length * 15.5 + 14 : 0,
+    keyH = !opts.panel && W < 520 && sim.cfg.staticKeyClearPhone && sim.cfg.staticKey ? sim.cfg.staticKey.length * 20 + 20 : 0,
     fBot = stY - 8 - keyH - (nCraft && !opts.panel ? Math.round(craftBase * 0.3) : 0);
   let R = Math.max(20, Math.min((W - 2 * fx) / (x1 - x0), (fBot - fTop) / (y1 - y0)));
   let CX = W / 2 - ((x0 + x1) / 2) * R,
@@ -131,5 +126,5 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
     CX = W / 2 - f.x * R;
     CY = (fTop + fBot) / 2 - f.y * R;
   }
-  return { stFs, stLh, stTxt, hasStatus, stLines, nCraft, craftBase, stH, stY, stW, bRes, fFont, ftxt, fw, fTop, fBot, R, CX, CY };
+  return { stFs, stLh, stTxt, hasStatus, stLines, nCraft, craftBase, stH, stY, stW, bRes, titleW, titleH, fTop, fBot, R, CX, CY };
 }
