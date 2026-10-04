@@ -78,6 +78,13 @@ def earth_json():
     return out
 
 
+def posters_json():
+    """One 16:9 WebP picture per 3D explainer (src/assets/posters/<id>.webp, made by tools/make_posters.mjs), embedded as data URLs for
+    <script id="cs-posters">. src/scenes/posters.js reads them: an instant picture while a scene loads, and the gallery cards."""
+    d = R / 'src/assets/posters'
+    return {f.stem: 'data:image/webp;base64,' + base64.b64encode(f.read_bytes()).decode() for f in sorted(d.glob('*.webp'))} if d.is_dir() else {}
+
+
 def esbuild(args, text=None):
     r = subprocess.run([str(ESB), *args], input=text, capture_output=True, text=True, cwd=R / 'src')
     if r.returncode:
@@ -110,6 +117,7 @@ def main():
     html = (tpl.replace('/*__DATA__*/', script_json(data))
             .replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json'))))
             .replace('/*__EARTH__*/', script_json(earth_json()))
+            .replace('/*__POSTERS__*/', script_json(posters_json()))
             .replace('/*__APP__*/', js))
     out = pathlib.Path(os.environ['OUTFILE']) if os.environ.get('OUTFILE') else R / 'index.html'
     out.write_text(html)
