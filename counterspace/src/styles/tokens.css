@@ -1,40 +1,193 @@
-:root, .xbox.xdark{
-  color-scheme: dark;
-  --bg:#0a0f1e; --surface:#10172c; --surface-2:#172040; --line:#2a3558; --grid:#212b4a;
-  --text:#e9edf7; --muted:#a9b3cc; --faint:#7d88a6; --accent:#8cc8ff; --accent-2:#ffcf6e;
-  --warn:#ff9b7a; --focus:#ffd24d;
-  --leo:rgba(120,170,255,.10); --meo:rgba(160,130,255,.08); --geo:rgba(255,200,110,.13);
-  --recon:rgba(255,255,255,.035);
-  --c-us:#56B4E9; --c-ru:#FF8C5A; --c-cn:#F0C24B; --c-in:#3FD0A0; --c-ir:#CFA3E6;
-  --c-kp:#FF9ECF; --c-il:#C3CDDE; --c-iq:#D9C38A; --c-multi:#B9C2D6;
-  --cat-da:#FF8C5A; --cat-co:#F0C24B; --cat-ew:#56B4E9; --cat-de:#CFA3E6; --cat-cy:#3FD0A0;
-  --shadow:0 10px 30px rgba(0,0,0,.45); --edge:rgba(0,0,0,.6);
-  --serif: Newsreader,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
-  --sans: "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+/* Design tokens. Section 2 of design/DESIGN.md explains every role. Never remove a name from this file: other files use them.
+   Theme-independent tokens come first, then the dark set (default, also used by dark downloads), then the light set (twice: by system
+   preference when no theme was chosen, and when light is chosen). Keep the three colour sets identical in their list of names. */
+:root {
+  --serif: Newsreader, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* type scale */
+  --fs-display: clamp(40px, 6vw, 72px);
+  --fs-h2: clamp(28px, 3.4vw, 42px);
+  --fs-h3: 20px;
+  --fs-lede: clamp(19px, 2vw, 23px);
+  --fs-body: 18px;
+  --fs-ui: 15px;
+  --fs-ui-sm: 14px;
+  --fs-small: 13px;
+  --fs-tiny: 12px;
+  /* space (4-point scale), radii, widths */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+  --s-9: 112px;
+  --r-1: 8px;
+  --r-2: 14px;
+  --r-3: 22px;
+  --r-pill: 999px;
+  --container: 1240px;
+  --measure: 66ch;
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  /* the hero and the scene viewer are dark in both themes */
+  --hero-bg: #050813;
+  --hero-text: #eef2fb;
+  --hero-muted: #b3bdd6;
+  --hero-accent: #7cc4ff;
+  --hero-accent-2: #ffc86b;
+  --hero-line: rgba(150, 175, 230, 0.24);
+  --hero-surface: rgba(15, 23, 43, 0.72);
 }
-@media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){
+
+:root,
+.xbox.xdark,
+.scope-dark {
+  color-scheme: dark;
+  --bg: #070b16;
+  --bg-2: #0b1224;
+  --surface: #0f172b;
+  --surface-2: #16203b;
+  --surface-3: #1d2848;
+  --line: rgba(150, 175, 230, 0.18);
+  --line-strong: rgba(150, 175, 230, 0.32);
+  --grid: rgba(150, 175, 230, 0.1);
+  --text: #eef2fb;
+  --muted: #b3bdd6;
+  --faint: #8791ae;
+  --accent: #7cc4ff;
+  --accent-2: #ffc86b;
+  --accent-soft: rgba(124, 196, 255, 0.14);
+  --accent-2-soft: rgba(255, 200, 107, 0.16);
+  --on-accent: #06101f;
+  --thumb: #2a3760;
+  --warn: #ff9b7a;
+  --focus: #ffd24d;
+  --glass: rgba(11, 18, 36, 0.76);
+  --leo: rgba(120, 170, 255, 0.1);
+  --meo: rgba(160, 130, 255, 0.08);
+  --geo: rgba(255, 200, 110, 0.13);
+  --recon: rgba(255, 255, 255, 0.035);
+  --c-us: #56b4e9;
+  --c-ru: #ff8c5a;
+  --c-cn: #f0c24b;
+  --c-in: #3fd0a0;
+  --c-ir: #cfa3e6;
+  --c-kp: #ff9ecf;
+  --c-il: #c3cdde;
+  --c-iq: #d9c38a;
+  --c-multi: #b9c2d6;
+  --cat-da: #ff8c5a;
+  --cat-co: #f0c24b;
+  --cat-ew: #56b4e9;
+  --cat-de: #cfa3e6;
+  --cat-cy: #3fd0a0;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.42), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-3: 0 24px 64px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow: var(--shadow-2);
+  --edge: rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
-    --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
-    --warn:#b2401c; --focus:#b36b00;
-    --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
-    --recon:rgba(0,0,0,.035);
-    --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
-    --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
-    --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
-    --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
+    --bg: #f6f4ee;
+    --bg-2: #efece3;
+    --surface: #ffffff;
+    --surface-2: #f1efe8;
+    --surface-3: #e6e2d6;
+    --line: rgba(30, 35, 55, 0.16);
+    --line-strong: rgba(30, 35, 55, 0.3);
+    --grid: rgba(30, 35, 55, 0.1);
+    --text: #151a28;
+    --muted: #424a5e;
+    --faint: #596176;
+    --accent: #1b5aa6;
+    --accent-2: #8a5a00;
+    --accent-soft: rgba(27, 90, 166, 0.1);
+    --accent-2-soft: rgba(138, 90, 0, 0.12);
+    --on-accent: #ffffff;
+    --thumb: #ffffff;
+    --warn: #b2401c;
+    --focus: #b36b00;
+    --glass: rgba(255, 255, 255, 0.8);
+    --leo: rgba(40, 90, 190, 0.07);
+    --meo: rgba(100, 60, 200, 0.05);
+    --geo: rgba(190, 120, 0, 0.1);
+    --recon: rgba(0, 0, 0, 0.035);
+    --c-us: #0072b2;
+    --c-ru: #c4501a;
+    --c-cn: #886000;
+    --c-in: #007a5a;
+    --c-ir: #8e44ad;
+    --c-kp: #b0357a;
+    --c-il: #4a5568;
+    --c-iq: #7a6522;
+    --c-multi: #5a6275;
+    --cat-da: #c4501a;
+    --cat-co: #886000;
+    --cat-ew: #0072b2;
+    --cat-de: #8e44ad;
+    --cat-cy: #007a5a;
+    --shadow-1: 0 1px 2px rgba(25, 30, 50, 0.08), 0 2px 8px rgba(25, 30, 50, 0.06);
+    --shadow-2: 0 8px 24px rgba(25, 30, 50, 0.12), 0 2px 6px rgba(25, 30, 50, 0.08);
+    --shadow-3: 0 24px 64px rgba(25, 30, 50, 0.22), 0 6px 16px rgba(25, 30, 50, 0.1);
+    --shadow: var(--shadow-2);
+    --edge: rgba(20, 25, 40, 0.28);
   }
 }
-:root[data-theme="light"], .xbox.xlight{
+
+:root[data-theme="light"],
+.xbox.xlight,
+.scope-light {
   color-scheme: light;
-  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
-  --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
-  --warn:#b2401c; --focus:#b36b00;
-  --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
-  --recon:rgba(0,0,0,.035);
-  --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
-  --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
-  --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
-  --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
+  --bg: #f6f4ee;
+  --bg-2: #efece3;
+  --surface: #ffffff;
+  --surface-2: #f1efe8;
+  --surface-3: #e6e2d6;
+  --line: rgba(30, 35, 55, 0.16);
+  --line-strong: rgba(30, 35, 55, 0.3);
+  --grid: rgba(30, 35, 55, 0.1);
+  --text: #151a28;
+  --muted: #424a5e;
+  --faint: #596176;
+  --accent: #1b5aa6;
+  --accent-2: #8a5a00;
+  --accent-soft: rgba(27, 90, 166, 0.1);
+  --accent-2-soft: rgba(138, 90, 0, 0.12);
+  --on-accent: #ffffff;
+  --thumb: #ffffff;
+  --warn: #b2401c;
+  --focus: #b36b00;
+  --glass: rgba(255, 255, 255, 0.8);
+  --leo: rgba(40, 90, 190, 0.07);
+  --meo: rgba(100, 60, 200, 0.05);
+  --geo: rgba(190, 120, 0, 0.1);
+  --recon: rgba(0, 0, 0, 0.035);
+  --c-us: #0072b2;
+  --c-ru: #c4501a;
+  --c-cn: #886000;
+  --c-in: #007a5a;
+  --c-ir: #8e44ad;
+  --c-kp: #b0357a;
+  --c-il: #4a5568;
+  --c-iq: #7a6522;
+  --c-multi: #5a6275;
+  --cat-da: #c4501a;
+  --cat-co: #886000;
+  --cat-ew: #0072b2;
+  --cat-de: #8e44ad;
+  --cat-cy: #007a5a;
+  --shadow-1: 0 1px 2px rgba(25, 30, 50, 0.08), 0 2px 8px rgba(25, 30, 50, 0.06);
+  --shadow-2: 0 8px 24px rgba(25, 30, 50, 0.12), 0 2px 6px rgba(25, 30, 50, 0.08);
+  --shadow-3: 0 24px 64px rgba(25, 30, 50, 0.22), 0 6px 16px rgba(25, 30, 50, 0.1);
+  --shadow: var(--shadow-2);
+  --edge: rgba(20, 25, 40, 0.28);
 }

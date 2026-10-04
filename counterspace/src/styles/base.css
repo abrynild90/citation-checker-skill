@@ -1,33 +1,103 @@
+/* Base: reset, type, the shared components (buttons, segmented control, chips, disclosure, callout, tags) and chapter headings.
+   Section 2 of design/DESIGN.md describes each one. Chart-specific rules belong in charts.css or charts2.css, scene viewer rules in scenes.css. */
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);font-synthesis:style;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:var(--accent)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 var(--sans);font-synthesis:style;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+a{color:var(--accent);text-underline-offset:.2em;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
-.kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
-h1{font:600 clamp(28px,4.7vw,46px)/1.08 var(--serif);margin:8px 0 10px;letter-spacing:-.018em;text-wrap:balance}
-h2{font:600 clamp(22px,2.7vw,30px)/1.2 var(--serif);margin:0 0 6px;letter-spacing:-.01em}
-h3{font:600 17px/1.3 var(--sans);margin:18px 0 6px}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 var(--s-5)}
+@media (max-width:640px){.wrap{padding:0 20px}}
+
+/* Type */
+h1{font:500 var(--fs-display)/1.02 var(--serif);margin:var(--s-3) 0 var(--s-4);letter-spacing:-.022em;text-wrap:balance}
+h2{font:500 var(--fs-h2)/1.12 var(--serif);margin:0;letter-spacing:-.012em;text-wrap:balance}
+h3{font:600 var(--fs-h3)/1.3 var(--sans);margin:var(--s-6) 0 var(--s-2)}
+.lede{font:400 var(--fs-lede)/1.5 var(--serif);color:var(--muted);margin:0}
+.kicker{font:600 12.5px/1.3 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2)}
+.eyebrow{display:flex;align-items:center;gap:var(--s-3);margin:0;font:600 12.5px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2)}
+.eyebrow .num{display:inline-flex;align-items:center;gap:var(--s-3);color:var(--faint);font-variant-numeric:tabular-nums}
+.eyebrow .num::after{content:"";width:28px;height:1px;background:var(--line-strong)}
 .nb{white-space:nowrap}
-.btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding:10px 16px}
-.btn.primary:hover{filter:brightness(1.08)}
-.btn{font:500 13px/1 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line);
-  border-radius:8px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:34px}
-.btn:hover{border-color:var(--accent)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-.btn.small{padding:6px 9px;font-size:12px;min-height:30px}
+em,i{font-style:italic}
+table,.glance,.legal-list,.tm,.count,.card,svg text,.hlabel{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font-family:inherit}
 [hidden]{display:none!important}
+
+/* Callout: the one thing to notice */
+.callout{margin:var(--s-4) 0 0;padding:var(--s-1) 0 var(--s-1) var(--s-4);border-left:3px solid var(--accent);font:400 17px/1.5 var(--serif);color:var(--text);max-width:var(--measure)}
+.callout b,.callout strong{font-weight:600}
+
+/* Buttons. Primary: filled pill. Default: outlined pill. Quiet: text with an icon. Icon: round, no label. Small: 34 px. */
+.btn{--h:40px;display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);min-height:var(--h);padding:0 var(--s-4);font:500 14px/1 var(--sans);
+  color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:var(--r-pill);cursor:pointer;text-decoration:none;white-space:nowrap;
+  transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),color var(--dur-1) var(--ease),box-shadow var(--dur-1) var(--ease),transform var(--dur-1) var(--ease)}
+.btn:hover{background:var(--surface-3);border-color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;transform:none}
+.btn .ico{width:18px;height:18px;vertical-align:0}
+.btn.small{--h:34px;padding:0 var(--s-3);font-size:13px}
+.btn.primary{--h:48px;padding:0 22px;font:600 15px/1 var(--sans);color:var(--on-accent);background:var(--accent);border-color:var(--accent);box-shadow:var(--shadow-1)}
+.btn.primary:hover{background:var(--accent);filter:brightness(1.1);box-shadow:var(--shadow-2)}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent);padding:0 var(--s-3)}
+.btn.quiet:hover{background:var(--accent-soft);border-color:transparent}
+.btn.icon{width:var(--h);padding:0;border-radius:50%}
+.btn[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.tools{display:flex;gap:var(--s-2);flex-wrap:wrap;align-items:center}
+
+/* Segmented control: one track, the chosen item sits on a raised thumb */
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-pill)}
+.seg .btn,.seg button{--h:32px;min-height:var(--h);padding:0 var(--s-4);border:0;background:transparent;color:var(--muted);border-radius:var(--r-pill);font:500 13.5px/1 var(--sans);box-shadow:none}
+.seg .btn:hover,.seg button:hover{background:transparent;color:var(--text)}
+.seg .btn[aria-pressed="true"],.seg button[aria-pressed="true"],.seg button[aria-selected="true"]{background:var(--thumb);color:var(--text);box-shadow:var(--shadow-1),0 0 0 1px var(--line-strong)}
+
+/* Filter chips (a dot of the category colour and a name; switched-off chips are dashed, never struck through) */
+.chips{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-top:var(--s-3)}
+.chip{display:inline-flex;align-items:center;gap:var(--s-2);min-height:36px;padding:0 14px 0 12px;font:500 13.5px/1 var(--sans);color:var(--text);background:var(--surface-2);
+  border:1px solid var(--line-strong);border-radius:var(--r-pill);cursor:pointer;transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),color var(--dur-1) var(--ease)}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="false"]{color:var(--faint);background:transparent;border-style:dashed}
+.chip[aria-pressed="false"] i{opacity:.4}
+.chip:disabled{opacity:.5;cursor:not-allowed}
+@media (max-width:640px){.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.chip{justify-content:flex-start}}
+
+/* Disclosure ("Show the data", "How to read this"): a quiet text button with a turning chevron */
+details.table,details.about{margin:var(--s-4) 0 var(--s-1)}
+details.table>summary,details.about>summary{list-style:none;display:inline-flex;align-items:center;gap:var(--s-2);cursor:pointer;min-height:36px;margin-left:calc(var(--s-2)*-1);
+  padding:0 var(--s-3) 0 var(--s-2);font:500 14px/1.2 var(--sans);color:var(--accent);border-radius:var(--r-pill);transition:background var(--dur-1) var(--ease)}
+details>summary::-webkit-details-marker{display:none}
+details.table>summary::before,details.about>summary::before{content:"";width:16px;height:16px;flex:none;background:currentColor;transition:transform var(--dur-2) var(--ease);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat}
+details[open]>summary::before{transform:rotate(90deg)}
+details.table>summary:hover,details.about>summary:hover{background:var(--accent-soft)}
+.about{max-width:820px;font-size:14px;color:var(--muted)}
+.about p{margin:var(--s-2) 0 0}
+
+/* Small labels */
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;font:600 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);background:var(--accent-2-soft);border-radius:var(--r-pill)}
+kbd,.kbd{font:600 12px/1 var(--sans);padding:4px 7px;border-radius:6px;background:var(--surface-3);border:1px solid var(--line-strong);border-bottom-width:2px;color:var(--text)}
+
+/* Chapters: every chart section opens with an eyebrow (number and plain name), a title, one sentence on what to look for, and its controls */
+section.chart{padding:var(--s-8) 0 var(--s-6);scroll-margin-top:8px}
+@media (min-width:761px){section.chart{scroll-margin-top:var(--band-h,172px)}}
+@media (max-width:760px){section.chart{padding:var(--s-7) 0 var(--s-5)}}
+section.chart+section.chart{border-top:1px solid var(--line)}
+.chapter-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s-2) var(--s-6);align-items:end;margin:0 0 var(--s-5)}
+.chapter-head>.eyebrow{grid-column:1/-1;margin-bottom:var(--s-1)}
+.chapter-head>h2{grid-column:1;max-width:22em}
+.chapter-head>.lede{grid-column:1;margin-top:var(--s-2);max-width:var(--measure);font-size:clamp(17px,1.5vw,20px)}
+.chapter-head>.tools{grid-column:2;grid-row:2/4;align-self:end}
+@media (max-width:760px){.chapter-head{grid-template-columns:1fr}.chapter-head>.tools{grid-column:1;grid-row:auto;margin-top:var(--s-3)}}
+
 .only-phone{display:none}
 .phone-only-btn{display:none}
 @media (max-width:640px){.phone-only-btn{display:inline-flex}}
 .show-phone{display:none}
 @media (max-width:640px){.hide-phone{display:none}.show-phone{display:inline}}
 @media (max-width:640px){.only-phone{display:block}}
-button,input,select,textarea{font-family:inherit}
 #expDark{margin:0;width:18px;height:18px}
-table,.glance,.legal-list,.tm,.count,.card,svg text,.hlabel{font-variant-numeric:tabular-nums}
-em,i{font-style:italic}
 .skip {
   position:absolute;
   left:8px;
@@ -36,7 +106,7 @@ em,i{font-style:italic}
   background:var(--surface);
   color:var(--text);
   border:2px solid var(--focus);
-  border-radius:8px;
+  border-radius:var(--r-1);
   padding:8px 12px;
   font:600 14px var(--sans)
 }
@@ -45,10 +115,12 @@ em,i{font-style:italic}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .flash-hl{animation:flash 1.6s ease 2}
 @keyframes flash{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px var(--focus))}}
-/* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene overlay keeps its denser 30 px buttons, which meet the 24 px AA minimum. */
+/* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene viewer sets its own sizes (all at least 24 px, the AA minimum). */
 @media (pointer:coarse){
-  .btn:not(.panel .btn),.btn.small:not(.panel .btn),.btn.primary:not(.panel .btn),main .chip{min-height:44px}
-  main details.table summary,main .about summary{padding-block:13px}
+  .btn:not(.panel .btn){--h:44px}
+  .seg .btn:not(.panel .btn),.seg button:not(.panel .btn){--h:44px}
+  main .chip{min-height:44px}
+  main details.table>summary,main details.about>summary{min-height:44px}
   .skip{min-height:44px}
 }
 @media (prefers-reduced-motion: reduce){

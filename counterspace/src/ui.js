@@ -3,24 +3,7 @@
 // Provides: bindMark(), showCard(), rove(), addGuide(), setOnce(), legend().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import {
-  ACTIVITY,
-  ATTR_LABEL,
-  EXPORTING,
-  LAST_DA,
-  PHONE_MAX,
-  REGIME_CO,
-  REGIME_LABEL,
-  TYPE_LABEL,
-  esc,
-  fmt,
-  fmtD,
-  fmtMY,
-  fmtY,
-  hasScene,
-  num,
-  parse,
-} from './app.js';
+import { EXPORTING, LAST_DA, PHONE_MAX, TYPE_LABEL, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
 import { hooks } from './shared.js';
 const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
@@ -63,9 +46,7 @@ function showCard(html, evt, el, full = false) {
       ? [...root.querySelectorAll('.mark')]
           .filter((n) => n !== el)
           .flatMap((n) =>
-            n.querySelector('.hit')
-              ? [...n.querySelectorAll(':scope > :not(.hit)')].map((c) => c.getBoundingClientRect())
-              : [n.getBoundingClientRect()],
+            n.querySelector('.hit') ? [...n.querySelectorAll(':scope > :not(.hit)')].map((c) => c.getBoundingClientRect()) : [n.getBoundingClientRect()],
           )
       : [];
   // Annotation lines are tspans inside a <text>: the whole <text> is the obstacle. Band labels are obstacles everywhere (not only on the RPO strip).
@@ -187,42 +168,7 @@ export function kinCard(e) {
     `</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`
   );
 }
-export function nkCard(e) {
-  const span = e.end === e.start ? fmt(parse(e.start)) : `${fmtMY(parse(e.start))} – ${e.end ? fmtMY(parse(e.end)) : 'ongoing'}`;
-  return (
-    `<h4>${esc(e.target_system)}</h4><dl><dt>When</dt><dd>${span}</dd><dt>Actor</dt><dd>${esc(e.actor)}` +
-    `</dd><dt>Attribution</dt><dd>${ATTR_LABEL[e.attribution]}</dd><dt>Category</dt><dd>${e.category.replace('_', ' ')}` +
-    `</dd><dt>Target</dt><dd>${REGIME_LABEL[e.target_regime]}` +
-    `</dd><dt>Use</dt><dd>${e.operational_use ? 'Operational (in conflict)' : 'Test, demonstration or peacetime'}` +
-    `</dd><dt>Effect</dt><dd>${esc(e.effect)}</dd><dt>Confidence</dt><dd>${e.confidence}` +
-    `</dd></dl>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}` +
-    `${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`
-  );
-}
-export const coWhen = (e) => {
-  const f = e.date_precision === 'month' ? fmtMY : e.date_precision === 'year' ? fmtY : fmt,
-    a = f(parse(e.start)),
-    b = e.end ? f(parse(e.end)) : null;
-  return b === a || e.end === e.start ? a : `${a} – ${b || 'ongoing (SWF, Apr. 2026)'}`;
-};
-// Compact form (desktop hover on the dense RPO strip): heading plus the key fields only, so the card stays small and hides few neighbouring rows.
-// Click or Enter shows the full card (description, notes, source). Phones dock the full card, which scrolls inside itself.
-export function coCard(e, compact = false) {
-  const hint = hasScene(e)
-    ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>'
-    : compact
-      ? '<div class="hint">more… click or press Enter</div>'
-      : '<div class="hint">A proximity operation is not an attack; SWF’s wording on intent is hedged.</div>';
-  const fields =
-    `<dt>When</dt><dd>${coWhen(e)}</dd>` +
-    (compact ? '' : `<dt>Actor</dt><dd>${esc(e.actor)}</dd>`) + // compact: the lane already names the actor
-    `<dt>Activity</dt><dd>${ACTIVITY[e.activity]}</dd>` +
-    (compact ? '' : `<dt>Orbit</dt><dd>${REGIME_CO[e.orbit_regime]}</dd>`) +
-    `<dt>Confidence</dt><dd>${e.confidence}</dd>`;
-  const head = `<h4>${esc(e.system)}${e.target ? ' → ' + esc(e.target) : ''}</h4><dl>${fields}</dl>`;
-  if (compact) return head + hint;
-  return `${head}<div>${esc(e.description)}</div>${e.notes ? `<div class="note">${esc(e.notes)}</div>` : ''}${srcLine(e)}${hint}`;
-}
+export { nkCard, coWhen, coCard } from './cards2.js';
 export function legalCard(l) {
   const when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start));
   return (
@@ -311,8 +257,7 @@ function announceCard() {
   live.textContent = '';
   setTimeout(() => (live.textContent = `Details shown. ${say} No 3D scene for this item.`), 60);
 }
-const cardFor = (d, full) =>
-  d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d, !full) : d.domain ? nkCard(d) : legalCard(d);
+const cardFor = (d, full) => (d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d, !full) : d.domain ? nkCard(d) : legalCard(d));
 export const activate = (d, el, ev) => {
   if (hasScene(d)) {
     hideCard();
@@ -349,9 +294,7 @@ export function addGuide(svg, x, y0, y1, key) {
     fn = key ? (f) => ((f.key = key), f) : (f) => f;
   const [r0, r1] = x.range();
   guides[at < 0 ? guides.length : at] = fn((date) =>
-    date && x(date) >= r0 - 1 && x(date) <= r1 + 1
-      ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null)
-      : line.style('display', 'none'),
+    date && x(date) >= r0 - 1 && x(date) <= r1 + 1 ? line.attr('x1', x(date)).attr('x2', x(date)).style('display', null) : line.style('display', 'none'),
   );
 }
 export function handoff(svg, x, y0, y1, label, anchorTop, ty) {
@@ -401,9 +344,7 @@ export function legend(id, w = 22, h = 16) {
   const parts = [],
     api = {
       item: (inner, text, iw = w) => (
-        parts.push(
-          `<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg><span>${text}</span></li>`,
-        ),
+        parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg><span>${text}</span></li>`),
         api
       ),
       raw: (html) => (parts.push(html), api),
@@ -419,8 +360,7 @@ const CAPTIONS = {
   tableA: 'Chart A data: kinetic counterspace tests, one row per event',
   tableB: 'Chart B data: states holding each capability, by decade',
   tableC: 'Chart C data: non-kinetic operations, one row per event or campaign',
-  tableR:
-    'Co-orbital data: rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one row per ledger row',
+  tableR: 'Co-orbital data: rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one row per ledger row',
   tableL: 'The lag: capability and response dates for each pair',
   tableLegal: 'Law and policy items with abbreviations',
 };

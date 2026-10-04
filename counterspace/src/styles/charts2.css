@@ -1,1 +1,9 @@
-/* Styles for the capability, jamming and close-approach charts (charts/b.js, charts/c.js, charts/rpo.js). Shared chart parts live in charts.css. */
+/* Capability, jamming and close-approach charts (chapters 03, 04 and 05). Loaded after charts.css, so rules here win on equal specificity.
+   Scope every rule to its chart (#chartC, #chartR, #chartB) so nothing leaks into the other charts. */
+/* chart B: grouping key and the "off" look of the category chips while grouped as kinetic vs non-kinetic */
+.kinkey{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--text)}
+.kinkey span{display:inline-flex;align-items:center;gap:7px}
+.kinkey i{width:16px;height:12px;border-radius:2px;display:inline-block}
+.chips.mode-kin .chip{opacity:.5;text-decoration:none;border-style:dotted;color:var(--muted)}
+.chips.mode-kin .chip i{background:var(--faint)!important}
+.chip-off-note{font-size:12.5px;color:var(--faint);align-self:center}
