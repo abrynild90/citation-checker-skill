@@ -22,6 +22,18 @@ export function wrapLines(text, maxW, measure) {
   return lines;
 }
 
+// The same wrap, then narrowed as far as the line count allows, so the lines come out about equally long (no lone word on the last line).
+export function wrapBalanced(text, maxW, measure) {
+  let best = wrapLines(text, maxW, measure);
+  if (best.length < 2) return best;
+  for (let w = maxW - 6; w > maxW * 0.4; w -= 6) {
+    const t = wrapLines(text, w, measure);
+    if (t.length > best.length) break;
+    best = t;
+  }
+  return best;
+}
+
 // ---------------------------------------------------------------- shapes (SVG path data)
 const f = (n) => Math.round(n * 100) / 100;
 export const circlePath = (cx, cy, r) => `M${f(cx - r)},${f(cy)}a${r},${r} 0 1,0 ${2 * r},0a${r},${r} 0 1,0 ${-2 * r},0Z`;
@@ -89,3 +101,6 @@ export const dot = (r = 6) => `<path d="${circlePath(0, 0, r)}" {p}/>`;
 export const zoomNote = (years, isDefault) =>
   `<span class="zbadge">Zoomed</span> ${years}${isDefault ? ' (the default on phones)' : ''}. This view no longer lines up with the law timeline or the other charts. ` +
   'Choose “Full span” to go back to the shared years.';
+// The note under a chapter heading when the chart shows the shared years.
+export const fullNote = () =>
+  `Full span, 1957 to 2026. The years line up with the law timeline above${innerWidth > 760 ? ', which stays in view as you scroll' : ''}.`;

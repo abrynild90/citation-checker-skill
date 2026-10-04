@@ -109,7 +109,7 @@ export function drawB(el = document.getElementById('svgB')) {
   // The tallest bar leaves room above it for its figure and the label of the assessed decade.
   const plotH = phone ? 300 : 340,
     top = 30,
-    lead = phone ? 78 : 92,
+    lead = phone ? 98 : 92,
     ymax = maxY / (1 - lead / plotH),
     y = d3
       .scaleLinear()
@@ -250,7 +250,7 @@ export function drawB(el = document.getElementById('svgB')) {
       hiY = y(tot[i]);
     if (!EXPORTING)
       s.append('rect')
-        .attr('class', 'rowhl')
+        .attr('class', 'rowhl hit')
         .attr('x', xa + 2)
         .attr('y', top + 2)
         .attr('width', xb - xa - 4)
@@ -372,12 +372,16 @@ export function drawB(el = document.getElementById('svgB')) {
       .map(([k]) => k),
     WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
   document.getElementById('calloutB').textContent =
-    `Electronic warfare is held by the most states: ${ew20} in the 2020s. Demonstrated destructive direct-ascent anti-satellite (DA-ASAT) capability ` +
-    `has stayed at ${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
+    `Electronic warfare (jamming and spoofing) is held by the most states: ${ew20} in the 2020s. Demonstrated destructive direct-ascent anti-satellite ` +
+    `(DA-ASAT) capability, meaning a missile launched from Earth that can hit a satellite, has stayed at ${WORD[da20.length] ?? da20.length} states: ` +
+    `${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('noteB').textContent = kin
     ? 'Each bar counts states in each group, so a state that holds both kinds appears in both and the groups can add up to more than the number of states. ' +
-      'Kinetic means weapons that hit a satellite and satellites that manoeuvre close to another; non-kinetic means electronic warfare, directed energy and cyber.'
-    : 'Each bar counts pairs of a state and a capability, so a state that holds two capabilities is counted twice.';
+      'Kinetic means missiles launched from Earth to hit a satellite and satellites that manoeuvre close to another; non-kinetic means electronic warfare ' +
+      '(jamming and spoofing), directed energy (lasers) and cyber attacks.'
+    : 'Each bar counts pairs of a state and a capability, so a state that holds two capabilities is counted twice. The five kinds are direct-ascent ' +
+      'anti-satellite weapons (missiles launched from Earth to hit a satellite), co-orbital systems (satellites that manoeuvre close to another), electronic ' +
+      'warfare (jamming and spoofing), directed energy (lasers and similar beams) and cyber (attacks through computers and networks).';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   legend('legendB')

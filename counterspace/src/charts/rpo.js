@@ -7,7 +7,7 @@
 import { CO, DOMAIN, EXPORTING, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ACTIVITY_LABEL, ORBIT_LABEL, SURE_LABEL, SURE_WORD, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, legend, rove, srcCell, table } from '../ui.js';
-import { arrowPath, barPath, circlePath, diamondPath, glyph, keyMarkup, roundRectPath, trianglePath, wrapLines, zoomNote } from './kit.js';
+import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, trianglePath, wrapLines, zoomNote } from './kit.js';
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
 // stateR.focus: null = the default (zoom 2000-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere);
@@ -185,7 +185,7 @@ export function drawR(el = document.getElementById('svgR')) {
     svg
       .append('text')
       .attr('class', 'band-gloss')
-      .attr('x', INSET + 18 + tw(b.l.key, 13, 600) + 12)
+      .attr('x', INSET + 18 + tw(b.l.key, 14, 600) + 12)
       .attr('y', hy)
       .text(`${b.count} operations`);
     void t;
@@ -292,9 +292,7 @@ export function drawR(el = document.getElementById('svgR')) {
   if (EXPORTING) return;
 
   // ---------------------------------------------------------------- note, key and data table
-  document.getElementById('noteR').innerHTML = zoomed
-    ? zoomNote('2000 to 2026', stateR.focus === null)
-    : 'Full span, 1957 to 2026, on the same years as the law timeline and the other charts.';
+  document.getElementById('noteR').innerHTML = zoomed ? zoomNote('2000 to 2026', stateR.focus === null) : fullNote();
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);
   const cube =

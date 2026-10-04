@@ -6,21 +6,25 @@
 import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtY, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
 import { activate, addGuide, bindMark, legend, nkCard, rove, srcCell, table } from '../ui.js';
-import { bar, barPath, circlePath, dot, glyph, keyMarkup, swatch, wrapLines, zoomNote } from './kit.js';
+import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, swatch, wrapBalanced, wrapLines, zoomNote } from './kit.js';
 
 const GROUPS = [
   {
-    title: 'Uplink and downlink jamming',
-    gloss: 'Radio interference with the signals sent up to a satellite or down from it.',
+    title: 'Jamming satellite communications',
+    gloss: 'Radio noise that drowns out the signals going up to a satellite (uplink) or coming down from it (downlink).',
     cats: ['ew_uplink', 'ew_downlink'],
   },
   {
-    title: 'Satellite-navigation jamming and spoofing',
-    gloss: 'Blocking or faking GPS and similar signals (global navigation satellite systems, GNSS).',
+    title: 'Jamming and spoofing satellite navigation',
+    gloss: 'Jamming blocks satellite navigation signals (GNSS, such as GPS); spoofing sends false ones, so a receiver shows the wrong position or time.',
     cats: ['gnss_jamming', 'gnss_spoofing'],
   },
-  { title: 'Laser dazzling and damage', gloss: 'Lasers aimed at a satellite to blind its sensors for a time, or to damage them.', cats: ['directed_energy'] },
-  { title: 'Cyber', gloss: 'Attacks on satellite services through computers and networks.', cats: ['cyber'] },
+  {
+    title: 'Lasers that dazzle or damage satellites',
+    gloss: 'Lasers aimed at a satellite to blind its sensors for a time, or to damage them.',
+    cats: ['directed_energy'],
+  },
+  { title: 'Cyber attacks', gloss: 'Hacking the computers and networks that run a satellite service.', cats: ['cyber'] },
 ];
 // SWF 2026, Executive Summary, p. xxiii (PDF p. 21): thirteen words, quoted exactly; the capital O is the only change and is shown in brackets.
 const QUOTE = '“[O]nly non-destructive capabilities are actively being used against satellites in current military operations.”';
@@ -55,7 +59,7 @@ export function drawC(el = document.getElementById('svgC')) {
   const qSize = phone ? 16 : 17,
     qLH = qSize + 7,
     qW = Math.min(phone ? W - 2 * PADX : 600, HX - INSET - 24),
-    qLines = wrapLines(QUOTE, Math.max(220, qW), (s) => tw(s, qSize, 400)),
+    qLines = wrapBalanced(QUOTE, Math.max(220, qW), (s) => tw(s, qSize, 400)),
     byLines = wrapLines(QUOTE_BY, W - INSET - PADX, (s) => tw(s, 12.5, 400)),
     hand = phone ? 'Last destructive test, Nov 2021' : 'Last destructive anti-satellite test, Nov 2021',
     handW = tw(hand, 12.5, 600),
@@ -110,17 +114,13 @@ export function drawC(el = document.getElementById('svgC')) {
     };
   };
 
-  // ---------------------------------------------------------------- band headers: title, with the one-line gloss in a shared column beside it or under it
-  const titleSize = 13;
-  const titleW = Math.max(...GROUPS.map((g) => tw(g.title, titleSize, 600))),
-    glossX = INSET + titleW + 28,
-    inline = !phone && GROUPS.every((g) => glossX + tw(g.gloss, 12.5, 400) <= R - PADX);
+  // ---------------------------------------------------------------- band headers: the title, then a one-sentence gloss for a reader new to the subject
+  const titleSize = 14;
   const planHeader = (g) => {
-    if (inline) return { title: [g.title], gloss: [g.gloss], h: 44 };
-    const avail = R - L - 2 * PADX,
-      title = wrapLines(g.title, avail, (s) => tw(s, titleSize, 600)),
-      gloss = wrapLines(g.gloss, avail, (s) => tw(s, 12.5, 400));
-    return { title, gloss, h: 18 + title.length * LH + 4 + gloss.length * 17 + 10 };
+    const avail = Math.min(R - L - 2 * PADX, 760),
+      title = wrapBalanced(g.title, avail, (s) => tw(s, titleSize, 600)),
+      gloss = wrapBalanced(g.gloss, avail, (s) => tw(s, 12.5, 400));
+    return { title, gloss, h: 18 + title.length * LH + 3 + gloss.length * 17 + 10 };
   };
 
   // ---------------------------------------------------------------- vertical layout
@@ -229,8 +229,7 @@ export function drawC(el = document.getElementById('svgC')) {
   bands.forEach((b) => {
     const h = b.head;
     lines(svg, 'band-title', INSET, b.y0 + 27, h.title, LH);
-    if (inline) lines(svg, 'band-gloss', glossX, b.y0 + 27, h.gloss, 17);
-    else lines(svg, 'band-gloss', INSET, b.y0 + 27 + (h.title.length - 1) * LH + LH, h.gloss, 17);
+    lines(svg, 'band-gloss', INSET, b.y0 + 27 + (h.title.length - 1) * LH + 21, h.gloss, 17);
   });
 
   // year axis
@@ -281,7 +280,7 @@ export function drawC(el = document.getElementById('svgC')) {
         .attr('width', hx1 - hx0)
         .attr('height', d.h - 4)
         .attr('rx', 8);
-    if (!EXPORTING) hit('rowhl');
+    if (!EXPORTING) hit('rowhl hit');
     // the mark
     glyph(
       s,
@@ -342,9 +341,7 @@ export function drawC(el = document.getElementById('svgC')) {
   if (EXPORTING) return;
 
   // ---------------------------------------------------------------- note, key and data table
-  document.getElementById('noteC').innerHTML = zoom
-    ? zoomNote('1995 to 2026', stateC.focus === null)
-    : 'Full span, 1957 to 2026, on the same years as the law timeline and the other charts.';
+  document.getElementById('noteC').innerHTML = zoom ? zoomNote('1995 to 2026', stateC.focus === null) : fullNote();
   document.getElementById('cFocus').setAttribute('aria-pressed', zoom);
   document.getElementById('cFull').setAttribute('aria-pressed', !zoom);
   const ink = (shape) => shape.replace('{p}', 'style="fill:var(--muted);stroke:var(--muted);stroke-width:1.5"'),

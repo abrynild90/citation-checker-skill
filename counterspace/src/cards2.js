@@ -7,15 +7,15 @@ import { esc, fmt, fmtMY, fmtY, hasScene, parse } from './app.js';
 
 // ---------------------------------------------------------------- words a reader understands (never the stored codes)
 export const CATEGORY_LABEL = {
-  ew_uplink: 'Uplink jamming',
-  ew_downlink: 'Downlink jamming',
-  gnss_jamming: 'Navigation-signal jamming',
-  gnss_spoofing: 'Navigation-signal spoofing',
+  ew_uplink: 'Jamming the signal going up to a satellite',
+  ew_downlink: 'Jamming the signal coming down from a satellite',
+  gnss_jamming: 'Jamming satellite navigation (GNSS)',
+  gnss_spoofing: 'Spoofing satellite navigation (GNSS)',
   directed_energy: 'Laser',
   cyber: 'Cyber attack',
 };
 export const TARGET_LABEL = {
-  GNSS_MEO: 'Satellite-navigation receivers (GPS and similar systems)',
+  GNSS_MEO: 'Satellite navigation receivers (GNSS, such as GPS)',
   GEO_comms: 'Communications satellites in geostationary orbit',
   LEO_constellation: 'A constellation of satellites in low Earth orbit',
   ground_segment: 'Ground equipment and networks',

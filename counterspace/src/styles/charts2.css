@@ -7,7 +7,7 @@
 
 /* ---- the drawings: type roles */
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band{fill:var(--band)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-title{fill:var(--text);font:600 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-title{fill:var(--text);font:600 14px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-gloss{fill:var(--muted);font:400 12.5px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 :is(.band-title,.band-gloss,.lbl){paint-order:stroke;stroke:var(--band);stroke-width:4px}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .lbl{fill:var(--text);font:400 13px var(--sans)}
