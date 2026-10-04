@@ -232,6 +232,14 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   .sub-nav a{display:block;padding:7px 0}
 }
 
+@media (min-width:1200px){
+  #methodBody{columns:2 400px;column-gap:var(--s-7)}
+  #methodBody>*{break-inside:avoid-column}
+  #methodBody p,#methodBody ul,#methodBody .src-intro{max-width:none}
+  #methodBody h3{break-after:avoid-column}
+  #methodBody .cites{max-width:none}
+}
+
 /* ---- footer ---- */
 .site-foot{background:var(--bg-2);border-top:1px solid var(--line);padding:var(--s-8) 0 var(--s-7);color:var(--muted)}
 .foot-cols{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-6)}

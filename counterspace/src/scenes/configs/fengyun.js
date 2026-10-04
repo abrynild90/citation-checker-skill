@@ -9,7 +9,7 @@ export const FENGYUN = {
   shells: ['LEO'],
   duration: 16,
   caption:
-    'On 11 January 2007 China fired an SC-19 anti-satellite missile from Xichang and ' +
+    'On 11 January 2007 China fired an SC-19 (a ground-launched anti-satellite missile) from Xichang and ' +
     'destroyed Fengyun-1C, a Chinese weather satellite, about 880 km above the Earth. ' +
     'At that height, fragments stay in orbit for decades. ' +
     'They spread along the old orbit into a ring around the planet. ' +

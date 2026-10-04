@@ -12,7 +12,7 @@ export const RPO = {
   shells: [],
   duration: 32,
   caption:
-    'Three separate episodes of close approach, from the Secure World Foundation’s (SWF) tables of rendezvous and proximity operations (RPOs). ' +
+    'Three separate episodes of close approach, from the Secure World Foundation’s (SWF) tables of close approaches, also called rendezvous and proximity operations. ' +
     '(1) In 2025, in geostationary orbit (GEO), about 36,000 km up, China’s SJ-21 and SJ-25 approached, appeared to dock (join together) and ' +
     'later separated, while two US GSSAP satellites (Geosynchronous Space Situational Awareness Program) were positioned “flanking” them. ' +
     '(2) In 2019–20, in low Earth orbit (LEO), up to 2,000 km up, Russia’s Cosmos 2542 ' +

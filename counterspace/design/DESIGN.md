@@ -153,7 +153,7 @@ then why it matters. Never explain the software.
 | Jamming, lasers and cyber | Attacks that leave satellites in orbit |
 | Close approaches | Satellites that fly close to other satellites |
 | Who can do what | Which states hold which counterspace capabilities, by decade |
-| Capability, then law | How long the law took to follow |
+| How long the law took | How long the law took to follow |
 | Sources and method | Where every fact comes from |
 
 Spell out acronyms on first use in each section (anti-satellite, ASAT; low Earth orbit, LEO). SWF means the Secure World Foundation: say so the
