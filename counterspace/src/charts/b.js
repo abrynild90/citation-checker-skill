@@ -10,7 +10,7 @@ import { keyMarkup, roundRectPath, setKey, topRoundPath, wrapLines } from './kit
 
 export const CATS = [
   { key: 'direct_ascent', label: 'Direct-ascent anti-satellite', v: '--cat-da', kin: true, gloss: 'A missile launched from Earth to hit a satellite' },
-  { key: 'co_orbital', label: 'Co-orbital', v: '--cat-co', kin: true, gloss: 'A satellite that manoeuvres close to another satellite' },
+  { key: 'co_orbital', label: 'Co-orbital', v: '--cat-co', kin: true, gloss: 'A satellite that maneuvers close to another satellite' },
   { key: 'electronic_warfare', label: 'Electronic warfare', v: '--cat-ew', kin: false, gloss: 'Jamming and spoofing of satellite signals' },
   { key: 'directed_energy', label: 'Directed energy', v: '--cat-de', kin: false, gloss: 'Lasers and similar beams used against satellites' },
   { key: 'cyber', label: 'Cyber', v: '--cat-cy', kin: false, gloss: 'Attacks on satellites and their ground systems through computers' },
@@ -369,10 +369,10 @@ export function drawB(el = document.getElementById('svgB')) {
     `${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('noteB').textContent = kin
     ? 'Each bar counts states in each group, so a state that holds both kinds appears in both and the groups can add up to more than the number of states. ' +
-      'Kinetic means missiles launched from Earth to hit a satellite and satellites that manoeuvre close to another; non-kinetic means electronic warfare ' +
+      'Kinetic means missiles launched from Earth to hit a satellite and satellites that maneuver close to another; non-kinetic means electronic warfare ' +
       '(jamming and spoofing), directed energy (lasers) and cyber attacks.'
     : 'Each bar counts pairs of a state and a capability, so a state that holds two capabilities is counted twice. The five kinds are direct-ascent ' +
-      'anti-satellite weapons (missiles launched from Earth to hit a satellite), co-orbital systems (satellites that manoeuvre close to another), electronic ' +
+      'anti-satellite weapons (missiles launched from Earth to hit a satellite), co-orbital systems (satellites that maneuver close to another), electronic ' +
       'warfare (jamming and spoofing), directed energy (lasers and similar beams) and cyber (attacks through computers and networks).';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
