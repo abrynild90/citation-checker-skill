@@ -1,9 +1,9 @@
 // ============================================================================
-// scene-ui.js: scene overlay (dialog, scrubber, camera presets, still export) and the hero.
+// scene-ui.js: the 3D explainer window (dialog, story steps, scrubber, views, keyboard, saved image) and the hero.
 // Provides: openScene(), closeScene(), exportStill(), startHero(); owns the single WebGL host.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { REDUCED, byId, ensureLand, esc, isPhoneNow, parse } from './app.js';
+import { REDUCED, byId, ensureLand, esc, parse } from './app.js';
 import { GLHost } from './scenes/gl-host.js';
 import { loadEarth } from './scenes/earth.js';
 import { HERO, SCENES } from './scenes/config.js';
@@ -54,7 +54,7 @@ async function getHost() {
     glOK = true;
     return host;
   } catch (e) {
-    console.warn('WebGL unavailable, using static diagrams', e);
+    console.warn('3D unavailable, using still diagrams', e);
     glOK = false;
     return null;
   }
@@ -72,56 +72,160 @@ function prefetchEarth() {
   });
 }
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
-const overlay = document.getElementById('overlay'),
-  view = document.getElementById('sceneView');
+
+const $ = (id) => document.getElementById(id);
+const overlay = $('overlay'),
+  panel = $('scenePanel'),
+  view = $('sceneView'),
+  titleEl = $('sceneTitle'),
+  countEl = $('sceneDate'),
+  dotsEl = $('sceneDots'),
+  captionEl = $('sceneCaption'),
+  srcEl = $('sceneSrc'),
+  scaleEl = $('sceneScale'),
+  stepsSection = $('sceneStepsSection'),
+  stepsBox = $('sceneStepsBox'),
+  stepsEl = $('sceneSteps'),
+  stepsNote = $('stepsNote'),
+  stepNow = $('stepNow'),
+  asideBody = $('asideBody'),
+  asideWrap = $('asideWrap'),
+  lawBox = $('asideLaw'),
+  lawBtn = $('scRelated'),
+  lawTxt = $('scRelatedTxt'),
+  playBtn = $('scPlay'),
+  scrub = $('scScrub'),
+  scrubWrap = $('scrubWrap'),
+  ticksEl = $('scTicks'),
+  scTime = $('scTime'),
+  camsEl = $('scCams'),
+  viewsEl = $('scViews'),
+  staticEl = $('scStatic'),
+  staticTxt = $('scStaticTxt'),
+  exportBtn = $('scExport'),
+  statusEl = $('scStatus'),
+  stateEl = $('sceneState'),
+  stateTxt = $('sceneStateTxt'),
+  hintEl = $('sceneHint');
+const COMPACT = matchMedia('(max-width: 760px)'), // the phone layout of scenes.css
+  STACKED = matchMedia('(max-width: 760px), (max-width: 900px) and (max-aspect-ratio: 1/1)'), // picture above story
+  KEYBOARD = matchMedia('(hover: hover) and (pointer: fine)'),
+  CLOSE_MS = 220; // the closing fade in scenes.css (--dur-2) with a little margin
 let wideSel = -1,
   epi = null, // the locked episode of an episode preset (see getHost)
-  curSim = null, // the simulation of the open scene (the static still re-draws it at a print-friendly layout width)
+  curSim = null, // the simulation of the open scene (the still diagram re-draws it at a print-friendly layout width)
   cur = null,
   returnFocus = null,
-  heroSim = null;
+  heroSim = null,
+  openToken = 0, // a newer open or a close cancels an open that is still waiting for 3D to load
+  closeTimer = 0,
+  hintTimer = 0,
+  toastTimer = 0,
+  hintShown = false,
+  steps = [], // [{t, text}] of the open scene: the scene's status lines in order (t is the fraction of scene time)
+  stepIdx = -1,
+  ticksFor,
+  timeTxt = '',
+  camOn = -2,
+  ttlTxt = '',
+  lblTxt = '',
+  lastUserScroll = 0,
+  stillOnly = false; // the open scene shows a still diagram (animation off or 3D unavailable)
 export function setHeroSim(s) {
   heroSim = s;
 }
+
+// ---------------------------------------------------------------- small helpers
+const sec = (s) => `${Math.round(s)} s`;
+const slug = (s) =>
+  String(s)
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+// A short, plain name for a view button: the config's own short form if it has one, else the name without brackets and without anything after a colon.
+function viewName(cc, name) {
+  const own = cc?.short || cc?.chip;
+  if (own) return own;
+  let s = name.replace(/\s*\([^)]*\)/g, '').trim();
+  if (s.length > 24 && s.includes(':')) s = s.split(':')[0].trim();
+  return s || name;
+}
+function setStatus(msg) {
+  clearTimeout(toastTimer);
+  statusEl.textContent = msg;
+  statusEl.classList.add('sr'); // read out by screen readers, not shown
+}
+// A short visible note near the controls (saving an image); it clears itself, and screen readers hear it too.
+function toast(msg, kind) {
+  clearTimeout(toastTimer);
+  statusEl.dataset.kind = kind || 'ok';
+  statusEl.textContent = msg;
+  statusEl.classList.remove('sr');
+  toastTimer = setTimeout(() => statusEl.classList.add('sr'), kind === 'warn' ? 9000 : 3500);
+}
+// The picture area while 3D loads, or when nothing could be drawn.
+function setState(kind, msg) {
+  if (!kind) {
+    stateEl.hidden = true;
+    return;
+  }
+  stateEl.dataset.kind = kind;
+  stateTxt.textContent = msg;
+  stateEl.hidden = false;
+}
+
+// ---------------------------------------------------------------- scene dots: one button per scene, one tab stop (the current one)
+ORDER.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'sv-dot';
+  b.dataset.tip = s.title;
+  b.setAttribute('aria-label', `Scene ${i + 1}: ${s.title}`);
+  b.tabIndex = -1;
+  b.onclick = () => {
+    if (s !== cur) openScene(s.id);
+  };
+  dotsEl.appendChild(b);
+});
+function syncDots() {
+  [...dotsEl.children].forEach((b, i) => {
+    const on = ORDER[i] === cur;
+    if (on) b.setAttribute('aria-current', 'true');
+    else b.removeAttribute('aria-current');
+    b.tabIndex = on ? 0 : -1;
+  });
+}
+
+// ---------------------------------------------------------------- open
 export async function openScene(id, originEl) {
   const cfg = SCENES.find((s) => s.id === id);
   if (!cfg) return;
-  if (!overlay.classList.contains('open')) {
-    returnFocus = originEl || document.activeElement;
-  }
+  clearTimeout(closeTimer);
+  const wasOpen = overlay.classList.contains('open'),
+    onDot = wasOpen && dotsEl.contains(document.activeElement),
+    token = ++openToken;
+  if (!wasOpen) returnFocus = originEl || document.activeElement;
   cur = cfg;
   epi = null;
+  wideSel = -1;
+  stillOnly = false;
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
-  document.getElementById('sceneTitle').textContent = cfg.title;
-  document.getElementById('sceneDate').textContent = `${ORDER.indexOf(cfg) + 1} / ${ORDER.length}`;
-  document.getElementById('sceneCaption').textContent = cfg.caption;
-  const ev = byId[cfg.event];
-  document.getElementById('sceneSrc').innerHTML =
-    `Source: ${esc(cfg.cite)}${ev ? ` · <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">${esc(ev.source)}</a>` : ''}` +
-    `${cfg.related ? '' : ' <span class="nolaw">· No specific legal item</span>'}`;
-  document.getElementById('sceneScale').textContent =
-    `Illustrative, not orbit-propagated. Radial distances compressed (altitude^0.45); Earth to ` +
-    `scale.${cfg.scaleNote ? ' ' + cfg.scaleNote : ''} Earth imagery: NASA Blue Marble (public domain); a vector map is shown if it ` +
-    `cannot load. ${REDUCED ? 'Reduced motion is on, so a static diagram is shown.' : ''}`;
-  const rel = document.getElementById('scRelated');
-  rel.disabled = !cfg.related;
-  document.getElementById('asideLaw').classList.toggle('none', !cfg.related); // no legal item: a slim note, not a full-width bar
-  rel.textContent = cfg.related ? `⚖ Related law: ${byId[cfg.related]?.label}` : '⚖ No specific legal item';
-  // Text alternative for the visual: the scene's own status lines, in order, as an ordered list (t is the fraction of scene time).
-  const steps = document.getElementById('sceneSteps'),
-    dur = cfg.duration || 0;
-  steps.innerHTML = (cfg.status || cfg.steps || [])
-    .map(([t, txt]) => `<li>${esc(txt)}${dur ? ` <span class="st">(${(t * dur).toFixed(0)} s)</span>` : ''}</li>`)
-    .join('');
-  document.getElementById('sceneStepsBox').open = !isPhoneNow();
-  document.getElementById('sceneStepsBox').hidden = !(cfg.status || cfg.steps || []).length;
+  setInert(true);
+  fillStory(cfg);
+  syncDots();
   const sim = buildSim(cfg);
   curSim = sim;
-  const cams = document.getElementById('scCams');
-  cams.innerHTML = '';
+  camsEl.textContent = '';
+  view.querySelector(':scope > svg')?.remove();
+  if (!host && !REDUCED && glOK !== false) setState('loading', 'Loading the 3D view');
+  else setState(null);
+  if (!wasOpen) panel.focus({ preventScroll: true });
   const h = await getHost();
+  if (token !== openToken) return; // closed, or another scene was chosen, while 3D was loading
   if (h) prefetchEarth();
   view.querySelector(':scope > svg')?.remove();
   if (h) {
@@ -130,85 +234,213 @@ export async function openScene(id, originEl) {
     h.load(sim);
     h.playing = true;
     setPlayBtn(true);
-    wideSel = -1;
-    sim.cams.forEach((c, i) => {
-      const b = document.createElement('button');
-      b.className = 'btn small';
-      b.type = 'button';
-      const sh = isPhoneNow() && cfg.cameras?.[i]?.short; // phone chips wrap (never cut off), so long preset names have a short form
-      b.textContent = sh || c.name;
-      b.dataset.name = sh ? c.name : '';
-      if (sh) b.title = c.name;
-      b.onclick = () => {
-        h.pickCam(i);
-        syncCams();
-      };
-      cams.appendChild(b);
-    });
+    buildViews(cfg, sim);
     h.play();
-    syncScrub(h.t);
     h.handEl && (h.handEl.style.visibility = 'hidden');
-    requestAnimationFrame(camFade);
+    setState(null);
   } else {
-    renderSVG(sim, view);
+    try {
+      renderSVG(sim, view);
+      setState(null);
+    } catch (e) {
+      console.warn('Still diagram failed', e);
+      setState('error', 'The picture could not be drawn. The story still tells what happened.');
+    }
   }
+  stillOnly = !h;
   staticMode(!h);
-  setInert(true);
+  syncScrub(h ? h.t : 0);
   asideBody.scrollTop = 0;
   requestAnimationFrame(() => {
     asideBody.scrollTop = 0; // layout of the new text is settled: a scene never opens scrolled
-    updateCue();
+    updateFades();
   });
-  setStatus(
-    `Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}. ${h ? 'Playing.' : ''} ${(cfg.status || cfg.steps || []).length} ` +
-      `stages are listed under “What happens in this scene”.`.replace(/\s+/g, ' ').trim(),
-    true,
-  );
-  document.getElementById('scClose').focus();
+  setStatus(`Scene ${ORDER.indexOf(cfg) + 1} of ${ORDER.length}: ${cfg.title}.${h ? ' Playing.' : ''}`);
+  if (onDot) dotsEl.querySelector('[aria-current="true"]')?.focus();
+  if (!wasOpen) showHint();
 }
-// Phone: the camera presets scroll sideways; a fade on the right edge says more chips lie beyond it.
-const camsEl = document.getElementById('scCams');
-function camFade() {
-  camsEl.classList.toggle('fade-r', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft > 4);
+
+// Text of the open scene: title, count, story, source, related law, picture note and the steps.
+function fillStory(cfg) {
+  const n = ORDER.indexOf(cfg) + 1;
+  titleEl.textContent = cfg.title;
+  panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
+  countEl.textContent = `${n} / ${ORDER.length}`;
+  captionEl.textContent = cfg.caption;
+  const ev = byId[cfg.event];
+  srcEl.innerHTML =
+    `<span class="sv-cite">Source: ${esc(cfg.cite)}</span>` +
+    (ev
+      ? `<a href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false">` +
+        `<use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
+      : '') +
+    (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
+  scaleEl.textContent = [
+    'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
+    cfg.scaleNote,
+    'Earth imagery: NASA Blue Marble and Black Marble (public domain). A simple map is drawn if the photograph cannot load.',
+    REDUCED ? 'Animation is switched off on this device, so a still diagram is shown.' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  lawBtn.disabled = !cfg.related;
+  lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
+  lawTxt.textContent = cfg.related ? `Related law: ${byId[cfg.related]?.label}` : 'Related law';
+  renderSteps(cfg);
 }
-camsEl.addEventListener('scroll', camFade, { passive: true });
-addEventListener('resize', camFade);
+
 // While the dialog is open the page behind it is inert (no focus, not read out).
 function setInert(on) {
-  document.querySelectorAll('header.top, main, footer, #card').forEach((n) => {
-    n.inert = on;
+  [...document.body.children].forEach((n) => {
+    if (n !== overlay && !/^(script|style|svg|link)$/i.test(n.tagName)) n.inert = on;
   });
 }
+
+// ---------------------------------------------------------------- close
 export function closeScene() {
   if (!cur) return;
   const closing = cur;
   cur = null;
   epi = null;
+  openToken++;
+  clearTimeout(hintTimer);
+  hintEl.classList.remove('on');
   setInert(false);
   setStatus('');
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
-  if (host) {
-    host.unload();
-  }
-  view.querySelector(':scope > svg')?.remove();
-  if (heroWanted) startHero();
+  // The picture stays until the panel has faded out; with reduced motion it goes at once.
+  const finish = () => {
+    if (cur) return;
+    if (host && host.el === view) host.unload();
+    view.querySelector(':scope > svg')?.remove();
+    setState(null);
+    if (heroWanted && host?.el !== heroStage) startHero();
+  };
+  if (REDUCED) finish();
+  else closeTimer = setTimeout(finish, CLOSE_MS);
   // Focus goes back to whatever opened the scene. If nothing did (opened from code, so focus was on <body>), fall back to the scene's own timeline
   // mark (by data-id), then to the tour button, so keyboard users never lose their place.
   const live = (n) => n && n !== document.body && document.contains(n) && !n.inert;
   const byMark = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #svgC [data-id="${id}"], #svgR [data-id="${id}"]`);
-  const target = [returnFocus, byMark(returnFocus?.dataset?.id), byMark(closing.event), document.getElementById('tourBtn')].find(live);
+  const target = [returnFocus, byMark(returnFocus?.dataset?.id), byMark(closing.event), $('tourBtn')].find(live);
   returnFocus = null;
   target?.focus();
 }
-const scrub = document.getElementById('scScrub'),
-  scTime = document.getElementById('scTime');
-// The preset chip that matches the camera on screen is pressed: when a locked episode preset hands over, the highlight moves with it.
+
+// ---------------------------------------------------------------- steps: what happens, as a timeline that follows the animation
+function renderSteps(cfg) {
+  const dur = cfg.duration || 0;
+  steps = (cfg.status || cfg.steps || []).map(([t, text]) => ({ t, text }));
+  stepIdx = -1;
+  stepsSection.hidden = !steps.length;
+  stepsEl.innerHTML = steps
+    .map(
+      (s, i) =>
+        `<li data-i="${i}"><button type="button" class="step"><span class="st-time">${dur ? sec(s.t * dur) : ''}</span>` +
+        `<span class="st-rail" aria-hidden="true"></span><span class="st-text">${esc(s.text)}</span></button></li>`,
+    )
+    .join('');
+  stepsBox.open = !COMPACT.matches;
+  stepNow.textContent = '';
+  lastUserScroll = 0;
+  ticksFor = undefined; // forces the scrubber ticks to be drawn for this scene
+}
+function stepAt(t) {
+  let k = 0;
+  steps.forEach((s, i) => {
+    if (t >= s.t - 1e-6) k = i;
+  });
+  return k;
+}
+function syncSteps(t) {
+  if (!steps.length || stillOnly) return;
+  const k = stepAt(t);
+  if (k === stepIdx) return;
+  const first = stepIdx < 0;
+  stepIdx = k;
+  [...stepsEl.children].forEach((li, i) => {
+    li.classList.toggle('done', i < k);
+    li.classList.toggle('now', i === k);
+    const b = li.firstElementChild;
+    if (i === k) b.setAttribute('aria-current', 'step');
+    else b.removeAttribute('aria-current');
+  });
+  // Phones show only the current step; the whole list is behind "All steps".
+  const li = stepsEl.children[k];
+  stepNow.innerHTML = `<li class="now"><div class="step">${li.firstElementChild.innerHTML}</div></li>`;
+  if (!first) followStep(li);
+}
+// Keep the current step in view as the animation moves on, moving the list as little as possible so the reader keeps their place: the step stays
+// inside a band with room for the next one below it. Nothing moves for a moment after the reader has scrolled the story themselves.
+function followStep(li) {
+  if (performance.now() - lastUserScroll < 4000) return;
+  const box = asideBody.getBoundingClientRect(),
+    r = li.getBoundingClientRect();
+  if (!r.height) return; // the list is folded away (phone)
+  const top = box.top + 56,
+    bottom = box.bottom - 96;
+  let dy = 0;
+  if (r.bottom > bottom) dy = r.bottom - bottom;
+  else if (r.top < top) dy = r.top - top;
+  if (dy) asideBody.scrollBy({ top: dy, behavior: REDUCED ? 'auto' : 'smooth' });
+}
+['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) =>
+  asideBody.addEventListener(
+    ev,
+    () => {
+      lastUserScroll = performance.now();
+    },
+    { passive: true },
+  ),
+);
+// Selecting a step plays the scene from the start of that step (the tour camera takes over if the step lies outside a locked episode).
+function jumpToStep(i) {
+  const s = steps[i];
+  if (!s || !host || !glOK || stillOnly || !cur) return;
+  const tour = host.sim.cams.findIndex((c) => c.auto);
+  if (epi && (s.t < epi.a0 || s.t >= epi.a1) && tour >= 0) host.pickCam(tour);
+  host.update(Math.min(s.t, 1));
+  setStatus(`Step ${i + 1} of ${steps.length}: ${s.text}`);
+}
+stepsEl.addEventListener('click', (e) => {
+  const li = e.target.closest('li[data-i]');
+  if (li) jumpToStep(+li.dataset.i);
+});
+// With the picture above the story, the source and the related law sit at the end of the story's scroll so the story keeps the room; elsewhere they stay in view below it.
+const storyEl = $('sceneStory'),
+  footEl = $('sceneFoot');
+function placeFoot() {
+  const into = STACKED.matches ? asideBody : storyEl;
+  if (footEl.parentElement !== into) into.appendChild(footEl);
+  updateFades();
+}
+COMPACT.addEventListener('change', () => {
+  stepsBox.open = !COMPACT.matches;
+  updateFades();
+});
+STACKED.addEventListener('change', placeFoot);
+placeFoot();
+
+// ---------------------------------------------------------------- scrubber, time and views
+// A tick on the scrubber at the start of each step (re-drawn when an episode preset narrows the scrubber to its episode).
+function drawTicks() {
+  ticksFor = epi;
+  const a0 = epi ? epi.a0 + 0.001 : 0,
+    a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
+  ticksEl.innerHTML = steps
+    .filter((s) => s.t > a0 + 0.004 && s.t < a1 - 0.004)
+    .map((s) => `<i style="--t:${((s.t - a0) / (a1 - a0)).toFixed(4)}"></i>`)
+    .join('');
+}
+// The view button that matches the camera on screen is pressed: when a locked episode preset hands over, the highlight moves with it.
 function syncCams() {
   if (!host || !cur) return;
   const tour = host.sim.cfg.acts && host.lock == null ? host.sim.cams.findIndex((c) => c.auto) : -1,
     on = wideSel >= 0 && host.lock == null ? wideSel : tour >= 0 ? tour : host.camIdx;
+  if (on === camOn) return;
+  camOn = on;
   [...camsEl.children].forEach((b, i) => {
     b.setAttribute('aria-pressed', String(i === on));
     b.title = b.dataset.name || '';
@@ -217,64 +449,111 @@ function syncCams() {
 function syncScrub(t) {
   if (!cur) return;
   syncCams();
-  const dur = cur?.duration || 0,
+  if (ticksFor !== epi) drawTicks();
+  const dur = cur.duration || 0,
     a0 = epi ? epi.a0 + 0.001 : 0,
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1,
     v = Math.max(0, Math.min(1, (t - a0) / (a1 - a0))),
     len = (a1 - a0) * dur,
-    range = epi ? `scene time ${(a0 * dur).toFixed(1)} to ${(epi.a1 * dur).toFixed(1)} of ${dur} s` : '', // the locked episode's span of the whole event
-    txt = epi ? `${epi.name}: ${(v * len).toFixed(1)} / ${len.toFixed(1)} s${isPhoneNow() ? '' : ' (' + range + ')'}` : `${(v * dur).toFixed(1)} / ${dur} s`;
-  scrub.title = range;
-  scrub.value = Math.round(v * 1000);
-  scrub.setAttribute('aria-valuetext', epi ? txt : `${(v * dur).toFixed(1)} of ${dur} seconds`);
-  scrub.setAttribute('aria-label', epi ? `Time within ${epi.name}` : 'Scene time');
-  scTime.textContent = txt;
+    txt = `${Math.round(v * len)} s of ${Math.round(len)} s`;
+  scrub.value = v * 1000;
+  scrub.style.setProperty('--f', v.toFixed(4));
+  if (txt !== timeTxt) {
+    timeTxt = txt;
+    scTime.textContent = txt;
+    scrub.setAttribute('aria-valuetext', `${Math.round(v * len)} of ${Math.round(len)} seconds`);
+  }
+  const lbl = epi ? `Time within ${epi.name}` : 'Time in the scene',
+    ttl = epi ? `${epi.name}: part of the whole scene, from ${Math.round(a0 * dur)} s to ${Math.round(epi.a1 * dur)} s of ${dur} s` : '';
+  if (lbl !== lblTxt) scrub.setAttribute('aria-label', (lblTxt = lbl));
+  if (ttl !== ttlTxt) scrubWrap.title = ttlTxt = ttl;
+  syncSteps(t);
 }
-// Static diagrams (reduced motion, no WebGL) have no timeline: hide Play, the scrubber and the camera presets.
+// A still diagram has no timeline: Play, the scrubber and the views give way to one plain sentence; the steps stay, for reading.
 function staticMode(on) {
-  ['scPlay', 'scScrub', 'scTime', 'scCams'].forEach((id) => {
-    document.getElementById(id).hidden = on;
+  [playBtn, scrubWrap, scTime, viewsEl].forEach((n) => {
+    n.hidden = on;
   });
-  document.getElementById('scStatic').hidden = !on;
-  if (!on) setPlayBtn(true);
+  staticEl.hidden = !on;
+  if (on) {
+    staticTxt.textContent = REDUCED
+      ? 'Animation is switched off on this device. This is a still diagram.'
+      : 'The 3D view could not start on this device. This is a still diagram.';
+    setPlayBtn(false);
+  } else setPlayBtn(true);
+  stepsNote.textContent = on ? 'Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
+  if (on) {
+    stepsBox.open = true;
+    stepNow.textContent = '';
+  }
+  stepsEl.querySelectorAll('.step').forEach((b) => (on ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));
 }
 scrub.oninput = () => {
-  if (host && cur && !scrub.hidden) {
+  if (host && cur && !stillOnly) {
     host.playing = false;
     setPlayBtn(false);
     host.update(epi ? epi.a0 + 0.001 + (scrub.value / 1000) * (epi.a1 - (epi.last ? 0 : 0.001) - epi.a0 - 0.001) : scrub.value / 1000);
   }
 };
-// Play/pause: an icon button (label hidden on phones) whose accessible name is the action it will do; the highlighted style marks "playing".
+// Play/pause: an icon button whose accessible name is the action it will do.
 function setPlayBtn(on) {
-  const b = document.getElementById('scPlay');
-  b.classList.toggle('playing', !!on);
-  b.setAttribute('aria-label', on ? 'Pause' : 'Play');
-  b.innerHTML = on ? '❚❚<span class="lbl"> Pause</span>' : '▶<span class="lbl"> Play</span>';
-  b.disabled = false;
+  playBtn.classList.toggle('playing', !!on);
+  playBtn.setAttribute('aria-label', on ? 'Pause' : 'Play');
+  playBtn.title = on ? 'Pause (Space)' : 'Play (Space)';
+  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : '#i-play');
+  playBtn.disabled = false;
 }
-document.getElementById('scPlay').onclick = () => {
-  if (!host || !cur || scrub.hidden) return;
+function togglePlay() {
+  if (!host || !cur || !glOK || stillOnly) return;
   host.playing = !host.playing;
   if (host.playing && host.t >= 1) host.t = 0;
   setPlayBtn(host.playing);
-};
-document.getElementById('scClose').onclick = closeScene;
-document.getElementById('scPrev').onclick = () => {
+  setStatus(host.playing ? 'Playing.' : 'Paused.');
+}
+playBtn.onclick = togglePlay;
+function buildViews(cfg, sim) {
+  camsEl.textContent = '';
+  camOn = -2;
+  sim.cams.forEach((c, i) => {
+    const label = viewName(cfg.cameras?.[i], c.name),
+      b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.dataset.name = label === c.name ? '' : c.name;
+    b.setAttribute('aria-keyshortcuts', String(i + 1));
+    b.onclick = () => chooseView(i);
+    camsEl.appendChild(b);
+  });
+  requestAnimationFrame(camFade);
+}
+function chooseView(i) {
+  if (!host || !cur || !glOK || stillOnly || !host.sim.cams[i]) return;
+  host.pickCam(i);
+  syncCams();
+  setStatus(`View: ${host.sim.cams[i].name}.`);
+}
+// Phone: the views scroll sideways; a fade on the right edge says more lie beyond it.
+function camFade() {
+  camsEl.classList.toggle('at-end', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft <= 4);
+}
+camsEl.addEventListener('scroll', camFade, { passive: true });
+addEventListener('resize', camFade);
+
+// ---------------------------------------------------------------- previous, next, close, related law
+$('scClose').onclick = closeScene;
+const go = (d) => {
   const i = ORDER.indexOf(cur);
-  openScene(ORDER[(i - 1 + ORDER.length) % ORDER.length].id);
+  if (i >= 0) openScene(ORDER[(i + d + ORDER.length) % ORDER.length].id);
 };
-document.getElementById('scNext').onclick = () => {
-  const i = ORDER.indexOf(cur);
-  openScene(ORDER[(i + 1) % ORDER.length].id);
-};
-document.getElementById('scRelated').onclick = () => {
+$('scPrev').onclick = () => go(-1);
+$('scNext').onclick = () => go(1);
+lawBtn.onclick = () => {
   const id = cur?.related;
   if (!id) return;
   closeScene();
   const m = document.querySelector(`#legalSvg [data-id="${id}"]`);
   if (!m) return;
-  document.getElementById('legalBand').scrollIntoView({ block: 'nearest' });
+  $('legalBand').scrollIntoView({ block: 'nearest' });
   m.classList.add('hl', 'flash-hl');
   m.focus();
   setGuide(parse(byId[id].start));
@@ -282,21 +561,102 @@ document.getElementById('scRelated').onclick = () => {
     m.classList.remove('hl', 'flash-hl');
   }, 3500);
 };
-// Still export. WebGL scenes use the host's renderer; static diagrams are rasterised from their SVG at print width (3000 px) with header and footer bands.
+
+// ---------------------------------------------------------------- story edges: a soft fade at the top and bottom says there is more to scroll
+function updateFades() {
+  const max = asideBody.scrollHeight - asideBody.clientHeight;
+  asideWrap.classList.toggle('can-up', asideBody.scrollTop > 4);
+  asideWrap.classList.toggle('can-down', max - asideBody.scrollTop > 4);
+}
+asideBody.addEventListener('scroll', updateFades, { passive: true });
+addEventListener('resize', updateFades);
+asideBody.addEventListener('toggle', updateFades, true);
+if ('ResizeObserver' in window) new ResizeObserver(updateFades).observe(asideBody);
+
+// ---------------------------------------------------------------- keyboard hint, shown once per visit
+function showHint() {
+  if (hintShown || !KEYBOARD.matches || COMPACT.matches) return;
+  hintShown = true;
+  hintEl.classList.add('on');
+  hintTimer = setTimeout(hideHint, 9000);
+}
+function hideHint() {
+  clearTimeout(hintTimer);
+  hintEl.classList.remove('on');
+}
+overlay.addEventListener('pointerdown', hideHint, { passive: true });
+
+// ---------------------------------------------------------------- keyboard: Space plays or pauses, Left and Right change scene, 1 to 5 choose a view, Esc closes
+const TABBABLE = 'button:not([disabled]),input:not([disabled]),a[href],summary,[tabindex]';
+function trapTab(e) {
+  const list = [...panel.querySelectorAll(TABBABLE)].filter(
+    (n) => n.tabIndex >= 0 && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden' && !n.closest('[hidden],[aria-hidden="true"]'),
+  );
+  if (!list.length) return;
+  const i = list.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) {
+    e.preventDefault();
+    list.at(-1).focus();
+  } else if (!e.shiftKey && i === list.length - 1) {
+    e.preventDefault();
+    list[0].focus();
+  }
+}
+// Left and Right on the scrubber move one second (five with Shift); everywhere else they change scene.
+function seek(e) {
+  const dur = cur?.duration || 0;
+  if (!dur || !host || !glOK || stillOnly) return;
+  e.preventDefault();
+  const a0 = epi ? epi.a0 + 0.001 : 0,
+    a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
+  host.playing = false;
+  setPlayBtn(false);
+  host.update(Math.max(a0, Math.min(a1, host.t + ((e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 5 : 1)) / dur)));
+}
+document.addEventListener('keydown', (e) => {
+  if (!cur || e.defaultPrevented) return;
+  hideHint();
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closeScene();
+    return;
+  }
+  if (e.key === 'Tab') return trapTab(e);
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target instanceof Element ? e.target : document.body;
+  if (t.matches('input:not([type=range]),textarea,select,[contenteditable]')) return;
+  if (e.key === ' ') {
+    if (t.matches('button,summary,a[href]')) return; // the control takes Space itself
+    e.preventDefault();
+    togglePlay();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    if (t === scrub) return seek(e);
+    e.preventDefault();
+    go(e.key === 'ArrowLeft' ? -1 : 1);
+  } else if (/^[1-9]$/.test(e.key) && host && host.sim.cams[+e.key - 1]) {
+    e.preventDefault();
+    chooseView(+e.key - 1);
+  }
+});
+overlay.addEventListener('click', (e) => {
+  if (e.target === overlay) closeScene();
+});
+
+// ---------------------------------------------------------------- saved image
+// Still export. WebGL scenes use the host's renderer; still diagrams are rasterised from their SVG at print width (3000 px) with header and footer bands.
 const PRINT_W = 3000;
-// Same layout as the live still (GLHost.stillPNG): header band with the "illustrative" banner, the diagram, then a footer band with
-// the title, the source and the imagery credit on separate lines. Sizes are in units of PRINT_W / 1000.
+// Same layout as the live image (GLHost.stillPNG): a header band with the note on illustration, the diagram, then a footer band with the title,
+// the source and the imagery credit on separate lines. Sizes are in units of PRINT_W / 1000.
 function svgToPNG(svg, title, cite) {
   return new Promise((resolve, reject) => {
     const vb = svg.viewBox.baseVal,
-      k = PRINT_W / vb.width,
       xml = new XMLSerializer().serializeToString(svg),
       img = new Image();
     img.onload = () => {
       const s = PRINT_W / 1000,
         hb = Math.round(40 * s),
         fb = Math.round(92 * s),
-        H = Math.round(PRINT_W * 0.625) - hb - fb; // the same 3000 x 1875 total as the live stills (the diagram is laid out at this aspect)
+        H = Math.round(PRINT_W * 0.625) - hb - fb; // the same 3000 x 1875 total as the live images (the diagram is laid out at this aspect)
       const c = document.createElement('canvas'),
         g = c.getContext('2d');
       c.width = PRINT_W;
@@ -308,7 +668,7 @@ function svgToPNG(svg, title, cite) {
       g.fillStyle = '#0b1120';
       g.fillRect(0, 0, PRINT_W, hb);
       g.fillRect(0, hb + H, PRINT_W, fb);
-      g.strokeStyle = 'rgba(255,224,138,0.28)';
+      g.strokeStyle = 'rgba(150,175,230,0.3)';
       g.lineWidth = Math.max(1, s);
       g.beginPath();
       g.moveTo(0, hb - 0.5);
@@ -317,17 +677,16 @@ function svgToPNG(svg, title, cite) {
       g.lineTo(PRINT_W, hb + H + 0.5);
       g.stroke();
       g.textBaseline = 'middle';
-      g.fillStyle = '#ffe08a';
+      g.fillStyle = '#ffc86b';
       g.font = `600 ${Math.round(14 * s)}px ${SANS}`;
-      g.fillText('Illustrative static diagram, not orbit-propagated · compressed radial scale', 16 * s, hb / 2);
-      g.fillStyle = '#e9edf7';
+      g.fillText('Drawn for illustration. Orbit heights are squeezed to fit.', 16 * s, hb / 2);
+      g.fillStyle = '#eef2fb';
       g.font = `600 ${Math.round(25 * s)}px ${SERIF}`;
       g.fillText(title, 16 * s, hb + H + 24 * s);
       const srcTxt = `Source: ${String(cite || '')
         .trim()
         .replace(/[.;,\s]+$/, '')}.`;
-      const credit =
-        svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Vector land map: Natural Earth (public domain).';
+      const credit = svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Land map: Natural Earth (public domain).';
       // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
       let f = Math.round(15 * s);
       for (; f > 10 * s; f -= 0.5 * s) {
@@ -340,7 +699,7 @@ function svgToPNG(svg, title, cite) {
       g.fillText(credit, 16 * s, hb + H + 77 * s);
       resolve(c.toDataURL('image/png'));
     };
-    img.onerror = () => reject(new Error('The diagram could not be rasterised'));
+    img.onerror = () => reject(new Error('The diagram could not be turned into an image'));
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
   });
 }
@@ -349,11 +708,11 @@ export async function exportStill() {
   await fontsReady; // the print layout measures and draws text on canvas
   if (host && glOK) return host.stillPNG(cur.title, cur.cite);
   const svg = view.querySelector(':scope > svg');
-  if (!svg) throw new Error('No diagram to export');
+  if (!svg) throw new Error('No diagram to save');
   // The diagram is laid out afresh in an off-screen stage 760 px wide (so the Earth fills more of the frame): its 11 px labels then
   // come out at about 43 px in the 3000 px print, instead of the 25 to 30 px a wide desktop stage would give. Same layout engine as on screen.
   if (curSim) {
-    // The diagram is laid out at the live still's body aspect (3000 x 1479: the whole still is 3000 x 1875 with its bands), so both sets match.
+    // The diagram is laid out at the live image's body aspect (3000 x 1479: the whole image is 3000 x 1875 with its bands), so both sets match.
     const vw = 760,
       vh = Math.round((vw * 1479) / 3000),
       tmp = document.createElement('div');
@@ -372,66 +731,24 @@ export async function exportStill() {
   }
   return svgToPNG(svg, cur.title, cur.cite);
 }
-function setStatus(msg, quiet) {
-  const s = document.getElementById('scStatus');
-  s.textContent = msg;
-  s.classList.toggle('sr', !!quiet);
-} // quiet: announced to screen readers, not shown (the title and counter already say it)
-// Scroll cue: the aside text is fully reachable by scrolling; a fade and label show while more is below.
-const asideBody = document.getElementById('asideBody'),
-  asideWrap = document.getElementById('asideWrap');
-// The cue row is reserved under the text (never overlaps it): it shows a label and a progress bar while the text is scrollable.
-const cueTxt = document.getElementById('cueTxt'),
-  cueProg = document.getElementById('scrollProg');
-function updateCue() {
-  const max = asideBody.scrollHeight - asideBody.clientHeight,
-    more = asideBody.scrollTop < max - 6;
-  asideWrap.classList.toggle('scrollable', max > 6);
-  asideWrap.classList.toggle('more', more);
-  cueTxt.textContent = more ? '▾ Scroll for more' : 'End of text';
-  cueProg.style.width = max > 6 ? Math.max(6, (100 * asideBody.clientHeight) / asideBody.scrollHeight) + '%' : '100%';
-  cueProg.style.left = max > 6 ? (100 - parseFloat(cueProg.style.width)) * (asideBody.scrollTop / max) + '%' : '0';
-}
-asideBody.addEventListener('scroll', updateCue, { passive: true });
-addEventListener('resize', updateCue);
-asideBody.addEventListener('toggle', updateCue, true);
-if ('ResizeObserver' in window) new ResizeObserver(updateCue).observe(asideBody);
-document.getElementById('scExport').onclick = async () => {
+exportBtn.onclick = async () => {
   const c = cur;
   if (!c) return;
   try {
-    setStatus('Preparing PNG…');
+    toast('Saving image…');
     const url = await exportStill();
-    download(`scene-${c.id}.png`, url, 'image/png');
-    setStatus('Saved scene-' + c.id + '.png');
+    download(`counterspace-${slug(c.title)}.png`, url, 'image/png');
+    toast('Image saved.');
   } catch (e) {
-    setStatus('Export failed: ' + e.message + '. Use your browser’s screenshot tool instead.');
+    toast('The image could not be saved. Try your browser’s screenshot tool instead.', 'warn');
   }
 };
-document.getElementById('tourBtn').onclick = (e) => openScene(ORDER[0].id, e.currentTarget);
-overlay.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    closeScene();
-  }
-  if (e.key === 'Tab') {
-    const f = [...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),a[href],[tabindex="0"]')];
-    const i = f.indexOf(document.activeElement);
-    if (e.shiftKey && i <= 0) {
-      e.preventDefault();
-      f.at(-1).focus();
-    } else if (!e.shiftKey && i === f.length - 1) {
-      e.preventDefault();
-      f[0].focus();
-    }
-  }
-});
-overlay.addEventListener('click', (e) => {
-  if (e.target === overlay) closeScene();
-});
+const tourBtn = $('tourBtn');
+if (tourBtn) tourBtn.onclick = (e) => openScene(ORDER[0].id, e.currentTarget);
 
+// ---------------------------------------------------------------- hero
 // Hero overview uses the same single renderer; it is unloaded whenever a scene opens.
-export const heroStage = document.getElementById('heroStage');
+export const heroStage = $('heroStage');
 let heroWanted = false; // the hero has been upgraded to WebGL (on user intent); only then does closing a scene restart it
 export async function startHero() {
   heroWanted = true;
@@ -452,7 +769,7 @@ function unloadHero() {
   if (host && host.el === heroStage) host.unload();
 }
 
-// Static diagrams size themselves from the stage at open time: redraw them if the overlay is resized while open.
+// Still diagrams size themselves from the stage at open time: redraw them if the window is resized while open.
 let srz = 0;
 addEventListener('resize', () => {
   clearTimeout(srz);

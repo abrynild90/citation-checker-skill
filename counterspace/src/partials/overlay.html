@@ -1,40 +1,84 @@
-<div class="overlay" id="overlay" aria-hidden="true">
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
-    <header>
-      <div class="hd"><h2 id="sceneTitle">Scene</h2></div>
-      <div class="nav">
-        <button class="btn small" id="scPrev" type="button" aria-label="Previous scene">◀<span class="lbl"> Previous</span></button>
-        <span class="count" id="sceneDate" aria-label="Scene number"></span>
-        <button class="btn small" id="scNext" type="button" aria-label="Next scene"><span class="lbl">Next </span>▶</button>
-        <button class="btn small" id="scClose" type="button" aria-label="Close scene">✕<span class="lbl"> Close</span></button>
+<div class="overlay scope-dark" id="overlay" aria-hidden="true">
+  <div class="panel" id="scenePanel" role="dialog" aria-modal="true" aria-label="3D explainer" tabindex="-1">
+    <header class="sv-head">
+      <h2 id="sceneTitle"></h2>
+      <div class="sv-meta">
+        <div class="sv-dots" id="sceneDots" role="group" aria-label="All scenes"></div>
+        <span class="sv-count" id="sceneDate" aria-hidden="true"></span>
+      </div>
+      <div class="sv-nav">
+        <button class="btn icon" id="scPrev" type="button" aria-label="Previous scene" aria-keyshortcuts="ArrowLeft" title="Previous scene (Left arrow)"><svg
+          class="ico" aria-hidden="true" focusable="false"><use href="#i-prev"/></svg></button>
+        <button class="btn icon" id="scNext" type="button" aria-label="Next scene" aria-keyshortcuts="ArrowRight" title="Next scene (Right arrow)"><svg
+          class="ico" aria-hidden="true" focusable="false"><use href="#i-next"/></svg></button>
+        <span class="sv-sep" aria-hidden="true"></span>
+        <button class="btn icon" id="scClose" type="button" aria-label="Close 3D explainer" aria-keyshortcuts="Escape" title="Close (Esc)"><svg
+          class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button>
       </div>
     </header>
-    <div class="view" id="sceneView" role="group" aria-label="Scene visual (illustrative)" aria-describedby="sceneCaption sceneSteps"><div
-      class="illus">Illustrative<span class="hide-phone">, not orbit-propagated</span> · compressed radial scale</div></div>
-    <aside>
-      <div class="aside-wrap" id="asideWrap">
-      <div class="aside-body" id="asideBody" tabindex="0" role="region" aria-label="Scene description">
-        <p id="sceneCaption"></p>
-        <details class="steps" id="sceneStepsBox"><summary>What happens in this scene</summary>
-          <ol id="sceneSteps"></ol></details>
-        <details class="scalenote"><summary>Scale and imagery note</summary><p class="src" id="sceneScale"></p></details>
+
+    <div class="view" id="sceneView" role="group" aria-label="Picture for this scene, drawn for illustration" aria-describedby="sceneCaption sceneSteps">
+      <div class="illus"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><span class="full">Drawn for illustration.
+        Orbit heights are squeezed to fit.</span><span class="short">Drawn for illustration</span></div>
+      <div class="sv-state" id="sceneState" hidden>
+        <div class="sv-orb" aria-hidden="true"><svg class="ico" focusable="false"><use href="#i-info"/></svg></div>
+        <p id="sceneStateTxt"></p>
       </div>
-      <div class="scroll-cue" id="scrollCue" aria-hidden="true"><span id="cueTxt">▾ Scroll for more</span><span class="cue-track"><i
-        id="scrollProg"></i></span></div>
-      <p class="src pin-src" id="sceneSrc"></p>
+      <div class="sv-hint" id="sceneHint" aria-hidden="true">
+        <span><kbd>Space</kbd> Play or pause</span>
+        <span><kbd><svg class="ico" focusable="false"><use href="#i-prev"/></svg></kbd><kbd><svg class="ico" focusable="false"><use href="#i-next"/></svg></kbd> Change
+          scene</span>
+        <span><kbd>1</kbd> to <kbd>5</kbd> Choose a view</span>
+        <span><kbd>Esc</kbd> Close</span>
       </div>
-      <div class="aside-law" id="asideLaw"><button class="btn small" id="scRelated" type="button">⚖ Related law</button></div>
+    </div>
+
+    <aside class="story" id="sceneStory" aria-label="The story of this scene">
+      <div class="story-wrap" id="asideWrap">
+        <div class="story-scroll" id="asideBody" tabindex="0" role="region" aria-label="The story of this scene">
+          <p class="sv-lede" id="sceneCaption"></p>
+          <section class="sv-steps" id="sceneStepsSection" aria-labelledby="stepsH">
+            <h3 id="stepsH">What happens</h3>
+            <p class="sv-note" id="stepsNote"></p>
+            <ol class="sv-now" id="stepNow" aria-hidden="true"></ol>
+            <details class="sv-all" id="sceneStepsBox" open>
+              <summary>All steps</summary>
+              <ol id="sceneSteps"></ol>
+            </details>
+          </section>
+          <details class="about sv-about">
+            <summary>About this picture</summary>
+            <p id="sceneScale"></p>
+          </details>
+        </div>
+      </div>
+      <div class="story-foot" id="sceneFoot">
+        <p class="sv-src" id="sceneSrc"></p>
+        <div class="aside-law" id="asideLaw">
+          <button class="btn" id="scRelated" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-law"/></svg><span
+            id="scRelatedTxt">Related law</span></button>
+        </div>
+      </div>
     </aside>
-    <div class="ctrl">
-      <button class="btn small" id="scPlay" type="button" aria-label="Pause">❚❚<span class="lbl"> Pause</span></button>
-      <label class="sr" for="scScrub">Scene time</label>
-      <input type="range" id="scScrub" min="0" max="1000" value="0">
+
+    <div class="ctrl" id="sceneCtrl">
+      <button class="btn primary icon" id="scPlay" type="button" aria-label="Pause" aria-keyshortcuts="Space" title="Pause (Space)"><svg class="ico"
+        aria-hidden="true" focusable="false"><use href="#i-pause"/></svg></button>
       <span class="tm" id="scTime" aria-hidden="true"></span>
-      <span class="static-note" id="scStatic" hidden>Static diagram: no timeline (reduced motion or no WebGL).</span>
-      <span id="scCams" style="display:flex;gap:6px"></span>
-      <span class="static-note" id="scStatus" role="status" aria-live="polite"></span>
-      <button class="btn small" id="scExport" type="button" aria-label="Export still image (PNG)">⤓<span class="lbl"> Export still (PNG)</span><span
-        class="lbl-s"> PNG</span></button>
+      <div class="scrub" id="scrubWrap">
+        <label class="sr" for="scScrub">Time in the scene</label>
+        <input type="range" id="scScrub" min="0" max="1000" step="any" value="0">
+        <span class="ticks" id="scTicks" aria-hidden="true"></span>
+      </div>
+      <p class="static-note" id="scStatic" hidden><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><span
+        id="scStaticTxt"></span></p>
+      <div class="views" id="scViews">
+        <span class="views-label" aria-hidden="true">View</span>
+        <div class="seg" id="scCams" role="group" aria-label="Choose a view"></div>
+      </div>
+      <button class="btn" id="scExport" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-image"/></svg><span>Save
+        image</span></button>
+      <p class="sv-toast sr" id="scStatus" role="status" aria-live="polite"></p>
     </div>
   </div>
 </div>
