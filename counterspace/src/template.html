@@ -50,31 +50,34 @@
 
   <section class="hero" aria-labelledby="pageTitle">
     <div class="hero-grid">
-      <div class="hero-copy">
+      <div class="hero-copy" id="heroCopy">
         <h1 class="hero-title" id="pageTitle"><span class="h1-main">Counterspace, <span class="nb">1957–2026:</span></span> <span
           class="h1-sub">the weapons and the law that trailed them</span></h1>
         <div class="hero-text">
           <p class="lede">Counterspace is the name for weapons and methods that can attack or disable satellites. This page shows them, and the laws and policies
             that followed, against the same years, from 1957 to 2026.</p>
-          <p class="lede-note">Tests that destroy a satellite have paused since <strong>November 2021</strong>. Jamming, lasers and cyber operations have not.
-            The Secure World Foundation (SWF), whose 2026 report is the main source of the facts here, finds that “only non-destructive capabilities are actively
-            being used against satellites in current military operations” (Executive Summary, p.&nbsp;xxiii).</p>
           <div class="cta">
             <a class="btn primary" href="#timeline">See the timeline<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
             <button class="btn lg" id="tourBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
           </div>
-          <p class="cta-note"></p>
         </div>
       </div>
-
-      <figure class="hero-figure" aria-label="The Earth with three orbit zones">
-        <div class="stage" id="heroStage"></div>
-        <figcaption><p class="illus">Drawn for illustration. Orbit heights are squeezed so every orbit fits.</p></figcaption>
+      <figure class="hero-figure" id="heroFigure">
+        <div class="stage" id="heroPic" role="img" aria-describedby="heroAlt"></div>
+        <figcaption class="hero-cap">
+          <p>Each dot is one test with a reported altitude, and each tick on the ground is a law or policy. Scroll for the detail.</p>
+          <button class="btn icon" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
+            href="#i-replay"/></svg></button>
+        </figcaption>
+        <div class="sr" id="heroAlt"></div>
       </figure>
       <div class="hero-notes">
+        <p class="lede-note">Tests that destroy a satellite have paused since <strong>November 2021</strong>. Jamming, lasers and cyber operations have not.
+          The Secure World Foundation (SWF), whose 2026 report is the main source of the facts here, finds that “only non-destructive capabilities are actively
+          being used against satellites in current military operations” (Executive Summary, p.&nbsp;xxiii).</p>
         <p class="orbit-note">Low Earth orbit (LEO) reaches up to about 2,000 km above the Earth. Global Positioning System (GPS) satellites sit in medium Earth
           orbit (MEO), about 20,200 km up. Broadcast and communications satellites sit in the geostationary belt (GEO), about 35,786 km up.</p>
-        <button class="btn small hero-rot" id="heroRot" type="button"><svg class="ico" aria-hidden="true"><use href="#i-rotate"/></svg>Rotate the globe</button>
+        <p class="cta-note"></p>
       </div>
 
       <div class="hero-contents">
