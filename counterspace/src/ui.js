@@ -1,6 +1,6 @@
 // ============================================================================
 // ui.js: hover/focus card, roving tabindex, shared guide line, write-once DOM helpers.
-// Provides: bindMark(), showCard(), rove(), addGuide(), setOnce(), legend().
+// Provides: bindMark(), showCard(), rove(), addGuide(), setOnce(), legend(), table(), hint3d().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { EXPORTING, LAST_DA, PHONE_MAX, TYPE_LABEL, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
@@ -25,12 +25,12 @@ function showCard(html, evt, el, full = false) {
     return;
   }
   card.classList.remove('more');
-  // Dense strips (the RPO chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a mark or
-  // two only when no empty spot is near (cheap, not free) and keeps off the lane titles; elsewhere covering a mark costs far more than distance.
+  // Dense strips (the close-approach chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a
+  // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
     WM = near ? 1.5 : 6;
   card.style.maxWidth = near ? (card.classList.contains('full') ? '340px' : '260px') : '';
-  card.classList.toggle('cc', near && !full); // compact RPO hover card: heading clamped to two lines
+  card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
@@ -49,17 +49,17 @@ function showCard(html, evt, el, full = false) {
             n.querySelector('.hit') ? [...n.querySelectorAll(':scope > :not(.hit)')].map((c) => c.getBoundingClientRect()) : [n.getBoundingClientRect()],
           )
       : [];
-  // Annotation lines are tspans inside a <text>: the whole <text> is the obstacle. Band labels are obstacles everywhere (not only on the RPO strip).
+  // Annotation lines are tspans inside a <text>: the whole <text> is the obstacle. Zone labels are obstacles everywhere (not only on the strip chart).
   const texts = new Set();
-  root?.querySelectorAll('.ann, .ann-sub').forEach((n) => texts.add(n.closest('text') || n));
+  root?.querySelectorAll('.ann, .ann-sub, .empty-note').forEach((n) => texts.add(n.closest('text') || n));
   root?.querySelectorAll('text.band-label, .handoff text').forEach((n) => texts.add(n));
-  const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or band-label text costs more than any distance
+  const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
     cx = (r.left + r.right) / 2;
   const H = 3 * G,
-    // On the dense RPO strip the card prefers the space above or below the whole chart (outside every lane), so it hides no row.
+    // On the dense strip chart the card prefers the space above or below the whole chart (outside every row), so it hides no row.
     outside =
       near && root
         ? (({ top, bottom }) => [
@@ -150,32 +150,49 @@ export function hideCard() {
   card.classList.remove('on');
   card.setAttribute('aria-hidden', 'true');
 }
+// ---------------------------------------------------------------- card content
+// The line that offers the 3D explainer, with the cube icon from the page's icon set. Every card builder uses it.
+export const hint3d = (what = 'the 3D explainer') =>
+  `<div class="hint"><svg class="ico" aria-hidden="true"><use href="#i-cube"/></svg>Select to open ${what}</div>`;
 const srcLine = (r) => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
+const ALT_KIND = { intercept: 'intercept', apogee: 'its highest point', detonation: 'detonation' };
+const CONFIDENCE = { high: 'High', medium: 'Medium', low: 'Low' };
+// "None" and "None known" are stored values; the card says it in words.
+export const targetWords = (t) => (/^none known$/i.test(t) ? 'No target known' : /^none$/i.test(t) ? 'No target' : t.replace(/^None \(/, 'No target ('));
 export function kinCard(e) {
   const debris =
     e.type === 'destructive'
-      ? `<dt>Fragments</dt><dd>${num(e.fragments_cataloged)} cataloged · ${num(e.fragments_in_orbit)} still in orbit (as of ` +
+      ? `<dt>Debris</dt><dd>${num(e.fragments_cataloged)} fragments cataloged; ${num(e.fragments_in_orbit)} still in orbit (as of ` +
         `${fmtMY(parse(e.fragments_as_of + '-01'))})</dd>`
       : '';
-  const alt = e.altitude_km == null ? 'not reported' : `${num(e.altitude_km)} km (${e.altitude_kind})`;
+  const alt = e.altitude_km == null ? 'Not reported' : `${num(e.altitude_km)} km at ${ALT_KIND[e.altitude_kind] || e.altitude_kind}`;
   const mdo =
     e.id === 'us-2008-burnt-frost'
-      ? '<div class="hint">Missile-defense interceptor (SM-3) used against a satellite: shows the missile-defense / ASAT overlap.</div>'
+      ? '<p class="note">A missile-defense interceptor (SM-3) used against a satellite: this is where missile defense and anti-satellite weapons overlap.</p>'
       : '';
   return (
-    `<h4>${esc(e.system)} → ${esc(e.target)}</h4><dl><dt>Date</dt><dd>${fmtD(e)}</dd><dt>State</dt><dd>${esc(e.state)}` +
-    `</dd><dt>Type</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>Confidence</dt><dd>${e.confidence}` +
-    `</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? '<div class="hint">▣ Click, tap or press Enter to open the 3D scene</div>' : ''}`
+    `<p class="card-title">${esc(e.system)}</p><p class="when">${esc(e.state)} · ${fmtD(e)}</p><dl><dt>Target</dt><dd>${esc(targetWords(e.target))}</dd>` +
+    `<dt>Kind of test</dt><dd>${TYPE_LABEL[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>How sure we are</dt>` +
+    `<dd>${CONFIDENCE[e.confidence] || e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? hint3d() : ''}`
   );
 }
 export { nkCard, coWhen, coCard } from './cards2.js';
+// What kind of legal item this is, in words (the data stores it as a code; the draft treaties share the "negotiation_span" code with the bars).
+export const LEGAL_KIND = {
+  treaty: 'Treaty',
+  resolution: 'Resolution or body finding',
+  unilateral: 'Unilateral pledge',
+  veto: 'Veto',
+  draft: 'Draft treaty put forward',
+  span: 'Negotiation period',
+};
+export const legalKindOf = (l) => (l.soft_law ? 'soft' : l.kind === 'negotiation_span' ? (l.end || l.id === 'paros-1981' ? 'span' : 'draft') : l.kind);
+export const legalKindWords = (l) => (l.soft_law ? 'Soft law (expert manual, not binding)' : LEGAL_KIND[legalKindOf(l)] || l.kind);
 export function legalCard(l) {
   const when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start));
   return (
-    `<h4>${esc(l.label)}</h4><dl><dt>Date</dt><dd>${when}` +
-    `</dd><dt>Kind</dt><dd>${l.soft_law ? 'Soft law (expert manual, not binding)' : l.kind.replace('_', ' ')}` +
-    `</dd></dl><div>${esc(l.short_note)}</div><div class="src">${esc(l.citation)}` +
-    `</div>${hasScene(l) ? '<div class="hint">▣ Click, tap or press Enter to open the related 3D scene</div>' : ''}`
+    `<p class="card-title">${esc(l.title || l.label)}</p><p class="when">${legalKindWords(l)} · ${when}</p><p>${esc(l.short_note)}</p>` +
+    `<div class="src">${esc(l.citation)}</div>${hasScene(l) ? hint3d('the related 3D explainer') : ''}`
   );
 }
 // Keyboard modality: while the user navigates with keys, a mouse hover never replaces the card of the focused mark;
@@ -240,22 +257,23 @@ export function bindMark(sel, cardFn, onActivate) {
       if (!touchMode && cardEl === this) hideCard();
     });
 }
-// Live region for cards: pressing Enter on a mark that has no 3D scene re-opens its card, pulses it and reads it out.
+// Live region for cards: pressing Enter on a mark that has no 3D scene re-opens its full card and reads it out.
 const live = Object.assign(document.createElement('div'), { id: 'cardLive', className: 'sr' });
 live.setAttribute('role', 'status');
 live.setAttribute('aria-live', 'polite');
 document.body.appendChild(live);
+// The card as one reading: each term is followed by its value, and the 3D line is left out.
+function cardSpeech() {
+  const c = card.cloneNode(true);
+  c.querySelectorAll('.hint, .ack-line').forEach((n) => n.remove());
+  c.querySelectorAll('dt').forEach((n) => (n.textContent += ': '));
+  c.querySelectorAll('.card-title, h4, .when, dd, p, .src, .note').forEach((n) => (n.textContent += '. '));
+  return c.textContent.replace(/\s+/g, ' ').trim();
+}
 function announceCard() {
-  card.classList.remove('pulse');
-  void card.offsetWidth;
-  card.classList.add('pulse');
-  setTimeout(() => card.classList.remove('pulse'), 900);
-  const say = [...card.querySelectorAll('h4, dl, div:not(.hint):not(.ack-line)')]
-    .map((n) => n.textContent.replace(/\s+/g, ' ').trim())
-    .filter(Boolean)
-    .join('. ');
+  const say = cardSpeech();
   live.textContent = '';
-  setTimeout(() => (live.textContent = `Details shown. ${say} No 3D scene for this item.`), 60);
+  setTimeout(() => (live.textContent = `Details shown. ${say} There is no 3D explainer for this item.`), 60);
 }
 const cardFor = (d, full) => (d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d, !full) : d.domain ? nkCard(d) : legalCard(d));
 export const activate = (d, el, ev) => {
@@ -264,11 +282,15 @@ export const activate = (d, el, ev) => {
     hooks.openScene(d.scene_3d, el);
     return;
   }
-  // No scene: show the full card with a visible confirmation (a line in the card and a brief ring on the mark); announceCard() reads it out.
-  showCard('<div class="ack-line">✓ Details shown · no 3D scene for this item</div>' + cardFor(d, true), ev, el, true);
+  // No scene: show the full card with a visible confirmation line at its top; announceCard() reads it out.
+  showCard(
+    '<div class="ack-line"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Details shown. No 3D explainer for this item.</div>' +
+      cardFor(d, true),
+    ev,
+    el,
+    true,
+  );
   cardEl = el;
-  el.classList.add('ack');
-  setTimeout(() => el.classList.remove('ack'), 1600);
   announceCard();
 };
 
@@ -332,42 +354,67 @@ export function rove(sel) {
   });
 }
 
-// ---------------------------------------------------------------- write-once DOM (legends and tables do not depend on layout)
+// ---------------------------------------------------------------- write-once DOM (keys and tables do not depend on layout)
 const written = new Map();
 function setOnce(id, html) {
   if (written.get(id) === html) return;
   written.set(id, html);
   document.getElementById(id).innerHTML = html;
 }
-// Legend builder: legend('legendA', 22, 18).item(svgInner, text[, w]).raw(html).done()
+// Key builder: legend('legendA', 22, 18).group('Kind of test').item(svgInner, text[, w]).raw(html).done()
+// Without .group() the items form one plain row of swatch-and-name pairs; with it each group is a line led by a small eyebrow label.
 export function legend(id, w = 22, h = 16) {
-  const parts = [],
+  const groups = [{ name: null, items: [] }],
     api = {
+      group: (name) => (groups.push({ name, items: [] }), api),
       item: (inner, text, iw = w) => (
-        parts.push(`<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg><span>${text}</span></li>`),
+        groups
+          .at(-1)
+          .items.push(
+            `<li><svg width="${iw}" height="${h}" viewBox="${-iw / 2} ${-h / 2} ${iw} ${h}" aria-hidden="true">${inner}</svg><span>${text}</span></li>`,
+          ),
         api
       ),
-      raw: (html) => (parts.push(html), api),
-      done: () => setOnce(id, parts.join('')),
+      raw: (html) => (groups.at(-1).items.push(html), api),
+      done: () =>
+        setOnce(
+          id,
+          groups
+            .map((g) =>
+              g.name == null ? g.items.join('') : `<li class="kgroup"><span class="kname">${g.name}</span><ul class="kitems">${g.items.join('')}</ul></li>`,
+            )
+            .join(''),
+        ),
     };
   return api;
 }
 
 // ---------------------------------------------------------------- data tables
 export const srcCell = (r) => `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}`;
-// Accessible data table. Each cell carries data-label so CSS can stack rows as cards on phones (no horizontal scroll).
+// Accessible data table. Each cell carries data-label so CSS can stack entries as cards on phones (no sideways scrolling). Columns whose cells are
+// all numbers are right-aligned; date columns never wrap on a wide screen.
 const CAPTIONS = {
-  tableA: 'Chart A data: kinetic counterspace tests, one row per event',
-  tableB: 'Chart B data: states holding each capability, by decade',
-  tableC: 'Chart C data: non-kinetic operations, one row per event or campaign',
-  tableR: 'Co-orbital data: rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one row per ledger row',
-  tableL: 'The lag: capability and response dates for each pair',
-  tableLegal: 'Law and policy items with abbreviations',
+  tableA: 'Anti-satellite tests, one line per test',
+  tableB: 'States holding each capability, by decade',
+  tableC: 'Jamming, laser and cyber operations, one line per event or campaign',
+  tableR:
+    'Close approaches in orbit: rendezvous and proximity operations, dockings, a capture and tow, releases and spaceplane missions, one line per operation',
+  tableL: 'Each capability and the later legal step linked to it, with the time between them',
+  tableLegal: 'Law and policy items, with the short names used on the timeline',
 };
+const isNumber = (c) => typeof c === 'number' || (typeof c === 'string' && /^-?[\d,]+(\.\d+)?$/.test(c));
 export function table(id, head, rows, caption = CAPTIONS[id]) {
-  const cell = (c, i) => `<td data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`;
+  const kind = head.map((h, i) =>
+    /date|^(start|end|when)$/i.test(h)
+      ? 'date'
+      : rows.some((r) => isNumber(r[i])) && rows.every((r) => r[i] == null || r[i] === '—' || r[i] === '' || isNumber(r[i]))
+        ? 'num'
+        : '',
+  );
+  const cell = (c, i) =>
+    `<td${kind[i] ? ` class="${kind[i]}"` : ''} data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`;
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
-  const th = head.map((h) => `<th scope="col">${h}</th>`).join('');
+  const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}>${h}</th>`).join('');
   setOnce(id, `<table>${cap}<thead><tr>${th}</tr></thead><tbody>${rows.map(tr).join('')}</tbody></table>`);
 }

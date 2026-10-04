@@ -64,43 +64,48 @@
 </div>
 
 <div id="timeline" tabindex="-1">
-  <div class="legal-band" id="legalBand" role="region" aria-label="Legal and policy responses, on the shared year axis">
+  <div class="wrap law-intro" id="law">
+    <header class="chapter-head" id="lawHead">
+      <h2 id="hLaw">Law and policy on one timeline</h2>
+      <p class="lede">Treaties, resolutions, pledges and expert manuals sit on the same years as every chart below, and this timeline stays in view as you
+        scroll.</p>
+      <div class="tools"><button class="btn small" data-export="legal" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download
+        chart</button></div>
+    </header>
+    <ul class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul>
+  </div>
+  <div class="legal-band" id="legalBand" role="region" aria-labelledby="hLaw">
     <div class="wrap">
-      <div class="band-head"><b>Law &amp; policy</b><span class="tools"><button class="btn small" data-export="legal" type="button">Export
-        SVG</button></span></div>
       <div id="legalSvg"></div>
       <div class="strip-pos" id="stripPos" hidden><span class="lab"></span><span class="track" aria-hidden="true"><i></i></span></div>
-      <div class="legal-tap" id="legalTap" role="status" hidden>Tap a mark for its label.</div>
+      <div class="legal-tap" id="legalTap" role="status" hidden>Tap a symbol for its name and date.</div>
     </div>
   </div>
-  <div class="wrap">
-    <ul class="legend" id="legendLegal" aria-label="Legal band key"></ul>
+  <div class="wrap law-detail">
+    <div class="legal-link" id="legalLink" aria-hidden="true"></div>
     <div class="legal-zoom" id="legalZoomBox">
-      <div class="zoom-head"><b>Zoom: 2021–26</b><span>The dashed window on the law band, enlarged so the crowded 2022–25 items can carry fuller
-        labels. On wide screens the main band numbers these marks and keys them beside the window; a thin stem runs from each down to its true date on
-        the axis. Tap or focus a mark for its citation.</span></div>
+      <div class="zoom-head"><h3 id="zoomTitle">Zoom: 2021 to 2026</h3><p>The shaded window above, enlarged so each item can carry its name; select a symbol for its
+        citation.</p></div>
       <div id="legalZoom"></div>
     </div>
     <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list"
       id="legalList"></ul></details>
-    <p class="note block hide-phone" id="abbrLegal"></p>
-    <details class="table" id="legalKey"><summary>Legal items and abbreviations (table)</summary><p class="note block" id="abbrLegal2"></p><div
-      class="tscroll" id="tableLegal"></div></details>
+    <details class="table" id="legalKey"><summary>Show the data behind this chart</summary>
+      <h3 class="sub-h">Abbreviations</h3><dl class="glossary" id="glossaryLegal"></dl>
+      <div class="tscroll" id="tableLegal"></div></details>
   </div>
 
   <div class="wrap">
     <section class="chart" id="chartA" aria-labelledby="hA">
-      <div class="chart-head">
-        <div><h2 id="hA">A · Kinetic tests: altitude over time</h2>
-        <p>Direct-ascent anti-satellite (DA-ASAT) tests and one high-altitude nuclear test. The log scale runs from 10 km (rocket-only tests) to
-          beyond GEO. Tests with no reported altitude sit in a strip below the axis, at their true dates. For destructive tests, bubble <em>area</em> is
-          proportional to the number of cataloged fragments.</p></div>
-        <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button">Zoom to 2004–2026</button><button
-          class="btn small" data-export="A" type="button">Export SVG</button></div>
-      </div>
+      <header class="chapter-head">
+        <h2 id="hA">How high anti-satellite tests have reached, and the debris they left</h2>
+        <p class="lede">Each point is one test, placed by year and altitude; the large bubbles mark the destructive tests that left the most debris.</p>
+        <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button><button class="btn small"
+          data-export="A" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div>
+      </header>
       <div class="svgbox" id="svgA"></div>
       <ul class="legend" id="legendA"></ul>
-      <details class="table"><summary>Data table: Chart A</summary><div class="tscroll" id="tableA"></div></details>
+      <details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableA"></div></details>
     </section>
 
     <section class="chart" id="chartC" aria-labelledby="hC">
@@ -171,16 +176,16 @@
     </section>
 
     <section class="chart" id="lag" aria-labelledby="hL">
-      <div class="chart-head">
-        <div><h2 id="hL">Chronology: capability, then law</h2>
-        <p>Time between a capability milestone and a later legal or policy step. This is chronology, not causation: each pair shows which came first,
-          not that one caused or answered the other. An open ring means the ledger pairs no later legal item with that event; it does not claim that no
-          rule exists.</p></div>
-        <div class="tools"><button class="btn small" data-export="L" type="button">Export SVG</button></div>
-      </div>
+      <header class="chapter-head">
+        <h2 id="hL">How long the law took to follow</h2>
+        <p class="lede">Each bar runs from a capability to the next legal step our records link to it. The gap shows the order of events and says nothing about
+          cause.</p>
+        <div class="tools"><button class="btn small" data-export="L" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download
+          chart</button></div>
+      </header>
       <div class="svgbox" id="svgL"></div>
       <ul class="legend" id="legendL"></ul>
-      <details class="table"><summary>Data table: chronology pairs</summary><div class="tscroll" id="tableL"></div></details>
+      <details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableL"></div></details>
     </section>
   </div>
 </div>
