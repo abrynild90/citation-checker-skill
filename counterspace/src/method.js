@@ -90,7 +90,7 @@ export function drawMethod() {
       2025</i> was used only to cross-check. No entry, page reference or citation depends on it. The 2026 edition was not yet published on ${DATA_DATE}.</li>
     <li><b>Data last updated:</b> ${DATA_DATE}.</li>
     <li><b>Where the opening claim comes from:</b> The statement at the top of the page that only non-destructive capabilities are in active use is SWF’s
-      finding, quoted from SWF 2026, Executive Summary, p. xxiii (PDF p. 21): “only non-destructive capabilities are actively being used against satellites
+      finding, quoted from SWF 2026, Executive Summary, p.&nbsp;xxiii (PDF p.&nbsp;21): “only non-destructive capabilities are actively being used against satellites
       in current military operations.”</li>
     <li><b>Check on the last destructive test:</b> No destructive direct-ascent anti-satellite test appears after ${fmtLong(parse(LAST_DA))} in SWF 2026 (Table 5-1
       ends with Cosmos 1408).</li>

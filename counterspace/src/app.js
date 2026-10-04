@@ -94,19 +94,19 @@ document.getElementById('asof').innerHTML =
     pairs = new Set(D.lag_pairs.pairs.map((p) => p.event)).size,
     open = D.lag_pairs.open.length,
     nSources = new Set(EVENTS.concat(LEGAL).map((r) => r.source_url)).size;
+  const nuclearText = nuclear ? (nuclear === 1 ? ', one of them a high-altitude nuclear test' : `, ${word(nuclear)} of them nuclear`) : '';
   const text = {
-    law: `${LEGAL.length} legal and policy items between ${first(LEGAL, 'start')} and ${last(LEGAL, 'start')}, from treaties to expert manuals, on one timeline.`,
+    law: `The legal and policy record, from treaties to expert manuals: ${LEGAL.length} items from ${first(LEGAL, 'start')} to ${last(LEGAL, 'start')}, drawn on the same years as every chart below.`,
     tests:
-      `${KIN.length} tests between ${first(KIN, 'date')} and ${last(KIN, 'date')}` +
-      `${nuclear ? (nuclear === 1 ? ', one of them a high-altitude nuclear test' : `, ${word(nuclear)} of them nuclear`) : ''}; ` +
+      `Tests of weapons meant to destroy satellites: ${KIN.length} between ${first(KIN, 'date')} and ${last(KIN, 'date')}${nuclearText}; ` +
       `${destroyed.length} destroyed a satellite${allLEO ? ', all in low Earth orbit' : ''}, the last in ${fmtMonthYear(parse(LAST_DA))}.`,
-    jam: `${NK.length} jamming, laser and cyber operations since ${first(NK, 'start')} that interfere with satellites or the signals they carry.`,
+    jam: `Interfering with satellites or the signals they carry, by jamming, laser or cyber attack: ${NK.length} operations since ${first(NK, 'start')}.`,
     close:
-      `${CO.length} close approaches, dockings, releases and spaceplane missions since ${first(CO, 'start')}. ` +
-      `Most are inspection, servicing or technology demonstrations.`,
-    who: `${nStates} countries and ${word(caps.length)} kinds of capability, counted decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
-    lag: `${pairs} capability milestones with a later legal step, and ${open} with none in our records.`,
-    src: `${nSources} cited sources, with the editions and dates behind them and the rules used to classify each entry.`,
+      `Satellites flying close to other satellites: ${CO.length} close approaches, dockings, releases and spaceplane missions since ${first(CO, 'start')}, ` +
+      `most of them inspection, servicing or technology demonstrations.`,
+    who: `Which countries can do what: ${nStates} countries and ${word(caps.length)} kinds of capability, counted decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
+    lag: `How long the law took to follow a new capability: ${pairs} milestones with a later legal step, and ${open} with none in our records.`,
+    src: `Where every fact comes from: ${nSources} cited sources, how current the data is, and the rules used to classify each entry.`,
   };
   document.querySelectorAll('#glance [data-ch]').forEach((li) => {
     li.querySelector('.t-text').textContent = text[li.dataset.ch] || '';
