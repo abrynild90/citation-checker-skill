@@ -1,0 +1,90 @@
+// Renders one poster picture per 3D explainer (no labels, 16:9, WebP) from the real live scenes:
+//   NODE_PATH=tools/node_modules PORT=9301 node tools/make_posters.mjs            all scenes
+//   ONLY=starfish,rpo  T_starfish=0.4  OUT=dir  W=960  Q=0.82  FILE=index.html
+// Writes <OUT>/<id>.webp (default src/assets/posters). The page build embeds them (instant picture while a scene loads, and the gallery cards).
+// Each scene is captured at the moment that shows its subject best (POSTER_T below); override one with T_<id>=<0..1>.
+import { chromium } from 'playwright';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+
+const root = path.resolve('.');
+const file = path.resolve(process.env.FILE || 'index.html');
+const out = path.resolve(process.env.OUT || path.join(root, 'src/assets/posters'));
+const PORT = +(process.env.PORT || 9301);
+const W = +(process.env.W || 960);
+const H = Math.round((W * 9) / 16);
+const Q = +(process.env.Q || 0.82);
+const POSTER_T = {
+  starfish: 0.38,
+  solwind: 0.5,
+  fengyun: 0.55,
+  'burnt-frost': 0.5,
+  dn2: 0.6,
+  shakti: 0.5,
+  cosmos1408: 0.6,
+  gnss: 0.5,
+  viasat: 0.7,
+  laser: 0.5,
+  'sj21-tug': 0.7,
+  rpo: 0.5,
+  spaceplanes: 0.5,
+};
+const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
+fs.mkdirSync(out, { recursive: true });
+
+const srv = http
+  .createServer((q, r) => {
+    if (q.url === '/' || q.url.startsWith('/?')) {
+      r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      return fs.createReadStream(file).pipe(r);
+    }
+    r.writeHead(404);
+    r.end();
+  })
+  .listen(PORT);
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-certificate-errors'] });
+try {
+  const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
+  page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
+  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+  await page.addStyleTag({ content: '#sceneView > :not(canvas) { visibility: hidden !important; }' }); // pictures without labels, caption or inset
+  for (const id of only) {
+    const t = +(process.env['T_' + id.replace(/-/g, '_')] ?? POSTER_T[id] ?? 0.5);
+    await page.evaluate((id) => window.__cs.openScene(id), id);
+    await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 90000 }); // the full Earth image loads when the first scene opens
+    await page.waitForTimeout(1500);
+    await page.evaluate((t) => {
+      const h = window.__cs.host();
+      h.playing = false;
+      h.update(t);
+    }, t);
+    await page.waitForTimeout(400);
+    const png = await page.locator('#sceneView canvas').first().screenshot({ type: 'png' });
+    const b64 = await page.evaluate(
+      async ({ data, W, H, Q }) => {
+        const img = new Image();
+        img.src = 'data:image/png;base64,' + data;
+        await img.decode();
+        const c = document.createElement('canvas');
+        c.width = W;
+        c.height = H;
+        const k = Math.max(W / img.width, H / img.height);
+        const w = img.width * k;
+        const h = img.height * k;
+        const x = c.getContext('2d');
+        x.imageSmoothingQuality = 'high';
+        x.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+        return c.toDataURL('image/webp', Q).split(',')[1];
+      },
+      { data: png.toString('base64'), W, H, Q },
+    );
+    fs.writeFileSync(path.join(out, `${id}.webp`), Buffer.from(b64, 'base64'));
+    console.log(id, 't=' + t, Math.round((b64.length * 3) / 4 / 1024) + ' KB');
+    await page.evaluate(() => window.__cs.closeScene());
+    await page.waitForTimeout(300);
+  }
+} finally {
+  await browser.close();
+  srv.close();
+}
