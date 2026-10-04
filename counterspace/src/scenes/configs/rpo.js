@@ -8,35 +8,38 @@ const MIN_PX = IS_PHONE ? 54 : 72, // craft model size range (px): larger than b
 export const RPO = {
   id: 'rpo',
   date: '2025-06-13',
-  title: 'Proximity operations: China, the US and Russia (2019–2026)',
+  title: 'Close approaches: China, the US and Russia (2019–2026)',
   shells: [],
   duration: 32,
   caption:
-    'Three separate episodes from SWF’s RPO tables. ' +
-    '(1) GEO, 2025: China’s SJ-21 and SJ-25 approach, appear to dock and later separate, while two US GSSAP satellites are positioned “flanking” them. ' +
-    '(2) LEO, 2019–20: Russia’s Cosmos 2542 releases Cosmos 2543, which then works near a US satellite, USA 245. ' +
-    '(3) GEO, 2025: a US GSSAP satellite and the UK’s SKYNET 5A in a jointly announced RPO. ' +
-    'SWF hedges the intent behind the first two; an RPO is not an attack.',
+    'Three separate episodes of close approach, from the Secure World Foundation’s (SWF) tables of rendezvous and proximity operations (RPOs). ' +
+    '(1) In 2025, in geostationary orbit (GEO), about 36,000 km up, China’s SJ-21 and SJ-25 approached, appeared to dock (join together) and ' +
+    'later separated, while two US GSSAP satellites (Geosynchronous Space Situational Awareness Program) were positioned “flanking” them. ' +
+    '(2) In 2019–20, in low Earth orbit (LEO), up to 2,000 km up, Russia’s Cosmos 2542 ' +
+    'released Cosmos 2543, which then worked near a US imaging satellite, USA 245. ' +
+    '(3) In 2025, in GEO, a US GSSAP satellite and the UK’s SKYNET 5A took part in a jointly announced close approach. ' +
+    'SWF hedges the intent behind the first two. A close approach is not an attack. ' +
+    'No treaty or resolution on this page’s law timeline is tied to these events.',
   cite:
-    'SWF 2026: Tables 1-3 (p. 01-15), 2-3 (p. 02-15), 3-2 (p. 03-16); SJ-21 and SJ-25 pp. 03-12 to 03-13; Cosmos 2542 pp. 02-09 to 02-10; ' +
-    'USA 271 and SKYNET 5A p. 01-14.',
+    'Secure World Foundation, 2026: Tables 1-3 (p. 01-15), 2-3 (p. 02-15) and 3-2 (p. 03-16); SJ-21 and SJ-25, pp. 03-12 to 03-13; ' +
+    'Cosmos 2542, pp. 02-09 to 02-10; USA 271 and SKYNET 5A, p. 01-14.',
   related: null,
   event: 'cn-2025-sj21-sj25-docking',
   panels: [
     {
       t: 0.3,
       title: '1 · GEO, 2025',
-      brief: 'SJ-21 + SJ-25 dock, GSSAP flank',
+      brief: 'SJ-21 + SJ-25 appear to dock',
       short: 'SJ-21 + SJ-25',
       dropPhone: ['GEO belt', 'SJ-21 + SJ-25 docked'], // 375: the panel title already names the docked pair
-      status: 'SJ-21 and SJ-25 appear to dock; two' + ' US GSSAP satellites are positioned' + ' “flanking” them',
+      status: 'SJ-21 and SJ-25 appear to dock; two US GSSAP satellites sit “flanking” them',
     },
     {
       t: 0.6,
       title: '2 · LEO, 2019–20',
       brief: 'Cosmos 2543 near USA 245',
       short: 'Cosmos 2543',
-      status: 'Cosmos 2542 releases Cosmos 2543, which works near USA 245',
+      status: 'Cosmos 2543, released by Cosmos 2542, works near USA 245',
     },
     {
       t: 0.85,
@@ -44,13 +47,13 @@ export const RPO = {
       brief: 'USA 271 near SKYNET 5A',
       short: 'USA 271',
       dropPhone: ['GEO belt'],
-      status: 'USA 271 and SKYNET 5A: a jointly announced US–UK RPO',
+      status: 'USA 271 and SKYNET 5A: a jointly announced US–UK close approach',
     },
   ],
-  inset: 'Context: top view',
+  inset: 'Top view',
   scaleNote:
-    'Distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen; the three episodes are at different ' +
-    'times and places.',
+    'The distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen. ' +
+    'The three episodes happened at different times and in different places.',
   anchors: { g1: { geo: { lon: 127 } }, l1: { orbit: { alt: 600, inc: 97.9, through: [58, 52], tThrough: 0.57, du: 0.4 } }, g3: { geo: { lon: 95.3 } } },
   acts: [
     { t0: 0, t1: 0.42, cam: 1 },
@@ -188,7 +191,7 @@ export const RPO = {
       short: 'Cosmos 2543',
       dx: 14,
       dy: -46, // above the craft (sky), not on the Earth limb below it
-      labelFn: (t, n) => (n ? 'Cosmos 2543' : 'Cosmos 2543 (subsatellite)'),
+      labelFn: (t, n) => (n ? 'Cosmos 2543' : 'Cosmos 2543 (small satellite)'),
       arcs: [{ t0: 0.53, t1: 0.6, o: [0, 0.07, 0] }],
       key: [
         [0.42, 0, 0, 0],
@@ -267,30 +270,34 @@ export const RPO = {
   ],
   still: 0.3,
   staticCenter: [28, 92],
-  staticStatus: 'Three separate episodes shown together: 1 China + US in GEO (2025) · 2 Russia in LEO (2019–20)' + ' · 3 US + UK in GEO (2025)',
+  staticStatus: 'Three separate episodes shown together: (1) China and the US in GEO, 2025; (2) Russia in LEO, 2019–20; (3) the US and the UK in GEO, 2025',
   status: [
-    [0, 'GEO, June 2025: SJ-21 (China) drifts west along the belt toward SJ-25', 'GEO 2025: SJ-21 drifts toward SJ-25'],
-    [0.08, 'Two US GSSAP satellites move to positions COMSPOC calls “flanking” SJ-21 and SJ-25', 'US GSSAP satellites “flanking” them'],
-    [0.16, '13–14 June: RPOs; on 13 June within 1 km, possibly docked, then separated (COMSPOC)', '13 June: within 1 km, possibly docked'],
+    [0, 'GEO, June 2025: China’s SJ-21 drifts west along the belt toward SJ-25', 'GEO 2025: SJ-21 drifts toward SJ-25'],
+    [0.08, 'Two US GSSAP satellites move to positions that COMSPOC, a tracking firm, calls “flanking”', 'US GSSAP satellites “flanking” them'],
+    [0.16, '13–14 June: close approaches; on 13 June within 1 km, possibly docked, then separated (COMSPOC)', '13 June: within 1 km, possibly docked'],
     [0.235, '30 June: again close enough to dock; 2–6 July: “thought to have docked”', '30 June–6 July: “thought to have docked”'],
     [0.29, 'SWF: they “remained docked until November 2025”', 'SWF: “remained docked until November 2025”'],
-    [0.34, '25 Nov.: SJ-25 burns to separate;' + ' imagery on 29 Nov. shows two satellites', '25 Nov.: SJ-25 burns to separate'],
-    [0.385, 'Dec.–Jan.: RPOs continue, closest just under 3 km on' + ' 13 Jan.; 130 km apart by 16 Jan.', 'Jan.: closest just under 3 km (13 Jan.)'],
-    [0.42, 'LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small subsatellite, Cosmos 2543', 'LEO 2019: Cosmos 2542 releases 2543'],
+    [0.34, '25 Nov.: SJ-25 fires its engine to separate; imagery on 29 Nov. shows two satellites', '25 Nov.: SJ-25 fires to separate'],
+    [0.385, 'Dec.–Jan.: close approaches continue, closest just under 3 km on 13 Jan.; 130 km apart by 16 Jan.', 'Jan.: closest just under 3 km (13 Jan.)'],
+    [0.42, 'LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small satellite, Cosmos 2543', 'LEO 2019: Cosmos 2542 releases 2543'],
     [0.47, 'Cosmos 2543 stays within 2 km of Cosmos 2542 for three days', 'Cosmos 2543 stays within 2 km for three days'],
-    [0.53, 'It then raises its apogee (590 km by 16 Dec.)'],
+    [0.53, 'It then raises its apogee (highest point) to 590 km by 16 Dec.', 'It raises its highest point to 590 km'],
     [0.6, 'Amateur analysis “strongly suggests” the aim was to observe USA 245; within 20 km in Jan.' + ' 2020', 'Analysis: aim was to observe USA 245'],
     [0.665, 'Russia’s Foreign Ministry said Cosmos 2543 posed no threat to USA 245', 'Russia: Cosmos 2543 posed no threat'],
     [0.72, 'GEO, Sept. 2025: USA 271 (US GSSAP) drifts west, about 1.5° per day, toward SKYNET 5A', 'GEO 2025: USA 271 nears SKYNET 5A'],
-    [0.8, '4 Sept.: an in-track maneuver; USA 271 stops within 0.05° of SKYNET 5A near 95.3° E', '4 Sept.: USA 271 stops near SKYNET 5A'],
-    [0.84, '5–11 Sept.: closest about 13 km. A first joint US–UK RPO, announced by both space commands', '5–11 Sept.: closest about 13 km'],
-    [0.94, 'The RPO lasted roughly 5–11 Sept. (SWF)'],
+    [0.8, '4 Sept.: a maneuver along its orbit; USA 271 stops within 0.05° of SKYNET 5A near 95.3° E', '4 Sept.: USA 271 stops near SKYNET 5A'],
+    [0.84, '5–11 Sept.: closest about 13 km. First joint US–UK approach, announced by both space commands', '5–11 Sept.: closest about 13 km'],
+    [0.94, 'The close approach lasted roughly 5–11 Sept. (SWF)', 'Lasted roughly 5–11 Sept. (SWF)'],
   ],
   cameras: [
-    { name: 'Tour (auto)', auto: true, at: [30, 90, 4.9], look: [0, 121, 2.0], phone: { at: [30, 90, 6.0] } },
-    { name: 'China + US in GEO', act: 0, fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.2 } },
+    { name: 'All three episodes', auto: true, at: [30, 90, 4.9], look: [0, 121, 2.0], phone: { at: [30, 90, 6.0] } },
+    {
+      name: 'China and the US in GEO',
+      act: 0,
+      fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.2 },
+    },
     { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: 0.88, t: 0.57 } },
-    { name: 'US + UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85 } },
-    { name: 'Wide: Earth and the whole GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: ['USA 245'] }, // unlocked from the tour
+    { name: 'The US and the UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85 } },
+    { name: 'Whole scene: Earth and the GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: ['USA 245'] }, // unlocked from the tour
   ],
 };
