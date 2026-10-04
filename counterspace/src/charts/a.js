@@ -296,7 +296,7 @@ export function drawA(el = document.getElementById('svgA')) {
     }
     return true;
   };
-  const ann = (id, t1, t2, prefs) => {
+  const ann = (id, t1, t2, prefs, relaxed = false) => {
     const e = byId[id],
       X = x(parse(e.date)),
       Y = y(e.altitude_km),
@@ -306,14 +306,14 @@ export function drawA(el = document.getElementById('svgA')) {
         ty = Y + dy,
         x0 = anchor === 'end' ? tx - w : tx,
         q = [x0, ty - 13, x0 + w, ty + (t2 ? 19 : 5)];
-      if (!pl.free(q, [], 3)) continue;
+      if (!relaxed && !pl.free(q, [], 3)) continue;
       // The leader starts at the edge of the mark (with a small dot there) and ends beside the first line of the note.
       const ex = tx + (anchor === 'end' ? 5 : -5),
         ey = ty - 4,
         len = Math.hypot(ex - X, ey - Y) || 1,
         sx = X + ((ex - X) / len) * 10,
         sy2 = Y + ((ey - Y) / len) * 10;
-      if (!segClear(sx, sy2, ex, ey)) continue;
+      if (!relaxed && !segClear(sx, sy2, ex, ey)) continue;
       pl.add(q);
       for (let i = 0; i <= Math.ceil(len / 8); i++) {
         const px = sx + ((ex - sx) * i) / Math.ceil(len / 8),
@@ -327,12 +327,14 @@ export function drawA(el = document.getElementById('svgA')) {
       if (t2) t.append('tspan').attr('class', 'ann-sub').attr('x', tx).attr('dy', 16).text(t2);
       return;
     }
+    // crowded view (a phone showing the full span): the note may touch a neighbour rather than be dropped
+    if (!relaxed) return ann(id, t1, t2, prefs.slice(0, 1), true);
     console.warn('annotation unplaced', id);
   };
   const sweep = () => {
     const o = [];
-    for (let dy = -30; dy >= -200; dy -= 14) o.push([-36, dy, 'end'], [36, dy, 'start']);
-    for (let dy = 30; dy <= 200; dy += 14) o.push([-36, dy, 'end'], [36, dy, 'start']);
+    for (let dy = -30; dy >= -200; dy -= 14) o.push([-36, dy, 'end'], [36, dy, 'start'], [-80, dy, 'end'], [80, dy, 'start']);
+    for (let dy = 30; dy <= 200; dy += 14) o.push([-36, dy, 'end'], [36, dy, 'start'], [-80, dy, 'end'], [80, dy, 'start']);
     return o;
   };
   const around = (a, b) => [

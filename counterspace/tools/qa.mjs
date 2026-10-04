@@ -428,6 +428,7 @@ await run('ux-phone', { viewport: { width: 375, height: 800 }, colorScheme: 'dar
       flagOverflow: (() => {
         const t = document.querySelector('#svgR .zoom-flag'),
           s = document.querySelector('#svgR svg');
+        if (!t) return false; // phones open the close-approach chart on the full span, so there is no zoom flag
         return t.getBoundingClientRect().right > s.getBoundingClientRect().right + 0.5;
       })(),
     })),

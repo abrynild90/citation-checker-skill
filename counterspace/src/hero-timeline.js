@@ -208,7 +208,7 @@ function build(stage) {
 
   // ---- annotations (plain sentences, a leader and a dot on the mark) and one small tag for the nuclear test
   const noteSize = phone ? 13 : 14,
-    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
+    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : W < 1100 ? Math.round(Math.max(140, W * 0.15)) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
     placed = [],
     // what a candidate spot costs: overlapping the words is worst, then another note, then a mark; zero means free
     clash = (box, lead) =>
@@ -243,7 +243,9 @@ function build(stage) {
         order: ['up-end', 'down-end', 'left'],
         phone: true,
       },
-    ].filter((s) => !phone || s.phone);
+    ]
+      .filter((s) => !phone || s.phone)
+      .filter((s) => W >= 1100 || phone || s.m !== markOf(topD.id)); // tablet widths: two crowded notes (2007 and 2021) collide, the chapter below carries the 2007 note
   const boxFor = (dir, al, m, L, w, h) => {
     const { px, py } = m;
     if (dir === 'up')

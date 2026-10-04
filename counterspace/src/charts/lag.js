@@ -205,7 +205,7 @@ export function drawL(el = document.getElementById('svgL')) {
     .attr('class', 'axis-title')
     .attr('x', x(0))
     .attr('y', yAx + 34)
-    .text('Years between the weapon or attack and the later legal step');
+    .text(phone ? 'Years until the later legal step' : 'Years between the weapon or attack and the later legal step');
   let y0 = top;
   const rows = [];
   info.forEach((r, i) => {
