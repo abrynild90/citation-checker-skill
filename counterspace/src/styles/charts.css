@@ -101,6 +101,20 @@
 .note{font-size:13px;color:var(--faint)}
 .note.block{margin:var(--s-2) 0 0;max-width:820px}
 
+/* ------------------------------------------------------------------ chapter 06: how long the law took to follow */
+.lag-title{font:400 13px var(--sans)}
+.lag-title .strong{fill:var(--text);font-weight:600}
+.lag-title .quiet{fill:var(--muted)}
+.lag-note{fill:var(--muted);font:400 12.5px var(--sans)}
+.lag-title,.lag-note,.lag-fig{paint-order:stroke;stroke:var(--ground);stroke-width:3.5px;stroke-linejoin:round}
+.lag-fig .num{fill:var(--text);font:600 22px var(--sans);font-variant-numeric:tabular-nums}
+.lag-fig .unit{fill:var(--muted);font:600 13px var(--sans)}
+.lag-bar{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.lag-bar.open{stroke-dasharray:.1 9}
+.lag-rule{stroke:var(--grid)}
+.lagrow:hover .hit,.lagrow.hl .hit{fill-opacity:.06;stroke-opacity:.35}
+.lagrow:focus-visible .hit{fill-opacity:.05}
+
 /* ------------------------------------------------------------------ key: groups of swatches and names, drawn like the points they explain */
 .legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-5);margin:var(--s-4) 0 0;padding:0;list-style:none;font-size:13.5px;line-height:1.3;color:var(--muted)}
 .legend li{display:flex;align-items:center;gap:var(--s-2);min-width:0;max-width:100%}
@@ -113,7 +127,7 @@
 .legend li.wide span{flex:1 1 0;min-width:0;overflow-wrap:anywhere}
 .lsep{flex-basis:100%;height:0;margin:0}
 .legend li.kgroup{flex-basis:100%;flex-wrap:wrap;gap:var(--s-2) var(--s-5)}
-.kname{flex:0 0 112px;font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.kname{flex:0 0 150px;font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
 .kitems{display:flex;flex:1 1 0;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-5);min-width:0;margin:0;padding:0;list-style:none}
 .kitems li{display:flex;align-items:center;gap:var(--s-2)}
 @media (max-width:640px){.kname{flex-basis:100%}.kitems{flex-basis:100%}}

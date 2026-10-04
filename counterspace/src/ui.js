@@ -293,6 +293,12 @@ export const activate = (d, el, ev) => {
   cardEl = el;
   announceCard();
 };
+// For charts whose marks are neither events nor laws (the pair rows of the last chart): the same card shell, opened and read out like the others.
+export function openCard(html, ev, el) {
+  showCard(html, ev, el, true);
+  cardEl = el;
+  announceCard();
+}
 
 // In-page links: draw the lazily drawn charts first, so the heights above the target are final and the jump lands on the heading (not 600 px off).
 document.addEventListener(
@@ -403,7 +409,7 @@ const CAPTIONS = {
   tableLegal: 'Law and policy items, with the short names used on the timeline',
 };
 const isNumber = (c) => typeof c === 'number' || (typeof c === 'string' && /^-?[\d,]+(\.\d+)?$/.test(c));
-export function table(id, head, rows, caption = CAPTIONS[id]) {
+export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false) {
   const kind = head.map((h, i) =>
     /date|^(start|end|when)$/i.test(h)
       ? 'date'
@@ -411,10 +417,12 @@ export function table(id, head, rows, caption = CAPTIONS[id]) {
         ? 'num'
         : '',
   );
+  // hiddenLast: the last column is kept in the markup but never shown or read out (the last chart keeps its record ids there for tools/qa.mjs).
+  const hide = (i) => (hiddenLast && i === head.length - 1 ? ' hidden' : '');
   const cell = (c, i) =>
-    `<td${kind[i] ? ` class="${kind[i]}"` : ''} data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`;
+    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`;
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
-  const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}>${h}</th>`).join('');
+  const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}>${h}</th>`).join('');
   setOnce(id, `<table>${cap}<thead><tr>${th}</tr></thead><tbody>${rows.map(tr).join('')}</tbody></table>`);
 }
