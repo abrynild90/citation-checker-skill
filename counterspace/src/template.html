@@ -104,70 +104,73 @@
     </section>
 
     <section class="chart" id="chartC" aria-labelledby="hC">
-      <div class="chart-head">
-        <div><h2 id="hC">C · Non-kinetic operations</h2>
-        <p>Jamming, spoofing, lasers and cyber operations, drawn as sustained campaigns (bars) or discrete events (points). Fill style shows how
-          strongly the source attributes the activity.</p></div>
+      <header class="chapter-head">
+        <h2 id="hC">Attacks that leave satellites in orbit</h2>
+        <p class="lede">Look for the arrows on the right: every campaign that is still going began in 2010 or later.</p>
         <div class="tools">
-          <span class="seg" role="group" aria-label="Chart C year range">
+          <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart">
             <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
             <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
           </span>
-          <button class="btn small" data-export="C" type="button">Export SVG</button></div>
-      </div>
+          <button class="btn small" data-export="C" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button>
+        </div>
+      </header>
       <p class="note block" id="noteC"></p>
       <div class="svgbox" id="svgC"></div>
-      <ul class="legend" id="legendC"></ul>
-      <details class="table"><summary>Data table: Chart C</summary><div class="tscroll" id="tableC"></div></details>
+      <ul class="legend" id="legendC" aria-label="Key to the jamming, laser and cyber chart"></ul>
+      <p class="callout">The rules that govern these operations are soft law (expert manuals) or carry military exemptions (Article 48 of the
+        International Telecommunication Union Constitution).</p>
+      <details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableC"></div></details>
     </section>
 
     <section class="chart" id="chartR" aria-labelledby="hR">
-      <div class="chart-head">
-        <div><h2 id="hR">Co-orbital proximity operations (RPO)</h2>
-        <p>Rendezvous, docking, capture, release and spaceplane-mission rows from SWF’s co-orbital tables, one lane per actor. Each mark sits at the
-          start date of a ledger row; shape shows the activity and colour the actor.</p></div>
+      <header class="chapter-head">
+        <h2 id="hR">Satellites that fly close to other satellites</h2>
+        <p class="lede">Almost every operation in the records begins after 2005, and all three states have operations that are still going.</p>
         <div class="tools">
-          <span class="seg" role="group" aria-label="Co-orbital chart year range">
+          <span class="seg" role="group" aria-label="Years shown in the close-approach chart">
             <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
             <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
           </span>
-          <button class="btn small" data-export="R" type="button">Export SVG</button></div>
-      </div>
-      <p class="note block" id="noteR0"><b>A proximity operation is not an attack.</b> Most rows are inspection, servicing or technology
-        demonstrations, and SWF’s wording on intent is hedged (“possibly”, “appeared to”, “likely”).
-        The ledger records that an operation happened,
-        not
-        why; outlined marks show where SWF itself hedges.</p>
+          <button class="btn small" data-export="R" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button>
+        </div>
+      </header>
+      <p class="callout" id="noteR0"><b>A proximity operation is not an attack.</b> Most are inspection, servicing or technology demonstrations, and the
+        Secure World Foundation (SWF) words its statements about intent with hedges such as “possibly”, “appeared to” and “likely”. The records show that
+        an operation took place; they do not show why. Outlined points show where SWF itself hedges.</p>
       <p class="note block" id="noteR"></p>
       <div class="svgbox" id="svgR"></div>
-      <ul class="legend" id="legendR"></ul>
-      <details class="table"><summary>Data table: co-orbital rows</summary><div class="tscroll" id="tableR"></div></details>
+      <ul class="legend" id="legendR" aria-label="Key to the close-approach chart"></ul>
+      <details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableR"></div></details>
     </section>
 
     <section class="chart" id="chartB" aria-labelledby="hB">
-      <div class="chart-head">
-        <div><h2 id="hB">B · Capability diffusion</h2>
-        <p>Number of states holding each counterspace capability, by decade, on a zero baseline. Solid bands are demonstrated; hatched are developing
-          or latent; faded decades are reconstructed, not SWF-assessed.</p></div>
+      <header class="chapter-head">
+        <h2 id="hB">Which states hold which counterspace capabilities, by decade</h2>
+        <p class="lede">Each bar counts the capabilities states hold in one decade; only the 2020s bar rests on the Secure World Foundation’s (SWF) own
+          assessment, and the earlier decades are reconstructed.</p>
         <div class="tools">
-          <span class="seg" role="group" aria-label="Grouping">
+          <span class="seg" role="group" aria-label="How the capabilities are grouped">
             <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
-            <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic vs non-kinetic</button>
+            <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic and non-kinetic</button>
           </span>
-          <button class="btn small" data-export="B" type="button">Export SVG</button>
+          <button class="btn small" data-export="B" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button>
         </div>
-      </div>
+      </header>
+      <p class="callout" id="calloutB"></p>
       <p class="note block" id="noteB" aria-live="polite"></p>
-      <details class="about" id="aboutB"><summary>About the coding</summary>
-        <p>The number above each decade is a range: demonstrated only, to demonstrated plus developing (the whisker). In the 2020s the states are
-          SWF-assessed, but the demonstrated/developing split is the builder’s coding of SWF text, so that range is the uncertain part. Dotted bands are
-          developing entries where SWF’s country matrix shows no data. Decades before 2020 are reconstructed from SWF’s test tables and country
-          chapters. See the <a href="#codingRules">coding rules</a>.</p></details>
-      <div class="kinkey" id="kinKeyB" hidden></div>
-      <div class="chips" id="chipsB" role="group" aria-label="Filter categories"></div>
+      <div class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
       <div class="svgbox" id="svgB"></div>
-      <ul class="legend" id="legendB"></ul>
-      <details class="table"><summary>Data table: Chart B</summary><div class="tscroll" id="tableB"></div></details>
+      <ul class="legend" id="legendB" aria-label="Key to the capability chart"></ul>
+      <details class="about" id="aboutB"><summary>How we classified these</summary>
+        <p>For the 2020s, the states and capabilities come from SWF’s 2026 assessment of 13 countries. Whether a capability counts as demonstrated
+          (tested or used) or as still developing is our reading of SWF’s text, so the range bar is the uncertain part: its low end counts demonstrated
+          capabilities only, and its high end adds those still developing. Dotted segments are capabilities we class as developing where SWF’s country
+          table has no data. Decades before 2020 are reconstructed from SWF’s test tables and country chapters; SWF did not assess them.</p>
+        <p>Direct-ascent anti-satellite weapons are missiles launched from Earth to hit a satellite. Co-orbital means a satellite that manoeuvres close to
+          another. Electronic warfare means jamming and spoofing. Directed energy means lasers and similar beams. Cyber means attacks through computers
+          and networks. The full rules are in <a href="#codingRules">Sources and method</a>.</p></details>
+      <details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableB"></div></details>
     </section>
 
     <section class="chart" id="lag" aria-labelledby="hL">
