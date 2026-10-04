@@ -84,6 +84,7 @@ export const VIASAT = {
     [0.8, 'Attributed to Russia’s military intelligence (GRU) by the US, UK and EU in May 2022 (SWF, p. 15-07)'],
   ],
   still: 0.75,
+  stillOff: { KA: [-250, 20] }, // the still: the satellite pill sits left of the satellite, clear of the caption
   camDist: 5.6,
   focus: [33, 12],
   shellLabels: { GEO: null },

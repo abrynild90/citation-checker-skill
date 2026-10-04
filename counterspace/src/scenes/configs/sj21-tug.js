@@ -63,7 +63,7 @@ export const SJ21_TUG = {
       ], // static: well above the belt line, left of its tug with a clear gap
       dx: 60,
       dy: 34,
-      labelFn: (t) => (t >= 0.4 && t < 0.8 ? null : 'Compass G2 (defunct)'),
+      labelFn: (t, n) => (t >= 0.4 && t < 0.8 ? null : n ? 'Compass G2' : 'Compass G2 (defunct)'),
       arcs: [{ t0: 0.5, t1: 0.76, o: [0.09, 0, 0] }],
       key: [
         [0, 0, 0, 0],
@@ -91,7 +91,7 @@ export const SJ21_TUG = {
       ], // static: the tug beside and a little higher than G2 (no overlap), both clear of the ring
       dx: -68,
       dy: -12,
-      labelFn: (t, n) => (t >= 0.4 && t < 0.8 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : 'SJ-21' + ' (China)'),
+      labelFn: (t, n) => (t >= 0.4 && t < 0.8 ? (n ? 'SJ-21 + G2 docked' : 'SJ-21 + Compass G2 (docked)') : n ? 'SJ-21' : 'SJ-21 (China)'),
       arcs: [{ t0: 0.8, t1: 0.97, o: [0.07, 0.06, 0] }],
       dock: { with: 'cg2', t0: 0.4, t1: 0.8 },
       key: [
@@ -124,7 +124,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93 } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98 } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', at: [36, 104, 3.9], look: [0, 106, 1.9], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',
@@ -136,7 +136,7 @@ export const SJ21_TUG = {
       name: 'The pull: the pair rises above the belt',
       short: 'The pull',
       ...ARM_TAG,
-      frame: { anchor: 'g', from: [0.1, 0.12, 0.7], to: [0.08, 0.12, 0], t: 0.6 },
+      frame: { anchor: 'g', from: [0.1, 0.17, 0.7], to: [0.08, 0.17, 0], t: 0.6 },
       phone: { frame: { anchor: 'g', from: [0.1, 0.14, 1.05], to: [0.08, 0.14, 0], t: 0.6 } },
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4] },

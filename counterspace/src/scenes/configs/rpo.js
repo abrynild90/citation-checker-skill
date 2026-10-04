@@ -31,7 +31,7 @@ export const RPO = {
       title: '1 · GEO, 2025',
       brief: 'SJ-21 + SJ-25 appear to dock',
       short: 'SJ-21 + SJ-25',
-      dropPhone: ['GEO belt', 'SJ-21 + SJ-25 docked'], // 375: the panel title already names the docked pair
+      dropPhone: ['GEO belt', 'SJ-21 + SJ-25 docked', 'USA 271'], // 375: the panel title already names the docked pair; USA 271 would sit under the title (USA 270 stays)
       status: 'SJ-21 and SJ-25 appear to dock; two US GSSAP satellites sit “flanking” them',
     },
     {
@@ -191,7 +191,7 @@ export const RPO = {
       short: 'Cosmos 2543',
       dx: 14,
       dy: -46, // above the craft (sky), not on the Earth limb below it
-      labelFn: (t, n) => (n ? 'Cosmos 2543' : 'Cosmos 2543 (small satellite)'),
+      labelFn: (t, n, s) => (n || s ? 'Cosmos 2543' : 'Cosmos 2543 (small satellite)'),
       arcs: [{ t0: 0.53, t1: 0.6, o: [0, 0.07, 0] }],
       key: [
         [0.42, 0, 0, 0],
@@ -269,6 +269,8 @@ export const RPO = {
     { type: 'trail', craft: 'usa271b', t0: 0.72, t1: 0.83, color: C.us, acts: [2] },
   ],
   still: 0.3,
+  stillShort: ['USA 271', 'USA 245', 'Cosmos 2542'],
+  stillOff: { 'USA 245': [-110, 175] }, // the live still: shorter names keep leaders short and the two Cosmos chips apart
   staticCenter: [28, 92],
   staticStatus: 'Three separate episodes shown together: (1) China and the US in GEO, 2025; (2) Russia in LEO, 2019–20; (3) the US and the UK in GEO, 2025',
   status: [
