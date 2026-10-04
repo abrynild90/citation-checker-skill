@@ -1,0 +1,40 @@
+:root, .xbox.xdark{
+  color-scheme: dark;
+  --bg:#0a0f1e; --surface:#10172c; --surface-2:#172040; --line:#2a3558; --grid:#212b4a;
+  --text:#e9edf7; --muted:#a9b3cc; --faint:#7d88a6; --accent:#8cc8ff; --accent-2:#ffcf6e;
+  --warn:#ff9b7a; --focus:#ffd24d;
+  --leo:rgba(120,170,255,.10); --meo:rgba(160,130,255,.08); --geo:rgba(255,200,110,.13);
+  --recon:rgba(255,255,255,.035);
+  --c-us:#56B4E9; --c-ru:#FF8C5A; --c-cn:#F0C24B; --c-in:#3FD0A0; --c-ir:#CFA3E6;
+  --c-kp:#FF9ECF; --c-il:#C3CDDE; --c-iq:#D9C38A; --c-multi:#B9C2D6;
+  --cat-da:#FF8C5A; --cat-co:#F0C24B; --cat-ew:#56B4E9; --cat-de:#CFA3E6; --cat-cy:#3FD0A0;
+  --shadow:0 10px 30px rgba(0,0,0,.45); --edge:rgba(0,0,0,.6);
+  --serif: Newsreader,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans: "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
+    --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
+    --warn:#b2401c; --focus:#b36b00;
+    --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
+    --recon:rgba(0,0,0,.035);
+    --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
+    --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
+    --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
+    --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
+  }
+}
+:root[data-theme="light"], .xbox.xlight{
+  color-scheme: light;
+  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#eeede7; --line:#cfccc2; --grid:#e3e0d7;
+  --text:#1b1f2a; --muted:#4a5162; --faint:#5b6373; --accent:#1f5fa8; --accent-2:#8a5a00;
+  --warn:#b2401c; --focus:#b36b00;
+  --leo:rgba(40,90,190,.07); --meo:rgba(100,60,200,.05); --geo:rgba(190,120,0,.10);
+  --recon:rgba(0,0,0,.035);
+  --c-us:#0072B2; --c-ru:#C4501A; --c-cn:#886000; --c-in:#007A5A; --c-ir:#8E44AD;
+  --c-kp:#B0357A; --c-il:#4A5568; --c-iq:#7A6522; --c-multi:#5a6275;
+  --cat-da:#C4501A; --cat-co:#886000; --cat-ew:#0072B2; --cat-de:#8E44AD; --cat-cy:#007A5A;
+  --shadow:0 10px 30px rgba(0,0,0,.15); --edge:rgba(20,25,40,.28);
+}

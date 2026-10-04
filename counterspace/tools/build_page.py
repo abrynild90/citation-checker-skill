@@ -19,6 +19,7 @@ def script_json(obj):
     return json.dumps(obj, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 
 
+STYLE_ORDER = ('tokens', 'base', 'page', 'charts', 'scenes')
 SRC_KEYS = ('source', 'source_url', 'source_full')
 DROP_KEYS = ('evidence', 'conflicts')  # ledger-only fields: verification notes the page never reads (see ledger.md)
 
@@ -88,8 +89,12 @@ def main():
     js = esbuild(['--bundle', '--format=iife', '--legal-comments=none', '--charset=utf8', 'boot.js']
                  + (['--sourcemap=inline'] if nomin else ['--minify']))
     tpl = (R / 'src/template.html').read_text()
-    tpl = re.sub(r'(<style>)(.*?)(</style>)', lambda m: m.group(1) + esbuild(['--loader=css', '--minify'], m.group(2)) + m.group(3),
-                 tpl, count=1, flags=re.S)
+    # The page is assembled from parts: src/template.html (page markup), src/partials/*.html (scene viewer, icon sprite) and src/styles/*.css.
+    # Styles are joined in this order, then minified together: tokens, base, page, charts, scenes.
+    for slot, part in (('<!--__OVERLAY__-->', 'overlay'), ('<!--__ICONS__-->', 'icons')):
+        tpl = tpl.replace(slot, (R / 'src/partials' / f'{part}.html').read_text().rstrip())
+    css = '\n'.join((R / 'src/styles' / f'{n}.css').read_text() for n in STYLE_ORDER)
+    tpl = tpl.replace('/*__CSS__*/', esbuild(['--loader=css', '--minify'], css))
     # land.json sits in its own script tag so it is parsed only when a scene or the hero needs it
     tpl = tpl.replace('/*__FONTS__*/', font_css())
     html = tpl.replace('/*__DATA__*/', script_json(data)).replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json')))).replace('/*__APP__*/', js)
