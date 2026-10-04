@@ -24,7 +24,7 @@ import {
   xAxis,
 } from '../app.js';
 import { KIND_PLAIN, activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
-const stateA = { zoom: true }, // phones open on the flagged 2004-2026 zoom (the toggle returns the full span); other widths ignore it
+const stateA = { zoom: false }, // phones open on the full span so the early treaties and tests show; the toggle zooms to 2004-2026; other widths ignore it
   ZOOM_A0 = '2004-01-01';
 const ALT_AT = { intercept: 'Intercept', apogee: 'Highest point', detonation: 'Detonation' };
 const CONFIDENCE = { high: 'High', medium: 'Medium', low: 'Low' };

@@ -4,9 +4,9 @@
 // ============================================================================
 // Pairs come from data/lag_pairs.json (embedded as D.lag_pairs): pairs first, then open rings. Dropped pairs are never drawn.
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { D, DOMAIN, EXPORTING, byId, esc, fmt, fmtMY, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
+import { D, EXPORTING, byId, esc, fmt, fmtMY, hasScene, isPhoneNow, parse, tw } from '../app.js';
 import { glyphMarkup, legalGlyph } from './legal.js';
-import { addGuide, bindMark, hideCard, hint3d, legalKindWords, legend, openCard, rove, table } from '../ui.js';
+import { bindMark, hideCard, hint3d, legalKindWords, legend, openCard, rove, table } from '../ui.js';
 import { hooks } from '../shared.js';
 const LAG = [...D.lag_pairs.pairs.map((p) => ({ cap: p.event, law: p.law })), ...D.lag_pairs.open.map((p) => ({ cap: p.event, law: null }))];
 // The two ends of each pair in a few plain words, and what the reader should know about the pair beyond the dates.
@@ -101,36 +101,60 @@ const lagCard = (p) => {
     `${scene ? hint3d() : ''}`
   );
 };
+// Every row shares one scale from 0 to 16 years, so a longer bar is a longer wait. The longest pair in our records is 15.1 years.
+const MAX_YEARS = 16;
 export function drawL(el = document.getElementById('svgL')) {
   el.innerHTML = '';
-  const { W, M, x } = layout(el),
-    phone = isPhoneNow();
+  const phone = isPhoneNow(),
+    W = Math.max(300, el.clientWidth),
+    PAD = phone ? 8 : 12,
+    ROOM = phone ? 104 : 124, // right of the 16 year mark: the number at the end of the longest bar
+    x = d3
+      .scaleLinear()
+      .domain([0, MAX_YEARS])
+      .range([PAD + 26, W - PAD - ROOM]);
   const TS = 13, // title size
     NS = 12.5, // note size
     TL = 19, // title line height
-    NL = 17,
-    top = 6;
+    NL = 17;
   const info = LAG.map(pairInfo);
-  // Geometry of each row. A pair whose two ends are closer than the symbols are wide gets a taller row: the capability sits above the legal step,
-  // joined by an elbow, and each keeps its true place on the shared year axis.
+  // The symbols are explained on the chart itself, in rows that wrap to the width.
+  const KEY = [
+    [hexMarkup('var(--cat-da)'), 'Physical attack, such as a missile test'],
+    [hexMarkup('var(--cat-ew)'), 'Jamming, laser or cyber operation'],
+    [glyphMarkup('treaty'), 'Treaty (binding)'],
+    [glyphMarkup('resolution'), 'Resolution or finding (not binding)'],
+    [glyphMarkup('unilateral'), 'Pledge by one country'],
+  ];
+  let kx = PAD,
+    ky = 14;
+  const keyAt = KEY.map(([m, label]) => {
+    const wd = 24 + tw(label, 12.5, 500) + 20;
+    if (kx > PAD && kx + wd > W - PAD) {
+      kx = PAD;
+      ky += 24;
+    }
+    const at = { m, label, x: kx, y: ky };
+    kx += wd;
+    return at;
+  });
+  const top = ky + 26;
+  // Geometry of each row: the words first, then a track from 0 to 16 years with the bar on it.
   info.forEach((r) => {
-    r.xa = x(r.a);
-    r.xb = r.l ? x(parse(r.l.start)) : x(DOMAIN[1]) - 10;
-    r.short = Math.abs(r.xb - r.xa) < 44;
     const runs = [
       { t: r.w.name, strong: true },
       { t: `, ${dateWords(r.c)}`, quiet: true },
-      { t: '  →  ', quiet: true },
+      { t: '  →  ', quiet: true },
       r.l ? { t: r.lawName, strong: true } : { t: NONE, strong: true },
       ...(r.l ? [{ t: `, ${fmtMY(parse(r.l.start))}`, quiet: true }] : []),
     ];
-    r.title = wrapRuns(runs, W - 8, TS);
-    r.note = r.w.note ? wrapRuns([{ t: r.w.note, quiet: true }], W - 8, NS) : [];
+    r.title = wrapRuns(runs, W - 2 * PAD, TS);
+    r.note = r.w.note ? wrapRuns([{ t: r.w.note, quiet: true }], W - 2 * PAD, NS) : [];
     r.block = 10 + TL * r.title.length + (r.note.length ? 4 + NL * r.note.length : 0);
-    r.rowH = r.block + 30 + (r.short ? 26 : 0) + 28;
+    r.rowH = r.block + 24 + 22 + 16;
   });
-  const H = top + info.reduce((s, r) => s + r.rowH, 0) + 36,
-    yAx = H - 28;
+  const H = top + info.reduce((s, r) => s + r.rowH, 0) + 46,
+    yAx = H - 38;
   const svg = d3
     .select(el)
     .append('svg')
@@ -143,11 +167,16 @@ export function drawL(el = document.getElementById('svgL')) {
   svg
     .append('desc')
     .text(
-      'One line for each pair. A hexagon shows the weapon or attack and a second symbol shows the later legal step: a circle for a treaty, a square for a ' +
-        'resolution or body finding, a triangle for a unilateral pledge. The bar between them is the time that passed, with the number of years or ' +
-        'months beside it. It shows the order of events and says nothing about cause. An open ring means our records link no later legal step to the ' +
-        'capability.',
+      'One line for each pair, all on the same scale from 0 to 16 years. A hexagon shows the weapon or attack and a second symbol shows the later legal step: ' +
+        'a circle for a treaty, a square for a resolution or body finding, a triangle for a unilateral pledge. The length of the bar is the time that ' +
+        'passed, with the number of years or months at its end. It shows the order of events and says nothing about cause. An open ring means our ' +
+        'records link no later legal step to the capability.',
     );
+  keyAt.forEach((k) => {
+    const g = svg.append('g').attr('class', 'lag-key').attr('aria-hidden', 'true').attr('transform', `translate(${k.x},${k.y})`);
+    g.append('g').attr('transform', 'translate(8,0)').append('g').attr('class', 'glyph').html(k.m);
+    g.append('text').attr('x', 22).attr('y', 4.5).text(k.label);
+  });
   svg
     .append('g')
     .attr('class', 'gridline')
@@ -155,19 +184,34 @@ export function drawL(el = document.getElementById('svgL')) {
     .call(
       d3
         .axisBottom(x)
-        .ticks(d3.utcYear.every(phone ? 20 : 10))
+        .tickValues(d3.range(0, MAX_YEARS + 1, phone ? 4 : 2))
         .tickSize(-(yAx - top))
         .tickFormat(''),
     );
-  xAxis(svg, x, yAx);
+  svg
+    .append('g')
+    .attr('class', 'axis xaxis')
+    .attr('transform', `translate(0,${yAx})`)
+    .call(
+      d3
+        .axisBottom(x)
+        .tickValues(d3.range(0, MAX_YEARS + 1, phone ? 4 : 2))
+        .tickFormat((d) => d)
+        .tickSizeOuter(0),
+    );
+  svg
+    .append('text')
+    .attr('class', 'axis-title')
+    .attr('x', x(0))
+    .attr('y', yAx + 34)
+    .text('Years between the weapon or attack and the later legal step');
   let y0 = top;
   const rows = [];
   info.forEach((r, i) => {
-    const { p, c, l, w, xa, xb, short, years, g } = r;
+    const { p, c, l, w, years, g } = r;
     const col = catColor(c),
-      yy = y0 + r.block + 24 + (short ? 13 : 0),
-      ya = short ? yy - 13 : yy,
-      yb = short ? yy + 13 : yy;
+      yy = y0 + r.block + 24,
+      xe = l ? x(Math.min(years, MAX_YEARS)) : x(0);
     const say = l ? `${g.num} ${g.unit}` : NONE;
     const row = svg
       .append('g')
@@ -187,14 +231,11 @@ export function drawL(el = document.getElementById('svgL')) {
       .attr('width', W)
       .attr('height', r.rowH - 8)
       .attr('rx', 10);
-    // title line(s) and note, set near the bar and kept inside the chart
-    const lineW = Math.max(...r.title.map((t) => t.w), ...r.note.map((t) => t.w)),
-      tx = phone ? 4 : Math.max(4, Math.min(Math.min(xa, xb) - 8, W - 4 - lineW));
     r.title.forEach((line, k) => {
       const t = row
         .append('text')
         .attr('class', 'lag-title')
-        .attr('x', tx)
+        .attr('x', PAD)
         .attr('y', y0 + 10 + TL * (k + 1) - 5);
       line.runs.forEach((run) =>
         t
@@ -207,38 +248,37 @@ export function drawL(el = document.getElementById('svgL')) {
       row
         .append('text')
         .attr('class', 'lag-note')
-        .attr('x', tx)
+        .attr('x', PAD)
         .attr('y', y0 + 10 + TL * r.title.length + 4 + NL * (k + 1) - 4)
         .text(line.runs.map((q) => q.t).join(''));
     });
-    // the bar: solid from capability to legal step, dotted to the open ring
-    if (short) row.append('path').attr('class', 'lag-bar').attr('d', `M${xa},${ya}H${xb}V${yb}`).style('stroke', col);
+    // the track (0 to 16 years), then the bar from the weapon (left) to the legal step
+    row.append('line').attr('class', 'lag-track').attr('x1', x(0)).attr('x2', x(MAX_YEARS)).attr('y1', yy).attr('y2', yy);
+    if (l) row.append('line').attr('class', 'lag-bar').attr('x1', x(0)).attr('x2', xe).attr('y1', yy).attr('y2', yy).style('stroke', col);
+    row
+      .append('g')
+      .attr('transform', `translate(${x(0) - 18},${yy})`)
+      .append('g')
+      .attr('class', 'glyph')
+      .html(hexMarkup(col));
+    if (l) legalGlyph(row.append('g').attr('transform', `translate(${xe},${yy}) scale(1.1)`), l);
     else
       row
-        .append('line')
-        .attr('class', l ? 'lag-bar' : 'lag-bar open')
-        .attr('x1', xa)
-        .attr('x2', xb)
-        .attr('y1', yy)
-        .attr('y2', yy)
-        .style('stroke', col);
-    row.append('g').attr('transform', `translate(${xa},${ya})`).append('g').attr('class', 'glyph').html(hexMarkup(col));
-    if (l) legalGlyph(row.append('g').attr('transform', `translate(${xb},${yb}) scale(1.1)`), l);
-    else row.append('g').attr('transform', `translate(${xb},${yb})`).append('g').attr('class', 'glyph').html(ringMarkup());
-    // the elapsed time: the largest figure in the row, just beyond the legal step (or before the capability when there is no room)
+        .append('g')
+        .attr('transform', `translate(${x(0) + 12},${yy})`)
+        .append('g')
+        .attr('class', 'glyph')
+        .html(ringMarkup());
+    // the elapsed time at the end of the bar: the largest figure in the row
+    const t = row
+      .append('text')
+      .attr('class', 'lag-fig')
+      .attr('x', l ? xe + 18 : x(0) + 34)
+      .attr('y', yy + 8);
     if (l) {
-      const fw = tw(g.num, 22, 600) + 5 + tw(g.unit, 13, 600),
-        right = xa - 26 - fw < 4,
-        fx = right ? Math.max(xa, xb) + 26 : Math.min(xa, xb) - 26;
-      const t = row
-        .append('text')
-        .attr('class', 'lag-fig')
-        .attr('x', fx)
-        .attr('y', yy + 8)
-        .attr('text-anchor', right ? 'start' : 'end');
       t.append('tspan').attr('class', 'num').text(g.num);
       t.append('tspan').attr('class', 'unit').attr('dx', 5).text(g.unit);
-    }
+    } else t.append('tspan').attr('class', 'unit').text('None linked');
     if (i < info.length - 1)
       svg
         .append('line')
@@ -259,7 +299,6 @@ export function drawL(el = document.getElementById('svgL')) {
     row.datum(p);
     y0 += r.rowH;
   });
-  addGuide(svg, x, top, yAx);
   const marks = svg.selectAll('.lagrow');
   bindMark(marks, lagCard, (p, node, ev) => {
     const c = byId[p.cap],
@@ -281,13 +320,6 @@ export function drawL(el = document.getElementById('svgL')) {
   // ---- key
   const K = legend('legendL', 22, 18),
     li = K.item;
-  K.group('Weapon or attack');
-  li(hexMarkup('var(--cat-da)'), 'Physical attack, such as a missile test (kinetic)');
-  li(hexMarkup('var(--cat-ew)'), 'Jamming, a laser or a cyber operation (non-kinetic)');
-  K.group('Later legal step');
-  li(glyphMarkup('treaty'), 'Treaty (binding)');
-  li(glyphMarkup('resolution'), 'Resolution or finding by an international body (not binding)');
-  li(glyphMarkup('unilateral'), 'Pledge by one country');
   K.group('No later step');
   li(ringMarkup(), 'Open ring: our records link no later legal step to it. This does not mean that no rule applies.');
   K.done();

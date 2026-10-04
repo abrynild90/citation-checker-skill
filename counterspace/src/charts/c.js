@@ -31,10 +31,10 @@ const QUOTE = '“[O]nly non-destructive capabilities are actively being used ag
 const QUOTE_BY = 'Secure World Foundation (SWF), 2026 assessment, Executive Summary, p. xxiii';
 const STYLE_OF = { official_government: 'solid', multi_government: 'solid', researcher_osint: 'outline', alleged: 'dashed' };
 
-// stateC.focus: null = the default (zoom 1995-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere);
+// stateC.focus: null = the default (the full shared 1957-2026 axis on every screen; the zoom 1995-2026 is opt-in);
 // true / false = the reader's choice.
 export const stateC = { focus: null };
-export const zoomedC = () => stateC.focus ?? isPhoneNow();
+export const zoomedC = () => !!stateC.focus;
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
 
 const FS = 13, // label size

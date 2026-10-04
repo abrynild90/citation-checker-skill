@@ -109,8 +109,9 @@
 .lag-title,.lag-note,.lag-fig{paint-order:stroke;stroke:var(--ground);stroke-width:3.5px;stroke-linejoin:round}
 .lag-fig .num{fill:var(--text);font:600 22px var(--sans);font-variant-numeric:tabular-nums}
 .lag-fig .unit{fill:var(--muted);font:600 13px var(--sans)}
-.lag-bar{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
-.lag-bar.open{stroke-dasharray:.1 9}
+.lag-bar{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.lag-track{stroke:var(--line);stroke-width:4;stroke-linecap:round}
+.lag-key text{fill:var(--muted);font:500 12.5px var(--sans)}
 .lag-rule{stroke:var(--grid)}
 .lagrow:hover .hit,.lagrow.hl .hit{fill-opacity:.06;stroke-opacity:.35}
 .lagrow:focus-visible .hit{fill-opacity:.05}
@@ -193,4 +194,4 @@ td a{overflow-wrap:anywhere}
 .break-tick{stroke:var(--text);stroke-width:1.5;fill:none}
 .whisker{stroke:var(--text);stroke-width:1.4;fill:none}
 .range-label{fill:var(--text);font:600 12px var(--sans)}
-.zbadge{display:inline-block;margin-right:6px;padding:2px 7px;border-radius:4px;background:var(--accent-2);color:var(--bg);font:700 12px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.zbadge{display:inline-block;margin-right:6px;padding:2px 7px;border-radius:4px;background:var(--accent-2);color:var(--bg);font:700 12px/1.3 var(--sans)}
