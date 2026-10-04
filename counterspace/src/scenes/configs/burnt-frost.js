@@ -8,10 +8,11 @@ export const BURNT_FROST = {
   shells: ['LEO'],
   duration: 12,
   caption:
-    'A US Navy cruiser fires a modified SM-3 at the failing USA-193 satellite at about 220 km (SWF’s text says 240 km; its Table 5-1 says 220 km). ' +
-    'At that altitude the 175 trackable pieces took about 20 months to de-orbit; the animation compresses that time. ' +
+    'A US Navy cruiser fires a modified SM-3 missile at the failing USA-193 satellite at about 220 km. ' +
+    'The Secure World Foundation (SWF) gives 220 km in its Table 5-1 and 240 km in its text. ' +
+    'At that height the 175 trackable pieces took about 20 months to fall out of orbit. The animation speeds that up. ' +
     'The event shows the overlap between missile defense and anti-satellite capability.',
-  cite: 'SWF 2026, Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); decay time and 240 km in text, p. 01-24.',
+  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); time to re-enter and the 240 km figure in the text, p. 01-24.',
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
@@ -40,7 +41,7 @@ export const BURNT_FROST = {
   still: 0.47,
   status: [
     [0, 'Interceptor rises toward the satellite'],
-    [0.44, 'Collision at ~220 km; low-altitude fragments decay quickly', 'Collision at ~220 km'],
-    [0.6, 'Time compressed: SWF reports ~20 months to de-orbit entirely', 'SWF: ~20 months to de-orbit'],
+    [0.44, 'Collision at about 220 km; fragments fall back quickly', 'Collision at about 220 km'],
+    [0.6, 'Fast-forward: all out of orbit after about 20 months (SWF)', 'SWF: about 20 months to come down'],
   ],
 };
