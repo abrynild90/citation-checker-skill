@@ -176,7 +176,10 @@ no wording errors.
 - Sky: fine stars of different sizes and colours, no banding.
 - Spacecraft: believable materials (metal, foil, glass solar cells, gloss), a faint reflection of the Earth, small details (antennas, thrusters).
 - Light effects: clean additive glows, beams with a soft core and falloff, debris with depth and fade, trails that taper.
-- Labels: pill labels at 12 px or more with a small leader; never overlapping each other, the Earth's bright limb or the caption.
+- Labels (live 3D, still diagrams and saved images all use this one look): a pill with a 1 px border `rgba(150,175,230,.35)` on `rgba(8,13,28,.72)`, radius 8 px,
+  padding 4 px 9 px, Plex Sans 600 at 12.5 px (never below 12 px, 13 px or more on touch screens), text `#eef2fb`, a 7 px dot of the item's colour at the left, a 1 px leader
+  `rgba(238,242,251,.55)` ending in a 3 px dot on the item. Secondary labels (places, orbit names) are the same without the dot and at 85% opacity. Warning or analysis captions use the
+  warm accent `#ffc86b` text on the same pill. Labels never overlap each other, the Earth's bright limb or the caption.
 - Keep memory flat (open and close every scene and the counts must return to baseline) and keep initial page weight under 1.2 MB.
 
 ## 8. Accessibility floor (non-negotiable)
@@ -186,12 +189,33 @@ Text can be enlarged to 200% without losing content. Screen-reader names in plai
 
 ## 9. Working rules for everyone building
 
-- Work only in the files you own (listed in your brief). Never edit another owner's file; ask the orchestrator.
-- Build to your own file so you never disturb a reviewer: `OUTFILE=<scratch>/index.html python3 tools/build_page.py`.
-- Keep lines at 160 characters or fewer. Run `tools/node_modules/.bin/prettier --print-width 160 --single-quote --write <file>` on the JavaScript you touch.
-- Do not commit. Report once at the end. Keep a progress file `counterspace/.progress_<track>.md` and update it after each item, in case the container
-  restarts.
-- Look at your work in screenshots at 1440, 900 and 390 px, light and dark, before you call anything done. Open the image files and read them.
-- Tools: `tools/qa.mjs` (page checks and visual regression; do not refresh its baseline), `tools/scene_check.mjs` (scene collisions; use
-  `ONLY=` for your scenes; the full run takes about 45 minutes and is the orchestrator's job), `tools/copy_lint.mjs` (wording),
-  `tools/contrast_check.mjs` (contrast).
+You work in your own checkout of the repository (a git worktree), so other people's unfinished edits never break your build.
+
+- **Where.** Run `pwd` and `git rev-parse --show-toplevel` first. The site is the `counterspace/` folder of your checkout. Use relative paths. Never read from
+  or write to `/home/user/citation-checker-skill` (that is the orchestrator's copy) and never run git commands there.
+- **Once, at the start.** `ln -s /home/user/citation-checker-skill/counterspace/tools/node_modules counterspace/tools/node_modules` (the shared tool
+  installation), then `git checkout -b track/<your-track-name>`.
+- **Build.** `cd counterspace && python3 tools/build_page.py` writes `./index.html` in your checkout. Never commit `index.html` (the orchestrator rebuilds it
+  once after merging). Commit with `git add -A . ':(exclude)index.html' && git commit -m "..."`. Do not push. Commit after each finished item so work is never lost.
+- **Own files only.** Edit only the files your track brief lists. For `src/template.html` edit only your own regions. If you need a change elsewhere, make
+  your side work without it and write the request in your final report. Do not restyle the shared components in `base.css` (buttons, segmented control, chips,
+  disclosure, chapter heading); the page-shell track owns them. Use their class names.
+- **Icons.** Use `<svg class="ico"><use href="#i-name"/></svg>` from `src/partials/icons.html` (41 icons). If a missing icon is essential, add one
+  `<symbol>` at the end of the sprite in the same style and say so in your report.
+- **Ports.** Tools start a local server. Use `PORT=<n>` from the range in your brief, a different number for each tool you run at the same time. Stop
+  servers you start by their process id (`kill <pid>`); never use `pkill -f`.
+- **Scratch files** (screenshots, test scripts, notes) go in `/tmp/claude-0/-home-user-citation-checker-skill/a512a4f7-356b-5da7-ae6f-7a7ae5194032/scratchpad/<track>/`.
+  Scripts you want to keep as tools go in `counterspace/tools/` named `tmp_*.mjs` or `_*.mjs` (git ignores them) unless your brief says otherwise.
+- **Look at your work.** `OUT=<scratch> VPS=1440x900,900x1000,390x844 THEMES=dark,light SECTIONS=top,chartA node tools/snap.mjs` (see the file header) writes
+  screenshots. Open the PNG files with the Read tool and judge them as a design reviewer would: hierarchy, spacing, alignment, clipping, contrast, consistency.
+  Fix what you see. Check dark and light and at 1440, 900 and 390 px wide.
+- **Code style.** Lines at most 160 characters. Run `tools/node_modules/.bin/prettier --print-width 160 --single-quote --write <file>` on JavaScript you touched.
+  Match the surrounding comment style: say why, not what; no change-log comments.
+- **Do not change facts.** Data files (`data/*.json`), numbers, dates, sources, citations and the legal cautions stay exactly as they are in meaning. Wording
+  changes are for plain language only.
+- **Checks to run for your area before you finish.** `node tools/copy_lint.mjs` (wording; no errors in your area), `node tools/qa.mjs` once at the end
+  (page errors, axe, horizontal scroll; ignore visual-regression differences in your own area, never refresh the baseline), `node tools/scene_check.mjs` with
+  `ONLY=<scene ids>` for any scene you touched (the 3D and scene viewer tracks; the full run is the orchestrator's job), `node tools/contrast_check.mjs`.
+- **Progress file.** Keep `counterspace/.progress_<track>.md` (git ignores it): what is done, what is next, commit hashes. Update it after each item.
+- **Final report** (short, plain): what changed and why it looks better; files touched; commits; checks and results; anything you could not finish; requests for
+  other tracks; any decision the orchestrator must make. Do not paste code.
