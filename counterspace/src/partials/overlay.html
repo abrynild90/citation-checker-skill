@@ -1,11 +1,18 @@
 <div class="overlay scope-dark" id="overlay" aria-hidden="true">
   <div class="panel" id="scenePanel" role="dialog" aria-modal="true" aria-label="3D explainer" tabindex="-1">
+    <div class="sv-sheet" id="sceneSheet" role="dialog" aria-label="All 3D explainers" hidden>
+      <div class="sheet-head"><h3>All scenes</h3><button class="btn icon" id="scSheetClose" type="button" aria-label="Close the list of scenes"><svg
+        class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div>
+      <ol class="sheet-list" id="sceneSheetList"></ol>
+    </div>
     <header class="sv-head">
       <h2 id="sceneTitle"></h2>
       <div class="sv-meta">
         <div class="sv-dots" id="sceneDots" role="group" aria-label="All scenes"></div>
         <span class="sv-count" id="sceneDate" aria-hidden="true"></span>
       </div>
+      <button class="sv-list-btn" id="scList" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="sceneSheet"><svg class="ico"
+        aria-hidden="true" focusable="false"><use href="#i-list"/></svg>All scenes</button>
       <div class="sv-nav">
         <button class="btn icon" id="scPrev" type="button" aria-label="Previous scene" aria-keyshortcuts="ArrowLeft" title="Previous scene (Left arrow)"><svg
           class="ico" aria-hidden="true" focusable="false"><use href="#i-prev"/></svg></button>
@@ -35,7 +42,9 @@
     <aside class="story" id="sceneStory" aria-label="The story of this scene">
       <div class="story-wrap" id="asideWrap">
         <div class="story-scroll" id="asideBody" tabindex="0" role="region" aria-label="The story of this scene">
-          <p class="sv-lede" id="sceneCaption"></p>
+          <p class="sv-lede clamped" id="sceneCaption"></p>
+          <button class="sv-more" id="sceneMore" type="button" aria-expanded="false" aria-controls="sceneCaption"><svg class="ico" aria-hidden="true"
+            focusable="false"><use href="#i-down"/></svg><span>Read the full account</span></button>
           <section class="sv-steps" id="sceneStepsSection" aria-labelledby="stepsH">
             <h3 id="stepsH">What happens</h3>
             <p class="sv-note" id="stepsNote"></p>

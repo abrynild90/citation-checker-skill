@@ -192,6 +192,31 @@ ORDER.forEach((s, i) => {
   };
   dotsEl.appendChild(b);
 });
+// Phones have no room for the dots: a list of all scenes opens in a sheet instead.
+const sheet = $('sceneSheet'),
+  sheetList = $('sceneSheetList'),
+  listBtn = $('scList');
+ORDER.forEach((s, i) => {
+  const li = document.createElement('li');
+  li.innerHTML = `<button type="button" class="sheet-item"><span class="sh-n">${i + 1}</span><span class="sh-t">${esc(s.title)}</span></button>`;
+  li.firstElementChild.onclick = () => {
+    toggleSheet(false);
+    if (s !== cur) openScene(s.id);
+  };
+  sheetList.appendChild(li);
+});
+function toggleSheet(open) {
+  sheet.hidden = !open;
+  listBtn.setAttribute('aria-expanded', String(open));
+  if (open) {
+    const now = [...sheetList.children][ORDER.indexOf(cur)]?.firstElementChild;
+    now?.setAttribute('aria-current', 'true');
+    [...sheetList.querySelectorAll('[aria-current]')].forEach((b) => b !== now && b.removeAttribute('aria-current'));
+    (now || sheetList.querySelector('button')).focus({ preventScroll: false });
+  } else if (sheet.contains(document.activeElement)) listBtn.focus();
+}
+listBtn.onclick = () => toggleSheet(sheet.hidden);
+$('scSheetClose').onclick = () => toggleSheet(false);
 function syncDots() {
   [...dotsEl.children].forEach((b, i) => {
     const on = ORDER[i] === cur;
@@ -264,6 +289,17 @@ export async function openScene(id, originEl) {
   if (!wasOpen) showHint();
 }
 
+// The account is folded to a few lines so "What happens" gets the room; the button opens the whole text.
+const moreBtn = $('sceneMore');
+function setMore(open) {
+  captionEl.classList.toggle('clamped', !open);
+  moreBtn.setAttribute('aria-expanded', String(open));
+  moreBtn.querySelector('span').textContent = open ? 'Show less' : 'Read the full account';
+  moreBtn.classList.toggle('open', open);
+  updateFades();
+}
+moreBtn.onclick = () => setMore(moreBtn.getAttribute('aria-expanded') !== 'true');
+
 // Text of the open scene: title, count, story, source, related law, picture note and the steps.
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
@@ -272,6 +308,9 @@ function fillStory(cfg) {
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   captionEl.textContent = cfg.caption;
+  setMore(false);
+  moreBtn.hidden = cfg.caption.split(/\s+/).length < 36;
+  if (moreBtn.hidden) captionEl.classList.remove('clamped');
   const ev = byId[cfg.event];
   srcEl.innerHTML =
     `<span class="sv-cite">Source: ${esc(cfg.cite)}</span>` +
@@ -303,6 +342,7 @@ function setInert(on) {
 
 // ---------------------------------------------------------------- close
 export function closeScene() {
+  sheet.hidden = true;
   if (!cur) return;
   const closing = cur;
   cur = null;
@@ -625,6 +665,7 @@ document.addEventListener('keydown', (e) => {
   hideHint();
   if (e.key === 'Escape') {
     e.preventDefault();
+    if (!sheet.hidden) return toggleSheet(false);
     closeScene();
     return;
   }

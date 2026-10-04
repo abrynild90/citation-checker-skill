@@ -101,7 +101,13 @@
 .overlay .sv-dots {
   display: flex;
   align-items: center;
-  margin-left: -8px;
+  margin-left: -12px;
+}
+.overlay .sv-list-btn {
+  display: none;
+}
+.overlay .sv-sheet {
+  display: none;
 }
 .overlay .sv-dot {
   position: relative;
@@ -109,8 +115,8 @@
   -webkit-appearance: none;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   margin: 0;
   padding: 0;
   background: none;
@@ -401,6 +407,47 @@
   letter-spacing: 0.004em;
   color: var(--text);
   text-wrap: pretty;
+}
+.overlay .sv-lede.clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  margin-bottom: var(--s-1);
+}
+.overlay .sv-more {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  margin: 0 0 var(--s-4) -8px;
+  padding: 0 var(--s-3) 0 var(--s-2);
+  font: 500 14px/1.3 var(--sans);
+  color: var(--accent);
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+.overlay .sv-more[hidden] {
+  display: none;
+}
+.overlay .sv-more:hover {
+  background: var(--surface-2);
+}
+.overlay .sv-more .ico {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--dur-2) var(--sv-ease);
+}
+.overlay .sv-more.open .ico {
+  transform: rotate(180deg);
+}
+.overlay .sv-more:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 .overlay .sv-steps h3 {
   margin: 0;
@@ -878,7 +925,7 @@
     height: 100vh;
     height: 100dvh;
     border-radius: 0;
-    grid-template-rows: auto minmax(0, 44%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 38%) minmax(0, 1fr) auto;
     --sv-pad: 16px;
   }
   /* The title takes the full width; close sits at its top right; previous, count and next make a small pager under it. */
@@ -886,7 +933,7 @@
     grid-template-columns: 40px auto 40px minmax(0, 1fr);
     grid-template-areas:
       "title title title title"
-      "prev count next .";
+      "prev count next list";
     column-gap: var(--s-2);
     row-gap: var(--s-1);
     padding: max(12px, env(safe-area-inset-top)) var(--sv-pad) 10px;
@@ -921,6 +968,85 @@
   .overlay .sv-dots {
     display: none;
   }
+  .overlay .sv-list-btn {
+    grid-area: list;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    padding: 0 var(--s-3);
+    font: 500 14px/1.3 var(--sans);
+    color: var(--accent);
+    background: none;
+    border: 0;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .overlay .sv-list-btn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .overlay .sv-list-btn .ico {
+    width: 18px;
+    height: 18px;
+  }
+  .overlay .sv-sheet:not([hidden]) {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-2);
+  }
+  .overlay .sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(12px, env(safe-area-inset-top)) var(--sv-pad) 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .overlay .sheet-head h3 {
+    margin: 0;
+    font: 500 22px/1.3 var(--serif);
+  }
+  .overlay .sheet-list {
+    flex: 1;
+    margin: 0;
+    padding: var(--s-2) var(--s-2) var(--s-4);
+    list-style: none;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .overlay .sheet-item {
+    appearance: none;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: var(--s-3);
+    align-items: center;
+    width: 100%;
+    min-height: 48px;
+    padding: var(--s-2) var(--s-3);
+    font: 500 16px/1.35 var(--sans);
+    text-align: left;
+    color: var(--text);
+    background: none;
+    border: 0;
+    border-radius: var(--r-2, 10px);
+    cursor: pointer;
+  }
+  .overlay .sheet-item:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: -3px;
+  }
+  .overlay .sheet-item[aria-current="true"] {
+    background: var(--surface-3);
+  }
+  .overlay .sheet-item .sh-n {
+    font: 600 14px/1 var(--sans);
+    font-variant-numeric: tabular-nums;
+    color: var(--faint);
+  }
   .overlay .illus .full {
     display: none;
   }
@@ -934,8 +1060,13 @@
     padding: 20px var(--sv-pad) 28px;
   }
   .overlay .sv-lede {
-    font-size: 17.5px;
-    margin-bottom: var(--s-5);
+    font-size: 17px;
+  }
+  .overlay .sv-more {
+    margin-bottom: var(--s-2);
+  }
+  .overlay .sv-note {
+    display: none;
   }
   .overlay .sv-now {
     display: block;
@@ -1002,8 +1133,8 @@
   }
   .overlay .seg {
     flex: 1;
-    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
-    mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
   }
   .overlay .seg.at-end {
     -webkit-mask-image: none;
@@ -1132,6 +1263,10 @@
 
 /* ---------- Touch screens: larger targets (44 px where there is room) */
 @media (pointer: coarse) {
+  .overlay .sv-dot {
+    width: 44px;
+    height: 44px;
+  }
   .overlay .sv-nav .btn {
     --h: 44px;
   }
