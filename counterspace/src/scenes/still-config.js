@@ -65,3 +65,22 @@ export const STILL = {
 };
 // Runtime override for tuning: globalThis.__stillCfg = { id: {...} }.
 export const stillFor = (id) => ({ ...(STILL[id] || {}), ...(globalThis.__stillCfg?.[id] || {}) });
+
+// The one line of context under the title of a saved image: what the picture shows, in the words of the scene's own caption.
+export const STILL_LINE = {
+  starfish: 'A 1.4-megaton warhead detonates about 400 km above Johnston Island, and its electrons are trapped by Earth’s magnetic field.',
+  solwind: 'An F-15 in a zoom climb releases an ASM-135 missile that rises to meet the Solwind P78-1 satellite at about 530 km.',
+  fengyun: 'China’s SC-19 interceptor strikes the Fengyun-1C weather satellite at about 880 km, and the debris spreads into a ring.',
+  'burnt-frost': 'A US Navy cruiser fires a modified SM-3 at the failing USA-193 satellite at about 220 km.',
+  dn2: 'A rocket from Xichang climbs toward the geostationary belt and falls back to Earth. It had no target.',
+  shakti: 'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km.',
+  cosmos1408: 'Russia’s Nudol interceptor destroys the defunct Cosmos 1408 at about 470 km, and the debris crosses the International Space Station’s orbit.',
+  gnss: 'A ground jammer swamps the weak signals of GPS satellites, but only inside its local effect zone.',
+  viasat: 'Attackers pushed destructive malware through KA-SAT’s ground network, and tens of thousands of modems went dark.',
+  laser: 'In October 1997 the US fired the MIRACL laser at MSTI-3, a retired Air Force experimental satellite.',
+  'sj21-tug': 'SWF reports that China’s SJ-21 docked with the defunct Compass G2 and pulled both above the GEO belt in January 2022.',
+  rpo: 'Three close approaches drawn side by side: SJ-21 and SJ-25 at GEO, Cosmos 2542 and 2543 in LEO, and USA 271 near SKYNET 5A.',
+  spaceplanes: 'The US X-37B has flown eight missions since 2010. China’s CSSHQ has flown three, and a fourth launched in February 2026.',
+};
+// The context line of a scene: the line written above, else the first sentence of its caption.
+export const stillLine = (cfg) => STILL_LINE[cfg?.id] || String(cfg?.caption || '').split(/(?<=[.!?])\s+(?=[A-Z“"(])/)[0] || '';

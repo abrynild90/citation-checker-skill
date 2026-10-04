@@ -14,6 +14,7 @@ import { renderPanels } from './svg/panels.js';
 import { drawHeroShells, heroTime, heroView } from './svg/hero.js';
 import { requestFullEarth, wantsFullEarth } from './svg/upgrade.js';
 import { prewarmEarth } from './svg/earth-raster.js';
+import { fontFaceCSS, rememberSim } from './svg/still-frame.js';
 import { SANS } from '../fonts.js';
 
 prewarmEarth(); // a worker starts decoding the embedded Earth images while the page boots, so the first picture finds it ready
@@ -24,7 +25,7 @@ prewarmEarth(); // a worker starts decoding the embedded Earth images while the 
 let svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
 
 export function renderSVG(sim, el, t = sim.still, opts = {}) {
-  if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el, renderSVG);
+  if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el, renderSVG, opts);
   const t0 = performance.now(),
     hero = !!sim.cfg.spin && !opts.panel;
   if (!opts.panel && sim.cfg.staticT != null && t === sim.still) t = sim.cfg.staticT;
@@ -69,6 +70,8 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     .attr('role', 'img')
     .attr('aria-label', `${sim.cfg.title}: still diagram`);
   const defs = addDefs(svg, U, { GX, GY, GR, gpath });
+  // The saved image draws this SVG as an image, which cannot see the page's fonts: the print layout carries the ones it uses.
+  if (opts.print) defs.append('style').text(fontFaceCSS());
   // The hero sits on the page's own dark sky, so its picture has no backdrop; a scene diagram carries its own flat ink-blue one.
   if (!hero) {
     svg.style('background', '#070b16');
@@ -77,7 +80,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   drawStars(svg, W, H, { cx: GX, cy: GY, r: GR * 1.06 });
   const S = createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY, R, showGlobe, craftBase });
   if (!hero) drawShells(S);
-  drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb, print: !!opts.print });
+  drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb, print: !!(opts.print || opts.syncEarth) });
   if (limb) drawLimbTag(svg, W, fBot, S.marks, S.fs);
   S.g = svg.append('g').attr('font-family', SANS).attr('font-size', 11);
   Object.assign(S, { GX, GY, GR });
@@ -90,6 +93,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   drawStatus(S, fit);
   drawChrome(S);
   attachProbe(S, fit, legend, pl);
+  rememberSim(svg.node(), sim);
   if (opts.panel) return svg.node();
   el.querySelector(':scope > svg')?.remove();
   el.prepend(svg.node());
