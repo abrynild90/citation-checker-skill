@@ -1,7 +1,7 @@
 // ============================================================================
 // scenes/svg/items.js: draws each sim item kind (dome, curve, cloud, beam, point, flash) into the static diagram and records what the label placer needs
 // ============================================================================
-import { drawCraft, isCraftShape, iconSize, iconRotation, capByArea, markerCapFor, capByMarker, drawnBox } from './craft.js';
+import { drawCraft, drawMarker, isCraftShape, iconSize, iconRotation, capByArea, markerCapFor, capByMarker, drawnBox } from './craft.js';
 
 // A coverage dome: a filled spherical cap.
 function drawDome(S, it) {
@@ -18,6 +18,7 @@ function drawDome(S, it) {
 // An orbit, path or trail: drawn as a smooth line, recorded as an obstacle and a ring; may carry a label.
 function drawCurve(S, it) {
   const { sim, opts, t, W, g, project, path, CX, CY, R, showGlobe, obst, ringsL, dPolys, orbitPts, NARROW, label, gapPts } = S;
+  if (sim.cfg.spin && it.ctx) return; // the hero keeps the constellation's satellites but not its planes: seen edge-on they are straight scratches
   let pts = it.pts(t).map(project);
   // only the part outside the disc: an arch behind the globe, clipped at its limb
   if (it.limbOnly) pts = pts.map((p) => (Math.hypot(p.x - CX, p.y - CY) < R * 1.005 ? { ...p, hidden: true } : p));
@@ -32,18 +33,41 @@ function drawCurve(S, it) {
   // staticRingGap: the orbit line is broken around each craft icon (the ring runs behind it, never through it)
   if (sim.cfg.staticRingGap && !opts.panel)
     pts = pts.map((p) => (!p.hidden && gapPts.some((q) => Math.hypot(p.x - q.x, p.y - q.y) < sim.cfg.staticRingGap) ? { ...p, hidden: true } : p));
-  let seg = [];
-  const flush = () => {
-    if (seg.length > 1) dPolys.push({ p: seg.slice(), role: it.role || 'line' });
-    if (seg.length > 1)
-      g.append('path')
-        .attr('d', d3.line().curve(d3.curveCatmullRom.alpha(0.5))(seg))
+  // a constellation (context only) never draws across the Earth's face: its planes are seen only against the sky
+  if (it.ctx) pts = pts.map((p) => (Math.hypot(p.x - CX, p.y - CY) < R * 1.01 ? { ...p, hidden: true } : p));
+  // an orbit has depth: the side beyond the Earth is drawn dimmer than the side in front
+  const depth = !!(it.orbit || it.gate || it.ctx || it.role === 'orbit'),
+    op = it.thick ? Math.max(0.85, it.opacity ?? 1) : (it.opacity ?? 1),
+    line = d3.line().curve(d3.curveCatmullRom.alpha(0.5)),
+    drawSeg = (s, far) =>
+      s.length > 1 &&
+      g
+        .append('path')
+        .attr('d', line(s.map((q) => [q.x, q.y])))
         .attr('fill', 'none')
         .attr('stroke', it.color)
         .attr('stroke-linecap', 'round')
-        .attr('stroke-opacity', it.thick ? Math.max(0.85, it.opacity ?? 1) : (it.opacity ?? 1))
+        .attr('stroke-opacity', far ? op * 0.45 : op)
         .attr('stroke-width', it.thick ? Math.max(2.2, it.thick * R * 1.8) : it.width || 1.2);
-    seg = [];
+  // one visible run (between the points hidden behind the Earth) is recorded whole for the label placer and the checks, and drawn in pieces by depth
+  let run = [];
+  const flush = () => {
+    if (run.length > 1) {
+      dPolys.push({ p: run.map((q) => [q.x, q.y]), role: it.role || 'line' });
+      let seg = [run[0]],
+        far = depth && run[0].z < 0;
+      for (let i = 1; i < run.length; i++) {
+        const f = depth && run[i].z < 0;
+        if (f !== far) {
+          drawSeg(seg, far);
+          seg = [seg.at(-1)];
+          far = f;
+        }
+        seg.push(run[i]);
+      }
+      drawSeg(seg, far);
+    }
+    run = [];
   };
   if (it.avoid) {
     let cur = [];
@@ -60,10 +84,7 @@ function drawCurve(S, it) {
     });
     fl();
   }
-  pts.forEach((p) => {
-    if (p.hidden) flush();
-    else seg.push([p.x, p.y]);
-  });
+  pts.forEach((p) => (p.hidden ? flush() : run.push(p)));
   flush();
   if (!it.dynamic && it.orbit) {
     let cur = [];
@@ -230,25 +251,7 @@ function drawPoint(S, it) {
         ovr: !!capOvr,
         id: it.craftId || it.label,
       });
-    } else if (it.shape === 'sat') {
-      const q3 = it.small ? 6 : 8;
-      g.append('rect')
-        .attr('x', p.x - q3 / 2)
-        .attr('y', p.y - q3 / 2)
-        .attr('width', q3)
-        .attr('height', q3)
-        .attr('fill', c)
-        .attr('stroke', '#070b17')
-        .attr('stroke-width', 0.8);
-    } else if (it.shape === 'tick')
-      g.append('path')
-        .attr('d', `M${p.x},${p.y - 5}L${p.x + 5},${p.y}L${p.x},${p.y + 5}L${p.x - 5},${p.y}Z`)
-        .attr('fill', c)
-        .attr('stroke', '#070b17');
-    else if (it.shape === 'none') {
-      /* label-only anchor */
-    } else if (it.shape === 'kv') g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c);
-    else g.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 4).attr('fill', c).attr('stroke', '#070b17').attr('stroke-width', 1);
+    } else if (it.shape !== 'none') drawMarker(g, it.shape, p.x, p.y, c, it.small); // ('none' is a label-only anchor)
     if (it.label && !it.ctx && !it.noLeader && !(!opts.panel && sim.cfg.staticNoLabel?.includes(it.craftId))) {
       const n0 = cands.length;
       label(
@@ -263,7 +266,8 @@ function drawPoint(S, it) {
         it.staticPin,
         it.shape === 'site' ? 'place' : 'item', // a place name is a quiet label
       );
-      if (it.offGlobe && cands.length > n0) cands.at(-1).off = true;
+      // offGlobe: the label leaves the Earth's disc (its site lies in the dark sky of the frame); a phone may keep a short label beside a site that is deep in the disc
+      if (it.offGlobe && cands.length > n0 && !(W < 520 && sim.cfg.staticOnDiscPhone?.includes(it.label))) cands.at(-1).off = true;
       if (cands.length > n0 && marks.length > mi) cands.at(-1).mk = mi;
     }
   }

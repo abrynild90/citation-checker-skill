@@ -4,14 +4,15 @@
 // The pixel loop is a pure function (rasterCore). The page calls it in a worker, so the first picture never blocks the main thread (the loop is slow only
 // while the browser's compiler warms up: about 100 ms on the first call); the saved image and a failed worker use it directly.
 // ============================================================================
+import { IS_PHONE } from '../core.js';
 import { LAND, earthImg, earthNightLow, earthSource, loadEmbeddedEarth } from '../earth.js';
 
 const DEG = Math.PI / 180;
 
 // The sun, as a direction in the diagram's own view basis (x right, y up, z toward the viewer): from the upper left and a little toward the viewer, so every
-// diagram shows a lit planet, a soft terminator and a dark crescent with city lights at the lower right. One constant, so it can be aligned with the live
-// scenes' sun in a single edit.
-const SUN_RAW = [-0.62, 0.46, 0.64];
+// diagram shows a lit planet (about 70% of the disc), a soft terminator and a dark crescent with city lights at the lower right. One constant, so it can be
+// aligned with the live scenes' sun in a single edit.
+const SUN_RAW = [-0.74, 0.5, 0.44];
 export const SUN_VIEW = SUN_RAW.map((c) => c / Math.hypot(...SUN_RAW));
 
 export const hasEmbeddedEarth = () => !!document.getElementById('cs-earth');
@@ -164,7 +165,7 @@ function rasterCore(P, day, night) {
       // --- ocean glint
       if (ndl > 0) {
         const ch = xx * hx + yy * hy + zz * hz;
-        if (ch > 0.94) {
+        if (ch > 0.97) {
           let wat = (tb - tr * 1.1 - 8) / 55;
           wat = wat < 0 ? 0 : wat > 1 ? 1 : wat;
           if (wat > 0) {
@@ -172,8 +173,8 @@ function rasterCore(P, day, night) {
               c4 = c2 * c2,
               c8 = c4 * c4,
               c16 = c8 * c8,
-              c64 = c16 * c16 * c16 * c16,
-              sp = c64 * c16 * c8 * c2 * wat * 150; // about ch^90
+              c32 = c16 * c16,
+              sp = c32 * c32 * c32 * c8 * wat * 70; // a small soft highlight (about ch^200)
             r += sp;
             gr += sp * 0.96;
             bl += sp * 0.88;
@@ -239,34 +240,37 @@ const resultOf = (P, url) => ({ url, x: P.wx0, y: P.wy0, w: P.SW * P.k, h: P.SH 
 const keyOf = (P, level) =>
   [level, P.SW, P.SH, P.wx0.toFixed(1), P.wy0.toFixed(1), P.CX.toFixed(1), P.CY.toFixed(1), P.k.toFixed(4), ...P.e.map((v) => v.toFixed(5))].join('|');
 
-// Decoded pixels of an equirectangular image, cached per image object (the embedded images and the full NASA image are different objects).
+// Decoded pixels of an equirectangular image at up to maxW wide, cached per image object and width (the embedded images and the full NASA image are
+// different objects).
 const pixCache = new WeakMap();
 function pixels(img, maxW) {
   if (!img) return null;
-  let p = pixCache.get(img);
-  if (p) return p;
   const iw = img.naturalWidth || img.width,
-    ih = img.naturalHeight || img.height,
     sw = Math.min(maxW, iw),
+    per = pixCache.get(img) || pixCache.set(img, new Map()).get(img);
+  if (per.has(sw)) return per.get(sw);
+  const ih = img.naturalHeight || img.height,
     sh = Math.max(2, Math.round((sw * ih) / iw)),
     c = document.createElement('canvas');
   c.width = sw;
   c.height = sh;
   const g = c.getContext('2d', { willReadFrequently: true });
   g.drawImage(img, 0, 0, sw, sh);
-  p = { w: sw, h: sh, d: g.getImageData(0, 0, sw, sh).data };
-  pixCache.set(img, p);
+  const p = { w: sw, h: sh, d: g.getImageData(0, 0, sw, sh).data };
+  per.set(sw, p);
   return p;
 }
+// The widest day image any raster uses: 4096 px where memory allows (the saved image magnifies the Earth about 12 times per degree), 2048 on a phone.
+const MAX_TEX = IS_PHONE ? 2048 : 4096;
 
 // ---------------------------------------------------------------- synchronous raster (the saved image, and the fallback when no worker is available)
-export function earthRasterSync(rot, CX, CY, R, win, ss = 2) {
+export function earthRasterSync(rot, CX, CY, R, win, ss = 2, hi = false) {
   const src = earthSource();
   if (!src) return null;
   const t0 = performance.now();
   try {
     const P = viewParams(rot, CX, CY, R, win, ss),
-      px = rasterCore(P, pixels(src, 2048), pixels(earthNightLow, 1024)),
+      px = rasterCore(P, pixels(src, hi ? MAX_TEX : 2048), pixels(earthNightLow, hi ? MAX_TEX : 2048)),
       // a CPU-backed canvas: the pixels are encoded without a round trip through the graphics card
       c = document.createElement('canvas');
     c.width = P.SW;
@@ -346,7 +350,7 @@ function startWorker() {
     worker.onerror = () => failWorker('worker error');
     const data = JSON.parse(document.getElementById('cs-earth').textContent);
     worker.postMessage({ type: 'tex', name: 'day', src: data.day, maxW: 2048 });
-    worker.postMessage({ type: 'tex', name: 'night', src: data.night, maxW: 1024 });
+    worker.postMessage({ type: 'tex', name: 'night', src: data.night, maxW: 2048 });
     workerLevel = 1;
   } catch (e) {
     failWorker(String(e));
@@ -360,7 +364,7 @@ export function prewarmEarth() {
 async function sendFullImage() {
   // the full NASA image replaces the embedded day image in the worker (decoded there too)
   const bmp = await createImageBitmap(earthImg);
-  worker.postMessage({ type: 'tex', name: 'day', src: bmp, maxW: 2048 }, [bmp]);
+  worker.postMessage({ type: 'tex', name: 'day', src: bmp, maxW: MAX_TEX }, [bmp]);
   workerLevel = 2;
 }
 

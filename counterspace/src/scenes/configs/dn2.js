@@ -86,6 +86,7 @@ export const DN2 = {
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
+  staticOnDiscPhone: ['Xichang'], // static, 375: Xichang's short label sits beside its site on the disc (off the disc it needed a long leader across the Earth)
   cameras: [
     { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.97, zoom: 1.3 } },
     // Profile: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame

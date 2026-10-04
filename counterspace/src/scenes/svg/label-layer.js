@@ -45,7 +45,21 @@ export function placeAndDrawLabels(S, fit, legend) {
   cands.forEach((c, i) => {
     const q = pl[i];
     if (!q) return;
-    if (q.leader) drawLeader(g, q.ax, q.ay, q.qx, q.qy);
+    if (q.leader) {
+      // the leader stops at the edge of a craft's glyph (it names the glyph, it does not run through it); elsewhere it ends on the line or point itself
+      let ex = q.ax,
+        ey = q.ay;
+      const m = c.mk != null ? marks[c.mk] : null;
+      if (m) {
+        const dx = q.qx - q.ax,
+          dy = q.qy - q.ay,
+          L = Math.hypot(dx, dy) || 1,
+          k = Math.min(m.r, L * 0.7) / L;
+        ex = q.ax + dx * k;
+        ey = q.ay + dy * k;
+      }
+      drawLeader(g, ex, ey, q.qx, q.qy);
+    }
     drawPill(g, { x: q.x, y: q.y, w: c.w, h: c.h, text: c.text, color: c.color, dot: c.dot, secondary: !c.dot, fs: c.fs });
   });
   return pl;
