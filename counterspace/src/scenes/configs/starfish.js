@@ -11,11 +11,13 @@ export const STARFISH = {
   shells: ['LEO'],
   duration: 14,
   caption:
-    'A 1.4-megaton warhead detonates about 400 km above Johnston Island. Electrons from the blast are trapped by Earth’s magnetic field. ' +
-    'They spread along field lines and drift around the planet, forming an artificial radiation belt. ' +
-    'SWF says such tests are known to have generated effects that damaged or destroyed satellites in orbit at the time. ' +
-    'The belt’s spread in the animation is drawn for legibility, not computed.',
-  cite: 'DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962); SWF 2026, p. 12-05 (effects that damaged or destroyed satellites in orbit at the time).',
+    'A 1.4-megaton nuclear warhead detonates about 400 km above Johnston Island. Electrons from the blast are trapped by Earth’s magnetic field. ' +
+    'They spread along the field lines and drift around the planet, forming an artificial radiation belt. ' +
+    'The Secure World Foundation (SWF) says such tests are known to have produced effects that damaged or destroyed satellites in orbit at the time. ' +
+    'The belt’s spread is drawn to show the idea. It is not a calculation.',
+  cite:
+    'US Department of Energy, DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962); ' +
+    'Secure World Foundation, 2026, p. 12-05 (satellite damage from such tests).',
   related: 'ltbt-1963',
   event: 'us-1962-starfish-prime',
   actors: [
@@ -91,9 +93,9 @@ export const STARFISH = {
   },
   // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
   cameras: [
-    { name: 'Wide', at: [20.02, 165.5, 3.5 * PH] },
-    { name: 'Near', at: [16.7, -177.5, Math.max(2.3, 3.5 * PH * 0.55)] },
-    { name: 'Polar', at: [42, -169.5, 4.3 * PH] },
+    { name: 'Whole scene', at: [20.02, 165.5, 3.5 * PH] },
+    { name: 'Close up', at: [16.7, -177.5, Math.max(2.3, 3.5 * PH * 0.55)] },
+    { name: 'From the north', at: [42, -169.5, 4.3 * PH] },
   ],
   phoneHide: ['Thor launch'],
   phoneOnDisc: ['Johnston', 'Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
@@ -109,10 +111,10 @@ export const STARFISH = {
   staticCraftMax: 54, // static: the satellite icon stays small (it must not cover the Earth's centre)
   stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
   status: [
-    [0, 'Thor rocket climbs toward ~400 km'],
-    [0.16, 'Detonation: electrons trapped on Earth’s field lines', 'Detonation: electrons trapped'],
-    [0.3, 'Trapped electrons spread in longitude and latitude along field lines', 'Electrons spread along field lines'],
-    [0.75, 'Belt has drifted around Earth (illustrative spread)', 'Belt drifts around Earth (illustrative)'],
-    [0.82, 'SWF: effects of such tests damaged or destroyed satellites in orbit at the time', 'Satellites in orbit were damaged (SWF)'],
+    [0, 'Thor rocket climbs toward about 400 km'],
+    [0.16, 'Detonation: electrons trapped by Earth’s magnetic field', 'Detonation: electrons trapped'],
+    [0.3, 'Trapped electrons spread north, south, east and west along field lines', 'Electrons spread along field lines'],
+    [0.75, 'The belt has drifted around Earth', 'Belt drifts around Earth'],
+    [0.82, 'SWF: tests like this damaged or destroyed satellites then in orbit', 'SWF: such tests damaged or destroyed satellites'],
   ],
 };
