@@ -51,7 +51,6 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(400px, 43%, 620px);
   grid-template-rows: auto minmax(0, 1fr) auto;
-  overflow: hidden;
   background: var(--bg-2);
   border-radius: 16px;
   box-shadow: var(--shadow-3);
@@ -82,7 +81,7 @@
 .overlay h2#sceneTitle {
   grid-area: title;
   margin: 0;
-  font: 500 26px/1.3 var(--serif);
+  font: 500 26px/1.32 var(--serif);
   letter-spacing: -0.008em;
   text-wrap: balance;
 }
@@ -166,6 +165,9 @@
   display: flex;
   align-items: center;
   gap: var(--s-2);
+}
+.overlay .btn {
+  line-height: 1.4;
 }
 .overlay .sv-nav .btn {
   --h: 40px;
@@ -324,6 +326,7 @@
   white-space: nowrap;
 }
 .overlay .sv-hint kbd {
+  line-height: 1.4;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -393,7 +396,7 @@
 }
 .overlay .sv-lede {
   margin: 0 0 var(--s-6);
-  max-width: 70ch;
+  max-width: 32em;
   font: 420 18px/1.6 var(--serif);
   letter-spacing: 0.004em;
   color: var(--text);
@@ -416,6 +419,7 @@
   display: none;
 }
 .overlay .sv-steps ol {
+  max-width: 600px;
   margin: var(--s-3) 0 0 -10px;
   padding: 0;
   list-style: none;
@@ -567,10 +571,11 @@
 }
 .overlay .sv-about > summary {
   font-size: 13.5px;
+  line-height: 1.4;
   color: var(--muted);
 }
 .overlay .sv-about p {
-  max-width: 60ch;
+  max-width: 34em;
   margin: var(--s-1) 0 0;
 }
 .overlay .story-foot {
@@ -638,6 +643,7 @@
   padding: 14px var(--sv-pad);
   background: var(--bg-2);
   border-top: 1px solid var(--line);
+  border-radius: 0 0 16px 16px;
 }
 .overlay #scPlay {
   grid-area: play;
@@ -770,7 +776,7 @@
   min-width: 0;
 }
 .overlay .views-label {
-  font: 500 13px/1.3 var(--sans);
+  font: 500 13px/1.4 var(--sans);
   color: var(--faint);
 }
 .overlay .seg {
@@ -785,6 +791,7 @@
 .overlay .seg button {
   --h: 34px;
   flex: none;
+  line-height: 1.4;
   padding: 0 14px;
   white-space: nowrap;
 }
@@ -833,8 +840,9 @@
   }
 }
 
-/* ---------- Tall and narrow windows, and phones: picture on top, story below, controls at the bottom */
-@media (max-width: 760px), (max-width: 900px) and (max-aspect-ratio: 1/1) {
+/* ---------- Tall and narrow windows, and phones: picture on top, story below, controls at the bottom.
+   The layouts are kept apart by their queries: stacked (this one), phone chrome (next), short and wide (after it). The same queries are in scene-ui.js. */
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1) {
   .overlay .panel {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 46%) minmax(0, 1fr) auto;
@@ -860,7 +868,7 @@
     border-top: 1px solid var(--line);
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px) {
   .overlay {
     padding: 0;
     align-items: stretch;
@@ -890,7 +898,7 @@
   .overlay h2#sceneTitle {
     padding-right: 52px;
     font-size: 22px;
-    line-height: 1.3;
+    line-height: 1.32;
   }
   .overlay #scPrev {
     grid-area: prev;
@@ -984,6 +992,7 @@
     column-gap: var(--s-3);
     row-gap: var(--s-2);
     padding: 10px var(--sv-pad) max(10px, env(safe-area-inset-bottom));
+    border-radius: 0;
   }
   .overlay .tm {
     min-width: 0;
@@ -1016,6 +1025,108 @@
   .overlay .sv-toast {
     left: var(--sv-pad);
     max-width: none;
+  }
+}
+
+/* ---------- Short and wide windows (a phone on its side, a page at 200% zoom): two columns with slim bars, so picture and story both keep their room */
+@media (max-height: 540px) and (min-aspect-ratio: 11/10) and (min-width: 600px) {
+  .overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+  .overlay .panel {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 42%, 440px);
+    --sv-pad: 16px;
+  }
+  .overlay .sv-head {
+    padding: 8px var(--sv-pad);
+  }
+  .overlay .sv-meta {
+    display: none;
+  }
+  .overlay h2#sceneTitle {
+    font-size: 19px;
+    line-height: 1.32;
+  }
+  .overlay .illus .full {
+    display: none;
+  }
+  .overlay .illus .short {
+    display: inline;
+  }
+  .overlay .sv-hint {
+    display: none;
+  }
+  .overlay .story-scroll {
+    padding: 16px var(--sv-pad) 24px;
+  }
+  .overlay .sv-lede {
+    font-size: 17px;
+    margin-bottom: var(--s-4);
+  }
+  .overlay .story-scroll .story-foot {
+    margin-top: var(--s-5);
+    padding: var(--s-4) 0 0;
+    gap: var(--s-3);
+  }
+  .overlay .story-scroll .sv-src {
+    max-height: none;
+    overflow: visible;
+  }
+  .overlay .ctrl {
+    grid-template-columns: auto auto minmax(80px, 2fr) minmax(0, 3fr) auto;
+    grid-template-areas: "play time scrub views save";
+    column-gap: var(--s-3);
+    padding: 8px var(--sv-pad);
+    border-radius: 0;
+  }
+  .overlay .views-label {
+    display: none;
+  }
+  .overlay .tm {
+    min-width: 0;
+  }
+  .overlay #scExport {
+    width: 44px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .overlay #scExport span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .overlay .static-note {
+    grid-column: 1 / 4;
+  }
+}
+
+/* ---------- Short and narrow windows: the whole panel scrolls, with the controls kept at the bottom */
+@media (max-height: 540px) and (max-aspect-ratio: 11/10), (max-height: 540px) and (max-width: 599px) {
+  .overlay .panel {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    grid-template-rows: auto clamp(200px, 46dvh, 340px) auto auto;
+  }
+  .overlay .story {
+    overflow: visible;
+  }
+  .overlay .story-scroll {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .overlay .ctrl {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
   }
 }
 
