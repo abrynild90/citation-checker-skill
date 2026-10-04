@@ -9,11 +9,12 @@ export const SOLWIND = {
   shells: ['LEO'],
   duration: 12,
   caption:
-    'An F-15 in a supersonic zoom climb releases an ASM-135 missile. ' +
-    'The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km (SWF Table 5-1; its text says 555 km) and ' +
-    'destroys it by collision. SWF counts 285 tracked fragments; all have since decayed. ' +
-    'The positions and the debris spread are drawn for legibility, not computed.',
-  cite: 'SWF 2026, Table 5-1: 285 tracked, 0 still in orbit (p. 05-01); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
+    'An F-15 fighter climbs steeply at supersonic speed (a “zoom climb”) and releases an ASM-135 missile. ' +
+    'The missile’s miniature homing vehicle rises to meet the Solwind P78-1 satellite at about 530 km and destroys it by collision. ' +
+    'The Secure World Foundation (SWF) gives that height as 530 km in its Table 5-1 and 555 km in its text. ' +
+    'SWF counts 285 tracked fragments; all have since fallen out of orbit. ' +
+    'The positions and the debris spread are drawn to show the idea. They are not calculated.',
+  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (285 tracked, 0 still in orbit); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
   related: null,
   event: 'us-1985-solwind',
   launchPhoneK: 1.2,
@@ -53,9 +54,9 @@ export const SOLWIND = {
   ],
   still: 0.45,
   status: [
-    [0, 'F-15 in a supersonic zoom climb'],
+    [0, 'F-15 in a steep, supersonic climb'],
     [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
-    [0.52, 'Collision at ~530 km; fragments spread and decay', 'Collision at ~530 km'],
-    [0.75, 'Time compressed: SWF counts 285 tracked fragments, all since decayed', 'SWF: 285 fragments, all decayed'],
+    [0.52, 'Collision at about 530 km; fragments spread, then fall out of orbit', 'Collision at about 530 km'],
+    [0.75, 'Fast-forward: all 285 tracked fragments are now out of orbit (SWF)', 'SWF: 285 fragments, none in orbit'],
   ],
 };
