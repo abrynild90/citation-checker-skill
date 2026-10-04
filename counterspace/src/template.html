@@ -3,65 +3,104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Counterspace Timeline</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<title>Counterspace Timeline, 1957–2026</title>
 <meta
   name="description"
-  content="Kinetic and non-kinetic counterspace capability, 1957–2026, and the law that trailed it. Companion to Space Security Law: Governance Beyond the Atmosphere."
+  content="Anti-satellite tests, jamming, lasers, cyber operations and close approaches in orbit, 1957 to 2026, set against the law that followed. A companion to Space Security Law by Aaron Brynildson."
 >
+<meta name="theme-color" content="#050813">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Counterspace Timeline, 1957–2026">
+<meta
+  property="og:description"
+  content="Anti-satellite tests, jamming, lasers, cyber operations and close approaches in orbit, set against the law that followed."
+>
+<link
+  rel="icon"
+  type="image/svg+xml"
+  href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070b16'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%233a7bd5'/%3E%3Cellipse cx='16' cy='16' rx='12.5' ry='5' transform='rotate(-24 16 16)' fill='none' stroke='%23ffc86b' stroke-width='1.8'/%3E%3Ccircle cx='26.6' cy='11.4' r='2' fill='%23ffc86b'/%3E%3C/svg%3E"
+>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style id="cs-fonts">/*__FONTS__*/</style>
 <style>/*__CSS__*/</style>
 </head>
 <body>
 <!--__ICONS__-->
-<a class="skip" href="#timeline">Skip to timeline</a>
-<header class="top wrap">
-  <div class="top-grid"><div class="top-main">
-  <div class="kicker">Companion to <em>Space Security Law: Governance Beyond the Atmosphere</em></div>
-  <h1>Counterspace, <span class="nb">1957–2026</span>: the weapons and the law that trailed them</h1>
-  <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations
-    have not. SWF’s 2026 assessment finds that “only non-destructive capabilities are actively being used against satellites in current military
-    operations” (Executive Summary, p. xxiii). This page puts the technology and the law on a single year axis.</p>
-  <div class="cta"><button class="btn primary" id="tourBtn" type="button">▶ Start the 3D scene tour</button><span class="cta-note">10 short scenes, or
-    select any cube badge on a chart.</span></div>
-  </div>
-  <div>
-    <div class="toolbar" role="toolbar" aria-label="Page controls">
-      <button class="btn small" id="themeBtn" type="button" aria-label="Toggle light or dark theme">◐ Theme</button>
-      <label class="btn small" for="expDark" title="SVG exports use the light palette (print-ready) unless this is checked"><input type="checkbox"
-        id="expDark"> Dark SVG exports</label>
+<a class="skip" href="#timeline">Skip to the timeline</a>
+<header class="top scope-dark" id="top">
+  <div class="topbar">
+    <div class="topbar-in wrap">
+      <div class="brand">
+        <svg class="ico brand-mark" aria-hidden="true"><use href="#i-orbit"/></svg>
+        <div class="brand-text">
+          <span class="brand-name">Counterspace</span>
+          <span class="brand-credit">A companion to <i>Space Security Law</i> by Aaron Brynildson</span>
+        </div>
+      </div>
+      <div class="bar-tools" role="group" aria-label="Page options">
+        <div id="barSlot">
+          <label class="switch" id="dlOption" title="Downloaded charts use light colours, which suit printing, unless this is on"><input
+            type="checkbox" role="switch" id="expDark"><span>Dark colours in downloads</span></label>
+        </div>
+        <button class="btn icon theme-btn" id="themeBtn" type="button" aria-label="Switch to light colours" title="Switch to light colours"><svg
+          class="ico i-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="ico i-moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
+      </div>
     </div>
-    <section class="glance" aria-labelledby="glanceH"><h2 id="glanceH">The ledger at a glance</h2><dl id="glance"></dl></section>
   </div>
-  <nav class="jump" aria-label="Jump to a section">
-    <a href="#legalBand"><b>Law band</b><span>Treaties and policy, pinned on scroll</span></a>
-    <a href="#chartA"><b>A · Kinetic tests</b><span>Altitude and debris, 1959–2021</span></a>
-    <a href="#chartC"><b>C · Non-kinetic</b><span>Jamming, lasers and cyber</span></a>
-    <a href="#chartR"><b>RPO · Co-orbital</b><span>Proximity operations, docking, spaceplanes</span></a>
-    <a href="#chartB"><b>B · Capabilities</b><span>States holding each, by decade</span></a>
-    <a href="#lag"><b>Chronology</b><span>Years from capability to a later legal step</span></a>
-    <a href="#sources"><b>Sources</b><span>Citations and method</span></a>
-  </nav>
-  <p class="meta" id="asof"></p>
-  </div>
+
+  <section class="hero" aria-labelledby="pageTitle">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1 class="hero-title" id="pageTitle"><span class="h1-main">Counterspace, <span class="nb">1957–2026:</span></span> <span
+          class="h1-sub">the weapons and the law that trailed them</span></h1>
+        <div class="hero-text">
+          <p class="lede">Destructive anti-satellite testing has paused since <strong>November 2021</strong>. Jamming, spoofing, dazzling and cyber operations
+            have not. The Secure World Foundation (SWF) finds in its 2026 assessment that “only non-destructive capabilities are actively being used against
+            satellites in current military operations” (Executive Summary, p. xxiii). This page sets the technology and the law on one timeline.</p>
+          <div class="cta">
+            <button class="btn primary" id="tourBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
+            <a class="btn lg" href="#timeline">Jump to the charts<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
+          </div>
+          <p class="cta-note"></p>
+        </div>
+      </div>
+
+      <figure class="hero-figure" aria-label="The Earth with three orbit zones">
+        <div class="stage" id="heroStage"></div>
+        <button class="btn small hero-rot" id="heroRot" type="button"><svg class="ico" aria-hidden="true"><use href="#i-rotate"/></svg>Rotate the globe</button>
+        <figcaption>
+          <p class="orbit-note">Low Earth orbit (LEO) reaches up to about 2,000 km. GPS satellites sit in medium Earth orbit (MEO) at about 20,200 km. Broadcast
+            and communications satellites sit in the geostationary belt (GEO) at about 35,786 km.</p>
+          <p class="illus">Drawn for illustration. Orbit heights are squeezed so every orbit fits.</p>
+        </figcaption>
+      </figure>
+
+      <div class="hero-contents">
+        <nav aria-label="Chapters">
+          <ul class="toc" id="glance">
+            <li data-ch="law"><a class="t-name" href="#legalBand">Law and policy</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+            <li data-ch="tests"><a class="t-name" href="#chartA">Anti-satellite tests</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+            <li data-ch="jam"><a class="t-name" href="#chartC">Jamming, lasers and cyber</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+            <li data-ch="close"><a class="t-name" href="#chartR">Close approaches</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+            <li data-ch="who"><a class="t-name" href="#chartB">Who can do what</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+            <li data-ch="lag"><a class="t-name" href="#lag">Capability, then law</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+            <li data-ch="src"><a class="t-name" href="#sources">Sources and method</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
+          </ul>
+        </nav>
+        <p class="hero-source" id="asof"></p>
+      </div>
+    </div>
+  </section>
 </header>
 
 <main>
-<div class="wrap">
-  <section class="hero" aria-label="Overview scene: Earth with LEO, MEO and GEO shells">
-    <div class="illus">Illustrative<span class="hide-phone">, not orbit-propagated</span> · compressed radial scale</div>
-    <button class="btn small hero-rot" id="heroRot" type="button" aria-label="Rotate the globe: load the interactive 3D overview">⟳ Rotate the globe</button>
-    <div class="stage" id="heroStage"></div>
-    <div class="copy">
-      <div class="prompt"><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><g class="badge3d" style="--x:0"><path
-        d="M0,-7 L6,-3.5 L0,0 L-6,-3.5Z" class="top" fill="#ffe08a"/><path d="M-6,-3.5 L0,0 L0,7 L-6,3.5Z" fill="none" stroke="#ffe08a"/><path
-        d="M6,-3.5 L0,0 L0,7 L6,3.5Z" fill="none" stroke="#ffe08a"/></g></svg><span><span class="hide-phone">Select any event with a 3D badge to explore
-        it</span><span class="show-phone">Select a 3D badge to explore</span></span></div>
-      <p>Low Earth orbit (to ~2,000 km) holds imaging satellites, the ISS and broadband constellations. GPS sits in medium Earth orbit (~20,200 km).
-        Broadcast and communications satellites sit in the geostationary belt (~35,786 km). Every destructive intercept so far has been in LEO.</p>
-    </div>
-  </section>
-</div>
 
 <div id="timeline" tabindex="-1">
   <div class="legal-band" id="legalBand" role="region" aria-label="Legal and policy responses, on the shared year axis">
@@ -185,16 +224,66 @@
   </div>
 </div>
 
-<div class="wrap prose" id="sources">
-  <section class="chart" aria-labelledby="hS" style="border:0">
-    <h2 id="hS">Sources and methodology</h2>
-    <div id="methodBody"></div>
-  </section>
-</div>
+<section class="sources" id="sources" aria-labelledby="hS">
+  <div class="wrap">
+    <header class="chapter-head">
+      <h2 id="hS">Where every fact comes from</h2>
+      <p class="lede">What the data is, what is counted, what is left out, and how to cite this page.</p>
+    </header>
+    <div class="sources-layout">
+      <nav class="sub-nav" aria-label="In this section">
+        <ul>
+          <li><a href="#srcEditions">Editions and dates</a></li>
+          <li><a href="#codingRules">How we classified the data</a></li>
+          <li><a href="#srcCite">How to cite this page</a></li>
+          <li><a href="#srcLicence">Licences and credits</a></li>
+          <li><a href="#srcList">All cited sources</a></li>
+        </ul>
+      </nav>
+      <div id="methodBody"></div>
+    </div>
+  </div>
+</section>
+
+<nav class="rail" id="rail" aria-label="Chapter progress">
+  <ul>
+    <li><a href="#legalBand"><span class="r-lab">Law and policy</span></a></li>
+    <li><a href="#chartA"><span class="r-lab">Anti-satellite tests</span></a></li>
+    <li><a href="#chartC"><span class="r-lab">Jamming, lasers and cyber</span></a></li>
+    <li><a href="#chartR"><span class="r-lab">Close approaches</span></a></li>
+    <li><a href="#chartB"><span class="r-lab">Who can do what</span></a></li>
+    <li><a href="#lag"><span class="r-lab">Capability, then law</span></a></li>
+    <li><a href="#sources"><span class="r-lab">Sources and method</span></a></li>
+  </ul>
+</nav>
 </main>
-<footer class="wrap" aria-label="Page footer">Built for teaching. SWF material is used for facts only under CC BY-NC 4.0; no SWF or CSIS figures,
-  graphics or prose are reproduced. No data is stored in your browser. Type: Newsreader (Production Type) and IBM Plex
-  (IBM Corp.), both under the SIL Open Font License 1.1.</footer>
+
+<footer class="site-foot" aria-label="Page footer">
+  <div class="wrap">
+    <div class="foot-cols">
+      <section aria-labelledby="fAbout">
+        <h2 id="fAbout">About this page</h2>
+        <p>Counterspace Timeline is a companion to <i>Space Security Law: Governance Beyond the Atmosphere</i> by Aaron Brynildson. It was built for teaching.</p>
+        <p>No data is stored in your browser.</p>
+      </section>
+      <section aria-labelledby="fData">
+        <h2 id="fData">Data and licence</h2>
+        <p>Material from the Secure World Foundation (SWF) is used for facts only, under CC BY-NC 4.0. No figures, graphics or prose from SWF or from the Center for
+          Strategic and International Studies (CSIS) are reproduced.</p>
+        <div id="footSlot"></div>
+      </section>
+      <section aria-labelledby="fType">
+        <h2 id="fType">Type and images</h2>
+        <p>Type: Newsreader (Production Type) and IBM Plex (IBM Corp.), both under the SIL Open Font License 1.1.</p>
+        <p>Earth images: NASA Blue Marble and Black Marble (public domain). Coastlines: Natural Earth (public domain).</p>
+      </section>
+    </div>
+    <div class="foot-base">
+      <span>Counterspace Timeline, 1957–2026</span>
+      <a class="btn quiet" href="#top"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Back to the top</a>
+    </div>
+  </div>
+</footer>
 
 <div class="card" id="card" role="tooltip" aria-hidden="true"></div>
 
