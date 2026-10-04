@@ -5,17 +5,12 @@
 import { beamCanvas, panelCanvas } from './earth.js';
 import { DEG, IS_PHONE, add, ll, scl } from './core.js';
 import { modelMethods } from './gl-models.js';
+import { earthMethods } from './gl-earth.js';
+import { spaceMethods } from './gl-space.js';
 
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz;
 vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
-const ATMO_FS = `uniform vec3 uColor; uniform vec3 uSun; uniform float uPow; uniform float uGain; uniform float uBack; varying vec3 vN;
-varying vec3 vP; varying vec3 vW;
-void main(){ vec3 v = normalize(-vP); float d = dot(normalize(vN), v);
-  // Front: brightest at the limb. Back (halo shell): brightest just outside the limb, 0 at the shell edge.
-  float rim = uBack > 0.5 ? pow(clamp(-d * 2.6, 0.0, 1.0), uPow) : pow(clamp(1.0 - d, 0.0, 1.0), uPow);
-  float day = 0.25 + 0.75 * smoothstep(-0.35, 0.6, dot(normalize(vW), uSun));
-  gl_FragColor = vec4(uColor, clamp(rim * uGain * day, 0.0, 1.0)); }`;
 
 const PT_VS = `attribute vec4 aCol; uniform float uScale; uniform float uSize; uniform float uMin; uniform float uMax; varying vec4 vC;
 void main(){ vC = aCol; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv;
@@ -25,8 +20,8 @@ const PT_FS = `uniform float uGain; varying vec4 vC;
 void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r));
 gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
-void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 2.2);
-gl_FragColor = vec4(uColor, clamp(0.015 + rim * uGain, 0.0, 1.0)); }`;
+void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 5.0);
+gl_FragColor = vec4(uColor, clamp(rim * uGain, 0.0, 1.0)); }`;
 const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; varying float vU; varying vec3 vP;
 void main(){ vU = uv.x; vP = position; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
 float r = min(uR, uMaxPx * d / uScale);
@@ -70,29 +65,6 @@ function glareCanvas() {
 export const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
 
 const methods = {
-  _atmo(root, r, side, pow, gain, back, sunDir, color = 0x5fa8ff) {
-    const T = this.T;
-    root.add(
-      new T.Mesh(
-        new T.SphereGeometry(r, 64, 48),
-        new T.ShaderMaterial({
-          vertexShader: ATMO_VS,
-          fragmentShader: ATMO_FS,
-          side,
-          transparent: true,
-          depthWrite: false,
-          blending: T.AdditiveBlending,
-          uniforms: {
-            uColor: { value: new T.Color(color) },
-            uSun: { value: new T.Vector3(...sunDir) },
-            uPow: { value: pow },
-            uGain: { value: gain },
-            uBack: { value: back },
-          },
-        }),
-      ),
-    );
-  },
   // Point material: size in world units, attenuated with distance, clamped to [min, max] CSS px (scaled to the drawing buffer in render()).
   _ptMat(size, minPx, maxPx, gain = 1) {
     const T = this.T,
@@ -503,5 +475,5 @@ const methods = {
 
 // Adds this file's methods to GLHost.prototype. Called once from app.js, after gl-host.js is loaded and before any scene opens.
 export function installGLItems(GLHost) {
-  Object.assign(GLHost.prototype, methods, modelMethods);
+  Object.assign(GLHost.prototype, methods, modelMethods, earthMethods, spaceMethods);
 }
