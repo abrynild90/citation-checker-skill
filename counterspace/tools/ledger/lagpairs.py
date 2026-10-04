@@ -11,17 +11,17 @@ import datetime
 # Neutral display text per pair (chronology only; no causal wording). Keyed by (event id, legal id).
 PAIR_TEXT = {
     ("us-1962-starfish-prime", "ltbt-1963"): "Starfish Prime (1962), then the Limited Test Ban Treaty (1963), which followed it",
-    ("in-2019-shakti", "unga-77-41"): "Shakti destructive test (2019), then UNGA 77/41 (2022), a non-binding call not to conduct destructive DA-ASAT tests",
-    ("ru-2021-cosmos1408", "us-moratorium-2022"): "Cosmos 1408 destructive test (2021), then a US test moratorium (2022, unilateral pledge)",
-    ("kp-2010-gps", "icao-2025"): "North Korean GNSS jamming (from 2010), then an ICAO Assembly finding on GNSS interference (2025), which SWF also ties to the Baltic case",
-    ("ru-2023-baltic", "icao-2025"): "Baltic-region GNSS interference (from 2023), then an ICAO Assembly finding on recurring GNSS interference (2025)",
-    ("ru-2024-eu-sats", "itu-rrb-2024"): "Jamming of European satellites (2024), then ITU RRB “grave concern” (2024)",
+    ("in-2019-shakti", "unga-77-41"): "Shakti destructive test (2019), then UN General Assembly resolution 77/41 (2022), a non-binding call not to conduct destructive anti-satellite tests",
+    ("ru-2021-cosmos1408", "us-moratorium-2022"): "Cosmos 1408 destructive test (2021), then a US moratorium on destructive anti-satellite tests (2022), a pledge by the US alone",
+    ("kp-2010-gps", "icao-2025"): "North Korean jamming of satellite navigation (from 2010), then a 2025 finding by the Assembly of the International Civil Aviation Organization (ICAO) on that interference, which the Secure World Foundation also ties to the Baltic case",
+    ("ru-2023-baltic", "icao-2025"): "Interference with satellite navigation around the Baltic Sea (from 2023), then the 2025 ICAO Assembly finding on recurring interference",
+    ("ru-2024-eu-sats", "itu-rrb-2024"): "Jamming of European satellites (2024), then “grave concern” from the Radio Regulations Board of the International Telecommunication Union (2024)",
 }
 # Events shown as an open ring: no later related legal item in the ledger. `basis` says why.
 OPEN = [
-    {"event": "us-1997-miracl", "text": "Laser fired at a satellite (1997): no legal item in the ledger is related to it",
+    {"event": "us-1997-miracl", "text": "Laser fired at a satellite (1997): no legal item in our records is related to it",
      "basis": "No related_events link; the ring states an absence in this ledger, not a finding that no rule exists."},
-    {"event": "ru-2022-viasat", "text": "Viasat cyberattack (2022): the only related legal item, Tallinn Manual 2.0 (2017), is soft law and pre-dates it",
+    {"event": "ru-2022-viasat", "text": "Viasat cyberattack (2022): the only related legal item, Tallinn Manual 2.0 (2017), is soft law (not binding) and came before the attack",
      "basis": "tallinn-2017 lists ru-2022-viasat in related_events but is earlier, so it forms no forward pair."},
 ]
 # Pairs the page drew before round 9 that have no related_events link. They are dropped from the panel.

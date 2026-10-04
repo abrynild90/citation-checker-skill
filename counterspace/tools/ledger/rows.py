@@ -263,136 +263,153 @@ def nk(id, start, end, actor, category, attribution, target_system, regime, oper
 NK = [
     nk("us-1997-miracl", "1997-10-17", "1997-10-17", "United States", "directed_energy", "official_government",
        "MSTI-3 (retired USAF experimental satellite)", "ISR_LEO", False,
-       "Test of MIRACL chemical laser (and a low-power laser) against an orbiting satellite; detailed "
-       "results not public. Secretary of Defense Cohen called it consistent with US policy.",
+       "The US tested the MIRACL chemical laser, and a low-power laser, against an orbiting satellite. Detailed results are "
+         "not public. Secretary of Defense Cohen called the test consistent with US policy.",
        "high", swf("01-35", 84, "MIRACL passage"),
-       notes="SWF gives October 1997 only. The exact day (17 Oct) is from FlightGlobal (Oct. 1997) and Arms Control "
-             "Association reporting. The laser was fired at White Sands Missile Range, NM (SWF fn. 259 cites the WSMR "
-             "High Energy Laser Systems Test Facility); MSTI-3 was a USAF experimental satellite that had completed its mission.",
+       notes="The Secure World Foundation (SWF) gives only October 1997. The exact day, 17 Oct., comes from FlightGlobal (Oct. 1997) "
+         "and Arms Control Association reporting. The laser was fired at White Sands Missile Range, New Mexico (SWF footnote 259 "
+         "cites the range's High Energy Laser Systems Test Facility). MSTI-3 was a US Air Force experimental satellite that had "
+         "completed its mission.",
        scene="laser"),
     nk("ir-2003-telstar12", "2003-01-01", "2006-12-31", "Iran (jamming from Cuba; later Bulgaria, Libya)",
        "ew_uplink", "alleged", "Telstar 12 Persian-language broadcasts", "GEO_comms", False,
-       "Uplink jamming of Persian-language programming originating in California.",
+       "Uplink jamming, which means jamming the signal sent up to a satellite, aimed at Persian-language programming that "
+         "originated in California.",
        "medium", swf("09-05", 247, "Iranian EW passage"),
-       notes="SWF: Iran 'has been accused'; the Telstar 12 jamming from Havana 'started in 2003' and similar jamming "
-             "occurred from Bulgaria and Libya in 2005/2006. Attribution kept at 'alleged'. Day/month not given; "
-             "span uses whole years (2006 end year = last year SWF dates for these third-country sites)."),
+       notes="The Secure World Foundation (SWF) says Iran 'has been accused', so the claim is shown as alleged. SWF says the Telstar "
+         "12 jamming from Havana 'started in 2003' and that similar jamming occurred from Bulgaria and Libya in 2005 and 2006. "
+         "SWF gives no day or month, so the span runs over whole years. The end year, 2006, is the last year SWF dates for the "
+         "Bulgarian and Libyan sites."),
     nk("iq-2003-gps", "2003-03-20", "2003-03-25", "Iraq", "gnss_jamming", "official_government",
        "GPS receivers of coalition munitions and aircraft", "GNSS_MEO", True,
-       "Russian-made GPS jammers fielded against coalition forces; US officials reported destroying "
-       "six jammers (and said they had no effect on US weapons).",
+       "Iraq used Russian-made GPS jammers against coalition forces. US officials reported destroying six jammers and said "
+         "they had no effect on US weapons.",
        "medium",
        dict(source="CENTCOM briefing (Maj. Gen. Renuart), 25 Mar 2003 (AFPS report)",
             source_url="https://www.globalsecurity.org/wmd/library/news/iraq/2003/iraq-030325-afps03.htm",
             pin="Briefing transcript, answer on GPS jammers"),
-       notes="Not covered in SWF 2026 (Iraq is not one of SWF's 13 countries). Excluded from Chart B."),
+       notes="The Secure World Foundation (SWF) 2026 report does not cover this case, because Iraq is not one of the 13 countries "
+         "SWF assesses. It is left out of the 'Who can do what' chart."),
     nk("cn-2006-laser", "2006-01-01", "2006-01-01", "China", "directed_energy", "alleged",
        "US optical imaging satellites", "ISR_LEO", False,
-       "DefenseNews cited anonymous US officials claiming lasers 'dazzled' US satellites; later "
-       "reporting suggested only illumination; senior officials said no satellite was materially damaged.",
+       "DefenseNews cited anonymous US officials who claimed that lasers had 'dazzled' (briefly blinded) US satellites. Later "
+         "reporting suggested only illumination. Senior officials said no satellite was materially damaged.",
        "low", swf("03-26", 187, "Chinese DE section, text at fn. 207"),
-       notes="Point event (year only). Anonymous-source press report; kept low confidence and 'alleged'."),
+       notes="The event is dated by year only. It rests on a press report from anonymous sources, so confidence is low and the claim "
+         "is shown as alleged."),
     nk("ir-2009-eutelsat", "2009-01-01", "2012-12-31", "Iran", "ew_uplink", "multi_government",
        "Eutelsat satellites carrying BBC Persian and Voice of America", "GEO_comms", False,
-       "Uplink jamming of Persian-language broadcasts. In 2010 the ITU, acting on two Eutelsat complaints, "
-       "ordered Iran (SWF's word) to assist in stopping jamming originating from its territory.",
+       "Uplink jamming (jamming the signal sent up to a satellite) of Persian-language broadcasts. In 2010 the International "
+         "Telecommunication Union (ITU), acting on two Eutelsat complaints, ordered Iran (the Secure World Foundation's word) to "
+         "assist in stopping jamming originating from its territory.",
        "medium", swf("09-06", 248, "Iranian EW passage, text above fn. 58"),
-       notes="Attribution coded 'multi_government' because an intergovernmental body (ITU) located the "
-             "source in Iranian territory; ITU did not find the Iranian state responsible. SWF dates only the "
-             "2010 ITU action and Eutelsat's Oct. 2022 report of renewed jamming from Iran; the 2009 start follows "
-             "Eutelsat's appeals from May 2009 (Eutelsat/HRW) and the 2012 end is the last year of the first "
-             "documented phase, so the span understates the 2022 episode."),
+       notes="The attribution is shown as coming from several governments because an intergovernmental body, the ITU, located the "
+         "source in Iranian territory. The ITU did not find the Iranian state responsible. The Secure World Foundation (SWF) "
+         "dates only the 2010 ITU action and Eutelsat's October 2022 report of renewed jamming from Iran. The 2009 start follows "
+         "Eutelsat's appeals from May 2009 (Eutelsat and Human Rights Watch). The 2012 end is the last year of the first "
+         "documented phase, so the span understates the 2022 episode."),
     nk("kp-2010-gps", "2010-08-23", None, "North Korea", "gnss_jamming", "official_government",
        "GPS receivers of aircraft, ships and vehicles in South Korea", "GNSS_MEO", False,
-       "Repeated downlink (terrestrial) GPS jamming near the inter-Korean border; South Korea raised it "
-       "with the ITU, ICAO and IMO; further interference reported in November 2024.",
+       "Repeated jamming of GPS receivers from the ground (known as downlink jamming) near the border between North and South "
+         "Korea. South Korea raised it with the International Telecommunication Union (ITU), the International Civil Aviation "
+         "Organization (ICAO) and the International Maritime Organization (IMO). Further interference was reported in November "
+         "2024.",
        "high", swf("12-05 to 12-06", "269-270", "Section 12.3"),
-       notes="Terrestrial jamming of receivers, not an attack on GPS satellites (SWF p. 12-05: 'no impact on the "
-             "GPS satellites themselves'). Campaign span, not individual incidents. SWF does not date the first "
-             "episode; start is the first publicly known incident, 23 Aug 2010 (GPS World, Inside GNSS). Treated as "
-             "ongoing (SWF p. 12-06: Nov. 2024 interference; Oct. 2025 ICAO finding)."),
+       notes="This is jamming of receivers from the ground, not an attack on GPS satellites. The Secure World Foundation (SWF) says "
+         "there is 'no impact on the GPS satellites themselves' (p. 12-05). The entry covers a campaign, not individual "
+         "incidents. SWF does not date the first episode, so the start is the first publicly known incident, 23 Aug. 2010 (GPS "
+         "World, Inside GNSS). It is treated as ongoing (SWF p. 12-06: November 2024 interference; October 2025 ICAO finding)."),
     nk("ru-2014-ukraine", "2014-03-01", None, "Russia", "gnss_spoofing", "researcher_osint",
        "GNSS receivers in Ukraine, Crimea and the Black Sea", "GNSS_MEO", True,
-       "Jamming and spoofing of GNSS in occupied territory and conflict zones; C4ADS logged nearly "
-       "10,000 suspected spoofing incidents across Russia, Crimea and Syria.",
+       "Jamming and spoofing of satellite navigation (GNSS) signals in occupied territory and conflict zones. Spoofing means "
+         "sending false signals. The research organization C4ADS logged nearly 10,000 suspected spoofing incidents across "
+         "Russia, Crimea and Syria.",
        "high", swf("02-27 to 02-28", "140-141", "GNSS passages, C4ADS report at fn. 220"),
-       notes="Attribution level follows the C4ADS open-source report SWF relies on (p. 02-28: nearly 10,000 suspected "
-             "incidents in Russia, Crimea and Syria); governments have also blamed Russia, but the source for the span "
-             "is OSINT. Covers jamming and spoofing. SWF's cited pages do not date the start: the March 2014 start is "
-             "from external reporting that Russia has jammed GPS in eastern Ukraine since the 2014 Crimea conflict "
-             "(Breaking Defense; Foreign Policy, Oct. 2015)."),
+       notes="The attribution follows the C4ADS report, based on open sources, that the Secure World Foundation (SWF) relies on (p. "
+         "02-28). Governments have also blamed Russia, but the source for the time span is open-source research. The entry "
+         "covers jamming and spoofing. SWF's cited pages do not date the start. The March 2014 start comes from outside "
+         "reporting that Russia has jammed GPS in eastern Ukraine since the 2014 Crimea conflict (Breaking Defense; Foreign "
+         "Policy, Oct. 2015)."),
     nk("ru-2016-syria", "2016-02-01", None, "Russia", "gnss_jamming", "researcher_osint",
        "GNSS receivers in and around Syria and the eastern Mediterranean", "GNSS_MEO", True,
-       "GNSS spoofing/jamming around Russian bases in Syria; reported effects on aircraft in the region.",
+       "Spoofing (sending false signals) and jamming of satellite navigation (GNSS) around Russian bases in Syria, with "
+         "reported effects on aircraft in the region.",
        "medium", swf("02-28", 141, "C4ADS passage"),
-       notes="SWF p. 02-28: 'The spoofing began in 2016, peaked in 2017'. The ledger uses 2016 "
-             "at medium confidence."),
+       notes="The Secure World Foundation (SWF), p. 02-28: 'The spoofing began in 2016, peaked in 2017'. This page uses 2016 as the "
+         "start, with medium confidence."),
     nk("ru-2018-trident", "2018-10-25", "2018-11-07", "Russia", "gnss_jamming", "official_government",
        "GPS receivers in northern Norway and Finland during NATO Trident Juncture", "GNSS_MEO", False,
-       "GPS disruption affecting civil aviation during the exercise; Norway said in March 2019 it had "
-       "proof of Russian interference.",
+       "GPS disruption affected civil aviation during the exercise. In March 2019 Norway said it had proof of Russian "
+         "interference.",
        "high", swf("02-28", 141, "text above fn. 217-218"),
-       notes="SWF does not name the exercise or give dates: it says (Nov. 2018) media reported jamming in Norway "
-             "and Finland during a major NATO exercise, and that Norway's government claimed in March 2019 it had "
-             "proof of Russian interference. Dates 25 Oct - 7 Nov 2018 are the Trident Juncture exercise window "
-             "(NATO; Norway's ministry put the jamming at 16 Oct - 7 Nov). Coded 'official_government' on Norway's "
-             "claim; Finland only expressed concern (external reporting)."),
+       notes="The Secure World Foundation (SWF) does not name the exercise or give dates. It says that media reported jamming in "
+         "Norway and Finland in November 2018, during a major exercise of the North Atlantic Treaty Organization (NATO), and "
+         "that Norway's government claimed in March 2019 it had proof of Russian interference. The dates, 25 Oct. to 7 Nov. "
+         "2018, are those of the NATO exercise Trident Juncture. Norway's ministry put the jamming at 16 Oct. to 7 Nov. The "
+         "attribution is 'official government' because of Norway's claim. Finland only expressed concern (outside reporting)."),
     nk("ru-2018-peresvet", "2018-03-01", "2018-03-01", "Russia", "directed_energy", "official_government",
        "Satellites overflying Russian mobile ICBM units (stated purpose)", "ISR_LEO", False,
-       "Capability announcement, not an act: President Putin announced the Peresvet mobile laser; SWF describes it as "
-       "appearing designed to blind imaging satellites. Not demonstrated against a satellite.",
+       "This is an announcement of a capability, not an act. President Putin announced the Peresvet mobile laser. The Secure "
+         "World Foundation (SWF) describes it as appearing designed to blind imaging satellites. It has not been demonstrated "
+         "against a satellite.",
        "medium", swf("02-36", 149, "Peresvet section"),
-       notes="Named in Putin's 1 March 2018 speech (SWF p. 02-36); SWF describes it as appearing designed to protect "
-             "mobile ICBMs from being imaged. Self-declared by the Russian government; no public evidence of use "
-             "against a satellite. Attribution level 'official_government' here records the Russian government's own "
-             "announcement of a system (a self-declaration); it is kept in the directed-energy lane as a capability "
-             "announcement, not as an operation against a satellite.",
+       notes="Putin named the system in his 1 March 2018 speech (SWF p. 02-36). SWF describes it as appearing designed to protect "
+         "mobile intercontinental ballistic missiles (ICBMs) from being imaged. The Russian government declared the system "
+         "itself, and there is no public evidence of its use against a satellite. The attribution 'official government' here "
+         "records only that announcement. The entry sits in the directed-energy (laser) group as a capability announcement, not "
+         "as an operation against a satellite.",
        scene="laser"),
     nk("ru-2022-viasat", "2022-02-24", "2022-02-24", "Russia", "cyber", "multi_government",
        "Viasat KA-SAT user terminals (modems) and management network", "ground_segment", True,
-       "AcidRain wiper disabled tens of thousands of modems in Ukraine and Europe in the first hours of the "
-       "invasion; satellite itself unaffected.",
+       "AcidRain, a program that erases data (a wiper), disabled tens of thousands of modems in Ukraine and Europe in the "
+         "first hours of the invasion. The satellite itself was unaffected.",
        "high", swf("15-06 to 15-07", "292-293", "Viasat case study"),
-       notes="Timing: SWF p. 15-06 says 'within hours' of Russian troops crossing the border; p. 15-07 adds that "
-             "independent analysts noted it began one hour before the first troops crossed. Publicly attributed to "
-             "the GRU by the United States, United Kingdom and European Union in May 2022 (p. 15-07).",
+       notes="On timing, the Secure World Foundation (SWF) says (p. 15-06) that the attack came 'within hours' of Russian troops "
+         "crossing the border. It adds (p. 15-07) that independent analysts noted it began one hour before the first troops "
+         "crossed. The United States, United Kingdom and European Union publicly attributed the attack to the GRU, Russia's "
+         "military intelligence service, in May 2022 (p. 15-07).",
        scene="viasat"),
     nk("ru-2022-starlink", "2022-03-01", None, "Russia", "ew_downlink", "alleged",
        "Starlink user terminals in Ukraine", "LEO_constellation", True,
-       "SpaceX CEO Elon Musk said in March 2022 that Russia had jammed a Starlink terminal; a Ukrainian "
-       "official attributed May 2024 outages to Russian EW testing.",
+       "SpaceX chief executive Elon Musk said in March 2022 that Russia had jammed a Starlink terminal. A Ukrainian official "
+         "attributed outages in May 2024 to Russian electronic warfare testing.",
        "medium", swf("02-32", "145", "Starlink passage, fns. 259-261"),
-       notes="SWF notes no independent validation of the type or magnitude of the jamming; coded 'alleged'."),
+       notes="The Secure World Foundation (SWF) notes that there is no independent validation of the type or size of the jamming, so "
+         "the claim is shown as alleged."),
     nk("ru-2023-baltic", "2023-12-01", None, "Russia", "gnss_jamming", "multi_government",
        "GNSS receivers of civil aircraft and ships over the Baltic region", "GNSS_MEO", True,
-       "Widespread jamming and spoofing affecting Finland, Sweden, Poland and the Baltic states, often "
-       "traced to Kaliningrad and St. Petersburg; Finnair paused Tartu flights (Apr 2024).",
+       "Widespread jamming and spoofing (sending false signals) affected Finland, Sweden, Poland and the Baltic states and was "
+         "often traced to Kaliningrad and St. Petersburg. Finnair paused its Tartu flights in April 2024.",
        "high", swf("02-29 to 02-30", "142-143", "Baltic GNSS passages"),
-       notes="SWF: interference 'picked up in late 2023 and early 2024'; start set to Dec 2023. Multi-"
-             "government coding rests on the October 2025 ICAO resolution and ITU RRB findings (Nov 2025). "
-             "Terrestrial jamming of receivers, not attacks on satellites.",
+       notes="The Secure World Foundation (SWF) says the interference 'picked up in late 2023 and early 2024'; the start is set to "
+         "December 2023. The attribution is shown as coming from several governments because it rests on the October 2025 "
+         "resolution of the International Civil Aviation Organization (ICAO) and on findings of the Radio Regulations Board "
+         "(RRB) of the International Telecommunication Union (ITU) in November 2025. This is jamming of receivers from the "
+         "ground, not attacks on satellites.",
        scene="gnss"),
     nk("mideast-2023-gnss", "2023-10-07", None, "Israel (IDF)", "gnss_jamming",
        "official_government", "GNSS receivers of aircraft over Israel and neighboring states", "GNSS_MEO", True,
-       "The IDF stated publicly that it was jamming GPS in the region \"in a proactive manner for various operational needs\". "
-       "Lebanon's foreign minister blamed Israel (Mar. 2024).",
+       "The Israel Defense Forces (IDF) stated publicly that it was jamming GPS in the region \"in a proactive manner for "
+         "various operational needs\". Lebanon's foreign minister blamed Israel (March 2024).",
        "medium", swf("10-01 to 10-02", "254-255", "Section 10.3"),
-       notes="Attribution rests on the IDF's own public statement (SWF p. 10-02), so it is coded 'official_government' for "
-             "Israel and for jamming only. SWF also reports regional jamming and spoofing after the 7 Oct. 2023 Hamas attack "
-             "and says it is hard to tell from open sources whether Israel, Hamas or other actors conduct the EW; no other actor "
-             "is attributed, so no second row is coded (dropped, not 'alleged': SWF makes no allegation against a named "
-             "actor). The spoofing reports are therefore not attributed to anyone here. SWF p. 10-01 also reports interference in "
-             "spring 2023 (20% of regional aircraft in April 2023), before this row's start; start is set to 7 Oct. 2023, the "
-             "attack SWF names as the trigger of the escalation. Lebanon's claim is a government claim about Israel, not proof."),
+       notes="The Secure World Foundation (SWF) reports the IDF's own public statement (p. 10-02), so the attribution is recorded as "
+         "official government, for Israel and for jamming only. SWF also reports regional jamming and spoofing after the 7 Oct. "
+         "2023 Hamas attack. It says it is hard to tell from open sources whether Israel, Hamas or other actors carry out the "
+         "electronic warfare. No other actor is attributed, so there is no second entry (left out, and not marked 'alleged', "
+         "because SWF makes no allegation against a named actor). The spoofing reports are therefore not attributed to anyone "
+         "here. SWF p. 10-01 also reports interference in spring 2023 (20% of regional aircraft in April 2023), before this "
+         "entry's start. The start is set to 7 Oct. 2023, the attack SWF names as the trigger of the escalation. Lebanon's claim "
+         "is a government claim about Israel, not proof."),
     nk("ru-2024-eu-sats", "2024-03-01", None, "Russia (origin locations cited by ITU RRB)", "ew_uplink",
        "multi_government", "Swedish and French broadcasting satellites", "GEO_comms", True,
-       "Hijacked/jammed broadcasts over Ukrainian channels; European states complained; RRB (July 2024) "
-       "said interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka.",
+       "Broadcasts on Ukrainian channels were hijacked or jammed. European states complained. The Radio Regulations Board "
+         "(RRB) of the International Telecommunication Union (ITU) said in July 2024 that the interference 'seemed to originate' "
+         "from earth stations (ground stations) near Moscow, Kaliningrad and Pavlovka.",
        "high", swf("02-32", 145, "ITU RRB passage, fn. 272"),
-       notes="SWF p. 02-32: several European countries complained in spring 2024; the RRB (July 2024) said the "
-             "interference 'seemed to originate' from earth stations near Moscow, Kaliningrad and Pavlovka. It "
-             "described origin locations but made no state-responsibility finding; coded 'multi_government' "
-             "because the ITU, an intergovernmental body, located the source."),
+       notes="The Secure World Foundation (SWF) reports (p. 02-32) that several European countries complained in spring 2024. The "
+         "Board described where the interference seemed to come from but made no finding that a state was responsible. The "
+         "attribution is shown as coming from several governments because the ITU, an intergovernmental body, located the "
+         "source."),
 ]
 
 # ---------------------------------------------------------------- legal
@@ -409,113 +426,120 @@ def lg(id, start, end, kind, label, short_note, citation, url, scene=None, relat
 
 L = [
     lg("ltbt-1963", "1963-08-05", None, "treaty", "Limited Test Ban Treaty",
-       "Signed Aug 5, 1963; in force Oct 10, 1963. Bans nuclear tests in outer space. It followed "
-       "Starfish Prime. The US State Department's Office of the Historian says the Cuban Missile Crisis provided "
-       "the impetus for an agreement and that worldwide concern about radioactive fallout from atmospheric tests built support for it.",
+       "Signed Aug 5, 1963; in force Oct 10, 1963. Bans nuclear tests in outer space. It followed Starfish Prime, a US nuclear "
+         "test in space in 1962. The US State Department's Office of the Historian says the Cuban Missile Crisis provided the "
+         "impetus for an agreement and that worldwide concern about radioactive fallout from atmospheric tests built support for "
+         "it.",
        "Treaty Banning Nuclear Weapon Tests in the Atmosphere, in Outer Space and Under Water, "
        "Aug. 5, 1963, 14 U.S.T. 1313, 480 U.N.T.S. 43. For context, see Office of the Historian, U.S. Dep't of State, "
        "Milestones: 1961-1968, The Limited Test Ban Treaty, 1963, https://history.state.gov/milestones/1961-1968/limited-ban.",
        "https://treaties.unoda.org/t/test_ban", scene="starfish", related=["us-1962-starfish-prime"]),
     lg("ost-1967", "1967-01-27", None, "treaty", "Outer Space Treaty",
-       "Opened Jan 27, 1967; in force Oct 10, 1967. Art. IV bars nuclear weapons and WMD in orbit; "
-       "silent on conventional ASATs.",
+       "Opened for signature Jan 27, 1967; in force Oct 10, 1967. Article IV bars nuclear weapons and other weapons of mass "
+         "destruction in orbit. It is silent on conventional (non-nuclear) anti-satellite weapons.",
        "Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer "
        "Space, Jan. 27, 1967, 18 U.S.T. 2410, 610 U.N.T.S. 205.",
        "https://treaties.unoda.org/t/outer_space"),
-    lg("abm-1972", "1972-05-26", None, "treaty", "ABM Treaty Art. XII",
-       "Bars interference with the other party's 'national technical means' of verification "
-       "(bilateral; US withdrew 2002).",
+    lg("abm-1972", "1972-05-26", None, "treaty", "Anti-Ballistic Missile (ABM) Treaty, Article XII",
+       "Bars interference with the other party's 'national technical means' of verification, meaning its own monitoring tools. "
+         "It is a treaty between the US and the Soviet Union; the US withdrew in 2002.",
        "Treaty on the Limitation of Anti-Ballistic Missile Systems, U.S.-U.S.S.R., art. XII, "
        "May 26, 1972, 23 U.S.T. 3435.",
        "https://www.armscontrol.org/factsheets/anti-ballistic-missile-abm-treaty-glance"),
-    lg("paros-1981", "1981-12-09", None, "negotiation_span", "PAROS (UNGA agenda item)",
-       "First PAROS resolutions adopted Dec 9, 1981 (UNGA 36/97 C; 36/99). CD Ad Hoc Committee on "
-       "PAROS met 1985-94. No treaty has resulted.",
+    lg("paros-1981", "1981-12-09", None, "negotiation_span", "Prevention of an Arms Race in Outer Space (PAROS)",
+       "The UN General Assembly adopted the first PAROS resolutions on Dec 9, 1981 (36/97 C and 36/99). The Conference on "
+         "Disarmament's ad hoc committee on PAROS met from 1985 to 1994. No treaty has resulted.",
        "G.A. Res. 36/97 (C) (Dec. 9, 1981); G.A. Res. 36/99 (Dec. 9, 1981).",
        "https://www.unoosa.org/oosa/oosadoc/data/resolutions/1981/general_assembly_36th_session/res_3697c.html"),
-    lg("cd-paros-committee", "1985-03-29", "1994-08-23", "negotiation_span", "CD Ad Hoc Committee on PAROS",
-       "Established by the Conference on Disarmament on Mar. 29, 1985; met annually 1985-1994; final meeting Aug. 23, "
-       "1994; never re-established.",
+    lg("cd-paros-committee", "1985-03-29", "1994-08-23", "negotiation_span", "Conference on Disarmament Ad Hoc Committee on PAROS",
+       "Established by the Conference on Disarmament on Mar. 29, 1985; met annually from 1985 to 1994; final meeting Aug. 23, "
+         "1994; never re-established.",
        "Conference on Disarmament, Report of the Ad Hoc Committee on Prevention of an Arms Race in Outer Space, "
        "CD/1271 (Aug. 24, 1994); see UNIDIR, The Conference on Disarmament and the Prevention of an Arms Race in "
        "Outer Space.",
        "https://unidir.org/files/publication/pdfs/the-conference-on-disarmament-and-the-prevention-of-an-arms-race-in-outer-space-370.pdf"),
-    lg("itu-1992", "1992-12-22", None, "treaty", "ITU Constitution Arts. 45 & 48",
-       "Adopted Geneva 1992; in force July 1, 1994. Art. 45 prohibits harmful interference; Art. 48 "
-       "lets Members 'retain their entire freedom' regarding military radio installations (the core gap for jamming). The Radio "
-       "Regulations sit beneath the Constitution.",
+    lg("itu-1992", "1992-12-22", None, "treaty", "ITU Constitution, Articles 45 and 48",
+       "The Constitution of the International Telecommunication Union (ITU) was adopted in Geneva in 1992 and entered into "
+         "force on July 1, 1994. Article 45 prohibits harmful interference. Article 48 lets member states 'retain their entire "
+         "freedom' regarding military radio installations, which is the core gap for jamming. The ITU's Radio Regulations sit "
+         "beneath the Constitution.",
        "Constitution of the International Telecommunication Union arts. 45, 48, Dec. 22, 1992, "
        "1825 U.N.T.S. 331, 361-62.",
        "https://www.itu.int/en/council/Documents/basic-texts/Constitution-E.pdf",
        scene="gnss", related=["ru-2023-baltic", "ru-2024-eu-sats"]),
     lg("tallinn-2017", "2017-02-01", None, "unilateral", "Tallinn Manual 2.0 (soft law)",
-       "Expert manual on international law applicable to cyber operations. Not binding law.",
+       "An expert manual on international law applicable to cyber operations. It is soft law, meaning it is not binding.",
        "Tallinn Manual 2.0 on the International Law Applicable to Cyber Operations (Michael N. Schmitt "
        "ed., Cambridge Univ. Press 2017).",
        "https://doi.org/10.1017/9781316822524", soft=True, related=["ru-2022-viasat"]),
-    lg("ppwt-2008", "2008-02-12", None, "negotiation_span", "PPWT draft (Russia-China)",
-       "Draft treaty on preventing placement of weapons in outer space, tabled at the CD. Does not "
-       "cover ground-based (direct-ascent) ASATs.",
+    lg("ppwt-2008", "2008-02-12", None, "negotiation_span", "Draft treaty on weapons in space (PPWT), Russia and China",
+       "A draft treaty on preventing the placement of weapons in outer space, tabled at the Conference on Disarmament (CD). It "
+         "does not cover ground-based, or direct-ascent, anti-satellite weapons.",
        "Draft Treaty on the Prevention of the Placement of Weapons in Outer Space, CD/1839 (Feb. 29, 2008) "
        "(tabled at the CD Feb. 12, 2008).",
        "https://documents.un.org/api/symbol/access?s=CD/1839&l=en&t=pdf"),
-    lg("ppwt-2014", "2014-06-10", None, "negotiation_span", "PPWT updated draft",
-       "Revised draft; still silent on ground-based ASATs and testing.",
+    lg("ppwt-2014", "2014-06-10", None, "negotiation_span", "Updated draft treaty on weapons in space (PPWT)",
+       "A revised draft of the same treaty. It is still silent on ground-based anti-satellite weapons and on testing.",
        "Updated Draft PPWT, CD/1985 (June 12, 2014) (tabled at the CD June 10, 2014).",
        "https://documents.un.org/api/symbol/access?s=CD/1985&l=en&t=pdf"),
-    lg("unga-75-36", "2020-12-07", None, "resolution", "UNGA 75/36",
-       "Reducing space threats through norms, rules and principles of responsible behaviour.",
+    lg("unga-75-36", "2020-12-07", None, "resolution", "UN General Assembly resolution 75/36",
+       "A General Assembly resolution on reducing space threats through norms, rules and principles of responsible behaviour.",
        "G.A. Res. 75/36 (Dec. 7, 2020).", "https://digitallibrary.un.org/record/3895440"),
-    lg("oewg-2022", "2022-05-09", "2023-09-01", "negotiation_span", "OEWG on space threats",
-       "Open-ended working group under Res. 76/231; ended without a consensus report.",
+    lg("oewg-2022", "2022-05-09", "2023-09-01", "negotiation_span", "Open-ended working group on space threats (OEWG)",
+       "An open-ended working group set up under UN General Assembly resolution 76/231. It ended without a consensus report.",
        "G.A. Res. 76/231 (Dec. 24, 2021) (establishing OEWG, 2022-2023).",
        "https://meetings.unoda.org/open-ended-working-group-on-reducing-space-threats-2022"),
-    lg("us-moratorium-2022", "2022-04-18", None, "unilateral", "US DA-ASAT test moratorium",
-       "US commits not to conduct destructive direct-ascent ASAT missile tests. Other states "
-       "followed; SWF counts 38 countries in total.",
+    lg("us-moratorium-2022", "2022-04-18", None, "unilateral", "US moratorium on destructive anti-satellite missile tests",
+       "The US committed not to conduct destructive direct-ascent anti-satellite missile tests, meaning tests launched from "
+         "Earth. Other states followed; the Secure World Foundation (SWF) counts 38 countries in total.",
        "The White House, Fact Sheet: Vice President Harris Advances National Security Norms in Space "
        "(Apr. 18, 2022); SWF 2026, p. 01-50.",
        "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2022/04/18/fact-sheet-vice-president-harris-advances-national-security-norms-in-space/",
        scene="cosmos1408", related=["ru-2021-cosmos1408"]),
-    lg("milamos-2022", "2022-07-01", None, "unilateral", "McGill (MILAMOS) Manual Vol. I (soft law)",
-       "Expert manual on international law applicable to military uses of outer space. Not binding law.",
+    lg("milamos-2022", "2022-07-01", None, "unilateral", "McGill Manual on military uses of outer space (MILAMOS), Vol. I (soft law)",
+       "An expert manual on international law applicable to military uses of outer space. It is soft law, meaning it is not "
+         "binding.",
        "McGill Manual on International Law Applicable to Military Uses of Outer Space, Vol. I - Rules "
        "(Ram S. Jakhu & Steven Freeland eds., McGill Centre for Research in Air & Space Law 2022).",
        "https://www.mcgill.ca/milamos/", soft=True),
-    lg("unga-77-41", "2022-12-07", None, "resolution", "UNGA 77/41 (DA-ASAT tests)",
-       "Calls on states to commit not to conduct destructive direct-ascent ASAT missile tests. "
-       "Adopted 155-9-9.",
+    lg("unga-77-41", "2022-12-07", None, "resolution", "UN General Assembly resolution 77/41 (destructive anti-satellite tests)",
+       "Calls on states to commit not to conduct destructive direct-ascent anti-satellite missile tests, meaning tests "
+         "launched from Earth. Adopted by 155 votes to 9, with 9 abstentions. The call is not binding.",
        "G.A. Res. 77/41 (Dec. 7, 2022).", "https://digitallibrary.un.org/record/3997622",
        related=["ru-2021-cosmos1408", "in-2019-shakti"]),
     lg("unsc-veto-2024", "2024-04-24", None, "veto", "Russian veto: nuclear weapons in orbit",
-       "Russia vetoed a US-Japan draft reaffirming OST Art. IV (no nuclear weapons in orbit). Vote "
-       "13-1-1 (China abstained). The draft did not concern DA-ASAT testing.",
+       "Russia vetoed a US-Japan draft resolution in the UN Security Council that reaffirmed Article IV of the Outer Space "
+         "Treaty (no nuclear weapons in orbit). The vote was 13 in favor, 1 against and 1 abstention (China). The draft did not "
+         "concern anti-satellite testing.",
        "U.N. SCOR, 79th Sess., 9616th mtg., U.N. Doc. S/PV.9616 (Apr. 24, 2024); draft S/2024/302.",
        "https://press.un.org/en/2024/sc15678.doc.htm"),
     lg("woomera-2024", "2024-01-01", None, "unilateral", "Woomera Manual (soft law)",
-       "Expert manual on international law of military space operations. Not binding law.",
+       "An expert manual on international law for military space operations. It is soft law, meaning it is not binding.",
        "The Woomera Manual on the International Law of Military Space Operations "
        "(Jack Beard & Dale Stephens eds., Oxford Univ. Press 2024).",
        "https://global.oup.com/academic/product/the-woomera-manual-on-the-international-law-of-military-space-operations-9780192870667",
        soft=True),
-    lg("itu-rrb-2024", "2024-07-01", None, "resolution", "ITU RRB: 'grave concern' (Sweden, France)",
-       "Radio Regulations Board expressed grave concern about intentional harmful interference to "
-       "Swedish and French satellites that seemed to originate from earth stations near Moscow, Kaliningrad and Pavlovka.",
+    lg("itu-rrb-2024", "2024-07-01", None, "resolution", "ITU Radio Regulations Board: 'grave concern' (Sweden, France)",
+       "The Radio Regulations Board of the International Telecommunication Union (ITU) expressed grave concern about "
+         "intentional harmful interference to Swedish and French satellites that seemed to originate from earth stations (ground "
+         "stations) near Moscow, Kaliningrad and Pavlovka.",
        "ITU Radio Regulations Board, 96th Meeting (June 24-28, 2024), Summary of Decisions (issued July 1, 2024); quoted in SWF 2026, p. 02-32 (PDF p. 145).",
        "https://www.itu.int/dms_pub/itu-r/md/24/rrb24.2/c/R24-RRB24.2-C-0012!!PDF-E.pdf",
        scene="gnss", related=["ru-2024-eu-sats"]),
-    lg("icao-2025", "2025-10-03", None, "resolution", "ICAO: GNSS interference an 'infraction' of the Chicago Convention",
-       "ICAO's Assembly (23 Sept.-3 Oct. 2025) endorsed its Council's determination that recurring GNSS interference "
-       "originating in the DPRK and in Russian territory constitutes 'infractions' of the 1944 Chicago Convention, "
-       "condemned both states and urged them to comply with their obligations. This is a finding by an "
-       "intergovernmental body; it is not a judgment of a court and carries no enforcement.",
+    lg("icao-2025", "2025-10-03", None, "resolution", "ICAO: interference with satellite navigation an 'infraction' of the Chicago Convention",
+       "The Assembly of the International Civil Aviation Organization (ICAO), meeting from 23 Sept. to 3 Oct. 2025, endorsed "
+         "its Council's determination that recurring interference with satellite navigation (GNSS) originating in North Korea "
+         "and in Russian territory constitutes 'infractions' of the 1944 Chicago Convention. It condemned both states and urged "
+         "them to comply with their obligations. This is a finding by an intergovernmental body. It is not a judgment of a court "
+         "and carries no enforcement.",
        "ICAO, ICAO Assembly Condemns GNSS Radio Frequency Interference Originating from the DPRK and the Russian "
        "Federation (Oct. 3, 2025); reported in SWF 2026, pp. 02-30, 12-06.",
        "https://www.icao.int/news/icao-assembly-condemns-gnss-radio-frequency-interference-originating-dprk-and-russian",
        scene="gnss", related=["ru-2023-baltic", "kp-2010-gps"]),
-    lg("itu-rrb-2025", "2025-11-10", None, "resolution", "ITU RRB 100th meeting: urges Russia to cease RNSS interference",
-       "Board again urged Russia to immediately cease harmful interference to radionavigation-satellite "
-       "service receivers in Estonia, Finland, Latvia and Lithuania.",
+    lg("itu-rrb-2025", "2025-11-10", None, "resolution", "ITU Radio Regulations Board, 100th meeting: urges Russia to stop interference with satellite navigation",
+       "The Radio Regulations Board of the International Telecommunication Union (ITU) again urged Russia to cease immediately "
+         "its harmful interference with radionavigation-satellite service (RNSS) receivers, meaning satellite-navigation "
+         "receivers, in Estonia, Finland, Latvia and Lithuania.",
        "ITU Radio Regulations Board, 100th Meeting (Nov. 10-14, 2025), Harmful Interference to the Radionavigation-Satellite "
        "Service (RNSS); quoted in SWF 2026, p. 02-30 (PDF p. 143), fn. 245.",
        "https://www.itu.int/harmful-interference-to-rnss/",
