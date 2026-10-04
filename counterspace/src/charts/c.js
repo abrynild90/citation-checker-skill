@@ -3,10 +3,10 @@
 // Provides: drawC(), stateC, zoomedC().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtY, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
+import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
-import { activate, addGuide, bindMark, legend, nkCard, rove, srcCell, table } from '../ui.js';
-import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, swatch, wrapBalanced, wrapLines, zoomNote } from './kit.js';
+import { activate, addGuide, bindMark, nkCard, rove, srcCell, table } from '../ui.js';
+import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote } from './kit.js';
 
 const GROUPS = [
   {
@@ -28,7 +28,7 @@ const GROUPS = [
 ];
 // SWF 2026, Executive Summary, p. xxiii (PDF p. 21): thirteen words, quoted exactly; the capital O is the only change and is shown in brackets.
 const QUOTE = '“[O]nly non-destructive capabilities are actively being used against satellites in current military operations.”';
-const QUOTE_BY = 'Secure World Foundation, 2026 assessment, Executive Summary, p. xxiii';
+const QUOTE_BY = 'Secure World Foundation (SWF), 2026 assessment, Executive Summary, p. xxiii';
 const STYLE_OF = { official_government: 'solid', multi_government: 'solid', researcher_osint: 'outline', alleged: 'dashed' };
 
 // stateC.focus: null = the default (zoom 1995-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere);
@@ -178,10 +178,8 @@ export function drawC(el = document.getElementById('svgC')) {
   };
 
   // the quotation, attributed
-  {
-    lines(svg, 'quote', INSET, qTop + qSize, qLines, qLH);
-    lines(svg, 'quote-by', INSET, byY + 13, byLines, 17);
-  }
+  lines(svg, 'quote', INSET, qTop + qSize, qLines, qLH);
+  lines(svg, 'quote-by', INSET, byY + 13, byLines, 17);
 
   // bands, and the year grid inside them
   const ticks = x.ticks(d3.utcYear.every(zoom ? (phone ? 10 : 5) : 10));
@@ -347,39 +345,38 @@ export function drawC(el = document.getElementById('svgC')) {
   const ink = (shape) => shape.replace('{p}', 'style="fill:var(--muted);stroke:var(--muted);stroke-width:1.5"'),
     cube =
       '<g class="badge3d" transform="scale(1.15)"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>';
-  legend('legendC')
-    .raw(
-      keyMarkup([
-        {
-          head: 'Attribution',
-          items: [
-            [swatch.solid(bar()), 'Governments or an international body', 26],
-            [swatch.outline(bar()), 'Researchers or open-source analysts', 26],
-            [swatch.dashed(bar()), 'Alleged, not confirmed', 26],
-          ],
-        },
-        {
-          head: 'Shape',
-          items: [
-            [ink(bar()), 'Campaign', 26],
-            [ink(dot(6)), 'Single event', 18],
-            [ink(bar(-12, 4, 12, 9)), 'Still going', 26],
-            [cube, '3D explainer', 18],
-          ],
-        },
-      ]),
-    )
-    .done();
+  setKey(
+    'legendC',
+    keyMarkup([
+      {
+        head: 'Attribution',
+        items: [
+          [swatch.solid(bar()), 'Governments or an international body', 26],
+          [swatch.outline(bar()), 'Researchers or open-source analysts', 26],
+          [swatch.dashed(bar()), 'Alleged, not confirmed', 26],
+        ],
+      },
+      {
+        head: 'Shape',
+        items: [
+          [ink(bar()), 'Campaign', 26],
+          [ink(dot(6)), 'Single event', 18],
+          [ink(bar(-12, 4, 12, 9)), 'Still going', 26],
+          [cube, '3D explainer', 18],
+        ],
+      },
+    ]),
+  );
   table(
     'tableC',
     ['Start', 'End', 'Actor', 'Type', 'Attribution', 'Target', 'Setting', 'How sure we are', 'Source'],
     NK.map((e) => [
-      e.start,
-      e.end === e.start ? 'Single event' : e.end || 'Ongoing',
+      e.start === e.end ? fmt(parse(e.start)) : fmtMY(parse(e.start)),
+      e.end === e.start ? 'Single event' : e.end ? fmtMY(parse(e.end)) : 'Ongoing',
       e.actor,
       CATEGORY_LABEL[e.category],
       ATTRIBUTION_LABEL[e.attribution],
-      `${e.target_system} (${TARGET_LABEL[e.target_regime]})`,
+      `${e.target_system} · ${TARGET_LABEL[e.target_regime]}`,
       e.operational_use ? 'In a conflict' : 'A test, a demonstration or peacetime',
       SURE_WORD[e.confidence],
       srcCell(e),

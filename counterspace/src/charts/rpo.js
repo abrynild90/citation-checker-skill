@@ -5,9 +5,9 @@
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { CO, DOMAIN, EXPORTING, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
-import { ACTIVITY_LABEL, ORBIT_LABEL, SURE_LABEL, SURE_WORD, plain } from '../cards2.js';
-import { activate, addGuide, bindMark, coCard, coWhen, legend, rove, srcCell, table } from '../ui.js';
-import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, trianglePath, wrapLines, zoomNote } from './kit.js';
+import { ACTIVITY_LABEL, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
+import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
+import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote } from './kit.js';
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
 // stateR.focus: null = the default (zoom 2000-2026 on phones, flagged in the chart and the note; the full shared 1957-2026 axis elsewhere);
@@ -30,7 +30,7 @@ export const R_SHAPE_KEY = [
 ];
 export const R_STYLE_KEY = [
   [`<path d="${circlePath(0, 0, 6)}" style="${solid}"/>`, 'Stated plainly by SWF', 18],
-  [`<path d="${circlePath(0, 0, 6)}" style="${outline}"/>`, 'Hedged by SWF (“possibly”, “appeared to”, “may”)', 18],
+  [`<path d="${circlePath(0, 0, 6)}" style="${outline}"/>`, 'Stated with caution by SWF (“possibly”, “appeared to”, “may”)', 18],
   [`<path d="${circlePath(0, 0, 6)}" style="${dashed}"/>`, 'Unclear or conflicting', 18],
   [
     `<path d="M-12,0H0" style="fill:none;stroke:${INK};stroke-width:3;stroke-opacity:.45;stroke-linecap:round"/><path d="${arrowPath(0, 0, 9, 6)}" style="fill:${INK}"/>`,
@@ -145,7 +145,7 @@ export function drawR(el = document.getElementById('svgR')) {
     .text(
       'Chart of close approaches between satellites, dockings, a capture and tow, releases and spaceplane missions, in one band for each of three states. ' +
         'Each shape sits at the start date of an entry and a line or bar runs to its end date; an arrow means the operation is still going. A solid ' +
-        'shape is stated plainly by the source, an outlined shape is hedged and a dashed outline is unclear or conflicting. A data table follows the chart.',
+        'shape is stated plainly by the source, an outlined shape is stated with caution and a dashed outline is unclear or conflicting. A data table follows the chart.',
     );
   const ticks = x.ticks(d3.utcYear.every(zoomed ? (phone ? 10 : 5) : 10));
   bands.forEach((b) => {
@@ -176,7 +176,7 @@ export function drawR(el = document.getElementById('svgR')) {
       .attr('cy', hy - 4.5)
       .attr('r', 5)
       .style('fill', colorOf(b.l.key));
-    const t = svg
+    svg
       .append('text')
       .attr('class', 'band-title')
       .attr('x', INSET + 18)
@@ -188,7 +188,6 @@ export function drawR(el = document.getElementById('svgR')) {
       .attr('x', INSET + 18 + tw(b.l.key, 14, 600) + 12)
       .attr('y', hy)
       .text(`${b.count} operations`);
-    void t;
   });
   xAxis(svg, x, axisY, zoomed ? (phone ? 10 : 5) : undefined);
   if (zoomLines.length) {
@@ -298,23 +297,22 @@ export function drawR(el = document.getElementById('svgR')) {
   const cube =
     '<g class="badge3d" transform="scale(1.15)"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>';
   const ink = (s) => s.replaceAll(INK, 'var(--muted)').replace(/;stroke:var\(--muted\);stroke-width:1\.5/, ';stroke:var(--muted);stroke-width:1.5');
-  legend('legendR')
-    .raw(
-      keyMarkup([
-        { head: 'Kind of operation', items: R_SHAPE_KEY.map(([inner, label, w]) => [ink(inner), label, w]) },
-        { head: 'How firmly SWF states it', items: R_STYLE_KEY.slice(0, 3).map(([inner, label, w]) => [inner, label, w]) },
-        { head: 'Also', items: [R_STYLE_KEY[3], [cube, '3D explainer', 18]].map(([inner, label, w]) => [inner, label, w]) },
-      ]) + `<li class="kwide">${R_VERT_NOTE}</li>`,
-    )
-    .done();
+  setKey(
+    'legendR',
+    keyMarkup([
+      { head: 'Kind of operation', items: R_SHAPE_KEY.map(([inner, label, w]) => [ink(inner), label, w]) },
+      { head: 'How firmly SWF states it', items: R_STYLE_KEY.slice(0, 3) },
+      { head: 'Also', items: [R_STYLE_KEY[3], [cube, '3D explainer', 18]] },
+    ]) + `<li class="kwide">${R_VERT_NOTE}</li>`,
+  );
   table(
     'tableR',
     ['Start', 'End', 'Actor', 'Activity', 'Spacecraft', 'Other object', 'Orbit', 'How sure we are', 'What happened', 'Source'],
     CO.slice()
       .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0))
       .map((e) => [
-        e.start,
-        e.end || 'Ongoing',
+        datePrecise(e, e.start),
+        e.end ? datePrecise(e, e.end) : 'Ongoing',
         e.actor,
         ACTIVITY_LABEL[e.activity],
         plain(e.system),

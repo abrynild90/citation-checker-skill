@@ -30,7 +30,7 @@ export const ATTRIBUTION_LABEL = {
 export const SURE_WORD = { high: 'High', medium: 'Medium', low: 'Low' };
 export const SURE_LABEL = {
   high: 'High',
-  medium: 'Medium (the source hedges, or a detail is missing or disputed)',
+  medium: 'Medium (the source is cautious, or a detail is missing or disputed)',
   low: 'Low (uncertain, or rests on a single or anonymous account)',
 };
 export const ACTIVITY_LABEL = {
@@ -116,10 +116,11 @@ export function nkCard(e) {
     `<div>${esc(plain(e.effect))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${srcLine(e)}${hasScene(e) ? sceneHint : ''}`
   );
 }
+// A date as the source gives it: the day only where the source gives a day, otherwise the month or the year.
+export const datePrecise = (e, iso) => (e.date_precision === 'month' ? fmtMY : e.date_precision === 'year' ? fmtY : fmt)(parse(iso));
 export const coWhen = (e) => {
-  const f = e.date_precision === 'month' ? fmtMY : e.date_precision === 'year' ? fmtY : fmt,
-    a = f(parse(e.start)),
-    b = e.end ? f(parse(e.end)) : null;
+  const a = datePrecise(e, e.start),
+    b = e.end ? datePrecise(e, e.end) : null;
   return b === a || e.end === e.start ? a : `${a} – ${b || 'ongoing (as of SWF’s April 2026 edition)'}`;
 };
 // Compact form (desktop hover on the dense close-approach chart): the key facts only, so the card stays small and hides few neighbouring points.
@@ -139,7 +140,7 @@ export function coCard(e, compact = false) {
   const note = noteOf(e);
   return (
     `${head}<div>${esc(plain(e.description))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${srcLine(e)}` +
-    `<div class="hint">A proximity operation is not an attack, and SWF’s wording on intent is hedged.</div>${hasScene(e) ? sceneHint : ''}`
+    `<div class="hint">A proximity operation is not an attack, and SWF is cautious in how it describes intent.</div>${hasScene(e) ? sceneHint : ''}`
   );
 }
 

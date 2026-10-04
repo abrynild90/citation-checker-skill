@@ -5,8 +5,8 @@
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { CAPS, DOMAIN, EXPORTING, isPhoneNow, layout, parse, tw } from '../app.js';
 import { decadeCard } from '../cards2.js';
-import { addGuide, bindMark, legend, rove, table } from '../ui.js';
-import { keyMarkup, roundRectPath, wrapLines } from './kit.js';
+import { addGuide, bindMark, rove, table } from '../ui.js';
+import { keyMarkup, roundRectPath, setKey, topRoundPath, wrapLines } from './kit.js';
 
 export const CATS = [
   { key: 'direct_ascent', label: 'Direct-ascent anti-satellite', v: '--cat-da', kin: true, gloss: 'A missile launched from Earth to hit a satellite' },
@@ -159,21 +159,13 @@ export function drawB(el = document.getElementById('svgB')) {
 
   // two panels: the reconstructed decades, and the assessed 2020s set apart
   svg
-    .append('rect')
+    .append('path')
     .attr('class', 'band')
-    .attr('x', M.l)
-    .attr('y', top)
-    .attr('width', X2020 - M.l)
-    .attr('height', plotH)
-    .attr('rx', 10);
+    .attr('d', topRoundPath(M.l, top, X2020 - M.l, plotH, 10));
   svg
-    .append('rect')
+    .append('path')
     .attr('class', 'panel-swf')
-    .attr('x', X2020)
-    .attr('y', top)
-    .attr('width', R - X2020)
-    .attr('height', plotH)
-    .attr('rx', 10);
+    .attr('d', topRoundPath(X2020, top, R - X2020, plotH, 10));
   const yticks = d3.range(0, ymax, 10);
   const gy = svg.append('g').attr('class', 'gridline');
   yticks.forEach((t) => gy.append('line').attr('x1', M.l).attr('x2', R).attr('y1', y(t)).attr('y2', y(t)));
@@ -384,41 +376,40 @@ export function drawB(el = document.getElementById('svgB')) {
       'warfare (jamming and spoofing), directed energy (lasers and similar beams) and cyber (attacks through computers and networks).';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
-  legend('legendB')
-    .raw(
-      keyMarkup([
-        {
-          head: 'Fill',
-          items: [
-            [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
-            [
-              `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
-                sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
-              'Developing or latent',
-              28,
-            ],
-            [
-              `<defs><pattern id="kD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${ink};fill-opacity:.1"/><circle cx="2.5" cy="2.5" r="1.1" style="fill:${ink}"/></pattern></defs>` +
-                sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
-              'Developing, our reading (SWF’s table has no data)',
-              28,
-            ],
-            [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+  setKey(
+    'legendB',
+    keyMarkup([
+      {
+        head: 'Fill',
+        items: [
+          [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
+          [
+            `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
+              sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
+            'Developing or latent',
+            28,
           ],
-        },
-        {
-          head: 'Range bar',
-          items: [
-            [
-              '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
-              'Demonstrated only (low end) to demonstrated plus developing (high end)',
-              18,
-            ],
+          [
+            `<defs><pattern id="kD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${ink};fill-opacity:.1"/><circle cx="2.5" cy="2.5" r="1.1" style="fill:${ink}"/></pattern></defs>` +
+              sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
+            'Developing, our reading (SWF’s table has no data)',
+            28,
           ],
-        },
-      ]),
-    )
-    .done();
+          [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+        ],
+      },
+      {
+        head: 'Range bar',
+        items: [
+          [
+            '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
+            'Demonstrated only (low end) to demonstrated plus developing (high end)',
+            18,
+          ],
+        ],
+      },
+    ]),
+  );
   table(
     'tableB',
     ['Kind of capability', ...CAPS.decades],
