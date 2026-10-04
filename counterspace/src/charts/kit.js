@@ -22,12 +22,29 @@ export function wrapLines(text, maxW, measure) {
   return lines;
 }
 
+// The same wrap, then narrowed as far as the line count allows, so the lines come out about equally long (no lone word on the last line).
+export function wrapBalanced(text, maxW, measure) {
+  let best = wrapLines(text, maxW, measure);
+  if (best.length < 2) return best;
+  for (let w = maxW - 6; w > maxW * 0.4; w -= 6) {
+    const t = wrapLines(text, w, measure);
+    if (t.length > best.length) break;
+    best = t;
+  }
+  return best;
+}
+
 // ---------------------------------------------------------------- shapes (SVG path data)
 const f = (n) => Math.round(n * 100) / 100;
 export const circlePath = (cx, cy, r) => `M${f(cx - r)},${f(cy)}a${r},${r} 0 1,0 ${2 * r},0a${r},${r} 0 1,0 ${-2 * r},0Z`;
 export function roundRectPath(x, y, w, h, r) {
   r = Math.min(r, w / 2, h / 2);
   return `M${f(x + r)},${f(y)}H${f(x + w - r)}a${r},${r} 0 0 1 ${r},${r}V${f(y + h - r)}a${r},${r} 0 0 1 ${-r},${r}H${f(x + r)}a${r},${r} 0 0 1 ${-r},${-r}V${f(y + r)}a${r},${r} 0 0 1 ${r},${-r}Z`;
+}
+// A rectangle with its top corners rounded and its bottom corners square (a panel that stands on an axis).
+export function topRoundPath(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h);
+  return `M${f(x)},${f(y + h)}V${f(y + r)}a${r},${r} 0 0 1 ${r},${-r}H${f(x + w - r)}a${r},${r} 0 0 1 ${r},${r}V${f(y + h)}Z`;
 }
 // A bar with round ends. With `tip`, the right end becomes an arrow (a campaign that is still going).
 export function barPath(x0, x1, cy, h, tip = 0) {
@@ -42,7 +59,7 @@ export const arrowPath = (x, cy, len, half) => `M${f(x)},${f(cy - half)}L${f(x +
 
 // ---------------------------------------------------------------- marks
 // Three ways to fill a mark; the key draws the same three.
-//   solid: stated plainly or confirmed. outline: hedged, or reported by researchers. dashed: unclear, or alleged.
+//   solid: stated plainly or confirmed. outline: stated with caution, or reported by researchers. dashed: unclear, or alleged.
 export function paint(sel, color, style, hollow = 'var(--bg)') {
   sel.style('fill', style === 'solid' ? color : hollow).style('stroke', color);
   sel.style('stroke-width', style === 'solid' ? 1.5 : 2);
@@ -60,6 +77,14 @@ export function glyph(parent, d, color, style, cls = '', hollow = 'var(--bg)') {
 }
 
 // ---------------------------------------------------------------- keys (the list under each chart)
+// Write a key once per change: the drawings call this on every redraw and a key does not depend on the layout.
+const keyed = new Map();
+export function setKey(id, html) {
+  if (keyed.get(id) === html) return;
+  keyed.set(id, html);
+  document.getElementById(id).innerHTML = html;
+}
+
 // groups: [{ head, items: [[svg inner, text, glyph width], ...] }]. Swatches are centred on 0,0 and drawn with the same paint as the marks.
 export function keyMarkup(groups) {
   return groups
@@ -89,3 +114,6 @@ export const dot = (r = 6) => `<path d="${circlePath(0, 0, r)}" {p}/>`;
 export const zoomNote = (years, isDefault) =>
   `<span class="zbadge">Zoomed</span> ${years}${isDefault ? ' (the default on phones)' : ''}. This view no longer lines up with the law timeline or the other charts. ` +
   'Choose “Full span” to go back to the shared years.';
+// The note under a chapter heading when the chart shows the shared years.
+export const fullNote = () =>
+  `Full span, 1957 to 2026. The years line up with the law timeline above${innerWidth > 760 ? ', which stays in view as you scroll' : ''}.`;

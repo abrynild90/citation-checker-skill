@@ -5,12 +5,12 @@
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { CAPS, DOMAIN, EXPORTING, isPhoneNow, layout, parse, tw } from '../app.js';
 import { decadeCard } from '../cards2.js';
-import { addGuide, bindMark, legend, rove, table } from '../ui.js';
-import { keyMarkup, roundRectPath, wrapLines } from './kit.js';
+import { addGuide, bindMark, rove, table } from '../ui.js';
+import { keyMarkup, roundRectPath, setKey, topRoundPath, wrapLines } from './kit.js';
 
 export const CATS = [
   { key: 'direct_ascent', label: 'Direct-ascent anti-satellite', v: '--cat-da', kin: true, gloss: 'A missile launched from Earth to hit a satellite' },
-  { key: 'co_orbital', label: 'Co-orbital', v: '--cat-co', kin: true, gloss: 'A satellite that manoeuvres close to another satellite' },
+  { key: 'co_orbital', label: 'Co-orbital', v: '--cat-co', kin: true, gloss: 'A satellite that maneuvers close to another satellite' },
   { key: 'electronic_warfare', label: 'Electronic warfare', v: '--cat-ew', kin: false, gloss: 'Jamming and spoofing of satellite signals' },
   { key: 'directed_energy', label: 'Directed energy', v: '--cat-de', kin: false, gloss: 'Lasers and similar beams used against satellites' },
   { key: 'cyber', label: 'Cyber', v: '--cat-cy', kin: false, gloss: 'Attacks on satellites and their ground systems through computers' },
@@ -109,7 +109,7 @@ export function drawB(el = document.getElementById('svgB')) {
   // The tallest bar leaves room above it for its figure and the label of the assessed decade.
   const plotH = phone ? 300 : 340,
     top = 30,
-    lead = phone ? 78 : 92,
+    lead = phone ? 98 : 92,
     ymax = maxY / (1 - lead / plotH),
     y = d3
       .scaleLinear()
@@ -159,21 +159,13 @@ export function drawB(el = document.getElementById('svgB')) {
 
   // two panels: the reconstructed decades, and the assessed 2020s set apart
   svg
-    .append('rect')
+    .append('path')
     .attr('class', 'band')
-    .attr('x', M.l)
-    .attr('y', top)
-    .attr('width', X2020 - M.l)
-    .attr('height', plotH)
-    .attr('rx', 10);
+    .attr('d', topRoundPath(M.l, top, X2020 - M.l, plotH, 10));
   svg
-    .append('rect')
+    .append('path')
     .attr('class', 'panel-swf')
-    .attr('x', X2020)
-    .attr('y', top)
-    .attr('width', R - X2020)
-    .attr('height', plotH)
-    .attr('rx', 10);
+    .attr('d', topRoundPath(X2020, top, R - X2020, plotH, 10));
   const yticks = d3.range(0, ymax, 10);
   const gy = svg.append('g').attr('class', 'gridline');
   yticks.forEach((t) => gy.append('line').attr('x1', M.l).attr('x2', R).attr('y1', y(t)).attr('y2', y(t)));
@@ -250,7 +242,7 @@ export function drawB(el = document.getElementById('svgB')) {
       hiY = y(tot[i]);
     if (!EXPORTING)
       s.append('rect')
-        .attr('class', 'rowhl')
+        .attr('class', 'rowhl hit')
         .attr('x', xa + 2)
         .attr('y', top + 2)
         .attr('width', xb - xa - 4)
@@ -372,49 +364,52 @@ export function drawB(el = document.getElementById('svgB')) {
       .map(([k]) => k),
     WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
   document.getElementById('calloutB').textContent =
-    `Electronic warfare is held by the most states: ${ew20} in the 2020s. Demonstrated destructive direct-ascent anti-satellite (DA-ASAT) capability ` +
-    `has stayed at ${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
+    `Electronic warfare (jamming and spoofing) is held by the most states: ${ew20} in the 2020s. Demonstrated destructive direct-ascent anti-satellite ` +
+    `(DA-ASAT) capability, meaning a missile launched from Earth that can hit a satellite, has stayed at ${WORD[da20.length] ?? da20.length} states: ` +
+    `${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('noteB').textContent = kin
     ? 'Each bar counts states in each group, so a state that holds both kinds appears in both and the groups can add up to more than the number of states. ' +
-      'Kinetic means weapons that hit a satellite and satellites that manoeuvre close to another; non-kinetic means electronic warfare, directed energy and cyber.'
-    : 'Each bar counts pairs of a state and a capability, so a state that holds two capabilities is counted twice.';
+      'Kinetic means missiles launched from Earth to hit a satellite and satellites that maneuver close to another; non-kinetic means electronic warfare ' +
+      '(jamming and spoofing), directed energy (lasers) and cyber attacks.'
+    : 'Each bar counts pairs of a state and a capability, so a state that holds two capabilities is counted twice. The five kinds are direct-ascent ' +
+      'anti-satellite weapons (missiles launched from Earth to hit a satellite), co-orbital systems (satellites that maneuver close to another), electronic ' +
+      'warfare (jamming and spoofing), directed energy (lasers and similar beams) and cyber (attacks through computers and networks).';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
-  legend('legendB')
-    .raw(
-      keyMarkup([
-        {
-          head: 'Fill',
-          items: [
-            [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
-            [
-              `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
-                sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
-              'Developing or latent',
-              28,
-            ],
-            [
-              `<defs><pattern id="kD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${ink};fill-opacity:.1"/><circle cx="2.5" cy="2.5" r="1.1" style="fill:${ink}"/></pattern></defs>` +
-                sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
-              'Developing, our reading (SWF’s table has no data)',
-              28,
-            ],
-            [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+  setKey(
+    'legendB',
+    keyMarkup([
+      {
+        head: 'Fill',
+        items: [
+          [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
+          [
+            `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
+              sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
+            'Developing or latent',
+            28,
           ],
-        },
-        {
-          head: 'Range bar',
-          items: [
-            [
-              '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
-              'Demonstrated only (low end) to demonstrated plus developing (high end)',
-              18,
-            ],
+          [
+            `<defs><pattern id="kD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${ink};fill-opacity:.1"/><circle cx="2.5" cy="2.5" r="1.1" style="fill:${ink}"/></pattern></defs>` +
+              sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
+            'Developing, our reading (SWF’s table has no data)',
+            28,
           ],
-        },
-      ]),
-    )
-    .done();
+          [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+        ],
+      },
+      {
+        head: 'Range bar',
+        items: [
+          [
+            '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
+            'Demonstrated only (low end) to demonstrated plus developing (high end)',
+            18,
+          ],
+        ],
+      },
+    ]),
+  );
   table(
     'tableB',
     ['Kind of capability', ...CAPS.decades],
