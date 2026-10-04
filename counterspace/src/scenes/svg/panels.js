@@ -2,7 +2,7 @@
 // scenes/svg/panels.js: scenes with cfg.panels (the RPO scene: three unrelated episodes) as one labelled static panel per episode
 // ============================================================================
 import { fitBanner } from '../labels.js';
-import { upgradePanelsEarth } from './upgrade.js';
+import { requestFullEarth, wantsFullEarth } from './upgrade.js';
 
 export function renderPanels(sim, el, renderSVG) {
   const W = el.clientWidth || 640,
@@ -76,8 +76,15 @@ export function renderPanels(sim, el, renderSVG) {
   sim.flags.all = true;
   root.node().__lay = { panels: lays, W, H };
   root.node().dataset.earth = root.node().querySelector('svg')?.dataset.earth || 'vector';
+  root.node().dataset.ss = root.node().querySelector('svg[data-ss]')?.dataset.ss || '';
+  const full = wantsFullEarth(el, sim);
+  root.node()
+    .querySelectorAll('svg')
+    .forEach((n) => {
+      if (n.__earth) Object.assign(n.__earth, { root: root.node(), full });
+    });
   el.querySelector(':scope > svg')?.remove();
   el.prepend(root.node());
-  upgradePanelsEarth({ sim, el, t: sim.still, node: root.node() }, renderSVG);
+  if (full) requestFullEarth(sim);
   return root.node();
 }

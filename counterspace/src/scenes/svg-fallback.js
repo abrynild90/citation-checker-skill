@@ -10,8 +10,11 @@ import { createDrawState, drawShells, queueShellLabels } from './svg/draw-state.
 import { drawItems } from './svg/items.js';
 import { attachProbe, drawChrome, drawLegend, drawStatus, legendBox, placeAndDrawLabels } from './svg/label-layer.js';
 import { renderPanels } from './svg/panels.js';
-import { upgradeDiagramEarth } from './svg/upgrade.js';
+import { requestFullEarth, wantsFullEarth } from './svg/upgrade.js';
+import { prewarmEarth } from './svg/earth-raster.js';
 import { SANS } from '../fonts.js';
+
+prewarmEarth(); // a worker starts decoding the embedded Earth images while the page boots, so the first picture finds it ready
 
 // A polished 2D diagram: orthographic globe with vector coastlines, shells, paths and markers,
 // with the same screen-space label de-confliction (pills + leader lines) as the live scene.
@@ -21,6 +24,7 @@ let svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be 
 
 export function renderSVG(sim, el, t = sim.still, opts = {}) {
   if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el, renderSVG);
+  const t0 = performance.now();
   if (!opts.panel && sim.cfg.staticT != null && t === sim.still) t = sim.cfg.staticT;
   const U = 'sf' + ++svgSeq;
   if (!opts.panel) fitBanner(el);
@@ -57,17 +61,20 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   const { GX, GY, GR, gproj, gpath, limb } = pickGlobe(opts, W, cl, CX, CY, R, fTop, fBot, proj, path, showGlobe);
   const svg = d3
     .create('svg')
-    .style('background', '#070b16')
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('role', 'img')
-    .attr('aria-label', `${sim.cfg.title}: static diagram`);
+    .attr('aria-label', `${sim.cfg.title}: still diagram`);
   const defs = addDefs(svg, U, { GX, GY, GR, gpath });
-  svg.append('rect').attr('width', W).attr('height', H).attr('fill', `url(#${U}-bg)`);
-  drawStars(svg, W, H);
+  // The hero sits on the page's own dark sky, so its picture has no backdrop; a scene diagram carries its own flat ink-blue one.
+  if (!sim.cfg.spin) {
+    svg.style('background', '#070b16');
+    svg.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b16');
+  }
+  drawStars(svg, W, H, { cx: GX, cy: GY, r: GR * 1.06 });
   const S = createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY, R, showGlobe, craftBase });
   drawShells(S);
-  drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb });
-  if (limb) drawLimbTag(svg, W, fBot, S.marks);
+  drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb, print: !!opts.print });
+  if (limb) drawLimbTag(svg, W, fBot, S.marks, S.fs);
   S.g = svg.append('g').attr('font-family', SANS).attr('font-size', 11);
   Object.assign(S, { GX, GY, GR });
   queueShellLabels(S, fTop, stY);
@@ -81,6 +88,10 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   if (opts.panel) return svg.node();
   el.querySelector(':scope > svg')?.remove();
   el.prepend(svg.node());
-  upgradeDiagramEarth({ sim, el, t, node: svg.node() }, renderSVG);
+  if (wantsFullEarth(el, sim) && svg.node().__earth) {
+    svg.node().__earth.full = true;
+    requestFullEarth(sim);
+  }
+  if (!opts.print) performance.measure('cs:diagram-' + sim.cfg.id, { start: t0, end: performance.now() }); // shows in window.__cs.perf()
   return svg.node();
 }
