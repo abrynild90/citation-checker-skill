@@ -133,6 +133,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           ctx: true,
           color: a.color,
           pos,
+          trailOf: a.trail && s === 0 ? { pts, u0: ph, speed: a.speed, len: a.trail } : null,
           label: p === 0 && s === 0 ? a.label : null,
           opt: p === 0 && s === 0 ? !!a.opt : false,
           labelDx: a.dx ?? 50,

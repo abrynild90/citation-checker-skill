@@ -379,3 +379,17 @@ export function foilCanvas() {
   }
   return foilCv;
 }
+
+// A crisp round dot for small satellites on the hero's rings.
+let dotCv = null;
+export function dotCanvas() {
+  if (dotCv) return dotCv;
+  dotCv = document.createElement('canvas');
+  dotCv.width = dotCv.height = 32;
+  const g = dotCv.getContext('2d');
+  g.fillStyle = 'rgba(255,255,255,1)';
+  g.beginPath();
+  g.arc(16, 16, 12, 0, 7);
+  g.fill();
+  return dotCv;
+}

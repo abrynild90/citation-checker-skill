@@ -275,6 +275,7 @@ export function buildSim(cfg) {
           labelDy: a.sat.dy,
           offGlobe: a.sat.offGlobe,
           iss: !!a.sat.iss,
+          trailOf: a.sat.trail ? { pts, u0: phase, speed: a.sat.speed, len: a.sat.trail } : null,
           minPx: a.sat.minPx,
           maxPx: a.sat.maxPx,
           scale: a.sat.big,

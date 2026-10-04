@@ -6,6 +6,8 @@ import { DEG, IS_PHONE, norm, occluded, scl, sunFor } from './core.js';
 import { LABEL, dotCss, fitBanner, pillCss } from './labels.js';
 import { ringCanvas, spriteCanvas } from './earth.js';
 
+const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ---------------------------------------------------------------- WebGL host (single shared renderer)
 export class GLHost {
   constructor(THREE) {
@@ -108,6 +110,7 @@ export class GLHost {
     this.tubeMats = [];
     this.ringPts = [];
     this.shellRings = [];
+    this.trails = [];
     this.beamTex = null;
     this._pt = null;
     // One sun for every picture (SUN_VIEW in core.js), fixed in space: orbiting the camera or turning the hero reveals the night side.
@@ -195,7 +198,8 @@ export class GLHost {
     this.setCam(i);
   }
   setCam(i, instant) {
-    const c = this.sim.cams[i];
+    const c = this.sim.cams[i],
+      prev = this._camSeen ? { p: this.camera.position.clone(), l: this.target.clone(), u: this.camera.up.clone() } : null;
     this.camIdx = i;
     this._user = false;
     this.hideShell = !!c.hideShell;
@@ -205,7 +209,53 @@ export class GLHost {
     this.camera.up.set(...(c.up || [0, 1, 0]));
     this.camera.lookAt(this.target);
     this._heroFit();
+    this._camSeen = true;
+    // A view switch during playback glides to the new view (exponential ease-out, 700 ms). Paused scenes, reduced motion and the hero cut instead.
+    this._tw = !instant && prev && this.playing && !REDUCED_MOTION && !this.sim.cfg.spin ? { t0: performance.now(), ...prev } : null;
+    if (this._tw) this._twLoop();
     this.render();
+  }
+  // Frames while a view change glides (a playing scene renders anyway; a scene being dragged or paused still needs them).
+  _twLoop() {
+    cancelAnimationFrame(this._twRaf);
+    const step = () => {
+      if (!this._tw) return;
+      this.render();
+      this._twRaf = requestAnimationFrame(step);
+    };
+    this._twRaf = requestAnimationFrame(step);
+  }
+  // Camera motion on top of the preset pose: the glide to a newly picked view, and a very slight drift while the scene plays.
+  _camMotion() {
+    const c = this.sim.cams[this.camIdx],
+      tw = this._tw,
+      drift = this.playing && !this.dragging && !REDUCED_MOTION && !this.sim.cfg.spin && !this._user && !c?.follow && !this._modelBoost;
+    if (!c || this._user || (!tw && !drift)) return;
+    const T = this.T,
+      cam = this.camera,
+      v = c.follow ? c.follow(this.t, cam.aspect) : { pos: c.pos, look: c.look || [0, 0, 0], up: c.up };
+    let e = 1;
+    if (tw) {
+      const f = Math.min(1, (performance.now() - tw.t0) / 700);
+      e = f >= 1 ? 1 : (1 - Math.pow(2, -10 * f)) / (1 - Math.pow(2, -10));
+      if (f >= 1) this._tw = null;
+    }
+    const p = (this._cmP ||= new T.Vector3()).set(...v.pos),
+      l = (this._cmL ||= new T.Vector3()).set(...v.look),
+      u = (this._cmU ||= new T.Vector3()).set(...(v.up || [0, 1, 0]));
+    if (tw && e < 1) {
+      p.lerpVectors(tw.p, p, e);
+      l.lerpVectors(tw.l, l, e);
+      u.lerpVectors(tw.u, u, e).normalize();
+    }
+    if (drift)
+      p.sub(l)
+        .applyAxisAngle(u, 0.006 * Math.sin(this.t * Math.PI * 2))
+        .add(l); // about a third of a degree each way over the scene
+    cam.position.copy(p);
+    this.target.copy(l);
+    cam.up.copy(u);
+    cam.lookAt(l);
   }
   update(t) {
     const T = this.T;
@@ -428,7 +478,7 @@ export class GLHost {
         }
       }
     }
-    if (this.sim.cfg.spin) this.root.rotation.y = t * Math.PI * 2;
+    for (const { m, u0, speed } of this.trails || []) m.uniforms.uU.value = (((u0 + t * Math.PI * 2 * speed) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     this._drawInset();
     if (this.statusEl) {
       // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
@@ -535,6 +585,9 @@ export class GLHost {
   }
   render() {
     if (!this.scene) return;
+    // hero: the globe turns once per loop, plus whatever the reader has dragged it by
+    if (this.sim.cfg.spin) this.root.rotation.y = this.t * Math.PI * 2 + (this._turn || 0);
+    this._camMotion();
     this._earthFrame();
     this._spaceFrame();
     this._rimFrame();
@@ -581,6 +634,9 @@ export class GLHost {
       this.ringTex?.dispose();
       this.beamTex?.dispose();
       this._pt?.dispose();
+      cancelAnimationFrame(this._twRaf);
+      this._tw = null;
+      this._camSeen = false;
       this.spriteTex = this.ringTex = this.beamTex = this._pt = null;
       this._disposeEarth();
       this._disposeSpace();
