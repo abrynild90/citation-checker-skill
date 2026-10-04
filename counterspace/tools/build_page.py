@@ -19,7 +19,7 @@ def script_json(obj):
     return json.dumps(obj, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 
 
-STYLE_ORDER = ('tokens', 'base', 'page', 'charts', 'charts2', 'scenes')
+STYLE_ORDER = ('tokens', 'base', 'page', 'hero', 'charts', 'charts2', 'scenes')
 SRC_KEYS = ('source', 'source_url', 'source_full')
 DROP_KEYS = ('evidence', 'conflicts')  # ledger-only fields: verification notes the page never reads (see ledger.md)
 

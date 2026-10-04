@@ -272,7 +272,7 @@ await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorSchem
   await p.hover('#heroStage');
   await p.waitForFunction(() => window.__cs.contexts() > 0, null, { timeout: 20000 }).catch(() => {});
   res.bytesAfterHeroIntent = p.netBytes();
-  res.heroRotateHidden = await p.evaluate(() => document.getElementById('heroRot').hidden);
+  res.heroRotateHidden = await p.evaluate(() => document.getElementById('heroRot')?.hidden ?? true);
   const t0 = Date.now();
   await p.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 20000 }).catch(() => {});
   res.earthReady = await p.evaluate(() => window.__cs.earthReady());

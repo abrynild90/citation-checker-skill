@@ -8,15 +8,13 @@ import { drawR } from './charts/rpo.js';
 import { chipsB, drawB } from './charts/b.js';
 import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
-import { REDUCED, ensureLand, timed } from './app.js';
+import { timed } from './app.js';
 import { drawLegal, drawLegalKey, legalScroll } from './charts/legal.js';
 import { hooks } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
-import { buildSim } from './scenes/sim.js';
-import { HERO } from './scenes/config.js';
-import { ORDER, closeScene, exportStill, heroStage, host, openScene, setHeroSim, startHero } from './scene-ui.js';
-import { renderSVG } from './scenes/svg-fallback.js';
+import { ORDER, closeScene, exportStill, host, openScene } from './scene-ui.js';
+import { mountHero } from './hero-timeline.js';
 import { EARTH_URL, earthReady } from './scenes/earth.js';
 import { exportSVG } from './export.js';
 import { audit } from './audit.js';
@@ -146,27 +144,10 @@ fontsReady.then(() => {
     drawAll(true);
   });
   performance.mark('cs:first-draw-done');
-  // Hero: a static diagram (vector map, ~57 KB of land data) is drawn straight away and is all that loads before the reader interacts. three.js (~1.3 MB)
-  // and the Earth JPG (~1.5 MB) are fetched only on intent: pointer enter or touch on the hero, the "Rotate the globe" button, keyboard focus on it, or
-  // opening a scene. Reduced motion (and no WebGL) keep the static diagram, and the button is then not offered.
-  {
-    ensureLand();
-    const s = buildSim(HERO);
-    setHeroSim(s);
-    renderSVG(s, heroStage, 0.2);
-  }
   watchSegs(); // the chart controls exist now and their words have their final font
 });
-const heroRot = document.getElementById('heroRot');
-heroRot.hidden = REDUCED;
-const upgradeHero = () => {
-  if (REDUCED || heroStage.dataset.gl) return;
-  heroStage.dataset.gl = '1';
-  heroRot.hidden = true;
-  fontsReady.then(startHero);
-};
-['pointerenter', 'pointerdown', 'touchstart'].forEach((t) => heroStage.addEventListener(t, upgradeHero, { once: true, passive: true }));
-heroRot.addEventListener('click', upgradeHero);
+// The hero picture is drawn from the page's own data and the embedded Earth image; no 3D library is involved.
+mountHero(fontsReady);
 let rz = 0,
   lastW = innerWidth;
 addEventListener('resize', () => {
