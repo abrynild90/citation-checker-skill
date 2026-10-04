@@ -340,6 +340,65 @@ export const labelW = (text, u = 1) => {
   }
   return (w + 16) * u;
 };
+// ---------------------------------------------------------------- the label look (DESIGN.md section 7)
+// One pill for live 3D labels, status captions and, through labelBox(), the placement boxes of stills: a 1 px border on a dark glass, type 12.5 px (13 px on
+// touch screens), a 7 px dot of the item's colour at the left, a 1 px leader that ends in a 3 px dot on the item. Places and orbit names drop the dot and
+// sit at 85% opacity. Warnings and analysis captions use the warm accent. Sizes below are for scale u = 1.
+export const LABEL = {
+  size: 12.5,
+  touch: 13,
+  padX: 9,
+  padY: 4,
+  border: 1,
+  dot: 7,
+  gap: 6,
+  radius: 8,
+  bg: 'rgba(8,13,28,.72)',
+  edge: 'rgba(150,175,230,.35)',
+  text: '#eef2fb',
+  warm: '#ffc86b',
+  leader: 'rgba(238,242,251,.55)',
+  casing: 'rgba(8,13,28,.28)',
+  leaderDot: 3,
+  place: 0.85,
+};
+let _coarse;
+export const labelPx = () => ((_coarse ??= matchMedia('(pointer: coarse)').matches), _coarse ? LABEL.touch : LABEL.size);
+const _bw = {};
+// Size of a pill for `text` at scale u (with or without the colour dot): what the placer reserves and what the DOM draws.
+export function labelBox(text, u = 1, dot = true) {
+  const fs = labelPx(),
+    key = fs + '|' + text;
+  let w = _bw[key];
+  if (w == null) {
+    try {
+      _mctx ||= document.createElement('canvas').getContext('2d');
+      _mctx.font = `600 ${fs}px ${SANS}`;
+      w = _mctx.measureText(text).width;
+      if (!document.fonts || document.fonts.status === 'loaded') _bw[key] = w; // never cache a measurement made with a fallback font
+    } catch (e) {
+      w = text.length * fs * 0.58;
+    }
+  }
+  return {
+    w: (w + 2 * (LABEL.padX + LABEL.border) + (dot ? LABEL.dot + LABEL.gap : 0)) * u,
+    h: (Math.round(fs * 1.2) + 2 * (LABEL.padY + LABEL.border)) * u,
+  };
+}
+// Inline style of a pill element. place: a place or orbit name (no dot, 85%); warm: a caption in the accent colour; block: a caption that may wrap.
+export function pillCss({ place = false, warm = false, block = false } = {}) {
+  const fs = labelPx(),
+    line = Math.round(fs * (block ? 1.3 : 1.2));
+  return (
+    `position:absolute;transform:translate(-50%,-50%);display:${block ? 'block' : 'flex'};align-items:center;gap:${LABEL.gap}px;box-sizing:border-box;` +
+    `padding:${LABEL.padY}px ${LABEL.padX}px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;background:${LABEL.bg};` +
+    `color:${warm ? LABEL.warm : LABEL.text};font:600 ${fs}px/${line}px ${SANS};font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;` +
+    (place ? `opacity:${LABEL.place};` : '')
+  );
+}
+export function dotCss(color) {
+  return `flex:none;width:${LABEL.dot}px;height:${LABEL.dot}px;border-radius:50%;background:${color || LABEL.text}`;
+}
 // The "illustrative" banner sits over the scene view: keep it on one line at any width (its CSS allows 70% of the view, which wraps on a phone).
 export function fitBanner(view) {
   const b = view?.querySelector(':scope > .illus');

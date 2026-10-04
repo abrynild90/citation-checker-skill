@@ -1,58 +1,78 @@
 // ============================================================================
-// scenes/gl-earth.js: GLHost mixin: the planet (day and night pictures, soft terminator, sea glint, clouds), its atmosphere, and the cloud map
+// scenes/gl-earth.js: GLHost mixin: the planet (day picture with relief, city lights, soft terminator, sea glint, clouds), its atmosphere, the cloud map
 // (ES module bundled by esbuild from src/boot.js; the methods are installed together with gl-items.js's, see installGLItems.)
 // ============================================================================
 import { IS_PHONE } from './core.js';
 import {
   earthImg,
+  earthLow,
+  earthNightLow,
   earthNightSource,
   earthPromise,
+  earthReliefImg,
   earthSource,
   getLandCanvas,
+  landCanvas,
+  lightsFor,
+  lightsIfReady,
   loadEarth,
   loadEarthNight,
   loadEmbeddedEarth,
-  onNightArrived,
   oceanMaskSource,
 } from './earth.js';
 
 // ---------------------------------------------------------------- shaders
 const EARTH_VS = `varying vec2 vUv; varying vec3 vN; varying vec3 vW;
 void main(){ vUv = uv; vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`;
-// Day side: the photograph, lit with a wide, soft terminator and reddened sunlight near it. Night side: a faint cool copy of the land and the city lights
-// (only the warm pixels of the night picture count as lights). Sea: a sharp sun glint plus a broad sheen and a sky reflection at grazing angles. Clouds come
-// from the generated map (R); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
-const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uNightA; uniform sampler2D uNightB; uniform sampler2D uMask; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights;
+// Day side: the photograph, shaded by the relief map and lit with a wide, soft terminator and reddened sunlight near it. Night side: a faint cool copy of
+// the land and the city lights (a one-channel picture, see lightsFor). Sea: a soft sun glint and a sky reflection at grazing angles. Clouds come from the
+// generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
+const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW;
-float lightsOf(vec3 c){ return max(0.0, c.r * 1.25 - c.b * 0.75 + c.g * 0.25 - 0.012); }
+// The relief map tilts the surface normal: height steps over two texels become a slope (8848 m is full white on a 6371 km planet), exaggerated by uBump. The
+// samples are taken at the mip level that matches the pixel, so the shading never turns to noise when the globe is small.
+vec3 relief(vec3 N){
+  if (uBump <= 0.0) return N;
+  vec2 e = vec2(1.0 / 2048.0, 1.0 / 1024.0);
+  float tpp = max(fwidth(vUv.x) * 2048.0, fwidth(vUv.y) * 1024.0);
+  float lod = max(0.0, log2(max(tpp, 1.0)));
+  vec2 s = e * exp2(lod);
+  float hx = textureLod(uRelief, vUv + vec2(s.x, 0.0), lod).r - textureLod(uRelief, vUv - vec2(s.x, 0.0), lod).r;
+  float hy = textureLod(uRelief, vUv + vec2(0.0, s.y), lod).r - textureLod(uRelief, vUv - vec2(0.0, s.y), lod).r;
+  float cosLat = max(sqrt(max(1.0 - N.y * N.y, 0.0)), 0.06);
+  vec3 T = normalize(vec3(N.z, 0.0, -N.x) + vec3(1e-5, 0.0, 0.0));
+  vec3 B = cross(N, T);
+  vec3 g = (hx * T * (0.00139 / (2.0 * s.x * 6.2831853 * cosLat)) + hy * B * (0.00139 / (2.0 * s.y * 3.14159265))) * uBump;
+  return normalize(N - g);
+}
 void main(){
   vec3 N = normalize(vN), V = normalize(cameraPosition - vW), L = normalize(uSun);
   float ndl = dot(N, L), ndv = clamp(dot(N, V), 0.0, 1.0);
+  vec3 Nb = relief(N);
   vec3 day = mix(texture2D(uDayA, vUv).rgb, texture2D(uDayB, vUv).rgb, uFade);
   float water = smoothstep(0.35, 0.65, texture2D(uMask, vUv).r);
   float dt = texture2D(uCloud, vUv * vec2(26.0, 13.0)).g + 0.5 * texture2D(uCloud, vUv * vec2(71.0, 35.5) + 0.37).g - 0.75;
   day *= 1.0 + dt * 0.7 * (1.0 - 0.75 * water);
   day = pow(day, vec3(0.93)) * vec3(1.04, 1.01, 0.98);
-  float dif = max(ndl, 0.0);
+  float dif = max(dot(Nb, L), 0.0);
   float dayAmt = smoothstep(-0.10, 0.26, ndl);
   float tw = exp(-pow((ndl - 0.04) / 0.13, 2.0));
   vec3 sunCol = mix(vec3(1.0, 0.985, 0.95), vec3(1.0, 0.6, 0.38), clamp(tw * 0.9, 0.0, 1.0));
   vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol;
-  float l0 = lightsOf(mix(texture2D(uNightA, vUv).rgb, texture2D(uNightB, vUv).rgb, uFade));
-  float l1 = lightsOf(textureLod(uNightB, vUv, 2.4).rgb);
-  float lights = (pow(l0, 0.72) * 3.4 + pow(l1, 0.8) * 5.5) * uLights;
-  vec3 dark = vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100) + vec3(1.0, 0.70, 0.40) * lights;
+  float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
+  vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt;
+  vec3 dark = vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100) + lamp * 1.15 * uLights;
   vec3 col = mix(dark, lit, dayAmt);
-  float cl = smoothstep(0.10, 0.90, texture2D(uCloud, vUv).r) * uCloudAmt;
+  float cl = smoothstep(0.08, 0.85, texture2D(uCloud, vUv).r) * uCloudAmt;
   vec3 H = normalize(L + V);
   float nh = max(dot(N, H), 0.0);
   float glint = pow(nh, 140.0) * 0.24 + pow(nh, 16.0) * 0.04;
   float fr = pow(1.0 - ndv, 4.0);
   col += (vec3(1.0, 0.96, 0.88) * glint + vec3(0.20, 0.36, 0.62) * fr * 0.5) * water * dayAmt * (1.0 - cl);
-  vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.30 * pow(dif, 0.8)) * sunCol;
-  vec3 cloudCol = mix(vec3(0.012, 0.018, 0.040), cLit, dayAmt);
-  col = mix(col, cloudCol, cl * 0.72);
+  vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.30 * pow(max(ndl, 0.0), 0.8)) * sunCol;
+  vec3 cloudCol = mix(vec3(0.030, 0.042, 0.075), cLit, dayAmt);
+  col = mix(col, cloudCol, cl * 0.62);
   float limb = 1.0 - ndv;
   vec3 haze = mix(vec3(0.16, 0.38, 0.85), vec3(0.46, 0.73, 1.0), clamp(ndl * 1.5 + 0.3, 0.0, 1.0));
   haze = mix(haze, vec3(1.0, 0.5, 0.25), tw * 0.5);
@@ -81,29 +101,33 @@ void main(){
   col = mix(col, vec3(1.0, 0.52, 0.24), tw * 0.65);
   gl_FragColor = vec4(col, clamp(dens * (0.03 + 0.97 * lit) * uGain, 0.0, 1.0));
 }`;
-// Cloud map, drawn once into a texture: swirling noise with weather belts (wet at the equator and in the mid-latitudes, dry in the subtropics).
+// Cloud map, drawn once into a texture. Large swirls decide where the weather is (about a third of the sphere, wetter at the equator and in the mid-latitudes);
+// inside them a finer, strongly warped noise draws wisps and filaments, and a faint veil thins out around the masses. No hard edges, no round blobs.
 const CLOUD_VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 const CLOUD_FS = `varying vec2 vUv;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(mix(h13(i), h13(i + vec3(1.0, 0.0, 0.0)), f.x), mix(h13(i + vec3(0.0, 1.0, 0.0)), h13(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
               mix(mix(h13(i + vec3(0.0, 0.0, 1.0)), h13(i + vec3(1.0, 0.0, 1.0)), f.x), mix(h13(i + vec3(0.0, 1.0, 1.0)), h13(i + vec3(1.0, 1.0, 1.0)), f.x), f.y), f.z); }
-float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int k = 0; k < 6; k++) { s += a * vn(p); p = p * 2.03 + 17.1; a *= 0.5; } return s; }
+float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int k = 0; k < 5; k++) { s += a * vn(p); p = p * 2.03 + 17.1; a *= 0.5; } return s; }
+float fbm3(vec3 p){ float a = 0.5, s = 0.0; for (int k = 0; k < 3; k++) { s += a * vn(p); p = p * 2.03 + 17.1; a *= 0.5; } return s; }
 void main(){
   float lon = vUv.x * 6.2831853, lat = (vUv.y - 0.5) * 3.14159265;
   vec3 p = vec3(cos(lat) * cos(lon), sin(lat), cos(lat) * sin(lon));
-  vec3 w = vec3(fbm(p * 1.5 + 1.3), fbm(p * 1.5 + 5.7), fbm(p * 1.5 + 9.1)) - 0.5;
-  float n = fbm(p * 4.6 + w * 2.8);
+  vec3 w1 = vec3(fbm3(p * 1.3 + 1.7), fbm3(p * 1.3 + 8.3), fbm3(p * 1.3 + 3.1)) - 0.5;
   float al = abs(lat);
   float belt = 0.55 + 0.32 * exp(-pow(lat / 0.20, 2.0)) - 0.36 * exp(-pow((al - 0.45) / 0.17, 2.0)) + 0.30 * exp(-pow((al - 0.98) / 0.28, 2.0)) - 0.28 * exp(-pow((al - 1.50) / 0.18, 2.0));
-  float th = 0.64 - 0.20 * clamp(belt, 0.0, 1.0);
-  float mass = smoothstep(th, th + 0.32, n);
-  float grain = fbm(p * 15.0 + w * 3.0);
-  float streak = fbm(p * 44.0 + w * 6.0);
-  float d = mass * (0.40 + 0.85 * smoothstep(0.28, 0.72, grain)) * (0.75 + 0.5 * streak);
-  float g = fbm(p * 7.0 + 3.0) * 0.6 + fbm(p * 23.0) * 0.4;
-  gl_FragColor = vec4(clamp(d, 0.0, 1.0), g, 0.0, 1.0);
+  float cov = fbm(p * 2.6 + w1 * 1.8) + (belt - 0.55) * 0.30;
+  vec3 w2 = vec3(fbm3(p * 5.0 + w1 * 2.0 + 2.2), fbm3(p * 5.0 + w1 * 2.0 + 6.6), fbm3(p * 5.0 + w1 * 2.0 + 4.4)) - 0.5;
+  float fine = fbm(p * 11.0 + w2 * 3.4);
+  float mass = smoothstep(0.50, 0.77, cov);
+  float d = mass * smoothstep(0.27, 0.72, fine);
+  float veil = smoothstep(0.44, 0.66, cov) * smoothstep(0.52, 0.86, fbm(p * 7.0 + w2 * 2.2 + 9.0)) * 0.34;
+  float g = fbm3(p * 7.0 + 3.0) * 0.6 + fbm3(p * 23.0) * 0.4;
+  gl_FragColor = vec4(clamp(d + veil, 0.0, 1.0), g, 0.0, 1.0);
 }`;
+
+const raf = () => new Promise((r) => requestAnimationFrame(r));
 
 export const earthMethods = {
   // Persistent per host: the cloud map is generated on the GPU once (a few ms on a real GPU) and kept for every scene.
@@ -139,45 +163,90 @@ export const earthMethods = {
     }
     return this._cloud?.texture || null;
   },
-  _etex(src, srgb = true) {
-    const T = this.T,
-      t = new T.Texture(src);
-    t.colorSpace = srgb ? T.SRGBColorSpace : T.NoColorSpace;
-    t.wrapS = T.RepeatWrapping;
-    t.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
-    t.needsUpdate = true;
+  // One GPU texture per picture, kept for the life of the page (uploading a 4096 px picture takes far longer than the rest of opening a scene).
+  _gtex(src, make) {
+    const c = (this._tc ||= new Map());
+    let t = c.get(src);
+    if (!t) c.set(src, (t = make()));
     return t;
   },
-  _eflat(rgba) {
-    const T = this.T,
-      t = new T.DataTexture(new Uint8Array(rgba), 1, 1);
-    t.colorSpace = T.SRGBColorSpace;
-    t.needsUpdate = true;
-    return t;
+  _imgTex(src, srgb = true) {
+    return this._gtex(src, () => {
+      const T = this.T,
+        t = new T.Texture(src);
+      t.colorSpace = srgb ? T.SRGBColorSpace : T.NoColorSpace;
+      t.wrapS = T.RepeatWrapping;
+      t.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+      t.needsUpdate = true;
+      return t;
+    });
   },
-  // The planet and its atmosphere. Pictures: the embedded ones at once, the full-size ones as they arrive (cross-faded, see refreshEarth).
+  _lightTex(levels) {
+    return this._gtex(levels, () => {
+      const T = this.T,
+        t = new T.DataTexture(levels[0].data, levels[0].width, levels[0].height, T.RedFormat, T.UnsignedByteType);
+      t.mipmaps = levels;
+      t.generateMipmaps = false;
+      t.minFilter = T.LinearMipmapLinearFilter;
+      t.magFilter = T.LinearFilter;
+      t.wrapS = T.RepeatWrapping;
+      t.unpackAlignment = 1;
+      t.needsUpdate = true;
+      return t;
+    });
+  },
+  _flatTex(key, rgba, srgb = false) {
+    return this._gtex(key, () => {
+      const T = this.T,
+        t = new T.DataTexture(new Uint8Array(rgba), 1, 1);
+      if (srgb) t.colorSpace = T.SRGBColorSpace;
+      t.needsUpdate = true;
+      return t;
+    });
+  },
+  // The best pictures available right now, as source objects (the GPU textures are made from them by _texturesFor).
+  _wantedPictures() {
+    const night = earthNightSource();
+    return {
+      day: earthSource() || getLandCanvas(),
+      lights: lightsIfReady(night),
+      mask: oceanMaskSource(),
+      relief: earthReliefImg,
+    };
+  },
+  _texturesFor(w) {
+    return {
+      day: w.day ? this._imgTex(w.day) : this._flatTex('flat-day', [6, 10, 22, 255], true),
+      lights: w.lights ? this._lightTex(w.lights) : this._flatTex('flat-lights', [0, 0, 0, 255]),
+      mask: w.mask ? this._imgTex(w.mask, false) : this._flatTex('flat-mask', [0, 0, 0, 255]),
+      relief: w.relief ? this._imgTex(w.relief, false) : this._flatTex('flat-relief', [0, 0, 0, 255]),
+    };
+  },
+  // The planet and its atmosphere. Pictures: the small embedded ones at once, the full-size ones as soon as they are decoded (cross-faded, see refreshEarth).
   _buildEarth(root, sunDir) {
     const T = this.T,
       S = this.scene,
       u = {
         uDayA: { value: null },
         uDayB: { value: null },
-        uNightA: { value: null },
-        uNightB: { value: null },
+        uLightA: { value: null },
+        uLightB: { value: null },
         uMask: { value: null },
-        uCloud: { value: this._cloudTexture() },
+        uRelief: { value: null },
+        uCloud: { value: this._cloudTexture() || this._flatTex('flat-cloud', [0, 128, 0, 255]) },
         uSun: { value: new T.Vector3(...sunDir) },
         uFade: { value: 1 },
         uCloudAmt: { value: 1 },
         uLights: { value: 1 },
+        uBump: { value: 0 },
       };
     this._eu = u;
-    this._et = { dayA: null, dayB: null, nightA: null, nightB: null, mask: null, flat: null };
-    this._eSrc = { day: null, night: null };
+    this._ep = { day: null, lights: null, mask: null, relief: null };
     this._efade = null;
+    this._ebusy = false;
     const mat = new T.ShaderMaterial({ vertexShader: EARTH_VS, fragmentShader: EARTH_FS, uniforms: u });
     this.earthMat = mat;
-    this._setEarthPictures(false);
+    this._bindPictures(this._wantedPictures(), false);
     root.add(new T.Mesh(new T.SphereGeometry(1, IS_PHONE ? 72 : 96, IS_PHONE ? 48 : 64), mat));
     // Atmosphere glow: a shell far enough out that its edge is fully faded
     const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: this.sim.cfg.spin ? 1.1 : 1 }, uScale: { value: 1 } };
@@ -196,77 +265,58 @@ export const earthMethods = {
         }),
       ),
     );
-    // Pictures that are not there yet: decode the embedded ones, then ask for the full-size ones (the hero waits for the page's idle prefetch)
-    loadEmbeddedEarth().then(() => this.scene === S && this.refreshEarth());
-    if (!earthImg) {
-      const p = earthPromise || (this.sim.cfg.spin ? null : loadEarth(this.maxTex));
-      p?.then((ok) => ok && this.scene === S && this.refreshEarth());
-    }
-    this._offNight = onNightArrived(() => this.scene === S && this.refreshEarth());
+    // Better pictures: decode the small embedded ones, then the full-size ones (embedded too; fetched only if the page lacks them)
+    const again = () => this.scene === S && this.refreshEarth();
+    loadEmbeddedEarth().then(again);
+    (earthPromise || loadEarth(this.maxTex)).then(again);
+    this.refreshEarth();
   },
-  // Bind the best pictures now. `fade`: keep the ones on screen as the "A" side and blend to the new ones over 0.7 s, so the swap has no visible jump.
-  _setEarthPictures(fade) {
-    const T = this.T,
-      u = this._eu,
-      et = this._et,
-      day = earthSource() || getLandCanvas(),
-      night = earthNightSource();
-    et.mask ||= (() => {
-      const m = oceanMaskSource();
-      return m ? this._etex(m, false) : this._eflat([0, 0, 0, 255]);
-    })();
-    if (et.mask.isDataTexture && oceanMaskSource()) {
-      et.mask.dispose();
-      et.mask = this._etex(oceanMaskSource(), false);
-    }
-    u.uMask.value = et.mask;
-    const dispose = (t) => t && t !== et.dayB && t !== et.nightB && t.dispose();
-    const dayNew = day !== this._eSrc.day,
-      nightNew = night !== this._eSrc.night;
-    if (dayNew) {
-      const old = et.dayB;
-      et.dayB = day ? this._etex(day) : (et.flat ||= this._eflat([6, 10, 22, 255]));
-      et.dayA = fade && old ? old : et.dayB;
-      this._eSrc.day = day;
-    }
-    if (nightNew) {
-      const old = et.nightB;
-      et.nightB = night ? this._etex(night) : (et.flat ||= this._eflat([6, 10, 22, 255]));
-      et.nightA = fade && old ? old : et.nightB;
-      this._eSrc.night = night;
-    }
-    if (!dayNew) et.dayA = et.dayB;
-    if (!nightNew) et.nightA = et.nightB;
-    u.uDayA.value = et.dayA;
-    u.uDayB.value = et.dayB;
-    u.uNightA.value = et.nightA;
-    u.uNightB.value = et.nightB;
-    if (fade && (dayNew || nightNew) && (et.dayA !== et.dayB || et.nightA !== et.nightB)) {
+  // Bind pictures to the shader. fade: keep what is on screen as the "A" side and blend to the new pictures over 0.7 s, so a swap has no visible jump.
+  _bindPictures(w, fade) {
+    const u = this._eu,
+      p = this._ep,
+      tx = this._texturesFor(w),
+      dayNew = w.day !== p.day,
+      lightsNew = w.lights !== p.lights;
+    if (fade && (dayNew || lightsNew)) {
+      u.uDayA.value = u.uDayB.value;
+      u.uLightA.value = u.uLightB.value;
       u.uFade.value = 0;
       this._efade = performance.now();
-      this._efadeTick();
-    } else u.uFade.value = 1;
-    void dispose;
+    } else {
+      u.uDayA.value = tx.day;
+      u.uLightA.value = tx.lights;
+      u.uFade.value = 1;
+    }
+    u.uDayB.value = tx.day;
+    u.uLightB.value = tx.lights;
+    u.uMask.value = tx.mask;
+    u.uRelief.value = tx.relief;
+    this._ebump = w.relief ? 14 : 0; // relief shading ramps in with the fade
+    u.uBump.value = fade && w.relief && !p.relief ? 0 : this._ebump;
+    Object.assign(p, w);
+    if (this._efade != null) this._efadeTick();
   },
   _efadeTick() {
     cancelAnimationFrame(this._efadeRaf);
     const step = (now) => {
       const u = this._eu;
       if (!u || this._efade == null) return;
-      const f = Math.min(1, (now - this._efade) / 700);
-      u.uFade.value = f * f * (3 - 2 * f);
+      const f = Math.min(1, (now - this._efade) / 700),
+        e = f * f * (3 - 2 * f);
+      u.uFade.value = e;
+      u.uBump.value = this._ebump * e;
       if (f >= 1) {
-        const et = this._et;
-        for (const t of [et.dayA, et.nightA]) if (t && t !== et.dayB && t !== et.nightB && t !== et.flat) t.dispose();
-        et.dayA = et.dayB;
-        et.nightA = et.nightB;
-        u.uDayA.value = et.dayB;
-        u.uNightA.value = et.nightB;
+        u.uDayA.value = u.uDayB.value;
+        u.uLightA.value = u.uLightB.value;
         u.uFade.value = 1;
+        u.uBump.value = this._ebump;
         this._efade = null;
+        this._ebusy = false;
+        this._retire();
         this.render();
-        if (this._efadePending) {
-          this._efadePending = false;
+        if (this._epending) {
+          this._epending = false;
           this.refreshEarth();
         }
         return;
@@ -276,22 +326,57 @@ export const earthMethods = {
     };
     this._efadeRaf = requestAnimationFrame(step);
   },
-  // A better picture has arrived (embedded decoded, full-size day, full-size night): blend to it.
+  // The small stand-in pictures are not needed once the full-size ones are on screen.
+  _retire() {
+    const c = this._tc,
+      p = this._ep;
+    if (!c) return;
+    const keep = new Set([p.day, p.lights, p.mask, p.relief]);
+    for (const old of [earthLow, earthNightLow, lightsIfReady(earthNightLow), landCanvas]) {
+      if (old && !keep.has(old) && c.has(old)) {
+        c.get(old).dispose();
+        c.delete(old);
+      }
+    }
+  },
+  // A better picture has arrived (small embedded decoded, full-size day, lights built): upload the new textures one per frame, then blend to them.
   refreshEarth() {
     if (!this.earthMat) return;
-    if (this._efade != null) {
-      this._efadePending = true;
+    if (this._ebusy) {
+      this._epending = true;
       return;
+    }
+    const S = this.scene,
+      night = earthNightSource();
+    // the lights are built from the night picture in slices; ask for them once the picture exists
+    if (night && !lightsIfReady(night) && !this._lightsAsked?.has(night)) {
+      (this._lightsAsked ||= new Set()).add(night);
+      lightsFor(night).then(() => this.scene === S && this.refreshEarth());
     }
     if (earthImg && !this._nightAsked) {
       this._nightAsked = true;
-      loadEarthNight(this.maxTex);
+      loadEarthNight(this.maxTex).then(() => this.scene === S && this.refreshEarth());
     }
-    const day = earthSource() || getLandCanvas(),
-      night = earthNightSource();
-    if (day === this._eSrc.day && night === this._eSrc.night) return;
-    this._setEarthPictures(true);
-    this.render();
+    const w = this._wantedPictures(),
+      p = this._ep;
+    if (w.day === p.day && w.lights === p.lights && w.mask === p.mask && w.relief === p.relief) return;
+    this._ebusy = true;
+    const first = !p.day;
+    (async () => {
+      const tx = this._texturesFor(w);
+      for (const t of [tx.day, tx.lights, tx.relief, tx.mask]) {
+        if (this.scene !== S) return;
+        await raf();
+        this.renderer.initTexture(t);
+      }
+      await raf();
+      if (this.scene !== S) return;
+      this._bindPictures(w, !first);
+      if (this._efade == null) {
+        this._ebusy = false;
+        this.render();
+      }
+    })();
   },
   // Per frame: clouds thin out as the camera comes close to the surface (they would hide the ground the scene is about).
   _earthFrame() {
@@ -300,14 +385,12 @@ export const earthMethods = {
     const alt = this.camera.position.length() - 1;
     u.uCloudAmt.value = (this.sim.cfg.cloudK ?? 0.6) * Math.min(1, Math.max(0, (alt - 0.3) / 1.4));
   },
+  // The textures belong to the host for the life of the page; only the running fade stops with the scene.
   _disposeEarth() {
     cancelAnimationFrame(this._efadeRaf);
     this._efade = null;
-    this._efadePending = false;
-    this._offNight?.();
-    this._offNight = null;
-    const et = this._et;
-    if (et) for (const k of ['dayA', 'dayB', 'nightA', 'nightB', 'mask', 'flat']) et[k]?.dispose();
-    this._et = this._eu = this._au = null;
+    this._ebusy = false;
+    this._epending = false;
+    this._eu = this._au = null;
   },
 };

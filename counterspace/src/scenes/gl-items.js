@@ -112,8 +112,15 @@ const methods = {
     (this.tubeMats ||= []).push(m);
     return m;
   },
+  // Craft materials: painted panel, wrapped foil (the item's colour), and the solar-cell glass. All read the scene's generated environment map.
   _mat(c, o = {}) {
-    return new this.T.MeshLambertMaterial({ color: c, ...o });
+    return new this.T.MeshStandardMaterial({ color: c, metalness: 0.12, roughness: 0.58, ...o });
+  },
+  _foil(c, o = {}) {
+    return new this.T.MeshStandardMaterial({ color: c, metalness: 0.9, roughness: 0.34, ...o });
+  },
+  _panelMat(o = {}) {
+    return new this.T.MeshStandardMaterial({ map: this._panelTexture(), metalness: 0.5, roughness: 0.3, emissive: 0x0b1c42, emissiveIntensity: 0.7, ...o });
   },
   _panelTexture() {
     if (!this._pt) {
@@ -228,6 +235,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.color, place: !!(it.orbit || it.gate) },
         );
     } else if (it.kind === 'point') {
       let m;
@@ -248,11 +256,11 @@ const methods = {
         // glow heads keep a bounded on-screen size
         Object.assign(m.userData, { span: 1, baseScale: it.kvSize ?? 0.1, minPx: it.kvMin ?? (it.kvSize ? 5 : 13), maxPx: it.kvMax ?? (it.kvSize ? 22 : 32) });
       } else if (it.shape === 'sat' && (!it.small || (it.label && !it.ctx))) {
-        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, true, it.bright, it.variant);
+        m = it.iss ? this._issModel(it.color) : this._satModel(it.color, !!(it.state || it.glow), it.bright, it.variant);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
-      } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright);
-      else if (it.shape === 'aircraft') m = this._aircraftModel();
-      else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0));
+      } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright, !!(it.state || it.glow));
+      else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state);
+      else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0), !!it.state);
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));
       else if (it.shape === 'jammer') m = this._jammerModel(it.color, it.pos(0));
       else {
@@ -288,6 +296,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.color, place: (it.shape === 'site' && !it.ctx) || it.shape === 'none' },
         );
     } else if (it.kind === 'cloud') {
       const n = it.n,
@@ -327,6 +336,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.hue || it.color },
         );
     } else if (it.kind === 'beam') {
       // Beam = thin bright core ribbon + soft halo ribbon, both camera-facing gradient quads; optional glow at the ends.
@@ -393,6 +403,7 @@ const methods = {
           it.labelDx ?? 0,
           it.short,
           it.opt,
+          { hue: it.color },
         );
     } else if (it.kind === 'dome') {
       const c = ll(it.at[0], it.at[1]);
@@ -403,7 +414,7 @@ const methods = {
       m.position.set(...c);
       m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...c));
       root.add(m);
-      this._label(it.label, () => scl(c, 1.12), null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt);
+      this._label(it.label, () => scl(c, 1.12), null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt, { place: true });
     } else if (it.kind === 'flash') {
       // Explosion: warm core sprite (fast fade) + expanding shock ring (slower).
       const m = new T.Group();
@@ -450,7 +461,8 @@ const methods = {
       }
       root.add(m);
       this.dyn.push({ it, obj: m });
-      if (it.label) this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt);
+      if (it.label)
+        this._label(it.label, (t) => (t > it.t0 ? it.pos : null), null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt, { hue: it.color });
     } else if (it.kind === 'glare') {
       // Dazzle glare: a bright core with four diffraction spikes, pulsing; sized in screen px by _fitModels
       const m = new T.Sprite(

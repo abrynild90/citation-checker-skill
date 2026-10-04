@@ -3,7 +3,7 @@
 // (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
 import { DEG, IS_PHONE, norm, occluded, scl, sunFor } from './core.js';
-import { fitBanner } from './labels.js';
+import { LABEL, dotCss, fitBanner, pillCss } from './labels.js';
 import { ringCanvas, spriteCanvas } from './earth.js';
 
 // ---------------------------------------------------------------- WebGL host (single shared renderer)
@@ -113,13 +113,7 @@ export class GLHost {
     // One sun for every picture (SUN_VIEW in core.js), fixed in space: orbiting the camera or turning the hero reveals the night side.
     const sunDir = sunFor(sim.sunRef);
     this.sunDir = sunDir;
-    // The hero and the stills lift the night side (ambient up, sun down a little) so craft stay readable there.
-    this.ambient = new T.AmbientLight(0x9fb4ff, sim.cfg.spin ? 0.6 : 0.32);
-    S.add(this.ambient);
-    const sun = new T.DirectionalLight(0xfff4e0, sim.cfg.spin ? 1.85 : 2.1);
-    this.sun = sun;
-    sun.position.set(...scl(sunDir, 10));
-    S.add(sun);
+    this._buildLights(S, sunDir);
     const root = new T.Group();
     S.add(root);
     this.root = root;
@@ -130,32 +124,33 @@ export class GLHost {
     this.ringTex = new T.CanvasTexture(ringCanvas());
     const col = (c) => new T.Color(c);
     for (const it of sim.items) this._buildItem(it, root, col);
+    // Status caption: the label pill in the warm accent, centred at the bottom; it may wrap on a very narrow stage.
     this.statusEl = document.createElement('div');
     this.statusEl.className = 'hlabel';
-    this.statusEl.style.cssText +=
-      ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);font-size:14px;color:#ffe08a;' +
-      'white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px);line-height:1.3';
+    this.statusEl.style.cssText =
+      pillCss({ warm: true, block: true }) +
+      ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px)';
     this.labelLayer.appendChild(this.statusEl);
     // Hero: an on-canvas hint that the stage is interactive (fades once the visitor drags it).
     this.chipEl = null;
     if (sim.cfg.spin) {
       const c = document.createElement('div');
       c.className = 'hlabel';
-      c.textContent = '⟲ Drag to rotate · pick an event below';
-      c.style.cssText +=
-        ';left:50%;bottom:9px;top:auto;transform:translateX(-50%);font-size:12px;font-weight:500;color:#cfd8ee;' +
-        'background:rgba(5,8,18,.55);white-space:nowrap;transition:opacity .7s';
+      // the hero stage styles every svg inside it at full size (page.css), so the icon carries its own size
+      c.innerHTML =
+        '<svg class="ico" aria-hidden="true" style="width:14px;height:14px;flex:none"><use href="#i-rotate"/></svg><span>Drag to turn the Earth</span>';
+      c.style.cssText = pillCss() + ';left:50%;bottom:9px;top:auto;transform:translateX(-50%);transition:opacity .3s cubic-bezier(.16,1,.3,1)';
       this.labelLayer.appendChild(c);
       this.chipEl = c;
     }
     // Handover chip: shown while an episode-locked preset has handed the camera to the episode actually on screen.
     this.handEl = document.createElement('div');
     this.handEl.className = 'hlabel';
-    this.handEl.style.cssText +=
-      ';left:10px;top:' +
-      (this.el.clientWidth < 520 ? 56 : 44) +
-      'px;font-size:12px;font-weight:600;color:#0a0f1e;background:#8cc8ff;white-space:nowrap;' +
-      'transform:none;visibility:hidden;pointer-events:none';
+    this.handEl.style.cssText = pillCss() + ';left:10px;top:' + (this.el.clientWidth < 520 ? 56 : 44) + 'px;transform:none;visibility:hidden';
+    this.handDot = document.createElement('i');
+    this.handDot.style.cssText = dotCss('#7cc4ff');
+    this.handTx = document.createElement('span');
+    this.handEl.append(this.handDot, this.handTx);
     this.labelLayer.appendChild(this.handEl);
     this.insetEl = null;
     if (sim.cfg.inset) this._makeInset();
@@ -251,10 +246,10 @@ export class GLHost {
         tag = !on && c?.tag; // a preset's own note (e.g. "Arm: not shown"), in the same top-left chip slot as the handover chip
       if (this.handEl) {
         this.handEl.style.visibility = on || tag ? 'visible' : 'hidden';
-        this.handEl.style.background = tag ? '#2d3a5c' : '#8cc8ff';
-        this.handEl.style.color = tag ? '#e8eefc' : '#0a0f1e';
-        if (on) this.handEl.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
-        else if (tag) this.handEl.textContent = this.el.clientWidth < 640 && c.tagShort ? c.tagShort : c.tag;
+        this.handEl.style.color = tag ? LABEL.warm : LABEL.text; // a preset's own note is an analysis caption: the warm accent, no dot
+        this.handDot.style.display = tag ? 'none' : '';
+        if (on) this.handTx.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
+        else if (tag) this.handTx.textContent = this.el.clientWidth < 640 && c.tagShort ? c.tagShort : c.tag;
       }
     }
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
@@ -438,7 +433,6 @@ export class GLHost {
     if (this.statusEl) {
       // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
       const cst = this.sim.cams[this.camIdx]?.status;
-      this.statusEl.style.fontSize = this.el.clientWidth >= 700 ? '14px' : '12px'; // desktop: same size as the static caption
       this.statusEl.textContent = cst
         ? this.el.clientWidth < 640 && cst[1]
           ? cst[1]
@@ -543,6 +537,7 @@ export class GLHost {
     if (!this.scene) return;
     this._earthFrame();
     this._spaceFrame();
+    this._rimFrame();
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
@@ -589,6 +584,8 @@ export class GLHost {
       this.spriteTex = this.ringTex = this.beamTex = this._pt = null;
       this._disposeEarth();
       this._disposeSpace();
+      this._envRT?.dispose();
+      this._envRT = this.rim = null;
       this.ptMats = [];
       this.tubeMats = [];
       this.gapRings = [];

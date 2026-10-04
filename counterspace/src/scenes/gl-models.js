@@ -4,16 +4,72 @@
 // ============================================================================
 import { norm } from './core.js';
 
+// Environment map colours (linear, so values above 1 are bright light): black sky above, a cold dim horizon, earthshine below.
+const ENV_SPACE = [0.01, 0.014, 0.03],
+  ENV_HORIZON = [0.1, 0.14, 0.24],
+  ENV_EARTH = [0.55, 0.78, 1.25];
+
 export const modelMethods = {
+  // Lights for craft and sites: the one sun, a faint ambient, a cool rim light behind the subject (it follows the camera, see _rimFrame) so every craft
+  // separates from dark space, and a small generated environment map so foil, paint and solar glass read as what they are.
+  _buildLights(S, sunDir) {
+    const T = this.T,
+      spin = !!this.sim.cfg.spin;
+    this.ambient = new T.AmbientLight(0x9fb4ff, spin ? 0.5 : 0.2);
+    S.add(this.ambient);
+    const sun = new T.DirectionalLight(0xfff4e0, spin ? 1.85 : 2.1);
+    this.sun = sun;
+    sun.position.set(sunDir[0] * 10, sunDir[1] * 10, sunDir[2] * 10);
+    S.add(sun);
+    this.rim = new T.DirectionalLight(0xa8c8ff, 0.8);
+    S.add(this.rim);
+    try {
+      const pm = new T.PMREMGenerator(this.renderer),
+        sc = new T.Scene(),
+        geo = new T.SphereGeometry(30, 24, 16),
+        pos = geo.attributes.position,
+        col = new Float32Array(pos.count * 3),
+        mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+      for (let i = 0; i < pos.count; i++) {
+        const y = pos.getY(i) / 30,
+          c = y > 0 ? mix(ENV_HORIZON, ENV_SPACE, Math.pow(y, 0.6)) : mix(ENV_HORIZON, ENV_EARTH, Math.pow(-y, 0.8));
+        col.set(c, 3 * i);
+      }
+      geo.setAttribute('color', new T.BufferAttribute(col, 3));
+      sc.add(new T.Mesh(geo, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide })));
+      const panel = (size, rgb, at) => {
+        const m = new T.Mesh(new T.PlaneGeometry(size, size), new T.MeshBasicMaterial({ color: new T.Color(...rgb), side: T.DoubleSide, toneMapped: false }));
+        m.position.set(...at);
+        m.lookAt(0, 0, 0);
+        sc.add(m);
+      };
+      panel(16, [9, 8.2, 6.6], [sunDir[0] * 25, sunDir[1] * 25, sunDir[2] * 25]); // the sun, as a bright warm panel metal can reflect
+      panel(14, [0.6, 0.8, 1.2], [-sunDir[0] * 22, -sunDir[1] * 22 + 5, -sunDir[2] * 22]); // a dim cool fill from the opposite side
+      this._envRT = pm.fromScene(sc, 0.03);
+      S.environment = this._envRT.texture;
+      pm.dispose();
+      geo.dispose();
+      sc.traverse((o) => o.material?.dispose?.());
+    } catch (e) {
+      console.warn('Environment map unavailable', e); // craft are then lit by the sun and ambient light alone
+    }
+  },
+  // The rim light shines from behind the subject toward the camera, so thin bright edges outline every craft.
+  _rimFrame() {
+    if (!this.rim) return;
+    const cp = this.camera.position,
+      d = (this._rd ||= new this.T.Vector3()).copy(cp).sub(this.target).normalize();
+    this.rim.position.set(-d.x * 10, -d.y * 10 + 2.5, -d.z * 10);
+  },
   // _fitModels() rescales them every frame so a model is never a giant blob when the camera is close, nor a speck when it is far.
   // Small spacecraft (MSTI-3 class): octagonal foil-wrapped bus, dark sensor aperture, aft ring, yoke + two-segment cell-textured wings, mast and dish.
   _satModel(color, halo, bright, variant) {
     const T = this.T,
       g = new T.Group(),
-      foil = this._mat(color),
+      foil = this._foil(color),
       gray = this._mat(0xb8c0d0),
       dark = this._mat(0x39415a),
-      pan = new T.MeshLambertMaterial({ map: this._panelTexture(), color: 0xffffff, emissive: 0x0a1a3a });
+      pan = this._panelMat();
     const cyl = (r0, r1, l, m, z, y = 0) => {
       const q = new T.Mesh(new T.CylinderGeometry(r0, r1, l, 8), m);
       q.rotation.x = Math.PI / 2;
@@ -42,7 +98,7 @@ export const modelMethods = {
     g.add(mast);
     const dish = new T.Mesh(
       new T.SphereGeometry(0.0034, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
-      new T.MeshLambertMaterial({ color: 0xe8ecf5, side: T.DoubleSide }),
+      this._mat(0xe8ecf5, { side: T.DoubleSide, metalness: 0.25, roughness: 0.4 }),
     );
     dish.position.set(0, 0.0122, -0.003);
     dish.rotation.x = -0.6;
@@ -116,7 +172,7 @@ export const modelMethods = {
       };
       const dish2 = new T.Mesh(
         new T.SphereGeometry(0.0022, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
-        new T.MeshLambertMaterial({ color: 0xe8ecf5, side: T.DoubleSide }),
+        this._mat(0xe8ecf5, { side: T.DoubleSide, metalness: 0.25, roughness: 0.4 }),
       );
       dish2.position.set(0.0054, -0.0102, 0.0035);
       dish2.rotation.x = Math.PI + 0.5;
@@ -137,7 +193,7 @@ export const modelMethods = {
         g.add(p3);
         const dsh = new T.Mesh(
           new T.SphereGeometry(0.0021, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
-          new T.MeshLambertMaterial({ color: 0xcfd5e2, side: T.DoubleSide }),
+          this._mat(0xcfd5e2, { side: T.DoubleSide, metalness: 0.25, roughness: 0.4 }),
         );
         dsh.position.set(sg * 0.0043, 0.0074, 0.0012);
         dsh.rotation.x = -0.9;
@@ -149,24 +205,30 @@ export const modelMethods = {
       const whip = new T.Mesh(new T.CylinderGeometry(0.00022, 0.00022, 0.011, 4), gray);
       whip.position.set(-0.0022, -0.0092, -0.0035);
       g.add(whip);
-      const bellN = new T.Mesh(new T.CylinderGeometry(0.0012, 0.0032, 0.0058, 12, 1, true), new T.MeshLambertMaterial({ color: 0x8a8f9c, side: T.DoubleSide }));
+      const bellN = new T.Mesh(
+        new T.CylinderGeometry(0.0012, 0.0032, 0.0058, 12, 1, true),
+        this._mat(0x8a8f9c, { side: T.DoubleSide, metalness: 0.7, roughness: 0.45 }),
+      );
       bellN.rotation.x = Math.PI / 2;
       bellN.position.set(0, 0, -0.0124);
       g.add(bellN);
     }
-    const h = new T.Sprite(
-      new T.SpriteMaterial({
-        map: this.spriteTex,
-        color: this._c(color),
-        transparent: true,
-        opacity: bright ? 0.5 : 0.32,
-        depthWrite: false,
-        blending: T.AdditiveBlending,
-      }),
-    );
-    h.scale.setScalar(bright ? 0.075 : 0.055);
-    g.add(h);
-    g.userData.halo = h;
+    // A glow behind a craft is drawn only when it carries state (a status colour, or the laser glow); otherwise the rim light does the separating.
+    if (halo) {
+      const h = new T.Sprite(
+        new T.SpriteMaterial({
+          map: this.spriteTex,
+          color: this._c(color),
+          transparent: true,
+          opacity: bright ? 0.5 : 0.32,
+          depthWrite: false,
+          blending: T.AdditiveBlending,
+        }),
+      );
+      h.scale.setScalar(bright ? 0.075 : 0.055);
+      g.add(h);
+      g.userData.halo = h;
+    }
     Object.assign(g.userData, { span: 0.052, minPx: 15, maxPx: 50 });
     return g;
   },
@@ -180,8 +242,8 @@ export const modelMethods = {
       g = new T.Group(),
       gray = this._mat(0xc9ced9),
       white = this._mat(0xf1f3f8),
-      gold = this._mat(0xd9b96a),
-      pan = new T.MeshLambertMaterial({ map: this._panelTexture(), emissive: 0x0a1a3a, side: T.DoubleSide });
+      gold = this._foil(0xd9b96a),
+      pan = this._panelMat({ side: T.DoubleSide });
     const box = (w, h, d, m, x, y, z) => {
       const q = new T.Mesh(new T.BoxGeometry(w, h, d), m);
       q.position.set(x, y, z);
@@ -216,18 +278,12 @@ export const modelMethods = {
     g.add(node);
     g.userData.iss = true;
     g.userData.tintMat = main.material;
-    const h = new T.Sprite(
-      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.3, depthWrite: false, blending: T.AdditiveBlending }),
-    );
-    h.scale.setScalar(0.085);
-    g.add(h);
-    g.userData.halo = h;
     Object.assign(g.userData, { span: 0.11, minPx: 24, maxPx: 62 });
     return g;
   },
   // Spaceplane (X-37B / CSSHQ class): tapered fuselage with a rounded nose, a dark cockpit and payload-bay door, swept delta wings, twin canted tail fins and
   // an engine bell; span about 0.046 (exaggerated). Nose along +z, up is +y.
-  _planeModel(color, bright) {
+  _planeModel(color, bright, halo) {
     const T = this.T,
       g = new T.Group(),
       body = this._mat(color),
@@ -300,26 +356,28 @@ export const modelMethods = {
     g.add(bell);
     g.userData.body = wing;
     g.userData.sat = true;
-    const h = new T.Sprite(
-      new T.SpriteMaterial({
-        map: this.spriteTex,
-        color: this._c(color),
-        transparent: true,
-        opacity: bright ? 0.5 : 0.34,
-        depthWrite: false,
-        blending: T.AdditiveBlending,
-      }),
-    );
-    h.scale.setScalar(0.07);
-    g.add(h);
-    g.userData.halo = h;
+    if (halo) {
+      const h = new T.Sprite(
+        new T.SpriteMaterial({
+          map: this.spriteTex,
+          color: this._c(color),
+          transparent: true,
+          opacity: bright ? 0.5 : 0.34,
+          depthWrite: false,
+          blending: T.AdditiveBlending,
+        }),
+      );
+      h.scale.setScalar(0.07);
+      g.add(h);
+      g.userData.halo = h;
+    }
     Object.assign(g.userData, { span: 0.046, minPx: 22, maxPx: 60 });
     return g;
   },
-  _aircraftModel() {
+  _aircraftModel(halo) {
     const T = this.T,
       g = new T.Group(),
-      m = new T.MeshBasicMaterial({ color: 0xe9edf7, side: T.DoubleSide });
+      m = this._mat(0xe9edf7, { side: T.DoubleSide, metalness: 0.3, roughness: 0.4, emissive: 0x2a3140 });
     const fus = new T.Mesh(new T.CylinderGeometry(0.0022, 0.0022, 0.026, 8), m);
     fus.rotation.x = Math.PI / 2;
     g.add(fus);
@@ -349,21 +407,23 @@ export const modelMethods = {
     stab.position.set(0, 0, -0.012);
     g.add(stab);
     g.userData.tintMat = m;
-    const h = new T.Sprite(
-      new T.SpriteMaterial({ map: this.spriteTex, color: 0xe9edf7, transparent: true, opacity: 0.5, depthWrite: false, blending: T.AdditiveBlending }),
-    );
-    h.scale.setScalar(0.06);
-    g.add(h);
-    g.userData.halo = h;
+    if (halo) {
+      const h = new T.Sprite(
+        new T.SpriteMaterial({ map: this.spriteTex, color: 0xe9edf7, transparent: true, opacity: 0.5, depthWrite: false, blending: T.AdditiveBlending }),
+      );
+      h.scale.setScalar(0.06);
+      g.add(h);
+      g.userData.halo = h;
+    }
     Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
     return g;
   },
   // Ground site: base plate, mast and a tilted dish (small pylon/dish glyph), standing on the local vertical.
-  _siteModel(color, pos) {
+  _siteModel(color, pos, halo) {
     const T = this.T,
       g = new T.Group(),
-      m = new T.MeshLambertMaterial({ color: this._c(color), side: T.DoubleSide, emissive: this._c(color), emissiveIntensity: 0.35 }),
-      dm = new T.MeshLambertMaterial({ color: 0xf2f4fa, side: T.DoubleSide, emissive: 0x556070 });
+      m = this._mat(this._c(color), { side: T.DoubleSide, emissive: this._c(color), emissiveIntensity: 0.3 }),
+      dm = this._mat(0xf2f4fa, { side: T.DoubleSide, emissive: 0x556070, metalness: 0.25, roughness: 0.4 });
     const base = new T.Mesh(new T.CylinderGeometry(0.008, 0.009, 0.0022, 12), m);
     g.add(base);
     const mast = new T.Mesh(new T.CylinderGeometry(0.0013, 0.0019, 0.022, 6), m);
@@ -377,12 +437,15 @@ export const modelMethods = {
     feed.position.set(0, 0.0285, 0.0045);
     feed.rotation.x = 0.6;
     g.add(feed);
-    const h = new T.Sprite(
-      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.16, depthWrite: false, blending: T.AdditiveBlending }),
-    );
-    h.scale.setScalar(0.04);
-    h.position.y = 0.012;
-    g.add(h);
+    if (halo) {
+      const h = new T.Sprite(
+        new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.16, depthWrite: false, blending: T.AdditiveBlending }),
+      );
+      h.scale.setScalar(0.04);
+      h.position.y = 0.012;
+      g.add(h);
+      g.userData.halo = h;
+    }
     g.userData.tintMat = m;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
     Object.assign(g.userData, { span: 0.03, minPx: 9, maxPx: 26 });

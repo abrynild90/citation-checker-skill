@@ -280,6 +280,7 @@ export function buildSim(cfg) {
           scale: a.sat.big,
           // fail: from this time the satellite is flagged as damaged (a visible end cue; SWF: such tests damaged or destroyed satellites)
           ...(a.sat.fail && {
+            state: true, // its colour changes when it is damaged: the model keeps a glow that shows the change
             labelFn: (t, n) => (t >= a.sat.fail.t ? (n ? a.sat.fail.short : a.sat.fail.label) : n ? a.sat.short : a.sat.label),
             statusColor: (t) => (t >= a.sat.fail.t ? '#ff9a9a' : '#dfe6f7'),
           }),
@@ -703,6 +704,7 @@ export function buildSim(cfg) {
           const p = ac.pos(t);
           return p && Math.acos(Math.min(1, dot(norm(p), zc))) / DEG < z.radius;
         };
+        ac.state = true; // the airliner's colour is the story (GNSS lost or fine): its model keeps a glow in that colour
         ac.statusColor = (t) => (inZone(t) ? C.jam : C.ok);
         ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GNSS lost' : ac.label + ' · GNSS OK');
         for (let k = 0; k < 1; k++)

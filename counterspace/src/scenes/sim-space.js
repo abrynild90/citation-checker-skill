@@ -227,6 +227,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         shape: 'site',
         pos: () => ll(hub[0], hub[1], 1.004),
         color: '#7fd6ff',
+        state: true,
         statusColor: (t) => (t >= pulse[0] ? '#ff6b6b' : '#7fd6ff'),
         scale: 1.5,
         label: a.hubLabel,
@@ -271,6 +272,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           small: true,
           scale: 1.3,
           color: '#7fd6ff',
+          state: true,
           statusColor: (t) => (t >= arr ? '#ff5d5d' : '#7fd6ff'),
           pos: () => all[N],
         });

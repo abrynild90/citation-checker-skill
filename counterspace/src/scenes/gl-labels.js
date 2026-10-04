@@ -3,9 +3,10 @@
 // (ES module bundled by esbuild from src/boot.js; the GLHost methods here are installed by installGLLabels(GLHost), see app.js.)
 // ============================================================================
 import { DEG, add, ll, occluded, scl } from './core.js';
-import { labelW, offDisc, placeLabels } from './labels.js';
+import { LABEL, dotCss, labelBox, offDisc, pillCss, placeLabels } from './labels.js';
 import { SANS } from '../fonts.js';
 
+const INSET_PX = 12; // the inset's type is never below the page-wide floor of 12 px
 const methods = {
   _placeLabels: placeLabels, // exposed for tools/scene_check.mjs debugging
   // Point on a sphere of radius r at the visible silhouette, `deg` counter-clockwise from screen-right.
@@ -42,11 +43,6 @@ const methods = {
       if (Math.abs(v.x) < 0.8 && v.y > -0.72 && v.y < 0.72) return p;
     }
     return null;
-  },
-  // Live label type scale: the hero's chips are 1.22x; a scene may raise its own at desktop width (cfg.liveLabelK: its labels are the story). Stills: 1.
-  _liveK(still = false) {
-    const c = this.sim?.cfg;
-    return c?.spin ? 1.22 : !still && c?.liveLabelK && this.el.clientWidth >= 520 ? c.liveLabelK : 1;
   },
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
@@ -138,11 +134,9 @@ const methods = {
       } // a label function may hide its label (act windows, docked pairs)
       const px = ((v.x + 1) / 2) * w,
         py = ((1 - v.y) / 2) * h;
+      const { w: lw, h: lh } = labelBox(text, u, L.role !== 'place');
       let lx = px + L.dx * k,
-        ly = py + (L.dy - 12) * k;
-      const hu = this._liveK(noBanner),
-        lw = labelW(text, u * hu * (noBanner ? 1.1 : 1)),
-        lh = 19 * u * hu;
+        ly = py + L.dy * k - (lh / 2 + 2.5 * k); // the pill sits just above its referent unless the scene offsets it
       if (L.item?.offGlobe && (!L.item.stillOnly || noBanner)) {
         const c0 = new T.Vector3(0, 0, 0).project(this.camera),
           lm = this._limb(1, 0),
@@ -477,7 +471,7 @@ const methods = {
   _makeInset() {
     const c = document.createElement('canvas');
     c.setAttribute('aria-hidden', 'true');
-    c.style.cssText = 'position:absolute;right:8px;border:1px solid rgba(255,224,138,.4);border-radius:8px;pointer-events:none;background:rgba(5,8,18,.86)';
+    c.style.cssText = `position:absolute;right:8px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;pointer-events:none;background:rgba(8,13,28,.84)`;
     this.labelLayer.appendChild(c);
     this.insetEl = c;
   },
@@ -489,8 +483,12 @@ const methods = {
     if (c.style.display) return;
     const bl = this.sim.cfg.insetCorner === 'bl', // bottom-left, above the caption (scenes whose action fills the top right)
       sz = this.sim.cfg.insetSize,
-      w = phone ? 128 : sz ? sz[0] : 188,
-      h = phone ? 104 : sz ? sz[1] : 142,
+      mc = (this._insetMeasure ||= document.createElement('canvas').getContext('2d')),
+      title = this.sim.cfg.inset;
+    mc.font = `600 ${INSET_PX}px ${SANS}`;
+    // the box is as wide as its title needs at 12 px (never squeezed), and a little taller than before to make room for the larger type
+    const w = Math.min(Math.round(this.el.clientWidth * 0.62), Math.max(phone ? 128 : sz ? sz[0] : 188, Math.ceil(mc.measureText(title).width) + 18)),
+      h = (phone ? 104 : sz ? sz[1] : 142) + 8,
       d = Math.min(devicePixelRatio || 1, 2);
     if (c.width !== Math.round(w * d)) {
       c.width = Math.round(w * d);
@@ -509,9 +507,9 @@ const methods = {
       lines = curves.map((i) => i.pts(t)).filter((p) => p.length > 1);
     let rmax = 1.2;
     for (const pl of lines) for (const p of pl) rmax = Math.max(rmax, Math.hypot(p[0], p[2]));
-    const sc = (Math.min(w, h - 16) / 2 - 6) / rmax,
+    const sc = (Math.min(w, h - 26) / 2 - 6) / rmax,
       cx = w / 2,
-      cy = h / 2 + 7;
+      cy = h / 2 + 11;
     const gr = g.createRadialGradient(cx - 0.3 * sc, cy - 0.3 * sc, 1, cx, cy, sc);
     gr.addColorStop(0, '#5aa0e6');
     gr.addColorStop(1, '#123a68');
@@ -548,7 +546,7 @@ const methods = {
       const mx = dots.reduce((a, q) => a + q[0], 0) / dots.length,
         my = dots.reduce((a, q) => a + q[1], 0) / dots.length,
         rr = Math.max(7, ...dots.map((q) => Math.hypot(q[0] - mx, q[1] - my) + 5));
-      g.strokeStyle = '#ffe08a';
+      g.strokeStyle = LABEL.warm;
       g.lineWidth = 1;
       g.setLineDash([3, 3]);
       g.beginPath();
@@ -562,28 +560,37 @@ const methods = {
       g.arc(q[0], q[1], 2.6, 0, 7);
       g.fill();
       if (q[3]) {
-        g.fillStyle = '#ffe08a';
-        g.font = `600 9.5px ${SANS}`;
+        g.fillStyle = LABEL.warm;
+        g.font = `600 ${INSET_PX}px ${SANS}`;
         g.textBaseline = 'middle';
         g.textAlign = q[0] > w / 2 ? 'right' : 'left';
-        g.fillText(q[3], q[0] + (q[0] > w / 2 ? -9 : 9), q[1] + 12);
+        g.fillText(q[3], q[0] + (q[0] > w / 2 ? -9 : 9), q[1] + 14);
         g.textAlign = 'left';
       }
     }
-    g.fillStyle = '#c3cbe0';
-    g.font = `600 9.5px ${SANS}`;
+    g.fillStyle = LABEL.text;
+    g.font = `600 ${INSET_PX}px ${SANS}`;
     g.textBaseline = 'top';
-    g.fillText(this.sim.cfg.inset, 6, 4, w - 10);
+    g.fillText(title, 9, 6, w - 14);
   },
-  _label(text, posFn, cls, item, dy = 0, dx = 0, short = null, opt = false) {
-    const d = document.createElement('div');
+  // look: { hue: the item's colour (the dot), place: a place or orbit name (no dot, 85%) }
+  _label(text, posFn, cls, item, dy = 0, dx = 0, short = null, opt = false, look = {}) {
+    const d = document.createElement('div'),
+      role = look.place || cls === 'shell' ? 'place' : 'item',
+      hue = look.hue ?? (/^#[0-9a-f]{6}$/i.test(item?.color || '') ? item.color : null);
     d.className = 'hlabel';
-    d.textContent = text;
-    if (this.sim?.cfg.spin) d.style.fontSize = '13.5px';
+    d.style.cssText = pillCss({ place: role === 'place' });
+    let pd = null;
+    if (role !== 'place') {
+      pd = document.createElement('i');
+      pd.style.cssText = dotCss(hue);
+      d.appendChild(pd);
+    }
+    const tx = document.createElement('span');
+    tx.textContent = text;
+    d.appendChild(tx);
     this.labelLayer.appendChild(d);
-    // hero: each chip takes the colour of its ring, as the static diagram does (LEO blue, MEO violet, GEO gold, ISS its own)
-    const own = this.sim?.cfg.spin ? this.sim.items.find((i) => (i.label === text || i.short === text) && /^#[0-9a-f]{6}$/i.test(i.color || '')) : null;
-    this.labels.push({ d, posFn, item, text, dy, dx, short, cls, opt, hue: own?.color || null });
+    this.labels.push({ d, tx, pd, posFn, item, text, dy, dx, short, cls, opt, hue, role });
   },
   _renderLabels() {
     const pos = this._labelPositions(this.el.clientWidth, this.el.clientHeight);
@@ -591,44 +598,43 @@ const methods = {
       const q = pos[i];
       if (!q || (L.cls === 'shell' && this.hideShell)) {
         L.d.style.display = 'none';
-        if (L.ln) L.ln.style.display = L.dot.style.display = 'none';
+        if (L.ln) L.ln.style.display = L.lc.style.display = L.dot.style.display = 'none';
         return;
       }
-      L.d.style.display = '';
-      if (!this.sim.cfg.spin) L.d.style.fontSize = this._liveK() > 1 ? 11 * this._liveK() + 'px' : '';
+      L.d.style.display = 'flex';
       L.ax = q.ax; // the referent's screen position (read by tools/scene_check.mjs)
       L.ay = q.ay;
-      L.d.style.left = q.x + 'px';
-      L.d.style.top = q.y + 'px';
-      if (L.d.textContent !== q.text) L.d.textContent = q.text;
-      if (L.item?.labelFn) L.d.style.color = q.color;
-      else if (L.hue) {
-        L.d.style.color = L.hue;
-        L.d.style.boxShadow = `inset 0 0 0 1px ${L.hue}99`;
+      L.d.style.left = Math.round(q.x) + 'px';
+      L.d.style.top = Math.round(q.y) + 'px';
+      if (L.tx.textContent !== q.text) L.tx.textContent = q.text;
+      const hue = q.color || L.hue;
+      if (L.pd && hue && hue !== L._hue) {
+        L.pd.style.background = L._hue = hue;
       }
       if (!L.ln && this.leaders) {
-        L.ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const mk = (tag) => this.leaders.appendChild(document.createElementNS('http://www.w3.org/2000/svg', tag));
+        L.lc = mk('line'); // a faint dark casing keeps the leader readable over bright cloud and ice
+        L.lc.setAttribute('stroke', LABEL.casing);
+        L.lc.setAttribute('stroke-width', '3');
+        L.lc.setAttribute('stroke-linecap', 'round');
+        L.ln = mk('line');
+        L.ln.setAttribute('stroke', LABEL.leader);
         L.ln.setAttribute('stroke-width', '1');
-        this.leaders.appendChild(L.ln);
-        L.dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        L.dot.setAttribute('r', '2');
-        this.leaders.appendChild(L.dot);
+        L.dot = mk('circle');
+        L.dot.setAttribute('r', String(LABEL.leaderDot / 2));
+        L.dot.setAttribute('fill', LABEL.leader);
       }
       if (L.ln) {
-        const c = q.color || '#dfe6f7';
-        L.ln.style.display = L.dot.style.display = q.leader ? '' : 'none';
+        L.ln.style.display = L.lc.style.display = L.dot.style.display = q.leader ? '' : 'none';
         if (q.leader) {
-          L.ln.setAttribute('x1', q.ax);
-          L.ln.setAttribute('y1', q.ay);
-          L.ln.setAttribute('x2', q.qx);
-          L.ln.setAttribute('y2', q.qy);
-          L.ln.setAttribute('stroke', c);
-          const long = Math.hypot(q.qx - q.ax, q.qy - q.ay) > 60; // a long leader is drawn stronger so it still reads
-          L.ln.setAttribute('stroke-width', long ? '1.6' : '1');
-          L.ln.setAttribute('stroke-opacity', long ? '0.95' : '0.75');
+          for (const l of [L.lc, L.ln]) {
+            l.setAttribute('x1', q.ax);
+            l.setAttribute('y1', q.ay);
+            l.setAttribute('x2', q.qx);
+            l.setAttribute('y2', q.qy);
+          }
           L.dot.setAttribute('cx', q.ax);
           L.dot.setAttribute('cy', q.ay);
-          L.dot.setAttribute('fill', c);
         }
       }
     });
