@@ -19,7 +19,7 @@ def script_json(obj):
     return json.dumps(obj, separators=(',', ':'), ensure_ascii=False).replace('</', '<\\/')
 
 
-STYLE_ORDER = ('tokens', 'base', 'page', 'charts', 'scenes')
+STYLE_ORDER = ('tokens', 'base', 'page', 'charts', 'charts2', 'scenes')
 SRC_KEYS = ('source', 'source_url', 'source_full')
 DROP_KEYS = ('evidence', 'conflicts')  # ledger-only fields: verification notes the page never reads (see ledger.md)
 
@@ -69,6 +69,15 @@ def font_css():
     return '\n'.join(rules)
 
 
+def earth_json():
+    """Small day and night images of the Earth (src/assets, from NASA Blue Marble and Black Marble imagery, public domain), embedded as data URLs so the first
+    picture of the planet needs no download. src/scenes/earth.js reads them from <script id="cs-earth">."""
+    out = {}
+    for key, f in (('day', 'earth-day.jpg'), ('night', 'earth-night.jpg')):
+        out[key] = 'data:image/jpeg;base64,' + base64.b64encode((R / 'src/assets' / f).read_bytes()).decode()
+    return out
+
+
 def esbuild(args, text=None):
     r = subprocess.run([str(ESB), *args], input=text, capture_output=True, text=True, cwd=R / 'src')
     if r.returncode:
@@ -90,14 +99,18 @@ def main():
                  + (['--sourcemap=inline'] if nomin else ['--minify']))
     tpl = (R / 'src/template.html').read_text()
     # The page is assembled from parts: src/template.html (page markup), src/partials/*.html (scene viewer, icon sprite) and src/styles/*.css.
-    # Styles are joined in this order, then minified together: tokens, base, page, charts, scenes.
+    # Styles are joined in this order, then minified together: tokens, base, page, charts (shared chart parts), charts2 (capability, jamming and
+    # close-approach charts), scenes.
     for slot, part in (('<!--__OVERLAY__-->', 'overlay'), ('<!--__ICONS__-->', 'icons')):
         tpl = tpl.replace(slot, (R / 'src/partials' / f'{part}.html').read_text().rstrip())
     css = '\n'.join((R / 'src/styles' / f'{n}.css').read_text() for n in STYLE_ORDER)
     tpl = tpl.replace('/*__CSS__*/', esbuild(['--loader=css', '--minify'], css))
     # land.json sits in its own script tag so it is parsed only when a scene or the hero needs it
     tpl = tpl.replace('/*__FONTS__*/', font_css())
-    html = tpl.replace('/*__DATA__*/', script_json(data)).replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json')))).replace('/*__APP__*/', js)
+    html = (tpl.replace('/*__DATA__*/', script_json(data))
+            .replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json'))))
+            .replace('/*__EARTH__*/', script_json(earth_json()))
+            .replace('/*__APP__*/', js))
     out = pathlib.Path(os.environ['OUTFILE']) if os.environ.get('OUTFILE') else R / 'index.html'
     out.write_text(html)
     print(out, len(html.encode()) // 1024, 'KB (esbuild module graph, src/boot.js)')

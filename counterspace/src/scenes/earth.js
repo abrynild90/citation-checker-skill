@@ -100,6 +100,35 @@ export function loadEarth(maxTex = 4096) {
 }
 export const earthReady = () => !!earthImg;
 
+// Small day and night images of the Earth are embedded in the page (<script id="cs-earth">, about 120 KB), so the first picture of the planet never waits
+// for the network. earthLow / earthNightLow are decoded images (null until loadEmbeddedEarth() resolves); the full-size NASA images above replace them
+// when they arrive. earthSource() is whichever is best right now (full-size, else embedded).
+export let earthLow = null,
+  earthNightLow = null,
+  embeddedPromise = null;
+export function loadEmbeddedEarth() {
+  if (embeddedPromise) return embeddedPromise;
+  const el = document.getElementById('cs-earth'),
+    data = el ? JSON.parse(el.textContent) : null,
+    decode = (src) =>
+      new Promise((res) => {
+        const im = new Image();
+        im.decoding = 'async';
+        im.onload = () => res(im);
+        im.onerror = () => res(null);
+        im.src = src;
+      });
+  embeddedPromise = data
+    ? Promise.all([decode(data.day), decode(data.night)]).then(([d, n]) => {
+        earthLow = d;
+        earthNightLow = n;
+        return !!d;
+      })
+    : Promise.resolve(false);
+  return embeddedPromise;
+}
+export const earthSource = () => earthImg || earthLow;
+
 // Soft round sprite + shock-ring sprite, drawn once on the CPU.
 let spriteCv = null,
   ringCv = null;
