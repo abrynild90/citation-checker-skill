@@ -23,11 +23,76 @@ import { audit } from './audit.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
-document.getElementById('themeBtn').onclick = () => {
-  const root = document.documentElement;
-  const now = root.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  root.dataset.theme = now === 'light' ? 'dark' : 'light'; // every chart colour is a CSS variable, so no redraw is needed
+// ---------------------------------------------------------------- page shell: theme, downloads switch, chapter rail, segmented controls
+// Theme button: its icon comes from CSS; here it is named for what a press will do, and renamed when the theme changes.
+const root = document.documentElement,
+  themeBtn = document.getElementById('themeBtn'),
+  lightQuery = matchMedia('(prefers-color-scheme: light)');
+const currentTheme = () => root.dataset.theme || (lightQuery.matches ? 'light' : 'dark');
+function nameThemeButton() {
+  const label = `Switch to ${currentTheme() === 'light' ? 'dark' : 'light'} colours`;
+  themeBtn.setAttribute('aria-label', label);
+  themeBtn.title = label;
+}
+themeBtn.onclick = () => {
+  root.dataset.theme = currentTheme() === 'light' ? 'dark' : 'light'; // every chart colour is a CSS variable, so no redraw is needed
+  nameThemeButton();
 };
+lightQuery.addEventListener?.('change', nameThemeButton);
+nameThemeButton();
+
+// "Dark colours in downloads" sits in the top bar; on phones the bar has no room for its words, so the switch moves to the footer.
+{
+  const option = document.getElementById('dlOption'),
+    barSlot = document.getElementById('barSlot'),
+    footSlot = document.getElementById('footSlot'),
+    narrow = matchMedia('(max-width: 719px)');
+  const place = () => (narrow.matches ? footSlot : barSlot).appendChild(option);
+  narrow.addEventListener?.('change', place);
+  place();
+}
+
+// Chapter rail (wide screens): the last chapter whose start has passed the reading line, 40% down the window, is the current one. Each chapter's start is
+// watched with one IntersectionObserver whose box is the top 40% of the window; an entry's own top edge says which side of the line it is on.
+{
+  const rail = document.getElementById('rail'),
+    links = [...rail.querySelectorAll('a')],
+    starts = ['timeline', 'chartA', 'chartC', 'chartR', 'chartB', 'lag', 'sources'].map((id) => document.getElementById(id)),
+    passed = new Map();
+  const mark = () => {
+    const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
+    links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
+    rail.classList.toggle('on', now >= 0);
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => passed.set(e.target, e.boundingClientRect.top <= innerHeight * 0.4));
+        mark();
+      },
+      { rootMargin: '0px 0px -60% 0px' },
+    );
+    starts.forEach((el) => el && io.observe(el));
+  }
+}
+
+// Segmented controls: the raised thumb slides to the chosen button. Without script the chosen button carries the raised look itself.
+function placeThumb(seg) {
+  const on = seg.querySelector('[aria-pressed="true"],[aria-selected="true"]');
+  if (!on || !on.offsetWidth) return seg.classList.remove('has-thumb'); // hidden for now, or nothing chosen
+  seg.style.setProperty('--seg-x', on.offsetLeft + 'px');
+  seg.style.setProperty('--seg-w', on.offsetWidth + 'px');
+  seg.classList.add('has-thumb');
+  if (!seg.classList.contains('anim')) requestAnimationFrame(() => requestAnimationFrame(() => seg.classList.add('anim'))); // the first placement does not slide
+}
+function watchSegs() {
+  document.querySelectorAll('.seg').forEach((seg) => {
+    const place = () => placeThumb(seg);
+    new MutationObserver(place).observe(seg, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-pressed', 'aria-selected'] });
+    new ResizeObserver(place).observe(seg);
+    place();
+  });
+}
 
 // ---------------------------------------------------------------- boot
 // Above-the-fold pieces draw first; the rest is drawn on the next task (or on demand by audit/export).
@@ -90,6 +155,7 @@ fontsReady.then(() => {
     setHeroSim(s);
     renderSVG(s, heroStage, 0.2);
   }
+  watchSegs(); // the chart controls exist now and their words have their final font
 });
 const heroRot = document.getElementById('heroRot');
 heroRot.hidden = REDUCED;

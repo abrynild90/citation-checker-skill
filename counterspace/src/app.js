@@ -62,20 +62,61 @@ export const LAST_DA = KIN.filter((e) => e.type === 'destructive')
   .sort()
   .at(-1);
 
-document.getElementById('asof').innerHTML =
-  `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (Apr. 2026). Ledger as of ${LEDGER_AS_OF}; ` +
-  `debris counts as of Feb. 2026. CSIS <i>Space Threat Assessment 2025</i> was consulted for cross-checking; no row cites it.`;
+// Dates in full for readers (the data keeps its own short forms).
+export const fmtLong = d3.utcFormat('%-d %B %Y'),
+  fmtMonthYear = d3.utcFormat('%B %Y');
+export const DATA_DATE = fmtLong(parse(SCHEMA.ledger_as_of));
 
+document.getElementById('asof').innerHTML =
+  `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (April 2026). Data last updated ${DATA_DATE}; ` +
+  `debris counts as of February 2026. The Center for Strategic and International Studies (CSIS) <i>Space Threat Assessment 2025</i> was consulted ` +
+  `for cross-checking; no entry cites it.`;
+
+// The chapter list at the foot of the hero: one sentence of fact per chapter, every number computed from the data.
 {
-  const nDest = KIN.filter((e) => e.type === 'destructive').length;
-  document.getElementById('glance').innerHTML =
-    `<div><dt>Kinetic tests and nuclear marker</dt><dd>${KIN.length}</dd></div><div><dt>Destructive intercepts</dt><dd>${nDest}` +
-    `</dd></div><div><dt>Non-kinetic operations</dt><dd>${NK.length}</dd></div><div><dt>Co-orbital RPO and mission ` +
-    `rows</dt><dd>${CO.length}</dd></div><div><dt>Law and policy items</dt><dd>${LEGAL.length}</dd></div><div><dt>Last destructive ` +
-    `test</dt><dd>${fmtMY(parse(LAST_DA))}</dd></div>`;
+  const first = (rows, key) => fmtY(parse(rows.map((r) => r[key]).sort()[0])),
+    last = (rows, key) =>
+      fmtY(
+        parse(
+          rows
+            .map((r) => r[key])
+            .sort()
+            .at(-1),
+        ),
+      );
+  const words = ['none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'],
+    word = (n) => words[n] || String(n);
+  const destroyed = KIN.filter((e) => e.type === 'destructive'),
+    nuclear = KIN.filter((e) => e.type === 'nuclear').length,
+    allLEO = destroyed.every((e) => e.altitude_km != null && e.altitude_km <= 2000); // low Earth orbit reaches up to about 2,000 km
+  const caps = Object.values(CAPS.coding),
+    nStates = new Set(caps.flatMap((c) => Object.values(c).flatMap((d) => Object.keys(d))).map((s) => s.replace('USSR/Russia', 'Russia'))).size,
+    pairs = new Set(D.lag_pairs.pairs.map((p) => p.event)).size,
+    open = D.lag_pairs.open.length,
+    nSources = new Set(EVENTS.concat(LEGAL).map((r) => r.source_url)).size;
+  const text = {
+    law: `${LEGAL.length} legal and policy items between ${first(LEGAL, 'start')} and ${last(LEGAL, 'start')}, from treaties to expert manuals, on one timeline.`,
+    tests:
+      `${KIN.length} tests between ${first(KIN, 'date')} and ${last(KIN, 'date')}` +
+      `${nuclear ? (nuclear === 1 ? ', one of them a high-altitude nuclear test' : `, ${word(nuclear)} of them nuclear`) : ''}; ` +
+      `${destroyed.length} destroyed a satellite${allLEO ? ', all in low Earth orbit' : ''}, the last in ${fmtMonthYear(parse(LAST_DA))}.`,
+    jam: `${NK.length} jamming, laser and cyber operations since ${first(NK, 'start')} that interfere with satellites or the signals they carry.`,
+    close:
+      `${CO.length} close approaches, dockings, releases and spaceplane missions since ${first(CO, 'start')}. ` +
+      `Most are inspection, servicing or technology demonstrations.`,
+    who: `${nStates} countries and ${word(caps.length)} kinds of capability, counted decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
+    lag: `${pairs} capability milestones with a later legal step, and ${open} with none in our records.`,
+    src: `${nSources} cited sources, with the editions and dates behind them and the rules used to classify each entry.`,
+  };
+  document.querySelectorAll('#glance [data-ch]').forEach((li) => {
+    li.querySelector('.t-text').textContent = text[li.dataset.ch] || '';
+  });
 }
-document.querySelector('#legalPhone summary').textContent = `All ${LEGAL.length} law and policy items, in date order`;
-document.querySelector('.cta-note').textContent = `${SCENES.length} short scenes, or select any cube badge on a chart.`;
+// The phone list's heading keeps its own wording; only a count in it follows the data.
+const legalSum = document.querySelector('#legalPhone summary');
+if (legalSum) legalSum.textContent = legalSum.textContent.replace(/\d+/, LEGAL.length);
+document.querySelector('.cta-note').innerHTML =
+  `${SCENES.length} short 3D explainers. On a chart, select a <svg class="ico" aria-hidden="true"><use href="#i-cube"/></svg> cube icon to open one.`;
 // ---------------------------------------------------------------- palette & helpers
 const STATE_VAR = {
   'United States': '--c-us',
@@ -88,8 +129,7 @@ const STATE_VAR = {
   Iraq: '--c-iq',
 };
 export const actorKey = (a) =>
-  Object.keys(STATE_VAR).find((k) => a.startsWith(k) || (k === 'Iran' && a.startsWith('Iran'))) ||
-  (a.startsWith('Israel') ? 'Israel' : null);
+  Object.keys(STATE_VAR).find((k) => a.startsWith(k) || (k === 'Iran' && a.startsWith('Iran'))) || (a.startsWith('Israel') ? 'Israel' : null);
 export const colorOf = (name) => `var(${STATE_VAR[actorKey(name)] || '--c-multi'})`;
 export const TYPE_LABEL = {
   destructive: 'Destructive intercept',
@@ -187,9 +227,7 @@ export class Placer {
   free(q, ignore = [], pad = 1.5) {
     const b = this.b;
     if (q[0] < b.x0 || q[2] > b.x1 || q[1] < b.y0 || q[3] > b.y1) return false;
-    return this.r.every(
-      (o) => ignore.includes(o[4]) || q[2] + pad <= o[0] || q[0] - pad >= o[2] || q[3] + pad <= o[1] || q[1] - pad >= o[3],
-    );
+    return this.r.every((o) => ignore.includes(o[4]) || q[2] + pad <= o[0] || q[0] - pad >= o[2] || q[3] + pad <= o[1] || q[1] - pad >= o[3]);
   }
   add(q, kind = 'T') {
     this.r.push([q[0], q[1], q[2], q[3], kind]);

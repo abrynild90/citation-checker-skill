@@ -4,16 +4,20 @@
 :root {
   --serif: Newsreader, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* type scale */
-  --fs-display: clamp(40px, 6vw, 72px);
+  /* type scale: display never above 56 px; every role that can wrap keeps its line height at 1.3 or more except display headings */
+  --fs-display: clamp(36px, 4.2vw, 56px);
   --fs-h2: clamp(28px, 3.4vw, 42px);
   --fs-h3: 20px;
-  --fs-lede: clamp(19px, 2vw, 23px);
+  --fs-lede: clamp(18px, 1.45vw, 21px);
   --fs-body: 18px;
   --fs-ui: 15px;
   --fs-ui-sm: 14px;
   --fs-small: 13px;
   --fs-tiny: 12px;
+  --lh-display: 1.14;
+  --lh-heading: 1.2;
+  --lh-body: 1.6;
+  --lh-ui: 1.4;
   /* space (4-point scale), radii, widths */
   --s-1: 4px;
   --s-2: 8px;
@@ -30,11 +34,19 @@
   --r-pill: 999px;
   --container: 1240px;
   --measure: 66ch;
-  /* motion */
-  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --gutter: 24px;
+  --chapter-gap: 96px;
+  /* motion: one authored moment (the hero entrance) and short functional transitions, all easing out fast */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-1: 120ms;
   --dur-2: 200ms;
   --dur-3: 320ms;
+  --dur-hero: 700ms;
+  /* layers: the law band sticks at 20, the chapter rail sits above it, hover cards above that, the scene viewer on top */
+  --z-band: 20;
+  --z-rail: 30;
+  --z-card: 60;
+  --z-overlay: 100;
   /* the hero and the scene viewer are dark in both themes */
   --hero-bg: #050813;
   --hero-text: #eef2fb;
@@ -43,6 +55,13 @@
   --hero-accent-2: #ffc86b;
   --hero-line: rgba(150, 175, 230, 0.24);
   --hero-surface: rgba(15, 23, 43, 0.72);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 20px;
+    --chapter-gap: 64px;
+  }
 }
 
 :root,
@@ -68,6 +87,7 @@
   --thumb: #2a3760;
   --warn: #ff9b7a;
   --focus: #ffd24d;
+  --selection: rgba(124, 196, 255, 0.34);
   --glass: rgba(11, 18, 36, 0.76);
   --leo: rgba(120, 170, 255, 0.1);
   --meo: rgba(160, 130, 255, 0.08);
@@ -92,22 +112,25 @@
   --shadow-3: 0 24px 64px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.35);
   --shadow: var(--shadow-2);
   --edge: rgba(0, 0, 0, 0.6);
+  /* a card or panel has one edge treatment: a hairline in the dark theme, a soft shadow in the light theme */
+  --card-bw: 1px;
+  --card-shadow: none;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --bg: #f6f4ee;
-    --bg-2: #efece3;
+    --bg: #f3f5f9;
+    --bg-2: #e9edf4;
     --surface: #ffffff;
-    --surface-2: #f1efe8;
-    --surface-3: #e6e2d6;
-    --line: rgba(30, 35, 55, 0.16);
-    --line-strong: rgba(30, 35, 55, 0.3);
-    --grid: rgba(30, 35, 55, 0.1);
-    --text: #151a28;
-    --muted: #424a5e;
-    --faint: #596176;
+    --surface-2: #eef1f6;
+    --surface-3: #e2e7f0;
+    --line: rgba(20, 30, 60, 0.14);
+    --line-strong: rgba(20, 30, 60, 0.3);
+    --grid: rgba(20, 30, 60, 0.1);
+    --text: #0e1422;
+    --muted: #3c4660;
+    --faint: #566079;
     --accent: #1b5aa6;
     --accent-2: #8a5a00;
     --accent-soft: rgba(27, 90, 166, 0.1);
@@ -116,6 +139,7 @@
     --thumb: #ffffff;
     --warn: #b2401c;
     --focus: #b36b00;
+    --selection: rgba(27, 90, 166, 0.22);
     --glass: rgba(255, 255, 255, 0.8);
     --leo: rgba(40, 90, 190, 0.07);
     --meo: rgba(100, 60, 200, 0.05);
@@ -135,11 +159,13 @@
     --cat-ew: #0072b2;
     --cat-de: #8e44ad;
     --cat-cy: #007a5a;
-    --shadow-1: 0 1px 2px rgba(25, 30, 50, 0.08), 0 2px 8px rgba(25, 30, 50, 0.06);
-    --shadow-2: 0 8px 24px rgba(25, 30, 50, 0.12), 0 2px 6px rgba(25, 30, 50, 0.08);
-    --shadow-3: 0 24px 64px rgba(25, 30, 50, 0.22), 0 6px 16px rgba(25, 30, 50, 0.1);
+    --shadow-1: 0 1px 2px rgba(20, 30, 60, 0.08), 0 2px 8px rgba(20, 30, 60, 0.06);
+    --shadow-2: 0 8px 24px rgba(20, 30, 60, 0.12), 0 2px 6px rgba(20, 30, 60, 0.08);
+    --shadow-3: 0 24px 64px rgba(20, 30, 60, 0.22), 0 6px 16px rgba(20, 30, 60, 0.1);
     --shadow: var(--shadow-2);
-    --edge: rgba(20, 25, 40, 0.28);
+    --edge: rgba(20, 28, 50, 0.28);
+    --card-bw: 0px;
+    --card-shadow: var(--shadow-1);
   }
 }
 
@@ -147,17 +173,17 @@
 .xbox.xlight,
 .scope-light {
   color-scheme: light;
-  --bg: #f6f4ee;
-  --bg-2: #efece3;
+  --bg: #f3f5f9;
+  --bg-2: #e9edf4;
   --surface: #ffffff;
-  --surface-2: #f1efe8;
-  --surface-3: #e6e2d6;
-  --line: rgba(30, 35, 55, 0.16);
-  --line-strong: rgba(30, 35, 55, 0.3);
-  --grid: rgba(30, 35, 55, 0.1);
-  --text: #151a28;
-  --muted: #424a5e;
-  --faint: #596176;
+  --surface-2: #eef1f6;
+  --surface-3: #e2e7f0;
+  --line: rgba(20, 30, 60, 0.14);
+  --line-strong: rgba(20, 30, 60, 0.3);
+  --grid: rgba(20, 30, 60, 0.1);
+  --text: #0e1422;
+  --muted: #3c4660;
+  --faint: #566079;
   --accent: #1b5aa6;
   --accent-2: #8a5a00;
   --accent-soft: rgba(27, 90, 166, 0.1);
@@ -166,6 +192,7 @@
   --thumb: #ffffff;
   --warn: #b2401c;
   --focus: #b36b00;
+  --selection: rgba(27, 90, 166, 0.22);
   --glass: rgba(255, 255, 255, 0.8);
   --leo: rgba(40, 90, 190, 0.07);
   --meo: rgba(100, 60, 200, 0.05);
@@ -185,9 +212,11 @@
   --cat-ew: #0072b2;
   --cat-de: #8e44ad;
   --cat-cy: #007a5a;
-  --shadow-1: 0 1px 2px rgba(25, 30, 50, 0.08), 0 2px 8px rgba(25, 30, 50, 0.06);
-  --shadow-2: 0 8px 24px rgba(25, 30, 50, 0.12), 0 2px 6px rgba(25, 30, 50, 0.08);
-  --shadow-3: 0 24px 64px rgba(25, 30, 50, 0.22), 0 6px 16px rgba(25, 30, 50, 0.1);
+  --shadow-1: 0 1px 2px rgba(20, 30, 60, 0.08), 0 2px 8px rgba(20, 30, 60, 0.06);
+  --shadow-2: 0 8px 24px rgba(20, 30, 60, 0.12), 0 2px 6px rgba(20, 30, 60, 0.08);
+  --shadow-3: 0 24px 64px rgba(20, 30, 60, 0.22), 0 6px 16px rgba(20, 30, 60, 0.1);
   --shadow: var(--shadow-2);
-  --edge: rgba(20, 25, 40, 0.28);
+  --edge: rgba(20, 28, 50, 0.28);
+  --card-bw: 0px;
+  --card-shadow: var(--shadow-1);
 }
