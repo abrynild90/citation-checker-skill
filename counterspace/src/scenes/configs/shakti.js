@@ -9,8 +9,9 @@ export const SHAKTI = {
   duration: 12,
   caption:
     'India’s PDV Mk-II interceptor destroys the Microsat-R satellite at about 300 km. ' +
-    'Indian officials said the debris would re-enter within 45 days. SWF counts 130 cataloged fragments, none still in orbit.',
-  cite: 'SWF 2026, Table 5-1, p. 05-01; p. 04-04.',
+    'Indian officials said the debris would re-enter within 45 days. ' +
+    'The Secure World Foundation (SWF) counts 130 tracked fragments, none still in orbit.',
+  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; p. 04-04.',
   related: 'unga-77-41',
   event: 'in-2019-shakti',
   launchAt: [2.67, 1.55, 0.5],
@@ -51,7 +52,7 @@ export const SHAKTI = {
   still: 0.43,
   status: [
     [0, 'PDV Mk-II rises from Abdul Kalam Island'],
-    [0.4, 'Collision at ~300 km; fragments spread and decay quickly', 'Collision at ~300 km'],
-    [0.65, 'Time compressed: SWF counts 130 cataloged pieces, none still in orbit', 'SWF: 130 pieces, none in orbit'],
+    [0.4, 'Collision at about 300 km; fragments spread and fall back quickly', 'Collision at about 300 km'],
+    [0.65, 'Fast-forward: all 130 tracked pieces have left orbit (SWF)', 'SWF: 130 pieces, none in orbit'],
   ],
 };
