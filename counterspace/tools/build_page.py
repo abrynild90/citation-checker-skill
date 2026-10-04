@@ -48,23 +48,31 @@ def pack_land(rings):
     return out
 
 
-# Embedded fonts: fonts/*.woff2 (Latin subsets, SIL OFL; see fonts/OFL-*.txt) become base64 @font-face rules in <style id="cs-fonts">, so the
-# page stays one self-contained file. src/export.js copies the IBM Plex Sans rules into exported SVGs (it matches the exact `font-family:"IBM Plex
-# Sans"` text written here), and src/fonts.js loads every face before the first text measurement.
-# Each entry: (family, file, weight or weight range, style). No unicode-range is needed: the subsets already hold only Latin plus the page's symbols.
+# Embedded fonts: fonts/*.woff2 (SIL OFL; see fonts/OFL-*.txt) become base64 @font-face rules in <style id="cs-fonts">, so the page stays one
+# self-contained file. src/export.js copies the IBM Plex Sans rules into exported SVGs (it matches the exact `font-family:"IBM Plex Sans"` text, a
+# normal style and a weight of `400` or `500 600` written here), and src/fonts.js loads every face before the first text measurement.
+# Newsreader is the complete Latin variable font (weight 200-800, optical size 6-72, so display sizes get their own drawing automatically); the
+# Latin Extended face only loads for text that needs it (unicode-range). IBM Plex Sans keeps its TrueType hinting, in Latin, Latin-1 and Extended-A.
+# Each entry: (family, file, weight or weight range, style, unicode-range or None). tools/subset_fonts.py documents how the files were made.
+LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
+LATIN_EXT = ('U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,'
+             'U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF')
 FONT_FACES = (
-    ('Newsreader', 'Newsreader-opsz.woff2', '400 600', 'normal'),
-    ('Newsreader', 'Newsreader-italic-400.woff2', '400', 'italic'),
-    ('IBM Plex Sans', 'IBMPlexSans-400.woff2', '400', 'normal'),
-    ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '500 600', 'normal'),
+    ('Newsreader', 'Newsreader-latin.woff2', '200 800', 'normal', LATIN),
+    ('Newsreader', 'Newsreader-latin-ext.woff2', '200 800', 'normal', LATIN_EXT),
+    ('Newsreader', 'Newsreader-italic-latin.woff2', '200 800', 'italic', LATIN),
+    ('IBM Plex Sans', 'IBMPlexSans-400.woff2', '400', 'normal', None),
+    ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '500 600', 'normal', None),
+    ('IBM Plex Sans', 'IBMPlexSans-700.woff2', '700', 'normal', None),
 )
 
 
 def font_css():
     rules = []
-    for fam, f, wt, st in FONT_FACES:
+    for fam, f, wt, st, ur in FONT_FACES:
         b64 = base64.b64encode((R / 'fonts' / f).read_bytes()).decode()
-        rules.append(f'@font-face{{font-family:"{fam}";font-style:{st};font-weight:{wt};font-display:swap;'
+        rng = f'unicode-range:{ur};' if ur else ''
+        rules.append(f'@font-face{{font-family:"{fam}";font-style:{st};font-weight:{wt};font-display:swap;{rng}'
                      f'src:url(data:font/woff2;base64,{b64}) format("woff2")}}')
     return '\n'.join(rules)
 
