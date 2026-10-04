@@ -4,3 +4,4 @@ tools/tmp_*.mjs
 tools/_*.mjs
 tools/_*.py
 .progress_*.md
+tools/node_modules
