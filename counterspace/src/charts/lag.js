@@ -143,7 +143,7 @@ export function drawL(el = document.getElementById('svgL')) {
   svg
     .append('desc')
     .text(
-      'One row for each pair. A hexagon marks the capability and a second symbol marks the later legal step: a circle for a treaty, a square for a ' +
+      'One line for each pair. A hexagon shows the weapon or attack and a second symbol shows the later legal step: a circle for a treaty, a square for a ' +
         'resolution or body finding, a triangle for a unilateral pledge. The bar between them is the time that passed, with the number of years or ' +
         'months beside it. It shows the order of events and says nothing about cause. An open ring means our records link no later legal step to the ' +
         'capability.',
@@ -281,13 +281,13 @@ export function drawL(el = document.getElementById('svgL')) {
   // ---- key
   const K = legend('legendL', 22, 18),
     li = K.item;
-  K.group('Capability');
-  li(hexMarkup('var(--cat-da)'), 'Kinetic: a physical attack such as a missile test');
-  li(hexMarkup('var(--cat-ew)'), 'Non-kinetic: jamming, a laser or a cyber operation');
+  K.group('Weapon or attack');
+  li(hexMarkup('var(--cat-da)'), 'Physical attack, such as a missile test (kinetic)');
+  li(hexMarkup('var(--cat-ew)'), 'Jamming, a laser or a cyber operation (non-kinetic)');
   K.group('Later legal step');
   li(glyphMarkup('treaty'), 'Treaty (binding)');
-  li(glyphMarkup('resolution'), 'Resolution or body finding (not binding)');
-  li(glyphMarkup('unilateral'), 'Unilateral pledge');
+  li(glyphMarkup('resolution'), 'Resolution or finding by an international body (not binding)');
+  li(glyphMarkup('unilateral'), 'Pledge by one country');
   K.group('No later step');
   li(ringMarkup(), 'Open ring: our records link no later legal step to it. This does not mean that no rule applies.');
   K.done();

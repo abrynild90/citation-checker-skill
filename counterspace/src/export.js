@@ -1,18 +1,18 @@
 // ============================================================================
-// export.js: SVG export (fresh 1200 px desktop render, titled, with as-of line and source footer) and file download.
+// export.js: chart downloads (a fresh 1200 px render of the chart in a titled frame, as a standalone file) and file download.
 // Provides: exportSVG(), download().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { drawA } from './charts/a.js';
-import { AS_OF, KIN, NK, actorKey, colorOf, setExporting, tw, wrap } from './app.js';
+import { drawA, kinMarkup } from './charts/a.js';
+import { AS_OF, KIN, LEDGER_AS_OF, NK, actorKey, colorOf, setExporting, tw, wrap } from './app.js';
 import { CATS, drawB, stateB } from './charts/b.js';
 import { drawC, stateC } from './charts/c.js';
 import { R_SHAPE_KEY, R_STYLE_KEY, R_VERT_NOTE, drawR, zoomedR } from './charts/rpo.js';
 import { drawL } from './charts/lag.js';
-import { ABBR_NOTE, drawLegal } from './charts/legal.js';
+import { ABBR_NOTE, drawLegal, glyphMarkup } from './charts/legal.js';
 import { hooks } from './shared.js';
 import { guides } from './ui.js';
-import { SANS } from './fonts.js';
+import { SANS, SERIF } from './fonts.js';
 const STYLE_PROPS = [
   'fill',
   'fill-opacity',
@@ -20,6 +20,8 @@ const STYLE_PROPS = [
   'stroke-width',
   'stroke-dasharray',
   'stroke-opacity',
+  'stroke-linecap',
+  'stroke-linejoin',
   'opacity',
   'font-family',
   'font-size',
@@ -27,121 +29,179 @@ const STYLE_PROPS = [
   'font-variant-numeric',
   'letter-spacing',
   'text-anchor',
+  'text-transform',
   'display',
   'paint-order',
 ];
+const INK = 'var(--text)';
+// One entry per chart. title and sub: the heading of the file (the title is the chapter title on the page); key: how to read it; file: the name of the
+// saved file; legend: swatches drawn above the key text (shapes use the same markup as the page's key).
 const EXPORT_SPEC = {
   A: {
     id: 'svgA',
     draw: () => drawA,
+    file: 'anti-satellite-tests',
+    title: 'How high anti-satellite tests have reached, and the debris they left',
+    sub: 'Every test in our records, by year and altitude, with the debris from the destructive ones.',
     legend: () => ({
-      head: 'Country:',
-      items: [...new Set(KIN.map((e) => actorKey(e.state) || e.state))].map((s) => ({ c: colorOf(s), t: s === 'Russia' ? 'USSR / Russia' : s })),
+      items: [
+        { head: 'What happened' },
+        { g: kinMarkup('destructive', INK), t: 'Destroyed a satellite', gw: 24 },
+        { g: kinMarkup('midcourse_intercept', INK), t: 'Intercepted a ballistic missile', gw: 24 },
+        { g: kinMarkup('apogee_only', INK), t: 'Test that destroyed nothing', gw: 24 },
+        { g: kinMarkup('nuclear', INK), t: 'Nuclear explosion in space', gw: 24 },
+        { head: 'Country' },
+        ...[...new Set(KIN.map((e) => actorKey(e.state) || e.state))].map((s) => ({ c: colorOf(s), t: s === 'Russia' ? 'USSR and Russia' : s })),
+      ],
     }),
-    bubbles: true, // frameExport adds a size key (debris bubble area) under the colour key
-    title: 'Chart A · Kinetic tests: altitude over time',
+    bubbles: true, // frameExport adds a size key (debris bubble area) under the swatches
     key:
-      'Filled circle: destructive intercept at its intercept altitude. Triangle: intercept of a missile (suborbital) target. Ring: ' +
-      'apogee, flyby or non-intercept test. Star: nuclear detonation. Dashed bubble: area proportional to cataloged fragments (as of Feb. ' +
-      '2026). Altitude axis is logarithmic; tests with no reported altitude sit in the strip below the axis.',
+      'Filled circle: a test that destroyed a satellite, at the altitude where it happened. Triangle: interception of a ballistic missile in flight. ' +
+      'Ring: a test that destroyed nothing (rocket-only flight, flyby or other). Star: nuclear explosion in space. Dashed bubble: debris, with area in proportion to the ' +
+      'fragments cataloged (as of February 2026). The altitude scale is logarithmic. Tests with no reported altitude sit in the strip below the plot, ' +
+      'placed by date only.',
   },
   B: {
     id: 'svgB',
     draw: () => drawB,
+    file: 'who-can-do-what',
+    title: 'Which states hold which counterspace capabilities, by decade',
+    sub: 'Number of states holding each capability in each decade.',
     legend: () => ({
-      head: 'Colour:',
-      items:
-        stateB.group === 'cat'
+      items: [
+        { head: 'Colour' },
+        ...(stateB.group === 'cat'
           ? CATS.filter((c) => stateB.on.has(c.key)).map((c) => ({ c: `var(${c.v})`, t: c.label }))
           : [
               { c: 'var(--cat-da)', t: 'Kinetic (direct-ascent, co-orbital)' },
-              { c: 'var(--cat-ew)', t: 'Non-kinetic (EW, directed energy, cyber)' },
-            ],
+              { c: 'var(--cat-ew)', t: 'Non-kinetic (electronic warfare, directed energy, cyber)' },
+            ]),
+      ],
     }),
-    title: 'Chart B · Capability diffusion',
     key:
-      'Solid: capability demonstrated (tested or used). Hatched: developing or latent (SWF matrix supports it). Dotted fill: ' +
-      'developing, builder-assessed (2020s entries for which the SWF matrix shows no data). Faded fill with dashed edge: reconstructed ' +
-      'decades. Whisker above each decade: low end = demonstrated only, high end = demonstrated plus developing. Stack height counts ' +
-      'state-capability pairs (a state with two capabilities counts twice). Decades before 2020 are reconstructed by the page builder, ' +
-      'not assessed by SWF.',
+      'Solid fill: capability demonstrated (tested or used). Hatched fill: developing or latent, as the SWF country tables support. Dotted fill: ' +
+      'developing, our reading, for 2020s entries where the SWF tables show no data. Faded fill with a dashed edge: decades before the 2020s, which we ' +
+      'reconstructed from SWF’s test tables and country chapters; SWF did not assess them. The range above each decade runs from capabilities ' +
+      'demonstrated only (low end) to demonstrated plus developing (high end). Bar height counts each state once for every capability it holds, so a ' +
+      'state with two capabilities counts twice.',
   },
   C: {
     id: 'svgC',
     draw: () => drawC,
+    file: 'jamming-lasers-and-cyber',
+    title: 'Attacks that leave satellites in orbit',
+    sub: 'Jamming, spoofing, laser and cyber operations, as campaigns and single events.',
     legend: () => ({
-      head: 'Actor:',
-      items: [...new Set(NK.map((e) => actorKey(e.actor) || 'Other or multiple actors'))].map((s) => ({ c: colorOf(s), t: s })),
+      items: [{ head: 'Actor' }, ...[...new Set(NK.map((e) => actorKey(e.actor) || 'Other or multiple actors'))].map((s) => ({ c: colorOf(s), t: s }))],
     }),
-    title: 'Chart C · Non-kinetic operations',
     get key() {
       return (
         (stateC.focus
-          ? 'Zoomed view: the axis is 1995–2026, not the shared 1957–2026 axis (the ledger has no earlier non-kinetic entry; earliest: ' +
-            '1997 MIRACL laser test). '
+          ? 'Zoomed view: the axis runs from 1995 to 2026, not the shared 1957 to 2026 axis (our records have no earlier jamming, laser or cyber entry; ' +
+            'the earliest is the 1997 MIRACL laser test). '
           : '') +
-        'Bars: sustained campaigns. Points: discrete events. Arrowhead: ongoing. Solid: official or multi-government attribution. Outline: ' +
-        'researcher / open-source attribution. Dashed outline: alleged. Attribution is recorded as the source states it.'
+        'Bar: a campaign that lasted. Point: a single event. Arrowhead: still going. Solid fill: attributed by a government or several governments. ' +
+        'Outline only: attributed by researchers or open-source analysis. Dashed outline: alleged. Attribution is recorded as the source states it.'
       );
     },
   },
   R: {
     id: 'svgR',
     draw: () => drawR,
-    // Shape key (activity), outline key (how firmly SWF states it), then the actor colours: the same glyphs as the page legend.
+    file: 'close-approaches',
+    title: 'Satellites that fly close to other satellites',
+    sub: 'Close approaches, dockings, captures, releases and spaceplane missions, by actor.',
+    // Shape key (activity), outline key (how firmly SWF states it), then the actor colours: the same symbols as the page key.
     legend: () => ({
       items: [
-        { head: 'Shape:' },
+        { head: 'Shape' },
         ...R_SHAPE_KEY.map(([g, t, gw]) => ({ g, t: t.replace(' (launch to landing)', ''), gw })),
-        { head: 'Outline:' },
+        { head: 'Outline' },
         ...R_STYLE_KEY.map(([g, t, gw]) => ({ g, t, gw })),
-        { head: 'Actor:' },
+        { head: 'Actor' },
         ...['United States', 'China', 'Russia'].map((s) => ({ c: colorOf(s), t: s })),
       ],
     }),
-    title: 'Co-orbital proximity operations (RPO)',
     get key() {
       return (
-        (zoomedR() ? 'Zoomed view: the axis is 2000–2026, not the shared 1957–2026 axis. ' : '') +
-        'Circle: rendezvous or proximity operation. Square: docking. Triangle: capture and tow. Diamond: release of an object. Bar: ' +
-        'spaceplane mission, launch to landing. Solid: stated plainly by SWF. Outline: hedged by SWF. Dashed outline: unclear or ' +
-        'conflicted. Arrowhead: ongoing. ' +
+        (zoomedR() ? 'Zoomed view: the axis runs from 2000 to 2026, not the shared 1957 to 2026 axis. ' : '') +
+        'Circle: rendezvous or close approach. Square: docking. Triangle: capture and tow. Diamond: release of an object. Bar: spaceplane mission, from ' +
+        'launch to landing. Solid: stated plainly by SWF. Outline: SWF hedges its wording. Dashed outline: unclear or conflicting. Arrowhead: still going. ' +
         R_VERT_NOTE +
-        ' A proximity operation is not an attack; SWF’s wording on intent is hedged.'
+        ' A close approach is not an attack; SWF’s wording on intent is hedged.'
       );
     },
   },
   L: {
     id: 'svgL',
     draw: () => drawL,
-    title: 'Chronology: capability milestones and later legal steps',
+    file: 'how-long-the-law-took',
+    title: 'How long the law took to follow',
+    sub: 'The time from a capability to the next legal step our records link to it.',
+    legend: () => ({
+      items: [
+        { head: 'Weapon or attack' },
+        { g: `<path d="M0,-8L6.9,-4L6.9,4L0,8L-6.9,4L-6.9,-4Z" style="fill:var(--cat-da)"/>`, t: 'Physical attack (kinetic)', gw: 20 },
+        { g: `<path d="M0,-8L6.9,-4L6.9,4L0,8L-6.9,4L-6.9,-4Z" style="fill:var(--cat-ew)"/>`, t: 'Jamming, laser or cyber (non-kinetic)', gw: 20 },
+        { head: 'Later legal step' },
+        { g: glyphMarkup('treaty'), t: 'Treaty', gw: 20 },
+        { g: glyphMarkup('resolution'), t: 'Resolution or finding (not binding)', gw: 20 },
+        { g: glyphMarkup('unilateral'), t: 'Pledge by one country', gw: 20 },
+        { head: 'No later step' },
+        { g: `<circle r="7" style="fill:var(--ground);stroke:var(--accent);stroke-width:2.4"/>`, t: 'Open ring', gw: 20 },
+      ],
+    }),
     key:
-      'Hexagon: capability milestone. Circle: treaty. Square: resolution or body finding (non-binding). Triangle: unilateral pledge. ' +
-      'Open ring: no later legal item paired in the ledger (not a claim that no rule exists). Chronology only: a pair shows which came first, not causation.',
+      'Hexagon: a space weapon or attack (orange for a physical attack, blue for jamming, a laser or a cyber operation). Circle: treaty. Square: ' +
+      'resolution or finding, not binding. Triangle: pledge by one country. Open ring: our records link no later legal step to the capability; this does not mean that no rule applies. The bar is the ' +
+      'time between the two. It shows the order of events and says nothing about cause.',
   },
   legal: {
     id: 'legalSvg',
-    draw: () => drawLegal,
-    title: 'Law and policy responses, 1957–2026',
-    key:
-      'Circle: treaty. Square: resolution or body finding. Triangle: unilateral pledge. Diamond: soft law (expert manual, not binding). ' +
-      'Cross: veto. Bars: negotiation spans. Marks that would collide are stacked vertically; each stays at its true date on the axis. ' +
-      ABBR_NOTE,
+    // The saved image holds the whole timeline and, under it, the enlarged 2021 to 2026 window, so every item is named in the file.
+    draw: () => (box) => {
+      [false, true].forEach((zoom) => {
+        const part = document.createElement('div');
+        box.appendChild(part);
+        drawLegal(part, zoom);
+      });
+    },
+    partTitles: [null, 'Zoom: 2021 to 2026'],
+    file: 'law-and-policy-timeline',
+    title: 'Law and policy on one timeline',
+    sub: 'Treaties, resolutions, pledges and expert manuals, 1957 to 2026.',
+    legend: () => ({
+      items: [
+        { g: glyphMarkup('treaty'), t: 'Treaty', gw: 20 },
+        { g: glyphMarkup('draft'), t: 'Draft treaty put forward', gw: 20 },
+        { g: glyphMarkup('resolution'), t: 'Resolution or finding (not binding)', gw: 20 },
+        { g: glyphMarkup('unilateral'), t: 'Pledge by one country', gw: 20 },
+        { g: glyphMarkup('soft'), t: 'Expert manual (soft law, not binding)', gw: 20 },
+        { g: glyphMarkup('veto'), t: 'Veto in the UN Security Council', gw: 20 },
+        { g: `<rect x="-9" y="-3.5" width="18" height="7" rx="3.5" style="fill:var(--accent);fill-opacity:.42"/>`, t: 'Years of negotiation', gw: 20 },
+      ],
+    }),
+    key: 'Symbols that would collide are stacked; each keeps its true date on the axis. Abbreviations: ' + ABBR_NOTE,
   },
 };
+export const EXPORT_FILES = Object.fromEntries(Object.entries(EXPORT_SPEC).map(([k, v]) => [k, v.file]));
 const EXPORT_W = 1200,
-  SANS_EXPORT = SANS;
+  PAD = 28;
 const SOURCE_LINE =
-  `Source: Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment (9th ed., Apr. 2026) and ` +
-  `the primary sources cited in the ledger. Data as of ${AS_OF}. Companion to Space Security Law: Governance Beyond the Atmosphere.`;
-// A standalone SVG has no page stylesheet, so it carries the subset IBM Plex Sans faces it uses (400 and 600; the 600 face is declared
-// "500 600", and a 700 request resolves to 600) as base64 @font-face rules, copied from the page's <style id="cs-fonts"> (written by
-// tools/build_page.py). Roughly 36 KB added per file.
+  'Source: SWF 2026 (Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment, 9th ed., Apr. 2026) and the primary sources ' +
+  'cited on the page.';
+const CREDIT = 'Counterspace timeline, companion to Space Security Law by Aaron Brynildson';
+// A standalone file has no page stylesheet, so it carries the font faces it uses (IBM Plex Sans 400 and 600, where the 600 face is declared "500 600",
+// and Newsreader for the title) as base64 @font-face rules copied from the page's <style id="cs-fonts"> (written by tools/build_page.py).
 function fontFaceCSS() {
   const css = document.getElementById('cs-fonts')?.textContent || '';
   return css
     .split('\n')
-    .filter((r) => r.includes('font-family:"IBM Plex Sans"') && r.includes('font-style:normal') && /font-weight:(400|500 600);/.test(r))
+    .filter(
+      (r) =>
+        r.includes('font-style:normal') &&
+        ((r.includes('font-family:"IBM Plex Sans"') && /font-weight:(400|500 600);/.test(r)) || r.includes('font-family:"Newsreader"')),
+    )
     .join('\n');
 }
 // Copy computed presentation properties onto the clone so the file renders the same without the page's stylesheet.
@@ -153,32 +213,31 @@ function inlineStyles(src, clone) {
     b[i].setAttribute('style', STYLE_PROPS.map((p) => `${p}:${cs.getPropertyValue(p)}`).join(';'));
     ['class', 'tabindex', 'role'].forEach((k) => b[i].removeAttribute(k));
   });
-  clone.querySelectorAll('.hit').forEach((n) => n.remove());
+  clone.querySelectorAll('.hit').forEach((n) => n.remove()); // hover and focus targets are never part of a picture
   clone.querySelectorAll('title').forEach((n) => {
     if (n.parentNode === clone) n.remove();
   });
 }
-// Wrap the chart clone in a titled frame with a visible as-of line (top right) and a source footer.
-function frameExport(spec, clone, box) {
+// Wrap the chart clone(s) in a titled frame: title and one-line subtitle on top, the key, the source and the credit line below.
+function frameExport(spec, clones, box) {
   const ns = 'http://www.w3.org/2000/svg',
     EW = EXPORT_W,
-    vb = clone.getAttribute('viewBox').split(' ').map(Number);
+    inner = EW - 2 * PAD;
   const bcs = getComputedStyle(box),
     fg = bcs.color,
     bg = bcs.backgroundColor,
-    muted = bcs.getPropertyValue('--muted').trim() || fg;
+    muted = bcs.getPropertyValue('--muted').trim() || fg,
+    line = bcs.getPropertyValue('--line-strong').trim() || muted;
   const rv = (v) => v.replace(/var\((--[\w-]+)\)/g, (_, n) => bcs.getPropertyValue(n).trim());
-  // colour key row(s): only the countries / categories / actors actually present in the chart
+  // swatches: groups led by a small label, then the items; wrapped into rows
   const leg = spec.legend ? spec.legend() : null,
-    LX = 16,
     legRows = [];
   let cur = null,
     cx = 0;
   if (leg) {
-    const items = [...(leg.head ? [{ head: leg.head }] : []), ...leg.items];
-    items.forEach((it) => {
-      const w = it.head ? tw(it.head, 10.5, 600) + 8 : (it.g ? (it.gw || 14) + 6 : 14) + tw(it.t, 10.5) + 16;
-      if (!cur || cx + w > EW - 32) {
+    leg.items.forEach((it) => {
+      const w = it.head ? tw(it.head, 12, 600) + 10 : (it.g ? (it.gw || 18) + 8 : 16) + tw(it.t, 12.5) + 20;
+      if (!cur || cx + w > inner || (it.head && cur.length)) {
         cur = [];
         legRows.push(cur);
         cx = 0;
@@ -187,11 +246,20 @@ function frameExport(spec, clone, box) {
       cx += w;
     });
   }
-  const LEGH = legRows.length * 16 + (legRows.length ? 8 : 0),
-    BK = spec.bubbles ? 68 : 0; // height of the bubble-size key row
-  const foot = wrap(spec.key, EW - 32, 10.5).concat(wrap(SOURCE_LINE, EW - 32, 10.5)),
-    HDR = 40,
-    HT = HDR + vb[3] + LEGH + BK + foot.length * 14 + 16;
+  const LEGH = legRows.length * 24 + (legRows.length ? 10 : 0),
+    BK = spec.bubbles ? 76 : 0; // height of the bubble-size key
+  const foot = wrap(spec.key, inner, 12),
+    src = wrap(SOURCE_LINE, inner, 12);
+  // heading
+  const HDR = PAD + 74,
+    parts = clones.map((c, i) => ({ c, vb: c.getAttribute('viewBox').split(' ').map(Number), title: spec.partTitles?.[i] ?? null }));
+  let chartH = 0;
+  parts.forEach((p) => {
+    p.y = HDR + chartH + (p.title ? 40 : 0);
+    chartH += p.vb[3] + (p.title ? 40 : 0) + 12;
+  });
+  const FOOT0 = HDR + chartH + 8,
+    HT = FOOT0 + LEGH + BK + 28 + foot.length * 18 + 10 + src.length * 18 + 14 + 18 + PAD;
   const out = document.createElementNS(ns, 'svg');
   out.setAttribute('xmlns', ns);
   out.setAttribute('width', EW);
@@ -208,49 +276,61 @@ function frameExport(spec, clone, box) {
   };
   mk('title', {}, spec.title);
   mk('defs', {}).appendChild(document.createElementNS(ns, 'style')).textContent = fontFaceCSS();
-  mk('desc', {}, spec.key);
+  mk('desc', {}, `${spec.sub} ${spec.key}`);
   mk('rect', { width: EW, height: HT, style: `fill:${bg}` });
-  mk('text', { x: 16, y: 26, style: `fill:${fg};font:600 17px ${SANS_EXPORT}` }, spec.title);
-  mk(
-    'text',
-    { x: EW - 16, y: 26, 'text-anchor': 'end', style: `fill:${muted};font:11.5px ${SANS_EXPORT}` },
-    `Data as of ${AS_OF} · Source: SWF 2026 and ledger`,
-  );
-  Object.entries({ x: 0, y: HDR, width: EW, height: vb[3] }).forEach(([k, v]) => clone.setAttribute(k, v));
-  // the nested chart svg would point at a heading id that does not exist in the file: the outer svg carries the title (role img, aria-label)
-  ['id', 'aria-labelledby', 'role'].forEach((a) => clone.removeAttribute(a));
-  clone.setAttribute('aria-hidden', 'true');
-  out.appendChild(clone);
+  mk('text', { x: PAD, y: PAD + 28, style: `fill:${fg};font:500 29px ${SERIF}` }, spec.title);
+  mk('text', { x: PAD, y: PAD + 54, style: `fill:${muted};font:400 14.5px ${SANS}` }, spec.sub);
+  parts.forEach(({ c, vb, y, title }) => {
+    if (title) mk('text', { x: PAD, y: y - 16, style: `fill:${fg};font:600 15px ${SANS}` }, title);
+    Object.entries({ x: PAD, y, width: inner, height: vb[3] }).forEach(([k, v]) => c.setAttribute(k, v));
+    // the nested chart would point at a heading id that does not exist in the file: the outer svg carries the title (role img, aria-label)
+    ['id', 'aria-labelledby', 'role'].forEach((a) => c.removeAttribute(a));
+    c.setAttribute('aria-hidden', 'true');
+    out.appendChild(c);
+  });
+  mk('line', { x1: PAD, x2: EW - PAD, y1: FOOT0, y2: FOOT0, style: `stroke:${line};stroke-width:1` });
   legRows.forEach((row, ri) =>
     row.forEach((it) => {
-      const yy = HDR + vb[3] + 14 + ri * 16;
-      if (it.head) mk('text', { x: LX + it.x, y: yy, style: `fill:${fg};font:600 10.5px ${SANS_EXPORT}` }, it.head);
+      const yy = FOOT0 + 28 + ri * 24;
+      if (it.head) mk('text', { x: PAD + it.x, y: yy, style: `fill:${muted};font:600 12px ${SANS}` }, it.head);
       else if (it.g) {
-        const gw = it.gw || 14;
-        mk('g', { transform: `translate(${LX + it.x + gw / 2},${yy - 4})`, 'aria-hidden': 'true' }).innerHTML = rv(it.g);
-        mk('text', { x: LX + it.x + gw + 6, y: yy, style: `fill:${fg};font:10.5px ${SANS_EXPORT}` }, it.t);
+        const gw = it.gw || 18;
+        mk('g', { transform: `translate(${PAD + it.x + gw / 2},${yy - 4})`, 'aria-hidden': 'true' }).innerHTML = rv(it.g);
+        mk('text', { x: PAD + it.x + gw + 8, y: yy, style: `fill:${fg};font:400 12.5px ${SANS}` }, it.t);
       } else {
-        mk('rect', { x: LX + it.x, y: yy - 9, width: 10, height: 10, rx: 2, style: `fill:${rv(it.c)}` });
-        mk('text', { x: LX + it.x + 14, y: yy, style: `fill:${fg};font:10.5px ${SANS_EXPORT}` }, it.t);
+        mk('rect', { x: PAD + it.x, y: yy - 10, width: 12, height: 12, rx: 2.5, style: `fill:${rv(it.c)}` });
+        mk('text', { x: PAD + it.x + 18, y: yy, style: `fill:${fg};font:400 12.5px ${SANS}` }, it.t);
       }
     }),
   );
   if (spec.bubbles) {
-    // Bubble-size key: nested dashed circles (same sqrt scale as the chart, 30 px radius = 3,600 fragments) with their fragment counts.
+    // Bubble-size key: nested dashed circles (same square-root scale as the chart: a 30 px radius is 3,600 fragments) with their fragment counts.
     const r30 = (n) => 30 * Math.sqrt(n / 3600),
-      by = HDR + vb[3] + LEGH + 4 + 62,
-      cx0 = LX + 32;
+      by = FOOT0 + LEGH + 14 + 62,
+      cx0 = PAD + 34;
     [100, 1000, 3500].forEach((n) => {
+      const top = by - 2 * r30(n);
       mk('circle', { cx: cx0, cy: by - r30(n), r: r30(n), style: `fill:none;stroke:${muted};stroke-dasharray:2 2` });
-      mk('text', { x: cx0 + 36, y: by - 2 * r30(n) + 9, style: `fill:${muted};font:10px ${SANS_EXPORT}` }, n.toLocaleString('en-US'));
+      mk('path', { d: `M${cx0},${top}H${cx0 + 38}`, style: `fill:none;stroke:${line}` });
+      mk('text', { x: cx0 + 42, y: top + 4, style: `fill:${muted};font:400 12px ${SANS}` }, n.toLocaleString('en-US'));
     });
     mk(
       'text',
-      { x: cx0 + 80, y: by - 26, style: `fill:${fg};font:10.5px ${SANS_EXPORT}` },
-      'Debris bubble area = cataloged fragments (as of Feb. 2026); labels give fragment counts.',
+      { x: cx0 + 96, y: by - 28, style: `fill:${fg};font:400 12.5px ${SANS}` },
+      'Debris bubble area = cataloged fragments (as of Feb. 2026); the numbers are fragment counts.',
     );
   }
-  foot.forEach((t, i) => mk('text', { x: 16, y: HDR + vb[3] + LEGH + BK + 18 + i * 14, style: `fill:${muted};font:10.5px ${SANS_EXPORT}` }, t));
+  let fy = FOOT0 + LEGH + BK + 38;
+  foot.forEach((t, i) => mk('text', { x: PAD, y: fy + i * 18, style: `fill:${muted};font:400 12px ${SANS}` }, t));
+  fy += foot.length * 18 + 10;
+  src.forEach((t, i) => mk('text', { x: PAD, y: fy + i * 18, style: `fill:${muted};font:400 12px ${SANS}` }, t));
+  fy += src.length * 18 + 14;
+  mk('text', { x: PAD, y: fy, style: `fill:${fg};font:600 12px ${SANS}` }, CREDIT);
+  mk(
+    'text',
+    { x: EW - PAD, y: fy, 'text-anchor': 'end', style: `fill:${muted};font:400 12px ${SANS}` },
+    `Data as of ${AS_OF}. Records last updated ${LEDGER_AS_OF}.`,
+  );
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(out);
 }
 // Redraw a chart off-screen at the fixed export width (desktop layout) and serialise it.
@@ -262,14 +342,14 @@ export function exportSVG(which) {
   setExporting(true, true);
   const box = document.createElement('div');
   box.className = 'xbox ' + (document.getElementById('expDark')?.checked ? 'xdark' : 'xlight');
-  box.style.cssText = `position:absolute;left:-99999px;top:0;width:${EXPORT_W}px`;
+  box.style.cssText = `position:absolute;left:-99999px;top:0;width:${EXPORT_W - 2 * PAD}px`;
   document.body.appendChild(box);
   try {
     spec.draw()(box);
-    const src = box.querySelector('svg'),
-      clone = src.cloneNode(true);
-    inlineStyles(src, clone);
-    return frameExport(spec, clone, box);
+    const srcs = [...box.querySelectorAll('svg')],
+      clones = srcs.map((s) => s.cloneNode(true));
+    srcs.forEach((s, i) => inlineStyles(s, clones[i]));
+    return frameExport(spec, clones, box);
   } finally {
     setExporting(false, false);
     box.remove();
@@ -286,4 +366,8 @@ export function download(name, data, type) {
 }
 document
   .querySelectorAll('[data-export]')
-  .forEach((b) => (b.onclick = () => download(`counterspace-${b.dataset.export}.svg`, exportSVG(b.dataset.export), 'image/svg+xml')));
+  .forEach(
+    (b) =>
+      (b.onclick = () =>
+        download(`counterspace-timeline-${EXPORT_FILES[b.dataset.export] || b.dataset.export}.svg`, exportSVG(b.dataset.export), 'image/svg+xml')),
+  );

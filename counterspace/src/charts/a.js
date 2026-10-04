@@ -9,7 +9,6 @@ import {
   KIN,
   LAST_DA,
   Placer,
-  TYPE_LABEL,
   badge,
   byId,
   colorOf,
@@ -24,7 +23,7 @@ import {
   tw,
   xAxis,
 } from '../app.js';
-import { activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
+import { KIND_PLAIN, activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
 const stateA = { zoom: true }, // phones open on the flagged 2004-2026 zoom (the toggle returns the full span); other widths ignore it
   ZOOM_A0 = '2004-01-01';
 const ALT_AT = { intercept: 'Intercept', apogee: 'Highest point', detonation: 'Detonation' };
@@ -103,17 +102,20 @@ export function drawA(el = document.getElementById('svgA')) {
     .scaleSqrt()
     .domain([0, 3600])
     .range([0, phone ? 22 : 30]);
-  // ---- orbit zones, each named inside the zone at the left
-  const zoneLabels = [],
-    HX = x(parse(LAST_DA));
-  // The label for the last destructive test runs vertically just right of its dotted line, so it can never meet the marks or notes.
-  const HT = [`Last destructive test (${fmtMY(parse(LAST_DA))})`, 'Last destructive test'],
+  // ---- orbit zones, each named inside the zone at the left (the names are placed after the notes, so the notes keep the clearest spots)
+  const HX = x(parse(LAST_DA));
+  // The label for the last destructive test runs vertically just right of its dotted line (its name, then its date beside it), so it can never meet the
+  // marks or notes. The date is dropped if there is not room for it.
+  const HN = 'Last destructive test',
+    HD = d3.utcFormat('%B %Y')(parse(LAST_DA)),
     nearX = KV.filter((e) => e.altitude_km != null && Math.abs(x(parse(e.date)) - HX) < 34).map(
       (e) => y(e.altitude_km) - (e.fragments_cataloged ? (phone ? 22 : 30) : 14),
     );
   const roomV = Math.min(top + plotH, ...nearX) - top - 14,
-    handoffText = HT.find((s) => tw(s, 12, 600) <= roomV) || HT.at(-1);
-  // Zone labels are obstacles too: each slides right until clear of every mark, its cube icon and every debris bubble.
+    handoffLines = Math.max(tw(HN, 12, 600), tw(HD, 12)) <= roomV ? [HN, HD] : [HN],
+    handoffLen = Math.max(...handoffLines.map((t, i) => tw(t, 12, i ? 400 : 600)));
+  // Zone labels are obstacles too: each takes the longest of its wordings that finds room clear of every mark, its cube icon and every debris bubble,
+  // looking near the top of its zone first and as far left as it can.
   const obst = KV.filter((e) => e.altitude_km != null).map((e) => {
     const X = x(parse(e.date)),
       Y = y(e.altitude_km),
@@ -121,13 +123,8 @@ export function drawA(el = document.getElementById('svgA')) {
       R = Math.max(r, 10);
     return [X - R, Y - R, X + R + (hasScene(e) ? 10 : 0), Y + R];
   });
-  const zone = (a, b, fill, label, ly) => {
-    const lw = tw(label, 12, 600);
-    let bx = M.l + 8;
-    const hit = () => obst.some(([x0, y0, x1, y1]) => x0 < bx + lw + 4 && x1 > bx - 4 && y0 < ly + 5 && y1 > ly - 14);
-    while (bx < W * 0.55 && hit()) bx += 4; // slide right until clear of the marks
-    if (bx >= W * 0.55) bx = M.l + 8; // nowhere clear: stay at the edge
-    zoneLabels.push({ x: bx, y: ly, w: lw });
+  const zoneJobs = [];
+  const zone = (a, b, fill, labels, ly0, depth = 140) => {
     svg
       .append('rect')
       .attr('x', M.l)
@@ -135,12 +132,33 @@ export function drawA(el = document.getElementById('svgA')) {
       .attr('y', y(b))
       .attr('height', y(a) - y(b))
       .style('fill', fill);
-    svg.append('text').attr('class', 'band-label').attr('x', bx).attr('y', ly).text(label);
+    zoneJobs.push({ a, labels, ly0, depth });
   };
-  zone(8, 100, 'var(--recon)', phone ? 'Below 100 km' : 'Below 100 km: the atmosphere', y(100) + 18);
-  zone(100, 2000, 'var(--leo)', phone ? 'Low Earth orbit' : 'Low Earth orbit (LEO), up to about 2,000 km', y(2000) + 18);
-  zone(2000, 35000, 'var(--meo)', phone ? 'Medium Earth orbit' : 'Medium Earth orbit (MEO), including navigation satellites at about 20,200 km', y(35000) + 26);
-  zone(35000, 37000, 'var(--geo)', phone ? 'Geostationary orbit' : 'Geostationary orbit (GEO), 35,786 km', y(37000) - 6);
+  zone(8, 100, 'var(--recon)', phone ? ['Below 100 km'] : ['Below 100 km: the atmosphere', 'Below 100 km'], y(100) + 18);
+  zone(
+    100,
+    2000,
+    'var(--leo)',
+    phone ? ['Low Earth orbit'] : ['Low Earth orbit (LEO), up to about 2,000 km', 'Low Earth orbit (LEO)', 'Low Earth orbit'],
+    y(2000) + 18,
+  );
+  zone(
+    2000,
+    35000,
+    'var(--meo)',
+    phone
+      ? ['Medium Earth orbit']
+      : ['Medium Earth orbit (MEO), including navigation satellites at about 20,200 km', 'Medium Earth orbit (MEO)', 'Medium Earth orbit'],
+    y(35000) + 26,
+  );
+  zone(
+    35000,
+    37000,
+    'var(--geo)',
+    phone ? ['Geostationary orbit'] : ['Geostationary orbit (GEO), 35,786 km', 'Geostationary orbit (GEO)', 'Geostationary orbit'],
+    y(37000) - 6,
+    0,
+  );
   // ---- altitude axis: plain numbers with the unit, a full-width rule at each tens step and a fainter one between
   const major = [10, 100, 1000, 10000],
     minor = [30, 300, 3000, 30000];
@@ -205,11 +223,15 @@ export function drawA(el = document.getElementById('svgA')) {
     .text(phone ? 'Altitude not reported' : 'Altitude not reported: placed by date only');
   xAxis(svg, x, sy + stripH, zoomed ? 5 : undefined);
   // ---- the last destructive test
-  handoff(svg, x, top, sy + stripH, null)
-    .append('text')
-    .attr('transform', `translate(${HX + 13},${top + 4}) rotate(90)`)
-    .attr('text-anchor', 'start')
-    .text(handoffText);
+  const hg = handoff(svg, x, top, sy + stripH, null);
+  handoffLines.forEach((t, i) =>
+    hg
+      .append('text')
+      .attr('transform', `translate(${HX + 13 + i * 16},${top + 4}) rotate(90)`)
+      .attr('text-anchor', 'start')
+      .style('font-weight', i ? 400 : null)
+      .text(t),
+  );
   // ---- debris bubbles first (behind the marks)
   const dest = KV.filter((e) => e.type === 'destructive');
   svg
@@ -240,7 +262,7 @@ export function drawA(el = document.getElementById('svgA')) {
     .attr(
       'aria-label',
       (d) =>
-        `${fmtD(d)}. ${d.state}, ${d.system}. Target: ${tgt(d)}. ${TYPE_LABEL[d.type]}. Altitude ` +
+        `${fmtD(d)}. ${d.state}, ${d.system}. Target: ${tgt(d)}. ${KIND_PLAIN[d.type]}. Altitude ` +
         `${d.altitude_km == null ? 'not reported' : d.altitude_km + ' km'}` +
         `.${d.fragments_cataloged ? ' ' + d.fragments_cataloged + ' fragments cataloged.' : ''}${hasScene(d) ? ' Select to open a 3D explainer.' : ''}`,
     );
@@ -256,15 +278,24 @@ export function drawA(el = document.getElementById('svgA')) {
   g.attr('data-t', (d) => +parse(d.date));
   rove(g);
   // ---- annotations: each tries several offsets and takes the first that clears zone labels, the label of the last destructive test, all marks and earlier notes
-  const pl = new Placer({ x0: 2, x1: W - 2, y0: 0, y1: H });
+  const pl = new Placer({ x0: 2, x1: W - 2, y0: top, y1: top + plotH });
   pl.add([0, 0, M.l + 1, top + plotH + 6]); // the altitude numbers: no note may sit on them
-  zoneLabels.forEach((b) => pl.add(pl.textRect(b.x, b.y, 'start', b.w, 12)));
-  pl.add([HX + 2, top + 4, HX + 17, top + 8 + tw(handoffText, 12, 600)]);
+  pl.add([HX + 2, top + 4, HX + 17 + (handoffLines.length - 1) * 16, top + 8 + handoffLen]);
   KV.forEach((d) => {
     const X = x(parse(d.date)),
       Y = d.altitude_km == null ? stripY(d) : y(d.altitude_km);
     pl.add([X - 12, Y - 21, X + 21, Y + 12], 'M');
   });
+  // A leader line may cross marks (it starts at one) but never text, a zone label or the axis numbers.
+  const segClear = (x1, y1, x2, y2) => {
+    const n = Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 4);
+    for (let i = 1; i < n; i++) {
+      const px = x1 + ((x2 - x1) * i) / n,
+        py = y1 + ((y2 - y1) * i) / n;
+      if (pl.r.some((o) => o[4] !== 'M' && px > o[0] - 2 && px < o[2] + 2 && py > o[1] - 2 && py < o[3] + 2)) return false;
+    }
+    return true;
+  };
   const ann = (id, t1, t2, prefs) => {
     const e = byId[id],
       X = x(parse(e.date)),
@@ -276,13 +307,19 @@ export function drawA(el = document.getElementById('svgA')) {
         x0 = anchor === 'end' ? tx - w : tx,
         q = [x0, ty - 13, x0 + w, ty + (t2 ? 19 : 5)];
       if (!pl.free(q, [], 3)) continue;
-      pl.add(q);
       // The leader starts at the edge of the mark (with a small dot there) and ends beside the first line of the note.
       const ex = tx + (anchor === 'end' ? 5 : -5),
         ey = ty - 4,
         len = Math.hypot(ex - X, ey - Y) || 1,
         sx = X + ((ex - X) / len) * 10,
         sy2 = Y + ((ey - Y) / len) * 10;
+      if (!segClear(sx, sy2, ex, ey)) continue;
+      pl.add(q);
+      for (let i = 0; i <= Math.ceil(len / 8); i++) {
+        const px = sx + ((ex - sx) * i) / Math.ceil(len / 8),
+          py = sy2 + ((ey - sy2) * i) / Math.ceil(len / 8);
+        pl.add([px - 2, py - 2, px + 2, py + 2], 'L');
+      }
       svg.append('line').attr('class', 'ann-leader').attr('x1', sx).attr('y1', sy2).attr('x2', ex).attr('y2', ey);
       svg.append('circle').attr('class', 'ann-dot').attr('cx', sx).attr('cy', sy2).attr('r', 2.5);
       const t = svg.append('text').attr('x', tx).attr('y', ty).attr('text-anchor', anchor);
@@ -309,11 +346,13 @@ export function drawA(el = document.getElementById('svgA')) {
     [a + 30, -b - 20, 'start'],
   ];
   if (!phone) {
-    ann('cn-2013-dn2', 'Reaching toward geostationary orbit: DN-2, 2013', 'About 30,000 km at its highest point. Not an intercept (hollow circle).', [
-      ...around(40, 28),
-      ...sweep(),
-    ]);
-    ann('cn-2007-fy1c', 'Highest intercept: Fengyun-1C, 2007, at 880 km', 'No intercept has reached that height since.', [
+    ann(
+      'cn-2013-dn2',
+      'China’s DN-2 rocket, 2013: toward geostationary orbit',
+      'About 30,000 km at its highest point. It did not hit a target (hollow circle).',
+      [...around(40, 28), ...sweep()],
+    );
+    ann('cn-2007-fy1c', 'Highest intercept: China’s Fengyun-1C satellite, 2007, at 880 km', 'No intercept has reached that height since.', [
       [-36, -44, 'end'],
       [-36, -62, 'end'],
       ...around(36, 44),
@@ -326,8 +365,8 @@ export function drawA(el = document.getElementById('svgA')) {
       ...sweep(),
     ]);
   } else {
-    ann('cn-2013-dn2', 'DN-2', null, [...around(20, 24), ...sweep()]);
-    ann('cn-2007-fy1c', 'Highest intercept', null, [[-20, -34, 'end'], [20, -34, 'start'], ...around(20, 30), ...sweep()]);
+    ann('cn-2013-dn2', '30,000 km', 'in 2013', [...around(20, 24), ...sweep()]);
+    ann('cn-2007-fy1c', 'Highest intercept: 880 km', null, [[-20, -34, 'end'], [20, -34, 'start'], ...around(20, 30), ...sweep()]);
   }
   // The empty stretches of the plot are data, not a mistake: say so in the chart. The note is worked out from the records (no years are typed in):
   // gaps are runs of 5 or more calendar years between consecutive tests of any country, plus the longest span with no destructive test.
@@ -354,11 +393,12 @@ export function drawA(el = document.getElementById('svgA')) {
         gx1 = Math.max(...gaps.map((q) => q.x1)),
         gm = (gx0 + gx1) / 2,
         w = Math.max(tw(l1, 12.5), l2 ? tw(l2, 12.5) : 0),
-        gy = y(5200);
+        gy = y(32); // the empty lower part of the plot: a calm place for the note, away from the marks
       let placed = null;
       for (const withL2 of l2 ? [true, false] : [false]) {
         const cand = [];
-        for (let dy = -126; dy <= 126; dy += 14) for (let dx = -240; dx <= 240; dx += 30) cand.push([dx, dy, Math.abs(dx) / 30 + (Math.abs(dy) / 14) * 1.2]);
+        for (let dy = -(gy + 4 - top - 30); dy <= top + plotH - 4 - gy - 4; dy += 7)
+          for (let dx = -480; dx <= 480; dx += 30) cand.push([dx, dy, Math.abs(dx) / 30 + (Math.abs(dy) / 14) * 1.2]);
         for (const [dx, dy] of cand.sort((p, q) => p[2] - q[2])) {
           const ty = gy + 4 + dy,
             cxx = gm + dx,
@@ -387,14 +427,31 @@ export function drawA(el = document.getElementById('svgA')) {
       }
     }
   }
+  zoneJobs.forEach(({ a, labels, ly0, depth }) => {
+    const left = M.l + 8,
+      yMax = Math.min(y(a) - 8, ly0 + depth);
+    let best = null;
+    labels.forEach((label, vi) => {
+      const lw = tw(label, 12, 600);
+      for (let ly = ly0; ly <= Math.max(ly0, yMax); ly += 14)
+        for (let bx = left; bx + lw <= W - M.r - 8 && bx < W * 0.7; bx += 4) {
+          const q = pl.textRect(bx, ly, 'start', lw, 12);
+          if (!pl.free(q, [], 3) || obst.some(([x0, y0, x1, y1]) => x0 < q[2] + 3 && x1 > q[0] - 3 && y0 < q[3] + 2 && y1 > q[1] - 2)) continue;
+          const cost = bx - left + (ly - ly0) * 0.8 + vi * 120;
+          if (!best || cost < best.cost) best = { bx, ly, label, lw, cost };
+        }
+    });
+    best ??= { bx: left, ly: ly0, label: labels.at(-1), lw: tw(labels.at(-1), 12, 600) };
+    pl.add(pl.textRect(best.bx, best.ly, 'start', best.lw, 12));
+    svg.append('text').attr('class', 'band-label').attr('x', best.bx).attr('y', best.ly).text(best.label);
+  });
   addGuide(svg, x, top, sy + stripH, 'A');
   if (zoomed)
     svg
       .append('text')
       .attr('class', 'zoom-flag')
-      .attr('x', W - M.r)
-      .attr('y', 14)
-      .attr('text-anchor', 'end')
+      .attr('x', 0)
+      .attr('y', 36)
       .text(`Zoomed to 2004–2026: ${KIN.length - KV.length} earlier tests hidden`);
   if (!EXPORTING) {
     const b = document.getElementById('aZoom');
@@ -406,11 +463,11 @@ export function drawA(el = document.getElementById('svgA')) {
   const K = legend('legendA', 24, 20),
     li = K.item,
     ink = 'var(--text)';
-  K.group('Kind of test');
-  li(kinMarkup('destructive', ink), 'Destructive intercept');
-  li(kinMarkup('midcourse_intercept', ink), 'Intercept of a missile target (suborbital)');
-  li(kinMarkup('apogee_only', ink), 'Apogee, flyby or other test with no intercept');
-  li(kinMarkup('nuclear', ink), 'Nuclear explosion');
+  K.group('What happened');
+  li(kinMarkup('destructive', ink), 'Destroyed a satellite (a destructive intercept)');
+  li(kinMarkup('midcourse_intercept', ink), 'Intercepted a ballistic missile in flight');
+  li(kinMarkup('apogee_only', ink), 'Test that destroyed nothing (rocket-only flight, flyby or other)');
+  li(kinMarkup('nuclear', ink), 'Nuclear explosion in space');
   K.group('Country');
   ['United States', 'Russia', 'China', 'India'].forEach((s) =>
     li(`<rect x="-6" y="-6" width="12" height="12" rx="2.5" style="fill:${colorOf(s)}"/>`, s === 'Russia' ? 'USSR and Russia' : s, 16),
@@ -461,7 +518,7 @@ export function drawA(el = document.getElementById('svgA')) {
       e.state,
       e.system,
       targetWords(e.target),
-      TYPE_LABEL[e.type],
+      KIND_PLAIN[e.type],
       e.altitude_km ?? '—',
       e.altitude_km == null ? '—' : ALT_AT[e.altitude_kind] || e.altitude_kind,
       num(e.fragments_cataloged),

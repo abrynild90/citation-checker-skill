@@ -79,20 +79,20 @@ export const GLOSSARY = [
   ['DA-ASAT', 'Direct-ascent anti-satellite: a missile launched from Earth to destroy or damage a satellite.'],
   ['GNSS', 'Global navigation satellite systems, such as GPS.'],
   ['ICAO', 'International Civil Aviation Organization.'],
-  [
-    'ITU Arts. 45 and 48',
-    'Articles 45 and 48 of the Constitution of the International Telecommunication Union (ITU): harmful interference; military radio services.',
-  ],
+  ['ITU', 'International Telecommunication Union, the United Nations agency for telecommunications.'],
+  ['ITU Arts. 45/48', 'Articles 45 and 48 of the Constitution of the ITU: harmful interference; military radio services.'],
   ['LTBT', 'Limited Test Ban Treaty.'],
   ['MILAMOS', 'McGill Manual on International Law Applicable to Military Uses of Outer Space.'],
   ['OEWG', 'Open-ended Working Group.'],
   ['OST', 'Outer Space Treaty.'],
   ['PAROS', 'Prevention of an Arms Race in Outer Space.'],
-  ['PPWT', 'The draft Treaty on the Prevention of the Placement of Weapons in Outer Space, put forward by Russia and China.'],
+  ['PPWT, PPWT II', 'The draft Treaty on the Prevention of the Placement of Weapons in Outer Space, put forward by Russia and China, and its updated version.'],
   ['RRB', 'ITU Radio Regulations Board.'],
+  ['Tallinn', 'Tallinn Manual 2.0: an expert manual on how international law applies to cyber operations.'],
   ['UNGA 75/36, 77/41', 'United Nations General Assembly resolutions.'],
   ['US pledge', 'The 2022 United States moratorium on destructive direct-ascent anti-satellite tests.'],
   ['Veto', 'Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit. The draft did not concern anti-satellite testing.'],
+  ['Woomera', 'Woomera Manual: an expert manual on the international law of military space operations.'],
   ['Asterisk (*)', 'Soft law: an expert manual, not binding.'],
 ];
 // The abbreviations as running text, for the saved image (the file has no glossary list).
@@ -698,11 +698,11 @@ export function drawLegalKey() {
     li = K.item;
   li(glyphMarkup('treaty'), 'Treaty');
   li(glyphMarkup('draft'), 'Draft treaty put forward');
-  li(glyphMarkup('resolution'), 'Resolution or body finding');
-  li(glyphMarkup('unilateral'), 'Unilateral pledge');
-  li(glyphMarkup('soft'), 'Soft law (expert manual, not binding)');
-  li(glyphMarkup('veto'), 'Veto');
-  li(`<rect x="-9" y="-3.5" width="18" height="7" rx="3.5" style="${BAR_STYLE}"/>`, 'Negotiation period');
+  li(glyphMarkup('resolution'), 'Resolution or finding by an international body (not binding)');
+  li(glyphMarkup('unilateral'), 'Pledge by one country');
+  li(glyphMarkup('soft'), 'Expert manual (soft law, not binding)');
+  li(glyphMarkup('veto'), 'Veto in the UN Security Council');
+  li(`<rect x="-9" y="-3.5" width="18" height="7" rx="3.5" style="${BAR_STYLE}"/>`, 'Years of negotiation');
   li(
     '<g class="badge3d"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>',
     'Select a cube icon to open a 3D explainer',
