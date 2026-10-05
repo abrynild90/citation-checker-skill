@@ -28,14 +28,14 @@ const POSTER_T = {
   laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.5,
-  spaceplanes: 0.17,
+  spaceplanes: 0.15,
 };
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
-  spaceplanes: { pose: [3.5, 2.4, 1.6, 0.25, 0.1, 0.1, 40] }, // the plane in sunlight over the Atlantic, wide enough that the orbit tilt reads
+  spaceplanes: { cam: 1, boost: 1.6 }, // the X-37B follow view: the plane large on the sunlit limb with its orbit loops
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });
@@ -63,13 +63,14 @@ try {
     await page.waitForTimeout(1500);
     const key = id.replace(/-/g, '_');
     const view = { ...(POSTER_VIEW[id] || {}) };
-    if (process.env['C_' + key] != null) view.cam = +process.env['C_' + key];
+    if (process.env['C_' + key] != null) { view.cam = +process.env['C_' + key]; if (!process.env['P_' + key]) delete view.pose; }
     if (process.env['P_' + key]) view.pose = process.env['P_' + key].split(',').map(Number);
     await page.evaluate(
       ({ t, view }) => {
         const h = window.__cs.host();
         h.playing = false;
         h.update(t);
+        if (view.boost) h._modelBoost = view.boost;
         if (view.cam != null) {
           h.pickCam(view.cam);
           h.update(t);
