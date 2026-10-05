@@ -495,6 +495,20 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
     det.insertAdjacentHTML('beforeend', `<span id="after-${id}" tabindex="-1"></span>`);
     host.insertAdjacentHTML('beforebegin', `<a class="skip-table" href="#after-${id}">Skip this table</a>`);
   }
+  // On a phone each row is a tall card, so a long list starts with its first 10 and a button shows the rest (CSS hides the extra rows on phones only).
+  if (host && rows.length > 12 && !host.parentElement.querySelector(':scope > .more-rows')) {
+    host.classList.add('capped');
+    host.insertAdjacentHTML(
+      'afterend',
+      `<button class="btn small more-rows" type="button" aria-expanded="false" aria-controls="${id}">Show all ${rows.length} entries</button>`,
+    );
+    const b = host.nextElementSibling;
+    b.addEventListener('click', () => {
+      const all = host.classList.toggle('capped') === false;
+      b.setAttribute('aria-expanded', String(all));
+      b.textContent = all ? 'Show first 10 entries' : `Show all ${rows.length} entries`;
+    });
+  }
   // the disclosure button says how big the table is
   const sum = document.getElementById(id)?.closest('details')?.querySelector(':scope > summary');
   if (sum && !sum.querySelector('.cnt')) sum.insertAdjacentHTML('beforeend', `<span class="cnt">${rows.length} entries</span>`);
