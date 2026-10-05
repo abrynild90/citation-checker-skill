@@ -116,7 +116,7 @@ export const GNSS = {
       phone: { at: [51, 18.5, 1.55] },
       ref: false, // a close-up of the dome: Airliner 2 is outside this frame by design
     },
-    { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], ref: false, hide: ['Ground jammer', 'Jammer effect'] },
+    { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], phone: { at: [42, -8, 5.6] }, ref: false, hide: ['Ground jammer', 'Jammer effect'] },
   ],
   status: [
     [0, 'Both airliners have GNSS (green); the jammer zone is red', 'Airliners have GNSS (green); zone is red'],
