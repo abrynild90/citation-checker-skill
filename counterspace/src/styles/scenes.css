@@ -900,7 +900,7 @@
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1) {
   .overlay .panel {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 40%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 44%) minmax(0, 1fr) auto;
   }
   .overlay .story-scroll .story-foot {
     margin-top: var(--s-6);
@@ -911,6 +911,18 @@
     max-height: none;
     overflow: visible;
     font-size: 13px;
+  }
+  /* The account is folded away until asked for, so the steps get the room */
+  .overlay .sv-lede.clamped {
+    display: none;
+  }
+  .overlay .sv-more {
+    float: right;
+    margin: 0 0 0 var(--s-2);
+  }
+  .overlay .sv-lede:not(.clamped) + .sv-more {
+    float: none;
+    margin: 0;
   }
   .overlay .view {
     grid-column: 1;
@@ -933,7 +945,7 @@
     height: 100vh;
     height: 100dvh;
     border-radius: 0;
-    grid-template-rows: auto minmax(0, 40%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 44%) minmax(0, 1fr) auto;
     --sv-pad: 16px;
   }
   /* The title takes the full width; close sits at its top right; previous, count and next make a small pager under it. */
@@ -1170,10 +1182,23 @@
     padding: 0 10px;
   }
   .overlay .seg {
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 12px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 36px), transparent);
+  }
+  .overlay .seg button {
+    scroll-snap-align: start;
+  }
+  .overlay .seg.at-start {
     -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
     mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
   }
   .overlay .seg.at-end {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px);
+    mask-image: linear-gradient(90deg, transparent 0, #000 28px);
+  }
+  .overlay .seg.at-start.at-end {
     -webkit-mask-image: none;
     mask-image: none;
   }
@@ -1356,10 +1381,13 @@
     display: block;
     flex: none;
     margin: 0;
-    padding: 6px var(--sv-pad, 16px);
+    padding: 6px var(--sv-pad, 16px) 0;
+    margin-bottom: 6px;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     font: 400 13px/1.4 var(--sans);
     color: var(--muted);
     background: var(--surface);
@@ -1424,5 +1452,19 @@
     height: auto;
     overflow: visible;
     clip: auto;
+  }
+}
+
+/* ---------- Wide layout: the step that is playing stays pinned to the edge of the list while it scrolls out of view */
+@media (min-width: 761px) and (min-aspect-ratio: 1/1) {
+  .overlay .sv-steps #sceneSteps li.now {
+    position: sticky;
+    top: 6px;
+    bottom: 6px;
+    z-index: 3;
+  }
+  .overlay .sv-steps #sceneSteps li.now .step {
+    background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
+    box-shadow: 0 0 0 1px var(--line);
   }
 }

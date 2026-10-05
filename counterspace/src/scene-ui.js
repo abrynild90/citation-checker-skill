@@ -503,6 +503,7 @@ function syncCams() {
   [...camsEl.children].forEach((b, i) => {
     b.setAttribute('aria-pressed', String(i === on));
     b.title = `${b.dataset.name ? b.dataset.name + ' ' : ''}(key ${i + 1})`;
+    if (i === on && camsEl.scrollWidth > camsEl.clientWidth) b.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   });
 }
 function syncScrub(t) {
@@ -536,9 +537,13 @@ function staticMode(on) {
   staticEl.hidden = !on;
   overlay.classList.toggle('is-static', on);
   if (on) {
-    staticTxt.textContent = REDUCED
-      ? 'Animation is switched off on this device, so this is a still diagram. Turn animation on in your device settings to watch it move.'
-      : 'The 3D view could not start here, so this is a still diagram.';
+    staticTxt.textContent = COMPACT.matches
+      ? REDUCED
+        ? 'Animation is off, so this is a still diagram.'
+        : 'The 3D view could not start here.'
+      : REDUCED
+        ? 'Animation is switched off on this device, so this is a still diagram. Turn animation on in your device settings to watch it move.'
+        : 'The 3D view could not start here, so this is a still diagram.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
@@ -578,6 +583,8 @@ function togglePlay() {
   setStatus(host.playing ? 'Playing.' : 'Paused.');
 }
 playBtn.onclick = togglePlay;
+const narrowViews = matchMedia('(max-width: 900px)');
+narrowViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
 function buildViews(cfg, sim) {
   camsEl.textContent = '';
   camOn = -2;
@@ -585,7 +592,10 @@ function buildViews(cfg, sim) {
     const label = viewName(cfg.cameras?.[i], c.name),
       b = document.createElement('button');
     b.type = 'button';
-    b.textContent = label;
+    // on a narrow screen "From the north" is shown as "North" (the full name stays as the button's name), so the views fit without clipping
+    const short = narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^./, (m) => m.toUpperCase()) : label;
+    b.textContent = short;
+    if (short !== label) b.setAttribute('aria-label', label);
     b.dataset.name = label === c.name ? '' : c.name;
     b.setAttribute('aria-keyshortcuts', String(i + 1));
     b.onclick = () => chooseView(i);
@@ -602,6 +612,7 @@ function chooseView(i) {
 // Phone: the views scroll sideways; a fade on the right edge says more lie beyond it.
 function camFade() {
   camsEl.classList.toggle('at-end', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft <= 4);
+  camsEl.classList.toggle('at-start', camsEl.scrollLeft <= 4);
 }
 camsEl.addEventListener('scroll', camFade, { passive: true });
 addEventListener('resize', camFade);
