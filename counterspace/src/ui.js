@@ -44,20 +44,24 @@ function showCard(html, evt, el, full = false) {
   const bandR = document.getElementById('legalBand')?.getBoundingClientRect(),
     TOP = bandR && bandR.top <= 1 && bandR.bottom > 0 && !(el && el.closest('#legalBand')) ? Math.max(8, bandR.bottom + 8) : 8;
   // Smart placement: try right, left, above and below the mark and take the candidate that covers the fewest neighbouring marks and the chart's x axis.
-  const root = el?.closest?.('svg'),
-    others = root
-      ? [...root.querySelectorAll('.mark')]
-          .filter((n) => n !== el)
-          .flatMap((n) =>
-            n.querySelector('.hit') ? [...n.querySelectorAll(':scope > :not(.hit)')].map((c) => c.getBoundingClientRect()) : [n.getBoundingClientRect()],
-          )
-      : [];
+  const root = el?.closest?.('svg');
   // Annotation lines are tspans inside a <text>: the whole <text> is the obstacle. Zone labels are obstacles everywhere (not only on the strip chart).
   const texts = new Set();
   root?.querySelectorAll('.ann, .ann-sub, .empty-note').forEach((n) => texts.add(n.closest('text') || n));
   root?.querySelectorAll('text.band-label, .handoff text').forEach((n) => texts.add(n));
   // every other piece of chart wording (titles, glosses, row names, panel labels, law labels) is an obstacle too; axis numbers have their own rule below
-  root?.querySelectorAll('text').forEach((n) => !n.closest('.mark, .axis, .xaxis, .yaxis, .tick, .glyph, .badge3d') && texts.add(n));
+  root?.querySelectorAll('text').forEach((n) => !n.closest('.axis, .xaxis, .yaxis, .tick, .glyph, .badge3d') && !(el && el.contains(n)) && texts.add(n));
+  // a mark's own words (a row name that belongs to a neighbouring mark) are wording too, so they are no longer counted as marks
+  const wordsOf = new Set([...texts].filter((n) => n.closest('.mark')));
+  const others = root
+      ? [...root.querySelectorAll('.mark')]
+          .filter((n) => n !== el)
+          .flatMap((n) =>
+            n.querySelector('.hit')
+              ? [...n.querySelectorAll(':scope > :not(.hit)')].filter((c) => !wordsOf.has(c)).map((c) => c.getBoundingClientRect())
+              : [n.getBoundingClientRect()],
+          )
+      : [];
   const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
