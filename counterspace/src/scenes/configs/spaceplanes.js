@@ -14,15 +14,11 @@ export const SPACEPLANES = {
   shells: [],
   duration: 32,
   caption:
-    'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions. ' +
-    'The X-37B missions are called OTV-1 to OTV-8, for Orbital Test Vehicle. Six lasted 224 ' +
-    'to 908 days. OTV-7 flew in an orbit reaching 38,838 km. OTV-8 launched in August 2025. ' +
-    'China’s reusable experimental spacecraft (CSSHQ) has flown three missions, lasting 2 to 276 days, and a fourth launched in February 2026. ' +
-    'After flights 2 and 3, CSSHQ repeatedly approached objects that the space-tracking catalog lists as released from it. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, says the X-37B has ' +
-    'so far approached no other object. The purposes of the missions are not stated. ' +
-    'A 2019 analysis by China’s People’s Liberation Army (PLA), as SWF reports ' +
-    'it, warned that the X-37B could turn into an “aggressive” fighter in space. ' +
+    'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions (OTV-1 to OTV-8, for Orbital Test Vehicle). ' +
+    'Six lasted 224 to 908 days. OTV-7 flew in an orbit reaching 38,838 km, and OTV-8 launched in August 2025. ' +
+    'China’s reusable experimental spacecraft (CSSHQ) has flown three missions, lasting 2 to 276 days, and a fourth launched in February 2026. After flights 2 and 3 it repeatedly approached objects that the space-tracking catalog lists as released from it. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, says the X-37B has so far approached no other object. The purposes of the missions are not stated. ' +
+    'A 2019 analysis by China’s People’s Liberation Army (PLA), as SWF reports it, warned that the X-37B could turn into an “aggressive” fighter in space. ' +
     'No treaty or resolution on this page’s law timeline is tied to these flights.',
   cite: 'Secure World Foundation, 2026: Table 1-1 (p. 01-08), Figure 1-3 (p. 01-07), pp. 01-04 to 01-09; Table 3-1 (p. 03-08), pp. 03-06 to 03-08.',
   related: null,

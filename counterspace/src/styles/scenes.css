@@ -1299,3 +1299,18 @@
     display: none !important;
   }
 }
+
+/* Tablet landscape and small laptops: the pinned source and related-law block gives the step list more room */
+@media (min-width: 761px) and (max-height: 820px) {
+  .overlay .story-foot {
+    gap: var(--s-2);
+    padding: 10px 20px 12px;
+  }
+  .overlay .sv-src {
+    max-height: 4.6em;
+  }
+  .overlay .aside-law .btn {
+    min-height: 44px;
+    padding-block: 6px;
+  }
+}

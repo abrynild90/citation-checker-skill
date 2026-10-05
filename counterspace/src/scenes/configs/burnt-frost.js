@@ -8,12 +8,9 @@ export const BURNT_FROST = {
   shells: ['LEO'],
   duration: 12,
   caption:
-    'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile ' +
-    'at USA-193, a failing US satellite, and destroyed it about 220 km above the Earth. ' +
-    'The SM-3 is a missile-defense interceptor, a missile built to shoot down other missiles. ' +
-    'Its use against a satellite shows the overlap between missile defense and anti-satellite capability. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, gives the height as 220 km in its Table 5-1 and 240 km in its text. ' +
-    'At that height the 175 trackable pieces took about 20 months to fall out of orbit. The animation speeds that up. ' +
+    'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile at USA-193, a failing US satellite, and destroyed it about 220 km above the Earth. ' +
+    'The SM-3 is a missile-defense interceptor, built to shoot down other missiles, so its use against a satellite shows the overlap between missile defense and anti-satellite capability. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, gives the height as 220 km in its Table 5-1 and 240 km in its text. At that height the 175 trackable pieces took about 20 months to fall out of orbit. The animation speeds that up. ' +
     'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); time to re-enter and the 240 km figure in the text, p. 01-24.',
   related: null,

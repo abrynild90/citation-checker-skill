@@ -15,18 +15,12 @@ export const GNSS = {
   staticTextPhone: [[' · GPS signal ', ' · ']], // 375 static: "Airliner 1 · lost"
   duration: 16,
   caption:
-    'Since late 2023, jamming from the ground has repeatedly cut satellite navigation ' +
-    'signals (GNSS), such as GPS, for aircraft and ships around the Baltic Sea. ' +
-    'Jamming means drowning out a signal with radio noise. ' +
-    'In April 2024 Finnair paused its flights to Tartu. ' +
-    'GPS satellites orbit in medium Earth orbit (MEO), about 20,000 km up, far above the aircraft. ' +
-    'A jammer on the ground swamps their weak signals, but only inside its local effect zone. ' +
-    'Aircraft that cross the zone lose their position fix. Aircraft outside it, and the satellites themselves, are unaffected. ' +
-    'The jammer interferes with receivers. It does not attack any satellite. ' +
-    'In October 2025 the International Civil Aviation Organization (ICAO) endorsed a finding that recurring interference with ' +
-    'satellite navigation from North Korea and from Russian territory is an “infraction” of the 1944 Chicago Convention. ' +
-    'This is a finding by an international body, not a court judgment, and it carries no enforcement. ' +
-    'The jammer’s position is drawn for illustration.',
+    'Since late 2023, ground jamming has repeatedly cut satellite navigation signals (GNSS), such as GPS, for aircraft and ships around the Baltic Sea. ' +
+    'Jamming means drowning out a signal with radio noise. In April 2024 Finnair paused its flights to Tartu. ' +
+    'GPS satellites orbit in medium Earth orbit (MEO), about 20,000 km up. A jammer swamps their weak signals only inside its local effect zone, so aircraft that cross it lose their position fix. ' +
+    'The satellites are unaffected: the jammer interferes with receivers and does not attack any satellite. ' +
+    'In October 2025 the International Civil Aviation Organization (ICAO) endorsed a finding that recurring interference with satellite navigation from North Korea and from Russian territory is an “infraction” of the 1944 Chicago Convention. ' +
+    'This is a finding by an international body, not a court judgment, and it carries no enforcement. The jammer’s position is drawn for illustration.',
   cite: 'Secure World Foundation, 2026: pp. 02-29 to 02-30; p. 12-05 (jamming of receivers has no effect on the satellites).',
   related: 'icao-2025',
   event: 'ru-2023-baltic',

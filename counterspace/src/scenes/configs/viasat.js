@@ -11,14 +11,10 @@ export const VIASAT = {
   shells: ['GEO'],
   duration: 14,
   caption:
-    'On 24 February 2022, within hours of Russian troops crossing into Ukraine, attackers later ' +
-    'attributed to Russia wiped tens of thousands of satellite modems in Ukraine and across Europe. ' +
-    'They sent destructive “AcidRain” malware, harmful software that erases the data ' +
-    'on a device, through the ground management network of the KA-SAT satellite. ' +
-    'KA-SAT is a communications satellite in geostationary orbit (GEO), about 36,000 km up. ' +
+    'On 24 February 2022, within hours of Russian troops crossing into Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems in Ukraine and across Europe. ' +
+    'They sent destructive “AcidRain” malware, harmful software that erases the data on a device, through the ground management network of the KA-SAT satellite, a communications satellite in geostationary orbit (GEO), about 36,000 km up. ' +
     'The satellite itself kept working. The attack hit the network on the ground. ' +
-    'The Tallinn Manual 2.0 is an expert manual on how international law applies to cyber operations. ' +
-    'It is soft law, meaning it is not binding, and it dates from 2017, before the attack. ' +
+    'The Tallinn Manual 2.0 is an expert manual on how international law applies to cyber operations. It is soft law, meaning not binding, and dates from 2017, before the attack. ' +
     'The ground network and the order in which regions go dark are drawn for illustration.',
   cite: 'Secure World Foundation, 2026, pp. 15-06 to 15-07 (Viasat case study).',
   related: 'tallinn-2017',

@@ -39,7 +39,7 @@ const RULES = [
   ['raw-code', 'error', /\b(ew (uplink|downlink)|negotiation span|[a-z]+_[a-z]+(_[a-z]+)*)\b/, 'show readable wording, never a stored code value'],
   ['glyph-icons', 'error', /[◀▶◐⟳⤓⚖✕❚▾▸↓⊕]/, 'use an icon from the sprite, not a text glyph'],
   ['emoji', 'error', /\p{Extended_Pictographic}/u, 'no emoji'],
-  ['rows', 'error', /\b\d+ rows?\b|\brows?\b(?! of)/i, 'say "entries" or "operations"'],
+  ['rows', 'error', /\b\d+ rows?\b|(?<!\bPrime )\brows?\b(?! of)(?!\s*\()/i, 'say "entries" or "operations"'],
   ['static-note', 'error', /\bstatic (diagram|view|image)|reduced motion|no WebGL/i, 'say "still diagram" and explain in a human way'],
   // stock phrasing
   [
@@ -127,6 +127,10 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 // Text of the page as a visitor can read or hear it: visible text, plus labels read out by screen readers.
 const pageText = () => {
   document.querySelectorAll('details').forEach((d) => (d.open = true));
+  // A bare dash in a table cell is the empty-cell mark, not prose.
+  document.querySelectorAll('td,th').forEach((c) => {
+    if (c.textContent.trim() === '—') c.textContent = 'none';
+  });
   const attrs = [];
   document.querySelectorAll('[aria-label],[title],img[alt]').forEach((e) => {
     for (const a of ['aria-label', 'title', 'alt']) if (e.getAttribute(a)) attrs.push(e.getAttribute(a));

@@ -9,17 +9,11 @@ export const DN2 = {
   shells: ['LEO', 'MEO', 'GEO'],
   duration: 14,
   caption:
-    'On 13 May 2013 China launched a DN-2 rocket from Xichang on a suborbital path, a ' +
-    'flight that reaches space and falls back to Earth without completing an orbit. ' +
-    'It climbed toward geostationary orbit (GEO), the ring about 36,000 km above ' +
-    'the equator where a satellite stays above the same point on the Earth. ' +
-    'China said it reached 10,000 km. ' +
-    'The US military said it went “nearly to GEO”, and US officials said the ' +
-    'rocket’s upper stages re-entered the atmosphere “over the Indian Ocean”. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, cites an analysis ' +
-    'that puts the highest point of the flight, its apogee, at 30,000 km or more. ' +
-    'There was no target, so this was not an intercept (a missile hitting its target). ' +
-    'The launch showed how far the rocket could reach. ' +
+    'On 13 May 2013 China launched a DN-2 rocket from Xichang on a suborbital path, a flight that reaches space and falls back without completing an orbit. ' +
+    'It climbed toward geostationary orbit (GEO), the ring about 36,000 km above the equator where a satellite stays above the same point on the Earth. ' +
+    'China said it reached 10,000 km. The US military said it went “nearly to GEO”, and US officials said the upper stages re-entered “over the Indian Ocean”. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, cites an analysis that puts the highest point, its apogee, at 30,000 km or more. ' +
+    'There was no target, so this was not an intercept (a missile hitting its target). The launch showed how far the rocket could reach. ' +
     'No treaty or resolution on this page’s law timeline is tied to this launch.',
   cite: 'Secure World Foundation, 2026, pp. 03-20, 03-22.',
   related: null,

@@ -12,14 +12,11 @@ export const RPO = {
   shells: [],
   duration: 32,
   caption:
-    'Three separate episodes of close approach, from the Secure World Foundation’s (SWF) tables of close approaches, also called rendezvous and proximity operations. ' +
-    '(1) In 2025, in geostationary orbit (GEO), about 36,000 km up, China’s SJ-21 and SJ-25 approached, appeared to dock (join together) and ' +
-    'later separated, while two US GSSAP satellites (Geosynchronous Space Situational Awareness Program) were positioned “flanking” them. ' +
-    '(2) In 2019–20, in low Earth orbit (LEO), up to 2,000 km up, Russia’s Cosmos 2542 ' +
-    'released Cosmos 2543, which then worked near a US imaging satellite, USA 245. ' +
+    'Three separate close approaches (also called rendezvous and proximity operations), from the Secure World Foundation’s (SWF) tables. ' +
+    '(1) In 2025, in geostationary orbit (GEO), about 36,000 km up, China’s SJ-21 and SJ-25 approached, appeared to dock (join together) and later separated, while two US GSSAP satellites (Geosynchronous Space Situational Awareness Program) were positioned “flanking” them. ' +
+    '(2) In 2019–20, in low Earth orbit (LEO), up to 2,000 km up, Russia’s Cosmos 2542 released Cosmos 2543, which then worked near a US imaging satellite, USA 245. ' +
     '(3) In 2025, in GEO, a US GSSAP satellite and the UK’s SKYNET 5A took part in a jointly announced close approach. ' +
-    'SWF hedges the intent behind the first two. A close approach is not an attack. ' +
-    'No treaty or resolution on this page’s law timeline is tied to these events.',
+    'SWF hedges the intent behind the first two. A close approach is not an attack. No treaty or resolution on this page’s law timeline is tied to these events.',
   cite:
     'Secure World Foundation, 2026: Tables 1-3 (p. 01-15), 2-3 (p. 02-15) and 3-2 (p. 03-16); SJ-21 and SJ-25, pp. 03-12 to 03-13; ' +
     'Cosmos 2542, pp. 02-09 to 02-10; USA 271 and SKYNET 5A, p. 01-14.',

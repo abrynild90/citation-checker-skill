@@ -13,15 +13,10 @@ export const SJ21_TUG = {
   shells: [],
   duration: 24,
   caption:
-    'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese ' +
-    'navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, reports that SJ-21 “docked to it at some point”. ' +
-    'Around 21 January 2022 SJ-21 used its own propulsion to pull both objects ' +
-    'above the GEO belt, the band of orbits where working satellites sit. ' +
-    'SJ-21 then came back down close to GEO. ' +
+    'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
+    'The Secure World Foundation (SWF), a space-security nonprofit, reports that SJ-21 “docked to it at some point”. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the GEO belt, the band of orbits where working satellites sit, then came back down close to GEO. ' +
     'SWF’s table says SJ-21 pulled Compass G2 well past the graveyard orbit, the disposal region above GEO for retired satellites. ' +
-    'SWF does not say how SJ-21 captured or docked with Compass G2, so the grabbing arm drawn on SJ-21 is for illustration only. ' +
-    'SWF does report robotic-arm demonstrations on other Chinese satellites: SY-7 (2013) and Aolong-1 (2016). ' +
+    'SWF does not say how SJ-21 captured or docked with it, so the grabbing arm drawn on SJ-21 is for illustration only. SWF does report robotic-arm demonstrations on other Chinese satellites: SY-7 (2013) and Aolong-1 (2016). ' +
     'No legal item in our records is tied to this event.',
   cite:
     'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15; robotic arms on other satellites: SY-7, p. 03-02; ' +

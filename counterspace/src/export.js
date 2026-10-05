@@ -79,7 +79,7 @@ const EXPORT_SPEC = {
       ],
     }),
     key:
-      'Solid fill: capability demonstrated (tested or used). Hatched fill: developing or latent, as the SWF country tables support. Dotted fill: ' +
+      'Solid fill: capability demonstrated (tested or used). Striped fill: developing or latent, as the SWF country tables support. Dotted fill: ' +
       'developing, our reading, for 2020s entries where the SWF tables show no data. Faded fill with a dashed edge: decades before the 2020s, which we ' +
       'reconstructed from SWF’s test tables and country chapters; SWF did not assess them. The range above each decade runs from capabilities ' +
       'demonstrated only (low end) to demonstrated plus developing (high end). Bar height counts each state once for every capability it holds, so a ' +
