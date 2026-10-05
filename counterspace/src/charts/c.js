@@ -3,7 +3,7 @@
 // Provides: drawC(), stateC, zoomedC().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
+import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, PHONE_MAX, layout, parse, tw, xAxis } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
 import { activate, addGuide, bindMark, nkCard, rove, srcCell, table } from '../ui.js';
 import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote } from './kit.js';
@@ -64,10 +64,14 @@ export function drawC(el = document.getElementById('svgC')) {
     hand = phone ? 'Last destructive test, Nov 2021' : 'Last destructive anti-satellite test, Nov 2021',
     handW = tw(hand, 12.5, 600),
     byW = Math.max(...byLines.map((s) => tw(s, 12.5, 400)));
-  const sameRow = !phone && byLines.length === 1 && INSET + byW + 36 < HX - 14 - handW; // the hand-off label fits beside the attribution
-  const qTop = 4,
+  // The quotation is a callout of its own (a quiet box); the hand-off label sits on a row below it, beside nothing, at the top of its dotted line.
+  const BP = 12, // padding inside the callout
+    boxX = INSET - BP,
+    boxW = Math.max(...qLines.map((s) => tw(s, qSize, 400)), byW) + 2 * BP,
+    qTop = 2 + BP,
     byY = qTop + qLines.length * qLH + 2,
-    handY = sameRow ? byY + 12 : byY + byLines.length * 17 + 14,
+    boxH = byY + byLines.length * 17 + BP - 2,
+    handY = boxH + 24,
     stripBottom = handY + 12;
 
   // ---------------------------------------------------------------- entries, planned one line each
@@ -178,6 +182,7 @@ export function drawC(el = document.getElementById('svgC')) {
   };
 
   // the quotation, attributed
+  svg.append('rect').attr('class', 'quote-box').attr('x', boxX).attr('y', 2).attr('width', boxW).attr('height', boxH - 2).attr('rx', 8).attr('aria-hidden', 'true');
   lines(svg, 'quote', INSET, qTop + qSize, qLines, qLH);
   lines(svg, 'quote-by', INSET, byY + 13, byLines, 17);
 
@@ -331,7 +336,7 @@ export function drawC(el = document.getElementById('svgC')) {
   }
   bindMark(
     g,
-    (d) => nkCard(d.e),
+    (d) => nkCard(d.e, innerWidth >= PHONE_MAX),
     (d, elx, ev) => activate(d.e, elx, ev),
   );
   rove(g);

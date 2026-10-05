@@ -3,9 +3,9 @@
 
 /* ---- header, top bar ---- */
 header.top{position:relative;isolation:isolate;background-color:var(--hero-bg);color:var(--text);border-bottom:1px solid var(--hero-line)}
-/* fine stars behind the words: one gradient per star, fading out before the chapter list */
+/* fine stars behind the words: one gradient per star, kept to the upper part of the header (no mask: a masked layer this tall painted a second copy of the page in some renderers) */
 header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%,920px);z-index:-1;pointer-events:none;
-  -webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent);
+  background-size:100% 72%;background-repeat:no-repeat;
   background-image:radial-gradient(0.9px 0.9px at 64.2% 29.2%,rgba(255,255,255,0.41) 40%,transparent 100%),
     radial-gradient(0.9px 0.9px at 47.3% 33.8%,rgba(255,255,255,0.38) 40%,transparent 100%),
     radial-gradient(0.9px 0.9px at 4.6% 64.6%,rgba(255,255,255,0.52) 40%,transparent 100%),
@@ -123,6 +123,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 
 /* ---- chapter rail: seven dots at the right edge on wide screens, names on hover and focus, the current chapter filled ---- */
 .rail{position:fixed;right:var(--s-4);top:50%;transform:translateY(-50%);z-index:var(--z-rail);display:none;opacity:0;pointer-events:none;transition:opacity var(--dur-3) var(--ease)}
+.rail:not(.on){visibility:hidden;transition:opacity var(--dur-3) var(--ease),visibility 0s var(--dur-3)}
 .rail.on{opacity:1;pointer-events:auto}
 @media (min-width:1360px){.rail{display:block}}
 .rail ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}

@@ -127,8 +127,14 @@ function build(stage) {
   const rect = stage.getBoundingClientRect(),
     words = wide
       ? ['.hero-title', '.hero-text .lede', '.hero-text .cta'].map((s) => {
-          const r = document.querySelector(s).getBoundingClientRect();
-          return { x0: r.left - rect.left - 14, y0: r.top - rect.top - 8, x1: r.right - rect.left + 14, y1: r.bottom - rect.top + 10 };
+          const node = document.querySelector(s),
+            r = node.getBoundingClientRect();
+          let dy = 0; // the words rise into place when the page opens: measure them where they will rest, not where they are now
+          for (let n = node; n && n !== document.body; n = n.parentElement) {
+            const t = getComputedStyle(n).transform;
+            if (t && t !== 'none') dy += new DOMMatrix(t).m42;
+          }
+          return { x0: r.left - rect.left - 14, y0: r.top - dy - rect.top - 8, x1: r.right - rect.left + 14, y1: r.bottom - dy - rect.top + 10 };
         })
       : [],
     wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
@@ -208,11 +214,11 @@ function build(stage) {
 
   // ---- annotations (plain sentences, a leader and a dot on the mark) and one small tag for the nuclear test
   const noteSize = phone ? 13 : 14,
-    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : W < 1100 ? Math.round(Math.max(140, W * 0.15)) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
+    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : W < 900 ? Math.round(Math.max(176, W * 0.21)) : W < 1100 ? Math.round(Math.max(140, W * 0.15)) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
     placed = [],
     // what a candidate spot costs: overlapping the words is worst, then another note, then a mark; zero means free
     clash = (box, lead) =>
-      obstacles.reduce((n, o, i) => n + (hits(box, o, 4) || (lead && hits(lead, o, 1)) ? (i < words.length ? 20 : 2) : 0), 0) +
+      obstacles.reduce((n, o, i) => n + (hits(box, o, 4) || (lead && hits(lead, o, 1)) ? (i < words.length ? 80 : 14) : 0), 0) +
       placed.reduce((n, p) => n + (hits(box, p.box, 4) || hits(box, p.lead, 4) || (lead && (hits(lead, p.box, 1) || hits(lead, p.lead, 1))) ? 8 : 0), 0),
     markOf = (id) => marks.find((m) => m.e.id === id),
     sorted = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1)),
@@ -251,21 +257,21 @@ function build(stage) {
     if (dir === 'up')
       return [
         { x0: al === 'end' ? px + 6 - w : px - 6, x1: al === 'end' ? px + 6 : px - 6 + w, y0: py - L - h - 2, y1: py - L },
-        { x0: px - 1, x1: px + 1, y0: py - L, y1: py - 8 },
+        { x0: px - 1, x1: px + 1, y0: py - L, y1: py - 12 },
       ];
     if (dir === 'down')
       return [
         { x0: al === 'end' ? px + 6 - w : px - 6, x1: al === 'end' ? px + 6 : px - 6 + w, y0: py + L, y1: py + L + h + 2 },
-        { x0: px - 1, x1: px + 1, y0: py + 8, y1: py + L },
+        { x0: px - 1, x1: px + 1, y0: py + 12, y1: py + L },
       ];
     if (dir === 'left')
       return [
         { x0: px - L - 8 - w, x1: px - L - 8, y0: py - h / 2, y1: py + h / 2 },
-        { x0: px - L - 8, x1: px - 8, y0: py - 1, y1: py + 1 },
+        { x0: px - L - 8, x1: px - 12, y0: py - 1, y1: py + 1 },
       ];
     return [
       { x0: px + L + 8, x1: px + L + 8 + w, y0: py - h / 2, y1: py + h / 2 },
-      { x0: px + 8, x1: px + L + 8, y0: py - 1, y1: py + 1 },
+      { x0: px + 12, x1: px + L + 8, y0: py - 1, y1: py + 1 },
     ];
   };
   const inside = (b) => b.x0 >= edge - 4 && b.x1 <= W - edge + 4 && b.y0 >= 6 && b.y1 <= yL - 24;
@@ -348,7 +354,7 @@ function build(stage) {
         }
         if (ok && (!best || n < best.n)) best = { dir, al, box, lead, n };
       }
-    if (!best) return;
+    if (!best || best.n >= 14) return; // no clean room: leave the note out rather than write over the buttons or the dots
     placed.push({ ...best, m: s.m, lines, w });
   });
   placed

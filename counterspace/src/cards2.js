@@ -40,6 +40,7 @@ export const ACTIVITY_LABEL = {
   release: 'Release of an object',
   spaceplane_mission: 'Spaceplane mission (launch to landing)',
 };
+const ACTIVITY_SHORT = { ...ACTIVITY_LABEL, rpo: 'Close approach', spaceplane_mission: 'Spaceplane mission' }; // the hover card's shorter wording
 export const ORBIT_LABEL = {
   LEO: 'Low Earth orbit',
   GEO: 'Geostationary orbit, or close to it',
@@ -99,9 +100,24 @@ const sceneHint = `<div class="hint">${cube}Open the 3D explainer</div>`;
 const srcLine = (r) => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
 const dl = (rows) => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 
-export function nkCard(e) {
+// Compact form (hover on a wide screen): the key facts and the first sentence only, so the card stays small and hides few bars. Click or Enter shows the
+// full card (all facts, notes, source); phones dock the full card, which scrolls inside itself.
+export function nkCard(e, compact = false) {
   const span = e.end === e.start ? fmt(parse(e.start)) : `${fmtMY(parse(e.start))} – ${e.end ? fmtMY(parse(e.end)) : 'ongoing'}`;
   const note = noteOf(e);
+  if (compact)
+    return (
+      `<p class="card-title">${esc(e.target_system)}</p>` +
+      dl([
+        ['When', span],
+        ['Actor', esc(e.actor)],
+        ['Type', CATEGORY_LABEL[e.category]],
+        ['Attribution', ATTRIBUTION_LABEL[e.attribution]],
+        ['How sure we are', SURE_WORD[e.confidence]],
+      ]) +
+      `<div class="clip3">${esc(plain(e.effect))}</div>` +
+      (hasScene(e) ? sceneHint : '<div class="hint plain">Select the bar, or press Enter, for the full entry.</div>')
+    );
   return (
     `<p class="card-title">${esc(e.target_system)}</p>` +
     dl([
@@ -126,11 +142,11 @@ export const coWhen = (e) => {
 // Compact form (desktop hover on the dense close-approach chart): the key facts only, so the card stays small and hides few neighbouring points.
 // Click or Enter shows the full card (description, notes, source). Phones dock the full card, which scrolls inside itself.
 export function coCard(e, compact = false) {
-  const hint = hasScene(e) ? sceneHint : compact ? '<div class="hint">Select the point, or press Enter, for the full entry.</div>' : '';
+  const hint = hasScene(e) ? sceneHint : compact ? '<div class="hint plain">Select the point, or press Enter, for the full entry.</div>' : '';
   const rows = [
     ['When', coWhen(e)],
     compact ? null : ['Actor', esc(e.actor)],
-    ['Activity', ACTIVITY_LABEL[e.activity]],
+    ['Activity', (compact ? ACTIVITY_SHORT : ACTIVITY_LABEL)[e.activity]],
     e.target ? ['Other object', esc(plain(e.target))] : null,
     compact ? null : ['Orbit', ORBIT_LABEL[e.orbit_regime]],
     ['How sure we are', compact ? SURE_WORD[e.confidence] : SURE_LABEL[e.confidence]],
@@ -140,7 +156,7 @@ export function coCard(e, compact = false) {
   const note = noteOf(e);
   return (
     `${head}<div>${esc(plain(e.description))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${srcLine(e)}` +
-    `<div class="hint">A proximity operation is not an attack, and SWF is cautious in how it describes intent.</div>${hasScene(e) ? sceneHint : ''}`
+    `<div class="hint plain">A proximity operation is not an attack, and SWF is cautious in how it describes intent.</div>${hasScene(e) ? sceneHint : ''}`
   );
 }
 

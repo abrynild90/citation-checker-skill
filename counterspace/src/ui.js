@@ -29,7 +29,7 @@ function showCard(html, evt, el, full = false) {
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
     WM = near ? 1.5 : 6;
-  card.style.maxWidth = near ? (card.classList.contains('full') ? '340px' : '260px') : '';
+  card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
   const cw = card.offsetWidth,
@@ -126,14 +126,17 @@ function dockCue() {
 card.addEventListener('scroll', dockCue, { passive: true, capture: true }); // scroll does not bubble: capture it from the .cbody
 let touchMode = false,
   shownY = 0;
-// A touch card is dismissed by scrolling the page (more than 24 px from where it opened), as well as by a tap outside it.
+// Any card goes away when the page scrolls under it (a fixed card would otherwise hang over the wrong thing), when the window loses focus, and on Escape
+// (boot.js). A touch card also goes with a tap outside it.
 addEventListener(
   'scroll',
   () => {
-    if (card.classList.contains('on') && (touchMode || card.classList.contains('dock')) && Math.abs(scrollY - shownY) > 24) hideCard();
+    if (card.classList.contains('on') && Math.abs(scrollY - shownY) > ((touchMode || card.classList.contains('dock')) ? 24 : 4)) hideCard();
   },
   { passive: true },
 );
+addEventListener('blur', () => hideCard());
+document.addEventListener('visibilitychange', () => document.hidden && hideCard());
 document.addEventListener(
   'pointerdown',
   (e) => {
@@ -406,7 +409,7 @@ export function legend(id, w = 22, h = 16) {
 }
 
 // ---------------------------------------------------------------- data tables
-export const srcCell = (r) => `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}`;
+export const srcCell = (r) => `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}</span>`;
 // Accessible data table. Each cell carries data-label so CSS can stack entries as cards on phones (no sideways scrolling). Columns whose cells are
 // all numbers are right-aligned; date columns never wrap on a wide screen.
 const CAPTIONS = {
@@ -430,7 +433,7 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
   // hiddenLast: the last column is kept in the markup but never shown or read out (the last chart keeps its record ids there for tools/qa.mjs).
   const hide = (i) => (hiddenLast && i === head.length - 1 ? ' hidden' : '');
   const cell = (c, i) =>
-    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(head[i])}">${typeof c === 'string' && c.startsWith('<a') ? c : esc(c)}</td>`;
+    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(head[i])}">${typeof c === 'string' && (c.startsWith('<a') || c.startsWith('<span class="srcc"')) ? c : esc(c)}</td>`;
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
   const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}>${h}</th>`).join('');

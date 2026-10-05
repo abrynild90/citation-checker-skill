@@ -300,12 +300,12 @@
 .overlay .sv-hint {
   position: absolute;
   z-index: 3;
-  left: 50%;
-  bottom: 64px;
+  left: 12px;
+  bottom: 56px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   width: max-content;
   max-width: calc(100% - 24px);
   padding: 9px 14px;
@@ -316,14 +316,14 @@
   border-radius: var(--r-1);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 8px);
+  transform: translateY(8px);
   transition:
     opacity var(--dur-3) var(--sv-ease),
     transform var(--dur-3) var(--sv-ease);
 }
 .overlay .sv-hint.on {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: none;
 }
 .overlay .sv-hint span {
   display: inline-flex;
@@ -810,7 +810,12 @@
   font: 400 14px/1.45 var(--sans);
   color: var(--muted);
 }
+.overlay .static-note .btn {
+  flex: none;
+  margin-left: auto;
+}
 .overlay .static-note .ico {
+  flex: none;
   width: 18px;
   height: 18px;
   color: var(--accent-2);
@@ -892,7 +897,7 @@
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1) {
   .overlay .panel {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 46%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 36%) minmax(0, 1fr) auto;
   }
   .overlay .story-scroll .story-foot {
     margin-top: var(--s-6);
@@ -925,7 +930,7 @@
     height: 100vh;
     height: 100dvh;
     border-radius: 0;
-    grid-template-rows: auto minmax(0, 44%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 34%) minmax(0, 1fr) auto;
     --sv-pad: 16px;
   }
   /* The title takes the full width; close sits at its top right; previous, count and next make a small pager under it. */
@@ -1087,6 +1092,12 @@
   .overlay .sv-now .st-text {
     font-weight: 500;
   }
+  .overlay .sv-now .next .step {
+    color: var(--muted);
+  }
+  .overlay .sv-now .next .st-text {
+    font-weight: 400;
+  }
   .overlay .sv-now .st-rail::before {
     display: none;
   }
@@ -1124,6 +1135,18 @@
   .overlay .sv-steps .sv-all ol {
     margin-left: 0;
   }
+  /* A still diagram (no 3D): a shorter picture and more room for the steps, which are the point here */
+  .overlay.is-static .panel {
+    grid-template-rows: auto minmax(0, 27%) minmax(0, 1fr) auto;
+  }
+  .overlay.is-static .sv-steps .step,
+  .overlay.is-static .sv-steps .st-time {
+    color: var(--text);
+  }
+  .overlay.is-static .static-note {
+    font-size: 13px;
+    line-height: 1.4;
+  }
   .overlay .ctrl {
     column-gap: var(--s-3);
     row-gap: var(--s-2);
@@ -1138,6 +1161,12 @@
   }
   .overlay .seg {
     flex: 1;
+  }
+  .overlay .seg button {
+    flex: 1 1 auto;
+    padding: 0 10px;
+  }
+  .overlay .seg {
     -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
     mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
   }

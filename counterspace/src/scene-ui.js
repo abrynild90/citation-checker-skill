@@ -153,6 +153,8 @@ function viewName(cc, name) {
   if (own) return own;
   let s = name.replace(/\s*\([^)]*\)/g, '').trim();
   if (s.length > 24 && s.includes(':')) s = s.split(':')[0].trim();
+  // On a phone the buttons share one row: "From the north pole" becomes "North pole", "Whole scene" stays.
+  if (matchMedia('(max-width: 760px)').matches && /^from (the )?/i.test(s)) s = s.replace(/^from (the )?/i, '').replace(/^./, (c) => c.toUpperCase());
   return s || name;
 }
 function setStatus(msg) {
@@ -272,7 +274,7 @@ export async function openScene(id, originEl) {
       setState(null);
     } catch (e) {
       console.warn('Still diagram failed', e);
-      setState('error', 'The picture could not be drawn. Reload the page to try again, or read the story.');
+      setState('error', 'The picture could not be drawn. You can still read the story.');
     }
   }
   stillOnly = !h;
@@ -413,9 +415,12 @@ function syncSteps(t) {
     if (i === k) b.setAttribute('aria-current', 'step');
     else b.removeAttribute('aria-current');
   });
-  // Phones show only the current step; the whole list is behind "All steps".
-  const li = stepsEl.children[k];
-  stepNow.innerHTML = `<li class="now"><div class="step">${li.firstElementChild.innerHTML}</div></li>`;
+  // Phones show the current step and the one after it; the whole list is behind "All steps".
+  const li = stepsEl.children[k],
+    nx = stepsEl.children[k + 1];
+  stepNow.innerHTML =
+    `<li class="now"><div class="step">${li.firstElementChild.innerHTML}</div></li>` +
+    (nx ? `<li class="next"><div class="step">${nx.firstElementChild.innerHTML}</div></li>` : '');
   if (!first) followStep(li);
 }
 // Keep the current step in view as the animation moves on, moving the list as little as possible so the reader keeps their place: the step stays
@@ -522,10 +527,12 @@ function staticMode(on) {
     n.hidden = on;
   });
   staticEl.hidden = !on;
+  overlay.classList.toggle('is-static', on);
   if (on) {
     staticTxt.textContent = REDUCED
       ? 'Animation is switched off on this device, so this is a still diagram. Turn animation on in your device settings to watch it move.'
-      : 'The 3D view could not start here, so this is a still diagram. Reload the page to try again.';
+      : 'The 3D view could not start here, so this is a still diagram.';
+    $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
   stepsNote.textContent = on ? 'Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
@@ -535,6 +542,12 @@ function staticMode(on) {
   }
   stepsEl.querySelectorAll('.step').forEach((b) => (on ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));
 }
+// "Try again": forget that 3D failed and open the same scene once more.
+$('scRetry').onclick = () => {
+  if (!cur) return;
+  glOK = null;
+  openScene(cur.id);
+};
 scrub.oninput = () => {
   if (host && cur && !stillOnly) {
     host.playing = false;
@@ -613,7 +626,7 @@ lawBtn.onclick = () => {
 function updateFades() {
   const max = asideBody.scrollHeight - asideBody.clientHeight;
   asideWrap.classList.toggle('can-up', asideBody.scrollTop > 4);
-  asideWrap.classList.toggle('can-down', max - asideBody.scrollTop > 4);
+  asideWrap.classList.toggle('can-down', max - asideBody.scrollTop > 40); // the last 36 px are only padding: no fade over them
 }
 asideBody.addEventListener('scroll', updateFades, { passive: true });
 addEventListener('resize', updateFades);
@@ -625,13 +638,14 @@ function showHint() {
   if (hintShown || stillOnly || !KEYBOARD.matches || COMPACT.matches || SHORT.matches) return;
   hintShown = true;
   hintEl.classList.add('on');
-  hintTimer = setTimeout(hideHint, 9000);
+  hintTimer = setTimeout(hideHint, 6000);
 }
 function hideHint() {
   clearTimeout(hintTimer);
   hintEl.classList.remove('on');
 }
 overlay.addEventListener('pointerdown', hideHint, { passive: true });
+overlay.addEventListener('keydown', hideHint, { passive: true });
 
 // ---------------------------------------------------------------- keyboard: Space plays or pauses, Left and Right change scene, 1 to 5 choose a view, Esc closes
 const TABBABLE = 'button:not([disabled]),input:not([disabled]),a[href],summary,[tabindex]';

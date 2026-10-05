@@ -11,9 +11,9 @@ import { hooks } from '../shared.js';
 // t: title for cards and the table. l, m, s: the label at three lengths (full name, shorter name, abbreviation); a missing size falls back to the next
 // longer one. Soft-law names end in "(soft law)" at full length and "*" when shortened. The glossary explains every abbreviation.
 const NAMES = {
-  'ltbt-1963': { t: 'Limited Test Ban Treaty', s: 'LTBT' },
-  'ost-1967': { t: 'Outer Space Treaty', s: 'OST' },
-  'abm-1972': { t: 'ABM Treaty, Article XII', m: 'ABM Treaty Art. XII', s: 'ABM Art. XII' },
+  'ltbt-1963': { t: 'Limited Test Ban Treaty', s: 'Test ban' },
+  'ost-1967': { t: 'Outer Space Treaty', s: 'Space Treaty' },
+  'abm-1972': { t: 'ABM Treaty, Article XII', m: 'ABM Treaty Art. XII', s: 'ABM Treaty' },
   'paros-1981': {
     t: 'UN General Assembly agenda item on preventing an arms race in outer space',
     l: 'UN General Assembly agenda item on preventing an arms race in outer space, since 1981',
@@ -26,16 +26,16 @@ const NAMES = {
     m: 'CD committee on PAROS, 1985–94',
     s: 'CD committee, 1985–94',
   },
-  'itu-1992': { t: 'ITU Constitution, Articles 45 and 48', m: 'ITU Arts. 45 and 48', s: 'ITU Arts. 45/48' },
+  'itu-1992': { t: 'ITU Constitution, Articles 45 and 48', m: 'ITU Arts. 45 and 48', s: 'ITU rules' },
   'ppwt-2008': {
     t: 'Russia–China draft treaty on weapons in space (PPWT)',
     l: 'Russia–China draft treaty on weapons in space',
     m: 'Russia–China draft treaty',
-    s: 'PPWT',
+    s: 'Draft treaty',
   },
-  'ppwt-2014': { t: 'Updated Russia–China draft treaty (PPWT)', l: 'Updated Russia–China draft treaty', m: 'Updated PPWT draft', s: 'PPWT II' },
-  'tallinn-2017': { t: 'Tallinn Manual 2.0 (soft law)', m: 'Tallinn Manual 2.0*', s: 'Tallinn*' },
-  'unga-75-36': { t: 'UN General Assembly resolution 75/36', m: 'UNGA 75/36', s: '75/36' },
+  'ppwt-2014': { t: 'Updated Russia–China draft treaty (PPWT)', l: 'Updated Russia–China draft treaty', m: 'Updated PPWT draft', s: 'Draft treaty II' },
+  'tallinn-2017': { t: 'Tallinn Manual 2.0 (soft law)', m: 'Tallinn Manual 2.0*', s: 'Cyber manual*' },
+  'unga-75-36': { t: 'UN General Assembly resolution 75/36', m: 'UNGA 75/36', s: 'UN 75/36' },
   'us-moratorium-2022': {
     t: 'US moratorium on destructive anti-satellite tests',
     l: 'US moratorium on destructive tests',
@@ -46,19 +46,19 @@ const NAMES = {
     t: 'Open-ended Working Group on space threats',
     l: 'Open-ended Working Group on space threats, 2022–23',
     m: 'Open-ended Working Group, 2022–23',
-    s: 'OEWG, 2022–23',
+    s: 'UN working group, 2022–23',
   },
-  'milamos-2022': { t: 'McGill Manual, Volume I (soft law)', l: 'McGill Manual (soft law)', m: 'McGill Manual*', s: 'MILAMOS*' },
-  'unga-77-41': { t: 'UN General Assembly resolution 77/41', m: 'UNGA 77/41', s: '77/41' },
+  'milamos-2022': { t: 'McGill Manual, Volume I (soft law)', l: 'McGill Manual (soft law)', m: 'McGill Manual*', s: 'McGill Manual*' },
+  'unga-77-41': { t: 'UN General Assembly resolution 77/41', m: 'UNGA 77/41', s: 'UN 77/41' },
   'woomera-2024': { t: 'Woomera Manual (soft law)', m: 'Woomera Manual*', s: 'Woomera*' },
-  'unsc-veto-2024': { t: 'Russian veto: nuclear weapons in orbit', m: 'Russian veto (nuclear weapons)', s: 'Veto' },
-  'itu-rrb-2024': { t: 'ITU Radio Regulations Board: grave concern', m: 'ITU Board: grave concern', s: 'RRB ’24' },
-  'icao-2025': { t: 'ICAO Assembly: GNSS interference an infraction', m: 'ICAO finding on GNSS', s: 'ICAO ’25' },
+  'unsc-veto-2024': { t: 'Russian veto: nuclear weapons in orbit', m: 'Russian veto (nuclear weapons)', s: 'Russian veto' },
+  'itu-rrb-2024': { t: 'ITU Radio Regulations Board: grave concern', m: 'ITU Board: grave concern', s: 'ITU Board ’24' },
+  'icao-2025': { t: 'ICAO Assembly: GNSS interference an infraction', m: 'ICAO finding on GNSS', s: 'Aviation body ’25' },
   'itu-rrb-2025': {
     t: 'ITU Radio Regulations Board urges Russia to stop interference',
     l: 'ITU Radio Regulations Board urges Russia to stop',
     m: 'ITU Board urges Russia to stop',
-    s: 'RRB ’25',
+    s: 'ITU Board ’25',
   },
 };
 // Card, table and list titles are set once, here, so ui.js and lag.js can read l.title without importing this module's tables.
@@ -74,24 +74,24 @@ const nameAt = (d, size) => {
 };
 // Terms and meanings for the abbreviations the timeline uses. Shown as a two-column list under "Show the data behind this chart".
 export const GLOSSARY = [
-  ['ABM Art. XII', 'Article XII of the Anti-Ballistic Missile (ABM) Treaty: non-interference with national technical means of verification.'],
+  ['Space Treaty', 'The Outer Space Treaty (1967).'],
+  ['ABM Treaty', 'Anti-Ballistic Missile Treaty (1972). Article XII bars interference with the other side’s means of verifying the treaty.'],
+  ['Aviation body', 'The International Civil Aviation Organization (ICAO), the United Nations agency for civil aviation.'],
   ['CD', 'Conference on Disarmament.'],
+  ['Cyber manual', 'Tallinn Manual 2.0: an expert manual on how international law applies to cyber operations.'],
   ['DA-ASAT', 'Direct-ascent anti-satellite: a missile launched from Earth to destroy or damage a satellite.'],
+  ['Draft treaty, Draft treaty II', 'The draft Treaty on the Prevention of the Placement of Weapons in Outer Space (PPWT), put forward by Russia and China, and its updated version.'],
   ['GNSS', 'Global navigation satellite systems, such as GPS.'],
-  ['ICAO', 'International Civil Aviation Organization.'],
   ['ITU', 'International Telecommunication Union, the United Nations agency for telecommunications.'],
-  ['ITU Arts. 45/48', 'Articles 45 and 48 of the Constitution of the ITU: harmful interference; military radio services.'],
-  ['LTBT', 'Limited Test Ban Treaty.'],
-  ['MILAMOS', 'McGill Manual on International Law Applicable to Military Uses of Outer Space.'],
-  ['OEWG', 'Open-ended Working Group.'],
-  ['OST', 'Outer Space Treaty.'],
+  ['ITU Board', 'The ITU Radio Regulations Board.'],
+  ['ITU rules', 'Articles 45 and 48 of the Constitution of the ITU: harmful interference; military radio services.'],
+  ['McGill Manual', 'McGill Manual on International Law Applicable to Military Uses of Outer Space (MILAMOS).'],
   ['PAROS', 'Prevention of an Arms Race in Outer Space.'],
-  ['PPWT, PPWT II', 'The draft Treaty on the Prevention of the Placement of Weapons in Outer Space, put forward by Russia and China, and its updated version.'],
-  ['RRB', 'ITU Radio Regulations Board.'],
-  ['Tallinn', 'Tallinn Manual 2.0: an expert manual on how international law applies to cyber operations.'],
-  ['UNGA 75/36, 77/41', 'United Nations General Assembly resolutions.'],
+  ['Test ban', 'The Limited Test Ban Treaty (1963), which bans nuclear tests in space.'],
+  ['UN 75/36, UN 77/41', 'United Nations General Assembly resolutions.'],
+  ['UN working group', 'The UN Open-ended Working Group on space threats.'],
   ['US pledge', 'The 2022 United States moratorium on destructive direct-ascent anti-satellite tests.'],
-  ['Veto', 'Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit. The draft did not concern anti-satellite testing.'],
+  ['Russian veto', 'Russia’s April 2024 veto of a UN Security Council draft on nuclear weapons in orbit. The draft did not concern anti-satellite testing.'],
   ['Woomera', 'Woomera Manual: an expert manual on the international law of military space operations.'],
   ['Asterisk (*)', 'Soft law: an expert manual, not binding.'],
 ];
@@ -348,7 +348,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         }
       });
   }
-  const yMark = compact ? TP * maxT + 12 : Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + 28),
+  const yMark = compact ? TP * maxT + 10 : Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + 28),
     dnSpace = !compact && maxDn >= 0 ? OFF0 + maxDn * PITCH + 8 : 0;
   // Negotiation periods: bars in rows below the symbol line (and below any labels hanging under it), each named just above its bar.
   const lanes = [];
@@ -368,9 +368,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       d._b = b;
     });
   const laneP = compact ? 8 : 26,
-    lane0 = yMark + (compact ? 24 : Math.max(32, dnSpace + 26));
+    lane0 = yMark + (compact ? 20 : Math.max(32, dnSpace + 26));
   const yAx = lane0 + (lanes.length ? (lanes.length - 1) * laneP + (compact ? 8 : 14) : 8),
-    H = yAx + (compact ? 27 : 38);
+    H = yAx + (compact ? 23 : 38);
   const svg = d3
     .select(el)
     .append('svg')

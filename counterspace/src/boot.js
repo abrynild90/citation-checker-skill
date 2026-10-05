@@ -61,7 +61,19 @@ nameThemeButton();
     const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
     links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
     rail.classList.toggle('on', now >= 0);
+    // One tab stop for the whole rail: the current chapter's dot (the first, until the reader has reached the timeline). Up and down arrows move along it.
+    links.forEach((a, i) => a.setAttribute('tabindex', i === Math.max(now, 0) ? '0' : '-1'));
   };
+  rail.addEventListener('keydown', (e) => {
+    const at = links.indexOf(document.activeElement),
+      step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key],
+      to = e.key === 'Home' ? 0 : e.key === 'End' ? links.length - 1 : step && at >= 0 ? (at + step + links.length) % links.length : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    links.forEach((a, i) => a.setAttribute('tabindex', i === to ? '0' : '-1'));
+    links[to].focus();
+  });
+  mark();
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(
       (entries) => {

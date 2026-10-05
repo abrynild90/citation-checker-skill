@@ -436,7 +436,14 @@ document.querySelectorAll('[data-export]').forEach((btn) => {
     closeMenus(pop);
     pop.hidden = !pop.hidden;
     btn.setAttribute('aria-expanded', String(!pop.hidden));
-    if (!pop.hidden) pop.firstElementChild.focus();
+    if (!pop.hidden) {
+      // keep the whole menu on screen, whatever side of the page its button sits on
+      pop.style.left = '';
+      const r = pop.getBoundingClientRect(),
+        dx = r.right > innerWidth - 8 ? innerWidth - 8 - r.right : r.left < 8 ? 8 - r.left : 0;
+      if (dx) pop.style.left = dx + 'px';
+      pop.firstElementChild.focus();
+    }
   };
   pop.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {

@@ -156,7 +156,7 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 .dl-menu button b{font:600 14px/1.3 var(--sans)}
 .dl-menu button span{font:400 13px/1.3 var(--sans);color:var(--muted)}
 .dl-menu button:hover{background:var(--surface-2)}
-@media (max-width:480px){.dl-menu{left:auto;right:0}.chapter-head>.tools{position:relative}}
+@media (max-width:480px){.dl-menu{min-width:min(240px,calc(100vw - 16px))}.chapter-head>.tools{position:relative}}
 @media (pointer:coarse){
   .sub-nav a{display:flex;align-items:center;min-height:44px;padding-block:0}
   .foot-base a,.foot-cols a{display:inline-flex;align-items:center;min-height:44px}
