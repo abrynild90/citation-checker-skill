@@ -42,7 +42,15 @@ export function drawMethod() {
     const m = html.match(SPLIT),
       head = m ? m[1] : html,
       rest = m ? html.slice(head.length).replace(/^[,;]\s*/, '') : '';
-    return `<a class="ct" href="${url}" target="_blank" rel="noopener">${head}</a>${rest ? `<span class="cd">${rest}</span>` : ''}`;
+    // A long trailing note folds away: the date and the report stay in view, the rest opens on request.
+    const cut = rest.length > 150 ? rest.search(/(?<!&[a-z#0-9]+);\s/) : -1;
+    const tail =
+      cut > 20
+        ? `<span class="cd">${rest.slice(0, cut)}</span><details class="cd-more"><summary>More about this source</summary><span class="cd">${rest.slice(cut + 1).trim()}</span></details>`
+        : rest
+          ? `<span class="cd">${rest}</span>`
+          : '';
+    return `<a class="ct" href="${url}" target="_blank" rel="noopener">${head}</a>${tail}`;
   };
   const cites = [...groups.values()].map((rs) => {
     const r = rs[0],

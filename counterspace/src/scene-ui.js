@@ -434,15 +434,17 @@ function syncSteps(t) {
 // inside a band with room for the next one below it. Nothing moves for a moment after the reader has scrolled the story themselves.
 function followStep(li) {
   if (performance.now() - lastUserScroll < 4000) return;
-  const box = asideBody.getBoundingClientRect(),
+  // The list moves inside its own fixed-height region when it has one, so the story's first paragraph and the title never scroll away.
+  const own = stepsEl.scrollHeight > stepsEl.clientHeight + 2 && getComputedStyle(stepsEl).overflowY !== 'visible' ? stepsEl : asideBody,
+    box = own.getBoundingClientRect(),
     r = li.getBoundingClientRect();
   if (!stepsBox.open || !r.height) return; // the list is folded away (phone)
-  const top = box.top + 56,
-    bottom = box.bottom - 96;
+  const top = box.top + (own === stepsEl ? 8 : 56),
+    bottom = box.bottom - (own === stepsEl ? 8 : 96);
   let dy = 0;
   if (r.bottom > bottom) dy = r.bottom - bottom;
   else if (r.top < top) dy = r.top - top;
-  if (dy) asideBody.scrollBy({ top: dy, behavior: REDUCED ? 'auto' : 'smooth' });
+  if (dy) own.scrollBy({ top: dy, behavior: REDUCED ? 'auto' : 'smooth' });
 }
 ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) =>
   asideBody.addEventListener(
@@ -488,8 +490,17 @@ function drawTicks() {
   ticksFor = epi;
   const a0 = epi ? epi.a0 + 0.001 : 0,
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
+  // Ticks closer than 13 px merge into one, so a scene with many steps does not draw a crowd (every step is still reachable from the list and the keys).
+  const wpx = scrub.clientWidth || 300;
+  let lastX = -99;
   ticksEl.innerHTML = steps
     .filter((s) => s.t > a0 + 0.004 && s.t < a1 - 0.004)
+    .filter((s) => {
+      const px = ((s.t - a0) / (a1 - a0)) * wpx;
+      if (px - lastX < 13) return false;
+      lastX = px;
+      return true;
+    })
     .map((s) => `<i style="--t:${((s.t - a0) / (a1 - a0)).toFixed(4)}"></i>`)
     .join('');
 }

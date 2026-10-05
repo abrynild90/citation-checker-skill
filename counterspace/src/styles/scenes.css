@@ -26,7 +26,7 @@
   justify-content: center;
   padding: 24px;
   color: var(--text);
-  background: rgba(3, 5, 12, 0.8);
+  background: rgba(3, 5, 12, 0.97);
   -webkit-tap-highlight-color: transparent;
   visibility: hidden;
   opacity: 0;
@@ -1457,6 +1457,11 @@
 
 /* ---------- Wide layout: the step that is playing stays pinned to the edge of the list while it scrolls out of view */
 @media (min-width: 761px) and (min-aspect-ratio: 1/1) {
+  .overlay .sv-steps #sceneSteps {
+    max-height: min(46vh, 400px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
   .overlay .sv-steps #sceneSteps li.now {
     position: sticky;
     top: 6px;
@@ -1466,5 +1471,12 @@
   .overlay .sv-steps #sceneSteps li.now .step {
     background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
     box-shadow: 0 0 0 1px var(--line);
+  }
+}
+
+/* Phone: only the step that is playing shows by default, so no step is cut off by the source line; the rest is under "All steps" */
+@media (max-width: 760px) and (max-height: 900px) {
+  .overlay .sv-now .next {
+    display: none;
   }
 }
