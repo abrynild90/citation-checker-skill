@@ -18,7 +18,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     parts = ex.parts || null;
   const boxes = reserved.map((r) => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })),
     segs = [],
-    M = 12 * (ex.scale || 1);
+    M = (ex.edge ?? 12) * (ex.scale || 1);
   const out = new Array(list.length).fill(null);
   const order = list
     .map((_, i) => i)
@@ -80,7 +80,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     const { w, h } = c;
     const cx = (x) => Math.max(w / 2 + M, Math.min(W - w / 2 - M, x)),
       cy = (y) => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
-    const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + 5 && Math.abs(y - b.y) < (h + b.h) / 2 + 5 ? 1 : 0), 0);
+    const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + (ex.gap ?? 5) && Math.abs(y - b.y) < (h + b.h) / 2 + (ex.gap ?? 5) ? 1 : 0), 0);
     // A leader longer than this (share of the canvas width) is a defect: the label belongs next to its object.
     const lim = W * (W <= 400 ? 0.27 : 0.17);
     const cost = (x, y) => {

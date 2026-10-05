@@ -32,7 +32,7 @@ export const FENGYUN = {
   stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 100, impactDy: -100, impactUntil: 0.6 },
+    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 22 : undefined, impactDx: 100, impactDy: -100, impactUntil: 0.6 },
     { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
     {
       type: 'debris',
