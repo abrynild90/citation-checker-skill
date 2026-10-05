@@ -132,7 +132,7 @@ export function drawL(el = document.getElementById('svgL')) {
   const keyAt = KEY.map(([m, label], i) => {
     const wd = 24 + tw(label, 12.5, 500) + 20;
     if (phone) {
-      const at = { m, label, x: PAD + (i % 2) * Math.round((W - 2 * PAD) / 2), y: 14 + Math.floor(i / 2) * 24 };
+      const at = { m, label, x: PAD + (i % 2) * Math.round((W - 2 * PAD) * 0.46), y: 14 + Math.floor(i / 2) * 24 };
       ky = at.y;
       return at;
     }
