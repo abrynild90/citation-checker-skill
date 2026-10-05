@@ -72,3 +72,9 @@
 #noteR0>b{display:block}
 #quoteC .q{display:block;font-size:19px;line-height:1.5}
 #quoteC .by{display:block;margin-top:6px;font:400 13px/1.4 var(--sans);color:var(--muted)}
+/* phone: the notes above the jamming and close-approach charts are compact (no icon, smaller serif text) so the chart starts sooner */
+@media (max-width:640px){
+  :is(#chartC,#chartR) .callout{margin-top:var(--s-4);padding:var(--s-3) var(--s-4);font-size:15.5px;line-height:1.45}
+  :is(#chartC,#chartR) .callout::before{display:none}
+  :is(#chartC,#chartR) #quoteC .q{font-size:16px;line-height:1.45}
+}

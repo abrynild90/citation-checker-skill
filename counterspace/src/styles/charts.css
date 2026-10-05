@@ -234,3 +234,16 @@ td a{overflow-wrap:anywhere}
 .whisker{stroke:var(--text);stroke-width:1.4;fill:none}
 .range-label{fill:var(--text);font:600 12px var(--sans)}
 .zbadge{display:inline-block;margin-right:6px;padding:2px 7px;border-radius:4px;background:var(--accent-2);color:var(--bg);font:700 12px/1.3 var(--sans)}
+
+/* phone only: the slim law timeline that stays in view over the anti-satellite, jamming and close-approach charts */
+.law-mini{display:none}
+@media (max-width:640px){
+  .law-mini{display:block;position:sticky;top:0;z-index:45;height:0;pointer-events:none}
+  .law-mini-in{display:none;height:40px;margin:0 calc(var(--gutter) * -1);padding:0 var(--gutter);background:var(--bg);border-bottom:1px solid var(--line-strong)}
+  .law-mini.on .law-mini-in{display:block}
+  .law-mini svg{display:block;overflow:visible}
+  .lm-name{fill:var(--muted);font:600 12px var(--sans)}
+  .lm-year{fill:var(--faint);font:500 12px var(--sans);font-variant-numeric:tabular-nums}
+  .lm-axis{stroke:var(--line-strong);stroke-width:1}
+  section.chart{scroll-margin-top:52px}
+}

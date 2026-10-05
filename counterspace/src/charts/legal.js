@@ -135,6 +135,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     // On phones the band becomes a sideways-scrolling strip (desktop layout at 1100 px), scrolled to the recent cluster.
     strip = isPhoneNow() && !zoom && !EXPORTING && el.id === 'legalSvg',
     compact = legalCompact && !isPhoneNow() && !EXPORTING && !zoom;
+  if (page) drawLawMini();
   if (page) {
     const tap = document.getElementById('legalTap');
     tap.hidden = !strip;
@@ -661,8 +662,62 @@ function tapLegal(d, el) {
   el.classList.add('hl');
   setGuide(parse(d.start));
 }
+// Phone only: a slim copy of the law timeline (about 40 px) stays at the top of the screen while the anti-satellite, jamming and close-approach charts are
+// read, on the same years as those charts, so each chart can still be read against the law.
+let miniFor = 'chartA';
+export function drawLawMini() {
+  const host = document.getElementById('lawMini'),
+    inner = host?.firstElementChild;
+  if (!inner) return;
+  if (!isPhoneNow()) {
+    inner.innerHTML = '';
+    host.classList.remove('on');
+    return;
+  }
+  const L1 = layout(host),
+    W = L1.W,
+    M = { l: miniFor === 'chartA' ? 50 : 40, r: L1.M.r }, // the anti-satellite chart leaves room for its altitude numbers
+    x = d3.scaleUtc().domain(DOMAIN).range([M.l, W - M.r]);
+  const H = 40,
+    yL = 24;
+  const g = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'presentation');
+  g.append('text').attr('x', 0).attr('y', 15).attr('class', 'lm-name').text('Law');
+  g.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', yL).attr('y2', yL).attr('class', 'lm-axis');
+  LEGAL.filter((l) => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981')).forEach((l) => {
+    const a = x(parse(l.start)),
+      b = l.end ? x(parse(l.end)) : x(DOMAIN[1]);
+    g.append('rect').attr('x', a).attr('y', yL - 2).attr('width', Math.max(3, b - a)).attr('height', 4).attr('rx', 2).attr('style', BAR_STYLE);
+  });
+  LEGAL.filter((l) => l.kind !== 'negotiation_span').forEach((l) => {
+    g.append('g')
+      .attr('transform', `translate(${x(parse(l.start))},${yL - 9}) scale(.58)`)
+      .html(glyphMarkup(legalKindOf(l)));
+  });
+  [1960, 1980, 2000, 2020].forEach((yr) => {
+    const px = x(parse(`${yr}-01-01`));
+    g.append('line').attr('x1', px).attr('x2', px).attr('y1', yL).attr('y2', yL + 4).attr('class', 'lm-axis');
+    g.append('text').attr('x', px).attr('y', 38).attr('text-anchor', 'middle').attr('class', 'lm-year').text(yr);
+  });
+  inner.innerHTML = '';
+  inner.appendChild(g.node());
+  miniShow();
+}
+// Shown from the top of the first of the three charts until the chart of who holds which capability starts.
+function miniShow() {
+  const host = document.getElementById('lawMini');
+  if (!host || !isPhoneNow()) return;
+  const a = document.getElementById('chartA').getBoundingClientRect(),
+    b = document.getElementById('chartB').getBoundingClientRect();
+  host.classList.toggle('on', a.top <= 2 && b.top > 60);
+  const now = document.getElementById('chartC').getBoundingClientRect().top > 2 ? 'chartA' : 'chartC';
+  if (now !== miniFor) {
+    miniFor = now;
+    drawLawMini();
+  }
+}
 let legalCompact = false;
 export function legalScroll() {
+  miniShow();
   const band = document.getElementById('legalBand'),
     tr = document.getElementById('timeline').getBoundingClientRect();
   const stuck = !isPhoneNow() && band.getBoundingClientRect().top <= 0.5 && tr.top < -1 && tr.bottom > 200;
