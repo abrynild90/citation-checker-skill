@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 50 : 76; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 54 : 108; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -63,7 +63,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: 40,
+      minPx: IS_PHONE ? 40 : 60,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
@@ -116,7 +116,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: 40,
+      minPx: IS_PHONE ? 40 : 60,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
@@ -156,8 +156,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
-      minPx: 38,
-      maxPx: IS_PHONE ? 46 : 68,
+      minPx: IS_PHONE ? 38 : 56,
+      maxPx: IS_PHONE ? 46 : 96,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
@@ -178,8 +178,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'objJ',
-      minPx: 48,
-      maxPx: 72,
+      minPx: IS_PHONE ? 48 : 56,
+      maxPx: IS_PHONE ? 72 : 84,
       anchor: 'cn',
       acts: [2],
       vis: [0.585, 0.755],
@@ -209,8 +209,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'objG',
-      minPx: 48,
-      maxPx: 72,
+      minPx: IS_PHONE ? 48 : 56,
+      maxPx: IS_PHONE ? 72 : 84,
       anchor: 'cn',
       acts: [2],
       vis: [0.8, 0.985],
@@ -271,7 +271,7 @@ export const SPACEPLANES = {
       name: 'X-37B OTV-7: follows the craft',
       chip: 'X-37B OTV-7',
       act: 1,
-      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.7, fill: 0.95, t: 0.42, lock: true },
+      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.7, fill: 0.95, t: 0.42, lock: true, tight: true },
     },
     {
       name: 'China: CSSHQ and released objects',
@@ -280,7 +280,7 @@ export const SPACEPLANES = {
       fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], fill: 0.93, dMin: 0.1, t: 0.75 },
     },
     // unlocked from the tour
-    { name: 'Whole scene: Earth and every orbit', at: [32, -25, 7.2], phone: { at: [32, -25, 10] }, ref: false, hide: ['OTV-7 orbit'] },
+    { name: 'Whole scene: Earth and every orbit', at: [32, -25, 5.8], phone: { at: [32, -25, 8] }, ref: false, hide: ['OTV-7 orbit'] },
   ],
   staticCenter: [40, 105],
   staticFit: 1.6,

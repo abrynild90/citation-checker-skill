@@ -28,7 +28,7 @@ const POSTER_T = {
   laser: 0.5,
   'sj21-tug': 0.7,
   rpo: 0.5,
-  spaceplanes: 0.5,
+  spaceplanes: 0.42,
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });

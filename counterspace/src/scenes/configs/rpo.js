@@ -191,7 +191,7 @@ export const RPO = {
       short: 'Cosmos 2543',
       dx: 14,
       dy: -46, // above the craft (sky), not on the Earth limb below it
-      labelFn: (t, n, s) => (n || s ? 'Cosmos 2543' : 'Cosmos 2543 (small satellite)'),
+      labelFn: (t, n, s) => (n || s || t > 0.62 ? 'Cosmos 2543' : 'Cosmos 2543 (small satellite)'),
       arcs: [{ t0: 0.53, t1: 0.6, o: [0, 0.07, 0] }],
       key: [
         [0.42, 0, 0, 0],

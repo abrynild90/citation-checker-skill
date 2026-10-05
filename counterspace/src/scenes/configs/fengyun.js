@@ -40,6 +40,7 @@ export const FENGYUN = {
       decay: 0,
       color: C.debris,
       label: 'Debris ring',
+      labelEdge: true, // live: the label points at a fragment on the ring's outer edge, so the leader stays short
       dx: 70,
       dy: 24,
       late: { t0: 0.6, k: 1.4, kr: 6 },

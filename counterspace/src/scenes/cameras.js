@@ -210,7 +210,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           at = (t, asp) => {
             const P = [];
             // fitCraft.lock: the target stays on the craft itself (a fast eccentric orbit would leave it at the frame edge or off a portrait stage)
-            for (const id of ids) if (crafts[id].pos(t)) for (const dt of [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
+            for (const id of ids) if (crafts[id].pos(t)) for (const dt of c.fitCraft.lock && c.fitCraft.tight ? [-0.015, 0, 0.008] : [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
             const f = an.frame(t),
               d = c.fitCraft.dir,
