@@ -136,7 +136,7 @@ export const SJ21_TUG = {
       frame: { anchor: 'g', from: [0.1, 0.17, 0.7], to: [0.08, 0.17, 0], t: 0.6 },
       phone: { frame: { anchor: 'g', from: [0.1, 0.14, 1.05], to: [0.08, 0.14, 0], t: 0.6 } },
     },
-    { name: 'Whole GEO belt', at: [26, 70, 7.4] },
+    { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9] } },
   ],
   stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
   staticCenter: [25, 72],

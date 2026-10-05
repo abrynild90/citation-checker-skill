@@ -216,7 +216,7 @@ const methods = {
     // where the placer's own slot lands on a dense field of lines). The leader runs from the referent to the nearest edge of the chip.
     // cfg.phoneOff: the same at phone width (default camera), in raw px
     // cfg.camOff: { camera index: { 'Label text start': [dx, dy] } } the same for another preset (desktop width only)
-    const camOffs = w >= 700 ? this.sim.cfg.camOff?.[this.camIdx] : null,
+    const camOffs = w >= 700 ? this.sim.cfg.camOff?.[this.camIdx] : w < 520 ? this.sim.cfg.phoneCamOff?.[this.camIdx] : null, // cfg.phoneCamOff: the same at phone width
       offs = noBanner ? this.sim.cfg.stillOff : camOffs || (this.camIdx === 0 ? (w >= 700 ? this.sim.cfg.liveOff : w < 520 ? this.sim.cfg.phoneOff : null) : null),
       offK = noBanner ? w / 1000 : w >= 700 ? Math.min(1, w / 798) : 1; // cfg.stillOff (PNG stills): px at a 1000 px wide frame
     if (offs)

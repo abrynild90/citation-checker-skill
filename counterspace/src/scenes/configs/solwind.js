@@ -28,8 +28,9 @@ export const SOLWIND = {
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
-  liveOff: { 'ASM-135': [120, 62] }, // the missile's pill sits above the F-15 with a leader down to the arc
-  phoneOff: { 'ASM-135': [120, 62] },
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [64, -56] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  phoneCamOff: { 3: { 'F-15': [92, -34] } },
+  phoneOff: { 'ASM-135': [-16, -58], 'F-15': [96, -16] },
   actors: [
     {
       type: 'aircraft',
@@ -67,6 +68,6 @@ export const SOLWIND = {
     [0, 'F-15 in a steep, supersonic climb'],
     [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
     [0.52, 'Collision at about 530 km; fragments spread, then fall out of orbit', 'Collision at about 530 km'],
-    [0.75, 'Fast-forward: all 285 tracked fragments are now out of orbit (SWF)', 'SWF: 285 fragments, none in orbit'],
+    [0.75, 'Fast-forward: fragments decay; SWF counts all 285 out of orbit', 'Decay: all 285 out (SWF)'],
   ],
 };

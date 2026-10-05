@@ -83,7 +83,7 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km (China)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [6, -72], '10,000': [12, -40], Apogee: [-160, 14], GEO: [38, 58] },
+  liveOff: { 'DN-2 path': [6, -72], '10,000': [-10, -42], Apogee: [-160, 14], GEO: [38, 58] },
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)

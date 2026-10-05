@@ -213,7 +213,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             for (const id of ids) if (crafts[id].pos(t)) for (const dt of c.fitCraft.lock && c.fitCraft.tight ? [-0.015, 0, 0.008] : [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
             const f = an.frame(t),
-              d = c.fitCraft.dir,
+              d = (asp != null && asp < 1.3 && c.fitCraft.phoneDir) || c.fitCraft.dir, // phoneDir: a steeper view on a narrow (phone) stage
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
             const pose = fitPose(P, n, c.fitCraft.lock ? add(scl(centroid(P), 0.65), scl(centroid(ids.map((id) => crafts[id].raw(t))), 0.35)) : centroid(P), {
               up: f.rad,
