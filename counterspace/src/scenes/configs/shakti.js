@@ -1,5 +1,6 @@
 // scenes/configs/shakti.js: scene `shakti` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
 
 export const SHAKTI = {
   id: 'shakti',
@@ -21,9 +22,9 @@ export const SHAKTI = {
   orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
-  fitFill: 1.1, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
+  fitFill: IS_PHONE ? 0.95 : 1.1, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
-  liveOff: { 'PDV': [-86, -46], 'Microsat-R': [70, 44] }, // the two pills sit on opposite sides of the strike, one above and one below
+  liveOff: { 'PDV': [-86, -46], 'Microsat-R': [70, 70] }, // the two pills sit on opposite sides of the strike, one above and one below
   phoneOff: { 'Abdul Kalam': [-56, 30] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
   actors: [

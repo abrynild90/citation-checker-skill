@@ -28,8 +28,8 @@ export const SOLWIND = {
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
-  liveOff: { 'ASM-135': [26, -84] }, // the missile's pill sits above the F-15 with a leader down to the arc
-  phoneOff: { 'ASM-135': [0, -64] },
+  liveOff: { 'ASM-135': [120, 62] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  phoneOff: { 'ASM-135': [120, 62] },
   actors: [
     {
       type: 'aircraft',
