@@ -108,8 +108,8 @@ export function drawB(el = document.getElementById('svgB')) {
     maxY = Math.max(4, ...tot);
   // The tallest bar leaves room above it for its figure and the label of the assessed decade.
   const plotH = phone ? 300 : 340,
-    top = 30,
-    lead = phone ? 98 : 92,
+    top = 54,
+    lead = phone ? 62 : 58,
     ymax = maxY / (1 - lead / plotH),
     y = d3
       .scaleLinear()
@@ -166,7 +166,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .append('path')
     .attr('class', 'panel-swf')
     .attr('d', topRoundPath(X2020, top, R - X2020, plotH, 10));
-  const yticks = d3.range(0, ymax, 10);
+  const yticks = d3.range(0, Math.ceil(maxY / 10) * 10 + 1, 10); // the axis stops at the last round number the data reaches; the room above is for the labels
   const gy = svg.append('g').attr('class', 'gridline');
   yticks.forEach((t) => gy.append('line').attr('x1', M.l).attr('x2', R).attr('y1', y(t)).attr('y2', y(t)));
   const ay = svg.append('g').attr('class', 'axis');
@@ -331,7 +331,7 @@ export function drawB(el = document.getElementById('svgB')) {
         .append('text')
         .attr('class', 'panel-label')
         .attr('x', cxR)
-        .attr('y', top + 22)
+        .attr('y', top - 24)
         .attr('text-anchor', phone ? 'end' : 'middle');
     a.append('tspan').attr('x', cxR).text('SWF-assessed');
     a.append('tspan').attr('class', 'panel-sub').attr('x', cxR).attr('dy', 17).text('13 states');

@@ -98,7 +98,7 @@ function showCard(html, evt, el, full = false) {
         others.filter((o) => hit(q, o)).length * WM +
         noText.filter((o) => hit(q, o)).length * 100 +
         (ax && hit(q, ax, 2) ? 60 : 0) +
-        (hit(q, r, 0) ? 80 : 0) +
+        (hit(q, r, 12) ? 120 : 0) +
         Math.abs(L - l) / 40 +
         Math.abs(T - tp) / 40 +
         i * 0.1;
@@ -114,7 +114,7 @@ function showCard(html, evt, el, full = false) {
           others.filter((o) => hit(q, o)).length * WM +
           noText.filter((o) => hit(q, o)).length * 100 +
           (ax && hit(q, ax, 2) ? 60 : 0) +
-          (hit(q, r, 0) ? 80 : 0) +
+          (hit(q, r, 12) ? 120 : 0) +
           Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (near ? 15 : 60) +
           0.5;
         if (score < best.score) best = { L, T, score };

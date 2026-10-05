@@ -108,7 +108,7 @@ export function drawL(el = document.getElementById('svgL')) {
   const phone = isPhoneNow(),
     W = Math.max(300, el.clientWidth),
     PAD = phone ? 8 : 12,
-    ROOM = phone ? 104 : 108, // right of the 16 year mark: the number at the end of the longest bar
+    ROOM = phone ? 104 : 48, // right of the 16 year mark: the number at the end of the longest bar
     x = d3
       .scaleLinear()
       .domain([0, MAX_YEARS])
@@ -119,17 +119,23 @@ export function drawL(el = document.getElementById('svgL')) {
     NL = 17;
   const info = LAG.map(pairInfo);
   // The symbols are explained on the chart itself, in rows that wrap to the width.
+  // (on a phone the names are shorter and sit in two columns)
   const KEY = [
-    [hexMarkup('var(--cat-da)'), 'Physical attack, such as a missile test'],
-    [hexMarkup('var(--cat-ew)'), 'Jamming, laser or cyber operation'],
+    [hexMarkup('var(--cat-da)'), phone ? 'Physical attack' : 'Physical attack, such as a missile test'],
+    [hexMarkup('var(--cat-ew)'), phone ? 'Jamming, laser or cyber' : 'Jamming, laser or cyber operation'],
     [glyphMarkup('treaty'), 'Treaty (binding)'],
-    [glyphMarkup('resolution'), 'Resolution or finding (not binding)'],
+    [glyphMarkup('resolution'), phone ? 'Resolution (not binding)' : 'Resolution or finding (not binding)'],
     [glyphMarkup('unilateral'), 'Pledge by one country'],
   ];
   let kx = PAD,
     ky = 14;
-  const keyAt = KEY.map(([m, label]) => {
+  const keyAt = KEY.map(([m, label], i) => {
     const wd = 24 + tw(label, 12.5, 500) + 20;
+    if (phone) {
+      const at = { m, label, x: PAD + (i % 2) * Math.round((W - 2 * PAD) / 2), y: 14 + Math.floor(i / 2) * 24 };
+      ky = at.y;
+      return at;
+    }
     if (kx > PAD && kx + wd > W - PAD) {
       kx = PAD;
       ky += 24;

@@ -83,7 +83,7 @@ button,input,select,textarea{font-family:inherit}
 .chip[aria-pressed="false"] i{opacity:.4}
 .chip:disabled{opacity:.5;cursor:not-allowed}
 @media (min-width:641px) and (max-width:900px){.chips{flex-wrap:nowrap;gap:6px}.chip{gap:6px;padding:0 10px 0 9px;font-size:13px;white-space:nowrap}}
-@media (max-width:640px){.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.chip{justify-content:flex-start}}
+@media (max-width:640px){.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.chip{justify-content:flex-start;text-align:left;line-height:1.2;padding-block:6px}.chip:last-child:nth-child(odd){grid-column:1/-1}}
 
 /* Disclosure ("Show the data behind this chart", "How we classified these"): a quiet text button with a turning chevron */
 details.table,details.about{margin:var(--s-4) 0 var(--s-1)}
