@@ -420,38 +420,42 @@ export const modelMethods = {
     K.geo(white, new T.LatheGeometry(prof, 48), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
     K.geo(nose, new T.SphereGeometry(0.0017, 12, 8), 0, 0, 0.0214, 0, 0, 0, 1, 0.8, 1.3);
     K.box(nose, 0.0094, 0.0006, 0.026, 0, -0.0043, -0.002); // dark heat-shield belly seen at the edges
-    K.box(glass, 0.003, 0.001, 0.005, 0, 0.0031, 0.0128);
-    K.box(body, 0.0046, 0.001, 0.014, 0, 0.0046, -0.004);
-    // Wing: a thick, bevelled slab in a darker shade of the national colour (its underside), with a smaller bright deck on top and a dark leading edge
+    K.box(glass, 0.0026, 0.0008, 0.0042, 0, 0.0033, 0.0136);
+    // Payload-bay doors: a dark frame on the back, two pale door panels with a dark centre seam and hinge lines (the X-37B's most recognisable detail)
+    K.box(dark, 0.0072, 0.0007, 0.0188, 0, 0.0043, -0.0036);
+    for (const s of [-1, 1]) K.box(white, 0.0028, 0.0005, 0.0172, s * 0.0017, 0.0047, -0.0036);
+    K.box(dark, 0.0004, 0.0006, 0.0176, 0, 0.0049, -0.0036);
+    for (const z of [-0.0072, 0.0004]) K.box(dark, 0.0068, 0.0005, 0.0003, 0, 0.0049, z);
+    // Wing: a thin bevelled slab, dark below (the national colour darkened) with a pale tile deck on top and a dark leading edge; a short, low-aspect
+    // trapezoid (X-37B: span about half its length) set low on the rear body
     const shape = (k) => {
-      // short, low-aspect trapezoid wing (X-37B: span about half its length): leading edge sweeps out from the body, straight tip, square trailing edge
       const q = new T.Shape();
-      q.moveTo(0.0046 * k, 0.0105 * k);
-      q.lineTo(0.0135 * k, -0.0075 * k);
-      q.lineTo(0.0135 * k, -0.0185 * k);
-      q.lineTo(-0.0135 * k, -0.0185 * k);
-      q.lineTo(-0.0135 * k, -0.0075 * k);
-      q.lineTo(-0.0046 * k, 0.0105 * k);
+      q.moveTo(0.0052 * k, 0.0085 * k);
+      q.lineTo(0.0108 * k, -0.0105 * k);
+      q.lineTo(0.0108 * k, -0.0185 * k);
+      q.lineTo(-0.0108 * k, -0.0185 * k);
+      q.lineTo(-0.0108 * k, -0.0105 * k);
+      q.lineTo(-0.0052 * k, 0.0085 * k);
       q.closePath();
       return q;
     };
     K.geo(
       under,
-      new T.ExtrudeGeometry(shape(1), { depth: 0.0024, bevelEnabled: true, bevelThickness: 0.0005, bevelSize: 0.0005, bevelSegments: 1 }),
+      new T.ExtrudeGeometry(shape(1), { depth: 0.0013, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 1 }),
       0,
-      0.0004,
+      -0.0014,
       0,
       PI / 2,
       0,
       0,
     );
-    K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0007, bevelEnabled: false }), 0, 0.0017, -0.0008, PI / 2, 0, 0); // above the slab's bevelled top, so the pale tile deck shows
-    // thermal-tile seams across the wing deck and a white dorsal spine
-    for (const [z, wd] of [[-0.002, 0.0185], [-0.0095, 0.0235]]) K.box(dark, wd, 0.0004, 0.0004, 0, 0.0021, z);
-    K.box(white, 0.0016, 0.0008, 0.026, 0, 0.0063, 0);
+    K.geo(deck, new T.ExtrudeGeometry(shape(0.9), { depth: 0.0004, bevelEnabled: false }), 0, -0.0008, -0.0004, PI / 2, 0, 0);
+    for (const [z, wd] of [[-0.0105, 0.0185], [-0.0045, 0.0145]]) K.box(dark, wd, 0.0003, 0.0003, 0, -0.0004, z);
     for (const s of [-1, 1]) {
-      K.box(dark, 0.0007, 0.0007, 0.0201, s * 0.009, -0.0004, 0.0015, 0, -s * 0.46, 0);
-      K.box(body, 0.001, 0.009, 0.0095, s * 0.0042, 0.0075, -0.0165, 0, 0, -s * 0.38);
+      K.box(dark, 0.0007, 0.0006, 0.0182, s * 0.0078, -0.0011, -0.0006, 0, -s * 0.36, 0); // leading edge
+      // canted tail fin (white, dark tip): the twin V tail
+      K.box(white, 0.0008, 0.0072, 0.0100, s * 0.0045, 0.0068, -0.0158, 0, 0, -s * 0.5);
+      K.box(dark, 0.001, 0.0012, 0.0100, s * 0.0068, 0.0105, -0.0158, 0, 0, -s * 0.5);
     }
     K.cyl(dark, 0.0026, 0.0032, 0.003, 0, 0, -0.0235, PI / 2);
     const g = K.build();
