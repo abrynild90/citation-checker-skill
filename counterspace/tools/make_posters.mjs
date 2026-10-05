@@ -34,6 +34,7 @@ const POSTER_T = {
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
+  starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.6 }, // the X-37B follow view: the plane large on the sunlit limb with its orbit loops
 };
@@ -74,6 +75,23 @@ try {
         if (view.cam != null) {
           h.pickCam(view.cam);
           h.update(t);
+        }
+        if (view.back) {
+          // back: dolly out by this factor from the target (the picture keeps its centre, the subject gets smaller)
+          const d = h.camera.position.clone().sub(h.target).multiplyScalar(view.back);
+          h.camera.position.copy(h.target).add(d);
+          h.camera.lookAt(h.target);
+          h._user = true;
+          h.render();
+        }
+        if (view.right) {
+          // right: slide the view sideways by this many Earth radii (the picture moves the other way)
+          const r = new h.camera.position.constructor(1, 0, 0).applyQuaternion(h.camera.quaternion).multiplyScalar(view.right);
+          h.camera.position.add(r);
+          h.target.add(r);
+          h.camera.lookAt(h.target);
+          h._user = true;
+          h.render();
         }
         if (view.lift) {
           const up = h.camera.up.clone().applyQuaternion(h.camera.quaternion).multiplyScalar(view.lift);
