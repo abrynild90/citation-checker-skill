@@ -50,6 +50,23 @@ nameThemeButton();
   place();
 }
 
+// Sources section: the contents list marks the part being read (the last heading above the reading line, 35% down the window).
+{
+  const links = [...document.querySelectorAll('.sub-nav a')];
+  let ticking = false;
+  const spy = () => {
+    ticking = false;
+    const heads = links.map((a) => document.getElementById(a.getAttribute('href').slice(1)));
+    const box = document.getElementById('sources')?.getBoundingClientRect();
+    const inside = box && box.top < innerHeight * 0.5 && box.bottom > innerHeight * 0.2;
+    let now = -1;
+    if (inside) heads.forEach((h, i) => h && h.getBoundingClientRect().top <= innerHeight * 0.35 && (now = i));
+    links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
+  };
+  addEventListener('scroll', () => !ticking && ((ticking = true), requestAnimationFrame(spy)), { passive: true });
+  addEventListener('resize', spy);
+}
+
 // Chapter rail (wide screens): the last chapter whose start has passed the reading line, 40% down the window, is the current one. Each chapter's start is
 // watched with one IntersectionObserver whose box is the top 40% of the window; an entry's own top edge says which side of the line it is on.
 {

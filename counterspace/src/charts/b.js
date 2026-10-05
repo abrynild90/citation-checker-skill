@@ -313,7 +313,7 @@ export function drawB(el = document.getElementById('svgB')) {
   // panel labels (the wording "reconstructed (not SWF-assessed)" is required), then the axis under the bars
   {
     const lim = Math.max(150, X2020 - M.l - 28 - (phone ? 92 : 0)),
-      ls = wrapLines('Before 2020: reconstructed (not SWF-assessed)', lim, (q) => tw(q, 12.5, 600)),
+      ls = wrapLines('Earlier decades are reconstructed (not SWF-assessed)', lim, (q) => tw(q, 12.5, 600)),
       t = svg
         .append('text')
         .attr('class', 'panel-label')

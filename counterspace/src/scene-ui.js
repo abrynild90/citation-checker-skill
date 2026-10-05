@@ -82,6 +82,7 @@ const overlay = $('overlay'),
   dotsEl = $('sceneDots'),
   captionEl = $('sceneCaption'),
   srcEl = $('sceneSrc'),
+  srcLineEl = $('sceneSrcLine'),
   scaleEl = $('sceneScale'),
   stepsSection = $('sceneStepsSection'),
   stepsBox = $('sceneStepsBox'),
@@ -253,7 +254,12 @@ export async function openScene(id, originEl) {
   view.querySelector(':scope > svg')?.remove();
   if (!host && !REDUCED && glOK !== false) setState('loading', 'Loading the 3D view. You can read the story while you wait.');
   else setState(null);
-  if (!wasOpen) panel.focus({ preventScroll: true });
+  if (!wasOpen) {
+    // Focus starts on the dialog's title, so a screen reader names the scene and the first Tab lands on the first control.
+    const ttl = $('sceneTitle');
+    ttl.tabIndex = -1;
+    ttl.focus({ preventScroll: true });
+  }
   const h = await getHost();
   if (token !== openToken) return; // closed, or another scene was chosen, while 3D was loading
   if (h) prefetchEarth();
@@ -321,6 +327,7 @@ function fillStory(cfg) {
         `<use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
       : '') +
     (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
+  srcLineEl.textContent = `Source: ${cfg.cite}`;
   scaleEl.textContent = [
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
@@ -626,7 +633,7 @@ lawBtn.onclick = () => {
 function updateFades() {
   const max = asideBody.scrollHeight - asideBody.clientHeight;
   asideWrap.classList.toggle('can-up', asideBody.scrollTop > 4);
-  asideWrap.classList.toggle('can-down', max - asideBody.scrollTop > 40); // the last 36 px are only padding: no fade over them
+  asideWrap.classList.toggle('can-down', max - asideBody.scrollTop > 56); // the last 48 px are only padding: no fade over them
 }
 asideBody.addEventListener('scroll', updateFades, { passive: true });
 addEventListener('resize', updateFades);

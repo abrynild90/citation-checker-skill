@@ -404,8 +404,8 @@ export function drawA(el = document.getElementById('svgA')) {
         for (const [dx, dy] of cand.sort((p, q) => p[2] - q[2])) {
           const ty = gy + 4 + dy,
             cxx = gm + dx,
-            q = [cxx - w / 2, ty - 13, cxx + w / 2, ty + (withL2 ? 19 : 4)];
-          if (q[0] >= M.l + 2 && q[2] <= W - M.r - 18 && q[1] >= top + 30 && q[3] <= top + plotH - 4 && pl.free(q, [], 3)) {
+            q = [cxx - w / 2, ty - 31, cxx + w / 2, ty + (withL2 ? 19 : 4)];
+          if (q[0] >= M.l + 2 && q[2] <= W - M.r - 18 && q[1] >= top + 24 && q[3] <= top + plotH - 4 && pl.free(q, [], 3)) {
             placed = { ty, q, withL2, cxx };
             break;
           }
@@ -418,7 +418,7 @@ export function drawA(el = document.getElementById('svgA')) {
           if (q.x1 - q.x0 > 6 && Math.abs(placed.cxx - gm) < 1)
             svg
               .append('path')
-              .attr('d', `M${q.x0},${placed.ty - 16}V${placed.ty - 21}H${q.x1}V${placed.ty - 16}`)
+              .attr('d', `M${q.x0},${placed.ty - 22}V${placed.ty - 28}H${q.x1}V${placed.ty - 22}`)
               .style('fill', 'none')
               .style('stroke', 'var(--faint)')
               .attr('aria-hidden', 'true');

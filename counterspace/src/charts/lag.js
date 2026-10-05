@@ -108,7 +108,7 @@ export function drawL(el = document.getElementById('svgL')) {
   const phone = isPhoneNow(),
     W = Math.max(300, el.clientWidth),
     PAD = phone ? 8 : 12,
-    ROOM = phone ? 104 : 124, // right of the 16 year mark: the number at the end of the longest bar
+    ROOM = phone ? 104 : 108, // right of the 16 year mark: the number at the end of the longest bar
     x = d3
       .scaleLinear()
       .domain([0, MAX_YEARS])
@@ -274,11 +274,11 @@ export function drawL(el = document.getElementById('svgL')) {
     const t = row
       .append('text')
       .attr('class', 'lag-fig')
-      .attr('x', l ? xe + 18 : x(0) + 34)
+      .attr('x', l ? xe + 16 : x(0) + 34)
       .attr('y', yy + 8);
     if (l) {
       t.append('tspan').attr('class', 'num').text(g.num);
-      t.append('tspan').attr('class', 'unit').attr('dx', 5).text(g.unit);
+      t.append('tspan').attr('class', 'unit').attr('dx', 4).text(g.unit);
     } else t.append('tspan').attr('class', 'unit').text('None linked');
     if (i < info.length - 1)
       svg

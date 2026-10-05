@@ -66,3 +66,9 @@
 :is(#chartC,#chartR,#chartB) .legend .kwide{flex-basis:100%;font:400 13.5px/1.4 var(--sans)}
 :is(#chartC,#chartR,#chartB) .callout{margin-top:var(--s-5)}
 
+
+/* callouts on chapters C and R share one look: a one-line heading, then at most three lines */
+:is(#chartC,#chartR) .callout{max-width:780px}
+#noteR0>b{display:block}
+#quoteC .q{display:block;font-size:19px;line-height:1.5}
+#quoteC .by{display:block;margin-top:6px;font:400 13px/1.4 var(--sans);color:var(--muted)}

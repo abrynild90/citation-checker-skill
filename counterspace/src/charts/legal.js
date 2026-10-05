@@ -327,7 +327,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   // Sticky (compact) band: short names sit under the line where they fit; symbols that do not fit keep the hover and focus card.
   const cLabels = [];
   if (compact) {
-    const p2 = new Placer({ x0: 2, x1: W - 2, y0: -999, y1: 999 });
+    const p2 = new Placer({ x0: 2, x1: W - M.r + 2, y0: -999, y1: 999 }); // labels stop at the end of the axis
     pts
       .slice()
       .reverse()
@@ -571,7 +571,15 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
   lg.raise(); // labels (with a background outline, see CSS) sit above the guide line so it never strikes through them
   if (strip) {
-    el.scrollLeft = el.scrollWidth;
+    // Start on the recent years (2004 to 2026), moved left just far enough that no label is cut by the left edge.
+    const end = el.scrollWidth - el.clientWidth,
+      boxes = [...svg.node().querySelectorAll('text')].map((t) => t.getBBox());
+    let left = end;
+    for (let s = 0; s <= 120 && left > 0; s += 2) {
+      left = Math.max(0, end - s);
+      if (!boxes.some((b) => b.x < left + 6 && b.x + b.width > left - 6)) break;
+    }
+    el.scrollLeft = left;
     el._x = x;
     el.onscroll = stripPos;
     stripPos();
@@ -613,6 +621,8 @@ function stripPos() {
     y1 = b >= sw - 2 ? 2026 : yr(b);
   box.hidden = false;
   box.querySelector('.lab').textContent = `Showing ${y0} to ${y1}. Scroll sideways for ${a > 2 ? 'earlier' : 'later'} years.`;
+  const hint = document.getElementById('stripEdge');
+  if (hint) hint.hidden = a <= 2;
   const f = box.querySelector('i');
   f.style.left = (100 * a) / sw + '%';
   f.style.width = (100 * el.clientWidth) / sw + '%';
@@ -708,6 +718,14 @@ export function drawLegalKey() {
     'Select a cube icon to open a 3D explainer',
   );
   K.done();
+  // On a phone the key folds into one row; wider screens always show it.
+  const kb = document.getElementById('keyLegal'),
+    mq = matchMedia('(max-width: 640px)');
+  if (kb && !kb.dataset.set) {
+    kb.dataset.set = '1';
+    kb.open = !mq.matches;
+    mq.addEventListener('change', () => (kb.open = !mq.matches));
+  }
   document.getElementById('glossaryLegal').innerHTML = GLOSSARY.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('');
   // app.js writes this summary once when the page loads; say it again here so the wording lives with the list it introduces
   const s = document.querySelector('#legalPhone summary');

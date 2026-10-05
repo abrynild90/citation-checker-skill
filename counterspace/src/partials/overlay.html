@@ -1,5 +1,5 @@
 <div class="overlay scope-dark" id="overlay" aria-hidden="true">
-  <div class="panel" id="scenePanel" role="dialog" aria-modal="true" aria-label="3D explainer" tabindex="-1">
+  <div class="panel" id="scenePanel" role="dialog" aria-modal="true" aria-labelledby="sceneTitle" tabindex="-1">
     <div class="sv-sheet" id="sceneSheet" role="dialog" aria-label="All 3D explainers" hidden>
       <div class="sheet-head"><h3>All scenes</h3><button class="btn icon" id="scSheetClose" type="button" aria-label="Close the list of scenes"><svg
         class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div>
@@ -60,6 +60,7 @@
           </details>
         </div>
       </div>
+      <p class="sv-srcline" id="sceneSrcLine" aria-hidden="true"></p>
       <div class="story-foot" id="sceneFoot">
         <p class="sv-src" id="sceneSrc"></p>
         <div class="aside-law" id="asideLaw">
@@ -78,8 +79,8 @@
         <input type="range" id="scScrub" min="0" max="1000" step="any" value="0">
         <span class="ticks" id="scTicks" aria-hidden="true"></span>
       </div>
-      <p class="static-note" id="scStatic" hidden><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><span
-        id="scStaticTxt"></span><button class="btn small" id="scRetry" type="button">Try again</button></p>
+      <p class="static-note" id="scStatic" hidden><span class="sn-text"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><span
+        id="scStaticTxt"></span></span><button class="btn small" id="scRetry" type="button">Try again</button></p>
       <div class="views" id="scViews">
         <span class="views-label" aria-hidden="true">View</span>
         <div class="seg" id="scCams" role="group" aria-label="Choose a view"></div>

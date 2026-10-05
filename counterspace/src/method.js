@@ -35,14 +35,23 @@ export function drawMethod() {
     if (!groups.has(r.source_url)) groups.set(r.source_url, []);
     groups.get(r.source_url).push(r);
   });
+  // A citation reads as a title line (the link) and a quieter detail line (date, report number, pages, where the file lives).
+  const MONTH = '(?:Jan|Feb|Mar|Apr|May|June|July|Aug|Sept|Oct|Nov|Dec)';
+  const SPLIT = new RegExp(`^(.{12,}?)(?=,\\s${MONTH}\\.?\\s\\d|\\s\\(|(?<!&[a-z#0-9]+);\\s|,\\sCD/|,\\sart\\.|,\\sU\\.S\\.-|\\sarts\\.\\s)`);
+  const twoLine = (html, url) => {
+    const m = html.match(SPLIT),
+      head = m ? m[1] : html,
+      rest = m ? html.slice(head.length).replace(/^[,;]\s*/, '') : '';
+    return `<a class="ct" href="${url}" target="_blank" rel="noopener">${head}</a>${rest ? `<span class="cd">${rest}</span>` : ''}`;
+  };
   const cites = [...groups.values()].map((rs) => {
     const r = rs[0],
       url = esc(r.source_url);
-    if (!r.source_full && r.citation) return `<li><a href="${url}" target="_blank" rel="noopener">${short(r.citation)}</a></li>`;
+    if (!r.source_full && r.citation) return `<li>${twoLine(short(r.citation), url)}</li>`;
     const head = short(r.source_full || r.source);
     const pins =
       rs.length > 1 ? `; ${rs.length} entries, each tied to its own table or page (shown with each point and in the data tables)` : `, ${esc(plain(r.pin))}`;
-    return `<li><a href="${url}" target="_blank" rel="noopener">${head}</a>${pins}.</li>`;
+    return `<li>${twoLine(head + pins, url)}</li>`;
   });
   // The data's own rule texts start with their own label ("Scope rule: ...", "Co-orbital rule: ..."); the label is dropped here.
   const unlabel = (t) => t.replace(/^[A-Za-z-]+ rule:\s*/, '');
@@ -155,15 +164,13 @@ export function drawMethod() {
 
   <h3 id="srcLicence">Licences and credits</h3>
   <p class="src-intro">What may be reused, and where the pictures come from.</p>
-  <div class="panel-card licence-card">
-    <p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
+  ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
       are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
       graphics are reproduced.</p>
     <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). Small versions are built
       into the page. The full-size images are fetched from a fixed copy hosted on jsDelivr, a public file host, only when you interact with the globe at the
       top of the page or open a 3D explainer, and never when animation is switched off on your device. Coastlines in the still diagrams come from Natural
-      Earth (public domain) through the world-atlas dataset.</p>
-  </div>
+      Earth (public domain) through the world-atlas dataset.</p>`)}
 
   <h3 id="srcList">All cited sources (${cites.length})</h3>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>

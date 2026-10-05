@@ -18,6 +18,9 @@ function showCard(html, evt, el, full = false) {
   card.dataset.touch = touchMode ? '1' : '';
   shownY = scrollY;
   if (dock) {
+    // The docked card sits at the bottom of the screen, or at the top when the tapped point is in the lower half, so it never covers that point.
+    const mr = el?.getBoundingClientRect?.();
+    card.classList.toggle('top', !!mr && (mr.top + mr.bottom) / 2 > innerHeight * 0.5);
     card.style.left = '';
     card.style.top = '';
     card.firstChild.scrollTop = 0;
@@ -53,6 +56,8 @@ function showCard(html, evt, el, full = false) {
   const texts = new Set();
   root?.querySelectorAll('.ann, .ann-sub, .empty-note').forEach((n) => texts.add(n.closest('text') || n));
   root?.querySelectorAll('text.band-label, .handoff text').forEach((n) => texts.add(n));
+  // every other piece of chart wording (titles, glosses, row names, panel labels, law labels) is an obstacle too; axis numbers have their own rule below
+  root?.querySelectorAll('text').forEach((n) => !n.closest('.mark, .axis, .xaxis, .yaxis, .tick, .glyph, .badge3d') && texts.add(n));
   const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
@@ -91,7 +96,7 @@ function showCard(html, evt, el, full = false) {
         q = { left: L, right: L + cw, top: T, bottom: T + ch };
       const score =
         others.filter((o) => hit(q, o)).length * WM +
-        noText.filter((o) => hit(q, o)).length * 40 +
+        noText.filter((o) => hit(q, o)).length * 100 +
         (ax && hit(q, ax, 2) ? 60 : 0) +
         (hit(q, r, 0) ? 80 : 0) +
         Math.abs(L - l) / 40 +
@@ -107,7 +112,7 @@ function showCard(html, evt, el, full = false) {
         const q = { left: L, right: L + cw, top: T, bottom: T + ch };
         const score =
           others.filter((o) => hit(q, o)).length * WM +
-          noText.filter((o) => hit(q, o)).length * 40 +
+          noText.filter((o) => hit(q, o)).length * 100 +
           (ax && hit(q, ax, 2) ? 60 : 0) +
           (hit(q, r, 0) ? 80 : 0) +
           Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (near ? 15 : 60) +
@@ -438,4 +443,7 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
   const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}>${h}</th>`).join('');
   setOnce(id, `<table>${cap}<thead><tr>${th}</tr></thead><tbody>${rows.map(tr).join('')}</tbody></table>`);
+  // the disclosure button says how big the table is
+  const sum = document.getElementById(id)?.closest('details')?.querySelector(':scope > summary');
+  if (sum && !sum.querySelector('.cnt')) sum.insertAdjacentHTML('beforeend', `<span class="cnt">${rows.length} entries</span>`);
 }

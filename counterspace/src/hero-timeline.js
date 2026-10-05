@@ -21,15 +21,15 @@ const NS = 'http://www.w3.org/2000/svg',
 const LAW_NAMES = {
   'ltbt-1963': {
     text: 'Limited Test Ban Treaty, 1963',
-    phone: 'Limited Test Ban Treaty',
+    phone: 'Test Ban Treaty, 1963',
     more: 'The earliest law here. It bans nuclear tests in space.',
     row: 1,
     prow: 1,
   },
-  'ost-1967': { text: 'Outer Space Treaty, 1967', phone: null },
+  'ost-1967': { text: 'Outer Space Treaty, 1967', phone: 'Outer Space Treaty, 1967', prow: 0 },
   'itu-1992': { text: 'ITU Constitution, Articles 45 and 48, 1992', phone: null },
   'tallinn-2017': { text: 'Tallinn Manual 2.0 (soft law), 2017', phone: null, end: true },
-  'unga-77-41': { text: 'UN General Assembly resolution 77/41, 2022', phone: 'UN resolution 77/41, 2022', row: 1 },
+  'unga-77-41': { text: 'UN General Assembly resolution 77/41, 2022', phone: 'UN resolution, 2022', row: 1, prow: 1 },
 };
 const el = (name, attrs = {}, parent) => {
   const n = document.createElementNS(NS, name);
@@ -214,7 +214,7 @@ function build(stage) {
 
   // ---- annotations (plain sentences, a leader and a dot on the mark) and one small tag for the nuclear test
   const noteSize = phone ? 13 : 14,
-    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : W < 900 ? Math.round(Math.max(176, W * 0.21)) : W < 1100 ? Math.round(Math.max(140, W * 0.15)) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
+    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : W < 900 ? Math.round(Math.max(236, W * 0.3)) : W < 1100 ? Math.round(Math.max(140, W * 0.15)) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
     placed = [],
     // what a candidate spot costs: overlapping the words is worst, then another note, then a mark; zero means free
     clash = (box, lead) =>
@@ -436,7 +436,9 @@ function build(stage) {
       ],
     });
   });
-  text(svg, { x: edge, y: rowTop(lastRow + 1) + 6, class: 'ht-law-h' }, 'LAW AND POLICY');
+  const keyY = rowTop(lastRow + 1);
+  el('line', { x1: edge + 1, x2: edge + 1, y1: keyY - 12, y2: keyY + 2, class: 'ht-law' }, svg);
+  text(svg, { x: edge + 10, y: keyY, class: 'ht-law-h' }, 'Gold ticks: law and policy');
 
   // ---- the time marker: a thin line that moves along the years; it never crosses the words
   const clip = el('clipPath', { id: 'htMarkClip' }, defs),

@@ -445,6 +445,14 @@ document.querySelectorAll('[data-export]').forEach((btn) => {
       pop.firstElementChild.focus();
     }
   };
+  wrap.addEventListener('keydown', (e) => {
+    // Esc closes the menu from the button too, and focus stays on (or returns to) the button
+    if (e.key === 'Escape' && !pop.hidden && !pop.contains(e.target)) {
+      e.stopPropagation();
+      closeMenus();
+      btn.focus();
+    }
+  });
   pop.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       e.stopPropagation();

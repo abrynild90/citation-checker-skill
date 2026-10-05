@@ -70,7 +70,7 @@ export function drawC(el = document.getElementById('svgC')) {
     boxW = Math.max(...qLines.map((s) => tw(s, qSize, 400)), byW) + 2 * BP,
     qTop = 2 + BP,
     byY = qTop + qLines.length * qLH + 2,
-    boxH = byY + byLines.length * 17 + BP - 2,
+    boxH = EXPORTING ? byY + byLines.length * 17 + BP - 2 : 0, // on the page the quotation is an HTML callout above the chart (same style as chart R's)
     handY = boxH + 24,
     stripBottom = handY + 12;
 
@@ -182,9 +182,11 @@ export function drawC(el = document.getElementById('svgC')) {
   };
 
   // the quotation, attributed
-  svg.append('rect').attr('class', 'quote-box').attr('x', boxX).attr('y', 2).attr('width', boxW).attr('height', boxH - 2).attr('rx', 8).attr('aria-hidden', 'true');
-  lines(svg, 'quote', INSET, qTop + qSize, qLines, qLH);
-  lines(svg, 'quote-by', INSET, byY + 13, byLines, 17);
+  if (EXPORTING) {
+    svg.append('rect').attr('class', 'quote-box').attr('x', boxX).attr('y', 2).attr('width', boxW).attr('height', boxH - 2).attr('rx', 8).attr('aria-hidden', 'true');
+    lines(svg, 'quote', INSET, qTop + qSize, qLines, qLH);
+    lines(svg, 'quote-by', INSET, byY + 13, byLines, 17);
+  }
 
   // bands, and the year grid inside them
   const ticks = x.ticks(d3.utcYear.every(zoom ? (phone ? 10 : 5) : 10));
@@ -226,6 +228,11 @@ export function drawC(el = document.getElementById('svgC')) {
       .attr('y', handY)
       .attr('text-anchor', 'end')
       .text(hand);
+    // The empty years before the first entry are data, not a gap in the drawing: say so (a phone says it in the note above the chart).
+    if (!EXPORTING && !phone && !zoom) {
+      const first = Math.min(...NK.map((e) => +e.start.slice(0, 4)));
+      svg.append('text').attr('class', 'band-label').attr('x', INSET).attr('y', handY).text(`Nothing in our records before ${first}`);
+    }
   }
 
   // band titles and glosses
@@ -344,7 +351,11 @@ export function drawC(el = document.getElementById('svgC')) {
   if (EXPORTING) return;
 
   // ---------------------------------------------------------------- note, key and data table
-  document.getElementById('noteC').innerHTML = zoom ? zoomNote('1995 to 2026', stateC.focus === null) : fullNote();
+  const firstYr = Math.min(...NK.map((e) => +e.start.slice(0, 4)));
+  document.getElementById('noteC').innerHTML = zoom
+    ? zoomNote('1995 to 2026', stateC.focus === null)
+    : fullNote() + (phone ? ` Nothing is in our records before ${firstYr}.` : '');
+  document.getElementById('quoteC').innerHTML = `<span class="q">${QUOTE}</span><span class="by">${QUOTE_BY}</span>`;
   document.getElementById('cFocus').setAttribute('aria-pressed', zoom);
   document.getElementById('cFull').setAttribute('aria-pressed', !zoom);
   const ink = (shape) => shape.replace('{p}', 'style="fill:var(--muted);stroke:var(--muted);stroke-width:1.5"'),
