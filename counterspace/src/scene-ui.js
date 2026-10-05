@@ -327,7 +327,10 @@ function fillStory(cfg) {
         `<use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
       : '') +
     (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
-  srcLineEl.textContent = `Source: ${cfg.cite}`;
+  // The phone's pinned source line carries the link too, so "Open the source" is reachable without scrolling the story.
+  srcLineEl.innerHTML =
+    `Source: ${esc(cfg.cite)}` +
+    (ev ? ` <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<span class="sr"> (opens in a new tab)</span></a>` : '');
   scaleEl.textContent = [
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
