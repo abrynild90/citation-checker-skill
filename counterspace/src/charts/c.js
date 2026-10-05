@@ -395,7 +395,7 @@ export function drawC(el = document.getElementById('svgC')) {
       `${e.target_system} · ${TARGET_LABEL[e.target_regime]}`,
       e.operational_use ? 'In a conflict' : 'A test, a demonstration or peacetime',
       SURE_WORD[e.confidence],
-      srcCell(e),
+      srcCell(e, 'tableC', `${e.target_system}, ${e.actor}, ${e.start}`),
     ]),
     'Jamming, laser and cyber operations against satellites, one line per entry or campaign',
   );

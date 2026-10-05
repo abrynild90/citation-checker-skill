@@ -502,32 +502,22 @@ export function drawA(el = document.getElementById('svgA')) {
   // ---- data table
   table(
     'tableA',
-    [
-      'Date',
-      'Country',
-      'System',
-      'Target',
-      'Kind of test',
-      'Altitude (km)',
-      'Altitude measured at',
-      'Fragments cataloged',
-      'Fragments in orbit',
-      'How sure we are',
-      'Source',
-    ],
-    KIN.map((e) => [
-      fmtD(e),
-      e.state,
-      e.system,
-      targetWords(e.target),
-      KIND_PLAIN[e.type],
-      e.altitude_km ?? '—',
-      e.altitude_km == null ? '—' : ALT_AT[e.altitude_kind] || e.altitude_kind,
-      num(e.fragments_cataloged),
-      num(e.fragments_in_orbit),
-      CONFIDENCE[e.confidence] || e.confidence,
-      srcCell(e),
-    ]),
+    ['Date', 'Country', 'System', 'Target', 'Kind of test', 'Altitude', 'Debris fragments', 'How sure we are', 'Source'],
+    KIN.map((e) => {
+      const cat = e.fragments_cataloged,
+        orb = e.fragments_in_orbit;
+      return [
+        fmtD(e),
+        e.state,
+        e.system,
+        targetWords(e.target),
+        KIND_PLAIN[e.type],
+        e.altitude_km == null ? '—' : `${e.altitude_km} km, ${(ALT_AT[e.altitude_kind] || e.altitude_kind).toLowerCase()}`,
+        cat == null && orb == null ? '—' : `${cat == null ? 'unknown' : num(cat)} cataloged, ${orb == null ? 'unknown' : num(orb)} in orbit`,
+        CONFIDENCE[e.confidence] || e.confidence,
+        srcCell(e, 'tableA', `${e.system}, ${fmtD(e)}`),
+      ];
+    }),
   );
 }
 document.getElementById('aZoom').onclick = () => {

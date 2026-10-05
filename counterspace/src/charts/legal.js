@@ -162,7 +162,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       : L.x;
   const FS = 12,
     PITCH = compact ? 14 : 17,
-    TP = compact ? 12 : 27, // vertical distance between the rows that crowded symbols are stacked in
+    TP = compact ? 12 : 31, // vertical distance between the rows that crowded symbols are stacked in
     SEP = compact ? 18 : 24, // symbols closer than this (in px) go into the next row; each keeps its true date on the axis
     GS = compact ? 0.7 : 1,
     OFF0 = 22; // first label row, below the line
@@ -488,24 +488,44 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     .attr('style', BAR_STYLE);
   if (!compact) {
     // Each negotiation period is named just above its bar: the longest of its three names that fits beside the names already placed.
-    const sp = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 });
-    spans.forEach((d) => {
-      const y = lane0 + d._lane * laneP - 3;
-      for (const size of strip || (zoom && isPhoneNow()) ? [2] : [0, 1, 2]) {
-        const name = nameAt(d, size),
-          w = tw(name, FS, 600),
-          spot = [
-            ['start', d._a],
-            ['end', Math.min(W - 6, d._b)],
-          ].find(([anchor, tx]) => sp.free(sp.textRect(tx, y, anchor, w, FS), [], 8));
-        if (spot || size === 2) {
-          const [anchor, tx] = spot ?? ['start', d._a];
-          sp.add(sp.textRect(tx, y, anchor, w, FS));
-          putLabel(lg, tx, y, anchor, name, '', 'quiet');
-          break;
+    // Names are tried longest first; if any bar cannot be named without touching another label, every bar is tried again with shorter names.
+    const sizesFrom = (n) => (strip || (zoom && isPhoneNow()) ? [2] : [0, 1, 2].filter((z) => z >= n));
+    const mins = spans.map(() => 0);
+    const attempt = (force) => {
+      const sp = new Placer({ x0: 4, x1: W - 4, y0: -999, y1: 999 }),
+        out = [];
+      for (const [i, d] of spans.entries()) {
+        const y = lane0 + d._lane * laneP - 3;
+        let done = false;
+        for (const size of sizesFrom(mins[i])) {
+          const name = nameAt(d, size),
+            w = tw(name, FS, 600),
+            spot = [
+              ['start', d._a],
+              ['end', Math.min(W - 6, d._b)],
+            ].find(([anchor, tx]) => sp.free(sp.textRect(tx, y, anchor, w, FS), [], 8));
+          if (spot || (force && size === 2)) {
+            const [anchor, tx] = spot ?? (d._a + w > W - 6 ? ['end', Math.min(W - 6, d._b)] : ['start', d._a]);
+            sp.add(sp.textRect(tx, y, anchor, w, FS));
+            out.push([tx, y, anchor, name]);
+            done = true;
+            break;
+          }
         }
+        if (!done) return i;
       }
-    });
+      return out;
+    };
+    let placed = attempt(false);
+    // a bar that finds no room makes the nearest earlier bar with a longer name use a shorter one, then tries again
+    for (let k = 0; k < 12 && typeof placed === 'number'; k++) {
+      const j = [...mins.keys()].filter((q) => q < placed && mins[q] < 2).at(-1);
+      if (j == null) break;
+      mins[j]++;
+      placed = attempt(false);
+    }
+    if (typeof placed === 'number') placed = attempt(true);
+    placed.forEach(([tx, y, anchor, name]) => putLabel(lg, tx, y, anchor, name, '', 'quiet'));
   }
   bindMark(sg, strip ? null : legalCard, strip ? tapLegal : activate);
   // symbols

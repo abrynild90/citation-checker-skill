@@ -320,7 +320,7 @@ export function drawR(el = document.getElementById('svgR')) {
         ORBIT_LABEL[e.orbit_regime],
         SURE_LABEL[e.confidence],
         plain(e.description),
-        srcCell(e),
+        srcCell(e, 'tableR', `${plain(e.system)}, ${datePrecise(e, e.start)}`),
       ]),
     'Close approaches, dockings, a capture and tow, releases and spaceplane missions, one line per entry',
   );

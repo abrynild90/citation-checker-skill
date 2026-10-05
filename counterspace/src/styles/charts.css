@@ -159,6 +159,25 @@ th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
 td.date{white-space:nowrap;font-variant-numeric:tabular-nums}
 caption{caption-side:top;padding:10px 14px;text-align:left;font-size:13px;color:var(--muted)}
 td a{overflow-wrap:anywhere}
+.pin-f{display:none}
+.srcc{display:inline}
+/* Column widths: keep "Kind of test" and "Source" on two lines at most at laptop width */
+@media (min-width:641px){
+  .tscroll th,.tscroll td{padding:10px 12px}
+  #tableA th:nth-child(1),#tableA td:nth-child(1){min-width:104px}
+  #tableA th:nth-child(2),#tableA td:nth-child(2){min-width:96px}
+  #tableA th:nth-child(5),#tableA td:nth-child(5){min-width:200px}
+  #tableA th:nth-child(6),#tableA td:nth-child(6){min-width:110px}
+  #tableA th:nth-child(7),#tableA td:nth-child(7){min-width:150px}
+  #tableA th:nth-child(9),#tableA td:nth-child(9),#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{min-width:170px}
+  #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:240px}
+  #tableR td:nth-child(4),#tableR th:nth-child(4){min-width:150px}
+  #tableR td:nth-child(6),#tableR th:nth-child(6){min-width:140px}
+  #tableR th:last-child,#tableR td:last-child{min-width:120px}
+}
+.skip-table{position:absolute;left:-9999px;top:auto;padding:8px 12px;border-radius:var(--r-1);background:var(--surface);color:var(--text);font:600 14px var(--sans)}
+.skip-table:focus{position:static;display:inline-block;margin:var(--s-2) 0;left:auto;outline:3px solid var(--focus);outline-offset:2px}
+.tscroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 @media (max-width:640px){
   .tscroll{max-height:none;overflow:visible;border:0;background:none}
   .tscroll table,.tscroll tbody,.tscroll tr,.tscroll td,.tscroll caption{display:block;width:100%}
@@ -171,6 +190,7 @@ td a{overflow-wrap:anywhere}
   .tscroll td a{display:inline-block;align-self:center;min-height:24px;line-height:24px}
   .tscroll td .srcc{align-self:center}
   .tscroll td .srcc a{display:inline;min-height:0;line-height:inherit}
+  .pin-s{display:none}.pin-f{display:inline}
   .tscroll td::before{content:attr(data-label);color:var(--muted);font-weight:600}
 }
 

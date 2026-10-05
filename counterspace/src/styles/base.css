@@ -88,12 +88,13 @@ button,input,select,textarea{font-family:inherit}
 /* Disclosure ("Show the data behind this chart", "How we classified these"): a quiet text button with a turning chevron */
 details.table,details.about{margin:var(--s-4) 0 var(--s-1)}
 /* "Show the data behind this chart" is a real button: outlined pill, table icon, row count */
-details.table>summary{margin-left:0;min-height:44px;padding:0 var(--s-4);border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text)}
+details.table>summary{min-height:44px;padding:0 var(--s-4);border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text)}
 details.table>summary:hover{border-color:var(--accent);background:var(--surface-3)}
 details.table>summary .cnt{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans)}
 details.table>summary,details.about>summary{list-style:none;display:inline-flex;align-items:center;gap:var(--s-2);cursor:pointer;min-height:40px;margin-left:calc(var(--s-3)*-1);
   padding:0 var(--s-4) 0 var(--s-3);font:600 14px/1.3 var(--sans);color:var(--accent);border-radius:var(--r-pill);transition:background var(--dur-1) var(--ease)}
 details>summary::-webkit-details-marker{display:none}
+main details.table>summary{margin-left:0}
 details.table>summary::before,details.about>summary::before{content:"";width:16px;height:16px;flex:none;background:currentColor;transition:transform var(--dur-2) var(--ease);
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat}

@@ -436,9 +436,6 @@ function build(stage) {
       ],
     });
   });
-  const keyY = rowTop(lastRow + 1);
-  el('line', { x1: edge + 1, x2: edge + 1, y1: keyY - 12, y2: keyY + 2, class: 'ht-law' }, svg);
-  text(svg, { x: edge + 10, y: keyY, class: 'ht-law-h' }, 'Gold ticks: law and policy');
 
   // ---- the time marker: a thin line that moves along the years; it never crosses the words
   const clip = el('clipPath', { id: 'htMarkClip' }, defs),

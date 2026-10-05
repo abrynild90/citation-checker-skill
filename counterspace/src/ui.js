@@ -414,7 +414,20 @@ export function legend(id, w = 22, h = 16) {
 }
 
 // ---------------------------------------------------------------- data tables
-export const srcCell = (r) => `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source)}</a>, ${esc(r.pin)}</span>`;
+// Source link for a table entry. On a wide screen the visible text is short (source and the PDF page); on a phone the full page reference shows.
+// The link's own name carries the source, the page reference, the table and the entry, so every link in a table is distinct for a screen reader.
+const SRC_TABLE = { tableA: 'anti-satellite tests', tableC: 'jamming, laser and cyber operations', tableR: 'close approaches' };
+function shortPin(pin) {
+  const first = String(pin).split(';')[0];
+  const t = first.match(/^(Table [\d.-]+|Section [\d.]+)/),
+    pg = first.match(/PDF p\. [\d-]+/);
+  return t && pg ? `${t[1]}, ${pg[0]}` : pg ? pg[0] : first.length > 34 ? `${first.slice(0, 32).trimEnd()}…` : first;
+}
+export const srcCell = (r, tableId, entry) => {
+  const tn = SRC_TABLE[tableId] || 'data',
+    label = `${r.source}, ${r.pin}. Source for the ${tn} table, ${entry}`;
+  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}">${esc(r.source)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin))}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
+};
 // Accessible data table. Each cell carries data-label so CSS can stack entries as cards on phones (no sideways scrolling). Columns whose cells are
 // all numbers are right-aligned; date columns never wrap on a wide screen.
 const CAPTIONS = {
@@ -442,7 +455,19 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
   const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}>${h}</th>`).join('');
+  const host = document.getElementById(id);
+  if (host && !host.hasAttribute('role')) {
+    host.setAttribute('role', 'region');
+    host.setAttribute('tabindex', '0');
+    host.setAttribute('aria-label', `${caption || 'Data table'} (scrolls)`);
+  }
   setOnce(id, `<table>${cap}<thead><tr>${th}</tr></thead><tbody>${rows.map(tr).join('')}</tbody></table>`);
+  // keyboard users can step over a long table of links
+  const det = host?.closest('details');
+  if (det && !det.querySelector('.skip-table') && rows.length > 12) {
+    det.insertAdjacentHTML('beforeend', `<span id="after-${id}" tabindex="-1"></span>`);
+    host.insertAdjacentHTML('beforebegin', `<a class="skip-table" href="#after-${id}">Skip this table</a>`);
+  }
   // the disclosure button says how big the table is
   const sum = document.getElementById(id)?.closest('details')?.querySelector(':scope > summary');
   if (sum && !sum.querySelector('.cnt')) sum.insertAdjacentHTML('beforeend', `<span class="cnt">${rows.length} entries</span>`);
