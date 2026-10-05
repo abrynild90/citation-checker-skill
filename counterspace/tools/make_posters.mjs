@@ -21,11 +21,11 @@ const POSTER_T = {
   fengyun: 0.55,
   'burnt-frost': 0.5,
   dn2: 0.6,
-  shakti: 0.5,
+  shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.5,
   viasat: 0.7,
-  laser: 0.78,
+  laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.5,
   spaceplanes: 0.17,
@@ -34,7 +34,8 @@ const POSTER_T = {
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
-  spaceplanes: { pose: [3.5, 2.4, 1.6, 0.25, 0.1, 0.1, 44] }, // the plane in sunlight over the Atlantic, wide enough that the orbit tilt reads
+  gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
+  spaceplanes: { pose: [3.5, 2.4, 1.6, 0.25, 0.1, 0.1, 40] }, // the plane in sunlight over the Atlantic, wide enough that the orbit tilt reads
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });
@@ -72,6 +73,14 @@ try {
         if (view.cam != null) {
           h.pickCam(view.cam);
           h.update(t);
+        }
+        if (view.lift) {
+          const up = h.camera.up.clone().applyQuaternion(h.camera.quaternion).multiplyScalar(view.lift);
+          h.camera.position.add(up);
+          h.target.add(up);
+          h.camera.lookAt(h.target);
+          h._user = true;
+          h.render();
         }
         if (view.pose) {
           const p = view.pose;
