@@ -1152,7 +1152,7 @@
   }
   /* A still diagram (no 3D): a shorter picture and more room for the steps, which are the point here */
   .overlay.is-static .panel {
-    grid-template-rows: auto minmax(0, 36%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 32%) minmax(0, 1fr) auto;
   }
   .overlay.is-static .sv-steps .step,
   .overlay.is-static .sv-steps .st-time {
@@ -1525,4 +1525,27 @@
     grid-template-areas: "play time scrub views save";
     column-gap: var(--s-3);
   }
+}
+/* A still diagram: the notice and "Save image" share one row at every width from tablet up; on a phone the steps list loses its redundant "All steps" bar */
+@media (min-width: 761px) {
+  .overlay.is-static .ctrl {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: none;
+  }
+  .overlay.is-static .static-note {
+    grid-area: auto;
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .overlay.is-static #scExport {
+    grid-area: auto;
+    grid-row: 1;
+    grid-column: 3;
+  }
+}
+.overlay.is-static .sv-all > summary {
+  display: none;
+}
+.overlay.is-static .sv-steps .sv-all ol {
+  margin-top: var(--s-2);
 }

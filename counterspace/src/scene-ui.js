@@ -553,7 +553,7 @@ function staticMode(on) {
         ? 'Animation is off, so this is a still diagram.'
         : 'The 3D view could not start here.'
       : REDUCED
-        ? 'Animation is switched off on this device, so this is a still diagram. Turn animation on in your device settings to watch it move.'
+        ? 'Animation is off on this device, so this is a still diagram.'
         : 'The 3D view could not start here, so this is a still diagram.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
