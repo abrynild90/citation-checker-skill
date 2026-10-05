@@ -163,7 +163,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       : L.x;
   const FS = 12,
     PITCH = compact ? 14 : 17,
-    TP = compact ? 12 : 31, // vertical distance between the rows that crowded symbols are stacked in
+    TP = compact ? 12 : strip ? 21 : 31, // vertical distance between the rows that crowded symbols are stacked in
     SEP = compact ? 18 : 24, // symbols closer than this (in px) go into the next row; each keeps its true date on the axis
     GS = compact ? 0.7 : 1,
     OFF0 = 22; // first label row, below the line
@@ -349,7 +349,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         }
       });
   }
-  const yMark = compact ? TP * maxT + 10 : Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + 28),
+  const yMark = compact ? TP * maxT + 10 : Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + (strip ? 20 : 28)),
     dnSpace = !compact && maxDn >= 0 ? OFF0 + maxDn * PITCH + 8 : 0;
   // Negotiation periods: bars in rows below the symbol line (and below any labels hanging under it), each named just above its bar.
   const lanes = [];

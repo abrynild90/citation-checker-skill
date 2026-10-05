@@ -302,10 +302,17 @@ export function drawA(el = document.getElementById('svgA')) {
       Y = y(e.altitude_km),
       w = Math.max(tw(t1, 13, 600), t2 ? tw(t2, 12.5) : 0);
     for (const [dx, dy, anchor] of prefs) {
-      const tx = X + dx,
-        ty = Y + dy,
-        x0 = anchor === 'end' ? tx - w : tx,
-        q = [x0, ty - 13, x0 + w, ty + (t2 ? 19 : 5)];
+      let tx = X + dx,
+        x0 = anchor === 'end' ? tx - w : tx;
+      const ty = Y + dy,
+        IN = 12; // a note stays 12 px inside the plot edges, never on the band's border or across it
+      if (!relaxed && (x0 < M.l + IN || x0 + w > W - M.r - IN)) continue;
+      if (relaxed) {
+        const sh = Math.max(0, M.l + IN - x0) - Math.max(0, x0 + w - (W - M.r - IN));
+        tx += sh;
+        x0 += sh;
+      }
+      const q = [x0, ty - 13, x0 + w, ty + (t2 ? 19 : 5)];
       if (!relaxed && !pl.free(q, [], 3)) continue;
       // The leader starts at the edge of the mark (with a small dot there) and ends beside the first line of the note.
       const ex = tx + (anchor === 'end' ? 5 : -5),
