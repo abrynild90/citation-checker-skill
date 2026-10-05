@@ -216,6 +216,7 @@ td a{overflow-wrap:anywhere}
   border:var(--edge-line);border-radius:var(--r-2);box-shadow:var(--edge-shadow);font:400 13.5px/1.45 var(--sans);pointer-events:none;opacity:0;
   transition:opacity 60ms var(--ease)}
 .card.on{opacity:1}
+.card.solid{transition:none}
 @media (prefers-reduced-motion:reduce){.card{transition:none;transform:none}}
 .card .card-title,.card h4{margin:0;font:500 17px/1.3 var(--serif)}
 .card .when{margin:3px 0 0;font:500 13px/1.4 var(--sans);color:var(--muted)}

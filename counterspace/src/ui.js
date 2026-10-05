@@ -9,6 +9,8 @@ const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
   card.innerHTML = html;
   card.classList.toggle('full', full);
+  // A card opened by keyboard focus is opaque at once (no half-faded card with page text showing through while it moves into place).
+  card.classList.toggle('solid', !!el?.matches?.(':focus-visible'));
   card.classList.add('on');
   card.setAttribute('aria-hidden', 'false');
   const dock = innerWidth < PHONE_MAX;
@@ -63,6 +65,16 @@ function showCard(html, evt, el, full = false) {
           )
       : [];
   const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
+  // Page wording around the chart (headings, ledes, callouts, keys: marked data-avoid) is avoided too, unless it is the mark's own region.
+  // Each line of such text is its own obstacle (a card may cover the empty end of a line, not the words), so a heading costs per line it covers.
+  const avoid = [...document.querySelectorAll('[data-avoid]')]
+    .filter((n) => !(el && n.contains(el)))
+    .flatMap((n) => {
+      const rg = document.createRange();
+      rg.selectNodeContents(n);
+      const rs = n.matches('ul, div') ? [...n.children].map((c) => c.getBoundingClientRect()) : [...rg.getClientRects()];
+      return rs.filter((b) => b.width > 2 && b.height > 2 && b.bottom > 0 && b.top < VH);
+    });
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -101,6 +113,7 @@ function showCard(html, evt, el, full = false) {
       const score =
         others.filter((o) => hit(q, o)).length * WM +
         noText.filter((o) => hit(q, o)).length * 100 +
+        avoid.filter((o) => hit(q, o, 0)).length * 20 +
         (ax && hit(q, ax, 2) ? 60 : 0) +
         (hit(q, r, 12) ? 120 : 0) +
         Math.abs(L - l) / 40 +
@@ -109,7 +122,7 @@ function showCard(html, evt, el, full = false) {
       return { L, T, score };
     });
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
-  if (best.score >= (near ? 14 : 6) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
+  if (best.score >= (near ? 14 : 6) || avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0)) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
     for (let T = TOP; T <= VH - ch - 8; T += 10)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
@@ -117,6 +130,7 @@ function showCard(html, evt, el, full = false) {
         const score =
           others.filter((o) => hit(q, o)).length * WM +
           noText.filter((o) => hit(q, o)).length * 100 +
+          avoid.filter((o) => hit(q, o, 0)).length * 20 +
           (ax && hit(q, ax, 2) ? 60 : 0) +
           (hit(q, r, 12) ? 120 : 0) +
           Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (near ? 15 : 60) +
