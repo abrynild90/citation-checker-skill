@@ -594,7 +594,7 @@ function togglePlay() {
   setStatus(host.playing ? 'Playing.' : 'Paused.');
 }
 playBtn.onclick = togglePlay;
-const narrowViews = matchMedia('(max-width: 900px)');
+const narrowViews = matchMedia('(max-width: 1180px)');
 narrowViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
 function buildViews(cfg, sim) {
   camsEl.textContent = '';
@@ -604,7 +604,12 @@ function buildViews(cfg, sim) {
       b = document.createElement('button');
     b.type = 'button';
     // on a narrow screen "From the north" is shown as "North" (the full name stays as the button's name), so the views fit without clipping
-    const short = narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^./, (m) => m.toUpperCase()) : label;
+    const short = narrowViews.matches
+      ? label
+          .replace(/^From (the |a )?/i, '')
+          .replace(/^Follow the action$/i, 'Follow')
+          .replace(/^./, (m) => m.toUpperCase())
+      : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
     b.dataset.name = label === c.name ? '' : c.name;
@@ -667,7 +672,7 @@ function showHint() {
   if (hintShown || stillOnly || !KEYBOARD.matches || COMPACT.matches || SHORT.matches) return;
   hintShown = true;
   hintEl.classList.add('on');
-  hintTimer = setTimeout(hideHint, 6000);
+  hintTimer = setTimeout(hideHint, 3200);
 }
 function hideHint() {
   clearTimeout(hintTimer);
