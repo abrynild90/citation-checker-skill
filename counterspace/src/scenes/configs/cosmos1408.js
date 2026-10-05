@@ -41,7 +41,7 @@ export const COSMOS1408 = {
       opacity: 0.85,
       sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.3, minPx: 44, maxPx: 90, dx: 96, dy: 14 },
     },
-    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: true, impactDx: 40, impactDy: -110, dx: -40, dy: 62 },
+    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: 40, impactDy: -110, dx: -40, dy: 62 },
     { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol' },
     {
       type: 'debris',

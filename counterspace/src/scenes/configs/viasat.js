@@ -37,8 +37,8 @@ export const VIASAT = {
       hub: [46, 8],
       hubLabel: 'Ground management network (drawn for illustration)',
       hubShort: 'Ground network',
-      hubDx: -60,
-      hubDy: 40,
+      hubDx: -34,
+      hubDy: 30,
       pulse: [0.1, 0.3],
       beams: [
         [50, 30],
@@ -79,6 +79,8 @@ export const VIASAT = {
     [0.62, 'Tens of thousands of modems are offline; the satellite itself keeps operating'],
     [0.8, 'Attributed to Russia’s military intelligence (GRU) by the US, UK and EU in May 2022 (SWF, p. 15-07)'],
   ],
+  insetPhone: 'Top view',
+  insetSizePhone: [92, 76], // 375: a small inset in the corner, clear of the Terminals pill
   still: 0.75,
   stillOff: { KA: [-250, 20] }, // the still: the satellite pill sits left of the satellite, clear of the caption
   camDist: 5.6,

@@ -328,8 +328,11 @@ export function buildSim(cfg) {
         labelDx: a.impactDx ?? 70,
         labelDy: a.impactDy ?? -50,
         opt: true,
-        pos: (t) => (t > tgt.t + 0.02 ? tgt.hitPos : null),
+        pos: (t) => (t > tgt.t + 0.02 && (a.impactUntil == null || t < a.impactUntil) ? tgt.hitPos : null),
       });
+    // impactUntil: the "Impact" pill is shown only while its step is on screen; a quiet tick keeps marking the point afterwards
+    if (a.type === 'target' && tgt && !a.noHit && a.label && a.impactUntil != null)
+      items.push({ kind: 'point', shape: 'tick', color: '#fff1c1', pos: (t) => (t >= a.impactUntil ? tgt.hitPos : null) });
     if (a.type === 'target' && tgt && a.wreck)
       // A dim, smaller copy of the satellite stays at the impact point: the wreck marker (its debris is the cloud).
       items.push({
@@ -469,11 +472,12 @@ export function buildSim(cfg) {
         dynamic: true,
         avoid: true,
         all,
-        thick: 0.0042,
+        thick: a.thick ?? 0.0042,
+        taper: a.taper,
         color: a.color,
         width: 2,
         label: a.label,
-        labelAt: bez(0.5),
+        labelAt: bez(a.labelS ?? 0.5),
         labelEnd: tgt.t + (a.hold ?? 0.03), // a.hold: the label outlives the hit (the still is taken just after it)
         pts: (t) => {
           const s = t >= a.t0 - 1e-6 ? Math.max(0.04, clamp01((t - a.t0) / (tgt.t - a.t0))) : 0;
@@ -489,6 +493,22 @@ export function buildSim(cfg) {
         color: a.color,
         pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(sAt(t)) : null),
       });
+      if (a.rocket)
+        // a drawn interceptor with its exhaust flame rides the head of the arc
+        items.push({
+          kind: 'point',
+          shape: 'rocket',
+          color: a.color,
+          scale: 1,
+          minPx: a.rocket.minPx ?? 26,
+          maxPx: a.rocket.maxPx ?? 48,
+          // stands at the launch point from the start, then rides the arc
+          pos: (t) => (t < tgt.t - 0.004 ? bez(sAt(t)) : null),
+          orient: (t) => {
+            const sv = sAt(t);
+            return { up: norm(bez(sv)), dir: norm(add(bez(Math.min(1, sv + 0.02)), scl(bez(sv), -1))) };
+          },
+        });
       items.push({
         kind: 'point',
         shape: 'kv',
@@ -503,6 +523,7 @@ export function buildSim(cfg) {
         color: '#fff1c1',
         big: true,
         strong: !!a.strong,
+        coreK: a.coreK,
         size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
         span: a.strong ? 0.2 : 0.16,
       });
@@ -676,8 +697,19 @@ export function buildSim(cfg) {
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
           return s > 0 && s < 1 ? all[Math.round(s * N)] : null;
         };
+        if (a.rocket) {
+          // a drawn rocket with its exhaust flame rides the head of the path (the glow behind it is kept smaller)
+          const sm = (t) => {
+            const s = clamp01((t - a.t0) / (a.t1 - a.t0)) * N,
+              i = Math.min(N - 1, Math.floor(s)),
+              f = s - i;
+            return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
+          };
+          items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: 16, kvMax: 38, pos: headPos });
+          items.push({ kind: 'point', shape: 'rocket', color: '#ff8a8a', scale: 1, minPx: a.rocket.minPx ?? 30, maxPx: a.rocket.maxPx ?? 54, pos: sm });
+        } else
         items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.3, kvMin: 28, kvMax: 64, pos: headPos });
-        items.push({ kind: 'point', shape: 'kv', color: a.headColor ?? '#fff1e6', kvSize: 0.14, kvMin: 14, kvMax: 30, pos: headPos });
+        if (!a.rocket) items.push({ kind: 'point', shape: 'kv', color: a.headColor ?? '#fff1e6', kvSize: 0.14, kvMin: 14, kvMax: 30, pos: headPos });
       }
       focus = focus || a.from;
     }

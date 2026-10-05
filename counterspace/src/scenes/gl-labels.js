@@ -482,13 +482,13 @@ const methods = {
     c.style.display = phone && this.sim.cfg.insetNoPhone ? 'none' : '';
     if (c.style.display) return;
     const bl = this.sim.cfg.insetCorner === 'bl', // bottom-left, above the caption (scenes whose action fills the top right)
-      sz = this.sim.cfg.insetSize,
+      sz = phone && this.sim.cfg.insetSizePhone ? this.sim.cfg.insetSizePhone : this.sim.cfg.insetSize,
       mc = (this._insetMeasure ||= document.createElement('canvas').getContext('2d')),
-      title = this.sim.cfg.inset;
+      title = phone && this.sim.cfg.insetPhone ? this.sim.cfg.insetPhone : this.sim.cfg.inset;
     mc.font = `600 ${INSET_PX}px ${SANS}`;
     // the box is as wide as its title needs at 12 px (never squeezed), and a little taller than before to make room for the larger type
-    const w = Math.min(Math.round(this.el.clientWidth * 0.62), Math.max(phone ? 128 : sz ? sz[0] : 188, Math.ceil(mc.measureText(title).width) + 18)),
-      h = (phone ? 104 : sz ? sz[1] : 142) + 8,
+    const w = Math.min(Math.round(this.el.clientWidth * 0.62), Math.max(phone ? (sz ? sz[0] : 128) : sz ? sz[0] : 188, Math.ceil(mc.measureText(title).width) + 18)),
+      h = (phone ? (sz ? sz[1] : 104) : sz ? sz[1] : 142) + 8,
       d = Math.min(devicePixelRatio || 1, 2);
     if (c.width !== Math.round(w * d)) {
       c.width = Math.round(w * d);
@@ -518,7 +518,19 @@ const methods = {
     g.arc(cx, cy, sc, 0, 7);
     g.fill();
     g.lineWidth = 1.3;
+    // insetRing: one orbit ring with a few satellite dots on it (GPS), instead of every orbit plane (which read as an atom)
+    const ringOnly = !!this.sim.cfg.insetRing;
+    if (ringOnly && curves.length) {
+      g.strokeStyle = curves[0].color;
+      g.globalAlpha = 0.95;
+      g.lineWidth = 1.6;
+      g.beginPath();
+      g.arc(cx, cy, rmax * sc, 0, 7);
+      g.stroke();
+      g.lineWidth = 1.3;
+    }
     curves.forEach((it, k) => {
+      if (ringOnly) return;
       const pl = lines.length === curves.length ? lines[k] : it.pts(t);
       if (pl.length < 2) return;
       g.strokeStyle = it.color;
@@ -536,10 +548,14 @@ const methods = {
         if (it.prim) dots.push([cx + p.x * sc, cy + p.z * sc, it.statusColor ? it.statusColor(t) : it.color, it.insetLabel]);
         else if (it.ctx) ctxDots.push([cx + p.x * sc, cy + p.z * sc, it.color]);
       }
-    for (const q of ctxDots) {
+    const ringDots = ringOnly ? ctxDots.filter((q, i) => i % Math.max(1, Math.round(ctxDots.length / 4)) === 0).slice(0, 4) : ctxDots;
+    for (const q of ringDots) {
       g.fillStyle = q[2];
       g.beginPath();
-      g.arc(q[0], q[1], 1.7, 0, 7);
+      if (ringOnly) {
+        const a = Math.atan2(q[1] - cy, q[0] - cx);
+        g.arc(cx + Math.cos(a) * rmax * sc, cy + Math.sin(a) * rmax * sc, 3, 0, 7);
+      } else g.arc(q[0], q[1], 1.7, 0, 7);
       g.fill();
     }
     if (dots.length) {

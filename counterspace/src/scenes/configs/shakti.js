@@ -21,7 +21,9 @@ export const SHAKTI = {
   orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
+  fitFill: 1.1, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
+  liveOff: { 'PDV': [-86, -46], 'Microsat-R': [70, 44] }, // the two pills sit on opposite sides of the strike, one above and one below
   phoneOff: { 'Abdul Kalam': [-56, 30] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
   actors: [
@@ -40,7 +42,7 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R (wreck)',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32 },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32, rocket: { minPx: 30, maxPx: 54 } },
     {
       type: 'debris',
       count: 130,

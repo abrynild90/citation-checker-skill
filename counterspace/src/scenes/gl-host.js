@@ -326,16 +326,15 @@ export class GLHost {
     {
       const on = acts && this.lock != null && this._fbAct != null && this.handEl,
         c = this.sim.cfg.cameras?.[this.camIdx],
-        tag = !on && c?.tag, // a preset's own note (e.g. "Arm: not shown"), in the same top-left chip slot as the handover chip
-        merge = !!tag && this.el.clientWidth < 640 && !!c.tagShort; // phone: the note joins the status caption as its second line (one amber tag, not two)
-      this._tagMerge = merge;
+        tag = !on && c?.tag; // a preset's own note (e.g. "Arm drawn for illustration"): one amber pill with the status caption, as its second line
+      this._tagMerge = false;
+      this._tagLine = tag ? (this.el.clientWidth < 640 && c.tagShort ? c.tagShort : c.tag) : '';
       if (this.handEl) {
-        this.handEl.style.visibility = on || tag ? 'visible' : 'hidden';
-        this.handEl.style.color = tag ? LABEL.warm : LABEL.text; // a preset's own note is an analysis caption: the warm accent, no dot
-        this.handDot.style.display = tag ? 'none' : '';
+        this.handEl.style.visibility = on ? 'visible' : 'hidden';
+        this.handEl.style.color = LABEL.text;
+        this.handDot.style.display = '';
         if (on) this.handTx.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
-        else if (tag) this.handTx.textContent = this.el.clientWidth < 640 && c.tagShort ? c.tagShort : c.tag;
-        if (!merge && this._tagStacked) this._stackTag(false);
+        if (this._tagStacked) this._stackTag(false);
       }
     }
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
@@ -497,7 +496,7 @@ export class GLHost {
             { core, ring } = obj.userData;
           core.scale.setScalar((it.size ?? (it.big ? 0.55 : 0.16)) * Math.sqrt(Math.min(1, f * 3)) + 0.01);
           core.userData.s0 = core.scale.x;
-          core.material.opacity = 0.85 * Math.max(0, 1 - f * 1.6);
+          core.material.opacity = 0.85 * Math.max(0, 1 - f * 1.6) * (it.coreK ?? 1);
           ring.scale.setScalar((it.size ? it.size * 1.7 : it.big ? 0.9 : 0.3) * Math.pow(f, 0.6) + 0.01);
           ring.userData.s0 = ring.scale.x;
           ring.material.opacity = 0.9 * (1 - f);
@@ -506,7 +505,7 @@ export class GLHost {
             // strong flash: a bigger, longer-lived core and a second white ring
             core.scale.setScalar(core.scale.x * 1.45);
             core.userData.s0 = core.scale.x;
-            core.material.opacity = Math.min(1, 1.1 * Math.max(0, 1 - f * 1.05));
+            core.material.opacity = Math.min(1, 1.1 * Math.max(0, 1 - f * 1.05)) * (it.coreK ?? 1);
             r2.scale.setScalar((it.size ?? 0.55) * 2.6 * Math.pow(f, 0.5) + 0.01);
             r2.userData.s0 = r2.scale.x;
             r2.material.opacity = 0.75 * (1 - f);
@@ -526,8 +525,13 @@ export class GLHost {
         : this.status
           ? this.status.text(t, false, this.el.clientWidth < 640)
           : '';
+      if (this._tagLine) {
+        const sp = document.createElement('span');
+        sp.style.cssText = 'display:block;margin-top:2px;font-weight:500;opacity:.88';
+        sp.textContent = this._tagLine;
+        this.statusEl.appendChild(sp);
+      }
       this._applyBands();
-      if (this._tagMerge && this.statusEl.textContent) this._stackTag(true);
     }
     this.render();
   }

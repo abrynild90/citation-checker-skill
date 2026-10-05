@@ -17,7 +17,7 @@ const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
   starfish: 0.21,
-  solwind: 0.5,
+  solwind: 0.58,
   fengyun: 0.55,
   'burnt-frost': 0.5,
   dn2: 0.6,
@@ -26,9 +26,15 @@ const POSTER_T = {
   gnss: 0.5,
   viasat: 0.7,
   laser: 0.78,
-  'sj21-tug': 0.3,
+  'sj21-tug': 0.6,
   rpo: 0.5,
-  spaceplanes: 0.15,
+  spaceplanes: 0.17,
+};
+// Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
+// Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
+const POSTER_VIEW = {
+  'sj21-tug': { pose: [-0.588, 0.17, -3.065, -0.64, 0.13, -2.37, 33] }, // the docked pair and its arm over the Earth limb
+  spaceplanes: { pose: [3.5, 2.4, 1.6, 0.25, 0.1, 0.1, 44] }, // the plane in sunlight over the Atlantic, wide enough that the orbit tilt reads
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });
@@ -54,11 +60,34 @@ try {
     await page.evaluate((id) => window.__cs.openScene(id), id);
     await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 90000 }); // the full Earth image loads when the first scene opens
     await page.waitForTimeout(1500);
-    await page.evaluate((t) => {
-      const h = window.__cs.host();
-      h.playing = false;
-      h.update(t);
-    }, t);
+    const key = id.replace(/-/g, '_');
+    const view = { ...(POSTER_VIEW[id] || {}) };
+    if (process.env['C_' + key] != null) view.cam = +process.env['C_' + key];
+    if (process.env['P_' + key]) view.pose = process.env['P_' + key].split(',').map(Number);
+    await page.evaluate(
+      ({ t, view }) => {
+        const h = window.__cs.host();
+        h.playing = false;
+        h.update(t);
+        if (view.cam != null) {
+          h.pickCam(view.cam);
+          h.update(t);
+        }
+        if (view.pose) {
+          const p = view.pose;
+          h.camera.position.set(p[0], p[1], p[2]);
+          h.target.set(p[3], p[4], p[5]);
+          h.camera.lookAt(h.target);
+          if (p[6]) {
+            h.camera.fov = p[6];
+            h.camera.updateProjectionMatrix();
+          }
+          h._user = true;
+          h.render();
+        }
+      },
+      { t, view },
+    );
     await page.waitForTimeout(400);
     const png = await page.locator('#sceneView canvas').first().screenshot({ type: 'png' });
     const b64 = await page.evaluate(

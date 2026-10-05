@@ -318,9 +318,9 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
     items.push({
       kind: 'cloud',
       n,
-      size: 0.02,
-      minPx: IS_PHONE ? 1.7 : 3.6,
-      maxPx: 12,
+      size: 0.012,
+      minPx: IS_PHONE ? 1.3 : 2.2,
+      maxPx: 7.2, // terminal dots at about 60% of the old size: the region reads as a field of points, not a green carpet
       dynCol: true,
       label: a.label,
       short: a.short,
@@ -395,6 +395,17 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       labelDy: a.dy,
       sdx: a.sdx,
       sdy: a.sdy,
+    });
+    // a soft glow where the beam leaves the ground: the beam falls off into it instead of ending in a hard line
+    items.push({
+      kind: 'point',
+      shape: 'kv',
+      color: a.color,
+      kvSize: 0.16,
+      kvMin: 26,
+      kvMax: 58,
+      noStatic: true,
+      pos: (t) => (Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02 ? from : null),
     });
     // dazzle: a flaring glare on the target while the beam is on (the sensor is overwhelmed, nothing is destroyed)
     items.push({

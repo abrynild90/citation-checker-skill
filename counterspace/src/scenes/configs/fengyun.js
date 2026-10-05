@@ -27,12 +27,12 @@ export const FENGYUN = {
   orbitAt: [26, 74, 4.6],
   phoneK: 1.14,
   fitFill: IS_PHONE ? 0.8 : undefined, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
-  phoneOff: { Xichang: [-70, 54] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
+  phoneOff: { Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   noSimCount: true,
   stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 100, impactDy: -100 },
+    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, impactDx: 100, impactDy: -100, impactUntil: 0.6 },
     { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
     {
       type: 'debris',

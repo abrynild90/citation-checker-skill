@@ -86,7 +86,8 @@ void main(){
   col += (vec3(0.20, 0.36, 0.62) * fr * 0.5) * water * dayAmt * (1.0 - cl);
   vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.30 * pow(max(ndl, 0.0), 0.8)) * sunCol;
   vec3 cloudCol = mix(vec3(0.030, 0.042, 0.075), cLit, dayAmt);
-  col = mix(col, cloudCol, cl * 0.62);
+  // cloud albedo fades to nothing at the terminator and on the night side, and stays a soft blue-grey over dark ocean
+  col = mix(col, cloudCol * vec3(0.84, 0.90, 1.0), cl * 0.5 * smoothstep(0.2, 0.8, ndl));
   float limb = 1.0 - ndv;
   vec3 haze = mix(vec3(0.16, 0.38, 0.85), vec3(0.46, 0.73, 1.0), clamp(ndl * 1.5 + 0.3, 0.0, 1.0));
   haze = mix(haze, vec3(1.0, 0.5, 0.25), tw * 0.5);
