@@ -102,7 +102,7 @@ export const STARFISH = {
     { name: 'Close up', at: [16.7, -177.5, Math.max(2.3, 3.5 * PH * 0.55)] },
     { name: 'From the north', at: [42, -169.5, 4.3 * PH] },
   ],
-  phoneHide: ['Thor launch'],
+  phoneHide: ['Thor launch', 'LEO'], // 375: three labels only (Detonation, Johnston, Satellite); the LEO shell name is secondary
   phoneOnDisc: ['Johnston', 'Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
   stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)
   staticDropPhone: ['Thor launch'], // 375 static: Thor shares the burst spot; Detonation and Johnston keep separate labels, placed apart

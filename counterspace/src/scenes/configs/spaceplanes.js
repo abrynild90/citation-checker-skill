@@ -5,12 +5,12 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 54 : 108; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 58 : 120; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
   date: '2023-12-28',
-  title: 'Spaceplanes: the US X-37B and China’s reusable spacecraft (2010–2026)',
+  title: 'Spaceplanes: X-37B and China’s reusable craft (2010–2026)',
   shells: [],
   duration: 32,
   caption:
@@ -50,14 +50,8 @@ export const SPACEPLANES = {
       opacity: 0.8,
       thick: 0.0034,
       acts: [0],
-      label: 'X-37B flights: 300–400 km, tilt 38°–54° (SWF)',
-      short: '300–400 km · tilt 38°–54°',
-      opt: true,
       staticHide: true,
       staticKeep: false,
-      labelIdx: 20,
-      dx: 40,
-      dy: -30,
     },
     { type: 'path', fn: (u) => orbitPos(350, 45, 288, u * 2 * Math.PI), N: 120, color: C.us, opacity: 1, thick: 0.0055, acts: [0], push: 0.1 },
     {
@@ -70,7 +64,7 @@ export const SPACEPLANES = {
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 3 * PK,
+      scale: 3.6 * PK,
       label: 'X-37B (US)',
       short: 'X-37B',
       dx: 46,
@@ -123,7 +117,7 @@ export const SPACEPLANES = {
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 4.5 * PK,
+      scale: 5.2 * PK,
       label: 'X-37B OTV-7 (US)',
       short: 'OTV-7',
       dx: -60,
@@ -235,6 +229,8 @@ export const SPACEPLANES = {
     { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, color: '#ffe9a8', acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
     { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: '#ffe9a8', acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
   ],
+  fillK: 0.5,
+  nightK: 2.4, // much of the China episode is on the dark side: a lifted night ambient keeps the terrain from going muddy
   still: 0.5,
   stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
   status: [

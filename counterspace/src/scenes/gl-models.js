@@ -125,7 +125,8 @@ export const modelMethods = {
   _buildLights(S, sunDir) {
     const T = this.T,
       spin = !!this.sim.cfg.spin;
-    this.ambient = new T.AmbientLight(0x9fb4ff, spin ? 0.5 : 0.2);
+    const fill = this.sim.cfg.fillK || 0; // a scene whose craft are often on their shadow side can add a neutral fill so they keep their colours
+    this.ambient = new T.AmbientLight(fill ? 0xd5ddf2 : 0x9fb4ff, (spin ? 0.5 : 0.2) + fill);
     S.add(this.ambient);
     const sun = new T.DirectionalLight(0xfff4e0, spin ? 1.85 : 2.1);
     this.sun = sun;
@@ -387,11 +388,12 @@ export const modelMethods = {
       K = new Kit(T),
       PI = Math.PI,
       body = this._mat(color, { metalness: 0.3, roughness: 0.45 }),
-      white = this._mat(0xeef1f8, { metalness: 0.15, roughness: 0.45 }),
+      white = new T.MeshPhysicalMaterial({ color: 0xeef1f8, metalness: 0.35, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.12, envMapIntensity: 1.6 }),
+      nose = this._mat(0x1b1f29, { metalness: 0.4, roughness: 0.4 }),
       dark = this._mat(0x2b3140, { metalness: 0.5, roughness: 0.5 }),
       glass = this._mat(0x060a14, { metalness: 0.9, roughness: 0.1 }),
-      under = this._mat(new T.Color(color).multiplyScalar(0.5).getHex(), { metalness: 0.25, roughness: 0.55 }),
-      deck = this._mat(new T.Color(color).lerp(new T.Color(0xffffff), 0.28).getHex(), { metalness: 0.2, roughness: 0.5 }),
+      under = this._mat(new T.Color(color).lerp(new T.Color(0x12151d), 0.82).getHex(), { metalness: 0.45, roughness: 0.38 }),
+      deck = this._mat(new T.Color(0xe7eaf1).lerp(new T.Color(color), 0.2).getHex(), { metalness: 0.35, roughness: 0.34 }),
       prof = [
         [0.0004, 0.0236],
         [0.0012, 0.0226],
@@ -404,6 +406,8 @@ export const modelMethods = {
         [0.0054, -0.0225],
       ].map(([r, y]) => new T.Vector2(r, y));
     K.geo(white, new T.LatheGeometry(prof, 24), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
+    K.geo(nose, new T.SphereGeometry(0.0017, 12, 8), 0, 0, 0.0214, 0, 0, 0, 1, 0.8, 1.3);
+    K.box(nose, 0.0094, 0.0006, 0.026, 0, -0.0043, -0.002); // dark heat-shield belly seen at the edges
     K.box(glass, 0.003, 0.001, 0.005, 0, 0.0031, 0.0128);
     K.box(body, 0.0046, 0.001, 0.014, 0, 0.0046, -0.004);
     // Wing: a thick, bevelled slab in a darker shade of the national colour (its underside), with a smaller bright deck on top and a dark leading edge
@@ -428,9 +432,9 @@ export const modelMethods = {
       0,
       0,
     );
-    K.geo(deck, new T.ExtrudeGeometry(shape(0.8), { depth: 0.0006, bevelEnabled: false }), 0, 0.0007, -0.0012, PI / 2, 0, 0);
+    K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0007, bevelEnabled: false }), 0, 0.0017, -0.0008, PI / 2, 0, 0); // above the slab's bevelled top, so the pale tile deck shows
     // thermal-tile seams across the wing deck and a white dorsal spine
-    for (const z of [-0.002, -0.0085]) K.box(dark, 0.0285 + z * 1.6, 0.0004, 0.0004, 0, 0.0012, z);
+    for (const z of [-0.002, -0.0085]) K.box(dark, 0.0285 + z * 1.6, 0.0004, 0.0004, 0, 0.0021, z);
     K.box(white, 0.0016, 0.0008, 0.026, 0, 0.0063, 0);
     for (const s of [-1, 1]) {
       K.box(dark, 0.0007, 0.0007, 0.031, s * 0.0125, -0.0004, 0.0004, 0, s * 0.67, 0);

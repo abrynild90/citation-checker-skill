@@ -43,10 +43,10 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         items.push({
           kind: 'curve',
           dynamic: true,
-          uniformA: 0.3,
+          uniformA: 0.2,
           staticKeep: lo % 3 === 0 && Li !== 1, // the static diagram draws a third of the arches: a cage, not a tangle
           limbOnly: true, // ... and only where they stand out against the sky, never across the Earth's face
-          opacity: 0.3,
+          opacity: 0.2,
           color: a.color,
           all: [],
           pts: (t) => {
@@ -190,7 +190,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       // space side stays bright; only the ground-side segment dims once the ground network is hit
       const e = ll(b[0], b[1], 1.003),
         m = add(scl(g, 0.4), scl(e, 0.6));
-      items.push({ kind: 'beam', a: () => g, b: () => m, on: () => true, color: a.color, opacity: 0.4, width: 0.0038 });
+      items.push({ kind: 'beam', a: () => g, b: () => m, on: () => true, color: a.color, opacity: 0.4, width: 0.0038, edgeFade: true });
       // Service traffic: small packets ride the downlink from the satellite to the ground; they stop once the ground side goes dark (illustrative).
       for (let k = 0; k < 3; k++)
         items.push({
@@ -212,6 +212,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         color: a.color,
         opacity: 0.4,
         width: 0.0038,
+        edgeFade: true,
         colorFn: (t) => (t > a.dimT0 + bi * 0.03 ? '#d98a7a' : a.color),
         opFn: (t) => 0.4 - 0.34 * smooth((t - a.dimT0 - bi * 0.03) / (a.dimT1 - a.dimT0)),
       });

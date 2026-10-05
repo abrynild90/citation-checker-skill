@@ -282,9 +282,9 @@ export function ringCanvas() {
   ringCv = document.createElement('canvas');
   ringCv.width = ringCv.height = 128;
   const g = ringCv.getContext('2d');
-  const r = g.createRadialGradient(64, 64, 40, 64, 64, 64);
+  const r = g.createRadialGradient(64, 64, 49, 64, 64, 64);
   r.addColorStop(0, 'rgba(255,255,255,0)');
-  r.addColorStop(0.7, 'rgba(255,255,255,0.9)');
+  r.addColorStop(0.62, 'rgba(255,255,255,0.95)');
   r.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = r;
   g.fillRect(0, 0, 128, 128);

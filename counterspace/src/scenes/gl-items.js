@@ -12,9 +12,12 @@ const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz;
 vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
 
-const PT_VS = `attribute vec4 aCol; uniform float uScale; uniform float uSize; uniform float uMin; uniform float uMax; varying vec4 vC;
+const PT_VS = `attribute vec4 aCol; uniform float uScale; uniform float uSize; uniform float uMin; uniform float uMax; uniform float uVar; uniform float uD0; varying vec4 vC;
 void main(){ vC = aCol; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv;
-gl_PointSize = clamp(uSize * uScale / max(-mv.z, 0.1), uMin, uMax); }`;
+float dz = max(-mv.z, 0.1);
+float k = 1.0;
+if (uVar > 0.0) { k = mix(1.0, 0.55 + 0.9 * clamp(aCol.a, 0.0, 1.0), uVar); vC.a *= mix(1.0, clamp(1.2 - 1.1 * (dz - uD0) / uD0, 0.45, 1.0), uVar); }
+gl_PointSize = clamp(k * uSize * uScale / dz, uMin, uMax); }`;
 // Soft gaussian falloff, normal alpha blending: dense clumps saturate to the particle colour, never to white.
 const PT_FS = `uniform float uGain; varying vec4 vC;
 void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r));
@@ -86,6 +89,8 @@ const methods = {
           uMin: { value: minPx },
           uMax: { value: maxPx },
           uGain: { value: gain },
+          uVar: { value: 0 },
+          uD0: { value: 3 },
         },
       });
     m.userData = { minPx, maxPx };
@@ -334,13 +339,15 @@ const methods = {
       g.setAttribute('aCol', new T.BufferAttribute(ca, 4));
       const deb = it.dynCol && !it.colored,
         mn = it.minPx ?? (deb ? 3 : 2);
-      const pts = new T.Points(g, this._ptMat(it.size, IS_PHONE ? mn + 1 : mn, it.maxPx ?? (deb ? 11 : 9), IS_PHONE ? 1.15 : 1));
+      const pm = this._ptMat(it.size, IS_PHONE ? mn + 1 : mn, it.maxPx ?? (deb ? 11 : 9), IS_PHONE ? 1.15 : 1);
+      if (deb) pm.uniforms.uVar.value = 1; // debris: dots differ in size and brightness, and fade with distance from the camera
+      const pts = new T.Points(g, pm);
       pts.frustumCulled = false;
       pts.renderOrder = 2;
       root.add(pts);
       this.dyn.push({ it, obj: pts });
       if (deb) {
-        const hz = new T.Points(g, this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, 0.2));
+        const hz = new T.Points(g, this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, 0.11));
         hz.frustumCulled = false;
         hz.renderOrder = 1;
         root.add(hz);
@@ -383,6 +390,17 @@ const methods = {
           }),
         );
         q.userData.hw = hw;
+        if (it.edgeFade) {
+          // the beam fades out toward every edge of the frame, so it never ends in a hard streak at the border
+          const res = (this._edgeRes ||= new T.Vector2(1, 1));
+          q.material.onBeforeCompile = (sh) => {
+            sh.uniforms.uRes = { value: res };
+            sh.fragmentShader = 'uniform vec2 uRes;\n' + sh.fragmentShader.replace(
+              '#include <dithering_fragment>',
+              'vec2 eq = gl_FragCoord.xy / uRes; float ee = min(min(eq.x, 1.0 - eq.x), min(eq.y, 1.0 - eq.y)); gl_FragColor.a *= smoothstep(0.0, 0.2, ee);\n#include <dithering_fragment>',
+            );
+          };
+        }
         return q;
       };
       const hwC = it.width ? Math.max(0.0026, it.width * 0.16) : w,
@@ -432,15 +450,45 @@ const methods = {
           { hue: it.color },
         );
     } else if (it.kind === 'dome') {
-      const c = ll(it.at[0], it.at[1]);
+      const c = ll(it.at[0], it.at[1]),
+        rho = it.radius * DEG,
+        up = new T.Vector3(...c);
+      // The dome fades toward its silhouette (strong where the surface faces the camera) so its edge has a falloff, not a hard shell.
       const m = new T.Mesh(
-        new T.SphereGeometry(it.radius * DEG * 1.0, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
-        new T.MeshBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.28, depthWrite: false, side: T.DoubleSide }),
+        new T.SphereGeometry(rho, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+        new T.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          side: T.DoubleSide,
+          uniforms: { uColor: { value: col(it.color) } },
+          vertexShader:
+            'varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
+          fragmentShader:
+            'uniform vec3 uColor; varying vec3 vN; varying vec3 vV; void main(){ float d = abs(dot(normalize(vN), normalize(vV))); gl_FragColor = vec4(uColor, 0.05 + 0.3 * smoothstep(0.0, 0.8, d));\n#include <colorspace_fragment>\n}',
+        }),
       );
       m.position.set(...c);
-      m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...c));
+      m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), up);
       root.add(m);
-      this._label(it.label, () => scl(c, 1.12), null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt, { place: true });
+      // Ground contact: a dark red cap on the surface, darkest at the centre and fading out toward the zone's edge, so the terrain under the zone dims.
+      const cap = new T.Mesh(
+        new T.SphereGeometry(1.004, 48, 10, 0, Math.PI * 2, 0, rho),
+        new T.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          uniforms: { uColor: { value: new T.Color(0x2a0307) }, uRho: { value: rho } },
+          vertexShader:
+            'uniform float uRho; varying float vT; void main(){ vT = acos(clamp(normalize(position).y, -1.0, 1.0)) / uRho; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+          fragmentShader:
+            'uniform vec3 uColor; varying float vT; void main(){ gl_FragColor = vec4(uColor, 0.46 * (1.0 - smoothstep(0.3, 1.0, vT)));\n#include <colorspace_fragment>\n}',
+        }),
+      );
+      cap.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), up);
+      cap.renderOrder = 1;
+      root.add(cap);
+      // the label's referent is the zone's east edge on the ground (a point of the drawn red ring), so its leader always ends on something drawn
+      const edge = ll(it.at[0], it.at[1] + it.radius / Math.max(0.3, Math.cos(it.at[0] * DEG)), 1.006);
+      this._label(it.label, () => edge, null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt, { place: true });
     } else if (it.kind === 'flash') {
       // Explosion: warm core sprite (fast fade) + expanding shock ring (slower).
       const m = new T.Group();
@@ -496,7 +544,7 @@ const methods = {
           map: (this.glareTex ||= new T.CanvasTexture(glareCanvas())),
           color: col(it.color),
           transparent: true,
-          opacity: 0.9,
+          opacity: 0.5, // translucent: the craft's shape stays visible through the flare
           depthWrite: false,
           depthTest: false,
           blending: T.AdditiveBlending,

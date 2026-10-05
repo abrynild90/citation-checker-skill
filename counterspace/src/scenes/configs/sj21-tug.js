@@ -110,6 +110,8 @@ export const SJ21_TUG = {
     { type: 'trail', craft: 'sj21', t0: 0.47, t1: 0.97, color: C.cn },
     { type: 'trail', craft: 'cg2', t0: 0.5, t1: 0.8, color: C.dead },
   ],
+  atmoK: 1.5, // the Earth is only a sliver in the follow views: a faint blue limb glow, lit or not, shows where it is
+  atmoFloor: 0.4,
   still: 0.78,
   staticT: 0.805, // static: just after the docked window, so the two craft are drawn apart (a gap, each at full size) above the belt
   staticStatus: 'SJ-21 pulls Compass G2 above the GEO belt (height and spacing exaggerated)',

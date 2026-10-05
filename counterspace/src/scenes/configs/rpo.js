@@ -168,8 +168,8 @@ export const RPO = {
       scale: 1.5 * PK,
       label: 'Cosmos 2542 (Russia)',
       short: 'Cosmos 2542',
-      dx: 96,
-      dy: -4,
+      dx: 104,
+      dy: -36,
       key: [
         [0.42, 0, 0, 0],
         [0.72, 0, 0, 0],
@@ -189,8 +189,8 @@ export const RPO = {
       scale: 1.6 * PK,
       label: 'Cosmos 2543',
       short: 'Cosmos 2543',
-      dx: 14,
-      dy: -46, // above the craft (sky), not on the Earth limb below it
+      dx: 66,
+      dy: 54, // right of and below the craft: its leader runs down-right, away from Cosmos 2542's chip above
       labelFn: (t, n, s) => (n || s || t > 0.62 ? 'Cosmos 2543' : 'Cosmos 2543 (small satellite)'),
       arcs: [{ t0: 0.53, t1: 0.6, o: [0, 0.07, 0] }],
       key: [

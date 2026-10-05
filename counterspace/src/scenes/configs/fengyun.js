@@ -1,5 +1,6 @@
 // scenes/configs/fengyun.js: scene `fengyun` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
 
 export const FENGYUN = {
   id: 'fengyun',
@@ -25,6 +26,8 @@ export const FENGYUN = {
   launchCam: 'second',
   orbitAt: [26, 74, 4.6],
   phoneK: 1.14,
+  fitFill: IS_PHONE ? 0.8 : undefined, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
+  phoneOff: { Xichang: [-70, 54] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   noSimCount: true,
   stillImpact: true, // the print also labels the impact point
   actors: [

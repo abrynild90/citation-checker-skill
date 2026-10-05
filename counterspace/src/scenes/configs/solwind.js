@@ -1,5 +1,6 @@
 // scenes/configs/solwind.js: scene `solwind` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
 
 export const SOLWIND = {
   id: 'solwind',
@@ -28,6 +29,7 @@ export const SOLWIND = {
   staticMarkerCap: { 'Solwind P78-1': 64 }, // the satellite is the subject: clearly visible (declared in tools/scene_check/rules.mjs MARKER_OVR)
   staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
+  cloudK: 0.15, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
   actors: [
     {
@@ -39,6 +41,9 @@ export const SOLWIND = {
       alt: 12,
       t0: 0.0,
       t1: 0.24,
+      scale: 2,
+      minPx: IS_PHONE ? 30 : 40,
+      maxPx: IS_PHONE ? 46 : 70,
       label: 'F-15 zoom climb',
       dx: -64,
       dy: 24,

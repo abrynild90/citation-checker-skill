@@ -19,11 +19,13 @@ export const BURNT_FROST = {
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
+  nightK: 2.6, // the scene sits on the dark side: a lifted night ambient separates ocean, debris and ship
+  phoneOff: { 'Larger pieces': [106, -58], 'Pieces falling': [106, -58] }, // 375: the label sits right of the debris cloud, not over it
   launchAt: [3.3, 0.95, 0.8],
   earlyKey: true,
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 70 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 70, minPx: 28, maxPx: 80 },
     {
       type: 'target',
       label: 'USA-193',

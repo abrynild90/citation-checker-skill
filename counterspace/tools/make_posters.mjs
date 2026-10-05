@@ -16,7 +16,7 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.38,
+  starfish: 0.21,
   solwind: 0.5,
   fengyun: 0.55,
   'burnt-frost': 0.5,
@@ -25,10 +25,10 @@ const POSTER_T = {
   cosmos1408: 0.6,
   gnss: 0.5,
   viasat: 0.7,
-  laser: 0.5,
-  'sj21-tug': 0.7,
+  laser: 0.78,
+  'sj21-tug': 0.3,
   rpo: 0.5,
-  spaceplanes: 0.42,
+  spaceplanes: 0.15,
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });

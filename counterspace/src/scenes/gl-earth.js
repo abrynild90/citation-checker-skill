@@ -28,7 +28,7 @@ void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal)
 // the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -71,7 +71,7 @@ void main(){
   vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol;
   float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
   vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt;
-  vec3 dark = vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100) + lamp * 1.15 * uLights;
+  vec3 dark = (vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100)) * uNight + lamp * 1.15 * uLights;
   vec3 col = mix(dark, lit, dayAmt);
   float cl = smoothstep(0.08, 0.85, texture2D(uCloud, vUv).r);
   // Close up the baked map (1024 px) is magnified: add detail noise on the sphere, only where a map texel covers more than ~a pixel.
@@ -100,7 +100,7 @@ void main(){
 // (an exponential atmosphere); blue-white on the lit limb, orange near the terminator, almost nothing on the dark side.
 const ATMO_VS = `varying vec3 vW;
 void main(){ vec4 wp = modelMatrix * vec4(position, 1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`;
-const ATMO_FS = `uniform vec3 uSun; uniform float uGain; uniform float uScale;
+const ATMO_FS = `uniform vec3 uSun; uniform float uGain; uniform float uScale; uniform float uFloor;
 varying vec3 vW;
 void main(){
   vec3 ro = cameraPosition, rd = normalize(vW - ro);
@@ -113,7 +113,7 @@ void main(){
   float tw = exp(-pow((sd - 0.02) / 0.16, 2.0));
   vec3 col = mix(vec3(0.20, 0.45, 1.0), vec3(0.62, 0.82, 1.0), lit * lit);
   col = mix(col, vec3(1.0, 0.52, 0.24), tw * 0.65);
-  gl_FragColor = vec4(col, clamp(dens * (0.03 + 0.97 * lit) * uGain, 0.0, 1.0));
+  gl_FragColor = vec4(col, clamp(dens * (uFloor + (1.0 - uFloor) * lit) * uGain, 0.0, 1.0));
 }`;
 // Cloud map, drawn once into a texture. Large swirls decide where the weather is (about a third of the sphere, wetter at the equator and in the mid-latitudes);
 // inside them a finer, strongly warped noise draws wisps and filaments, and a faint veil thins out around the masses. No hard edges, no round blobs.
@@ -252,6 +252,7 @@ export const earthMethods = {
         uFade: { value: 1 },
         uCloudAmt: { value: 1 },
         uLights: { value: 1 },
+        uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
         uBump: { value: 0 },
       };
     this._eu = u;
@@ -263,7 +264,7 @@ export const earthMethods = {
     this._bindPictures(this._wantedPictures(), false);
     root.add(new T.Mesh(new T.SphereGeometry(1, IS_PHONE ? 72 : 96, IS_PHONE ? 48 : 64), mat));
     // Atmosphere glow: a shell far enough out that its edge is fully faded
-    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: this.sim.cfg.spin ? 1.1 : 1 }, uScale: { value: 1 } };
+    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: this.sim.cfg.atmoK ?? (this.sim.cfg.spin ? 1.1 : 1) }, uScale: { value: 1 }, uFloor: { value: this.sim.cfg.atmoFloor ?? 0.03 } };
     this._au = au;
     root.add(
       new T.Mesh(
