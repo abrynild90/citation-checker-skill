@@ -424,13 +424,14 @@ export const modelMethods = {
     K.box(body, 0.0046, 0.001, 0.014, 0, 0.0046, -0.004);
     // Wing: a thick, bevelled slab in a darker shade of the national colour (its underside), with a smaller bright deck on top and a dark leading edge
     const shape = (k) => {
+      // short, low-aspect trapezoid wing (X-37B: span about half its length): leading edge sweeps out from the body, straight tip, square trailing edge
       const q = new T.Shape();
-      q.moveTo(0.004 * k, 0.014 * k);
-      q.lineTo(0.0215 * k, -0.0125 * k);
-      q.lineTo(0.0215 * k, -0.0185 * k);
-      q.lineTo(-0.0215 * k, -0.0185 * k);
-      q.lineTo(-0.0215 * k, -0.0125 * k);
-      q.lineTo(-0.004 * k, 0.014 * k);
+      q.moveTo(0.0046 * k, 0.0105 * k);
+      q.lineTo(0.0135 * k, -0.0075 * k);
+      q.lineTo(0.0135 * k, -0.0185 * k);
+      q.lineTo(-0.0135 * k, -0.0185 * k);
+      q.lineTo(-0.0135 * k, -0.0075 * k);
+      q.lineTo(-0.0046 * k, 0.0105 * k);
       q.closePath();
       return q;
     };
@@ -446,10 +447,10 @@ export const modelMethods = {
     );
     K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0007, bevelEnabled: false }), 0, 0.0017, -0.0008, PI / 2, 0, 0); // above the slab's bevelled top, so the pale tile deck shows
     // thermal-tile seams across the wing deck and a white dorsal spine
-    for (const z of [-0.002, -0.0085]) K.box(dark, 0.0285 + z * 1.6, 0.0004, 0.0004, 0, 0.0021, z);
+    for (const [z, wd] of [[-0.002, 0.0185], [-0.0095, 0.0235]]) K.box(dark, wd, 0.0004, 0.0004, 0, 0.0021, z);
     K.box(white, 0.0016, 0.0008, 0.026, 0, 0.0063, 0);
     for (const s of [-1, 1]) {
-      K.box(dark, 0.0007, 0.0007, 0.031, s * 0.0125, -0.0004, 0.0004, 0, s * 0.67, 0);
+      K.box(dark, 0.0007, 0.0007, 0.0201, s * 0.009, -0.0004, 0.0015, 0, -s * 0.46, 0);
       K.box(body, 0.001, 0.009, 0.0095, s * 0.0042, 0.0075, -0.0165, 0, 0, -s * 0.38);
     }
     K.cyl(dark, 0.0026, 0.0032, 0.003, 0, 0, -0.0235, PI / 2);
