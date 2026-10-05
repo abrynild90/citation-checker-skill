@@ -1559,3 +1559,11 @@
 .overlay.is-static .sv-steps .sv-all ol {
   margin-top: var(--s-2);
 }
+
+/* A tall desktop window has room to spare beside the steps, so more of the account shows before "Read the full account". */
+@media (min-width: 761px) and (min-aspect-ratio: 1/1) and (min-height: 1000px) {
+  .overlay .sv-lede.clamped {
+    -webkit-line-clamp: 7;
+    line-clamp: 7;
+  }
+}
