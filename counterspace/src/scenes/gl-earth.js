@@ -70,7 +70,7 @@ void main(){
   vec3 sunCol = mix(vec3(1.0, 0.985, 0.95), vec3(1.0, 0.6, 0.38), clamp(tw * 0.9, 0.0, 1.0));
   vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol;
   float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
-  vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt;
+  vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt * (1.0 - 0.9 * water); // no warm patches on the open ocean (cloud and airglow in the night picture)
   vec3 dark = (vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100)) * uNight + lamp * 1.15 * uLights;
   vec3 col = mix(dark, lit, dayAmt);
   float cl = smoothstep(0.08, 0.85, texture2D(uCloud, vUv).r);
@@ -87,7 +87,7 @@ void main(){
   vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.30 * pow(max(ndl, 0.0), 0.8)) * sunCol;
   vec3 cloudCol = mix(vec3(0.030, 0.042, 0.075), cLit, dayAmt);
   // cloud albedo fades to nothing at the terminator and on the night side, and stays a soft blue-grey over dark ocean
-  col = mix(col, cloudCol * vec3(0.84, 0.90, 1.0), cl * 0.5 * smoothstep(0.2, 0.8, ndl));
+  col = mix(col, cloudCol * vec3(0.84, 0.90, 1.0), cl * 0.5 * smoothstep(0.6, 1.0, ndl));
   float limb = 1.0 - ndv;
   vec3 haze = mix(vec3(0.16, 0.38, 0.85), vec3(0.46, 0.73, 1.0), clamp(ndl * 1.5 + 0.3, 0.0, 1.0));
   haze = mix(haze, vec3(1.0, 0.5, 0.25), tw * 0.5);

@@ -60,6 +60,7 @@ export const COSMOS1408 = {
     },
   ],
   still: 0.8,
+  liveOff: { 'Cosmos 1408': [-60, -66] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],

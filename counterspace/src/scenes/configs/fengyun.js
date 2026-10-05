@@ -27,6 +27,7 @@ export const FENGYUN = {
   orbitAt: [26, 74, 4.6],
   phoneK: 1.14,
   fitFill: IS_PHONE ? 0.8 : undefined, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
+  liveOff: { 'Fengyun-1C': [-70, -64] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
   phoneOff: { Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   noSimCount: true,
   stillImpact: true, // the print also labels the impact point
