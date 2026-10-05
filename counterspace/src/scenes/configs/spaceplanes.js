@@ -146,8 +146,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
-      minPx: IS_PHONE ? 26 : 36,
-      maxPx: IS_PHONE ? 36 : 60,
+      minPx: IS_PHONE ? 48 : 88,
+      maxPx: IS_PHONE ? 64 : 124,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
