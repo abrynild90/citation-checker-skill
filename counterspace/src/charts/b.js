@@ -239,7 +239,7 @@ export function drawB(el = document.getElementById('svgB')) {
       bw = Math.max(6, xb - xa - 2 * inset),
       cx = bx + bw / 2,
       recon = decs[i] !== '2020s',
-      hiY = y(tot[i]);
+      hiY = tot[i] > 0 ? Math.min(y(tot[i]), y(0) - 9) : y(tot[i]); // a bar of one or two states still shows at least 9 px
     if (!EXPORTING)
       s.append('rect')
         .attr('class', 'rowhl hit')
@@ -257,15 +257,17 @@ export function drawB(el = document.getElementById('svgB')) {
         .append('path')
         .attr('d', roundRectPath(bx, hiY, bw, base - hiY + 12, Math.min(7, bw / 2)));
       const seg = bar.append('g').attr('clip-path', `url(#${id})`);
+      const topJ = series.reduce((a, sr, j) => (stack[j][i][1] > stack[j][i][0] ? j : a), -1);
       series.forEach((sr, j) => {
         const [y0, y1] = stack[j][i];
         if (y1 <= y0) return;
+        const yt = j === topJ ? hiY : y(y1);
         seg
           .append('rect')
           .attr('x', bx - 1)
           .attr('width', bw + 2)
-          .attr('y', y(y1))
-          .attr('height', y(y0) - y(y1))
+          .attr('y', yt)
+          .attr('height', y(y0) - yt)
           .style('fill', sr.dev ? `url(#hatch-${sr.key.replace(':', '-')})` : `var(${sr.v})`)
           .style('fill-opacity', sr.dev ? 1 : 0.9)
           .style('stroke', 'var(--bg)')

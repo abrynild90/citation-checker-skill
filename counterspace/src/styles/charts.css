@@ -81,7 +81,7 @@
 .gridline line{stroke:var(--grid)}
 .gridline path{display:none}
 .gridline.minor line{stroke-dasharray:2 5;stroke-opacity:.6}
-.band-label{fill:var(--faint);font:600 12px var(--sans)}
+.band-label{fill:var(--muted);font:600 12px var(--sans)}
 .ann{fill:var(--text);font:600 13px var(--sans)}
 .ann-sub{fill:var(--muted);font:400 12.5px var(--sans)}
 .ann,.ann-sub,.lbls text{paint-order:stroke;stroke:var(--ground);stroke-width:3.5px;stroke-linejoin:round}
