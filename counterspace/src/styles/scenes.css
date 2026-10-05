@@ -1430,6 +1430,7 @@
   .overlay.is-static .ctrl {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: none;
+    row-gap: 8px;
   }
   .overlay.is-static .static-note {
     display: contents;
