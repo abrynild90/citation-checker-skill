@@ -68,6 +68,6 @@ export const SOLWIND = {
     [0, 'F-15 in a steep, supersonic climb'],
     [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
     [0.52, 'Collision at about 530 km; fragments spread, then fall out of orbit', 'Collision at about 530 km'],
-    [0.75, 'Fast-forward: fragments decay; SWF counts all 285 out of orbit', 'Decay: SWF counts all 285 out of orbit'],
+    [0.75, 'Fast-forward: fragments decay; SWF counts all 285 out of orbit', 'Decay: all 285 out (SWF)'],
   ],
 };

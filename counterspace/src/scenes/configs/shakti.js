@@ -62,6 +62,6 @@ export const SHAKTI = {
   status: [
     [0, 'PDV Mk-II rises from Abdul Kalam Island'],
     [0.4, 'Collision at about 300 km; fragments spread and fall back quickly', 'Collision at about 300 km'],
-    [0.65, 'Fast-forward: pieces decay; SWF counts all 130 out of orbit', 'Decay: SWF counts all 130 out of orbit'],
+    [0.65, 'Fast-forward: pieces decay; SWF counts all 130 out of orbit', 'Decay: all 130 out (SWF)'],
   ],
 };
