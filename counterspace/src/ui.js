@@ -421,7 +421,7 @@ function shortPin(pin) {
   const first = String(pin).split(';')[0];
   const t = first.match(/^(Table [\d.-]+|Section [\d.]+)/),
     pg = first.match(/PDF p\. [\d-]+/);
-  return t && pg ? `${t[1]}, ${pg[0]}` : pg ? pg[0] : first.length > 34 ? `${first.slice(0, 32).trimEnd()}…` : first;
+  return t && pg ? `${t[1]}, ${pg[0]}` : pg ? pg[0] : first;
 }
 export const srcCell = (r, tableId, entry) => {
   const tn = SRC_TABLE[tableId] || 'data',
@@ -462,6 +462,15 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
     host.setAttribute('aria-label', `${caption || 'Data table'} (scrolls)`);
   }
   setOnce(id, `<table>${cap}<thead><tr>${th}</tr></thead><tbody>${rows.map(tr).join('')}</tbody></table>`);
+  let hint = host?.parentElement.querySelector(':scope > .scroll-hint');
+  if (host && !hint && !host.closest('.only-phone')) {
+    host.insertAdjacentHTML('beforebegin', '<p class="scroll-hint">Scroll sideways to see more columns.</p>');
+    hint = host.previousElementSibling;
+    const check = () => hint.classList.toggle('on', host.scrollWidth > host.clientWidth + 2);
+    host.closest('details')?.addEventListener('toggle', check);
+    addEventListener('resize', check);
+  }
+  hint?.classList.toggle('on', host.scrollWidth > host.clientWidth + 2);
   // keyboard users can step over a long table of links
   const det = host?.closest('details');
   if (det && !det.querySelector('.skip-table') && rows.length > 12) {
