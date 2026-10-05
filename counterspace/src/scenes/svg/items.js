@@ -216,7 +216,7 @@ function drawPoint(S, it) {
   const { sim, opts, t: t0, W, g, project, R, craftBase, marks, mark, cands, crafts, label, phoneText, NARROW } = S;
   for (const tt of (!opts.panel && sim.cfg.staticSnap?.[it.craftId]) || [t0]) {
     const t = tt;
-    const q = it.liveOnly ? null : (!opts.panel && it.staticPos?.(t)) || it.pos(t);
+    const q = it.liveOnly || it.shape === 'rocket' || it.noStatic ? null : (!opts.panel && it.staticPos?.(t)) || it.pos(t);
     if (!q) continue;
     let p = project(q);
     if (p.hidden) continue;

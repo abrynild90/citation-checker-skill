@@ -1,5 +1,5 @@
 // scenes/configs/sj21-tug.js: scene `sj21-tug` (see ../config.js for the list order)
-import { GEO_ALT } from '../core.js';
+import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C, PK } from './shared.js';
 
 // SJ-21 presets that show the pair carry this note: SWF says SJ-21 "docked" with Compass G2 but does not describe any arm or grapple, so the boom drawn
@@ -48,8 +48,8 @@ export const SJ21_TUG = {
       anchor: 'g',
       color: C.dead,
       scale: 2.2 * PK,
-      minPx: 80,
-      maxPx: 112,
+      minPx: IS_PHONE ? 90 : 80,
+      maxPx: IS_PHONE ? 120 : 112,
       label: 'Compass G2 (defunct)',
       short: 'Compass G2',
       staticKey: [
@@ -76,8 +76,8 @@ export const SJ21_TUG = {
       color: C.cn,
       bright: true,
       scale: 2.2 * PK,
-      minPx: 80,
-      maxPx: 112,
+      minPx: IS_PHONE ? 90 : 80,
+      maxPx: IS_PHONE ? 120 : 112,
       label: 'SJ-21 (China)',
       short: 'SJ-21',
       staticKey: [
@@ -121,7 +121,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98 } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98 }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93 } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', at: [36, 104, 3.9], look: [0, 106, 1.9], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',

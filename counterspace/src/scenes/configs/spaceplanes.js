@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 58 : 120; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 36 : 74; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -53,14 +53,14 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: IS_PHONE ? 40 : 60,
+      minPx: IS_PHONE ? 26 : 38,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 3.6 * PK,
+      scale: 2.2 * PK,
       label: 'X-37B (US)',
       short: 'X-37B',
       dx: 46,
@@ -106,14 +106,14 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: IS_PHONE ? 40 : 60,
+      minPx: IS_PHONE ? 26 : 38,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 5.2 * PK,
+      scale: 3.1 * PK,
       label: 'X-37B OTV-7 (US)',
       short: 'OTV-7',
       dx: -60,
@@ -146,14 +146,14 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
-      minPx: IS_PHONE ? 38 : 56,
-      maxPx: IS_PHONE ? 46 : 96,
+      minPx: IS_PHONE ? 26 : 36,
+      maxPx: IS_PHONE ? 36 : 60,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
       color: C.cn,
       bright: true,
-      scale: 1.45 * PK,
+      scale: 0.9 * PK,
       label: 'CSSHQ (China)',
       short: 'CSSHQ',
       dx: 36,

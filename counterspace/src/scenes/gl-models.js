@@ -387,13 +387,22 @@ export const modelMethods = {
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
-      body = this._mat(color, { metalness: 0.3, roughness: 0.45 }),
-      white = new T.MeshPhysicalMaterial({ color: 0xeef1f8, metalness: 0.35, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.12, envMapIntensity: 1.6 }),
+      body = this._mat(new T.Color(0xdfe3ec).lerp(new T.Color(color), 0.08).getHex(), { metalness: 0.45, roughness: 0.34 }),
+      white = new T.MeshPhysicalMaterial({ color: 0xf4f6fb, metalness: 0.45, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2, envMapIntensity: 1.8 }),
       nose = this._mat(0x1b1f29, { metalness: 0.4, roughness: 0.4 }),
       dark = this._mat(0x2b3140, { metalness: 0.5, roughness: 0.5 }),
       glass = this._mat(0x060a14, { metalness: 0.9, roughness: 0.1 }),
-      under = this._mat(new T.Color(color).lerp(new T.Color(0x12151d), 0.82).getHex(), { metalness: 0.45, roughness: 0.38 }),
-      deck = this._mat(new T.Color(0xe7eaf1).lerp(new T.Color(color), 0.2).getHex(), { metalness: 0.35, roughness: 0.34 }),
+      under = this._mat(new T.Color(color).lerp(new T.Color(0x0c0e14), 0.9).getHex(), { metalness: 0.5, roughness: 0.42 }),
+      deck = this._mat(0xf1f3f8, { metalness: 0.4, roughness: 0.3 }),
+      rim = (m) => {
+        m.onBeforeCompile = (sh) => {
+          sh.fragmentShader = sh.fragmentShader.replace(
+            '#include <dithering_fragment>',
+            'float rimK = pow(1.0 - abs(dot(normalize(vNormal), normalize(vViewPosition))), 3.0);\n gl_FragColor.rgb += vec3(0.55, 0.68, 0.95) * rimK * 0.45;\n #include <dithering_fragment>',
+          );
+        };
+        return m;
+      },
       prof = [
         [0.0004, 0.0236],
         [0.0012, 0.0226],
@@ -405,7 +414,10 @@ export const modelMethods = {
         [0.0056, -0.016],
         [0.0054, -0.0225],
       ].map(([r, y]) => new T.Vector2(r, y));
-    K.geo(white, new T.LatheGeometry(prof, 24), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
+    rim(white);
+    rim(deck);
+    rim(body);
+    K.geo(white, new T.LatheGeometry(prof, 48), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
     K.geo(nose, new T.SphereGeometry(0.0017, 12, 8), 0, 0, 0.0214, 0, 0, 0, 1, 0.8, 1.3);
     K.box(nose, 0.0094, 0.0006, 0.026, 0, -0.0043, -0.002); // dark heat-shield belly seen at the edges
     K.box(glass, 0.003, 0.001, 0.005, 0, 0.0031, 0.0128);
@@ -460,6 +472,41 @@ export const modelMethods = {
       g.userData.halo = h;
     }
     Object.assign(g.userData, { span: 0.046, minPx: 22, maxPx: 60 });
+    return g;
+  },
+  // Sounding rocket (DN-2): white body, red nose cone, four fins, an engine bell and a glowing exhaust flame behind. Nose along +z, length about 0.06.
+  _rocketModel(color) {
+    const T = this.T,
+      K = new Kit(T),
+      PI = Math.PI,
+      white = this._mat(0xf2f4f9, { metalness: 0.3, roughness: 0.36 }),
+      tip = this._mat(new T.Color(color).lerp(new T.Color(0xffffff), 0.1).getHex(), { metalness: 0.2, roughness: 0.4 }),
+      dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45 });
+    K.cyl(white, 0.0042, 0.0042, 0.036, 0, 0, 0, PI / 2, 0, 0, 20);
+    K.cyl(tip, 0.0003, 0.0042, 0.016, 0, 0, 0.026, PI / 2, 0, 0, 20);
+    K.cyl(dark, 0.0034, 0.0042, 0.003, 0, 0, -0.0195, PI / 2, 0, 0, 16);
+    K.cyl(dark, 0.003, 0.0022, 0.006, 0, 0, -0.0225, PI / 2, 0, 0, 16);
+    for (let k = 0; k < 4; k++) {
+      const a = (k * PI) / 2;
+      K.box(tip, 0.0007, 0.0085, 0.011, Math.cos(a) * 0.0068, Math.sin(a) * 0.0068, -0.0125, 0, 0, a - PI / 2);
+    }
+    K.cyl(dark, 0.0043, 0.0043, 0.0012, 0, 0, 0.0075, PI / 2, 0, 0, 20); // a dark band
+    const g = K.build();
+    const flame = new T.Mesh(
+      new T.ConeGeometry(0.0038, 0.045, 14, 1, true),
+      new T.MeshBasicMaterial({ color: 0xffa24a, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide }),
+    );
+    flame.rotation.x = -PI / 2; // apex (+y) to -z: the wide end sits at the engine
+    flame.position.z = -0.03;
+    const core = flame.clone();
+    core.material = flame.material.clone();
+    core.material.color.set(0xfff0c8);
+    core.scale.set(0.5, 0.55, 0.5);
+    core.position.z = -0.0255;
+    g.add(flame, core);
+    g.userData.sat = true;
+    g.userData.body = g.userData.meshes.get(white);
+    Object.assign(g.userData, { span: 0.062, minPx: 30, maxPx: 52 });
     return g;
   },
   // Airliner: white fuselage with a pointed nose and a tapered tail, swept wings, two engines, a tail fin and stabilisers. The airframe colour is the
@@ -562,36 +609,47 @@ export const modelMethods = {
     const T = this.T,
       g = new T.Group(),
       m = this._mat(color),
-      dark = this._mat(0x3a4254),
-      lite = this._mat(0xdde2ee);
-    const bed = new T.Mesh(new T.BoxGeometry(0.016, 0.0055, 0.0065), dark);
-    bed.position.set(-0.0015, 0.004, 0);
+      dark = this._mat(0x2b3140, { metalness: 0.5, roughness: 0.5 }),
+      body = this._mat(0x4a5266, { metalness: 0.3, roughness: 0.55 }),
+      lite = this._mat(0xb8c0d0, { metalness: 0.5, roughness: 0.4 }),
+      glass = this._mat(0x0b1020, { metalness: 0.8, roughness: 0.15 });
+    // a dark flat-bed truck: the cab is slate with a dark windscreen (no white block), the bed carries the transmitter
+    const bed = new T.Mesh(new T.BoxGeometry(0.016, 0.0045, 0.0065), dark);
+    bed.position.set(-0.0015, 0.0036, 0);
     g.add(bed);
-    const cab = new T.Mesh(new T.BoxGeometry(0.0055, 0.0065, 0.0065), lite);
-    cab.position.set(0.0083, 0.0045, 0);
+    const cab = new T.Mesh(new T.BoxGeometry(0.0055, 0.0058, 0.0065), body);
+    cab.position.set(0.0083, 0.0041, 0);
     g.add(cab);
+    const ws = new T.Mesh(new T.BoxGeometry(0.0006, 0.0028, 0.0054), glass);
+    ws.position.set(0.0111, 0.0054, 0);
+    g.add(ws);
+    const box = new T.Mesh(new T.BoxGeometry(0.0075, 0.0032, 0.0052), body);
+    box.position.set(-0.0035, 0.0074, 0);
+    g.add(box);
     for (const x of [-0.005, 0.0, 0.0085]) {
       const w = new T.Mesh(new T.CylinderGeometry(0.0019, 0.0019, 0.0075, 10), dark);
       w.rotation.x = Math.PI / 2;
       w.position.set(x, 0.0019, 0);
       g.add(w);
     }
-    const mast = new T.Mesh(new T.CylinderGeometry(0.0005, 0.0008, 0.03, 6), lite);
-    mast.position.set(-0.004, 0.022, 0);
+    // a mast about twice the old height with two cross-arms and a bright beacon on top
+    const mast = new T.Mesh(new T.CylinderGeometry(0.0006, 0.001, 0.058, 6), lite);
+    mast.position.set(-0.004, 0.037, 0);
     g.add(mast);
     for (const [y, w] of [
-      [0.035, 0.012],
-      [0.029, 0.0085],
+      [0.063, 0.014],
+      [0.054, 0.0105],
+      [0.045, 0.008],
     ]) {
-      const bar = new T.Mesh(new T.BoxGeometry(0.0006, 0.0006, w), m);
+      const bar = new T.Mesh(new T.BoxGeometry(0.0007, 0.0007, w), m);
       bar.position.set(-0.004, y, 0);
       g.add(bar);
     }
     const tip = new T.Sprite(
-      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.9, depthWrite: false, blending: T.AdditiveBlending }),
+      new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.95, depthWrite: false, blending: T.AdditiveBlending }),
     );
-    tip.scale.setScalar(0.012);
-    tip.position.set(-0.004, 0.037, 0);
+    tip.scale.setScalar(0.02);
+    tip.position.set(-0.004, 0.067, 0);
     g.add(tip);
     const rings = [0, 1, 2].map(() => {
       const r = new T.Sprite(
@@ -605,14 +663,14 @@ export const modelMethods = {
           blending: T.AdditiveBlending,
         }),
       );
-      r.position.set(-0.004, 0.036, 0);
+      r.position.set(-0.004, 0.066, 0);
       g.add(r);
       return r;
     });
     g.userData.rings = rings;
     g.userData.tintMat = m;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
-    Object.assign(g.userData, { span: 0.04, minPx: 40, maxPx: 78 });
+    Object.assign(g.userData, { span: 0.07, minPx: 50, maxPx: 96 });
     return g;
   },
   // Guided-missile cruiser (Ticonderoga class, about 10:1 hull): pointed-bow hull extrusion, dark deck, forward and aft deckhouses with a mast, two

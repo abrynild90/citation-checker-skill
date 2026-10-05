@@ -97,6 +97,8 @@ export const GNSS = {
   focus: [55, 18],
   inset: 'GPS orbits (top view)',
   insetSize: [132, 104],
+  insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
+  phoneHide: ['Jammer effect'], // 375: the zone is named by the status line and its red dome; the Jammer pill stays
   insetNoPhone: true, // the phone stage is too small for an inset that would sit on the jammer zone
   cameras: [
     {

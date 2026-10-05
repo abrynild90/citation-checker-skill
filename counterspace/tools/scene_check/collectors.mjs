@@ -61,7 +61,7 @@ export const LIVE = (KEYS) => {
   let statusLines = 0;
   if (st && status) {
     const rg = document.createRange();
-    rg.selectNodeContents(st);
+    rg.selectNodeContents(st.firstChild || st); // the first text node: a preset's note is the pill's deliberate second line
     statusLines = new Set([...rg.getClientRects()].map((q) => Math.round(q.top / 4))).size;
   }
   const hitT = h.sim.cfg.hit && !h.sim.cfg.actors.some((a) => a.noHit) ? h.sim.cfg.hit.t : null,

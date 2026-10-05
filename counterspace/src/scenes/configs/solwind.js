@@ -26,8 +26,10 @@ export const SOLWIND = {
   staticMarkerCap: { 'Solwind P78-1': 64 }, // the satellite is the subject: clearly visible (declared in tools/scene_check/rules.mjs MARKER_OVR)
   staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
-  cloudK: 0.15, // a thinner cloud deck: the white bank beside the subject read as a blob
+  cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
+  liveOff: { 'ASM-135': [120, 62] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  phoneOff: { 'ASM-135': [120, 62] },
   actors: [
     {
       type: 'aircraft',
@@ -38,9 +40,9 @@ export const SOLWIND = {
       alt: 12,
       t0: 0.0,
       t1: 0.24,
-      scale: 2,
-      minPx: IS_PHONE ? 30 : 40,
-      maxPx: IS_PHONE ? 46 : 70,
+      scale: 3,
+      minPx: IS_PHONE ? 44 : 62,
+      maxPx: IS_PHONE ? 62 : 104,
       label: 'F-15 zoom climb',
       dx: -64,
       dy: 24,
@@ -49,10 +51,13 @@ export const SOLWIND = {
       type: 'target',
       label: 'Solwind P78-1',
       color: C.tgt,
-      big: 3.4, // the satellite reads at t=0.2, before the intercept
+      big: 5,
+      minPx: IS_PHONE ? 40 : 56,
+      maxPx: IS_PHONE ? 60 : 96, // the satellite reads at t=0.2, before the intercept
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
+      impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
     { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42 },
     { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, decay: 0.9, color: '#ffd2a6' },

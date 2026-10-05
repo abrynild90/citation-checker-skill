@@ -32,9 +32,9 @@ float r = min(uR, uMaxPx * d / uScale) * (0.2 + 0.8 * vF);
 gl_Position = projectionMatrix * modelViewMatrix * vec4(ax + normal * r, 1.0); }`;
 const TRAIL_FS = `uniform vec3 uColor; uniform float uOp; varying float vF;
 void main(){ if (vF <= 0.003) discard; gl_FragColor = vec4(uColor, uOp * pow(vF, 1.5)); }`;
-const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; varying float vU; varying vec3 vP;
+const TUBE_VS = `uniform float uR; uniform float uScale; uniform float uMaxPx; uniform float uPush; uniform float uTaper; varying float vU; varying vec3 vP;
 void main(){ vU = uv.x; vP = position; vec3 ax = position - normal * uR; float d = max(-(modelViewMatrix * vec4(ax, 1.0)).z, 0.1);
-float r = min(uR, uMaxPx * d / uScale);
+float r = min(uR, uMaxPx * d / uScale) * mix(uTaper, 1.0, pow(uv.x, 1.2));
 vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail;
@@ -114,6 +114,7 @@ const methods = {
           uScale: { value: 800 },
           uMaxPx: { value: maxPx },
           uHead: { value: 0 },
+          uTaper: { value: 1 },
           uTail: { value: 0 },
           uGap0: { value: new T.Vector4(0, 0, 0, 0) },
           uGap1: { value: new T.Vector4(0, 0, 0, 0) },
@@ -249,6 +250,7 @@ const methods = {
         );
         if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds });
         if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
+        if (it.taper != null) tube.material.uniforms.uTaper.value = it.taper; // thin at the start, full width at the far end: reads apart from the orbit line it crosses
         if (it.push) tube.material.uniforms.uPush.value = it.push; // orbit line pushed back from the camera: craft on it are drawn in front
         if (!it.dynamic && it.orbit) (this.ringPts ||= []).push(pts);
         root.add(tube);
@@ -292,6 +294,7 @@ const methods = {
         m = it.iss ? this._issModel(it.color) : this._satModel(it.color, !!(it.state || it.glow), it.bright, it.variant);
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
       } else if (it.shape === 'plane') m = this._planeModel(it.color, it.bright, !!(it.state || it.glow));
+      else if (it.shape === 'rocket') m = this._rocketModel(it.color);
       else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state);
       else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0), !!it.state);
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0));

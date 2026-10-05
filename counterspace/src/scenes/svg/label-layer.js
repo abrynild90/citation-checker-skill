@@ -41,6 +41,8 @@ export function placeAndDrawLabels(S, fit, legend) {
     rings: ringsL,
     parts: { count: pcount },
     fine: true,
+    edge: 8,
+    gap: 3,
   });
   cands.forEach((c, i) => {
     const q = pl[i];

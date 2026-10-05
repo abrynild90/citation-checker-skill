@@ -22,7 +22,7 @@ export const BURNT_FROST = {
   earlyKey: true,
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 70, minPx: 28, maxPx: 80 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 44, minPx: 56, maxPx: 130 },
     {
       type: 'target',
       label: 'USA-193',
@@ -37,7 +37,7 @@ export const BURNT_FROST = {
         { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
       ],
     },
-    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: C.int, label: 'SM-3', flash: 0.42, strong: true, hold: 0.07 },
+    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.36, coreK: 0.4, strong: true, hold: 0.07 },
     { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.046, lateGlow: true },
   ],
   still: 0.47,

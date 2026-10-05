@@ -40,7 +40,7 @@ export const LASER = {
   staticK: 1.9, // static: MSTI-3 drawn further out in space so it clears the Earth limb
   actors: [
     { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, New Mexico', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
-    { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 1.7, minPx: 46, maxPx: 84, dx: 30, dy: 50 },
+    { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 2.4, minPx: 64, maxPx: 118, dx: 30, dy: 50 },
     {
       type: 'beam',
       from: [32.4, -106.4],
@@ -99,7 +99,7 @@ export const LASER = {
   status: [
     [0, 'MSTI-3 rises over White Sands'],
     [0.15, 'MIRACL beam tracks the satellite while it is above the horizon', 'MIRACL beam tracks the satellite'],
-    [0.8, 'Same principle: Russia’s Peresvet laser (named in 2018) is a mobile dazzler (SWF)', 'SWF: Russia’s Peresvet is a laser dazzler'],
+    [0.8, 'Same principle, shown with the US test: Russia’s Peresvet laser (named in 2018) is a mobile dazzler (SWF)', 'Shown: US test. Same principle: Peresvet (SWF)'],
   ],
   cameras: [
     { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55, fill: 0.66 } },

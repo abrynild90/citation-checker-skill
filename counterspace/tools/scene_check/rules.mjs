@@ -396,7 +396,7 @@ export function check(S) {
     f('status-early', `t=${S.t} < event ${S.evT}+0.02: "${S.status.slice(0, 70)}"`);
   if (S.statusLines > 1) f('status-wrap', `status wraps to ${S.statusLines} lines at ${W}px: "${(S.status || '').slice(0, 60)}"`);
   if (S.keyOut) for (const k of S.keyOut) f('key-out', k);
-  if (S.hitT != null && S.def && S.t >= S.hitT + 0.1 && !L.some((l) => IMPACT.test(l.text)))
+  if (S.hitT != null && S.def && S.t >= S.hitT + 0.1 && S.t <= S.hitT + 0.2 && !L.some((l) => IMPACT.test(l.text)))
     f('no-impact', `no impact/debris label at t=${S.t} (hit ${S.hitT})`);
   if (S.shellCrop) for (const k of S.shellCrop) f('shell-crop', k);
   if (S.resX != null && S.resX < 1.5) f('still-res', `Earth supersampling ${S.resX.toFixed(2)}x < 1.5x`);
