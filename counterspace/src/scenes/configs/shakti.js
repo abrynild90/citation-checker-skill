@@ -18,9 +18,11 @@ export const SHAKTI = {
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; p. 04-04.',
   related: 'unga-77-41',
   event: 'in-2019-shakti',
+  orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
+  phoneOff: { 'Abdul Kalam': [-56, 30] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
   actors: [
     { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },

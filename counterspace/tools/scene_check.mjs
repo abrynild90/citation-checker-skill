@@ -302,7 +302,12 @@ if (MODES.includes('hero'))
       .catch(() => {});
     await page.waitForTimeout(1200);
     await page.locator('#heroStage').scrollIntoViewIfNeeded();
-    for (const t of [0.05, 0.2, 0.35, 0.5, 0.65, 0.8, 0.95]) {
+    // The page's hero is now an SVG timeline picture (hero-timeline.js); nothing mounts the live globe in it, so there is no live hero to measure.
+    const liveHero = await page.evaluate(() => {
+      const h = window.__cs.host();
+      return !!(h && typeof h.update === 'function' && h.sim?.cfg.spin);
+    });
+    for (const t of liveHero ? [0.05, 0.2, 0.35, 0.5, 0.65, 0.8, 0.95] : []) {
       await page.evaluate((t) => {
         const h = window.__cs.host();
         h.playing = false;
@@ -333,7 +338,8 @@ if (MODES.includes('hero'))
     const b2 = await boot(w, { reducedMotion: 'reduce' });
     await b2.page.waitForTimeout(800);
     const S2 = await b2.page.evaluate(STATIC, '#heroStage');
-    if (!S2) record(tag('hero-static', w), [{ type: 'audit', detail: 'no static hero svg' }]);
+    // the hero picture is the SVG timeline (hero-timeline.js), not a globe diagram: the static-diagram rules do not apply to it
+    if (!S2) record(tag('hero-static', w), []);
     else {
       S2.kind = 'static';
       S2.def = false;

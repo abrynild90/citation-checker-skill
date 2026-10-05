@@ -87,7 +87,7 @@ export const DN2 = {
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
   phoneHide: ['DN-2 path', 'GEO'],
-  phoneOff: { '≥30,000': [14, -44] },
+  phoneOff: { '≥30,000': [22, -52] },
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)

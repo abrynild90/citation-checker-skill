@@ -1,5 +1,5 @@
 // ============================================================================
-// scenes/gl-earth.js: GLHost mixin: the planet (day picture with relief, city lights, soft terminator, sea glint, clouds), its atmosphere, the cloud map
+// scenes/gl-earth.js: GLHost mixin: the planet (day picture with relief, city lights, soft terminator, clouds), its atmosphere, the cloud map
 // (ES module bundled by esbuild from src/boot.js; the methods are installed together with gl-items.js's, see installGLItems.)
 // ============================================================================
 import { IS_PHONE } from './core.js';
@@ -22,14 +22,18 @@ import {
 } from './earth.js';
 
 // ---------------------------------------------------------------- shaders
-const EARTH_VS = `varying vec2 vUv; varying vec3 vN; varying vec3 vW;
-void main(){ vUv = uv; vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`;
+const EARTH_VS = `varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
+void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`;
 // Day side: the photograph, shaded by the relief map and lit with a wide, soft terminator and reddened sunlight near it. Night side: a faint cool copy of
-// the land and the city lights (a one-channel picture, see lightsFor). Sea: a soft sun glint and a sky reflection at grazing angles. Clouds come from the
+// the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump;
-varying vec2 vUv; varying vec3 vN; varying vec3 vW;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight;
+varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
+float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
+float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h13(i), h13(i + vec3(1.0, 0.0, 0.0)), f.x), mix(h13(i + vec3(0.0, 1.0, 0.0)), h13(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+              mix(mix(h13(i + vec3(0.0, 0.0, 1.0)), h13(i + vec3(1.0, 0.0, 1.0)), f.x), mix(h13(i + vec3(0.0, 1.0, 1.0)), h13(i + vec3(1.0, 1.0, 1.0)), f.x), f.y), f.z); }
 // The relief map tilts the surface normal: height steps over two texels become a slope (8848 m is full white on a 6371 km planet), exaggerated by uBump. The
 // samples are taken at the mip level that matches the pixel, so the shading never turns to noise when the globe is small.
 vec3 relief(vec3 N){
@@ -53,6 +57,11 @@ void main(){
   vec3 day = mix(texture2D(uDayA, vUv).rgb, texture2D(uDayB, vUv).rgb, uFade);
   float water = smoothstep(0.35, 0.65, texture2D(uMask, vUv).r);
   float dt = texture2D(uCloud, vUv * vec2(26.0, 13.0)).g + 0.5 * texture2D(uCloud, vUv * vec2(71.0, 35.5) + 0.37).g - 0.75;
+  float magL = 1.0 - smoothstep(0.25, 1.0, max(fwidth(vUv.x), fwidth(vUv.y)) * 4096.0);
+  if (magL > 0.0) {
+    vec3 qd = normalize(vP);
+    dt += magL * (0.50 * (vn(qd * 700.0) - 0.5) + 0.35 * (vn(qd * 1700.0 + 5.3) - 0.5) + 0.25 * (vn(qd * 4200.0 + 2.1) - 0.5));
+  }
   day *= 1.0 + dt * 0.7 * (1.0 - 0.75 * water);
   day = pow(day, vec3(0.93)) * vec3(1.04, 1.01, 0.98);
   float dif = max(dot(Nb, L), 0.0);
@@ -62,14 +71,19 @@ void main(){
   vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol;
   float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
   vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt;
-  vec3 dark = vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100) + lamp * 1.15 * uLights;
+  vec3 dark = (vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100)) * uNight + lamp * 1.15 * uLights;
   vec3 col = mix(dark, lit, dayAmt);
-  float cl = smoothstep(0.08, 0.85, texture2D(uCloud, vUv).r) * uCloudAmt;
-  vec3 H = normalize(L + V);
-  float nh = max(dot(N, H), 0.0);
-  float glint = pow(nh, 140.0) * 0.24 + pow(nh, 16.0) * 0.04;
+  float cl = smoothstep(0.08, 0.85, texture2D(uCloud, vUv).r);
+  // Close up the baked map (1024 px) is magnified: add detail noise on the sphere, only where a map texel covers more than ~a pixel.
+  float mag = 1.0 - smoothstep(0.4, 1.2, max(fwidth(vUv.x), fwidth(vUv.y)) * 1024.0);
+  if (mag > 0.0 && cl > 0.0) {
+    vec3 q = normalize(vP);
+    float n = 0.45 * vn(q * 90.0) + 0.30 * vn(q * 210.0 + 3.7) + 0.25 * vn(q * 470.0 + 9.1);
+    cl = clamp(cl + (n - 0.5) * mag * (1.3 * 4.0 * cl * (1.0 - cl) + 0.45 * cl), 0.0, 1.0);
+  }
+  cl *= uCloudAmt;
   float fr = pow(1.0 - ndv, 4.0);
-  col += (vec3(1.0, 0.96, 0.88) * glint + vec3(0.20, 0.36, 0.62) * fr * 0.5) * water * dayAmt * (1.0 - cl);
+  col += (vec3(0.20, 0.36, 0.62) * fr * 0.5) * water * dayAmt * (1.0 - cl);
   vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.30 * pow(max(ndl, 0.0), 0.8)) * sunCol;
   vec3 cloudCol = mix(vec3(0.030, 0.042, 0.075), cLit, dayAmt);
   col = mix(col, cloudCol, cl * 0.62);
@@ -86,7 +100,7 @@ void main(){
 // (an exponential atmosphere); blue-white on the lit limb, orange near the terminator, almost nothing on the dark side.
 const ATMO_VS = `varying vec3 vW;
 void main(){ vec4 wp = modelMatrix * vec4(position, 1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`;
-const ATMO_FS = `uniform vec3 uSun; uniform float uGain; uniform float uScale;
+const ATMO_FS = `uniform vec3 uSun; uniform float uGain; uniform float uScale; uniform float uFloor;
 varying vec3 vW;
 void main(){
   vec3 ro = cameraPosition, rd = normalize(vW - ro);
@@ -99,7 +113,7 @@ void main(){
   float tw = exp(-pow((sd - 0.02) / 0.16, 2.0));
   vec3 col = mix(vec3(0.20, 0.45, 1.0), vec3(0.62, 0.82, 1.0), lit * lit);
   col = mix(col, vec3(1.0, 0.52, 0.24), tw * 0.65);
-  gl_FragColor = vec4(col, clamp(dens * (0.03 + 0.97 * lit) * uGain, 0.0, 1.0));
+  gl_FragColor = vec4(col, clamp(dens * (uFloor + (1.0 - uFloor) * lit) * uGain, 0.0, 1.0));
 }`;
 // Cloud map, drawn once into a texture. Large swirls decide where the weather is (about a third of the sphere, wetter at the equator and in the mid-latitudes);
 // inside them a finer, strongly warped noise draws wisps and filaments, and a faint veil thins out around the masses. No hard edges, no round blobs.
@@ -238,6 +252,7 @@ export const earthMethods = {
         uFade: { value: 1 },
         uCloudAmt: { value: 1 },
         uLights: { value: 1 },
+        uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
         uBump: { value: 0 },
       };
     this._eu = u;
@@ -249,7 +264,7 @@ export const earthMethods = {
     this._bindPictures(this._wantedPictures(), false);
     root.add(new T.Mesh(new T.SphereGeometry(1, IS_PHONE ? 72 : 96, IS_PHONE ? 48 : 64), mat));
     // Atmosphere glow: a shell far enough out that its edge is fully faded
-    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: this.sim.cfg.spin ? 1.1 : 1 }, uScale: { value: 1 } };
+    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: this.sim.cfg.atmoK ?? (this.sim.cfg.spin ? 1.1 : 1) }, uScale: { value: 1 }, uFloor: { value: this.sim.cfg.atmoFloor ?? 0.03 } };
     this._au = au;
     root.add(
       new T.Mesh(

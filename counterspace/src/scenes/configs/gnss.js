@@ -1,5 +1,6 @@
 // scenes/configs/gnss.js: scene `gnss` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
 
 export const GNSS = {
   id: 'gnss',
@@ -45,8 +46,8 @@ export const GNSS = {
       radius: 6.2,
       color: C.jam,
       label: 'Jammer effect zone',
-      dx: 40,
-      dy: -34,
+      dx: 50,
+      dy: 18,
       jammer: { at: [56.5, 21.0], label: 'Ground jammer', short: 'Jammer', dx: -70, dy: 30 },
     },
     {
@@ -56,10 +57,13 @@ export const GNSS = {
         [61.0, 32.0],
       ],
       alt: 11,
+      lift: IS_PHONE ? 0.022 : 0, // 375: drawn a little higher above the ground so an airliner never touches the jammer marker
       t0: 0,
       t1: 1,
       label: 'Airliner 1',
       gnss: true,
+      minPx: IS_PHONE ? 38 : 26,
+      maxPx: IS_PHONE ? 70 : 52,
       dx: -96,
       dy: -14,
     },
@@ -70,15 +74,18 @@ export const GNSS = {
         [45.2, 30.0],
       ],
       alt: 11,
+      lift: IS_PHONE ? 0.022 : 0, // 375: drawn a little higher above the ground so an airliner never touches the jammer marker
       t0: 0,
       t1: 1,
       label: 'Airliner 2',
-      beamLabel: 'GPS signal (from a MEO satellite, out of view)',
+      beamLabel: 'GPS signal',
       beamShort: 'GPS signal',
-      beamFrac: 0.22, // the label sits on the beam's midpoint (the visible part), not beside the aircraft
+      beamFrac: 0.3, // the label sits on the beam's midpoint (the visible part), not beside the aircraft
       beamDx: 0,
       beamDy: 0,
       gnss: true,
+      minPx: IS_PHONE ? 38 : 26,
+      maxPx: IS_PHONE ? 70 : 52,
       labelDy: 34,
       dx: 92,
     },
@@ -89,8 +96,7 @@ export const GNSS = {
   stillCam: { at: [49, 14, 1.85], look: [51.5, 16, 0.98], hideShell: true },
   focus: [55, 18],
   inset: 'GPS orbits (top view)',
-  insetCorner: 'bl',
-  insetSize: [150, 116],
+  insetSize: [132, 104],
   insetNoPhone: true, // the phone stage is too small for an inset that would sit on the jammer zone
   cameras: [
     {

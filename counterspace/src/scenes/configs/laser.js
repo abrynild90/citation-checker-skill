@@ -93,6 +93,8 @@ export const LASER = {
       maxPx: IS_PHONE ? 32 : 66,
     },
   ],
+  liveShort: ['White Sands'], // live: the short name, so the pill stays clear of the ground station and the limb
+  liveOff: { 'White Sands': [-112, 14], 'MSTI-3': [96, -30] }, // fixed offsets: the ground station and satellite pills keep their places as the pass moves
   still: 0.5,
   status: [
     [0, 'MSTI-3 rises over White Sands'],
@@ -100,7 +102,7 @@ export const LASER = {
     [0.8, 'Same principle: Russia’s Peresvet laser (named in 2018) is a mobile dazzler (SWF)', 'SWF: Russia’s Peresvet is a laser dazzler'],
   ],
   cameras: [
-    { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55 } },
+    { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55, fill: 0.66 } },
     { name: 'Side view', fit: { site: [32.4, -106.4], tilt: 58, side: -1, fill: 0.72 } },
     {
       name: 'Close up of MSTI-3',

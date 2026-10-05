@@ -6,7 +6,7 @@ import { DEG, add, ll, occluded, scl } from './core.js';
 import { LABEL, dotCss, labelBox, offDisc, pillCss, placeLabels } from './labels.js';
 import { SANS } from '../fonts.js';
 
-const INSET_PX = 12; // the inset's type is never below the page-wide floor of 12 px
+const INSET_PX = 13; // the inset's type is never below the page-wide floor of 12 px
 const methods = {
   _placeLabels: placeLabels, // exposed for tools/scene_check.mjs debugging
   // Point on a sphere of radius r at the visible silhouette, `deg` counter-clockwise from screen-right.
@@ -592,7 +592,66 @@ const methods = {
     this.labelLayer.appendChild(d);
     this.labels.push({ d, tx, pd, posFn, item, text, dy, dx, short, cls, opt, hue, role });
   },
+  // GPS links reach a satellite far outside the frame: where such a beam leaves the picture, a small arrowhead in the beam's colour at the frame edge shows that it
+  // continues toward a satellite out of view (drawn into the leader layer, so it is not a label and never moves one).
+  _edgeArrows() {
+    const links = this.sim.items.filter((i) => i.kind === 'beam' && i.link);
+    if (!links.length || !this.leaders) return;
+    const w = this.el.clientWidth,
+      h = this.el.clientHeight,
+      m = 16,
+      t = this.t,
+      V = (this._av ||= new this.T.Vector3()),
+      pm = this.camera.projectionMatrix.elements,
+      proj = (p) => {
+        V.set(p[0], p[1], p[2]).applyMatrix4(this.root.matrixWorld).applyMatrix4(this.camera.matrixWorldInverse);
+        const d = -V.z;
+        if (d <= 0.05) return [0, 0, 1e9];
+        return [(((pm[0] * V.x + pm[8] * V.z) / d + 1) / 2) * w, ((1 - (pm[5] * V.y + pm[9] * V.z) / d) / 2) * h, 0];
+      },
+      inside = (q) => q[2] === 0 && q[0] >= m && q[0] <= w - m && q[1] >= m && q[1] <= h - m;
+    const arrows = (this._arrows ||= []);
+    links.forEach((it, k) => {
+      let el = arrows[k];
+      if (!el) {
+        el = arrows[k] = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        el.setAttribute('points', '-7,-6 7,0 -7,6 -3,0');
+        el.setAttribute('stroke', LABEL.casing);
+        el.setAttribute('stroke-width', '1.5');
+        el.setAttribute('stroke-linejoin', 'round');
+        this.leaders.appendChild(el);
+      }
+      const A = it.on(t) && it.a(t),
+        B = A && it.b(t);
+      if (!A || !B) return void (el.style.display = 'none');
+      // walk along the beam from the aircraft: the last sample still inside the frame is where the beam leaves the picture (the satellite end may be
+      // behind the camera, so the end points alone cannot be projected)
+      let prev = proj(A),
+        last = null,
+        exited = false;
+      if (!inside(prev)) return void (el.style.display = 'none');
+      for (let k = 1; k <= 160; k++) {
+        const f = k / 160,
+          q = proj([A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f]);
+        if (!inside(q)) {
+          exited = true;
+          break;
+        }
+        last = { x: q[0], y: q[1], dx: q[0] - prev[0], dy: q[1] - prev[1] };
+        prev = q;
+      }
+      if (!exited || !last) return void (el.style.display = 'none');
+      const dx = last.dx,
+        dy = last.dy,
+        s = 0;
+      const pa = [last.x, last.y];
+      el.style.display = '';
+      el.setAttribute('fill', it.colorFn ? it.colorFn(t) : it.color);
+      el.setAttribute('transform', `translate(${(pa[0] + dx * s).toFixed(1)} ${(pa[1] + dy * s).toFixed(1)}) rotate(${((Math.atan2(dy, dx) * 180) / Math.PI).toFixed(1)})`);
+    });
+  },
   _renderLabels() {
+    this._edgeArrows();
     const pos = this._labelPositions(this.el.clientWidth, this.el.clientHeight);
     this.labels.forEach((L, i) => {
       const q = pos[i];

@@ -64,6 +64,36 @@ export class GLHost {
     this.canvas.style.height = '100%';
     this.render();
   }
+  // Phone: a preset's own note and the status caption are one amber tag, the note joined on top of the caption (same width, shared edge), not two pills.
+  _stackTag(on) {
+    const h = this.handEl,
+      st = this.statusEl;
+    if (!h || !st) return;
+    this._tagStacked = on;
+    for (const e of [h, st]) {
+      e.style.minWidth = '';
+      e.style.boxSizing = on ? 'border-box' : '';
+    }
+    if (!on) {
+      const vis = h.style.visibility;
+      h.style.cssText = this._handCss;
+      h.style.visibility = vis;
+      st.style.borderTopLeftRadius = st.style.borderTopRightRadius = '';
+      return;
+    }
+    const w = Math.max(h.offsetWidth, st.offsetWidth);
+    h.style.minWidth = st.style.minWidth = w + 'px';
+    h.style.width = 'max-content';
+    h.style.maxWidth = 'calc(100% - 16px)';
+    h.style.left = '50%';
+    h.style.top = 'auto';
+    h.style.transform = 'translateX(-50%)';
+    h.style.bottom = st.offsetHeight + 10 + 'px';
+    h.style.borderBottomLeftRadius = h.style.borderBottomRightRadius = '0';
+    h.style.borderBottomWidth = '0';
+    h.style.justifyContent = 'center';
+    st.style.borderTopLeftRadius = st.style.borderTopRightRadius = '0';
+  }
   // Hero: the camera distance follows the stage aspect so the whole outermost shell (its glow included) stays inside the stage, banner and hint chip
   // clear of it: wide stage = the vertical field of view decides, phone = the horizontal one.
   _heroFit() {
@@ -154,12 +184,15 @@ export class GLHost {
     this.handDot.style.cssText = dotCss('#7cc4ff');
     this.handTx = document.createElement('span');
     this.handEl.append(this.handDot, this.handTx);
+    this._handCss = this.handEl.style.cssText;
+    this._tagStacked = false;
     this.labelLayer.appendChild(this.handEl);
     this.insetEl = null;
     if (sim.cfg.inset) this._makeInset();
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.leaders.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;overflow:visible');
     this.leaders.setAttribute('aria-hidden', 'true');
+    this._arrows = null;
     this.labelLayer.prepend(this.leaders);
     this.lock = null;
     this._act = null;
@@ -293,13 +326,16 @@ export class GLHost {
     {
       const on = acts && this.lock != null && this._fbAct != null && this.handEl,
         c = this.sim.cfg.cameras?.[this.camIdx],
-        tag = !on && c?.tag; // a preset's own note (e.g. "Arm: not shown"), in the same top-left chip slot as the handover chip
+        tag = !on && c?.tag, // a preset's own note (e.g. "Arm: not shown"), in the same top-left chip slot as the handover chip
+        merge = !!tag && this.el.clientWidth < 640 && !!c.tagShort; // phone: the note joins the status caption as its second line (one amber tag, not two)
+      this._tagMerge = merge;
       if (this.handEl) {
         this.handEl.style.visibility = on || tag ? 'visible' : 'hidden';
         this.handEl.style.color = tag ? LABEL.warm : LABEL.text; // a preset's own note is an analysis caption: the warm accent, no dot
         this.handDot.style.display = tag ? 'none' : '';
         if (on) this.handTx.textContent = 'Showing: ' + (c?.chip || c?.short || c?.name || '');
         else if (tag) this.handTx.textContent = this.el.clientWidth < 640 && c.tagShort ? c.tagShort : c.tag;
+        if (!merge && this._tagStacked) this._stackTag(false);
       }
     }
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
@@ -491,6 +527,7 @@ export class GLHost {
           ? this.status.text(t, false, this.el.clientWidth < 640)
           : '';
       this._applyBands();
+      if (this._tagMerge && this.statusEl.textContent) this._stackTag(true);
     }
     this.render();
   }
@@ -503,7 +540,10 @@ export class GLHost {
       m.uniforms.uScale.value = sc;
       m.uniforms.uMaxPx.value = m.userData.maxPx * k;
     }
+    if (this._edgeRes) this.renderer.getDrawingBufferSize(this._edgeRes);
+    const d0 = Math.max(0.5, this.camera.position.distanceTo(this.target));
     for (const m of this.ptMats || []) {
+      m.uniforms.uD0.value = d0;
       m.uniforms.uScale.value = sc;
       m.uniforms.uMin.value = m.userData.minPx * k;
       m.uniforms.uMax.value = m.userData.maxPx * k;
@@ -536,7 +576,7 @@ export class GLHost {
       obj.position.set(...p);
       const d = Math.max(0.15, obj.position.distanceTo(cp)),
         pulse = 0.85 + 0.15 * Math.sin(this.t * this.sim.cfg.duration * 9);
-      obj.scale.setScalar((120 * k * d * pulse) / sc);
+      obj.scale.setScalar((92 * k * d * pulse) / sc);
       obj.material.rotation = this.t * 3;
     }
     // Orbit lines that fade out around their craft (it.gapIds): the line never runs through a model.

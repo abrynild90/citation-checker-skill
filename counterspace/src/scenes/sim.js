@@ -237,7 +237,7 @@ export function buildSim(cfg) {
         labelDy: a.dy,
       });
     if (a.type === 'ship')
-      items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', label: a.label, labelDx: a.dx, labelDy: a.dy });
+      items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ring') {
       let raan = a.raan,
         phase = a.sat?.phase ?? 0;
@@ -383,7 +383,7 @@ export function buildSim(cfg) {
       });
     }
     if (a.type === 'aircraft') {
-      const r = 1.012 + a.alt / 6371;
+      const r = 1.012 + a.alt / 6371 + (a.lift ?? 0);
       const P = (s) => {
         const la = lerp(a.path[0][0], a.path[1][0], s),
           lo = lerp(a.path[0][1], a.path[1][1], s);
@@ -394,7 +394,9 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: 'aircraft',
         prim: true,
-        scale: a.gnss ? null : 1.1,
+        scale: a.gnss ? null : a.scale ?? 1.1,
+        minPx: a.minPx,
+        maxPx: a.maxPx,
         color: '#e9edf7',
         label: a.label,
         labelDy: a.labelDy,
@@ -589,7 +591,9 @@ export function buildSim(cfg) {
               colr[k4] = c[0] * p.br;
               colr[k4 + 1] = c[1] * p.br;
               colr[k4 + 2] = c[2] * p.br;
-              colr[k4 + 3] = (0.7 + 0.3 * dens) * 0.9 * fade * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1);
+              // velocity-sorted: fragments near the parent's speed stay bright and large, the fast and slow tails are dimmer and smaller
+              const core = 1 - Math.min(1, Math.abs(p.dw - 1) / (a.dv * 1.6 || 1));
+              colr[k4 + 3] = (0.7 + 0.3 * dens) * 0.9 * fade * (0.4 + 0.6 * core * core) * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1);
             }
           }
           cloud.vis = vis;
