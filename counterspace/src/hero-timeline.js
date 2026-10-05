@@ -185,7 +185,15 @@ function build(stage) {
   // ---- the flat dark band the ground labels stand on: a fixed, quiet ground for words over the photograph
   el('rect', { x: 0, y: bandTop, width: W, height: H - bandTop, fill: 'rgba(5,8,19,.8)' }, svg);
   el('line', { x1: 0, x2: W, y1: bandTop, y2: bandTop, stroke: 'rgba(150,175,230,.24)' }, svg);
-  decades.forEach((d) => text(svg, { x: x(d), y: bandTop + 19, class: 'ht-year-t' }, d.getUTCFullYear()));
+  // A named law drops its tick through the ground band: a year label that sits on one of those ticks steps aside, to the left of it.
+  const named = LEGAL.filter((l) => LAW_NAMES[l.id] && (phone ? LAW_NAMES[l.id].phone : LAW_NAMES[l.id].text)).map((l) => x(parse(l.start)));
+  decades.forEach((d) => {
+    const cx = x(d),
+      yl = String(d.getUTCFullYear()),
+      half = tw(yl, 12, 500) / 2 + 3,
+      cross = named.find((px) => Math.abs(px - cx) < half + 2);
+    text(svg, cross === undefined ? { x: cx, y: bandTop + 19, class: 'ht-year-t' } : { x: cross - 6, y: bandTop + 19, class: 'ht-year-t', style: 'text-anchor:end' }, yl);
+  });
 
   // ---- events
   const obstacles = [...words],
