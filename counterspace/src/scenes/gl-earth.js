@@ -62,7 +62,7 @@ void main(){
     vec3 qd = normalize(vP);
     dt += magL * (0.50 * (vn(qd * 700.0) - 0.5) + 0.35 * (vn(qd * 1700.0 + 5.3) - 0.5) + 0.25 * (vn(qd * 4200.0 + 2.1) - 0.5));
   }
-  day *= 1.0 + dt * 0.7 * (1.0 - 0.75 * water);
+  day *= 1.0 + dt * (0.7 + 0.45 * magL) * (1.0 - 0.75 * water);
   day = pow(day, vec3(0.93)) * vec3(1.04, 1.01, 0.98);
   float dif = max(dot(Nb, L), 0.0);
   float dayAmt = smoothstep(-0.10, 0.26, ndl);
