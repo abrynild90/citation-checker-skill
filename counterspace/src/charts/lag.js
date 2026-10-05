@@ -282,8 +282,8 @@ export function drawL(el = document.getElementById('svgL')) {
     const t = row
       .append('text')
       .attr('class', 'lag-fig')
-      .attr('x', l ? (flip ? xe - 16 : xe + 16) : x(0) + 34)
-      .attr('y', yy + 8)
+      .attr('x', l ? (flip ? xe + 8 : xe + 16) : x(0) + 34)
+      .attr('y', flip ? yy + 29 : yy + 8)
       .style('text-anchor', flip ? 'end' : null);
     if (l) {
       t.append('tspan').attr('class', 'num').text(g.num);

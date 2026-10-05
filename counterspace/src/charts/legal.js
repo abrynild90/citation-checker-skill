@@ -592,15 +592,8 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
   lg.raise(); // labels (with a background outline, see CSS) sit above the guide line so it never strikes through them
   if (strip) {
-    // Start on the recent years (2004 to 2026), moved left just far enough that no label is cut by the left edge.
-    const end = el.scrollWidth - el.clientWidth,
-      boxes = [...svg.node().querySelectorAll('text')].map((t) => t.getBBox());
-    let left = end;
-    for (let s = 0; s <= 120 && left > 0; s += 2) {
-      left = Math.max(0, end - s);
-      if (!boxes.some((b) => b.x < left + 6 && b.x + b.width > left - 6)) break;
-    }
-    el.scrollLeft = left;
+    // Start at 1957, so the first treaties are in the first view; the line under the strip says how much is in view and which way to scroll for later years.
+    el.scrollLeft = 0;
     el._x = x;
     el.onscroll = stripPos;
     stripPos();
@@ -644,6 +637,8 @@ function stripPos() {
   box.querySelector('.lab').textContent = `Showing ${y0} to ${y1}. Scroll sideways for ${a > 2 ? 'earlier' : 'later'} years.`;
   const hint = document.getElementById('stripEdge');
   if (hint) hint.hidden = a <= 2;
+  const more = document.getElementById('stripMore');
+  if (more) more.hidden = b >= sw - 2;
   const f = box.querySelector('i');
   f.style.left = (100 * a) / sw + '%';
   f.style.width = (100 * el.clientWidth) / sw + '%';

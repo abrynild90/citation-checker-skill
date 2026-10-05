@@ -50,6 +50,7 @@
 /* phone strip: a sideways-scrolling band with a position bar and a panel that names the tapped symbol */
 .legal-band .wrap{position:relative}
 .strip-edge{position:absolute;left:var(--gutter);top:4px;display:inline-flex;align-items:center;gap:2px;padding:2px 10px 2px 4px;border-radius:999px;background:var(--bg);border:1px solid var(--line-strong);font:600 12px/1.4 var(--sans);color:var(--muted);pointer-events:none}
+.strip-edge.right{left:auto;right:var(--gutter);padding:2px 4px 2px 10px}
 .strip-edge .ico{width:14px;height:14px}
 @media (min-width:641px){.strip-edge{display:none}}
 .strip-pos{margin:var(--s-2) 0 0;font-size:13px;color:var(--muted)}
