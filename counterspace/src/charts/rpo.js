@@ -10,10 +10,10 @@ import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } fr
 import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote } from './kit.js';
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
-// stateR.focus: null = the default (the full shared 1957-2026 axis on every screen; the zoom 2000-2026 is opt-in);
+// stateR.focus: null = the default (the full shared 1957-2026 axis, except on a phone, where the first view is the zoom 2000-2026 because nothing earlier exists);
 // true / false = the reader's explicit choice, kept across resizes.
 export const stateR = { focus: null };
-export const zoomedR = () => !!stateR.focus;
+export const zoomedR = () => stateR.focus ?? isPhoneNow();
 const R_FOCUS = () => [parse('2000-01-01'), DOMAIN[1]];
 
 // Key lists, shared by the page key and the downloads: [svg inner (drawn in the current ink), label, glyph width].

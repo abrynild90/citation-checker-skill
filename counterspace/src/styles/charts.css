@@ -107,7 +107,7 @@
 .badge3d path{fill:var(--ground);stroke:var(--text);stroke-width:1.1}
 .badge3d path.top{fill:var(--text)}
 .note{font-size:13px;color:var(--faint)}
-.note.block{margin:var(--s-2) 0 0;max-width:820px}
+.note.block{margin:var(--s-2) 0 0;max-width:820px;padding-right:var(--s-2)}
 
 /* ------------------------------------------------------------------ chapter 06: how long the law took to follow */
 .lag-title{font:400 13px var(--sans)}

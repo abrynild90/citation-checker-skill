@@ -108,7 +108,7 @@ export function drawL(el = document.getElementById('svgL')) {
   const phone = isPhoneNow(),
     W = Math.max(300, el.clientWidth),
     PAD = phone ? 8 : 12,
-    ROOM = phone ? 104 : 48, // right of the 16 year mark: the number at the end of the longest bar
+    ROOM = 12, // right of the 16 year mark; a number that does not fit beyond its bar is set on the bar instead
     x = d3
       .scaleLinear()
       .domain([0, MAX_YEARS])
@@ -277,11 +277,14 @@ export function drawL(el = document.getElementById('svgL')) {
         .attr('class', 'glyph')
         .html(ringMarkup());
     // the elapsed time at the end of the bar: the largest figure in the row
+    const figW = l ? tw(g.num, 22, 600) + 4 + tw(g.unit, 13, 600) : 0,
+      flip = l && xe + 16 + figW > W - PAD;
     const t = row
       .append('text')
       .attr('class', 'lag-fig')
-      .attr('x', l ? xe + 16 : x(0) + 34)
-      .attr('y', yy + 8);
+      .attr('x', l ? (flip ? xe - 16 : xe + 16) : x(0) + 34)
+      .attr('y', yy + 8)
+      .style('text-anchor', flip ? 'end' : null);
     if (l) {
       t.append('tspan').attr('class', 'num').text(g.num);
       t.append('tspan').attr('class', 'unit').attr('dx', 4).text(g.unit);
