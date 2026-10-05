@@ -33,7 +33,7 @@ const POSTER_T = {
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
-  'sj21-tug': { pose: [-0.588, 0.17, -3.065, -0.64, 0.13, -2.37, 33] }, // the docked pair and its arm over the Earth limb
+  'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
   spaceplanes: { pose: [3.5, 2.4, 1.6, 0.25, 0.1, 0.1, 44] }, // the plane in sunlight over the Atlantic, wide enough that the orbit tilt reads
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
