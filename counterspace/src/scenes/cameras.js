@@ -194,7 +194,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               P = [
                 all[0],
                 pl.length ? pl[pl.length - 1] : all[1],
-                all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + 0.22) * (all.length - 1)))],
+                all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + (c.trackPath.ahead ?? 0.22)) * (all.length - 1)))],
               ];
             if (geo) P.push(scl(up, rAlt(GEO_ALT)));
             // trackPath.ring: the whole GEO ring (8 points in the equatorial plane) and the arc's apex stay in frame

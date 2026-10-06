@@ -41,6 +41,7 @@ const POSTER_VIEW = {
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
+  dn2: { back: 0.8, boost: 1.3, right: 0.5 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
 const TRIPTYCH = [[0.2, 1], [0.57, 2], [0.88, 3]]; // [t, camera preset] per episode (RPO poster)

@@ -773,7 +773,7 @@ export function buildSim(cfg) {
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
       });
-      items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: 0.22, role: 'action' });
+      items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: a.ghostOpacity ?? 0.22, role: 'action' }); // ghostOpacity (opt-in): a brighter whole path
       if (a.marks) {
         // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]),
