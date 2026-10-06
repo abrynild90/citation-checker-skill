@@ -523,9 +523,20 @@ function followStep(li, instant) {
   if (dy && own === asideBody) {
     // The column rests on a block boundary (a paragraph, a button, a step), never mid-line, so no half line shows under the picture.
     const pos = (n) => n.getBoundingClientRect().top - box.top + own.scrollTop,
-      want = own.scrollTop + dy,
-      cuts = [...own.children, ...stepsEl.children].filter((n) => n.getClientRects().length).map((n) => pos(n) - 6).filter((v) => v >= want - 0.5 && v <= pos(li) - 2),
-      to = Math.min(own.scrollHeight - own.clientHeight, Math.max(0, cuts.length ? Math.min(...cuts) : want));
+      cap = own.scrollHeight - own.clientHeight,
+      want = Math.min(cap, own.scrollTop + dy),
+      cuts = [...own.children, ...own.querySelectorAll('.sv-steps h3'), ...stepsEl.children]
+        .filter((n) => n.getClientRects().length)
+        .flatMap((n) => {
+          // a paragraph can also rest on any of its own lines
+          const lh = parseFloat(getComputedStyle(n).lineHeight) || 0,
+            lines = lh && n.matches('p, .sv-lede') ? Math.round(n.getBoundingClientRect().height / lh) : 1;
+          return Array.from({ length: Math.max(1, lines) }, (_, k) => pos(n) + k * lh - 6);
+        })
+        .filter((v) => v >= want - 44 && v <= pos(li) - 2 && v <= cap + 0.5),
+      ahead = cuts.filter((v) => v >= want - 0.5),
+      pick = ahead.length ? Math.min(...ahead) : cuts.length ? Math.max(...cuts) : want, // the active row keeps 44 px of the 96 px margin below it at worst
+      to = Math.min(own.scrollHeight - own.clientHeight, Math.max(0, pick));
     own.scrollTo({ top: to, behavior: REDUCED || instant ? 'auto' : 'smooth' });
     return;
   }

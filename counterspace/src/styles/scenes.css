@@ -1944,3 +1944,12 @@
     max-width: none;
   }
 }
+
+/* A little room under the story lets it rest on a whole line when it follows the steps, so no half line shows under the picture */
+@media (max-width: 900px) {
+  .overlay .story-scroll::after {
+    content: "";
+    flex: none;
+    height: 40px;
+  }
+}
