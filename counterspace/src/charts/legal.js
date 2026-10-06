@@ -128,6 +128,13 @@ export function legalGlyph(sel, l) {
 
 // ---------------------------------------------------------------- the band
 const ZOOM = [parse('2021-06-01'), parse('2026-07-01')];
+// On a wide screen the zoom's time axis starts and ends at the same page positions as the main chart's, so the panel's own padding is taken off its gutters.
+function zoomGutters(el, M) {
+  const cs = el.parentElement ? getComputedStyle(el.parentElement) : null,
+    pl = cs ? parseFloat(cs.paddingLeft) || 0 : 0,
+    pr = cs ? parseFloat(cs.paddingRight) || 0 : 0;
+  return { l: Math.max(8, M.l - pl), r: Math.max(8, M.r - pr) };
+}
 let linkBox = null; // where the shaded window sits on the band (read when the connector to the zoom panel is drawn)
 export function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.innerHTML = '';
@@ -154,8 +161,8 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   }
   const L = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300),
     W = L.W,
-    // The zoom panel has no y axis to leave room for, so its time axis runs almost edge to edge.
-    M = zoom ? { l: isPhoneNow() ? 18 : 28, r: isPhoneNow() ? 18 : 30 } : L.M,
+    // The zoom panel has no y axis to leave room for, so on a phone its time axis runs almost edge to edge; on a wide screen it shares the main chart's gutters so the two axes line up.
+    M = zoom ? (isPhoneNow() ? { l: 18, r: 18 } : zoomGutters(el, L.M)) : L.M,
     x = zoom
       ? d3
           .scaleUtc()
@@ -573,7 +580,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     .attr('r', 12 / GS);
   pg.each(function (d) {
     legalGlyph(d3.select(this), d);
-    if (hasScene(d)) badge(d3.select(this), 10, -11);
+    if (hasScene(d)) badge(d3.select(this), 12, -17);
   });
   bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
