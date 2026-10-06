@@ -65,6 +65,7 @@ export const GNSS = {
       t0: 0,
       t1: 1,
       label: 'Airliner 1',
+      short: 'Plane 1',
       gnss: true,
       minPx: IS_PHONE ? 46 : 44,
       maxPx: IS_PHONE ? 78 : 78,
@@ -82,6 +83,7 @@ export const GNSS = {
       t0: 0,
       t1: 1,
       label: 'Airliner 2',
+      short: 'Plane 2',
       beamLabel: 'GPS signal',
       beamShort: 'GPS signal',
       beamFrac: 0.3, // the label sits on the beam's midpoint (the visible part), not beside the aircraft
@@ -115,7 +117,7 @@ export const GNSS = {
       short: 'Baltic zone',
       at: [38, 11, 1.42],
       look: [51.8, 22.6, 0.98],
-      phone: { at: [40, 12, 1.4], look: [53.8, 21, 0.98] },
+      phone: { at: [40, 12, 1.4], look: [52.4, 21, 0.98] },
     },
     {
       name: 'Close up: jammer zone and Airliner 1',

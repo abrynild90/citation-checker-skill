@@ -123,9 +123,9 @@ export const STARFISH = {
   staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
   still: 0.7,
   camDist: 3.5,
-  seaK: 2.6,
-  dayK: 1.5,
-  nightK: 3.2, // the Pacific night side is lifted so the ocean, the island glints and the rocket separate from the dark at t=0
+  seaK: 1.5,
+  dayK: 1.2,
+  nightK: 2.4, // the Pacific night side is lifted so the ocean, the island glints and the rocket separate from the dark at t=0
   phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
   staticZoom: 1.7,
   staticCenter: [35, -205],

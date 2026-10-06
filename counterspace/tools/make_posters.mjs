@@ -23,7 +23,7 @@ const POSTER_T = {
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
-  gnss: 0.5,
+  gnss: 0.35, // both airliners in view: one already red, one still fine
   viasat: 0.55,
   laser: 0.5,
   'sj21-tug': 0.6,
@@ -40,7 +40,7 @@ const POSTER_VIEW = {
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08, boost: 1.7 },
-  fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
+  fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
   dn2: { back: 0.8, boost: 1.3, right: 0.5 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };

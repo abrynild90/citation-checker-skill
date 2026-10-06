@@ -29,6 +29,9 @@ export const VIASAT = {
       maxPx: 72,
       label: 'KA-SAT (GEO, unaffected)',
       short: 'KA-SAT (GEO)',
+      endLabel: 'KA-SAT (GEO): still working',
+      endShort: 'KA-SAT: still works',
+      endFrom: 0.62,
       dx: 130,
       dy: -46,
       color: C.geo,
@@ -39,8 +42,8 @@ export const VIASAT = {
       hubShort: 'Ground network',
       hubScale: 1.15,
       nodeScale: 0.85,
-      hubDx: -110,
-      hubDy: 44,
+      hubDx: -200,
+      hubDy: 52,
       pulse: [0.1, 0.3],
       beams: [
         [50, 30],
@@ -109,8 +112,8 @@ export const VIASAT = {
       ],
       phone: {
         glide: [
-          [0, [10, 12, 4.7], [8, 25, 1.0]],
-          [0.2, [10, 12, 4.7], [8, 25, 1.0]],
+          [0, [10, 12, 3.8], [8, 25, 1.0]],
+          [0.2, [10, 12, 3.8], [8, 25, 1.0]],
           [0.32, [30, 13, 2.6], [52, 17, 1.0]],
           [1, [30, 13, 2.6], [52, 17, 1.0]],
         ],
