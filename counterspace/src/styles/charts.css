@@ -207,6 +207,7 @@ td a{overflow-wrap:anywhere}
     background:var(--surface);box-shadow:-1px 0 0 var(--grid),-12px 0 12px -10px color-mix(in srgb,var(--text) 16%,transparent)}
   #tableA th:last-child,#tableC th:last-child,#tableR th:last-child{z-index:3;background:var(--surface-2)}
   #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:200px;max-width:28ch}
+  #tableA td:last-child,#tableA th:last-child,#tableC td:last-child,#tableC th:last-child,#tableR td:last-child,#tableR th:last-child{white-space:normal;min-width:220px;max-width:34ch}
   .more-rows{display:none}
 }
 @media (max-width:1000px){
