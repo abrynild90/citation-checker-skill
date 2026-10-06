@@ -19,7 +19,7 @@ const POSTER_T = {
   starfish: 0.34, // the burst rings over Johnston Island in the tight first camera
   solwind: 0.5, // the textured satellite at the instant the missile reaches it (the textured model is drawn only until impact)
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
-  'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
+  'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
@@ -41,6 +41,7 @@ const POSTER_VIEW = {
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
+  'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
 const TRIPTYCH = [[0.2, 1], [0.57, 2], [0.88, 3]]; // [t, camera preset] per episode (RPO poster)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
