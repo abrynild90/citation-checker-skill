@@ -20,7 +20,7 @@ const POSTER_T = {
   solwind: 0.68, // debris spread over the ocean and Arctic, not read as city lights on land
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
-  dn2: 0.6,
+  dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.5,
