@@ -338,7 +338,7 @@ export function buildSim(cfg) {
       });
     // impactUntil: the "Impact" pill is shown only while its step is on screen; a quiet tick keeps marking the point afterwards
     if (a.type === 'target' && tgt && !a.noHit && a.label && a.impactUntil != null)
-      items.push({ kind: 'point', shape: 'tick', color: '#fff1c1', pos: (t) => (t >= a.impactUntil ? tgt.hitPos : null) });
+      items.push({ kind: 'point', shape: 'tick', color: '#fff1c1', pos: (t) => (t >= a.impactUntil && (a.tickUntil == null || t < a.tickUntil) ? tgt.hitPos : null) }); // tickUntil: the tick retires with the last fragment
     if (a.type === 'target' && tgt && a.wreck)
       // A dim, smaller copy of the satellite stays at the impact point: the wreck marker (its debris is the cloud).
       items.push({
@@ -426,6 +426,17 @@ export function buildSim(cfg) {
         };
         aircraftPos = (t) => Pc(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         item.pos = (t) => (t >= a.t0 - 1e-6 ? aircraftPos(t) : null);
+        if (a.exit) {
+          // exit { dur, k }: after the release the aircraft keeps its heading, eases down and leaves; it is gone dur later (k: path lengths flown by then)
+          const ex = (t) => {
+            const u = clamp01((t - a.t1) / a.exit.dur),
+              s = 1 + a.exit.k * u * (2 - u),
+              la = lerp(a.path[0][0], a.path[1][0], s),
+              lo = lerp(a.path[0][1], a.path[1][1], s);
+            return ll(la, lo, r + 0.03 * (1 - 0.7 * u));
+          };
+          item.pos = (t) => (t < a.t0 - 1e-6 || t > a.t1 + a.exit.dur ? null : t <= a.t1 ? aircraftPos(t) : ex(t));
+        }
         const all = [];
         for (let k = 0; k <= 30; k++) all.push(Pc(k / 30));
         items.push({
@@ -438,6 +449,7 @@ export function buildSim(cfg) {
           width: 2,
           pts: (t) => {
             const s = clamp01((t - a.t0) / (a.t1 - a.t0));
+            if (a.exit && t > a.t1 + a.exit.dur) return []; // the trail leaves with the aircraft
             return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * 30) + 1));
           },
         });

@@ -28,6 +28,7 @@ export const SOLWIND = {
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
   fitDebrisT: 0.66, // the camera keeps framing the cloud at its widest, also while it decays away
   latePct: 0.85,
+  camGlide: true,
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
   liveOff: { 'ASM-135': [-80, -62], 'F-15': [112, 34] }, // the missile's pill sits above the F-15 with a leader down to the arc
@@ -46,6 +47,7 @@ export const SOLWIND = {
       scale: 3,
       minPx: IS_PHONE ? 44 : 62,
       maxPx: IS_PHONE ? 62 : 104,
+      exit: { dur: 0.2, k: 0.6 }, // after the release the F-15 eases down and leaves
       label: 'F-15 zoom climb',
       dx: -64,
       dy: 24,
@@ -60,6 +62,7 @@ export const SOLWIND = {
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
+      tickUntil: 0.84, // the tick retires with the last fragment
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
     { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42, retire: 0.06 },
