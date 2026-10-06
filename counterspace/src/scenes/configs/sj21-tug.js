@@ -141,9 +141,16 @@ export const SJ21_TUG = {
       frame: { anchor: 'g', from: [0.1, 0.17, 0.7], to: [0.08, 0.17, 0], t: 0.6 },
       phone: { frame: { anchor: 'g', from: [0.1, 0.14, 1.05], to: [0.08, 0.14, 0], t: 0.6 } },
     },
+    {
+      name: 'Looking down at the pair, Earth below',
+      short: 'Looking down',
+      ...ARM_TAG,
+      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.5, 0]] },
+      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.42, 0]] } },
+    },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
   ],
-  camHide: { 1: ['GEO belt line', '290'], 2: ['GEO belt line', '290'], 4: ['GEO belt line', '290'] },
+  camHide: { 1: ['GEO belt line', '290'], 2: ['GEO belt line', '290'], 5: ['GEO belt line', '290'] },
   stillHideText: ['290'], // the print frame leaves out the height gauge
   phoneHide: ['290'], // 375: the status line carries the gauge
   stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
