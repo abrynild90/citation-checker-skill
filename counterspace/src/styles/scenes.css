@@ -1800,3 +1800,50 @@
     font-size: 20px;
   }
 }
+
+/* ---------- Round 9 ---------- */
+.overlay .sv-hint{min-width:0;overflow:hidden}
+.overlay .sv-hint span[hidden]{display:none}
+/* In-picture status caption on a wide stage: a calm pill of at most about 60 characters a line, balanced over two lines, not edge to edge */
+@media (min-width: 761px) {
+  .overlay #sceneView .hlabel[style*="bottom: 10px"] {
+    max-width: min(36em, calc(100% - 32px)) !important;
+    text-wrap: balance;
+  }
+}
+/* Phone: the small top-view inset covers the lower-left Earth and the labels; it is left out (the main picture carries the scene) */
+@media (max-width: 599px) {
+  .overlay .view canvas[aria-hidden="true"][style*="pointer-events: none"] {
+    display: none !important;
+  }
+}
+/* Phone, more than four steps: only the playing step shows, so the picture gets the height */
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px) {
+  .overlay.steps-one .panel {
+    grid-template-rows: auto minmax(240px, 40%) minmax(0, 1fr) auto;
+  }
+  .overlay.steps-one #stepsNote {
+    display: none;
+  }
+}
+
+/* Source pills wrap to a second line rather than touch the panel edge */
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1), (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) {
+  .overlay .sv-srcrow { flex-wrap: wrap; padding-block: 4px; }
+  .overlay .sl-links { flex-wrap: wrap; flex: 1 1 auto; }
+}
+/* Still diagram on a tablet or a small laptop: the sentence has its own row; the buttons share the next one */
+@media (min-width: 761px) and (max-width: 900px) {
+  .overlay.is-static .ctrl { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: none !important; row-gap: 8px; }
+  .overlay.is-static .static-note { grid-area: auto !important; grid-row: 1; grid-column: 1; flex-wrap: wrap; }
+  .overlay.is-static .static-note .sn-text { flex: 1 1 100%; }
+  .overlay.is-static .static-note .btn { margin-left: 0; }
+  .overlay.is-static #scExport { grid-area: auto !important; grid-row: 2; grid-column: 1; justify-self: stretch; }
+}
+
+/* Narrow story column (tablet landscape, small laptop): the source pills are a little tighter so the three of them keep one line */
+@media (min-width: 761px) and (max-width: 1180px) {
+  .overlay .sv-srcrow { gap: 4px; padding-inline: 12px; }
+  .overlay .sl-btn, .overlay .sv-srcrow .pill { padding: 0 10px; font-size: 13px; gap: 5px; }
+  .overlay .sl-links { gap: 4px; }
+}

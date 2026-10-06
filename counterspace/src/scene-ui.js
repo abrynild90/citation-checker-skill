@@ -317,10 +317,10 @@ function splitSentences(text) {
 // level 0: two sentences (one on a phone), 1: one sentence, 2: none; a number above that (from fitSteps, when there is room to spare) adds sentences
 function setLede(level, count) {
   const full = cur?.caption || '';
-  const max = expanded ? Infinity : count ?? (level === 0 ? (COMPACT.matches ? 1 : 2) : level === 1 ? 1 : 0);
+  // The first sentence always shows, at every width: it says what the scene is before the steps say what happens. (The lede gives way from two sentences to one.)
+  const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? (COMPACT.matches ? 1 : 2) : 1));
   let shown = expanded ? full : sentences.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 360) shown = sentences[0];
-  if (!expanded && COMPACT.matches && (shown.length > 230 || overlay.classList.contains('is-static'))) shown = ''; // a phone's still diagram gives the steps the room
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
   moreBtn.hidden = shown === full;
@@ -553,11 +553,14 @@ function fitSteps() {
   stepsEl.style.flex = '';
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.paddingBottom = '';
+  const one = COMPACT.matches && steps.length > 4;
+  overlay.classList.toggle('steps-one', one);
   if (!steps.length) return;
   if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
-  const want = Math.min(steps.length, COMPACT.matches ? 3 : 4);
+  // Phone with more than four steps: the list shows the playing step only (more height for the picture); a phone with fewer shows up to three rows.
+  const want = one ? 1 : Math.min(steps.length, COMPACT.matches ? 3 : 4);
   let r;
-  for (let lvl = 0; lvl <= 2; lvl++) {
+  for (let lvl = 0; lvl <= 1; lvl++) {
     setLede(lvl);
     r = rowsFit();
     if (r.n >= want) break;
@@ -913,6 +916,10 @@ function showHint() {
   if (hintShown || stillOnly || !KEYBOARD.matches || COMPACT.matches || SHORT.matches) return;
   hintShown = true;
   hintEl.classList.add('on');
+  // The hint sits in the scrubber's cell: where its three notes do not fit that cell, the last ones are left out (never printed over the time or the views).
+  const spans = [...hintEl.children];
+  spans.forEach((n) => (n.hidden = false));
+  for (let k = spans.length - 1; k > 0 && hintEl.scrollWidth > hintEl.clientWidth + 1; k--) spans[k].hidden = true;
   hintTimer = setTimeout(hideHint, 3000);
 }
 function hideHint() {
@@ -920,6 +927,19 @@ function hideHint() {
   hintEl.classList.remove('on');
 }
 overlay.addEventListener('pointerdown', hideHint, { passive: true });
+let hintX = null,
+  hintY = 0;
+overlay.addEventListener(
+  'pointermove',
+  (e) => {
+    if (!hintEl.classList.contains('on')) return (hintX = null);
+    if (hintX === null) {
+      hintX = e.clientX;
+      hintY = e.clientY;
+    } else if (Math.hypot(e.clientX - hintX, e.clientY - hintY) > 6) hideHint(); // the first real pointer movement dismisses it
+  },
+  { passive: true },
+);
 overlay.addEventListener('keydown', hideHint, { passive: true });
 
 // ---------------------------------------------------------------- keyboard: Space plays or pauses, Left and Right change scene, 1 to 5 choose a view, Esc closes
