@@ -242,6 +242,9 @@ export function buildSim(cfg) {
         staticPin: a.staticPin,
         labelDy: a.dy,
       });
+    if (a.type === 'place')
+      // a place name with no marker (a sea or region named in the scene's title): a plain label at a lat/lon, no leader
+      items.push({ kind: 'point', shape: 'none', pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color || '#cfd8ea', label: a.label, short: a.short, labelDx: a.dx ?? 0, labelDy: a.dy ?? 0, opt: a.opt });
     if (a.type === 'ship')
       items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ring') {

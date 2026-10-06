@@ -651,6 +651,7 @@ const methods = {
       const A = it.on(t) && it.a(t),
         B = A && it.b(t);
       if (!A || !B) return void (el.style.display = 'none');
+      if (this.sim.cfg.noJamArrow && it.dashFn?.(t)) return void (el.style.display = 'none'); // opt-in: no edge arrow on a jammed (faint, flickering) link
       // walk along the beam from the aircraft: the last sample still inside the frame is where the beam leaves the picture (the satellite end may be
       // behind the camera, so the end points alone cannot be projected)
       let prev = proj(A),
