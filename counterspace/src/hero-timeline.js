@@ -410,7 +410,7 @@ function build(stage) {
     rowBoxes = [],
     laws = el('g', {}, svg),
     tickLen = Math.max(14, bandTop - yL - sag);
-  [...LEGAL].forEach((l) => {
+  [...LEGAL].forEach((l, li) => {
     const px = x(parse(l.start)),
       len = bandTop - limbY(px),
       name = LAW_NAMES[l.id],
@@ -437,7 +437,7 @@ function build(stage) {
             ln,
           ),
         );
-        S.tracks.push({ node: g, at: l.start, lead: -120, dur: 450, keys: [{ opacity: 0 }, { opacity: 1 }] });
+        S.tracks.push({ node: g, at: l.start, delay: 350 + li * 28, dur: 450, keys: [{ opacity: 0 }, { opacity: 1 }] });
         break;
       }
     }
@@ -447,8 +447,8 @@ function build(stage) {
     S.tracks.push({
       node: tick,
       at: l.start,
-      lead: 100,
-      dur: 600,
+      delay: 100 + li * 28, // the ground is drawn first, one tick after another in the first second, before the sweep brings in the dots
+      dur: 500,
       keys: [
         { opacity: 0, transform: 'scaleY(0)' },
         { opacity: 1, transform: 'none' },
@@ -481,7 +481,7 @@ function play() {
     span = DOMAIN[1].getTime() - t0,
     when = (date) => ((parse(date).getTime() - t0) / span) * SWEEP_MS;
   drawn.tracks.forEach((t) =>
-    anims.push(t.node.animate(t.keys, { duration: t.dur, delay: Math.max(0, when(t.at) - t.lead), easing: EASE, fill: 'backwards' })),
+    anims.push(t.node.animate(t.keys, { duration: t.dur, delay: t.delay ?? Math.max(0, when(t.at) - t.lead), easing: EASE, fill: 'backwards' })),
   );
   const m = drawn.marker;
   anims.push(m.inn.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${m.dx}px)` }], { duration: SWEEP_MS, easing: 'linear', fill: 'both' }));
