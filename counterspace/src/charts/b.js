@@ -116,7 +116,7 @@ export function drawB(el = document.getElementById('svgB')) {
       .domain([0, ymax])
       .range([top + plotH, top]),
     base = top + plotH,
-    H = base + 40,
+    H = base + (phone ? 54 : 40),
     inset = phone ? 3 : 8;
 
   const svg = d3
@@ -314,17 +314,19 @@ export function drawB(el = document.getElementById('svgB')) {
 
   // panel labels (the wording "reconstructed (not SWF-assessed)" is required), then the axis under the bars
   {
-    const lim = Math.max(150, X2020 - M.l - 28 - (phone ? 92 : 0)),
+    // the label starts to the right of the 1950s bar, so that bar's focus ring never crosses it
+    const lx = Math.max(M.l + 14, bandsX[0][1] + 12),
+      lim = Math.max(150, X2020 - lx - 14 - (phone ? 92 : 0)),
       ls = wrapLines('Earlier decades are reconstructed (not SWF-assessed)', lim, (q) => tw(q, 12.5, 600)),
       t = svg
         .append('text')
-        .attr('class', 'panel-label')
-        .attr('x', M.l + 14)
+        .attr('class', 'panel-label panel-in')
+        .attr('x', lx)
         .attr('y', top + 22);
     ls.forEach((ln, i) =>
       t
         .append('tspan')
-        .attr('x', M.l + 14)
+        .attr('x', lx)
         .attr('dy', i ? 17 : 0)
         .text(ln),
     );
@@ -343,7 +345,10 @@ export function drawB(el = document.getElementById('svgB')) {
   decs.forEach((d, i) => {
     const [xa, xb] = bandsX[i];
     if (i) ax.append('line').attr('class', 'tick').attr('x1', xa).attr('x2', xa).attr('y1', 0).attr('y2', 6);
-    if ((phone ? i % 2 === 1 : true) && tw(d, 12, 500) <= xb - xa + 14)
+    if (phone && i === 0) {
+      // the 1950s band is only three years wide: its name sits on a second row so it never touches the 1960s name
+      ax.append('text').attr('x', M.l - 2).attr('y', 42).attr('text-anchor', 'start').text(d);
+    } else if ((phone ? i % 2 === 1 : true) && tw(d, 12, 500) <= xb - xa + 14)
       ax.append('text')
         .attr('x', (xa + xb) / 2)
         .attr('y', 24)
