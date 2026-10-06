@@ -401,6 +401,8 @@ function renderSteps(cfg) {
     )
     .join('');
   stepsBox.open = !COMPACT.matches;
+  stepsEl.scrollTop = 0;
+  requestAnimationFrame(fitSteps);
   stepNow.textContent = '';
   lastUserScroll = -Infinity;
   ticksFor = undefined; // forces the scrubber ticks to be drawn for this scene
@@ -431,24 +433,68 @@ function syncSteps(t) {
   stepNow.innerHTML =
     `<li class="now"><div class="step">${li.firstElementChild.innerHTML}</div></li>` +
     (nx ? `<li class="next"><div class="step">${nx.firstElementChild.innerHTML}</div></li>` : '');
-  if (!first) followStep(li);
+  if (first) requestAnimationFrame(() => followStep(li, true));
+  else followStep(li);
 }
 // Keep the current step in view as the animation moves on, moving the list as little as possible so the reader keeps their place: the step stays
 // inside a band with room for the next one below it. Nothing moves for a moment after the reader has scrolled the story themselves.
-function followStep(li) {
-  if (performance.now() - lastUserScroll < 4000) return;
+function followStep(li, instant) {
+  if (!instant && performance.now() - lastUserScroll < 4000) return;
   // The list moves inside its own fixed-height region when it has one, so the story's first paragraph and the title never scroll away.
-  const own = stepsEl.scrollHeight > stepsEl.clientHeight + 2 && getComputedStyle(stepsEl).overflowY !== 'visible' ? stepsEl : asideBody,
+  const own = listScrolls() ? stepsEl : asideBody,
     box = own.getBoundingClientRect(),
     r = li.getBoundingClientRect();
   if (!stepsBox.open || !r.height) return; // the list is folded away (phone)
-  const top = box.top + (own === stepsEl ? 8 : 56),
-    bottom = box.bottom - (own === stepsEl ? 8 : 96);
+  const top = box.top + (own === stepsEl ? 4 : 56),
+    bottom = box.bottom - (own === stepsEl ? 4 : 96);
   let dy = 0;
   if (r.bottom > bottom) dy = r.bottom - bottom;
   else if (r.top < top) dy = r.top - top;
-  if (dy) own.scrollBy({ top: dy, behavior: REDUCED ? 'auto' : 'smooth' });
+  if (dy) own.scrollBy({ top: dy, behavior: REDUCED || instant ? 'auto' : 'smooth' });
 }
+const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && getComputedStyle(stepsEl).overflowY !== 'visible';
+// The list shows whole steps at rest: its height is cut to the last step that fits in full, and a fade appears at an edge only while steps are hidden there.
+function fitSteps() {
+  stepsEl.style.height = '';
+  stepsEl.style.maxHeight = '';
+  if (!stepsBox.open || !stepsEl.children.length) return stepsEl.classList.remove('can-up', 'can-down');
+  const max = parseFloat(getComputedStyle(stepsEl).maxHeight);
+  if (max && stepsEl.scrollHeight > max + 1 && getComputedStyle(stepsEl).overflowY !== 'visible') {
+    let h = 0;
+    for (const li of stepsEl.children) {
+      const b = li.offsetTop + li.offsetHeight;
+      if (b <= max) h = b;
+      else break;
+    }
+    if (h > 80) stepsEl.style.maxHeight = h + 14 + 'px';
+  }
+  fadeSteps();
+}
+function fadeSteps() {
+  const sc = listScrolls();
+  stepsEl.classList.toggle('can-up', sc && stepsEl.scrollTop > 3);
+  stepsEl.classList.toggle('can-down', sc && stepsEl.scrollHeight - stepsEl.clientHeight - stepsEl.scrollTop > 3);
+}
+let snapTimer = 0;
+stepsEl.addEventListener(
+  'scroll',
+  () => {
+    fadeSteps();
+    clearTimeout(snapTimer);
+    snapTimer = setTimeout(() => {
+      // settle on a step boundary at the top so no step is cut mid-line at rest
+      if (!listScrolls() || stepsEl.scrollTop < 3) return;
+      const end = stepsEl.scrollHeight - stepsEl.clientHeight - stepsEl.scrollTop < 3;
+      if (end) return;
+      const y = stepsEl.scrollTop;
+      let best = 0;
+      for (const li of stepsEl.children) if (Math.abs(li.offsetTop - 4 - y) < Math.abs(best - y)) best = li.offsetTop - 4;
+      if (Math.abs(best - y) > 1) stepsEl.scrollTo({ top: Math.max(0, best), behavior: REDUCED ? 'auto' : 'smooth' });
+    }, 140);
+  },
+  { passive: true },
+);
+addEventListener('resize', fitSteps);
 ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) =>
   asideBody.addEventListener(
     ev,
@@ -592,13 +638,40 @@ function setPlayBtn(on) {
 function togglePlay() {
   if (!host || !cur || !glOK || stillOnly) return;
   host.playing = !host.playing;
+  hideHint();
   if (host.playing && host.t >= 1) host.t = 0;
   setPlayBtn(host.playing);
   setStatus(host.playing ? 'Playing.' : 'Paused.');
 }
 playBtn.onclick = togglePlay;
-const narrowViews = matchMedia('(max-width: 1180px)');
+const narrowViews = matchMedia('(max-width: 1180px)'),
+  phoneViews = matchMedia('(max-width: 760px)');
 narrowViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
+phoneViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
+// A short label for a phone button (about 12 characters at most, always whole words); the full name stays as the button's accessible name.
+const STOP = /^(the|and|in|of|a|to|at|on|for|from)$/i;
+function phoneLabel(label) {
+  if (/^whole scene/i.test(label)) return 'Whole';
+  let s = label
+    .replace(/\s*\([^)]*\)/g, '')
+    .split(':')[0]
+    .replace(/^(From|Follow) (the |a )?(.+)$/i, (m, f, a, rest) => (/^follow$/i.test(f) ? 'Follow' : rest))
+    .replace(/^(the) /i, '')
+    .replace(/\s+in\s+(GEO|LEO|low Earth orbit)$/i, '')
+    .trim();
+  if (s.length <= 12) return s.replace(/^./, (m) => m.toUpperCase());
+  s = s.replace(/^all (three|\w+) \w+$/i, 'All $1').replace(/\s+(?:and the|and)\s+/i, ', ').replace(/\s+(of|with|at|on)\s+.*$/i, '');
+  if (s.length > 12) {
+    const out = [];
+    for (const w of s.split(/\s+/)) {
+      if ([...out, w].join(' ').length > 12) break;
+      out.push(w);
+    }
+    while (out.length > 1 && STOP.test(out.at(-1).replace(/,$/, ''))) out.pop();
+    s = (out.join(' ') || s.split(/\s+/)[0]).replace(/,$/, '');
+  }
+  return s.replace(/^./, (m) => m.toUpperCase());
+}
 function buildViews(cfg, sim) {
   camsEl.textContent = '';
   camOn = -2;
@@ -606,13 +679,7 @@ function buildViews(cfg, sim) {
     const label = viewName(cfg.cameras?.[i], c.name),
       b = document.createElement('button');
     b.type = 'button';
-    // on a narrow screen "From the north" is shown as "North" (the full name stays as the button's name), so the views fit without clipping
-    const short = narrowViews.matches
-      ? label
-          .replace(/^From (the |a )?/i, '')
-          .replace(/^Follow the action$/i, 'Follow')
-          .replace(/^./, (m) => m.toUpperCase())
-      : label;
+    const short = phoneViews.matches ? phoneLabel(label) : narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^Follow the action$/i, 'Follow').replace(/^./, (m) => m.toUpperCase()) : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
     b.dataset.name = label === c.name ? '' : c.name;
@@ -674,8 +741,11 @@ if ('ResizeObserver' in window) new ResizeObserver(updateFades).observe(asideBod
 function showHint() {
   if (hintShown || stillOnly || !KEYBOARD.matches || COMPACT.matches || SHORT.matches) return;
   hintShown = true;
+  // bottom left, just above the caption pill: no inset (top right) and no label of the picture sits there
+  const capH = host?.statusEl?.offsetHeight || 28;
+  hintEl.style.bottom = capH + 22 + 'px';
   hintEl.classList.add('on');
-  hintTimer = setTimeout(hideHint, 3200);
+  hintTimer = setTimeout(hideHint, 3000);
 }
 function hideHint() {
   clearTimeout(hintTimer);
