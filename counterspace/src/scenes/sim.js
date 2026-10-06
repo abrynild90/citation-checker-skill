@@ -553,9 +553,15 @@ export function buildSim(cfg) {
           br: 0.7 + rnd() * 0.3,
         });
       // Fragments start hot (pale orange) and cool to dim red with age; each has its own tint and brightness. Soft sprites, normal blending: no white clipping.
-      const HOT = [1, 0.8, 0.5],
+      let HOT = [1, 0.8, 0.5],
         MID = [1, 0.5, 0.2],
         COOL = a.lateGlow ? [0.95, 0.45, 0.25] : [0.62, 0.17, 0.12]; // lateGlow: old fragments stay clearly visible
+      if (a.palette) {
+        // opt-in palette { hot, mid, cool } (rgb 0..1): e.g. yellow-white fragments that separate from the amber city lights
+        HOT = a.palette.hot ?? HOT;
+        MID = a.palette.mid ?? MID;
+        COOL = a.palette.cool ?? COOL;
+      }
       let kc = 0,
         kb = 1e9;
       const ranked = [];
