@@ -554,7 +554,8 @@ function fitSteps() {
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.paddingBottom = '';
   // a phone with more than four steps, or a short phone screen: the list shows the playing step only and the picture keeps the height
-  const one = COMPACT.matches && (steps.length > 4 || innerHeight <= 700);
+  // The steps are read-only here: every row is drawn whole, at its natural height, and the story column scrolls if it must (no fixed-height window).
+  const one = false;
   overlay.classList.toggle('steps-one', one);
   if (!steps.length) return;
   if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
@@ -564,7 +565,8 @@ function fitSteps() {
   for (let lvl = 0; lvl <= 1; lvl++) {
     setLede(lvl);
     r = rowsFit();
-    if (r.n >= want) break;
+    if (asideBody.scrollHeight <= asideBody.clientHeight + 1) break; // every row fits whole, with nothing to scroll
+    if (lvl === 1) break;
   }
   if (!r.h && !COMPACT.matches && r.n >= steps.length) {
     // every row fits and there is room to spare: show more of the account, a sentence at a time, while everything still fits
@@ -579,6 +581,7 @@ function fitSteps() {
     }
     r = rowsFit();
   }
+  r.h = 0; // never a fixed-height window
   if (r.h) {
     stepsEl.style.flex = '0 0 auto';
     stepsEl.style.height = r.h + 'px';
