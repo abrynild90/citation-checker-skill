@@ -114,8 +114,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
             dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time
             dMax: cfg.fitMax ?? 6.5,
-            fillX: cfg.fitFill ?? 0.9,
-            fillY: (cfg.fitFill ?? 0.9) * 0.8,
+            fillX: cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9, // fitFillKeys (opt-in): the frame fill per key time
+            fillY: (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
             asp,
           });
         }));

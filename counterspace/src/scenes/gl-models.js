@@ -745,7 +745,7 @@ export const modelMethods = {
   },
   // Guided-missile cruiser (Ticonderoga class, about 10:1 hull): pointed-bow hull extrusion, dark deck, forward and aft deckhouses with a mast, two
   // stacks, a gun and a helicopter pad.
-  _shipModel(pos) {
+  _shipModel(pos, o = {}) {
     const T = this.T,
       g = new T.Group(),
       hull = this._mat(0x8b95a8),
@@ -759,10 +759,27 @@ export const modelMethods = {
     sh.quadraticCurveTo(0.0034, 0.03, 0, 0.042);
     sh.quadraticCurveTo(-0.0034, 0.03, -0.0043, 0.008);
     sh.closePath();
-    const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
-    hg.rotateX(Math.PI / 2);
-    hg.translate(0, 0.0038, 0);
-    g.add(new T.Mesh(hg, hull));
+    if (o.shade) {
+      // opt-in (ship actor `shade`): a dark waterline band under a lighter upper hull, and a white wake astern
+      const lo = new T.ExtrudeGeometry(sh, { depth: 0.0017, bevelEnabled: false });
+      lo.rotateX(Math.PI / 2);
+      lo.translate(0, 0.0017, 0);
+      g.add(new T.Mesh(lo, this._mat(0x3c4558)));
+      const hi = new T.ExtrudeGeometry(sh, { depth: 0.0021, bevelEnabled: false });
+      hi.rotateX(Math.PI / 2);
+      hi.translate(0, 0.0038, 0);
+      g.add(new T.Mesh(hi, this._mat(0xaab4c8)));
+      const wg = new T.BufferGeometry();
+      wg.setAttribute('position', new T.Float32BufferAttribute([-0.0034, 0.0006, -0.036, 0.0034, 0.0006, -0.036, -0.011, 0.0006, -0.105, 0.011, 0.0006, -0.105], 3));
+      wg.setAttribute('color', new T.Float32BufferAttribute([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], 3));
+      wg.setIndex([0, 2, 1, 1, 2, 3]);
+      g.add(new T.Mesh(wg, new T.MeshBasicMaterial({ vertexColors: true, color: 0xdfeaff, transparent: true, opacity: 0.4, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+    } else {
+      const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
+      hg.rotateX(Math.PI / 2);
+      hg.translate(0, 0.0038, 0);
+      g.add(new T.Mesh(hg, hull));
+    }
     const box = (w, h, d, m, x, y, z) => {
       const q = new T.Mesh(new T.BoxGeometry(w, h, d), m);
       q.position.set(x, 0.0038 + h / 2 + y, z);

@@ -310,7 +310,7 @@ const methods = {
       else if (it.shape === 'rocket') m = this._rocketModel(it.color);
       else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state);
       else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0), !!it.state);
-      else if (it.shape === 'ship') m = this._shipModel(it.pos(0));
+      else if (it.shape === 'ship') m = this._shipModel(it.pos(0), { shade: it.shade });
       else if (it.shape === 'jammer') m = this._jammerModel(it.color, it.pos(0));
       else {
         if (it.shape === 'sat') {
