@@ -208,7 +208,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   const crowd = (d) => !zoom && d._cx >= zx0 - 2;
   if (!compact) {
     pts.forEach((d) => {
-      pl.add([d._cx - 9.5, -d._t * TP - 10 - (hasScene(d) ? 9 : 0), d._cx + (hasScene(d) ? 16 : 9.5), -d._t * TP + 10], 'G');
+      pl.add([d._cx - 9.5, -d._t * TP - 10 - (hasScene(d) ? 12 : 0), d._cx + (hasScene(d) ? 16 : 9.5), -d._t * TP + 10], 'G');
       if (d._t) pl.add([d._cx - 1.5, -d._t * TP, d._cx + 1.5, 0], 'S');
     });
     // The shaded window belongs to the zoom panel: no other label runs into it.
@@ -224,7 +224,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       return { name, date, tier, w: tw(name, FS, 600) + (date ? tw(date, FS) : 0) };
     };
     // A label above the line sits just above its own symbol (and its cube icon), and climbs only where something is in the way.
-    const upBase = (d) => d._t * TP + 24;
+    const upBase = (d) => d._t * TP + 24 + (hasScene(d) ? 7 : 0);
     const clusters = [];
     pts
       .filter((d) => !crowd(d))
@@ -580,7 +580,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     .attr('r', 12 / GS);
   pg.each(function (d) {
     legalGlyph(d3.select(this), d);
-    if (hasScene(d)) badge(d3.select(this), 12, -17);
+    if (hasScene(d)) badge(d3.select(this), 12, -16);
   });
   bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
   pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
