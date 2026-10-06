@@ -503,7 +503,15 @@ function followStep(li, instant) {
           break;
         }
     }
-    if (Math.abs(to - y) > 1) stepsEl.scrollTo({ top: to, behavior: REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5 ? 'auto' : 'smooth' });
+    if (Math.abs(to - y) > 1) {
+      const smooth = !(REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5);
+      stepsEl.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' });
+      // a smooth scroll that did not arrive (a busy page, a browser that skips it) is finished at once, so the list always rests on its row
+      if (smooth)
+        setTimeout(() => {
+          if (Math.abs(stepsEl.scrollTop - to) > 1 && performance.now() - lastUserScroll > 1500 && stepIdx === +li.dataset.i) stepsEl.scrollTo({ top: to, behavior: 'auto' });
+        }, 700);
+    }
     return;
   }
   const top = box.top + (own === stepsEl ? 4 : 56),
@@ -581,7 +589,7 @@ function fitSteps() {
   }
   if (r.sp > 0.5) {
     stepsEl.style.setProperty('--sp', r.sp.toFixed(2) + 'px');
-    if (r.h) stepsEl.style.height = r.h + r.sp * 2 * r.n + 'px';
+    if (r.h) stepsEl.style.height = r.h + r.sp * 2 * r.n + 0.8 + 'px';
   }
   if (r.h) {
     // so that every row can rest at the top of the list (also the last ones), the end of the list gets the room the last whole window leaves
@@ -591,15 +599,31 @@ function fitSteps() {
     let pad = 0;
     for (let k = kids.length - 1; k >= 0; k--) {
       const left = total - kids[k].offsetTop;
-      if (left > H + 0.5) break;
+      if (left > H + 1.5) break;
       pad = H - left;
     }
     if (pad > 0.5) stepsEl.style.paddingBottom = pad + 'px';
   }
   const li = stepsEl.children[Math.max(0, stepIdx)];
   if (li && stepIdx >= 0) followStep(li, true);
+  snapList(li);
   fadeSteps();
   trimSteps();
+}
+// After a re-fit the list may rest between two rows (the rows changed size): move it to the nearest row edge that keeps the active row in view.
+function snapList(active) {
+  if (!stepsEl.style.height || !listScrolls()) return;
+  const H = stepsEl.clientHeight,
+    y = stepsEl.scrollTop,
+    kids = [...stepsEl.children];
+  if (kids.some((k) => Math.abs(k.offsetTop - y) < 1)) return;
+  const ok = (t) => !active || stillOnly === undefined || (active.offsetTop >= t - 0.5 && active.offsetTop + active.offsetHeight <= t + H + 0.5);
+  const maxY = stepsEl.scrollHeight - H;
+  const c = kids
+    .map((k) => k.offsetTop)
+    .filter((t) => t <= maxY + 0.5 && ok(t))
+    .sort((a, b) => Math.abs(a - y) - Math.abs(b - y))[0];
+  if (c !== undefined) stepsEl.scrollTo({ top: c, behavior: 'auto' });
 }
 // Rows differ in height, so the window of a fixed height can show a sliver of the row after the last whole one: the box is clipped at that row's edge.
 function trimSteps() {
@@ -612,7 +636,7 @@ function trimSteps() {
   let end = 0;
   for (const li of stepsEl.children) {
     const b = li.offsetTop + li.offsetHeight - y;
-    if (b <= H + 0.5) end = Math.max(end, b);
+    if (b <= H + 1.5) end = Math.max(end, b);
   }
   const gap = Math.max(0, H - end);
   stepsEl.style.clipPath = gap > 1 && end > 0 ? `inset(0 0 ${gap}px 0)` : '';

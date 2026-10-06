@@ -1494,6 +1494,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  overflow-anchor: none; /* the list rests on row edges: the browser must not nudge it when rows change size */
 }
 .overlay .sv-steps #sceneSteps::-webkit-scrollbar {
   display: none;
