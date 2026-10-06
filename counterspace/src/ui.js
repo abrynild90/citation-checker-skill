@@ -33,7 +33,7 @@ function showCard(html, evt, el, full = false) {
   // Dense strips (the close-approach chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
-    WM = near ? 1.5 : 2.5;
+    WM = near ? 1.5 : 60;
   card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
   // A long bar (a campaign, a negotiation period) is a poor anchor: a hover card sits by the pointer, not by the bar's far end.
@@ -143,7 +143,7 @@ function showCard(html, evt, el, full = false) {
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
   if (best.score >= (near ? 14 : onBand ? 80 : 40) || (near && avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0))) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
-    for (let T = TOP; T <= VH - ch - 8; T += 10)
+    for (let T = TOP; T <= VH - ch - 8; T += 5)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
         const q = { left: L, right: L + cw, top: T, bottom: T + ch };
         const score =
@@ -159,6 +159,21 @@ function showCard(html, evt, el, full = false) {
   }
   card.style.left = best.L + 'px';
   card.style.top = best.T + 'px';
+  // a small tail on the edge nearest the mark points at it
+  const tail = document.createElement('i');
+  tail.className = 'ctail';
+  tail.setAttribute('aria-hidden', 'true');
+  const isBelow = best.T >= r.bottom - 2,
+    isAbove = best.T + ch <= r.top + 2,
+    isSide = !isBelow && !isAbove;
+  if (isBelow || isAbove) {
+    tail.dataset.edge = isBelow ? 't' : 'b';
+    tail.style.left = Math.min(Math.max(cx - best.L, 18), cw - 18) + 'px';
+  } else if (isSide) {
+    tail.dataset.edge = best.L >= r.right - 2 ? 'l' : 'r';
+    tail.style.top = Math.min(Math.max(mid - best.T, 18), ch - 18) + 'px';
+  }
+  if (tail.dataset.edge && (isBelow || isAbove ? Math.abs((isBelow ? best.T - r.bottom : r.top - (best.T + ch))) < 60 : Math.abs(best.L >= r.right - 2 ? best.L - r.right : r.left - (best.L + cw)) < 60)) card.appendChild(tail);
 }
 // A docked (phone) card is capped in height and scrolls inside itself; while more text lies below the fold a visible cue says so.
 function dockCue() {

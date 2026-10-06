@@ -377,3 +377,10 @@ details.table>summary{scroll-margin-top:110px}
   #tableR th:last-child,#tableR td:last-child{width:140px;min-width:140px;max-width:140px}
 }
 .nw{white-space:nowrap}
+/* the tail on a hover card points at its mark */
+.card .ctail{position:absolute;width:10px;height:10px;background:var(--surface);border:var(--edge-line);transform:translate(-50%,-50%) rotate(45deg);pointer-events:none}
+.card .ctail[data-edge="t"]{top:0;border-right:0;border-bottom:0}
+.card .ctail[data-edge="b"]{top:100%;border-left:0;border-top:0}
+.card .ctail[data-edge="l"]{left:0;border-right:0;border-top:0}
+.card .ctail[data-edge="r"]{left:100%;border-left:0;border-bottom:0}
+.card.dock .ctail{display:none}
