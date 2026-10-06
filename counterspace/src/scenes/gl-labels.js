@@ -209,6 +209,7 @@ const methods = {
     }
     const objs = this._sceneObjects(w, h);
     objs.scale = u;
+    objs.leaderK = this.sim.cfg.leaderK;
     this._lastObjs = objs;
     this._lastObst = obst;
     const chip = (!noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : [])

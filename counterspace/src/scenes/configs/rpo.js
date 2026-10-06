@@ -51,6 +51,7 @@ export const RPO = {
       status: 'USA 271 and SKYNET 5A: a jointly announced US–UK close approach',
     },
   ],
+  leaderK: 0.3, // a label that sits just off its object still gets a leader (the GEO belt name floated free)
   labelEase: true, // labels glide instead of jumping each frame
   actFade: true, // a short cross-fade over the cut between episodes
   inset: 'Top view',
