@@ -185,7 +185,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               for (let k = 0; k < 8; k++) P.push([R * Math.cos((k * Math.PI) / 4), 0, R * Math.sin((k * Math.PI) / 4)]);
               P.push(all[all.length >> 1]);
             }
-            const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
+            const look = scl(centroid(P.concat([[0, 0, 0]])), c.trackPath.lookK ?? 1); // lookK < 1 pulls the view toward the Earth's centre
             const q = fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp });
             // trackPath.zoom: with the ring in frame, move in by that factor: the Earth gets larger and the far side of the ring is cropped on purpose
             if (ring && c.trackPath.zoom) q.pos = add(look, scl(add(q.pos, scl(look, -1)), 1 / c.trackPath.zoom));

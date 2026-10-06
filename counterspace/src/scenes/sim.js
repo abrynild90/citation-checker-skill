@@ -717,7 +717,7 @@ export function buildSim(cfg) {
               f = s - i;
             return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
           };
-          items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: 16, kvMax: 38, pos: headPos });
+          items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: a.rocket.glowMin ?? 16, kvMax: a.rocket.glowMax ?? 38, pos: headPos });
           items.push({ kind: 'point', shape: 'rocket', color: '#ff8a8a', scale: 1, minPx: a.rocket.minPx ?? 30, maxPx: a.rocket.maxPx ?? 54, pos: sm });
         } else
         items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.3, kvMin: 28, kvMax: 64, pos: headPos });
