@@ -447,7 +447,10 @@ function shortPin(pin) {
   const first = String(pin).split(';')[0];
   const t = first.match(/^(Table [\d.-]+|Section [\d.]+)/),
     pg = first.match(/PDF p\. [\d-]+/);
-  return t && pg ? `${t[1]}, ${pg[0]}` : pg ? pg[0] : first;
+  if (t && pg) return `${t[1]}, ${pg[0]}`;
+  if (pg) return pg[0];
+  const cut = first.length > 56 ? first.slice(0, 56).replace(/[\s,;(]+\S*$/, '') + '...' : first; // long free-text pins: the full page reference stays in the link name and the title
+  return cut;
 }
 export const srcCell = (r, tableId, entry) => {
   const tn = SRC_TABLE[tableId] || 'data',

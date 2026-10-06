@@ -443,6 +443,19 @@ await run('ux-phone', { viewport: { width: 375, height: 800 }, colorScheme: 'dar
   return res;
 });
 
+// 3b2. Table width balance: the Source column must stay under 40% of the scroller at desktop widths.
+for (const w of [1024, 1280, 1440, 1920]) {
+  await run(`table-source-width-${w}`, { viewport: { width: w, height: 900 }, colorScheme: 'dark' }, async (p) => {
+    await p.evaluate(() => document.querySelectorAll('details.table').forEach((d) => (d.open = true)));
+    const r = await p.evaluate(() => ['tableA', 'tableC', 'tableR'].map((id) => {
+      const sc = document.getElementById(id);
+      const th = sc.querySelector('th:last-child');
+      return { id, pct: Math.round((th.getBoundingClientRect().width / sc.clientWidth) * 100) };
+    }));
+    return { widths: r, tooWide: r.filter((x) => x.pct >= 40).map((x) => x.id) };
+  });
+}
+
 // 3c. Keyboard walk: Tab from the top and record what takes focus; each stop class must be reached and the focus must stay visible below the sticky band.
 await run('keyboard-walk', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark', reducedMotion: 'reduce' }, async (p) => {
   await p.evaluate(() => document.querySelectorAll('details.table').forEach((d) => (d.open = true))); // tables are reachable once their disclosure is open

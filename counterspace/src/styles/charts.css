@@ -202,7 +202,7 @@ td a{overflow-wrap:anywhere}
 .skip-table:focus{position:static;display:inline-block;margin:var(--s-2) 0;left:auto;outline:3px solid var(--focus);outline-offset:2px}
 .tscroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* A wide table keeps its Source column in view at the right edge, with a soft shadow where the other columns slide under it. */
-@media (min-width:1001px){
+@media (min-width:1281px){
   #tableA th:last-child,#tableA td:last-child,#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{position:sticky;right:0;z-index:2;
     background:var(--surface);box-shadow:-1px 0 0 var(--grid),-12px 0 12px -10px color-mix(in srgb,var(--text) 16%,transparent)}
   #tableA th:last-child,#tableC th:last-child,#tableR th:last-child{z-index:3;background:var(--surface-2)}
@@ -325,3 +325,13 @@ details.table>summary{scroll-margin-top:110px}
   #chipsB::-webkit-scrollbar{display:none}
   #chipsB .chip{flex:none}
 }
+
+/* 1001-1280: the scroller is narrower than the table, so nothing sticks; the Source column stays narrow and wraps */
+@media (min-width:1001px) and (max-width:1280px){
+  .tscroll th:first-child,.tscroll td:first-child{position:static;box-shadow:none}
+  .tscroll th{top:0}
+  #tableA th:last-child,#tableA td:last-child,#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{min-width:150px;max-width:24ch;white-space:normal}
+  #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:150px;max-width:24ch}
+  .more-rows{display:none}
+}
+@media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}}
