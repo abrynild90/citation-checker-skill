@@ -39,7 +39,7 @@ const POSTER_VIEW = {
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.6 },
   shakti: { back: 0.58, right: 0.08 },
-  fengyun: { back: 1.35 },
+  fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });
