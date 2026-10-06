@@ -22,6 +22,7 @@ export const RPO = {
     'Cosmos 2542, pp. 02-09 to 02-10; USA 271 and SKYNET 5A, p. 01-14.',
   related: null,
   event: 'cn-2025-sj21-sj25-docking',
+  epChip: ['China and the US in GEO', 'Russia in LEO', 'The US and the UK in GEO'], // the in-picture chip names the episode on screen
   panels: [
     {
       t: 0.3,
@@ -48,6 +49,8 @@ export const RPO = {
     },
   ],
   inset: 'Top view',
+  insetCorner: IS_PHONE ? 'bl' : undefined, // 375: the top view sits at the lower left, clear of the satellites
+  insetSizePhone: [92, 74],
   scaleNote:
     'The distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen. ' +
     'The three episodes happened at different times and in different places.',
@@ -73,8 +76,8 @@ export const RPO = {
       scale: 1.5 * PK,
       label: 'SJ-25 (China)',
       short: 'SJ-25',
-      dx: -20,
-      dy: 44,
+      dx: 70,
+      dy: 48,
       labelFn: (t) => (t >= 0.27 && t < 0.335 ? null : 'SJ-25 (China)'),
       key: [
         [0, 0, 0, 0],
@@ -126,8 +129,8 @@ export const RPO = {
       scale: 1.4 * PK,
       label: 'USA 270 (US GSSAP)',
       short: 'USA 270',
-      dx: -10,
-      dy: -40,
+      dx: -30,
+      dy: -58,
       key: [
         [0, -1.0, -0.05, 0.02],
         [0.13, -0.5, -0.05, 0.02],

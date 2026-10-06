@@ -187,6 +187,18 @@ export class GLHost {
     this._handCss = this.handEl.style.cssText;
     this._tagStacked = false;
     this.labelLayer.appendChild(this.handEl);
+    // Episode chip (cfg.epChip, opt-in): which episode is on screen, in the handover chip's slot, e.g. "Episode 2 of 3: Russia in LEO".
+    this.epEl = null;
+    if (sim.cfg.epChip && sim.cfg.acts) {
+      this.epEl = document.createElement('div');
+      this.epEl.className = 'hlabel';
+      this.epEl.style.cssText = pillCss() + ';left:10px;top:' + (this.el.clientWidth < 520 ? 56 : 44) + 'px;transform:none;visibility:hidden';
+      const d = document.createElement('i');
+      d.style.cssText = dotCss('#ffc86b');
+      this.epTx = document.createElement('span');
+      this.epEl.append(d, this.epTx);
+      this.labelLayer.appendChild(this.epEl);
+    }
     this.insetEl = null;
     if (sim.cfg.inset) this._makeInset();
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -322,6 +334,16 @@ export class GLHost {
         this._fbAct = null;
         this.setCam(this._lockCam);
       }
+    }
+    if (this.epEl) {
+      const ai = Math.max(
+          0,
+          acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1)),
+        ),
+        txt = `Episode ${ai + 1} of ${acts.length}: ${this.sim.cfg.epChip[ai]}`;
+      if (this.epTx.textContent !== txt) this.epTx.textContent = txt;
+      this.epEl.style.color = LABEL.text;
+      this.epEl.style.visibility = this.lock != null && this._fbAct != null ? 'hidden' : 'visible'; // the handover chip takes the slot while it is shown
     }
     {
       const on = acts && this.lock != null && this._fbAct != null && this.handEl,
