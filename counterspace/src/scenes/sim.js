@@ -468,7 +468,9 @@ export function buildSim(cfg) {
       for (let k = 0; k <= N; k++) all.push(bez(k / N));
       items._arc = { from, to, mid: bez(0.5), bez, t0: a.t0 };
       // Faint predicted path (whole arc, always visible) under the bright growing trail.
-      items.push({ kind: 'curve', avoid: true, pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028, role: 'action' });
+      // a.retire: the spent missile arc (predicted path and trail) is removed this long after the hit (t span), so no stub is left beside the aircraft
+      const spent = (t) => a.retire != null && t > tgt.t + a.retire;
+      items.push({ kind: 'curve', gate: a.retire != null, avoid: true, pts: (t) => (spent(t) ? [] : all), color: a.color, opacity: 0.32, thick: 0.0028, role: 'action' });
       items.push({
         kind: 'curve',
         dynamic: true,
@@ -482,6 +484,7 @@ export function buildSim(cfg) {
         labelAt: bez(a.labelS ?? 0.5),
         labelEnd: tgt.t + (a.hold ?? 0.03), // a.hold: the label outlives the hit (the still is taken just after it)
         pts: (t) => {
+          if (spent(t)) return [];
           const s = t >= a.t0 - 1e-6 ? Math.max(0.04, clamp01((t - a.t0) / (tgt.t - a.t0))) : 0;
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
@@ -541,6 +544,7 @@ export function buildSim(cfg) {
           dw: 1 + gauss(rnd) * a.dv,
           du: gauss(rnd) * 0.02,
           dec: a.decay * (0.4 + rnd() * 1.4),
+          u: 0.35 + rnd() * 0.65, // decayWin: where in the window this fragment burns up
           cj: (rnd() - 0.5) * 0.5,
           br: 0.7 + rnd() * 0.3,
         });
@@ -587,7 +591,13 @@ export function buildSim(cfg) {
               y = 0,
               z = 0;
             if (dt > 0) {
-              const alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              let alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              if (a.decayWin) {
+                // decayWin [t0, t1]: the fast-forward decay: every fragment sinks and burns up inside this window (all gone at t1), so the picture matches the text
+                const sw = clamp01((t - a.decayWin[0]) / (a.decayWin[1] - a.decayWin[0]));
+                const base = tgt.alt + p.da * Math.min(1, dt * 12);
+                alt = sw >= p.u ? 0 : base * (1 - 0.45 * (sw / p.u) ** 2);
+              }
               if (alt > 60) {
                 // optional late phase: the band keeps spreading along and across the orbit (time compressed)
                 const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
