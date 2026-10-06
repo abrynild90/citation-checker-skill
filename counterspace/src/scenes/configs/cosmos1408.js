@@ -1,11 +1,13 @@
 // scenes/configs/cosmos1408.js: scene `cosmos1408` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
 
 export const COSMOS1408 = {
   id: 'cosmos1408',
   fitPct: 0.92,
   latePct: 0.8, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
   fitCross: true,
+  fitFillKeys: IS_PHONE ? [0.74, 0.9, 0.9, 0.9, 0.9] : undefined, // 375: the first frame keeps the satellite clear of the caption
   keyTimes: [0, 0.2, 0.46, 0.62, 1], // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut
   date: '2021-11-15',
   title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',

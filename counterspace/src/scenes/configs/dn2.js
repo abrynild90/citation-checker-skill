@@ -89,7 +89,7 @@ export const DN2 = {
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
   phoneHide: ['DN-2 path', 'GEO'],
-  phoneOff: { Xichang: [4, -100] }, // the pill sits beside its site on the disc, no leader across it
+  phoneOff: { Xichang: [10, -94] }, // the pill sits beside its site on the disc, no leader across it
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
