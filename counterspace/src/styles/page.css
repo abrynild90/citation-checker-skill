@@ -138,7 +138,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .rail a:hover .r-lab,.rail a:focus-visible .r-lab{opacity:1}
 
 /* ---- sources and method ---- */
-.sources{padding:var(--s-8) 0 var(--s-9);border-top:1px solid var(--line);scroll-margin-top:16px}
+.sources{padding:var(--s-8) 0 var(--s-5);border-top:1px solid var(--line);scroll-margin-top:16px}
 .sources-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-6) var(--s-8)}
 .sub-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-5)}
 .sub-nav a{position:relative;display:inline-block;padding:6px 0;font:600 14px/1.3 var(--sans);color:var(--muted);text-decoration:none}

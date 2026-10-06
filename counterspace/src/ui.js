@@ -412,6 +412,19 @@ export function rove(sel) {
   if (EXPORTING) return;
   const nodes = sel.nodes().sort((a, b) => (+a.dataset.t || 0) - (+b.dataset.t || 0));
   nodes.forEach((n, i) => n.setAttribute('tabindex', i ? -1 : 0));
+  // One short hint, shown at the foot of the window while a mark has focus, and read out after the mark's own name.
+  const box = nodes[0]?.closest('.svgbox, #legalBand, #legalZoomBox');
+  if (box) {
+    const hid = 'kh-' + (box.id || 'chart');
+    let h = document.getElementById(hid);
+    if (!h) {
+      document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between marks. Enter opens details. Escape closes a card. Tab leaves the chart.</p>`);
+      h = document.getElementById(hid);
+      box.addEventListener('focusin', () => h.classList.add('on'));
+      box.addEventListener('focusout', () => h.classList.remove('on'));
+    }
+    nodes.forEach((n) => n.setAttribute('aria-describedby', hid));
+  }
   nodes.forEach((n, i) => {
     n.addEventListener('keydown', (ev) => {
       const k = ev.key;
