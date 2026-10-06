@@ -267,6 +267,7 @@ export function buildSim(cfg) {
         thick: a.thick,
         push: a.push,
         gapIds: a.gapCrafts,
+        fadeDisc: a.fadeDisc, // opt-in: the line fades where it crosses the Earth's disc
         label: a.label,
         labelAt: pts[a.sat ? 118 : 45],
       });
