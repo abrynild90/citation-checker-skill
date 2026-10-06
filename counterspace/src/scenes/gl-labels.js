@@ -164,6 +164,7 @@ const methods = {
         color,
         avoidDisc: !!L.item?.offGlobe && (!L.item.stillOnly || noBanner),
         noLeader: !!L.item?.noLeader,
+        leaderK: L.role === 'place' && (!this.sim.cfg.leaderCams || this.sim.cfg.leaderCams.includes(this.camIdx)) ? this.sim.cfg.leaderK : undefined, // cfg.leaderCams: only these presets
         onDisc: this.el.clientWidth < 520 && !!this.sim.cfg.phoneOnDisc?.some((h) => text.startsWith(h)), // phone: dark ocean under a label beats a long leader
       });
     }
@@ -209,7 +210,6 @@ const methods = {
     }
     const objs = this._sceneObjects(w, h);
     objs.scale = u;
-    objs.leaderK = this.sim.cfg.leaderK;
     this._lastObjs = objs;
     this._lastObst = obst;
     const chip = (!noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : [])

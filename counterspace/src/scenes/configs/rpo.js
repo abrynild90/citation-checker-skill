@@ -51,7 +51,10 @@ export const RPO = {
       status: 'USA 271 and SKYNET 5A: a jointly announced US–UK close approach',
     },
   ],
-  leaderK: 0.3, // a label that sits just off its object still gets a leader (the GEO belt name floated free)
+  phoneCamOff: { 2: { 'Cosmos 2543': [-88, -62] } }, // 375: the Cosmos 2543 chip sits off the Earth's limb, above the craft
+  liveText: { 'Within 1 km (13 June)': 'Within 1 km' }, // live desktop: the date is in the step text; the shorter chip stays off the Earth's disc
+  leaderK: 0.3, // a place or orbit name that sits just off its line still gets a leader (the GEO belt name floated free)
+  leaderCams: [1, 3], // only in the two GEO episode views
   labelEase: true, // labels glide instead of jumping each frame
   actFade: true, // a short cross-fade over the cut between episodes
   inset: 'Top view',
