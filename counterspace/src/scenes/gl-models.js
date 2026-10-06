@@ -422,6 +422,7 @@ export const modelMethods = {
     K.geo(white, new T.LatheGeometry(prof, 48), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
     K.geo(nose, new T.SphereGeometry(0.0017, 12, 8), 0, 0, 0.0214, 0, 0, 0, 1, 0.8, 1.3);
     K.box(nose, 0.0094, 0.0006, 0.026, 0, -0.0043, -0.002); // dark heat-shield belly seen at the edges
+    K.geo(under, new T.LatheGeometry(prof, 36), 0, -0.0016, 0, PI / 2, 0, 0, 1.04, 1, 0.42); // a dark lower hull: the belly reads dark from the side
     // Underside: a dark tile belly along the fuselage (wider than the body so it reads from the side), with a few tile seams
     K.box(tile, 0.0096, 0.0016, 0.044, 0, -0.0034, -0.0008);
     for (const z of [-0.012, -0.005, 0.002, 0.009]) K.box(dark, 0.0098, 0.0004, 0.0002, 0, -0.0027, z);
@@ -497,36 +498,53 @@ export const modelMethods = {
   // A generic winged vehicle (variant 'winged', used for China's CSSHQ): the sources show a winged spacecraft and no more, so this is a plain slim
   // fuselage on a broad swept delta wing, with no tail fins, payload doors or surface detail. Clearly not the X-37B's short wings and twin tail.
   _wingedModel(color, bright, halo) {
+    // Lifting-body hull: a broad, flat-bellied body with a domed, lighter top and a dark underside, blended into short swept wings. Nose along +z.
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
-      body = this._mat(new T.Color(0xdde1ea).lerp(new T.Color(color), 0.22).getHex(), { metalness: 0.4, roughness: 0.38 }),
-      under = this._mat(new T.Color(color).lerp(new T.Color(0x0c0e14), 0.8).getHex(), { metalness: 0.5, roughness: 0.42 }),
-      deck = this._mat(new T.Color(0xd2d7e1).lerp(new T.Color(color), 0.18).getHex(), { metalness: 0.4, roughness: 0.34 }),
-      dark = this._mat(0x2b3140, { metalness: 0.5, roughness: 0.5 }),
+      top = this._mat(new T.Color(0xe6e9f0).lerp(new T.Color(color), 0.16).getHex(), { metalness: 0.35, roughness: 0.36 }),
+      topShade = this._mat(new T.Color(0xaeb6c6).lerp(new T.Color(color), 0.18).getHex(), { metalness: 0.4, roughness: 0.42 }),
+      under = this._mat(new T.Color(color).lerp(new T.Color(0x0a0c12), 0.86).getHex(), { metalness: 0.5, roughness: 0.46 }),
+      dark = this._mat(0x232938, { metalness: 0.5, roughness: 0.5 }),
+      rimm = (m) => {
+        m.onBeforeCompile = (sh) => {
+          sh.fragmentShader = sh.fragmentShader.replace(
+            '#include <dithering_fragment>',
+            'float rimK = pow(1.0 - abs(dot(normalize(vNormal), normalize(vViewPosition))), 3.0);\n gl_FragColor.rgb += vec3(0.5, 0.62, 0.9) * rimK * 0.4;\n #include <dithering_fragment>',
+          );
+        };
+        return m;
+      },
       prof = [
         [0.0003, 0.0262],
-        [0.0013, 0.0248],
-        [0.0026, 0.021],
-        [0.0036, 0.014],
-        [0.0042, 0.005],
-        [0.0044, -0.006],
-        [0.0042, -0.016],
-        [0.0036, -0.0225],
+        [0.0014, 0.0248],
+        [0.0027, 0.021],
+        [0.0038, 0.014],
+        [0.0044, 0.005],
+        [0.0046, -0.006],
+        [0.0044, -0.016],
+        [0.0038, -0.0225],
       ].map(([r, y]) => new T.Vector2(r, y));
-    K.geo(body, new T.LatheGeometry(prof, 40), 0, 0.0008, 0, PI / 2, 0, 0, 1.3, 1.1, 0.85);
-    const delta = (k) => {
+    rimm(top);
+    rimm(topShade);
+    K.geo(top, new T.LatheGeometry(prof, 40), 0, 0.0004, 0, PI / 2, 0, 0, 2.0, 1.0, 0.62); // domed, broad upper hull
+    K.geo(under, new T.LatheGeometry(prof, 40), 0, -0.0007, 0, PI / 2, 0, 0, 2.15, 1.0, 0.4); // flatter, dark underside that shows at the edges
+    // Short, thick swept wings blended into the hull: a dark underside slab and a mid-grey deck, with a dark trailing flap
+    const wing = (k) => {
       const q = new T.Shape();
-      q.moveTo(0.0035 * k, 0.0125 * k);
-      q.lineTo(0.0145 * k, -0.0190 * k);
-      q.lineTo(-0.0145 * k, -0.0190 * k);
-      q.lineTo(-0.0035 * k, 0.0125 * k);
+      q.moveTo(0.0052 * k, 0.0098 * k);
+      q.lineTo(0.0125 * k, -0.0140 * k);
+      q.lineTo(0.0125 * k, -0.0192 * k);
+      q.lineTo(-0.0125 * k, -0.0192 * k);
+      q.lineTo(-0.0125 * k, -0.0140 * k);
+      q.lineTo(-0.0052 * k, 0.0098 * k);
       q.closePath();
       return q;
     };
-    K.geo(under, new T.ExtrudeGeometry(delta(1), { depth: 0.0011, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 1 }), 0, -0.0012, 0, PI / 2, 0, 0);
-    K.geo(deck, new T.ExtrudeGeometry(delta(0.92), { depth: 0.0004, bevelEnabled: false }), 0, -0.0004, -0.0004, PI / 2, 0, 0);
-    K.box(dark, 0.0026, 0.0007, 0.0042, 0, 0.0034, 0.0138); // a plain dark canopy-sized patch at the nose end (no cockpit claim)
+    K.geo(under, new T.ExtrudeGeometry(wing(1), { depth: 0.0016, bevelEnabled: true, bevelThickness: 0.0004, bevelSize: 0.0005, bevelSegments: 2 }), 0, -0.0017, 0, PI / 2, 0, 0);
+    K.geo(topShade, new T.ExtrudeGeometry(wing(0.93), { depth: 0.0005, bevelEnabled: true, bevelThickness: 0.0002, bevelSize: 0.0002, bevelSegments: 1 }), 0, -0.0004, -0.0004, PI / 2, 0, 0);
+    K.box(dark, 0.0058, 0.0004, 0.0034, 0, 0.0021, 0.0148); // a plain dark patch at the nose end (no cockpit claim)
+    for (const s of [-1, 1]) K.box(dark, 0.0072, 0.0004, 0.0022, s * 0.0078, -0.0003, -0.0172); // trailing-edge flaps
     K.cyl(dark, 0.0024, 0.003, 0.0028, 0, 0, -0.0238, PI / 2);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(under);

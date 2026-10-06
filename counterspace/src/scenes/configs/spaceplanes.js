@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 72 : 150; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 66 : 112; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -54,7 +54,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: IS_PHONE ? 56 : 104,
+      minPx: IS_PHONE ? 52 : 76,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
@@ -109,7 +109,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: IS_PHONE ? 56 : 104,
+      minPx: IS_PHONE ? 52 : 76,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
@@ -151,14 +151,14 @@ export const SPACEPLANES = {
       type: 'craft',
       id: 'csshq',
       variant: 'winged', // a generic winged vehicle: the sources show no more, so it is not drawn as an X-37B
-      minPx: IS_PHONE ? 48 : 88,
-      maxPx: IS_PHONE ? 64 : 124,
+      minPx: IS_PHONE ? 38 : 54,
+      maxPx: IS_PHONE ? 52 : 76,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
       color: C.cn,
       bright: true,
-      scale: 0.9 * PK,
+      scale: 0.55 * PK,
       label: 'CSSHQ (China)',
       short: 'CSSHQ',
       dx: 36,
@@ -181,7 +181,7 @@ export const SPACEPLANES = {
       small: true,
       scale: 1.6 * PK,
       color: C.cn,
-      label: 'Object J',
+      label: 'Released object J',
       short: 'Obj. J',
       dx: -58,
       dy: 46,
@@ -212,7 +212,7 @@ export const SPACEPLANES = {
       small: true,
       scale: 1.6 * PK,
       color: C.cn,
-      label: 'Object G',
+      label: 'Released object G',
       short: 'Obj. G',
       dx: -46,
       dy: 20,
@@ -226,12 +226,14 @@ export const SPACEPLANES = {
         [0.96, 0.08, 0.005, 0.02],
       ],
     },
-    { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0025, tail: 0.14, wakeOp: 0.34 }, // wake capped in length and brightness
+    { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0018, tail: 0.12, wakeOp: 0.2, taper: 0.1 }, // a soft wake: thin at its tail, faint, capped in length
     { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 }, // the wake ends soon after Object J does
     { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
   ],
   fillK: 0.5,
-  sunView: { az: 22, el: 26 }, // the lit side faces the opening camera: the China episode is in daylight, not a grey night
+  cloudK: 1.2,
+  cloudFloor: 0.8, // a cloud layer stays on the Earth even in the close China views, so it is not a flat tan
+  sunView: { az: 22, el: 14 }, // the lit side faces the opening camera: the China episode is in daylight, not a grey night
   lightsK: 0.2, // the night city lights are dimmed so they never blow out into white blobs under the labels
   nightK: 1.5, // a modest night ambient: enough to read the terrain without a grey haze over the dark side
   atmoK: 0.6, // less atmosphere haze on the limb
@@ -274,7 +276,7 @@ export const SPACEPLANES = {
       name: 'X-37B OTV-7: follows the craft',
       chip: 'X-37B OTV-7',
       act: 1,
-      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.5, fill: 1.2, t: 0.42, lock: true, tight: true },
+      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 2.3, fill: 1.1, t: 0.42, lock: true, tight: true },
     },
     {
       name: 'China: CSSHQ and released objects',

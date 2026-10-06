@@ -192,6 +192,7 @@ export function buildSim(cfg) {
         byIndex: a.byIndex,
         tail: a.tail, // capped wake length (fraction of the whole path) and brightness
         wakeOp: a.wakeOp,
+        taper: a.taper, // opt-in: the wake starts thin and widens toward the craft (a soft wake)
         color: a.color,
         width: 2,
         pts: (t) => {
