@@ -1899,6 +1899,11 @@
 .overlay.open {
   transition: none;
 }
+/* The window is its own painted layer: the page behind never leaks a stale tile over the title (found by repeated captures) */
+.overlay {
+  contain: paint;
+  isolation: isolate;
+}
 /* The window fades in; its panel does not move (a moving panel left a stale tile of its footer over the title in some browsers) */
 .overlay .panel,
 .overlay.open .panel {

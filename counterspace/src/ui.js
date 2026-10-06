@@ -9,7 +9,7 @@ const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
   const byKey = !!el?.matches?.(':focus-visible') && !matchMedia('(hover: none)').matches;
   // a card opened by keyboard carries the one-line key help, so nothing else has to float over the chart
-  card.innerHTML = byKey && !html.includes('kb-line') ? html + '<p class="kb-line">Arrow keys move between marks. Enter opens details. Escape closes this card.</p>' : html;
+  card.innerHTML = byKey && !html.includes('kb-line') ? html + '<p class="kb-line">Arrow keys move between points. Enter opens details. Escape closes this card.</p>' : html;
   card.classList.toggle('full', full);
   // A card opened by keyboard focus is opaque at once (no half-faded card with page text showing through while it moves into place).
   card.classList.toggle('solid', !!el?.matches?.(':focus-visible'));
@@ -441,7 +441,7 @@ export function rove(sel) {
     const hid = 'kh-' + (box.id || 'chart');
     let h = document.getElementById(hid);
     if (!h) {
-      document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between marks. Enter opens details. Escape closes a card. Tab leaves the chart.</p>`);
+      document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between points. Enter opens details. Escape closes a card. Tab leaves the chart.</p>`);
       h = document.getElementById(hid);
     }
     nodes.forEach((n) => n.setAttribute('aria-describedby', hid));
