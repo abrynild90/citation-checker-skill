@@ -30,6 +30,7 @@ export const FENGYUN = {
   latePct: IS_PHONE ? 0.8 : 0.62, // the ring steps frame the bulk of the cloud, so the Earth fills more of the frame
   fitFillKeys: IS_PHONE ? [0.88, 0.88, 0.88, 0.88, 0.88] : [0.78, 0.8, 0.88, 0.95, 0.95],
   phoneK: 1.14,
+  narrowK: 1, // phone: the fitted dolly already frames the debris; a further tighten cut it at the frame edge
   fitFill: IS_PHONE ? 0.88 : 0.78, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
   liveOff: { 'Fengyun-1C': [0, -70], Xichang: [-60, 34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
   phoneOff: { 'Fengyun-1C': [0, -58], Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader

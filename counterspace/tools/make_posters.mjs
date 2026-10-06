@@ -86,7 +86,7 @@ try {
           // the screen box of the craft on show (the picture is cropped around it)
           const cv = h.renderer.domElement;
           let pts = h.dyn
-              .filter((d) => d.it.kind === 'point' && d.it.prim && d.it.label && d.it.pos?.(tt))
+              .filter((d) => d.it.kind === 'point' && d.it.prim && (d.it.label || d.obj.visible) && d.it.pos?.(tt))
               .map((d) => {
                 const v = d.obj.position.clone().project(h.camera);
                 return [((v.x + 1) / 2) * cv.clientWidth, ((1 - v.y) / 2) * cv.clientHeight];
@@ -122,11 +122,12 @@ try {
           // three square tiles in a row, each cropped around its craft, under one title: the three-episode story at a glance
           const gap = W * 0.0125,
             ts = (W - 4 * gap) / 3,
-            ty = H * 0.19;
+            th = ts * 1.12, // the tiles are 12% taller than square: the pictures use the space under the row
+            ty = H * 0.165; // and the title sits closer to them
           x.textBaseline = 'alphabetic';
           x.fillStyle = '#eef2fb';
           x.font = '600 ' + Math.round(H * 0.058) + 'px "Newsreader", Georgia, serif';
-          x.fillText('Three close approaches, three places', gap, H * 0.115);
+          x.fillText('Three close approaches, three places', gap, H * 0.105);
           const imgs = [];
           for (let i = 0; i < 3; i++) {
             const img = new Image();
@@ -135,36 +136,37 @@ try {
             imgs.push(img);
           }
           // the same scale for all three tiles: the crop that fits the widest group
-          const SW = Math.min(imgs[0].height, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.4 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.08 + 44 * (imgs[i].width / s.box.w)))));
+          const SW = Math.min(imgs[0].height / 1.12, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.36 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.06 + 150 * (imgs[i].width / s.box.w)))));
           for (let i = 0; i < 3; i++) {
             const img = imgs[i],
               b = shots[i].box,
               k = img.width / b.w;
-            const sw = SW;
+            const sw = SW,
+              sh = SW * 1.12;
             const sx = Math.max(0, Math.min(img.width - sw, b.cx * k - sw / 2)),
-              sy = Math.max(0, Math.min(img.height - sw, b.cy * k - sw / 2));
+              sy = Math.max(0, Math.min(img.height - sh, b.cy * k - sh / 2));
             const tx = gap + i * (ts + gap);
             x.imageSmoothingQuality = 'high';
             x.save();
             x.beginPath();
-            x.roundRect(tx, ty, ts, ts, 10);
+            x.roundRect(tx, ty, ts, th, 10);
             x.clip();
-            x.drawImage(img, sx, sy, sw, sw, tx, ty, ts, ts);
+            x.drawImage(img, sx, sy, sw, sh, tx, ty, ts, th);
             x.restore();
             x.strokeStyle = 'rgba(150,175,230,.4)';
             x.lineWidth = 1.5;
             x.beginPath();
-            x.roundRect(tx, ty, ts, ts, 10);
+            x.roundRect(tx, ty, ts, th, 10);
             x.stroke();
             x.fillStyle = '#ffc86b';
             x.font = '700 ' + Math.round(H * 0.052) + 'px ' + SANS;
-            x.fillText(String(i + 1), tx + 2, ty + ts + H * 0.085);
+            x.fillText(String(i + 1), tx + 2, ty + th + H * 0.085);
             x.fillStyle = '#eef2fb';
             x.font = '600 ' + Math.round(H * 0.038) + 'px ' + SANS;
-            x.fillText(titles[i], tx + H * 0.05, ty + ts + H * 0.066);
+            x.fillText(titles[i], tx + H * 0.05, ty + th + H * 0.066);
             x.fillStyle = '#b3bdd6';
             x.font = Math.round(H * 0.032) + 'px ' + SANS;
-            x.fillText(briefs[i], tx + H * 0.05, ty + ts + H * 0.108);
+            x.fillText(briefs[i], tx + H * 0.05, ty + th + H * 0.108);
           }
           return c.toDataURL('image/webp', Q).split(',')[1];
         },

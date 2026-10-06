@@ -38,7 +38,7 @@ export const SOLWIND = {
   liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [205, -40], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
   countFrom: 0.08,
   narrowShift: 0.06, // phone: the view slides so the impact label and badge clear the right edge
-  phoneOff: { 'ASM-135': [-16, -58] },
+  phoneOff: { 'ASM-135': [52, -46] },
   actors: [
     {
       type: 'aircraft',
