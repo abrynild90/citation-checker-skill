@@ -11,7 +11,7 @@
 .cta{display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center;margin:var(--s-4) 0 0}
 @media (max-width:639px){.cta{flex-wrap:nowrap;gap:var(--s-2);margin-top:var(--s-3)}.cta .btn{flex:1 1 0;min-width:0;padding-inline:10px;white-space:nowrap;font-size:15px}.hero-key{margin-top:var(--s-3)}.hero-figure{margin-top:var(--s-3)}}
 @media (max-width:359px){.cta{flex-wrap:wrap}.cta .btn{flex:1 1 100%}}
-@media (max-width:639px){.hero-cap .btn{position:absolute;top:8px;right:var(--gutter);background:rgba(7,11,22,.72)}.hero-cap{padding-top:var(--s-3)}}
+@media (max-width:639px){.hero-cap{position:relative;padding-top:var(--s-3);padding-right:calc(var(--gutter) + 52px);min-height:64px}.hero-cap .btn{position:absolute;top:8px;right:var(--gutter);background:rgba(7,11,22,.72)}}
 
 /* the key to the picture: one line of two labelled marks under the buttons on a phone, top right on a wide screen */
 .hero-key{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-4);list-style:none;margin:var(--s-4) 0 0;padding:0;font:500 14px/1.4 var(--sans);color:var(--muted)}

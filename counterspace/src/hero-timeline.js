@@ -346,23 +346,30 @@ function build(stage) {
   }
 
   specs.forEach((s) => {
-    const lines = wrap(s.t, noteW, noteSize, 400),
-      w = Math.max(...lines.map((l) => tw(l, noteSize))),
-      h = lines.length * (noteSize + 5);
-    let best = null;
-    search: for (const L of [24, 38, 56, 80, 110, 140, 170])
-      for (const side of [...new Set([...s.order, 'up-end', 'up-start', 'down-end', 'down-start', 'left', 'right'])]) {
-        const [dir, al] = side.split('-'),
-          [box, lead] = boxFor(dir, al, s.m, L, w, h),
-          n = clash(box, lead),
-          ok = inside(box);
-        if (ok && n === 0) {
-          best = { dir, al, box, lead, n };
-          break search;
+    let best = null,
+      lines = [],
+      w = 0;
+    // A phone tries narrower notes (taller, but they fit between the zone names and the edge) before it gives the note up.
+    for (const nw of phone ? [noteW, 150, 126] : W < 900 ? [noteW, 190, 160] : [noteW]) {
+      lines = wrap(s.t, nw, noteSize, 400);
+      w = Math.max(...lines.map((l) => tw(l, noteSize)));
+      const h = lines.length * (noteSize + 5);
+      best = null;
+      search: for (const L of [24, 38, 56, 80, 110, 140, 170])
+        for (const side of [...new Set([...s.order, 'up-end', 'up-start', 'down-end', 'down-start', 'left', 'right'])]) {
+          const [dir, al] = side.split('-'),
+            [box, lead] = boxFor(dir, al, s.m, L, w, h),
+            n = clash(box, lead),
+            ok = inside(box);
+          if (ok && n === 0) {
+            best = { dir, al, box, lead, n };
+            break search;
+          }
+          if (ok && (!best || n < best.n)) best = { dir, al, box, lead, n };
         }
-        if (ok && (!best || n < best.n)) best = { dir, al, box, lead, n };
-      }
-    if (!best || best.n >= 14) return; // no clean room: leave the note out rather than write over the buttons or the dots
+      if (best && best.n <= (phone || W < 900 ? 14 : 13)) break;
+    }
+    if (!best || best.n > (phone || W < 900 ? 14 : 13)) return; // no clean room: leave the note out rather than write over the buttons or the dots
     placed.push({ ...best, m: s.m, lines, w });
   });
   placed
