@@ -16,7 +16,7 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.21,
+  starfish: 0.3,
   solwind: 0.68, // debris spread over the ocean and Arctic, not read as city lights on land
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
@@ -35,7 +35,7 @@ const POSTER_T = {
 const POSTER_VIEW = {
   viasat: { cam: 3, lift: -0.45, back: 1.05 }, // the whole GEO ring, Europe and the beams down to KA-SAT, which sits inside the frame
   'sj21-tug': { pose: [-1.010,0.521,-2.776,-0.538,-0.075,-2.080] }, // the docked pair above the belt line, with the Earth's limb below it
-  starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
+  starfish: { cam: 0, back: 1.0, right: 0.5, lift: 0.0 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   shakti: { back: 0.58, right: 0.08 },
