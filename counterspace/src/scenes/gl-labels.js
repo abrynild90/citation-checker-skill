@@ -56,6 +56,10 @@ const methods = {
         raw.push(null);
         continue;
       }
+      if (noBanner && L.item?.stillHide) {
+        raw.push(null); // stillHide: a live-view aid (a gauge or a path tag) that the print frame does not need
+        continue;
+      }
       if (noBanner && L.item?.impactMark && !this.sim.cfg.stillImpact) {
         raw.push(null); // the still shows the debris and the flash; the impact marker's label is a live-view aid and crowds the print frame
         continue;

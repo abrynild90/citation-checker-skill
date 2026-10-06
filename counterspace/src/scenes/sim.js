@@ -185,7 +185,9 @@ export function buildSim(cfg) {
     if (a.type === 'tag')
       items.push({
         kind: 'point',
-        shape: 'none',
+        shape: a.leader ? 'tick' : 'none', // a leader needs a mark to end on
+        liveOnly: a.liveOnly,
+        stillHide: a.stillHide,
         noLeader: !a.leader, // leader: true draws the usual leader and dot to the tagged point
         small: a.leader ? true : undefined,
         color: a.color,
@@ -212,6 +214,7 @@ export function buildSim(cfg) {
         label: a.label,
         short: a.short,
         staticHide: a.staticHide,
+        stillHide: a.stillHide,
         staticKeep: a.staticKeep,
         labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)],
         labelDx: a.dx,

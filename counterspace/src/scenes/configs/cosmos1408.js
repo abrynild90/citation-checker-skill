@@ -4,7 +4,7 @@ import { C } from './shared.js';
 export const COSMOS1408 = {
   id: 'cosmos1408',
   fitPct: 0.92,
-  latePct: 0.6, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
+  latePct: 0.8, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
   fitCross: true,
   date: '2021-11-15',
   title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',
@@ -25,7 +25,7 @@ export const COSMOS1408 = {
   event: 'ru-2021-cosmos1408',
   hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 },
   phoneHide: ['Plesetsk'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
-  camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact'] },
+  camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact', 'Debris of'] },
   launchCam: 'second',
   orbitAt: [52, 28, 4.5],
   phoneK: 1.16,

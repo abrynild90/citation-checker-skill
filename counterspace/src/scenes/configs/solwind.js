@@ -26,6 +26,8 @@ export const SOLWIND = {
   staticMarkerCap: { 'Solwind P78-1': 64 }, // the satellite is the subject: clearly visible (declared in tools/scene_check/rules.mjs MARKER_OVR)
   staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
+  fitDebrisT: 0.66, // the camera keeps framing the cloud at its widest, also while it decays away
+  latePct: 0.85,
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
   liveOff: { 'ASM-135': [-80, -62], 'F-15': [112, 34] }, // the missile's pill sits above the F-15 with a leader down to the arc
