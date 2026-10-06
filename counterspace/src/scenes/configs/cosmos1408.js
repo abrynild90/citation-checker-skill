@@ -41,7 +41,7 @@ export const COSMOS1408 = {
       crossHit: 0.55,
       thick: 0.0032,
       opacity: 0.85,
-      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.35, minPx: 46, maxPx: 84, dx: 96, dy: 14 },
+      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.35, minPx: 46, maxPx: 84, dx: 134, dy: 8 },
     },
     { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: -84, impactDy: -46, dx: -40, dy: 62 },
     { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true, flash: 0.2, coreK: 0.4, flashSpan: 0.12 },
@@ -68,7 +68,7 @@ export const COSMOS1408 = {
     },
   ],
   still: 0.8,
-  phoneOff: { 'ISS orbit': [40, 44] }, // 375: the label hangs below the (smaller) ISS model, off the craft
+  phoneOff: { 'ISS orbit': [74, 24] }, // 375: the label hangs below the (smaller) ISS model, off the craft
   liveOff: { 'Cosmos 1408': [-96, 52] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
