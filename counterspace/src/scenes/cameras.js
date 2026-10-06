@@ -87,7 +87,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
     const ht = tgt.t,
       arc = items._arc,
       // earlyKey: the camera is already tight on the intercept at mid-approach
-      keys = cfg.earlyKey ? [0, ht * 0.45, ht, ht + 0.1, 0.6, 1] : [0, ht, ht + 0.1, 0.6, 1],
+      keys = cfg.keyTimes || (cfg.earlyKey ? [0, ht * 0.45, ht, ht + 0.1, 0.6, 1] : [0, ht, ht + 0.1, 0.6, 1]), // keyTimes (opt-in): the key times, e.g. a longer pull-back
       core = [tgt.hitPos].concat(arc ? [arc.from] : [], aircraftPos ? [aircraftPos(0)] : []),
       c0 = centroid(core),
       cn = norm(c0);

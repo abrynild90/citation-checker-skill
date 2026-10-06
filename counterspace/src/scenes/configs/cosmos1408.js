@@ -6,6 +6,7 @@ export const COSMOS1408 = {
   fitPct: 0.92,
   latePct: 0.8, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
   fitCross: true,
+  keyTimes: [0, 0.2, 0.46, 0.62, 1], // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut
   date: '2021-11-15',
   title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',
   shells: ['LEO'],
@@ -68,7 +69,7 @@ export const COSMOS1408 = {
     },
   ],
   still: 0.8,
-  phoneOff: { 'ISS orbit': [74, 24] }, // 375: the label hangs below the (smaller) ISS model, off the craft
+  phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
   liveOff: { 'Cosmos 1408': [-96, 52] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
