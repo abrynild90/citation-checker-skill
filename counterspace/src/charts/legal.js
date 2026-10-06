@@ -766,6 +766,7 @@ function miniShow() {
   }
 }
 let legalCompact = false;
+let bandFullH = 0;
 let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
 export function legalScroll() {
   miniShow();
@@ -780,15 +781,28 @@ export function legalScroll() {
   const under = ['chartR', 'chartC'].find((id) => document.getElementById(id).getBoundingClientRect().top < band.offsetHeight + 40 && document.getElementById(id).getBoundingClientRect().bottom > band.offsetHeight);
   const want = stuck && under ? chartWindow[under] : null;
   const changed = stuck && want !== stripDom;
+  // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it.
+  const reading =
+    stuck &&
+    [...document.querySelectorAll('details.table[open] .tscroll')].some((t) => {
+      const r = t.getBoundingClientRect();
+      return r.top < innerHeight - 80 && r.bottom > 140;
+    });
+  if (reading !== band.classList.contains('reading')) {
+    band.classList.toggle('reading', reading);
+    if (stuck) band.style.marginBottom = Math.max(0, bandFullH - band.offsetHeight) + 'px';
+  }
   if (stuck === legalCompact && !changed) return;
   if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused symbol
   const h0 = band.offsetHeight;
+  if (!legalCompact) bandFullH = h0;
   legalCompact = stuck;
   stripDom = want;
   drawLegal();
   band.classList.toggle('compact', stuck);
+  if (!stuck) band.classList.remove('reading');
   if (stuck) document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
-  band.style.marginBottom = stuck ? Math.max(0, h0 - band.offsetHeight) + 'px' : '0px';
+  band.style.marginBottom = stuck ? Math.max(0, (bandFullH || h0) - band.offsetHeight) + 'px' : '0px';
 }
 // Measures the sticky (compact) band's height once per layout so section anchors clear it exactly (--band-h drives scroll-margin-top), and how far the
 // band sits below the top of its chapter heading so a link to the band keeps that heading in view (--law-head-h).

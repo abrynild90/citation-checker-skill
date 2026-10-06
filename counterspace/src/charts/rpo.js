@@ -4,10 +4,16 @@
 // Provides: drawR(), stateR, zoomedR(), R_SHAPE_KEY, R_STYLE_KEY, R_VERT_NOTE.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { CO, DOMAIN, EXPORTING, chartWindow, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
+import { CO, DOMAIN, esc, EXPORTING, chartWindow, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ACTIVITY_LABEL, ACTIVITY_SHORT, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
 import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
+
+const coWhenShort = (e) => {
+  const a = datePrecise(e, e.start),
+    b = e.end ? datePrecise(e, e.end) : null;
+  return e.end === e.start || b === a ? a : `${a} to ${b || 'ongoing'}`;
+};
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
 // stateR.focus: null = the default (the zoom 2000-2026 on a phone only; wider screens open on the shared years so the sticky law strip lines up);
@@ -399,16 +405,14 @@ export function drawR(el = document.getElementById('svgR')) {
   );
   table(
     'tableR',
-    ['Start', 'End', 'Actor', 'Activity', 'Spacecraft', 'Other object', 'Orbit', 'How sure we are', 'What happened', 'Source'],
+    ['When', 'Actor', 'Activity', 'Spacecraft and other object', 'Orbit', 'How sure we are', 'What happened', 'Source'],
     CO.slice()
       .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0))
       .map((e) => [
-        datePrecise(e, e.start),
-        e.end ? datePrecise(e, e.end) : 'Ongoing',
+        coWhenShort(e),
         e.actor,
         `<span class="tl" title="${ACTIVITY_LABEL[e.activity]}">${ACTIVITY_SHORT[e.activity].replace('Spaceplane mission (launch to landing)', 'Spaceplane mission')}</span>`,
-        plain(e.system),
-        plain(e.target) || '—',
+        `<span class="tl"><span class="obj-a">${esc(plain(e.system))}</span>${e.target ? `<span class="obj-b">with ${esc(plain(e.target))}</span>` : ''}</span>`,
         `<span class="tl" title="${ORBIT_LABEL[e.orbit_regime]}">${ORBIT_SHORT[e.orbit_regime]}</span>`,
         `<span class="tl" title="${SURE_LABEL[e.confidence]}">${SURE_WORD[e.confidence]}</span>`,
         plain(e.description),

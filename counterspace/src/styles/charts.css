@@ -27,6 +27,7 @@
 .legal-band::after{content:'';position:absolute;left:0;right:0;top:100%;height:18px;background:linear-gradient(var(--bg),transparent);pointer-events:none;opacity:0;
   transition:opacity var(--dur-1)}
 .legal-band.compact::after{opacity:1}
+.legal-band.reading #legalSvg{max-height:56px;overflow:hidden}
 .legal-band svg{display:block;width:100%}
 #legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
 #legalSvg[role="region"] svg{width:auto;max-width:none}
@@ -147,7 +148,7 @@
 .legend li.bubbles span{line-height:1.45}
 
 /* ------------------------------------------------------------------ data tables: a contained scroll area with a sticky header; cards on phones */
-.tscroll{max-width:100%;max-height:none;margin-top:var(--s-3);overflow:auto;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
+.tscroll{max-width:100%;max-height:min(72vh,680px);margin-top:var(--s-3);overflow:auto;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;line-height:1.45}
 th,td{padding:10px 14px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
 th{position:sticky;top:0;z-index:1;background:var(--surface-2);border-bottom:1px solid var(--line-strong);font:600 13px/1.35 var(--sans);color:var(--muted)}
@@ -189,7 +190,8 @@ td a{overflow-wrap:anywhere}
   .tscroll{max-height:none;overflow:visible;border:0;background:none}
   .tscroll table,.tscroll tbody,.tscroll tr,.tscroll td,.tscroll caption{display:block;width:100%}
   .tscroll thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-  .tscroll tr{margin:0 0 var(--s-3);padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
+  .tscroll tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(21rem,100%),1fr));gap:var(--s-3);align-items:start}
+  .tscroll tr{margin:0;padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
   .tscroll td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
   .tscroll td.num{text-align:left}
   .tscroll td.date{white-space:normal}
@@ -314,18 +316,14 @@ details.table>summary{scroll-margin-top:110px}
   #tableB th:last-child,#tableB td:last-child{border-left:2px solid var(--accent)}
 }
 @media (min-width:1001px){
-  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:280px;max-width:none}
-  #tableR th:nth-child(7),#tableR td:nth-child(7),#tableR th:nth-child(8),#tableR td:nth-child(8){min-width:0}
   #tableR th:last-child,#tableR td:last-child{min-width:120px;max-width:22ch;white-space:normal}
   #tableA th:last-child,#tableA td:last-child{min-width:140px;max-width:22ch;white-space:normal}
   #tableC th:last-child,#tableC td:last-child{min-width:140px;max-width:200px;white-space:normal}
 }
 
 @media (min-width:1001px){
-  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:300px}
   #tableR th:last-child,#tableR td:last-child,#tableA th:last-child,#tableA td:last-child{min-width:120px;max-width:20ch;white-space:normal}
   #tableC th:last-child,#tableC td:last-child{min-width:120px;max-width:190px;white-space:normal}
-  #tableC th:nth-child(6),#tableC td:nth-child(6){min-width:220px}
   #tableA th:nth-child(5),#tableA td:nth-child(5){min-width:170px}
 }
 @media (min-width:1001px){
@@ -335,11 +333,8 @@ details.table>summary{scroll-margin-top:110px}
   .tscroll td:last-child a,.tscroll td:last-child .srcc{white-space:normal;overflow-wrap:anywhere}
 }
 @media (min-width:1001px){
-  #tableR th:nth-child(5),#tableR td:nth-child(5),#tableR th:nth-child(6),#tableR td:nth-child(6){min-width:88px;max-width:14ch}
-  #tableR th:nth-child(4),#tableR td:nth-child(4){max-width:14ch}
 }
 @media (min-width:1001px) and (max-width:1100px){
-  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:220px}
   #tableR th,#tableR td{padding:8px 7px;font-size:13px}
 }
 
@@ -349,7 +344,8 @@ details.table>summary{scroll-margin-top:110px}
   #tableC.tscroll,#tableR.tscroll{max-height:none;overflow:visible;border:0;background:none}
   #tableC.tscroll table,#tableR.tscroll table,#tableC.tscroll tbody,#tableR.tscroll tbody,#tableC.tscroll tr,#tableR.tscroll tr,#tableC.tscroll td,#tableR.tscroll td,#tableC.tscroll caption,#tableR.tscroll caption{display:block;width:100%}
   #tableC.tscroll thead,#tableR.tscroll thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-  #tableC.tscroll tr,#tableR.tscroll tr{margin:0 0 var(--s-3);padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
+  #tableC.tscroll tbody,#tableR.tscroll tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(21rem,100%),1fr));gap:var(--s-3);align-items:start}
+  #tableC.tscroll tr,#tableR.tscroll tr{margin:0;padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
   #tableC.tscroll td,#tableR.tscroll td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
   #tableC.tscroll td.num,#tableR.tscroll td.num{text-align:left}
   #tableC.tscroll td.date,#tableR.tscroll td.date{white-space:normal}
@@ -371,9 +367,6 @@ details.table>summary{scroll-margin-top:110px}
 @media (max-width:1000px){#tableA td:has(.qc){display:none!important}}
 /* Close approaches: the object columns get room, the Source column a fixed share */
 @media (min-width:1101px){
-  #tableR th:nth-child(5),#tableR td:nth-child(5){min-width:110px;max-width:16ch}
-  #tableR th:nth-child(6),#tableR td:nth-child(6){min-width:128px;max-width:22ch}
-  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:240px}
   #tableR th:last-child,#tableR td:last-child{width:140px;min-width:140px;max-width:140px}
 }
 .nw{white-space:nowrap}
@@ -392,3 +385,17 @@ details.table>summary{scroll-margin-top:110px}
 @media (min-width:641px) and (max-width:1000px){.law-intro{padding-top:var(--s-6)}}
 /* a chart opened from the contents lands just under the sticky strip, with the one before it fully behind the strip */
 @media (min-width:761px){section.chart{scroll-margin-top:calc(var(--band-h,96px) + 8px)}}
+
+/* Close approaches and jamming tables, wide: When is one column; the description gets room; the object cell stacks the spacecraft over the other object */
+@media (min-width:1001px){
+  #tableR th:nth-child(7),#tableR td:nth-child(7){min-width:24rem}
+  #tableC td:nth-child(5){min-width:200px}
+  #tableR td:nth-child(4){min-width:170px}
+  #tableR td:nth-child(4) .obj-a{display:block;font-weight:600}
+  #tableR td:nth-child(4) .obj-b{display:block;color:var(--muted);font-size:13px}
+  #tableC td.date,#tableR td.date{white-space:normal;min-width:7.5rem}
+}
+@media (max-width:1000px){
+  #tableR td .obj-a{font-weight:600}
+  #tableR td .obj-b{display:block;color:var(--muted)}
+}

@@ -398,10 +398,9 @@ export function drawC(el = document.getElementById('svgC')) {
   );
   table(
     'tableC',
-    ['Start', 'End', 'Actor', 'Type', 'Attribution', 'Target', 'Setting', 'How sure we are', 'Source'],
+    ['When', 'Actor', 'Type', 'Attribution', 'Target', 'Setting', 'How sure we are', 'Source'],
     NK.map((e) => [
-      e.start === e.end ? fmt(parse(e.start)) : fmtMY(parse(e.start)),
-      e.end === e.start ? 'Single event' : e.end ? fmtMY(parse(e.end)) : 'Ongoing',
+      e.start === e.end ? fmt(parse(e.start)) : `${fmtMY(parse(e.start))} to ${e.end ? fmtMY(parse(e.end)) : 'ongoing'}`,
       e.actor,
       CATEGORY_LABEL[e.category],
       ATTRIBUTION_LABEL[e.attribution],
