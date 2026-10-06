@@ -67,6 +67,13 @@ function showCard(html, evt, el, full = false) {
           )
       : [];
   const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
+  // A card never covers a Download chart button, nor the zoom strip when it belongs to a mark on the law band above it.
+  [...document.querySelectorAll('.dl-row .btn, .dl-wrap .btn')]
+    .concat(el && !el.closest('#legalZoomBox') && el.closest('#legalBand') ? [document.getElementById('legalZoomBox')] : [])
+    .forEach((n) => {
+      const b = n?.getBoundingClientRect();
+      if (b && b.width > 2 && b.bottom > 0 && b.top < VH) noText.push(b);
+    });
   // Page wording around the chart (headings, ledes, callouts, keys: marked data-avoid) is avoided too, unless it is the mark's own region.
   // Each line of such text is its own obstacle (a card may cover the empty end of a line, not the words), so a heading costs per line it covers.
   const avoid = [...document.querySelectorAll('[data-avoid]')]
