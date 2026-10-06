@@ -28,7 +28,7 @@ void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal)
 // the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -68,7 +68,7 @@ void main(){
   float dayAmt = smoothstep(-0.10, 0.26, ndl);
   float tw = exp(-pow((ndl - 0.04) / 0.13, 2.0));
   vec3 sunCol = mix(vec3(1.0, 0.985, 0.95), vec3(1.0, 0.6, 0.38), clamp(tw * 0.9, 0.0, 1.0));
-  vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol;
+  vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol * uDay + vec3(0.03, 0.09, 0.20) * uSea * water * (0.15 + dif);
   float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
   vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt * (1.0 - 0.9 * water); // no warm patches on the open ocean (cloud and airglow in the night picture)
   vec3 dark = (vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100)) * uNight + lamp * 1.15 * uLights;
@@ -254,6 +254,8 @@ export const earthMethods = {
         uCloudAmt: { value: 1 },
         uLights: { value: this.sim.cfg.lightsK ?? 1 }, // cfg.lightsK: an opt-in scale for the night city lights
         uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
+        uDay: { value: this.sim.cfg.dayK ?? 1 }, // cfg.dayK: an opt-in gain on the lit side (dark ocean in daylight)
+        uSea: { value: this.sim.cfg.seaK ?? 0 }, // cfg.seaK: an opt-in blue lift of the sunlit sea (dark ocean in the picture)
         uBump: { value: 0 },
       };
     this._eu = u;

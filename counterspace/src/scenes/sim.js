@@ -325,6 +325,15 @@ export function buildSim(cfg) {
         glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
       });
     }
+    // impactFollow (opt-in): the impact marker glides from the hit point to the debris cloud's centre, so its label stays beside the fragments
+    const centroid = (t) => {
+      const d = cfg.actors.find((x) => x.type === 'debris') || {},
+        dt = t - tgt.t,
+        k = clamp01((dt - 0.02) / 0.1),
+        alt = Math.max(110, tgt.alt * (1 - (d.decay ?? 0) * 1.1 * dt)),
+        c = orbitPos(alt, tgt.inc, tgt.raan, tgt.uHit + tgt.w * (d.drift ?? 1) * dt);
+      return add(scl(tgt.hitPos, 1 - k), scl(c, k));
+    };
     if (a.type === 'target' && tgt && !a.noHit && a.label)
       // The target itself is gone after the hit: a small marker and label keep the impact point identified for the rest of the scene.
       items.push({
@@ -337,7 +346,7 @@ export function buildSim(cfg) {
         labelDx: a.impactDx ?? 70,
         labelDy: a.impactDy ?? -50,
         opt: true,
-        pos: (t) => (t > tgt.t + 0.02 && (a.impactUntil == null || t < a.impactUntil) ? tgt.hitPos : null),
+        pos: (t) => (t > tgt.t + 0.02 && (a.impactUntil == null || t < a.impactUntil) ? (a.impactFollow ? centroid(t) : tgt.hitPos) : null),
       });
     // impactUntil: the "Impact" pill is shown only while its step is on screen; a quiet tick keeps marking the point afterwards
     if (a.type === 'target' && tgt && !a.noHit && a.label && a.impactUntil != null)

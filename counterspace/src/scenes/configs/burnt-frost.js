@@ -1,5 +1,6 @@
 // scenes/configs/burnt-frost.js: scene `burnt-frost` (see ../config.js for the list order)
 import { C } from './shared.js';
+import { IS_PHONE } from '../core.js';
 
 export const BURNT_FROST = {
   id: 'burnt-frost',
@@ -16,21 +17,24 @@ export const BURNT_FROST = {
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
-  sunView: { az: -32, el: 24 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
+  sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -32, el: 24 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
   nightK: 1.2,
+  dayK: IS_PHONE ? 1.6 : 1.15,
+  seaK: IS_PHONE ? 2.2 : 0.8, // the Pacific is dark even in daylight: lifted so the ship and satellite separate from it
   phoneOff: { 'Larger pieces': [112, -50], 'Pieces falling': [112, -50] }, // 375: the label sits right of the debris cloud, not over it
   launchAt: [3.3, 0.95, 0.8],
   earlyKey: true,
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 44, minPx: 56, maxPx: 130 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 44, minPx: 84, maxPx: 170 },
     {
       type: 'target',
       label: 'USA-193',
       color: C.tgt,
       big: 1.7,
-      minPx: 46,
-      maxPx: 86,
+      minPx: 70,
+      maxPx: 120,
+      impactFollow: true, // the Impact pill follows the debris centre once the cloud has spread
       bright: true,
       fall: [
         { k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 },
