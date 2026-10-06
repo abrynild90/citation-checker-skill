@@ -13,7 +13,7 @@ function showCard(html, evt, el, full = false) {
   card.classList.toggle('full', full);
   // On a narrow page a hover card for a mark on the law band is slim (name, kind and date): the full text opens on click or Enter, so the card fits the empty
   // part of the band instead of covering the zoom panel, the axis or the chapter heading.
-  if (!full && !byKey && innerWidth < 1100 && el?.closest?.('#legalBand')) {
+  if (!full && !byKey && innerWidth < 1100 && el?.closest?.('#legalBand, #svgL')) {
     const t = document.createElement('div');
     t.innerHTML = html;
     t.querySelectorAll('p:not(.card-title):not(.when), .src').forEach((n) => n.remove());
