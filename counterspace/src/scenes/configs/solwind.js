@@ -29,7 +29,7 @@ export const SOLWIND = {
   fitDebrisT: 0.66, // the camera keeps framing the cloud at its widest, also while it decays away
   latePct: 0.85,
   camGlide: true,
-  lookK: 0.84, // the Earth sits nearer the middle of the frame, not against its left edge
+  lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
   liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -30] }, // the missile's pill sits above the F-15 with a leader down to the arc

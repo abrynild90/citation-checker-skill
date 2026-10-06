@@ -317,8 +317,9 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           lo = (lo0 + lo1) / 2 + ((lo1 - lo0) / 2) * (g3() * 1.15 + cl[1]);
         }
         const off = wave == null ? lerp(a.t0, a.t1, bi === 0 ? rv() * 0.6 : 0.3 + rv() * 0.7) : lerp(a.t0, a.t1, (wave + rv() * 0.8) / nw);
+        const jit = a.ragged ? 0.55 + 0.45 * rv() : 1; // drawn for every dot, so the random stream does not depend on how many a phone shows
         canon.push(off);
-        if (k < mShow) P.push({ p: ll(la, lo, 1.004), off, j: a.ragged ? 0.55 + 0.45 * rv() : 1 });
+        if (k < mShow) P.push({ p: ll(la, lo, 1.004), off, j: jit });
       }
     });
     const n = P.length;

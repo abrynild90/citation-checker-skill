@@ -67,8 +67,8 @@ export const VIASAT = {
       labelOffDisc: true, // stills: the label sits beside the globe, not on it
       label: 'Ground terminals (modems)',
       short: 'Terminals',
-      labelDx: 120,
-      labelDy: -84,
+      labelDx: 150,
+      labelDy: -130,
     },
     // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
     { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
