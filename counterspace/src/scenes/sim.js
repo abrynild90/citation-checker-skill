@@ -98,7 +98,7 @@ export function buildSim(cfg) {
       const anc = anchors[a.anchor],
         // dock: {with, t0, t1}: while docked the craft sits exactly on its partner (the renderers then set the two models side by side in screen
         // space, touching, at any zoom). Nothing is drawn between them: SWF says docked, not how.
-        raw = (t) => (a.dock && t >= a.dock.t0 && t <= a.dock.t1 ? crafts[a.dock.with].raw(t) : craftPos(anc, a.key, t, a.arcs)),
+        raw = (t) => (a.dock && t >= a.dock.t0 && t <= a.dock.t1 ? crafts[a.dock.with].raw(t) : craftPos(anc, a.key, t, a.arcs, a.spline)),
         inVis = (t) => flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]),
         pos = (t) => (actOn(t, a.acts) && inVis(t) ? raw(t) : null);
       crafts[a.id] = { raw, pos, anc };
@@ -159,6 +159,25 @@ export function buildSim(cfg) {
         big: true,
         size: a.size ?? 0.16,
         span: a.span ?? 0.06,
+      });
+    // range (opt-in): a thin line between two crafts with the separation the sources report, e.g. "within 1 km", shown in [t0, t1]
+    if (a.type === 'range')
+      items.push({
+        kind: 'beam',
+        liveOnly: true,
+        soft: true,
+        opacity: a.opacity ?? 0.55,
+        width0: 0.0011,
+        color: a.color || '#e6ecf8',
+        a: (t) => (t >= a.t0 && t <= a.t1 ? crafts[a.a].pos(t) : null),
+        b: (t) => (t >= a.t0 && t <= a.t1 ? crafts[a.b].pos(t) : null),
+        on: (t) => t >= a.t0 && t <= a.t1,
+        label: a.label,
+        short: a.short,
+        labelFrac: a.frac ?? 0.5,
+        labelDx: a.dx ?? 0,
+        labelDy: a.dy ?? 0,
+        opt: true,
       });
     if (a.type === 'trail') {
       const N = a.N ?? 60,
@@ -242,6 +261,9 @@ export function buildSim(cfg) {
         staticPin: a.staticPin,
         labelDy: a.dy,
       });
+    if (a.type === 'place')
+      // a place name with no marker (a sea or region named in the scene's title): a plain label at a lat/lon, no leader
+      items.push({ kind: 'point', shape: 'none', pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color || '#cfd8ea', label: a.label, short: a.short, labelDx: a.dx ?? 0, labelDy: a.dy ?? 0, opt: a.opt });
     if (a.type === 'ship')
       items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ring') {
@@ -322,6 +344,15 @@ export function buildSim(cfg) {
         glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
       });
     }
+    // impactFollow (opt-in): the impact marker glides from the hit point to the debris cloud's centre, so its label stays beside the fragments
+    const centroid = (t) => {
+      const d = cfg.actors.find((x) => x.type === 'debris') || {},
+        dt = t - tgt.t,
+        k = clamp01((dt - 0.02) / 0.1),
+        alt = Math.max(110, tgt.alt * (1 - (d.decay ?? 0) * 1.1 * dt)),
+        c = orbitPos(alt, tgt.inc, tgt.raan, tgt.uHit + tgt.w * (d.drift ?? 1) * dt);
+      return add(scl(tgt.hitPos, 1 - k), scl(c, k));
+    };
     if (a.type === 'target' && tgt && !a.noHit && a.label)
       // The target itself is gone after the hit: a small marker and label keep the impact point identified for the rest of the scene.
       items.push({
@@ -334,7 +365,7 @@ export function buildSim(cfg) {
         labelDx: a.impactDx ?? 70,
         labelDy: a.impactDy ?? -50,
         opt: true,
-        pos: (t) => (t > tgt.t + 0.02 && (a.impactUntil == null || t < a.impactUntil) ? tgt.hitPos : null),
+        pos: (t) => (t > tgt.t + 0.02 && (a.impactUntil == null || t < a.impactUntil) ? (a.impactFollow ? centroid(t) : tgt.hitPos) : null),
       });
     // impactUntil: the "Impact" pill is shown only while its step is on screen; a quiet tick keeps marking the point afterwards
     if (a.type === 'target' && tgt && !a.noHit && a.label && a.impactUntil != null)
@@ -553,9 +584,15 @@ export function buildSim(cfg) {
           br: 0.7 + rnd() * 0.3,
         });
       // Fragments start hot (pale orange) and cool to dim red with age; each has its own tint and brightness. Soft sprites, normal blending: no white clipping.
-      const HOT = [1, 0.8, 0.5],
+      let HOT = [1, 0.8, 0.5],
         MID = [1, 0.5, 0.2],
         COOL = a.lateGlow ? [0.95, 0.45, 0.25] : [0.62, 0.17, 0.12]; // lateGlow: old fragments stay clearly visible
+      if (a.palette) {
+        // opt-in palette { hot, mid, cool } (rgb 0..1): e.g. yellow-white fragments that separate from the amber city lights
+        HOT = a.palette.hot ?? HOT;
+        MID = a.palette.mid ?? MID;
+        COOL = a.palette.cool ?? COOL;
+      }
       let kc = 0,
         kb = 1e9;
       const ranked = [];
@@ -568,6 +605,10 @@ export function buildSim(cfg) {
         }
       });
       ranked.sort((x, y) => x[0] - y[0]);
+      if (a.ring) {
+        const byV = P.map((_, k) => k).sort((x, y) => P[x].dw - P[y].dw);
+        byV.forEach((k, r) => (P[k].ph = Math.PI * (2 * ((r + 0.5) / n) - 1) + (rnd() - 0.5) * 0.02));
+      }
       const cloud = {
         kind: 'cloud',
         labelIdx: kc,
@@ -592,6 +633,9 @@ export function buildSim(cfg) {
         vis: 0,
         fill(t, out, colr) {
           const dt = t - tgt.t;
+          // a.ring { t1, ease }: opt-in closed ring: each fragment's along-track offset grows from 0 at the hit to its own share of the full circle at t1
+          // (ordered by speed, so the ring is evenly filled), then the band keeps widening; the early cloud is a short, fat shell, not a thin wall
+          const rs = a.ring ? 1 - (1 - clamp01(dt / (a.ring.t1 - tgt.t))) ** (a.ring.ease ?? 2) : 0;
           let vis = 0;
           const dens = Math.min(1, Math.sqrt(300 / n));
           for (let k = 0; k < n; k++) {
@@ -600,7 +644,8 @@ export function buildSim(cfg) {
               y = 0,
               z = 0;
             if (dt > 0) {
-              let alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
+              let alt = tgt.alt + p.da * fat * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
                 // decayWin [t0, t1]: the fast-forward decay: every fragment sinks and burns up inside this window (all gone at t1), so the picture matches the text
                 const sw = clamp01((t - a.decayWin[0]) / (a.decayWin[1] - a.decayWin[0]));
@@ -612,9 +657,13 @@ export function buildSim(cfg) {
                 const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
                   q = orbitPos(
                     alt,
-                    tgt.inc + p.di,
+                    tgt.inc + p.di * (a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1),
                     tgt.raan + p.dr * (1 + (a.late?.kr ?? 0) * lt),
-                    tgt.uHit + p.du + tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0)),
+                    tgt.uHit +
+                      p.du +
+                      (a.ring
+                        ? tgt.w * (a.drift ?? 1) * dt + p.ph * rs
+                        : tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0))),
                   );
                 x = q[0];
                 y = q[1];

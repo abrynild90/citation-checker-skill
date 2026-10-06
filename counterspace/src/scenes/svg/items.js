@@ -149,6 +149,7 @@ function drawCloud(S, it) {
 // A beam: a tapered or plain line between two ends, recorded as a polyline; may carry a label.
 function drawBeam(S, it) {
   const { sim, opts, t, g, project, obst, dPolys, NARROW, label } = S;
+  if (it.liveOnly) return; // opt-in: a live-view aid (the RPO distance callouts) the static diagram leaves out
   const A = it.a(t),
     B = (!opts.panel && it.bStatic?.(t)) || it.b(t);
   if (A && B && it.on(t)) {

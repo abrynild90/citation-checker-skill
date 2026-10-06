@@ -150,6 +150,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
+      variant: 'winged', // a generic winged vehicle: the sources show no more, so it is not drawn as an X-37B
       minPx: IS_PHONE ? 48 : 88,
       maxPx: IS_PHONE ? 64 : 124,
       anchor: 'cn',
@@ -230,8 +231,13 @@ export const SPACEPLANES = {
     { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
   ],
   fillK: 0.5,
-  lightsK: 0.55, // the night city lights are dimmed so they never blow out into white blobs under the labels
-  nightK: 2.4, // much of the China episode is on the dark side: a lifted night ambient keeps the terrain from going muddy
+  sunView: { az: 22, el: 26 }, // the lit side faces the opening camera: the China episode is in daylight, not a grey night
+  lightsK: 0.2, // the night city lights are dimmed so they never blow out into white blobs under the labels
+  nightK: 1.5, // a modest night ambient: enough to read the terrain without a grey haze over the dark side
+  atmoK: 0.6, // less atmosphere haze on the limb
+  insetSizePhone: [84, 72], // 375: a small Top view, in the lower left, off the limb and clear of the craft
+  insetCornerPhone: 'bl',
+  phoneHide: ['GEO', 'OTV-7 orbit', 'CSSHQ orbit', '~600'], // 375: at most two labels over the picture
   still: 0.5,
   stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
   status: [

@@ -494,6 +494,56 @@ export const modelMethods = {
     Object.assign(g.userData, { span: 0.046, minPx: 22, maxPx: 60 });
     return g;
   },
+  // A generic winged vehicle (variant 'winged', used for China's CSSHQ): the sources show a winged spacecraft and no more, so this is a plain slim
+  // fuselage on a broad swept delta wing, with no tail fins, payload doors or surface detail. Clearly not the X-37B's short wings and twin tail.
+  _wingedModel(color, bright, halo) {
+    const T = this.T,
+      K = new Kit(T),
+      PI = Math.PI,
+      body = this._mat(new T.Color(0xdde1ea).lerp(new T.Color(color), 0.22).getHex(), { metalness: 0.4, roughness: 0.38 }),
+      under = this._mat(new T.Color(color).lerp(new T.Color(0x0c0e14), 0.8).getHex(), { metalness: 0.5, roughness: 0.42 }),
+      deck = this._mat(new T.Color(0xd2d7e1).lerp(new T.Color(color), 0.18).getHex(), { metalness: 0.4, roughness: 0.34 }),
+      dark = this._mat(0x2b3140, { metalness: 0.5, roughness: 0.5 }),
+      prof = [
+        [0.0003, 0.0262],
+        [0.0013, 0.0248],
+        [0.0026, 0.021],
+        [0.0036, 0.014],
+        [0.0042, 0.005],
+        [0.0044, -0.006],
+        [0.0042, -0.016],
+        [0.0036, -0.0225],
+      ].map(([r, y]) => new T.Vector2(r, y));
+    K.geo(body, new T.LatheGeometry(prof, 40), 0, 0.0008, 0, PI / 2, 0, 0, 1.3, 1.1, 0.85);
+    const delta = (k) => {
+      const q = new T.Shape();
+      q.moveTo(0.0035 * k, 0.0125 * k);
+      q.lineTo(0.0145 * k, -0.0190 * k);
+      q.lineTo(-0.0145 * k, -0.0190 * k);
+      q.lineTo(-0.0035 * k, 0.0125 * k);
+      q.closePath();
+      return q;
+    };
+    K.geo(under, new T.ExtrudeGeometry(delta(1), { depth: 0.0011, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 1 }), 0, -0.0012, 0, PI / 2, 0, 0);
+    K.geo(deck, new T.ExtrudeGeometry(delta(0.92), { depth: 0.0004, bevelEnabled: false }), 0, -0.0004, -0.0004, PI / 2, 0, 0);
+    K.box(dark, 0.0026, 0.0007, 0.0042, 0, 0.0034, 0.0138); // a plain dark canopy-sized patch at the nose end (no cockpit claim)
+    K.cyl(dark, 0.0024, 0.003, 0.0028, 0, 0, -0.0238, PI / 2);
+    const g = K.build();
+    g.userData.body = g.userData.meshes.get(under);
+    g.userData.sat = true;
+    const eg = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xffc89f, transparent: true, opacity: 0.8, depthWrite: false, blending: T.AdditiveBlending }));
+    eg.scale.setScalar(0.011);
+    eg.position.set(0, 0, -0.0268);
+    g.add(eg);
+    if (halo) {
+      const h = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: bright ? 0.5 : 0.34, depthWrite: false, blending: T.AdditiveBlending }));
+      h.scale.setScalar(0.07);
+      g.add(h);
+      g.userData.halo = h;
+    }
+    Object.assign(g.userData, { span: 0.046, minPx: 22, maxPx: 60 });
+    return g;
+  },
   // Sounding rocket (DN-2): white body, red nose cone, four fins, an engine bell and a glowing exhaust flame behind. Nose along +z, length about 0.06.
   _rocketModel(color) {
     const T = this.T,

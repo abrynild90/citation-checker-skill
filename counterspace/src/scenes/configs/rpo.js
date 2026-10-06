@@ -2,8 +2,8 @@
 import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C, PK } from './shared.js';
 
-const MIN_PX = IS_PHONE ? 54 : 72, // craft model size range (px): larger than before on the desk, kept modest on a phone and in the PNG still
-  MAX_PX = IS_PHONE ? 84 : 108;
+const MIN_PX = IS_PHONE ? 62 : 90, // craft model size range (px): larger than before on the desk, kept modest on a phone and in the PNG still
+  MAX_PX = IS_PHONE ? 96 : 136;
 
 export const RPO = {
   id: 'rpo',
@@ -23,6 +23,8 @@ export const RPO = {
   related: null,
   event: 'cn-2025-sj21-sj25-docking',
   epChip: ['China and the US in GEO', 'Russia in LEO', 'The US and the UK in GEO'], // the in-picture chip names the episode on screen
+  epChipShort: ['China, US in GEO', 'Russia in LEO', 'US, UK in GEO'],
+  epChipMerge: true, // 375: one chip, "Drawn for illustration · 2 of 3: Russia in LEO"
   panels: [
     {
       t: 0.3,
@@ -161,8 +163,8 @@ export const RPO = {
     {
       type: 'craft',
       id: 'c2542',
-      minPx: IS_PHONE ? 54 : 64,
-      maxPx: IS_PHONE ? 84 : 90,
+      minPx: IS_PHONE ? 62 : 80,
+      maxPx: IS_PHONE ? 96 : 116,
       anchor: 'l1',
       acts: [1],
       color: C.ru,
@@ -176,12 +178,14 @@ export const RPO = {
         [0.72, 0, 0, 0],
       ],
     },
+    { type: 'range', a: 'sj21b', b: 'sj25', t0: 0.16, t1: 0.235, label: 'Within 1 km (13 June)', short: '≤ 1 km' }, // COMSPOC: on 13 June within 1 km
+    { type: 'range', a: 'sj21b', b: 'sj25', t0: 0.385, t1: 0.415, label: 'Just under 3 km (13 Jan.)', short: '< 3 km' },
     { type: 'burst', craft: 'c2542', t0: 0.447, color: '#ffd9c0', ringColor: C.ru, size: 0.1, span: 0.05 },
     {
       type: 'craft',
       id: 'c2543',
-      minPx: 44,
-      maxPx: 66,
+      minPx: IS_PHONE ? 50 : 58,
+      maxPx: IS_PHONE ? 74 : 86,
       anchor: 'l1',
       acts: [1],
       vis: [0.447, 0.72],
@@ -205,6 +209,8 @@ export const RPO = {
         [0.72, 0.3, 0.1, 0.02],
       ],
     },
+    { type: 'range', a: 'c2543', b: 'c2542', t0: 0.47, t1: 0.53, label: 'Within 2 km', short: '≤ 2 km' },
+    { type: 'range', a: 'c2543', b: 'usa245', t0: 0.6, t1: 0.665, label: 'Within 20 km (Jan. 2020)', short: '≤ 20 km' },
     { type: 'trail', craft: 'c2543', t0: 0.447, t1: 0.68, color: C.ru, acts: [1] },
     {
       type: 'craft',
@@ -246,6 +252,7 @@ export const RPO = {
     {
       type: 'craft',
       id: 'usa271b',
+      spline: true, // a smooth track through the keyframes, not a kinked wake
       minPx: MIN_PX,
       maxPx: MAX_PX,
       anchor: 'g3',
@@ -266,6 +273,7 @@ export const RPO = {
         [1, -0.4, 0.05, 0],
       ],
     },
+    { type: 'range', a: 'usa271b', b: 'sky', t0: 0.84, t1: 0.94, label: 'Closest about 13 km', short: '~ 13 km' },
     { type: 'burst', craft: 'usa271b', t0: 0.82, color: '#cfe8ff', ringColor: C.us, size: 0.1, span: 0.05 },
     { type: 'trail', craft: 'usa271b', t0: 0.72, t1: 0.83, color: C.us, acts: [2] },
   ],

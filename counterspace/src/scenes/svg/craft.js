@@ -95,6 +95,10 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
         solid('M-6.5,19 L-9.5,29 L9.5,29 L6.5,19Z', '#8a8f9c');
       }
     }
+  } else if (shape === 'plane' && o.variant === 'winged') {
+    // a generic winged vehicle (CSSHQ), nose up: a slim body on a broad delta wing, no tail or surface detail
+    solid('M0,-47 L6,-28 L48,34 L-48,34 L-6,-28Z', color);
+    k.append('path').attr('d', 'M0,-45 C4,-30 4.6,-10 4.6,14 L4.6,34 L-4.6,34 L-4.6,14 C-4.6,-10 -4,-30 0,-45Z').attr('fill', '#fff').attr('fill-opacity', 0.28);
   } else if (shape === 'plane') {
     // spaceplane, seen from above, nose up: a swept delta with a lighter fuselage and a dark cockpit
     solid('M0,-47 L5,-31 L9.5,-12 L45,22 L45,30 L13,25 L7,37 L0,41 L-7,37 L-13,25 L-45,30 L-45,22 L-9.5,-12 L-5,-31Z', color);

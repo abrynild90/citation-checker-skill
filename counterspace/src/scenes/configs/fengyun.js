@@ -31,10 +31,11 @@ export const FENGYUN = {
   phoneOff: { Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   sunView: { az: 60, el: 14 }, // a lower, more sideways sun: a clear terminator and a shaded limb, not a flat disc
   noSimCount: true,
+  lightsK: 0.5, // softer night lights over East Asia
   stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 34 : 46, maxPx: IS_PHONE ? 60 : 84, impactDx: 100, impactDy: -100, impactUntil: 0.6 },
+    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 34 : 46, maxPx: IS_PHONE ? 60 : 84, impactDx: 150, impactDy: -80, impactUntil: 0.6 },
     { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
     {
       type: 'debris',
@@ -51,6 +52,7 @@ export const FENGYUN = {
       labelEdge: true, // live: the label points at a fragment on the ring's outer edge, so the leader stays short
       dx: 70,
       dy: 24,
+      ring: { t1: 0.57, ease: 1.5, fat: 2.4 }, // the fragments reach their share of the full circle by t 0.56: a closed ring, as the caption says
       late: { t0: 0.6, k: 1.4, kr: 6 },
     },
   ],

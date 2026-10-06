@@ -22,9 +22,11 @@ export const SHAKTI = {
   orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
+  lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
+  phoneHide: ['Abdul Kalam'], // 375: two labels at the burst (the island is in the status line)
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
-  liveOff: { 'Abdul Kalam': [-34, 50], 'PDV': [-86, -46], 'Microsat-R': [172, -14] }, // the two pills sit on opposite sides of the strike, one above and one below
+  liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-86, -46], 'Microsat-R': [172, -14] }, // the two pills sit on opposite sides of the strike, one above and one below
   phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
   actors: [
@@ -43,7 +45,7 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32, rocket: { minPx: 44, maxPx: 70 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.46, strong: true, coreK: 0.5, flashSpan: 0.12, rocket: { minPx: 44, maxPx: 70 } },
     {
       type: 'debris',
       count: 130,
@@ -53,10 +55,11 @@ export const SHAKTI = {
       dv: 1.2,
       drift: 0.15,
       decay: 1.5,
-      color: '#ff9c52',
-      size: 0.1,
-      minPx: 4.5,
-      maxPx: 13,
+      color: '#ffe9a0',
+      palette: { hot: [1, 0.97, 0.78], mid: [1, 0.86, 0.4], cool: [1, 0.72, 0.28] },
+      size: 0.11,
+      minPx: 5,
+      maxPx: 15,
       additive: true,
       lateGlow: true,
     },

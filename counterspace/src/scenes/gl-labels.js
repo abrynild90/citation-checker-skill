@@ -486,7 +486,7 @@ const methods = {
     const phone = this.el.clientWidth < 520;
     c.style.display = phone && this.sim.cfg.insetNoPhone ? 'none' : '';
     if (c.style.display) return;
-    const bl = this.sim.cfg.insetCorner === 'bl', // bottom-left, above the caption (scenes whose action fills the top right)
+    const bl = (phone && this.sim.cfg.insetCornerPhone ? this.sim.cfg.insetCornerPhone : this.sim.cfg.insetCorner) === 'bl', // insetCornerPhone: an opt-in corner for a phone-width stage // bottom-left, above the caption (scenes whose action fills the top right)
       sz = phone && this.sim.cfg.insetSizePhone ? this.sim.cfg.insetSizePhone : this.sim.cfg.insetSize,
       mc = (this._insetMeasure ||= document.createElement('canvas').getContext('2d')),
       title = phone && this.sim.cfg.insetPhone ? this.sim.cfg.insetPhone : this.sim.cfg.inset;
@@ -651,6 +651,7 @@ const methods = {
       const A = it.on(t) && it.a(t),
         B = A && it.b(t);
       if (!A || !B) return void (el.style.display = 'none');
+      if (this.sim.cfg.noJamArrow && it.dashFn?.(t)) return void (el.style.display = 'none'); // opt-in: no edge arrow on a jammed (faint, flickering) link
       // walk along the beam from the aircraft: the last sample still inside the frame is where the beam leaves the picture (the satellite end may be
       // behind the camera, so the end points alone cannot be projected)
       let prev = proj(A),
