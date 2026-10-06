@@ -147,9 +147,9 @@ export function drawB(el = document.getElementById('svgB')) {
         .attr('id', `hatch-${s.key.replace(':', '-')}`)
         .attr('patternUnits', 'userSpaceOnUse');
       if (s.nd) {
-        p.attr('width', 5).attr('height', 5);
-        p.append('rect').attr('width', 5).attr('height', 5).style('fill', `var(${s.v})`).style('fill-opacity', 0.1);
-        p.append('circle').attr('cx', 2.5).attr('cy', 2.5).attr('r', 1.1).style('fill', `var(${s.v})`);
+        p.attr('width', 6).attr('height', 6);
+        p.append('rect').attr('width', 6).attr('height', 6).style('fill', `var(${s.v})`).style('fill-opacity', 0.1);
+        p.append('circle').attr('cx', 3).attr('cy', 3).attr('r', 1.6).style('fill', `var(${s.v})`);
       } else {
         p.attr('width', 6).attr('height', 6).attr('patternTransform', 'rotate(45)');
         p.append('rect').attr('width', 6).attr('height', 6).style('fill', `var(${s.v})`).style('fill-opacity', 0.16);
@@ -285,8 +285,8 @@ export function drawB(el = document.getElementById('svgB')) {
         s.append('path').attr('class', 'whisker').attr('d', wd).attr('stroke-linecap', 'round');
       }
       // the figure above the bar, and the range as a quiet second line
-      let range = dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : '';
-      if (range && !phone && xb - xa >= 100) range = `range ${range}`;
+      let range = dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : 'no range';
+      if (range && range !== 'no range' && !phone && xb - xa >= 100) range = `range ${range}`;
       if (range && tw(range, 12.5, 400) > xb - xa + 14) range = '';
       s.append('text')
         .attr('class', 'fig')
@@ -394,7 +394,7 @@ export function drawB(el = document.getElementById('svgB')) {
             28,
           ],
           [
-            `<defs><pattern id="kD" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:${ink};fill-opacity:.1"/><circle cx="2.5" cy="2.5" r="1.1" style="fill:${ink}"/></pattern></defs>` +
+            `<defs><pattern id="kD" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" style="fill:${ink};fill-opacity:.1"/><circle cx="3" cy="3" r="1.6" style="fill:${ink}"/></pattern></defs>` +
               sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
             'Developing, our reading (SWF’s table has no data)',
             28,

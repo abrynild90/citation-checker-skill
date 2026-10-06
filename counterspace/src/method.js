@@ -99,6 +99,7 @@ export function drawMethod() {
   document.getElementById('methodBody').innerHTML = `
   <h3 id="srcEditions">Editions and dates</h3>
   <p class="src-intro">Which editions the data rests on, and how current it is.</p>
+  <h4 class="sub-h">What the data rests on</h4>
   <ul>
     <li><b>Main source:</b> Secure World Foundation (SWF), <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen
       Brett, eds., 9th ed., April 2026). It covers 13 countries and five categories of capability. The count of 13 countries is a 2026 figure, not a fixed
@@ -106,6 +107,9 @@ export function drawMethod() {
     <li><b>Consulted, not cited:</b> The Center for Strategic and International Studies (CSIS) Aerospace Security Project’s <i>Space Threat Assessment
       2025</i> was used only to cross-check. No entry, page reference or citation depends on it. The 2026 edition was not yet published on ${DATA_DATE}.</li>
     <li><b>Data last updated:</b> ${DATA_DATE}.</li>
+  </ul>
+  <h4 class="sub-h">Checks we ran</h4>
+  <ul>
     <li><b>Where the opening claim comes from:</b> The statement at the top of the page that only non-destructive capabilities are in active use is SWF’s
       finding, quoted from SWF 2026, Executive Summary, p.&nbsp;xxiii (PDF p.&nbsp;21): “only non-destructive capabilities are actively being used against satellites
       in current military operations.”</li>

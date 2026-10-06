@@ -46,7 +46,7 @@ const NONE = 'No later legal step in our records';
 const capDate = (r) => parse(r.date || r.start);
 const HEX = 'M0,-8L6.9,-4L6.9,4L0,8L-6.9,4L-6.9,-4Z';
 const GROUND = 'var(--ground)';
-const hexMarkup = (c) => `<path d="${HEX}" style="fill:${c};stroke:${GROUND};stroke-width:3;paint-order:stroke;stroke-linejoin:round"/>`;
+const hexMarkup = (c) => `<path d="${HEX}" transform="scale(1.2)" style="fill:${c};stroke:${GROUND};stroke-width:3;paint-order:stroke;stroke-linejoin:round"/>`;
 const ringMarkup = () =>
   `<circle r="7" style="fill:${GROUND};stroke:${GROUND};stroke-width:5.6"/><circle r="7" style="fill:${GROUND};stroke:var(--accent);stroke-width:2.4"/>`;
 const catColor = (c) => (c.domain === 'kinetic' ? 'var(--cat-da)' : 'var(--cat-ew)');
@@ -218,7 +218,7 @@ export function drawL(el = document.getElementById('svgL')) {
     const { p, c, l, w, years, g } = r;
     const col = catColor(c),
       yy = y0 + r.block + 24,
-      xe = l ? x(Math.min(years, MAX_YEARS)) : x(0);
+      xe = l ? Math.max(x(0) + 26, x(Math.min(years, MAX_YEARS))) : x(0);
     const say = l ? `${g.num} ${g.unit}` : NONE;
     const row = svg
       .append('g')

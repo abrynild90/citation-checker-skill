@@ -315,3 +315,12 @@ details.table>summary{scroll-margin-top:110px}
 .tscroll td a,.tscroll .srcc{white-space:nowrap}
 @media (min-width:1001px){#tableA th:nth-last-child(2),#tableA td:nth-last-child(2),#tableC th:nth-last-child(2),#tableC td:nth-last-child(2),#tableR th:nth-last-child(2),#tableR td:nth-last-child(2){padding-right:var(--s-5)}}
 @media (max-width:1000px){.tscroll td a,.tscroll .srcc{white-space:normal}.tscroll td .srcc a{white-space:nowrap}}
+
+/* the lag chart's grid stays quieter than the track under each bar */
+#lag .gridline line{stroke-opacity:.5}
+/* chart B on a phone: the category chips are one row that scrolls sideways, so the chart starts sooner */
+@media (max-width:640px){
+  #chipsB{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:calc(var(--gutter) * -1);padding-right:var(--gutter);-webkit-overflow-scrolling:touch}
+  #chipsB::-webkit-scrollbar{display:none}
+  #chipsB .chip{flex:none}
+}
