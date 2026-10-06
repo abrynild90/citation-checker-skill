@@ -3,7 +3,7 @@
 // Provides: drawC(), stateC, zoomedC().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, PHONE_MAX, layout, parse, tw, xAxis } from '../app.js';
+import { DOMAIN, EXPORTING, chartWindow, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, PHONE_MAX, layout, parse, tw, xAxis } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
 import { activate, addGuide, bindMark, nkCard, quiet, rove, srcCell, table } from '../ui.js';
 import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
@@ -34,7 +34,7 @@ const STYLE_OF = { official_government: 'solid', multi_government: 'solid', rese
 // stateC.focus: null = the default (the zoom 1995-2026 on a phone only; wider screens open on the shared 1957-2026 years so the sticky law strip lines up);
 // true / false = the reader's choice.
 export const stateC = { focus: null };
-export const zoomedC = () => stateC.focus ?? isPhoneNow();
+export const zoomedC = () => stateC.focus ?? true;
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
 
 const FS = 13, // label size
@@ -356,6 +356,10 @@ export function drawC(el = document.getElementById('svgC')) {
 
   // ---------------------------------------------------------------- note, key and data table
   const firstYr = Math.min(...NK.map((e) => +e.start.slice(0, 4)));
+  if (!EXPORTING) {
+    chartWindow.chartC = zoom ? C_FOCUS() : null;
+    queueMicrotask(() => dispatchEvent(new Event('scroll')));
+  }
   document.getElementById('noteC').innerHTML = zoom
     ? zoomNote('1995 to 2026', stateC.focus === null, 'the earliest entry in our records is from 1997')
     : fullNote() + (phone ? ` Nothing is in our records before ${firstYr}.` : '');

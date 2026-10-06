@@ -4,7 +4,7 @@
 // Provides: drawR(), stateR, zoomedR(), R_SHAPE_KEY, R_STYLE_KEY, R_VERT_NOTE.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { CO, DOMAIN, EXPORTING, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
+import { CO, DOMAIN, EXPORTING, chartWindow, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ACTIVITY_LABEL, ACTIVITY_SHORT, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
 import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
@@ -13,7 +13,7 @@ const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
 // stateR.focus: null = the default (the zoom 2000-2026 on a phone only; wider screens open on the shared years so the sticky law strip lines up);
 // true / false = the reader's explicit choice, kept across resizes.
 export const stateR = { focus: null };
-export const zoomedR = () => stateR.focus ?? isPhoneNow();
+export const zoomedR = () => stateR.focus ?? true;
 const R_FOCUS = () => [parse('2000-01-01'), DOMAIN[1]];
 
 // Key lists, shared by the page key and the downloads: [svg inner (drawn in the current ink), label, glyph width].
@@ -241,6 +241,12 @@ export function drawR(el = document.getElementById('svgR')) {
     'us-2018-mycroft-eagle': 'Mycroft',
     'us-2019-mycroft-s5': 'Mycroft',
     'us-2023-otv7': 'OTV-7',
+    'us-2022-usa270-sy12': 'USA 270',
+    'us-2025-usa271-tjs15': 'USA 271',
+    'us-2025-usa324-tjs16-17': 'USA 324',
+    'us-2025-gssap-flank-sj21-sj25': 'GSSAP flank',
+    'cn-2024-sj23-akm': 'SJ-23',
+    'cn-2025-sj21-sj25-rpo': 'SJ-21 / SJ-25',
     'us-2024-ldpe3a-sj23': 'LDPE 3A',
     'us-2020-usa271-sj20': 'USA 271',
     'us-2005-dart': 'DART',
@@ -272,6 +278,8 @@ export function drawR(el = document.getElementById('svgR')) {
     const lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true'),
       lbox = []; // [x0, x1, y] of every label drawn so far: labels keep 6 px apart
     const clear = (a, b, yy) => lbox.every((q) => Math.abs(q[2] - yy) > 13 || q[1] < a - 6 || q[0] > b + 6);
+    // a label never sits on any 3D cube
+    const cubeHit = (a, b, yy) => placed.some((q) => q.bx != null && q.bx + 8 > a && q.bx - 8 < b && q.by + 9 > yy - 9 && q.by - 9 < yy + 7);
     placed.forEach((p) => {
       const t = HEADLINES[p.e.id];
       if (!t) return;
@@ -281,16 +289,16 @@ export function drawR(el = document.getElementById('svgR')) {
       const edge = p.bx != null && p.bx < p.X0 ? p.bx - 14 : p.X0 - 14, // a 3D cube left of the mark pushes the label further left
         left = [edge - w, edge],
         right = [p.X1 + (p.ongoing ? 30 : 16), p.X1 + (p.ongoing ? 30 : 16) + w];
-      const side = left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y) && !p.ongoing ? 'r' : null;
+      const side = left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y) && !cubeHit(left[0], left[1], p.y) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y) && !cubeHit(right[0], right[1], p.y) && !p.ongoing ? 'r' : null;
       let dy = 0,
         ax = null;
       if (!side) {
         // no room in the row: try just above or below the mark, ending where the mark ends, when nothing is there
-        const hi = (p.bx != null && p.bx > p.X1 ? p.X0 - 10 : Math.max(p.X1, p.bx ?? 0) + 4); // ends before a cube on the mark's right
-        for (const off of [-15, 15]) {
+        const hi0 = (p.bx != null && p.bx > p.X1 ? p.X0 - 10 : Math.max(p.X1, p.bx ?? 0) + 4); // ends before a cube on the mark's right
+        for (const [off, hi] of [-15, 15].flatMap((o) => [hi0, p.bx != null ? p.bx - 10 : null, p.X0 - 10].filter((v) => v != null).map((h) => [o, h]))) {
           const a = hi - w,
             yy = p.y + off;
-          if (a > INSET + 8 && hi < R - 4 && clear(a, hi, yy) && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 4 || q.ext[0] > hi + 4)) {
+          if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy) && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 4 || q.ext[0] > hi + 4)) {
             dy = off;
             ax = hi;
             lbox.push([a, hi, yy]);
@@ -371,6 +379,10 @@ export function drawR(el = document.getElementById('svgR')) {
   if (EXPORTING) return;
 
   // ---------------------------------------------------------------- note, key and data table
+  if (!EXPORTING) {
+    chartWindow.chartR = zoomed ? R_FOCUS() : null;
+    queueMicrotask(() => dispatchEvent(new Event('scroll')));
+  }
   document.getElementById('noteR').innerHTML = zoomed ? zoomNote('2000 to 2026', stateR.focus === null, 'the first entry in our records is from 2003') : fullNote();
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);

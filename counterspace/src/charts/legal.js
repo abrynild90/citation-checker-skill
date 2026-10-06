@@ -3,7 +3,7 @@
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
 import { activate, addGuide, bindMark, legalCard, legalKindOf, legalKindWords, legend, rove, setGuide, table } from '../ui.js';
 import { hooks } from '../shared.js';
 
@@ -159,7 +159,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     el.removeAttribute('role');
     el.removeAttribute('aria-label');
   }
-  const L = layout(el, zoom ? ZOOM : DOMAIN, strip ? 1100 : 300),
+  const win = zoom ? ZOOM : compact && stripDom ? stripDom : DOMAIN,
+    windowed = win !== DOMAIN,
+    L = layout(el, win, strip ? 1100 : 300),
     W = L.W,
     // The zoom panel has no y axis to leave room for, so on a phone its time axis runs almost edge to edge; on a wide screen it shares the main chart's gutters so the two axes line up.
     M = zoom ? (isPhoneNow() ? { l: 18, r: 18 } : zoomGutters(el, L.M)) : L.M,
@@ -179,9 +181,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     (l) =>
       l.kind === 'negotiation_span' &&
       (l.end || l.id === 'paros-1981') &&
-      (!zoom || ((l.end ? parse(l.end) : DOMAIN[1]) > ZOOM[0] && parse(l.start) < ZOOM[1])),
+      (!windowed || ((l.end ? parse(l.end) : DOMAIN[1]) > win[0] && parse(l.start) < win[1])),
   );
-  const pts = LEGAL.filter((l) => !spans.includes(l) && (!zoom || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) =>
+  const pts = LEGAL.filter((l) => !spans.includes(l) && (!windowed || (x(parse(l.start)) >= M.l - 1 && x(parse(l.start)) <= W - M.r + 1))).sort((a, b) =>
     a.start < b.start ? -1 : 1,
   );
   // 1. Crowded symbols are stacked into rows (the true date stays on the axis).
@@ -764,6 +766,7 @@ function miniShow() {
   }
 }
 let legalCompact = false;
+let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
 export function legalScroll() {
   miniShow();
   const band = document.getElementById('legalBand'),
@@ -773,10 +776,15 @@ export function legalScroll() {
   const lagEl = document.getElementById('chartB') || document.getElementById('lag');
   band.classList.toggle('off', !isPhoneNow() && !!lagEl && lagEl.getBoundingClientRect().top < band.offsetHeight + 24);
   const stuck = !isPhoneNow() && band.getBoundingClientRect().top <= 0.5 && tr.top < -1 && tr.bottom > 200;
-  if (stuck === legalCompact) return;
+  // which chart is under the strip decides the years it shows (a zoomed chart: its own window)
+  const under = ['chartR', 'chartC'].find((id) => document.getElementById(id).getBoundingClientRect().top < band.offsetHeight + 40 && document.getElementById(id).getBoundingClientRect().bottom > band.offsetHeight);
+  const want = stuck && under ? chartWindow[under] : null;
+  const changed = stuck && want !== stripDom;
+  if (stuck === legalCompact && !changed) return;
   if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused symbol
   const h0 = band.offsetHeight;
   legalCompact = stuck;
+  stripDom = want;
   drawLegal();
   band.classList.toggle('compact', stuck);
   if (stuck) document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');

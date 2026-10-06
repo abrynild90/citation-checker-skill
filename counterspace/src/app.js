@@ -172,6 +172,8 @@ export function setExporting(exporting, forceDesktop) {
   EXPORTING = exporting;
   FORCE_DESKTOP = forceDesktop;
 }
+// The time window each zoomed chart shows (null when it shows the full span); the sticky law strip follows the chart under it so the years line up.
+export const chartWindow = { chartC: null, chartR: null };
 export const PHONE_MAX = 640; // px: below this width the page uses its phone layouts
 export const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < PHONE_MAX;
 export function layout(el, domain = DOMAIN, minW = 300) {
