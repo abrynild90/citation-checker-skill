@@ -44,7 +44,7 @@ const POSTER_VIEW = {
   dn2: { back: 0.8, boost: 1.3, right: 0.5 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
-const TRIPTYCH = [[0.2, 1], [0.57, 2], [0.88, 3]]; // [t, camera preset] per episode (RPO poster)
+const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
 const TRIPTYCH_BRIEFS = ['SJ-21 + SJ-25 appear to dock', 'Cosmos 2543 near USA 245', 'USA 271 near SKYNET 5A'];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
@@ -75,8 +75,8 @@ try {
     if (id === 'rpo' && !process.env.NO_TRIPTYCH) {
       // RPO: one picture that tells the three-episode story, three tiles side by side (each at its own moment and act camera), numbered with the panel titles
       const shots = [];
-      for (const [tt, cam] of TRIPTYCH) {
-        const box = await page.evaluate(({ tt, cam }) => {
+      for (const [tt, cam, back] of TRIPTYCH) {
+        const box = await page.evaluate(({ tt, cam, back }) => {
           const h = window.__cs.host();
           h.playing = false;
           h.update(tt);
@@ -86,7 +86,7 @@ try {
           // the screen box of the craft on show (the picture is cropped around it)
           const cv = h.renderer.domElement;
           let pts = h.dyn
-              .filter((d) => d.it.kind === 'point' && d.it.prim && (d.it.label || d.obj.visible) && d.it.pos?.(tt))
+              .filter((d) => d.it.kind === 'point' && (d.it.prim || d.it.label) && d.obj.visible && d.it.pos?.(tt))
               .map((d) => {
                 const v = d.obj.position.clone().project(h.camera);
                 return [((v.x + 1) / 2) * cv.clientWidth, ((1 - v.y) / 2) * cv.clientHeight];
@@ -103,7 +103,7 @@ try {
           h.camera.updateProjectionMatrix();
           h.render();
           return { cx: w / 2, cy: hh / 2, bw: Math.max(...xs) - Math.min(...xs), bh: Math.max(...ys) - Math.min(...ys), w, h: hh };
-        }, { tt, cam });
+        }, { tt, cam, back });
         if (process.env.DEBUG_TRI) console.log(JSON.stringify(box));
         await page.waitForTimeout(900);
         shots.push({ png: (await page.locator('#sceneView canvas').first().screenshot({ type: 'png' })).toString('base64'), box });
@@ -136,7 +136,7 @@ try {
             imgs.push(img);
           }
           // the same scale for all three tiles: the crop that fits the widest group
-          const SW = Math.min(imgs[0].height / 1.12, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.36 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.06 + 150 * (imgs[i].width / s.box.w)))));
+          const SW = Math.min(imgs[0].height / 1.12, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.36 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.1 + 200 * (imgs[i].width / s.box.w)))));
           for (let i = 0; i < 3; i++) {
             const img = imgs[i],
               b = shots[i].box,
