@@ -388,3 +388,5 @@ details.table>summary{scroll-margin-top:110px}
 .lag-fig{stroke-width:8px}
 #lag p.note{color:var(--muted)}
 .card .kb-line{margin:var(--s-2) 0 0;padding-top:var(--s-2);border-top:1px solid var(--grid);color:var(--muted);font-size:12.5px;line-height:1.4}
+/* tablet: the law chapter starts closer to the hero */
+@media (min-width:641px) and (max-width:1000px){.law-intro{padding-top:var(--s-6)}}
