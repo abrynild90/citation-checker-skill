@@ -169,8 +169,8 @@ export const RPO = {
       scale: 1.5 * PK,
       label: 'Cosmos 2542 (Russia)',
       short: 'Cosmos 2542',
-      dx: IS_PHONE ? 62 : 104,
-      dy: IS_PHONE ? -48 : -36,
+      dx: IS_PHONE ? -24 : 104,
+      dy: IS_PHONE ? 46 : -36,
       key: [
         [0.42, 0, 0, 0],
         [0.72, 0, 0, 0],
