@@ -91,7 +91,7 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -44], Johnston: [-140, -4], Thor: [-100, 58], Artificial: [-60, -21] },
+  liveOff: { Detonation: [-150, -44], Johnston: [-140, -4], Thor: [-100, 58], Artificial: [-60, -21], 'Satellite damaged': [-120, 36] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
@@ -105,7 +105,6 @@ export const STARFISH = {
     { name: 'From the north', at: [42, -169.5, 4.3 * PH] },
   ],
   phoneHide: ['Thor launch', 'LEO', 'Artificial', 'Johnston'], // 375: two labels only (Detonation, Satellite) plus the caption; Johnston is named in the story text
-  phoneOff: { Satellite: [30, 46] }, // the Satellite pill drops onto the globe, its leader short
   phoneOnDisc: ['Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
   stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)
   staticDropPhone: ['Thor launch'], // 375 static: Thor shares the burst spot; Detonation and Johnston keep separate labels, placed apart
