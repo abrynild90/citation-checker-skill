@@ -109,7 +109,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           if (burst && tk <= ht + 0.16) P.push(...burstPad);
           if (arc && tk <= ht + 0.05) P.push(arc.to);
           if (tk <= ht) P.push(tgt.pos(tk));
-          if (tk > ht) P.push(...debrisPts(tk, cfg.fitPct ?? 0.8));
+          if (tk > ht) P.push(...debrisPts(tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
+          if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
           return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
             dMin: cfg.fitMin ?? 0.3,
             dMax: cfg.fitMax ?? 6.5,
