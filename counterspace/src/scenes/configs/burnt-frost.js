@@ -18,7 +18,7 @@ export const BURNT_FROST = {
   phoneK: 1.15,
   sunView: { az: -32, el: 24 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
   nightK: 1.2,
-  phoneOff: { 'Larger pieces': [106, -58], 'Pieces falling': [106, -58] }, // 375: the label sits right of the debris cloud, not over it
+  phoneOff: { 'Larger pieces': [112, -50], 'Pieces falling': [112, -50] }, // 375: the label sits right of the debris cloud, not over it
   launchAt: [3.3, 0.95, 0.8],
   earlyKey: true,
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
