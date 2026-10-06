@@ -56,7 +56,7 @@ const methods = {
         raw.push(null);
         continue;
       }
-      if (noBanner && L.item?.stillHide) {
+      if (noBanner && (L.item?.stillHide || this.sim.cfg.stillHideText?.some((h) => L.text.startsWith(h)))) {
         raw.push(null); // stillHide: a live-view aid (a gauge or a path tag) that the print frame does not need
         continue;
       }

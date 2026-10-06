@@ -24,7 +24,7 @@ export const COSMOS1408 = {
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',
   hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 },
-  phoneHide: ['Plesetsk'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
+  phoneHide: ['Plesetsk', 'Nudol'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
   camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact', 'Debris of'] },
   launchCam: 'second',
   orbitAt: [52, 28, 4.5],
