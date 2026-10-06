@@ -487,7 +487,7 @@ function shortPin(pin) {
     pg = first.match(/PDF p\. [\d-]+/);
   if (t && pg) return `${t[1]}, ${pg[0]}`;
   if (pg) return pg[0];
-  const cut = first.length > 56 ? first.slice(0, 56).replace(/[\s,;(]+\S*$/, '') + '...' : first; // long free-text pins: the full page reference stays in the link name and the title
+  const cut = first.length > 40 ? first.slice(0, 40).replace(/[\s,;(]+\S*$/, '') + '...' : first; // long free-text pins: the full page reference stays in the link name and the title
   return cut;
 }
 // A value that repeats on nearly every row shows as a dash; screen readers still hear it, and the cards on small screens leave it out.
@@ -496,7 +496,7 @@ export const srcCell = (r, tableId, entry) => {
   const tn = SRC_TABLE[tableId] || 'data',
     label = `${r.source}, ${r.pin}. Source for the ${tn} table, ${entry}`;
   const shown = r.source.length > 34 ? r.source.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim() : r.source;
-  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}" title="${esc(r.source)}">${esc(shown)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin))}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
+  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}" title="${esc(r.source)}">${esc(shown)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin)).replace(/^(Table [\d.-]+|Section [\d.]+)/, '<span class="nw">$1</span>')}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
 };
 // Accessible data table. Each cell carries data-label so CSS can stack entries as cards on phones (no sideways scrolling). Columns whose cells are
 // all numbers are right-aligned; date columns never wrap on a wide screen.

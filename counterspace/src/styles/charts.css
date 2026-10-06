@@ -369,3 +369,11 @@ details.table>summary{scroll-margin-top:110px}
 .qc{color:var(--faint)}
 @media (max-width:1100px){#tableC td:has(.qc){display:none!important}}
 @media (max-width:1000px){#tableA td:has(.qc){display:none!important}}
+/* Close approaches: the object columns get room, the Source column a fixed share */
+@media (min-width:1101px){
+  #tableR th:nth-child(5),#tableR td:nth-child(5){min-width:110px;max-width:16ch}
+  #tableR th:nth-child(6),#tableR td:nth-child(6){min-width:128px;max-width:22ch}
+  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:240px}
+  #tableR th:last-child,#tableR td:last-child{width:140px;min-width:140px;max-width:140px}
+}
+.nw{white-space:nowrap}
