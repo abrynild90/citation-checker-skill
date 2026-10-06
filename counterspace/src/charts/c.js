@@ -6,7 +6,7 @@
 import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, PHONE_MAX, layout, parse, tw, xAxis } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
 import { activate, addGuide, bindMark, nkCard, rove, srcCell, table } from '../ui.js';
-import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote } from './kit.js';
+import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
 
 const GROUPS = [
   {
@@ -75,7 +75,7 @@ export function drawC(el = document.getElementById('svgC')) {
     byY = qTop + qLines.length * qLH + 2,
     boxH = EXPORTING ? byY + byLines.length * 17 + BP - 2 : 0, // on the page the quotation is an HTML callout above the chart (same style as chart R's)
     handY = boxH + 24,
-    stripBottom = handY + 12;
+    stripBottom = handY + 12 + (zoom && !EXPORTING ? TOP_AXIS_H : 0);
 
   // ---------------------------------------------------------------- entries, planned one line each
   const planEntry = (e) => {
@@ -247,6 +247,7 @@ export function drawC(el = document.getElementById('svgC')) {
 
   // year axis
   xAxis(svg, x, axisY, zoom ? (phone ? 10 : 5) : undefined);
+  if (zoom && !EXPORTING) topAxis(svg, x, stripBottom + 14 - 6, phone ? 10 : 5);
   if (zoomLines.length) lines(svg, 'zoom-flag', PADX, axisY + 56, zoomLines, 17);
 
   // entries

@@ -237,7 +237,7 @@ export class Placer {
 export function badge(g, x, y) {
   // 3D badge: an isometric cube (shape, not color). Omitted from static exports: the cube means nothing in a figure and has no key entry there.
   if (EXPORTING) return;
-  const b = g.append('g').attr('class', 'badge3d').attr('transform', `translate(${x},${y}) scale(0.9)`).attr('aria-hidden', 'true');
+  const b = g.append('g').attr('class', 'badge3d').attr('transform', `translate(${x},${y}) scale(${typeof innerWidth !== 'undefined' && innerWidth >= 1024 && !EXPORTING ? 1.3 : 0.9})`).attr('aria-hidden', 'true');
   b.append('path').attr('class', 'top').attr('d', 'M0,-6 L5.2,-3 L0,0 L-5.2,-3Z');
   b.append('path').attr('d', 'M-5.2,-3 L0,0 L0,6 L-5.2,3Z');
   b.append('path').attr('d', 'M5.2,-3 L0,0 L0,6 L5.2,3Z');

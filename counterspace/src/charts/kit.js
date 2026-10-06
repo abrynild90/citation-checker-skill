@@ -112,8 +112,15 @@ export const dot = (r = 6) => `<path d="${circlePath(0, 0, r)}" {p}/>`;
 // ---------------------------------------------------------------- notes
 // "Zoomed" flag shown above a chart whose axis is not the shared one.
 export const zoomNote = (years, isDefault, why = '') =>
-  `<span class="zbadge">Zoomed</span> ${years}${isDefault && why ? ', because ' + why : ''}. This view no longer lines up with the law timeline or the other charts. ` +
-  'The full span (1957 to 2026) is one click away: choose “Full span”.';
+  `<span class="zbadge">Zoomed</span> ${years}${isDefault && why ? ', because ' + why : ''}. The years no longer line up with the law timeline. ` +
+  'Choose “Full span” to go back.';
 // The note under a chapter heading when the chart shows the shared years.
 export const fullNote = () =>
   `Full span, 1957 to 2026. The years line up with the law timeline above${innerWidth > 760 ? ', which stays in view as you scroll' : ''}.`;
+
+// A zoomed chart repeats its year axis at the top, so the years stay readable beside the first rows (the page draws it; downloads do not).
+export const TOP_AXIS_H = 22;
+export function topAxis(svg, x, y, every) {
+  const ax = d3.axisTop(x).ticks(d3.utcYear.every(every)).tickFormat(d3.utcFormat('%Y')).tickSizeOuter(0);
+  svg.append('g').attr('class', 'axis xaxis top-axis').attr('aria-hidden', 'true').attr('transform', `translate(0,${y})`).call(ax);
+}

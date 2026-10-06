@@ -7,7 +7,7 @@
 import { CO, DOMAIN, EXPORTING, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ACTIVITY_LABEL, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
-import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote } from './kit.js';
+import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
 // stateR.focus: null = the default (the zoom 2000-2026 on every screen, because nothing in our records is earlier than 2003; the full shared axis is one click away);
@@ -83,7 +83,7 @@ export function drawR(el = document.getElementById('svgR')) {
       });
     return rows;
   });
-  let yCur = TOP;
+  let yCur = TOP + (zoomed && !EXPORTING ? TOP_AXIS_H : 0);
   const placed = [];
   const bands = R_LANES.map((l, li) => {
     const n = Math.max(1, lanes[li].length),
@@ -190,6 +190,7 @@ export function drawR(el = document.getElementById('svgR')) {
       .text(`${b.count} operations`);
   });
   xAxis(svg, x, axisY, zoomed ? (phone ? 10 : 5) : undefined);
+  if (zoomed && !EXPORTING) topAxis(svg, x, TOP + TOP_AXIS_H - 6, phone ? 10 : 5);
   if (zoomLines.length) {
     const t = svg
       .append('text')
