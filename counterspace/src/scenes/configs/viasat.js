@@ -11,8 +11,8 @@ export const VIASAT = {
   shells: ['GEO'],
   duration: 14,
   caption:
-    'On 24 February 2022, within hours of Russian troops crossing into Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems in Ukraine and across Europe. ' +
-    'They sent destructive “AcidRain” malware, harmful software that erases the data on a device, through the ground management network of the KA-SAT satellite, a communications satellite in geostationary orbit (GEO), about 36,000 km up. ' +
+    'On 24 February 2022, within hours of Russia’s invasion of Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems across Europe. ' +
+    'Their “AcidRain” malware, software that erases a device’s data, reached the modems through the ground management network of KA-SAT, a communications satellite in geostationary orbit (GEO) about 36,000 km up. ' +
     'The satellite itself kept working. The attack hit the network on the ground. ' +
     'The Tallinn Manual 2.0 is an expert manual on how international law applies to cyber operations. It is soft law, meaning not binding, and dates from 2017, before the attack. ' +
     'The ground network and the order in which regions go dark are drawn for illustration.',
@@ -59,6 +59,8 @@ export const VIASAT = {
         [54, 60, 6, 26, 0.18, 3],
       ],
       count: 900,
+      compactStatus: true,
+      ragged: true, // soft-edged, clumpy regions instead of flat slabs of dots
       pulse0: 0.1,
       t0: 0.3,
       t1: 0.62,
@@ -75,12 +77,13 @@ export const VIASAT = {
     { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
   ],
   steps: [
-    [0, 'The network works normally: KA-SAT serves user modems across Ukraine and Europe'],
-    [0.1, 'Attackers send AcidRain, a data-erasing program, into the ground management network'],
-    [0.3, 'Commands reach user modems region by region; the modems are wiped and go offline'],
-    [0.62, 'Tens of thousands of modems are offline; the satellite itself keeps operating'],
+    [0, 'Normal service: KA-SAT serves modems across Ukraine and Europe'],
+    [0.1, 'Attackers send AcidRain, a data-erasing program, into the ground network'],
+    [0.3, 'Commands reach modems region by region; they are wiped and go offline'],
+    [0.62, 'Tens of thousands of modems are offline; the satellite keeps working'],
     [0.8, 'Attributed to Russia’s military intelligence (GRU) by the US, UK and EU in May 2022 (SWF, p. 15-07)'],
   ],
+
   insetHalo: true, // dark casing on the inset's KA-SAT text (it sat on the blue globe)
   insetPhone: 'Top view',
   insetSizePhone: [92, 76], // 375: a small inset in the corner, clear of the Terminals pill
@@ -89,7 +92,7 @@ export const VIASAT = {
   camDist: 5.6,
   focus: [33, 12],
   shellLabels: { GEO: null },
-  liveShort: ['Ground terminals'], // the full text puts a corner of the label on the Earth at 900 px on the wide camera
+  liveShort: ['Ground terminals', 'Ground management'], // the full text puts a corner of the label on the Earth at 900 px on the wide camera
   staticZoom: 1.5,
   stillCam: { at: [10, 12, 3.9], look: [24, 13, 0.5], hideShell: true },
   cameras: [
@@ -101,19 +104,19 @@ export const VIASAT = {
       glide: [
         [0, [10, 11, 4.3], [8, 9, 1.0]],
         [0.26, [10, 11, 4.3], [8, 9, 1.0]],
-        [0.36, [32, 14, 2.4], [50, 19, 1.0]],
-        [1, [32, 14, 2.4], [50, 19, 1.0]],
+        [0.36, [4, 12, 3.3], [14, 12, 1.2]],
+        [1, [4, 12, 3.3], [14, 12, 1.2]],
       ],
       phone: {
         glide: [
           [0, [10, 12, 4.7], [8, 18, 1.0]],
           [0.2, [10, 12, 4.7], [8, 18, 1.0]],
-          [0.3, [32, 14, 2.4], [56, 20, 1.0]],
-          [1, [32, 14, 2.4], [56, 20, 1.0]],
+          [0.3, [4, 12, 3.9], [14, 12, 1.2]],
+          [1, [4, 12, 3.9], [14, 12, 1.2]],
         ],
       },
     },
-    { name: 'Europe close up', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], insetRef: true, phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] } },
+    { name: 'Europe close up', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], insetRef: true, phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] } }, // the close view of the regions (KA-SAT is out of frame here by design; the first camera keeps it in view)
     { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
     { name: 'Whole scene', at: [30, -6, 6.5], hide: ['Ground management'] }, // its label would need a leader across the whole globe
   ],
