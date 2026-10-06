@@ -432,11 +432,12 @@ document.querySelectorAll('[data-export]').forEach((btn) => {
   item('Sharp drawing', 'Stays crisp at any size', () => download(`${base}.svg`, exportSVG(which), 'image/svg+xml'));
   const bg = document.createElement('button');
   bg.type = 'button';
-  bg.setAttribute('role', 'menuitemcheckbox');
+  bg.setAttribute('role', 'switch');
+  bg.className = 'dl-switch';
   const dark = document.getElementById('expDark');
   const syncBg = () => {
     bg.setAttribute('aria-checked', String(!!dark?.checked));
-    bg.innerHTML = `<b>Dark background: ${dark?.checked ? 'on' : 'off'}</b><span>Applies to every download</span>`;
+    bg.innerHTML = `<span class="sw-txt"><b>Dark background: ${dark?.checked ? 'on' : 'off'}</b><span>Applies to every download</span></span><span class="sw-track" aria-hidden="true"><span class="sw-thumb"></span></span>`;
   };
   bg.onclick = () => {
     if (dark) dark.checked = !dark.checked;
