@@ -412,62 +412,10 @@
   color: var(--text);
   text-wrap: pretty;
 }
-.overlay .sv-lede.clamped {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  overflow: hidden;
-  margin-bottom: var(--s-1);
-}
-.overlay .sv-more {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  min-height: 40px;
-  margin: 0 0 var(--s-4) -8px;
-  padding: 0 var(--s-3) 0 var(--s-2);
-  font: 500 14px/1.3 var(--sans);
-  color: var(--accent);
-  background: none;
-  border: 0;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-}
-.overlay .sv-more[hidden] {
-  display: none;
-}
-.overlay .sv-more:hover {
-  background: var(--surface-2);
-}
-.overlay .sv-more .ico {
-  width: 16px;
-  height: 16px;
-  transition: transform var(--dur-2) var(--sv-ease);
-}
-.overlay .sv-more.open .ico {
-  transform: rotate(180deg);
-}
-.overlay .sv-more:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
-}
 .overlay .sv-steps h3 {
   margin: 0;
   font: 600 15px/1.3 var(--sans);
   color: var(--text);
-}
-.overlay .sv-note {
-  margin: var(--s-1) 0 0;
-  font: 400 13px/1.45 var(--sans);
-  color: var(--faint);
-}
-.overlay .sv-now {
-  display: none;
-}
-.overlay .sv-all > summary {
-  display: none;
 }
 .overlay .sv-steps ol {
   max-width: 600px;
@@ -906,28 +854,6 @@
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 42%) minmax(0, 1fr) auto;
   }
-  .overlay .story-scroll .story-foot {
-    margin-top: var(--s-6);
-    padding: var(--s-4) 0 0;
-    gap: var(--s-3);
-  }
-  .overlay .story-scroll .sv-src {
-    max-height: none;
-    overflow: visible;
-    font-size: 13px;
-  }
-  /* The account is folded away until asked for, so the steps get the room */
-  .overlay .sv-lede.clamped {
-    display: none;
-  }
-  .overlay .sv-more {
-    float: right;
-    margin: 0 0 0 var(--s-2);
-  }
-  .overlay .sv-lede:not(.clamped) + .sv-more {
-    float: none;
-    margin: 0;
-  }
   .overlay .view {
     grid-column: 1;
     grid-row: 2;
@@ -949,7 +875,7 @@
     height: 100vh;
     height: 100dvh;
     border-radius: 0;
-    grid-template-rows: auto minmax(0, 36%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 38%) minmax(0, 1fr) auto;
     --sv-pad: 16px;
   }
   /* The title takes the full width; close sits at its top right; previous, count and next make a small pager under it. */
@@ -1086,77 +1012,9 @@
   .overlay .sv-lede {
     font-size: 17px;
   }
-  .overlay .sv-lede.clamped {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-  .overlay .sv-more {
-    min-height: 36px;
-    margin-bottom: var(--s-2);
-  }
-  .overlay .sv-note {
-    display: none;
-  }
-  .overlay .sv-now {
-    display: block;
-    margin: var(--s-3) 0 0 -10px;
-    padding: 0;
-    list-style: none;
-  }
-  .overlay .sv-now .step {
-    cursor: default;
-    color: var(--text);
-    background: none;
-  }
-  .overlay .sv-now .st-text {
-    font-weight: 500;
-  }
-  .overlay .sv-now .next .step {
-    color: var(--muted);
-  }
-  .overlay .sv-now .next .st-text {
-    font-weight: 400;
-  }
-  .overlay .sv-now .st-rail::before {
-    display: none;
-  }
-  .overlay .sv-all {
-    margin: var(--s-1) 0 0 -8px;
-  }
-  .overlay .sv-all > summary {
-    list-style: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--s-2);
-    min-height: 44px;
-    padding: 0 var(--s-3) 0 var(--s-2);
-    font: 500 14px/1.3 var(--sans);
-    color: var(--accent);
-    border-radius: var(--r-pill);
-    cursor: pointer;
-  }
-  .overlay .sv-all > summary::before {
-    content: "";
-    width: 16px;
-    height: 16px;
-    flex: none;
-    background: currentColor;
-    transition: transform var(--dur-2) var(--sv-ease);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
-  }
-  .overlay .sv-all[open] > summary::before {
-    transform: rotate(90deg);
-  }
-  .overlay .sv-all > summary::-webkit-details-marker {
-    display: none;
-  }
-  .overlay .sv-steps .sv-all ol {
-    margin-left: 0;
-  }
   /* A still diagram (no 3D): a shorter picture and more room for the steps, which are the point here */
   .overlay.is-static .panel {
-    grid-template-rows: auto minmax(0, 32%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 34%) minmax(0, 1fr) auto;
   }
   .overlay.is-static .sv-steps .step,
   .overlay.is-static .sv-steps .st-time {
@@ -1175,19 +1033,16 @@
   .overlay .tm {
     min-width: 0;
   }
-  .overlay .views-label {
-    display: none;
-  }
   .overlay .seg {
     flex: 1;
   }
   .overlay .seg button {
     --h: 44px;
-    flex: 1 1 auto;
-    padding: 0 12px;
+    flex: 0 0 auto;
+    padding: 0 14px;
   }
-  /* The views have a row of their own and wrap onto a second one rather than scroll, so no label is ever cut (short labels, made in scene-ui.js,
-     keep it to one row in most scenes); Save image moves up beside the scrubber. */
+  /* The views have one row of their own: it scrolls sideways (snapping to a button, with a fade at an edge that has more beyond it), never wraps;
+     Save image moves up beside the scrubber. */
   .overlay .ctrl {
     grid-template-columns: auto auto minmax(0, 1fr) auto;
     grid-template-areas:
@@ -1196,13 +1051,19 @@
   }
   .overlay .seg {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 12px;
     gap: 5px;
     padding: 0;
-    overflow: visible;
+    overflow-x: auto;
     background: none;
     border: 0;
     border-radius: 0;
+  }
+  .overlay .seg button {
+    scroll-snap-align: start;
   }
   .overlay .seg.has-thumb::before {
     display: none;
@@ -1273,15 +1134,6 @@
   .overlay .sv-lede {
     font-size: 17px;
     margin-bottom: var(--s-4);
-  }
-  .overlay .story-scroll .story-foot {
-    margin-top: var(--s-5);
-    padding: var(--s-4) 0 0;
-    gap: var(--s-3);
-  }
-  .overlay .story-scroll .sv-src {
-    max-height: none;
-    overflow: visible;
   }
   .overlay .ctrl {
     grid-template-columns: auto auto minmax(80px, 2fr) minmax(0, 3fr) auto;
@@ -1385,53 +1237,7 @@
   }
 }
 
-/* ---------- Stacked layout (phones, tall windows): a one-line source stays in view above the controls, and the two disclosures share one row style */
-.overlay .sv-srcline {
-  display: none;
-}
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1) {
-  .overlay .sv-srcline {
-    display: block;
-    flex: none;
-    margin: 0;
-    padding: 6px var(--sv-pad, 16px) 0;
-    margin-bottom: 6px;
-    font: 400 13px/1.4 var(--sans);
-    color: var(--muted);
-    background: var(--surface);
-    border-top: 1px solid var(--line);
-  }
-  .overlay .sv-srcline .sl-cite {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-  }
-  .overlay .sv-srcline .sl-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--s-4);
-  }
-  .overlay .sv-srcline a,
-  .overlay .sv-srcline .sl-law {
-    display: inline-flex;
-    align-items: center;
-    min-height: 28px;
-    padding: 0;
-    font: 500 13px/1.4 var(--sans);
-    color: var(--accent);
-    background: none;
-    border: 0;
-    white-space: nowrap;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    cursor: pointer;
-  }
-  .overlay .story-foot .sv-cite,
-  .overlay .story-foot .sv-src a {
-    display: none;
-  }
   .overlay .sv-about {
     margin: var(--s-1) 0 0 -8px;
   }
@@ -1510,9 +1316,6 @@
 
 /* Phone: only the step that is playing shows by default, so no step is cut off by the source line; the rest is under "All steps" */
 @media (max-width: 760px) and (max-height: 740px) {
-  .overlay .sv-now .next {
-    display: none;
-  }
 }
 
 /* ---------- Round 4: a tall window of tablet width gives the story more room; a short desktop window trims the source block so more steps show */
@@ -1522,13 +1325,6 @@
   }
 }
 @media (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) {
-  .overlay .sv-lede.clamped {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-  .overlay .sv-note {
-    display: none;
-  }
   .overlay .story-foot {
     padding: 10px 20px 12px;
     gap: 8px;
@@ -1576,34 +1372,11 @@
     grid-column: 3;
   }
 }
-.overlay.is-static .sv-all > summary {
-  display: none;
-}
-.overlay.is-static .sv-steps .sv-all ol {
-  margin-top: var(--s-2);
-}
 
 /* A tall desktop window has room to spare beside the steps, so more of the account shows before "Read the full account". */
 @media (min-width: 761px) and (min-aspect-ratio: 1/1) and (min-height: 1000px) {
-  .overlay .sv-lede.clamped {
-    -webkit-line-clamp: 7;
-    line-clamp: 7;
-  }
 }
 
-/* ---------- Round 6: the story list fades only where steps are hidden; the in-picture caption uses the pane width and keeps to two lines */
-.overlay #sceneSteps.can-down {
-  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent);
-  mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent);
-}
-.overlay #sceneSteps.can-up {
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 20px);
-  mask-image: linear-gradient(180deg, transparent, #000 20px);
-}
-.overlay #sceneSteps.can-up.can-down {
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 20px, #000 calc(100% - 20px), transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 20px, #000 calc(100% - 20px), transparent);
-}
 .overlay #sceneView .hlabel[style*="bottom: 10px"] {
   max-width: calc(100% - 16px) !important;
   display: -webkit-box !important;
@@ -1620,29 +1393,358 @@
 /* A short phone (375 x 667): a little less picture, and the one-line source waits in the story, so the current step and the next one keep their room */
 @media (max-width: 760px) and (max-height: 740px) {
   .overlay .panel {
-    grid-template-rows: auto minmax(0, 38%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 36%) minmax(0, 1fr) auto;
   }
 }
 @media (max-width: 760px) and (max-height: 700px) {
-  .overlay .sv-srcline {
-    display: none;
-  }
 }
 .overlay #sceneSteps {
   position: relative; /* the steps measure their offsets from the list itself */
 }
 @media (max-width: 760px) and (max-height: 740px) {
-  .overlay.views-wrap .panel {
-    grid-template-rows: auto minmax(0, 32%) minmax(0, 1fr) auto;
-  }
 }
 
 /* A phone keeps the first two lines of the account above the steps; a tablet folds it away so the steps get the room */
 @media (max-width: 599px) {
-  .overlay .sv-lede.clamped {
-    display: -webkit-box;
-    margin-bottom: var(--s-1);
+}
+
+/* ---------- Round 8: the story column is a flex column (lede, button, steps, about, source) and the step list takes what is left.
+   scene-ui.js (fitSteps) cuts the list to a whole number of rows, so no row is sliced by a divider or the edge of the column, and lets the lede give way
+   (two sentences, one, none) when the list would show fewer than three or four rows. */
+.overlay .story-scroll {
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 24px 28px 20px;
+  scroll-padding: 0;
+}
+.overlay .story-scroll > * {
+  flex: none;
+}
+.overlay .story-scroll > .sv-steps {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+.overlay .sv-lede {
+  margin: 0 0 var(--s-2);
+  max-width: 32em;
+}
+.overlay .sv-lede[hidden],
+.overlay .sv-more[hidden] {
+  display: none;
+}
+.overlay .sv-more {
+  appearance: none;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 36px;
+  margin: 0 0 var(--s-2) -8px;
+  padding: 0 var(--s-3) 0 var(--s-2);
+  font: 500 14px/1.3 var(--sans);
+  color: var(--accent);
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+.overlay .sv-more:hover {
+  background: var(--surface-2);
+}
+.overlay .sv-more:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.overlay .sv-more .ico {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--dur-2) var(--sv-ease);
+}
+.overlay .sv-more.open .ico {
+  transform: rotate(180deg);
+}
+.overlay .sv-steps {
+  display: flex;
+  flex-direction: column;
+  margin: var(--s-2) 0 0;
+}
+.overlay .sv-steps h3 {
+  flex: none;
+}
+.overlay .sv-note {
+  flex: none;
+  margin: var(--s-1) 0 0;
+  font: 400 13px/1.45 var(--sans);
+  color: var(--faint);
+}
+.overlay .sv-all {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.overlay .sv-steps #sceneSteps {
+  position: relative; /* the steps measure their offsets from the list itself */
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  margin: var(--s-2) 0 0 -10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.overlay .sv-steps #sceneSteps::-webkit-scrollbar {
+  display: none;
+}
+.overlay .story-scroll.expanded > .sv-steps,
+.overlay .story-scroll.expanded #sceneSteps {
+  flex: none;
+  overflow: visible;
+}
+/* The slack that is left under the last whole row is shared out as a little extra air in every row (fitSteps sets --sp), so there is no gap under the list */
+.overlay #sceneSteps .st-text {
+  padding-block: calc(9px + var(--sp, 0px));
+}
+.overlay #sceneSteps .st-time {
+  padding-top: calc(11px + var(--sp, 0px));
+}
+.overlay #sceneSteps .st-rail::after {
+  top: calc(14px + var(--sp, 0px));
+}
+.overlay #sceneSteps li:first-child .st-rail::before {
+  top: calc(19.5px + var(--sp, 0px));
+}
+.overlay #sceneSteps li:last-child .st-rail::before {
+  bottom: calc(100% - 19.5px - var(--sp, 0px));
+}
+/* A fade shows only at an edge that has hidden rows beyond it */
+.overlay #sceneSteps.can-down {
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent);
+}
+.overlay #sceneSteps.can-up {
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22px);
+  mask-image: linear-gradient(180deg, transparent, #000 22px);
+}
+.overlay #sceneSteps.can-up.can-down {
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+}
+.overlay .sv-about {
+  margin: var(--s-3) 0 0;
+}
+.overlay .story-scroll > .story-foot {
+  margin-top: var(--s-3);
+  padding: var(--s-3) 0 0;
+  background: none;
+  border-top: 1px solid var(--line);
+}
+.overlay .story-scroll > .story-foot .sv-src {
+  max-height: none;
+  overflow: visible;
+}
+@media (max-width: 1180px) and (min-width: 761px) {
+  .overlay .sv-lede {
+    font-size: 16.5px;
+    line-height: 1.5;
+  }
+}
+@media (min-width: 761px) and (max-height: 860px) {
+  .overlay .story-scroll {
+    padding: 18px 22px 16px;
+  }
+}
+
+/* The source row (stacked layouts): pills in one line; the citation and the note on the picture open from "Source" */
+.overlay .sv-srcrow {
+  display: none;
+}
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1), (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) {
+  .overlay .story-scroll > .story-foot,
+  .overlay .story-scroll > .sv-about {
+    display: none;
+  }
+  .overlay .sv-srcrow {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px var(--sv-pad, 16px);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+  }
+  .overlay .sl-btn,
+  .overlay .sv-srcrow .pill {
+    appearance: none;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 13px;
+    font: 500 13.5px/1.2 var(--sans);
+    color: var(--accent);
+    white-space: nowrap;
+    text-decoration: none;
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .overlay .sl-btn[aria-expanded="true"] {
+    color: var(--text);
+    background: var(--surface-3);
+  }
+  .overlay .sl-btn .ico,
+  .overlay .sv-srcrow .pill .ico {
+    width: 15px;
+    height: 15px;
+  }
+  .overlay .sl-btn:focus-visible,
+  .overlay .sv-srcrow .pill:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .overlay .sl-links {
+    display: flex;
+    gap: 6px;
+    min-width: 0;
+  }
+  .overlay .sl-pop {
+    position: absolute;
+    z-index: 8;
+    left: var(--sv-pad, 16px);
+    right: var(--sv-pad, 16px);
+    bottom: calc(100% + 6px);
+    max-height: 52dvh;
+    overflow: auto;
+    padding: 12px 14px;
+    font: 400 13.5px/1.5 var(--sans);
+    color: var(--muted);
+    background: var(--surface-3);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-1);
+    box-shadow: var(--shadow-3);
+  }
+  .overlay .sl-pop[hidden] {
+    display: none;
+  }
+  .overlay .sl-pop p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .overlay .sl-pop p + p {
+    margin-top: var(--s-2);
+  }
+  .overlay .sl-pop strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1) {
+  .overlay .story-scroll {
+    padding: 14px var(--sv-pad, 16px) 8px;
+  }
+  .overlay .sv-lede {
     font-size: 16px;
-    line-height: 1.45;
+    line-height: 1.5;
+  }
+  .overlay .views-label {
+    display: inline;
+  }
+  .overlay .sv-note {
+    display: none;
+  }
+  /* No lede above it: the button shares the row of the "What happens" heading instead of taking a row of its own */
+  .overlay .story-scroll {
+    position: relative;
+  }
+  .overlay .sv-more.lone:not(.open) {
+    position: absolute;
+    z-index: 1;
+    top: 8px;
+    right: calc(var(--sv-pad, 16px) - 6px);
+    min-height: 40px;
+    margin: 0;
+  }
+  .overlay #scPlay {
+    --h: 44px;
+    width: 44px;
+  }
+  .overlay .seg button {
+    --h: 38px;
+  }
+  .overlay .sv-head {
+    row-gap: 0;
+    padding-bottom: 6px;
+  }
+  .overlay #scPrev,
+  .overlay #scNext {
+    --h: 40px;
+  }
+  .overlay .sv-list-btn {
+    min-height: 40px;
+  }
+  .overlay .sv-srcrow {
+    padding-block: 2px;
+  }
+  .overlay .ctrl {
+    padding-block: 8px max(8px, env(safe-area-inset-bottom));
+    row-gap: 6px;
+  }
+}
+@media (max-width: 400px) {
+  .overlay .sl-btn,
+  .overlay .sv-srcrow .pill {
+    padding: 0 11px;
+    font-size: 13px;
+  }
+}
+
+/* A few phones: the views have a label and a row that scrolls with a fade at the edge that has more beyond it */
+.overlay .seg {
+  --fl: 0px;
+  --fr: 0px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%);
+}
+.overlay .seg:not(.at-start) {
+  --fl: 22px;
+}
+.overlay .seg:not(.at-end) {
+  --fr: 22px;
+}
+
+/* ---------- The keyboard hint sits in the control bar (over the scrubber, which waits a moment), never over the picture; it fades after three seconds */
+.overlay .sv-hint {
+  grid-area: scrub;
+  position: static;
+  z-index: 3;
+  align-self: stretch;
+  justify-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-5);
+  width: auto;
+  max-width: none;
+  padding: 0 var(--s-3);
+  background: var(--bg-2);
+  border: 0;
+  border-radius: var(--r-1);
+  transform: none;
+}
+.overlay .sv-hint.on {
+  transform: none;
+}
+@media (max-width: 1180px) {
+  .overlay .sv-hint {
+    grid-area: auto;
+    grid-row: 1;
+    grid-column: 3 / -1;
   }
 }

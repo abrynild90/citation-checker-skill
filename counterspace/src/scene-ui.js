@@ -82,13 +82,11 @@ const overlay = $('overlay'),
   dotsEl = $('sceneDots'),
   captionEl = $('sceneCaption'),
   srcEl = $('sceneSrc'),
-  srcLineEl = $('sceneSrcLine'),
   scaleEl = $('sceneScale'),
   stepsSection = $('sceneStepsSection'),
   stepsBox = $('sceneStepsBox'),
   stepsEl = $('sceneSteps'),
   stepsNote = $('stepsNote'),
-  stepNow = $('stepNow'),
   asideBody = $('asideBody'),
   asideWrap = $('asideWrap'),
   lawBox = $('asideLaw'),
@@ -107,7 +105,11 @@ const overlay = $('overlay'),
   statusEl = $('scStatus'),
   stateEl = $('sceneState'),
   stateTxt = $('sceneStateTxt'),
-  hintEl = $('sceneHint');
+  hintEl = $('sceneHint'),
+  srcRow = $('sceneSrcLine'),
+  slBtn = $('slSource'),
+  slLinks = $('slLinks'),
+  slPop = $('slPop');
 // The same queries as scenes.css: the phone layout, the layout with the picture above the story, and the short and wide layout (a phone on its side).
 const PHONE = '(max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px)',
   COMPACT = matchMedia(PHONE),
@@ -297,17 +299,43 @@ export async function openScene(id, originEl) {
   if (!wasOpen) showHint();
 }
 
-// The account is folded to a few lines so "What happens" gets the room; the button opens the whole text.
+// The account shows its first sentences, whole (never cut mid-sentence); the button opens the rest. How many sentences show depends on the room:
+// fitSteps() tries two sentences, then one, then none, so the step list always keeps at least three or four whole rows.
 const moreBtn = $('sceneMore');
+let expanded = false,
+  sentences = [];
+const ABBR = /\b(?:U\.S|U\.K|U\.N|No|Nos|St|Dr|Mr|Ms|Gen|Lt|Col|vs|approx|e\.g|i\.e|etc|Fig|ca|Jan|Feb|Aug|Sept|Oct|Nov|Dec)\.$/;
+function splitSentences(text) {
+  const out = [];
+  for (const part of text.split(/(?<=[.!?]["”')\]]?)\s+(?=["“(]?[A-Z0-9])/)) {
+    if (out.length && ABBR.test(out.at(-1))) out[out.length - 1] += ' ' + part;
+    else out.push(part);
+  }
+  return out;
+}
+// level 0: two sentences (one on a phone), 1: one sentence, 2: none
+function setLede(level) {
+  const full = cur?.caption || '';
+  const max = expanded ? Infinity : level === 0 ? (COMPACT.matches ? 1 : 2) : level === 1 ? 1 : 0;
+  let shown = expanded ? full : sentences.slice(0, max).join(' ');
+  if (!expanded && max === 2 && shown.length > 360) shown = sentences[0];
+  if (!expanded && COMPACT.matches && shown.length > 230) shown = '';
+  captionEl.textContent = shown;
+  captionEl.hidden = !shown;
+  moreBtn.hidden = shown === full;
+  moreBtn.classList.toggle('lone', !shown); // nothing above it: the button stands alone
+}
 function setMore(open) {
-  captionEl.classList.toggle('clamped', !open);
+  expanded = open;
+  asideBody.classList.toggle('expanded', open);
   moreBtn.setAttribute('aria-expanded', String(open));
   moreBtn.querySelector('span').textContent = open ? 'Show less' : 'Read the full account';
   moreBtn.classList.toggle('open', open);
+  if (!open) asideBody.scrollTop = 0;
   fitSteps();
   updateFades();
 }
-moreBtn.onclick = () => setMore(moreBtn.getAttribute('aria-expanded') !== 'true');
+moreBtn.onclick = () => setMore(!expanded);
 
 // Text of the open scene: title, count, story, source, related law, picture note and the steps.
 function fillStory(cfg) {
@@ -316,10 +344,13 @@ function fillStory(cfg) {
   titleEl.innerHTML = esc(cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
-  captionEl.textContent = cfg.caption;
-  setMore(false);
-  moreBtn.hidden = cfg.caption.split(/\s+/).length < 36;
-  if (moreBtn.hidden) captionEl.classList.remove('clamped');
+  sentences = splitSentences(cfg.caption);
+  expanded = false;
+  asideBody.classList.remove('expanded');
+  moreBtn.setAttribute('aria-expanded', 'false');
+  moreBtn.querySelector('span').textContent = 'Read the full account';
+  moreBtn.classList.remove('open');
+  setLede(0);
   const ev = byId[cfg.event];
   srcEl.innerHTML =
     `<span class="sv-cite">Source: ${esc(cfg.cite)}</span>` +
@@ -328,14 +359,13 @@ function fillStory(cfg) {
         `<use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
       : '') +
     (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
-  // The phone's pinned source line carries the link too, so "Open the source" is reachable without scrolling the story.
-  srcLineEl.innerHTML =
-    `<span class="sl-cite">Source: ${esc(cfg.cite)}</span><span class="sl-links">` +
-    (ev ? `<a href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<span class="sr"> (opens in a new tab)</span></a>` : '') +
-    (cfg.related ? `<button type="button" class="sl-law">Related law</button>` : '') +
-    `</span>`;
-  const slLaw = srcLineEl.querySelector('.sl-law');
+  // Stacked layouts: one row of pills (Source, Open the source, Related law); the citation and the picture note open from "Source".
+  slLinks.innerHTML =
+    (ev ? `<a class="pill" href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>` : '') +
+    (cfg.related ? `<button type="button" class="pill sl-law">Related law</button>` : '');
+  const slLaw = slLinks.querySelector('.sl-law');
   if (slLaw) slLaw.onclick = () => lawBtn.click();
+  toggleSrc(false);
   scaleEl.textContent = [
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
@@ -344,11 +374,21 @@ function fillStory(cfg) {
   ]
     .filter(Boolean)
     .join(' ');
+  slPop.innerHTML = `<p><strong>Source.</strong> ${esc(cfg.cite)}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
   lawBtn.disabled = !cfg.related;
   lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
   lawTxt.textContent = cfg.related ? `Related law: ${byId[cfg.related]?.label}` : 'Related law';
   renderSteps(cfg);
 }
+
+function toggleSrc(open) {
+  slPop.hidden = !open;
+  slBtn.setAttribute('aria-expanded', String(open));
+}
+slBtn.onclick = () => toggleSrc(slPop.hidden);
+document.addEventListener('pointerdown', (e) => {
+  if (!slPop.hidden && !srcRow.contains(e.target)) toggleSrc(false);
+});
 
 // While the dialog is open the page behind it is inert (no focus, not read out).
 function setInert(on) {
@@ -405,10 +445,11 @@ function renderSteps(cfg) {
         `<span class="st-rail" aria-hidden="true"></span><span class="st-text">${esc(s.text)}</span></button></li>`,
     )
     .join('');
-  stepsBox.open = !COMPACT.matches;
+  liRO?.disconnect();
+  [...stepsEl.children].forEach((li) => liRO?.observe(li));
+  stepsBox.open = true; // the list is always there; fitSteps() decides how many whole rows fit
   stepsEl.scrollTop = 0;
   requestAnimationFrame(fitSteps);
-  stepNow.textContent = '';
   lastUserScroll = -Infinity;
   ticksFor = undefined; // forces the scrubber ticks to be drawn for this scene
 }
@@ -419,12 +460,7 @@ function stepAt(t) {
   });
   return k;
 }
-function syncSteps(t) {
-  if (!steps.length || stillOnly) return;
-  const k = stepAt(t);
-  if (k === stepIdx) return;
-  const first = stepIdx < 0;
-  stepIdx = k;
+function markStep(k) {
   [...stepsEl.children].forEach((li, i) => {
     li.classList.toggle('done', i < k);
     li.classList.toggle('now', i === k);
@@ -432,12 +468,15 @@ function syncSteps(t) {
     if (i === k) b.setAttribute('aria-current', 'step');
     else b.removeAttribute('aria-current');
   });
-  // Phones show the current step and the one after it; the whole list is behind "All steps".
-  const li = stepsEl.children[k],
-    nx = stepsEl.children[k + 1];
-  stepNow.innerHTML =
-    `<li class="now"><div class="step">${li.firstElementChild.innerHTML}</div></li>` +
-    (nx ? `<li class="next"><div class="step">${nx.firstElementChild.innerHTML}</div></li>` : '');
+}
+function syncSteps(t) {
+  if (!steps.length || stillOnly) return;
+  const k = stepAt(t);
+  if (k === stepIdx) return;
+  const first = stepIdx < 0;
+  stepIdx = k;
+  markStep(k);
+  const li = stepsEl.children[k];
   if (first) requestAnimationFrame(() => followStep(li, true));
   else followStep(li);
 }
@@ -454,12 +493,15 @@ function followStep(li, instant) {
     // move to a step boundary so the list rests on whole steps: the active step lands fully in view
     const y = stepsEl.scrollTop,
       maxY = stepsEl.scrollHeight - stepsEl.clientHeight,
-      need = li.offsetTop + li.offsetHeight - stepsEl.clientHeight + 4;
+      need = li.offsetTop + li.offsetHeight - stepsEl.clientHeight;
     let to = y;
-    if (li.offsetTop - 4 < y) to = Math.max(0, li.offsetTop - 4);
-    else if (need > y) {
+    if (li.offsetTop < y - 1) to = li.offsetTop;
+    else if (need > y + 1) {
       to = maxY;
-      for (const c of stepsEl.children) if (c.offsetTop - 4 >= need) { to = Math.min(maxY, c.offsetTop - 4); break; }
+      for (const c of stepsEl.children) if (c.offsetTop >= need - 1) {
+          to = Math.min(maxY, c.offsetTop);
+          break;
+        }
     }
     if (Math.abs(to - y) > 1) stepsEl.scrollTo({ top: to, behavior: REDUCED || instant ? 'auto' : 'smooth' });
     return;
@@ -472,27 +514,58 @@ function followStep(li, instant) {
   if (dy) own.scrollBy({ top: dy, behavior: REDUCED || instant ? 'auto' : 'smooth' });
 }
 const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && getComputedStyle(stepsEl).overflowY !== 'visible';
-// The list shows whole steps at rest: its height is cut to the last step that fits in full, and a fade appears at an edge only while steps are hidden there.
-function fitSteps() {
+// The list shows whole steps at rest. The story column is a flex column whose list takes what the lede and the foot leave; this measures how many whole
+// rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
+// (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
+function rowsFit() {
+  stepsEl.style.removeProperty('--sp');
   stepsEl.style.height = '';
-  stepsEl.style.maxHeight = '';
-  if (!stepsBox.open || !stepsEl.children.length) return stepsEl.classList.remove('can-up', 'can-down');
-  const cs = getComputedStyle(stepsEl);
-  if (cs.overflowY !== 'visible') {
-    // no taller than the room the story column has below the first paragraph, so the active step is never under the source block
-    const top = stepsEl.getBoundingClientRect().top - asideBody.getBoundingClientRect().top + asideBody.scrollTop,
-      avail = asideBody.clientHeight - top - 24,
-      max = Math.max(120, Math.min(parseFloat(cs.maxHeight) || Infinity, avail));
-    if (stepsEl.scrollHeight > max + 1) {
-      let h = 0;
-      for (const li of stepsEl.children) {
-        const b = li.offsetTop + li.offsetHeight;
-        if (b <= max) h = b;
-        else break;
-      }
-      stepsEl.style.maxHeight = (h > 80 ? h : max) + 'px';
-    }
+  stepsEl.style.flex = '';
+  const avail = stepsEl.clientHeight;
+  let n = 0,
+    h = 0;
+  if (stepsEl.scrollHeight <= avail + 1) return { n: steps.length, h: 0, avail };
+  for (const li of stepsEl.children) {
+    const b = li.offsetTop + li.offsetHeight;
+    if (b <= avail + 1) {
+      n++;
+      h = b;
+    } else break;
   }
+  return { n, h, avail };
+}
+function fitSteps() {
+  if (!cur) return;
+  stepsEl.style.height = '';
+  stepsEl.style.flex = '';
+  stepsEl.style.removeProperty('--sp');
+  if (!steps.length) return;
+  if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
+  const want = Math.min(steps.length, COMPACT.matches ? 3 : 4);
+  let r;
+  for (let lvl = 0; lvl <= 2; lvl++) {
+    setLede(lvl);
+    r = rowsFit();
+    if (r.n >= want) break;
+  }
+  if (r.h) {
+    stepsEl.style.flex = '0 0 auto';
+    stepsEl.style.height = r.h + 'px';
+    r.sp = Math.min(8, Math.max(0, Math.floor(((r.avail - r.h) / (2 * r.n)) * 50) / 50 - 0.02));
+  } else if (r.n < steps.length) r.sp = 0;
+  else if (!r.h) {
+    // every row fits: a share of what is left under the content goes into the rows, so the column has no gap at its foot
+    const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
+      ab = asideBody.getBoundingClientRect(),
+      slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0;
+    r.sp = slack > 16 ? Math.min(10, (slack * 0.7) / (2 * steps.length)) : 0;
+  }
+  if (r.sp > 0.5) {
+    stepsEl.style.setProperty('--sp', r.sp.toFixed(2) + 'px');
+    if (r.h) stepsEl.style.height = r.h + r.sp * 2 * r.n + 'px';
+  }
+  const li = stepsEl.children[Math.max(0, stepIdx)];
+  if (li && stepIdx >= 0 && !stillOnly) followStep(li, true);
   fadeSteps();
 }
 function fadeSteps() {
@@ -500,7 +573,8 @@ function fadeSteps() {
   stepsEl.classList.toggle('can-up', sc && stepsEl.scrollTop > 3);
   stepsEl.classList.toggle('can-down', sc && stepsEl.scrollHeight - stepsEl.clientHeight - stepsEl.scrollTop > 3);
 }
-let snapTimer = 0;
+let snapTimer = 0,
+  liRO = null; // watches the rows: a row that wraps differently (a font arriving, a new width) re-fits the list
 stepsEl.addEventListener(
   'scroll',
   () => {
@@ -514,13 +588,14 @@ stepsEl.addEventListener(
       if (end) return;
       const y = stepsEl.scrollTop;
       let best = 0;
-      for (const li of stepsEl.children) if (Math.abs(li.offsetTop - 4 - y) < Math.abs(best - y)) best = li.offsetTop - 4;
+      for (const li of stepsEl.children) if (Math.abs(li.offsetTop - y) < Math.abs(best - y)) best = li.offsetTop;
       if (Math.abs(best - y) > 1) stepsEl.scrollTo({ top: Math.max(0, best), behavior: REDUCED ? 'auto' : 'smooth' });
     }, 140);
   },
   { passive: true },
 );
 addEventListener('resize', fitSteps);
+document.fonts?.ready.then(() => fitSteps());
 ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) =>
   asideBody.addEventListener(
     ev,
@@ -543,21 +618,9 @@ stepsEl.addEventListener('click', (e) => {
   const li = e.target.closest('li[data-i]');
   if (li) jumpToStep(+li.dataset.i);
 });
-// With the picture above the story, the source and the related law sit at the end of the story's scroll so the story keeps the room; elsewhere they stay in view below it.
-const storyEl = $('sceneStory'),
-  footEl = $('sceneFoot');
-function placeFoot() {
-  const into = STACKED.matches || SHORT.matches ? asideBody : storyEl;
-  if (footEl.parentElement !== into) into.appendChild(footEl);
-  updateFades();
-}
-COMPACT.addEventListener('change', () => {
-  stepsBox.open = !COMPACT.matches;
-  updateFades();
-});
-STACKED.addEventListener('change', placeFoot);
-SHORT.addEventListener('change', placeFoot);
-placeFoot();
+COMPACT.addEventListener('change', () => fitSteps());
+STACKED.addEventListener('change', () => fitSteps());
+addEventListener('resize', () => toggleSrc(false));
 
 // ---------------------------------------------------------------- scrubber, time and views
 // A tick on the scrubber at the start of each step (re-drawn when an episode preset narrows the scrubber to its episode).
@@ -623,21 +686,20 @@ function staticMode(on) {
   staticEl.hidden = !on;
   overlay.classList.toggle('is-static', on);
   if (on) {
-    staticTxt.textContent = COMPACT.matches
-      ? REDUCED
-        ? 'Animation is off, so this is a still diagram.'
-        : 'The 3D view could not start. Your browser may have 3D switched off.'
-      : REDUCED
-        ? 'Animation is off on this device, so this is a still diagram.'
-        : 'The 3D view could not start, so this is a still diagram. Your browser may have 3D switched off.';
+    staticTxt.textContent = REDUCED
+      ? 'Animation is off on this device, so this is a still diagram.'
+      : 'The 3D view could not start, so this is a still diagram. Your browser may have 3D switched off.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
-  stepsNote.textContent = on ? 'Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
-  if (on) {
-    stepsBox.open = true;
-    stepNow.textContent = '';
+  stepsNote.textContent = on ? 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
+  if (on && curSim) {
+    stepIdx = stepAt(curSim.cfg.staticT ?? curSim.still ?? 0);
+    markStep(stepIdx); // the step the still shows
+    const now = stepsEl.children[stepIdx];
+    if (now) requestAnimationFrame(() => (fitSteps(), now.scrollIntoView({ block: 'nearest' })));
   }
+  exportBtn.querySelector('span').textContent = on ? 'Save this diagram' : 'Save image';
   stepsEl.querySelectorAll('.step').forEach((b) => (on ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));
 }
 // "Try again": forget that 3D failed and open the same scene once more.
@@ -723,7 +785,6 @@ function chooseView(i) {
 }
 // Phone: the views scroll sideways; a fade on the right edge says more lie beyond it.
 function camFade() {
-  overlay.classList.toggle('views-wrap', camsEl.offsetHeight > 48); // two rows of views: a short phone gives the picture a little less
   camsEl.classList.toggle('at-end', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft <= 4);
   camsEl.classList.toggle('at-start', camsEl.scrollLeft <= 4);
 }
@@ -764,16 +825,18 @@ addEventListener('resize', updateFades);
 asideBody.addEventListener('toggle', updateFades, true);
 if ('ResizeObserver' in window) {
   new ResizeObserver(updateFades).observe(asideBody);
-  new ResizeObserver(() => fitSteps()).observe(stepsEl);
+  let raf = 0;
+  liRO = new ResizeObserver(() => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => fitSteps());
+  });
+  new ResizeObserver(() => fitSteps()).observe(asideBody);
 }
 
-// ---------------------------------------------------------------- keyboard hint, shown once per visit
+// ---------------------------------------------------------------- keyboard hint, shown once per visit; it sits in the control bar zone, never over the picture
 function showHint() {
   if (hintShown || stillOnly || !KEYBOARD.matches || COMPACT.matches || SHORT.matches) return;
   hintShown = true;
-  // bottom left, just above the caption pill: no inset (top right) and no label of the picture sits there
-  const capH = host?.statusEl?.offsetHeight || 28;
-  hintEl.style.bottom = capH + 22 + 'px';
   hintEl.classList.add('on');
   hintTimer = setTimeout(hideHint, 3000);
 }
@@ -817,6 +880,11 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     e.preventDefault();
     if (!sheet.hidden) return toggleSheet(false);
+    if (!slPop.hidden) {
+      toggleSrc(false);
+      slBtn.focus();
+      return;
+    }
     closeScene();
     return;
   }

@@ -31,46 +31,48 @@
         <div class="sv-orb" aria-hidden="true"><svg class="ico" focusable="false"><use href="#i-info"/></svg></div>
         <p id="sceneStateTxt"></p>
       </div>
-      <div class="sv-hint" id="sceneHint" aria-hidden="true">
-        <span><kbd>Space</kbd> Play or pause</span>
-        <span><kbd><svg class="ico" focusable="false"><use href="#i-prev"/></svg></kbd><kbd><svg class="ico" focusable="false"><use href="#i-next"/></svg></kbd> Change
-          scene</span>
-        <span><kbd>Esc</kbd> Close</span>
-      </div>
     </div>
 
     <aside class="story" id="sceneStory" aria-label="The story of this scene">
       <div class="story-wrap" id="asideWrap">
         <div class="story-scroll" id="asideBody" tabindex="0" role="region" aria-label="The story of this scene">
-          <p class="sv-lede clamped" id="sceneCaption"></p>
+          <p class="sv-lede" id="sceneCaption"></p>
           <button class="sv-more" id="sceneMore" type="button" aria-expanded="false" aria-controls="sceneCaption"><svg class="ico" aria-hidden="true"
             focusable="false"><use href="#i-down"/></svg><span>Read the full account</span></button>
           <section class="sv-steps" id="sceneStepsSection" aria-labelledby="stepsH">
             <h3 id="stepsH">What happens</h3>
             <p class="sv-note" id="stepsNote"></p>
-            <ol class="sv-now" id="stepNow" aria-hidden="true"></ol>
-            <details class="sv-all" id="sceneStepsBox" open>
-              <summary>All steps</summary>
+            <div class="sv-all" id="sceneStepsBox">
               <ol id="sceneSteps"></ol>
-            </details>
+            </div>
           </section>
           <details class="about sv-about">
             <summary>About this picture</summary>
             <p id="sceneScale"></p>
           </details>
+          <div class="story-foot" id="sceneFoot">
+            <p class="sv-src" id="sceneSrc"></p>
+            <div class="aside-law" id="asideLaw">
+              <button class="btn" id="scRelated" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-law"/></svg><span
+                id="scRelatedTxt">Related law</span></button>
+            </div>
+          </div>
         </div>
       </div>
-      <p class="sv-srcline" id="sceneSrcLine"></p>
-      <div class="story-foot" id="sceneFoot">
-        <p class="sv-src" id="sceneSrc"></p>
-        <div class="aside-law" id="asideLaw">
-          <button class="btn" id="scRelated" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-law"/></svg><span
-            id="scRelatedTxt">Related law</span></button>
-        </div>
+      <div class="sv-srcrow" id="sceneSrcLine">
+        <button class="sl-btn" id="slSource" type="button" aria-expanded="false" aria-controls="slPop"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>Source</button>
+        <span class="sl-links" id="slLinks"></span>
+        <div class="sl-pop" id="slPop" role="region" aria-label="Source and notes" hidden></div>
       </div>
     </aside>
 
     <div class="ctrl" id="sceneCtrl">
+    <div class="sv-hint" id="sceneHint" aria-hidden="true">
+      <span><kbd>Space</kbd> Play or pause</span>
+      <span><kbd><svg class="ico" focusable="false"><use href="#i-prev"/></svg></kbd><kbd><svg class="ico" focusable="false"><use href="#i-next"/></svg></kbd> Change
+          scene</span>
+      <span><kbd>Esc</kbd> Close</span>
+    </div>
       <button class="btn primary icon" id="scPlay" type="button" aria-label="Pause" aria-keyshortcuts="Space" title="Pause (Space)"><svg class="ico"
         aria-hidden="true" focusable="false"><use href="#i-pause"/></svg></button>
       <span class="tm" id="scTime" aria-hidden="true"></span>
