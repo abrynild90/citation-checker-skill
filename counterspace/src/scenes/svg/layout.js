@@ -84,8 +84,8 @@ function bannerBox(el, opts, W) {
 export function fitFrame(sim, el, t, opts, W, H, unit) {
   // The caption is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
-    stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true) : ''),
-    stFs = !opts.panel && W >= 700 ? 14 : 12, // the caption matches the live caption: 14 px on a desktop stage
+    stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true, true) : ''),
+    stFs = !opts.panel && W >= 700 ? 14 : W < 520 ? 13 : 12, // the caption matches the live caption: 14 px on a desktop stage
     stLh = Math.round(stFs * 1.35),
     maxW = W - (opts.panel ? 16 : 32) - 2 * PILL.padX,
     hasStatus = !!(opts.panel ? stTxt : st),

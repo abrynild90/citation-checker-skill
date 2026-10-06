@@ -14,7 +14,7 @@ import { renderPanels } from './svg/panels.js';
 import { drawHeroShells, heroTime, heroView } from './svg/hero.js';
 import { requestFullEarth, wantsFullEarth } from './svg/upgrade.js';
 import { prewarmEarth } from './svg/earth-raster.js';
-import { fontFaceCSS, rememberSim } from './svg/still-frame.js';
+import { fontFaceCSS, rememberSim, simOf } from './svg/still-frame.js';
 import { SANS } from '../fonts.js';
 
 prewarmEarth(); // a worker starts decoding the embedded Earth images while the page boots, so the first picture finds it ready
@@ -101,12 +101,12 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     svg.node().__earth.full = true;
     requestFullEarth(sim);
   }
-  if (hero && !opts.print) watchStage(sim, el, t, W, H);
+  if (!opts.print && !opts.panel && !opts.W) watchStage(sim, el, t, W, H);
   if (!opts.print) performance.measure('cs:diagram-' + sim.cfg.id, { start: t0, end: performance.now() }); // shows in window.__cs.perf()
   return svg.node();
 }
 
-// The hero is drawn once for the stage it finds, so it is drawn again when the stage changes shape (a window resize, a phone turned over, the page's own
+// The picture is drawn once for the stage it finds, so it is drawn again when the stage changes shape (a window resize, a phone turned over, the page's own
 // layout settling after the first paint). It stops when the live globe takes the stage over.
 const watched = new WeakMap();
 function watchStage(sim, el, t, W, H) {
@@ -119,6 +119,7 @@ function watchStage(sim, el, t, W, H) {
     clearTimeout(st.timer);
     st.timer = setTimeout(() => {
       if (el.querySelector(':scope > canvas') || !el.querySelector(':scope > svg')) return; // the live globe (or nothing) is on the stage
+      if (simOf(el.querySelector(':scope > svg')) !== st.sim) return; // a different picture has taken the stage
       const nw = el.clientWidth,
         nh = el.clientHeight;
       if (nw && nh && (Math.abs(nw - st.W) > 3 || Math.abs(nh - st.H) > 3)) renderSVG(st.sim, el, st.t);
