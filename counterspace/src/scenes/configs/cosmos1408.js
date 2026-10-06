@@ -32,7 +32,7 @@ export const COSMOS1408 = {
   liveText: { 'ISS orbit': 'ISS orbit' }, // the shorter text keeps its leader within the limit at 900 px
   noSimCount: true,
   actors: [
-    { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground, dx: -110, dy: -16 },
+    { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground, dx: -60, dy: 52 },
     {
       type: 'ring',
       alt: 420,
@@ -41,7 +41,7 @@ export const COSMOS1408 = {
       crossHit: 0.55,
       thick: 0.0032,
       opacity: 0.85,
-      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.9, minPx: 66, maxPx: 120, dx: 96, dy: 14 },
+      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.35, minPx: 46, maxPx: 84, dx: 96, dy: 14 },
     },
     { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: -84, impactDy: -46, dx: -40, dy: 62 },
     { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true, flash: 0.2, coreK: 0.4, flashSpan: 0.12 },
@@ -53,7 +53,10 @@ export const COSMOS1408 = {
       spreadRaan: 2.2,
       dv: 1.0,
       decay: 0.25,
-      late: { t0: 0.34, k: 7, kr: 1.2 }, // the band keeps spreading along and across the orbit instead of a smear over the pole
+      late: { t0: 0.34, k: 7, kr: 1.2 },
+      lateBoost: 1.9, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end
+      minPx: 4.2,
+      maxPx: 9, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
       color: C.debris,
       label: 'Debris of Cosmos 1408',
@@ -65,6 +68,7 @@ export const COSMOS1408 = {
     },
   ],
   still: 0.8,
+  phoneOff: { 'ISS orbit': [40, 44] }, // 375: the label hangs below the (smaller) ISS model, off the craft
   liveOff: { 'Cosmos 1408': [-96, 52] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [

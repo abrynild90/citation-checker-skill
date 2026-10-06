@@ -703,7 +703,7 @@ export function buildSim(cfg) {
               colr[k4 + 2] = c[2] * p.br;
               // velocity-sorted: fragments near the parent's speed stay bright and large, the fast and slow tails are dimmer and smaller
               const core = 1 - Math.min(1, Math.abs(p.dw - 1) / (a.dv * 1.6 || 1));
-              colr[k4 + 3] = (0.7 + 0.3 * dens) * 0.9 * fade * (0.4 + 0.6 * core * core) * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1);
+              colr[k4 + 3] = Math.min(1, (0.7 + 0.3 * dens) * 0.9 * fade * (0.4 + 0.6 * core * core) * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1) * (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1)); // lateBoost (opt-in): the old fragments get brighter, so a thin late ring stays visible
             }
           }
           cloud.vis = vis;
