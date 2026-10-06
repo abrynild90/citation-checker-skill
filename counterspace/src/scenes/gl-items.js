@@ -534,7 +534,7 @@ const methods = {
           const a = (k / 96) * Math.PI * 2;
           pts.push(new T.Vector3(Math.cos(a) * rho, 0, Math.sin(a) * rho));
         }
-        const base = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.55, depthWrite: false }));
+        const base = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: it.clean ? 0.95 : 0.55, depthWrite: false }));
         base.position.copy(m.position);
         base.quaternion.copy(m.quaternion);
         root.add(base);
@@ -545,11 +545,11 @@ const methods = {
         new T.ShaderMaterial({
           transparent: true,
           depthWrite: false,
-          uniforms: { uColor: { value: new T.Color(0x2a0307) }, uRho: { value: rho } },
+          uniforms: { uColor: { value: new T.Color(it.clean ? 0xb0121e : 0x2a0307) }, uRho: { value: rho }, uA: { value: it.clean ? 0.15 : 0.46 } }, // it.clean (opt-in): a red tint over the land, not a dark maroon smear
           vertexShader:
             'uniform float uRho; varying float vT; void main(){ vT = acos(clamp(normalize(position).y, -1.0, 1.0)) / uRho; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
           fragmentShader:
-            'uniform vec3 uColor; varying float vT; void main(){ gl_FragColor = vec4(uColor, 0.46 * (1.0 - smoothstep(0.3, 1.0, vT)));\n#include <colorspace_fragment>\n}',
+            'uniform vec3 uColor; uniform float uA; varying float vT; void main(){ gl_FragColor = vec4(uColor, uA * (1.0 - smoothstep(0.55, 1.0, vT)));\n#include <colorspace_fragment>\n}',
         }),
       );
       cap.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), up);
