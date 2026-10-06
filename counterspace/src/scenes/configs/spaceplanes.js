@@ -233,7 +233,7 @@ export const SPACEPLANES = {
   fillK: 0.5,
   cloudK: 1.2,
   cloudFloor: 0.8, // a cloud layer stays on the Earth even in the close China views, so it is not a flat tan
-  sunView: { az: 22, el: 14 }, // the lit side faces the opening camera: the China episode is in daylight, not a grey night
+  sunView: { az: -22, el: 20 }, // the lit side faces the opening camera: the China episode is in daylight, not a grey night
   lightsK: 0.2, // the night city lights are dimmed so they never blow out into white blobs under the labels
   nightK: 1.5, // a modest night ambient: enough to read the terrain without a grey haze over the dark side
   atmoK: 0.6, // less atmosphere haze on the limb
