@@ -1,5 +1,5 @@
 // scenes/configs/viasat.js: scene `viasat` (see ../config.js for the list order)
-import { GEO_ALT } from '../core.js';
+import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C } from './shared.js';
 
 export const VIASAT = {
@@ -67,8 +67,8 @@ export const VIASAT = {
       labelOffDisc: true, // stills: the label sits beside the globe, not on it
       label: 'Ground terminals (modems)',
       short: 'Terminals',
-      labelDx: 150,
-      labelDy: -130,
+      labelDx: IS_PHONE ? 125 : 150,
+      labelDy: IS_PHONE ? -104 : -130,
     },
     // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
     { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },

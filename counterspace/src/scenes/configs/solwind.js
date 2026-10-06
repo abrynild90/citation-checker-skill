@@ -63,6 +63,7 @@ export const SOLWIND = {
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
+      impactDy: IS_PHONE ? -81 : undefined,
       tickUntil: 0.84, // the tick retires with the last fragment
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
