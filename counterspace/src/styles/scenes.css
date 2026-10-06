@@ -1741,7 +1741,7 @@
   gap: var(--s-5);
   width: auto;
   max-width: none;
-  padding: 0 var(--s-3);
+  padding: 6px var(--s-3);
   background: var(--bg-2);
   border: 0;
   border-radius: var(--r-1);
