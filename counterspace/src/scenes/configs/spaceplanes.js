@@ -150,6 +150,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'csshq',
+      variant: 'winged', // a generic winged vehicle: the sources show no more, so it is not drawn as an X-37B
       minPx: IS_PHONE ? 48 : 88,
       maxPx: IS_PHONE ? 64 : 124,
       anchor: 'cn',
