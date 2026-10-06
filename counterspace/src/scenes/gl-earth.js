@@ -252,7 +252,7 @@ export const earthMethods = {
         uSun: { value: new T.Vector3(...sunDir) },
         uFade: { value: 1 },
         uCloudAmt: { value: 1 },
-        uLights: { value: 1 },
+        uLights: { value: this.sim.cfg.lightsK ?? 1 }, // cfg.lightsK: an opt-in scale for the night city lights
         uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
         uBump: { value: 0 },
       };

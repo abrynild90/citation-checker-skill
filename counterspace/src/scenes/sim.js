@@ -206,6 +206,7 @@ export function buildSim(cfg) {
         color: a.color,
         opacity: a.opacity ?? 0.6,
         thick: a.thick,
+        fade: a.fade,
         push: a.push,
         label: a.label,
         short: a.short,
