@@ -287,7 +287,7 @@ export function drawB(el = document.getElementById('svgB')) {
       // the figure above the bar, and the range as a quiet second line
       let range = dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : 'no range';
       if (range && range !== 'no range' && !phone && xb - xa >= 100) range = `range ${range}`;
-      if (range && tw(range, 12.5, 400) > xb - xa + 14) range = '';
+      if (range && tw(range, 12.5, 400) > xb - xa + (range === 'no range' ? -6 : 14)) range = ''; // a note that would touch the axis is left to the card
       s.append('text')
         .attr('class', 'fig')
         .attr('x', cx)

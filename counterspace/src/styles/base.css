@@ -183,3 +183,13 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 .kbd-hint{position:fixed;left:8px;top:8px;z-index:60;max-width:min(92vw,520px);margin:0;padding:8px 14px;border:1px solid var(--line-strong);border-radius:var(--r-1);background:var(--surface);color:var(--text);font:500 13px/1.4 var(--sans);box-shadow:0 4px 16px color-mix(in srgb,var(--text) 18%,transparent);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s}
 .kbd-hint.on{opacity:1;visibility:visible}
 @media print{.kbd-hint{display:none}}
+/* Download menu: the two formats read as choices (a divider and a small arrow each); the background switch is set apart under them */
+.dl-menu{padding:4px;min-width:260px}
+.dl-menu button{position:relative;border-radius:var(--r-1)}
+.dl-menu button:not(.dl-switch){padding-right:44px}
+.dl-menu button:not(.dl-switch)::after{content:"";position:absolute;right:14px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--accent);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v12M6.5 11l5.5 5.5 5.5-5.5M5 20h14'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v12M6.5 11l5.5 5.5 5.5-5.5M5 20h14'/%3E%3C/svg%3E") center/contain no-repeat}
+.dl-menu button:not(.dl-switch)+button:not(.dl-switch){border-top:1px solid var(--grid);border-top-left-radius:0;border-top-right-radius:0}
+.dl-menu button.dl-switch{margin-top:4px;border-top:1px solid var(--line-strong);border-top-left-radius:0;border-top-right-radius:0;background:var(--surface-2)}
+.dl-menu button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
