@@ -3,7 +3,7 @@
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { DOMAIN, EXPORTING, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
 import { activate, addGuide, bindMark, legalCard, legalKindOf, legalKindWords, legend, rove, setGuide, table } from '../ui.js';
 import { hooks } from '../shared.js';
 
@@ -136,6 +136,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     strip = isPhoneNow() && !zoom && !EXPORTING && el.id === 'legalSvg',
     compact = legalCompact && !isPhoneNow() && !EXPORTING && !zoom;
   if (page) drawLawMini();
+  if (page) drawOverview(strip);
   if (page) {
     const tap = document.getElementById('legalTap');
     tap.hidden = !strip;
@@ -620,6 +621,45 @@ function drawLink() {
     `<path class="beam" d="M${zx0},0H${zx1}C${zx1},${c1} ${W},${c2} ${W},${h}H0C0,${c2} ${zx0},${c1} ${zx0},0Z"/>` +
     `<path class="edge" d="M${zx0},0C${zx0},${c1} 0,${c2} 0,${h}M${zx1},0C${zx1},${c1} ${W},${c2} ${W},${h}"/></svg>`;
 }
+// Phone only: the whole 1957 to 2026 span in two thin rows (tests above, laws below), with the window the scrolling strip shows. A tap moves the strip.
+function drawOverview(strip) {
+  const host = document.getElementById('legalOv');
+  if (!host) return;
+  host.hidden = !strip;
+  if (!strip) {
+    host.innerHTML = '';
+    return;
+  }
+  const W = Math.max(300, host.clientWidth || host.parentElement.clientWidth),
+    ml = 44,
+    x = d3.scaleUtc().domain(DOMAIN).range([ml, W - 12]),
+    H = 66,
+    yT = 14,
+    yL = 40;
+  const g = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+    .attr('aria-label', 'Overview of 1957 to 2026: anti-satellite tests above, laws and policies below. The outlined box is the part shown in the strip below.');
+  g.append('rect').attr('class', 'ov-win').attr('x', ml).attr('y', 1).attr('width', 60).attr('height', H - 14).attr('rx', 4);
+  g.append('text').attr('x', 0).attr('y', yT + 4).attr('class', 'lm-name').text('Tests');
+  g.append('text').attr('x', 0).attr('y', yL + 4).attr('class', 'lm-name').text('Laws');
+  KIN.forEach((e) => g.append('circle').attr('cx', x(parse(e.date))).attr('cy', yT).attr('r', 2.6).attr('class', 'ov-test'));
+  LEGAL.filter((l) => l.kind !== 'negotiation_span').forEach((l) =>
+    g.append('g').attr('transform', `translate(${x(parse(l.start))},${yL}) scale(.5)`).html(glyphMarkup(legalKindOf(l))),
+  );
+  [1960, 1980, 2000, 2020].forEach((yr) => {
+    const px = x(parse(`${yr}-01-01`));
+    g.append('text').attr('x', px).attr('y', H - 1).attr('text-anchor', 'middle').attr('class', 'lm-year').text(yr);
+  });
+  host.innerHTML = '';
+  host.appendChild(g.node());
+  const sv = document.getElementById('legalSvg');
+  sv._ovW = W;
+  g.on('click', (ev) => {
+    const r = g.node().getBoundingClientRect(),
+      yr = x.invert(ev.clientX - r.left),
+      sx = sv._x;
+    if (sx) sv.scrollTo({ left: Math.max(0, sx(yr) - sv.clientWidth / 2), behavior: 'smooth' });
+  });
+}
 // Phone strip position: says how much of 1957 to 2026 is in view and which way to scroll.
 function stripPos() {
   const el = document.getElementById('legalSvg'),
@@ -639,6 +679,12 @@ function stripPos() {
   if (hint) hint.hidden = a <= 2;
   const more = document.getElementById('stripMore');
   if (more) more.hidden = b >= sw - 2;
+  const win = document.querySelector('#legalOv .ov-win');
+  if (win) {
+    const ox = x.range();
+    win.setAttribute('x', ox[0] + ((a / sw) * (el._ovW - ox[0] - 12)));
+    win.setAttribute('width', Math.max(10, (el.clientWidth / sw) * (el._ovW - ox[0] - 12)));
+  }
   const f = box.querySelector('i');
   f.style.left = (100 * a) / sw + '%';
   f.style.width = (100 * el.clientWidth) / sw + '%';

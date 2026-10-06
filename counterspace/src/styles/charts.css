@@ -300,3 +300,12 @@ details.table>summary{scroll-margin-top:110px}
 /* A table opened or focused by keyboard or link must land below the strip that stays in view */
 .tscroll,.scroll-hint,details.table,.more-rows{scroll-margin-top:var(--band-h,180px)}
 @media (max-width:760px){.tscroll,.scroll-hint,details.table,.more-rows{scroll-margin-top:64px}}
+/* phone: the whole span in two thin rows above the scrolling strip */
+.legal-ov{margin:0 0 var(--s-2)}
+.legal-ov svg{cursor:pointer;overflow:visible}
+.legal-ov .ov-win{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.legal-ov .ov-test{fill:var(--accent-2)}
+.legal-ov .lm-name{fill:var(--muted);font:600 12px var(--sans)}
+.legal-ov .lm-year{fill:var(--faint);font:500 12px var(--sans)}
+.legal-ov[hidden]{display:none}
+.legal-ov:not([hidden]) ~ .strip-edge{top:84px}
