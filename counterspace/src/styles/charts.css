@@ -265,9 +265,11 @@ details.table>summary{scroll-margin-top:110px}
 .sources .to-top{display:inline-block;margin-top:var(--s-3);font-size:14px}
 /* Capability table: each decade reads "4 demonstrated, 3 developing"; the state names sit behind a small disclosure */
 #tableB .cnt-line{display:block;color:var(--text)}
-#tableB .cn{font-weight:500}
+#tableB .cn{font-weight:400}
+#tableB .cn b{font-weight:600}
 #tableB details.st{margin-top:4px}
-#tableB details.st>summary{display:inline-flex;align-items:center;min-height:24px;padding:0;border:0;background:none;color:var(--accent);font:600 13px/1.4 var(--sans);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#tableB details.st>summary{display:inline-flex;align-items:center;min-height:24px;padding:0;border:0;background:none;color:var(--muted);font:500 13px/1.4 var(--sans);cursor:pointer;text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:3px}
+#tableB details.st>summary:hover{color:var(--text)}
 #tableB details.st>summary::before{display:none}
 #tableB details.st p{margin:6px 0 0;font-size:13px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
 #tableB details.st p b{color:var(--text);font-weight:600}
@@ -308,11 +310,10 @@ details.table>summary{scroll-margin-top:110px}
 
 /* Wide tables fit their box: no pinned Source column, narrower cells, short labels where a long one wraps */
 .tl{white-space:normal}
-.cn-short,.th-sub{display:none}
+.th-sub{display:none}
 #tableB th:last-child{color:var(--text)}
 #tableB td:last-child{background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
 @media (min-width:1001px){
-  .cn-long{display:none}.cn-short{display:inline;font-variant-numeric:tabular-nums}
   .th-sub{display:block;font-weight:500;font-size:12px}
   #tableB th:last-child,#tableB td:last-child{border-left:2px solid var(--accent)}
 }

@@ -414,7 +414,7 @@ export function drawB(el = document.getElementById('svgB')) {
       },
     ]),
   );
-  const cnt = (d, p, long) => `<span class="cn-long">${long}</span><span class="cn-short" aria-hidden="true">${d} + ${p}</span>`;
+  const cnt = (d, p) => `<b>${d}</b> demonstrated, <b>${p}</b> developing`;
   table(
     'tableB',
     ['Kind of capability', ...CAPS.decades.map((d) => (d === CAPS.decades[CAPS.decades.length - 1] ? `${d}<span class="th-sub"> (SWF-assessed)</span>` : d))],
@@ -425,19 +425,17 @@ export function drawB(el = document.getElementById('svgB')) {
         const D_ = Object.keys(o).filter((k) => o[k] === 'D'),
           P_ = Object.keys(o).filter((k) => o[k] === 'P' && !isNoData(c.key, d, k)),
           N_ = Object.keys(o).filter((k) => o[k] === 'P' && isNoData(c.key, d, k));
-        const plural = (n, w) => `${n} ${w}`,
-          counts = [plural(D_.length, 'demonstrated'), plural(P_.length + N_.length, 'developing')].join(', '),
-          groups = [
+        const groups = [
             ['Demonstrated', D_],
             ['Developing', P_],
             ['Developing, our reading (SWF’s table has no data)', N_],
           ].filter(([, l]) => l.length);
         return groups.length
-          ? `<span class="cnt-line"><span class="cn">${cnt(D_.length, P_.length + N_.length, counts)}</span><details class="st"><summary>States</summary>${groups.map(([h, l]) => `<p><b>${h}:</b> ${l.join(', ')}</p>`).join('')}</details></span>`
-          : `<span class="cnt-line"><span class="cn">${cnt(0, 0, counts)}</span></span>`;
+          ? `<span class="cnt-line"><span class="cn">${cnt(D_.length, P_.length + N_.length)}</span><details class="st"><summary aria-label="Show states: ${c.label}, ${d}">Show states</summary>${groups.map(([h, l]) => `<p><b>${h}:</b> ${l.join(', ')}</p>`).join('')}</details></span>`
+          : `<span class="cnt-line"><span class="cn">${cnt(0, 0)}</span></span>`;
       }),
     ]),
-    'States that hold each kind of counterspace capability, by decade. On a wide screen each cell reads "demonstrated + developing".',
+    'States that hold each kind of counterspace capability, by decade',
   );
 }
 
