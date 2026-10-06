@@ -51,7 +51,7 @@ export const GNSS = {
       dy: 18,
       jammer: { at: [56.5, 21.0], label: 'Ground jammer', short: 'Jammer', dx: -70, dy: 30 },
     },
-    { type: 'place', at: [59.6, 19.4], label: 'Baltic Sea', color: '#cfd8ea' },
+    { type: 'place', at: [60.4, 18.6], label: 'Baltic Sea', color: '#cfd8ea' },
     {
       type: 'aircraft',
       path: [
@@ -101,6 +101,7 @@ export const GNSS = {
   insetSize: [132, 104],
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
   liveOff: { 'Jammer effect zone': [80, -30] }, // desktop: a leader runs from the label to the zone's edge
+  stillHideText: ['Baltic Sea'], // the print drops the place name: it would sit on Airliner 1's leader
   noJamArrow: true, // the jammed link gets no edge arrowhead (it would read as a stray marker at the frame border)
   sunView: { az: 30, el: 32 }, // a higher, more frontal sun: the Baltic terrain is lit, not olive and murky
   phoneHide: ['Jammer', 'Ground jammer', 'Jammer effect', 'GPS signal', 'Baltic Sea'], // 375: two labels (the airliners, whose colour is the story); the jammer and zone are named by the status line and the red dome
@@ -111,7 +112,7 @@ export const GNSS = {
       short: 'Baltic zone',
       at: [38, 11, 1.42],
       look: [51.8, 22.6, 0.98],
-      phone: { at: [38, 11, 1.26] },
+      phone: { at: [38, 11, 1.33] },
     },
     {
       name: 'Close up: jammer zone and Airliner 1',

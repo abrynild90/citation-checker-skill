@@ -164,6 +164,7 @@ export function buildSim(cfg) {
     if (a.type === 'range')
       items.push({
         kind: 'beam',
+        liveOnly: true,
         soft: true,
         opacity: a.opacity ?? 0.55,
         width0: 0.0011,

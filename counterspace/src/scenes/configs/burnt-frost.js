@@ -23,6 +23,7 @@ export const BURNT_FROST = {
   seaK: IS_PHONE ? 2.2 : 0.8, // the Pacific is dark even in daylight: lifted so the ship and satellite separate from it
   phoneOff: { 'Larger pieces': [112, -50], 'Pieces falling': [112, -50] }, // 375: the label sits right of the debris cloud, not over it
   launchAt: [3.3, 0.95, 0.8],
+  camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   earlyKey: true,
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
@@ -32,8 +33,8 @@ export const BURNT_FROST = {
       label: 'USA-193',
       color: C.tgt,
       big: 1.7,
-      minPx: 70,
-      maxPx: 120,
+      minPx: 60,
+      maxPx: 100,
       impactFollow: true, // the Impact pill follows the debris centre once the cloud has spread
       bright: true,
       fall: [
