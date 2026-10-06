@@ -226,6 +226,8 @@ export const SPACEPLANES = {
       ],
     },
     { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0025, tail: 0.14, wakeOp: 0.34 }, // wake capped in length and brightness
+    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 }, // the wake ends soon after Object J does
+    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
   ],
   fillK: 0.5,
   lightsK: 0.55, // the night city lights are dimmed so they never blow out into white blobs under the labels
@@ -266,7 +268,7 @@ export const SPACEPLANES = {
       name: 'X-37B OTV-7: follows the craft',
       chip: 'X-37B OTV-7',
       act: 1,
-      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.7, fill: 0.95, t: 0.42, lock: true, tight: true },
+      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 0.5, fill: 1.2, t: 0.42, lock: true, tight: true },
     },
     {
       name: 'China: CSSHQ and released objects',

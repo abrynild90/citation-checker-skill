@@ -175,7 +175,7 @@ export function buildSim(cfg) {
         color: a.color,
         width: 2,
         pts: (t) => {
-          if (!actOn(t, a.acts)) return [];
+          if (!actOn(t, a.acts) || (a.until != null && t > a.until)) return []; // a.until: opt-in end of the wake
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
           return s <= 0 ? [] : all.slice(0, Math.max(2, ts ? ts.filter((x) => x <= t).length : Math.round(s * N) + 1));
         },
