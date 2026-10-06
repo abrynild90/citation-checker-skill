@@ -304,6 +304,7 @@ function setMore(open) {
   moreBtn.setAttribute('aria-expanded', String(open));
   moreBtn.querySelector('span').textContent = open ? 'Show less' : 'Read the full account';
   moreBtn.classList.toggle('open', open);
+  fitSteps();
   updateFades();
 }
 moreBtn.onclick = () => setMore(moreBtn.getAttribute('aria-expanded') !== 'true');
@@ -445,6 +446,20 @@ function followStep(li, instant) {
     box = own.getBoundingClientRect(),
     r = li.getBoundingClientRect();
   if (!stepsBox.open || !r.height) return; // the list is folded away (phone)
+  if (own === stepsEl) {
+    // move to a step boundary so the list rests on whole steps: the active step lands fully in view
+    const y = stepsEl.scrollTop,
+      maxY = stepsEl.scrollHeight - stepsEl.clientHeight,
+      need = li.offsetTop + li.offsetHeight - stepsEl.clientHeight + 4;
+    let to = y;
+    if (li.offsetTop - 4 < y) to = Math.max(0, li.offsetTop - 4);
+    else if (need > y) {
+      to = maxY;
+      for (const c of stepsEl.children) if (c.offsetTop - 4 >= need) { to = Math.min(maxY, c.offsetTop - 4); break; }
+    }
+    if (Math.abs(to - y) > 1) stepsEl.scrollTo({ top: to, behavior: REDUCED || instant ? 'auto' : 'smooth' });
+    return;
+  }
   const top = box.top + (own === stepsEl ? 4 : 56),
     bottom = box.bottom - (own === stepsEl ? 4 : 96);
   let dy = 0;
@@ -458,15 +473,21 @@ function fitSteps() {
   stepsEl.style.height = '';
   stepsEl.style.maxHeight = '';
   if (!stepsBox.open || !stepsEl.children.length) return stepsEl.classList.remove('can-up', 'can-down');
-  const max = parseFloat(getComputedStyle(stepsEl).maxHeight);
-  if (max && stepsEl.scrollHeight > max + 1 && getComputedStyle(stepsEl).overflowY !== 'visible') {
-    let h = 0;
-    for (const li of stepsEl.children) {
-      const b = li.offsetTop + li.offsetHeight;
-      if (b <= max) h = b;
-      else break;
+  const cs = getComputedStyle(stepsEl);
+  if (cs.overflowY !== 'visible') {
+    // no taller than the room the story column has below the first paragraph, so the active step is never under the source block
+    const top = stepsEl.getBoundingClientRect().top - asideBody.getBoundingClientRect().top + asideBody.scrollTop,
+      avail = asideBody.clientHeight - top - 24,
+      max = Math.max(120, Math.min(parseFloat(cs.maxHeight) || Infinity, avail));
+    if (stepsEl.scrollHeight > max + 1) {
+      let h = 0;
+      for (const li of stepsEl.children) {
+        const b = li.offsetTop + li.offsetHeight;
+        if (b <= max) h = b;
+        else break;
+      }
+      stepsEl.style.maxHeight = (h > 80 ? h : max) + 'px';
     }
-    if (h > 80) stepsEl.style.maxHeight = h + 14 + 'px';
   }
   fadeSteps();
 }
@@ -481,6 +502,7 @@ stepsEl.addEventListener(
   () => {
     fadeSteps();
     clearTimeout(snapTimer);
+    if (performance.now() - lastUserScroll > 1500) return; // the list moved by itself: it already stops on a step
     snapTimer = setTimeout(() => {
       // settle on a step boundary at the top so no step is cut mid-line at rest
       if (!listScrolls() || stepsEl.scrollTop < 3) return;
@@ -697,6 +719,7 @@ function chooseView(i) {
 }
 // Phone: the views scroll sideways; a fade on the right edge says more lie beyond it.
 function camFade() {
+  overlay.classList.toggle('views-wrap', camsEl.offsetHeight > 48); // two rows of views: a short phone gives the picture a little less
   camsEl.classList.toggle('at-end', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft <= 4);
   camsEl.classList.toggle('at-start', camsEl.scrollLeft <= 4);
 }
@@ -735,7 +758,10 @@ function updateFades() {
 asideBody.addEventListener('scroll', updateFades, { passive: true });
 addEventListener('resize', updateFades);
 asideBody.addEventListener('toggle', updateFades, true);
-if ('ResizeObserver' in window) new ResizeObserver(updateFades).observe(asideBody);
+if ('ResizeObserver' in window) {
+  new ResizeObserver(updateFades).observe(asideBody);
+  new ResizeObserver(() => fitSteps()).observe(stepsEl);
+}
 
 // ---------------------------------------------------------------- keyboard hint, shown once per visit
 function showHint() {
