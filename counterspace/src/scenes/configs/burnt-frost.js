@@ -28,7 +28,7 @@ export const BURNT_FROST = {
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [1.0, 1.0], // the first two key frames sit tight on the ship, the interceptor and the satellite
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, dx: 0, dy: 44, minPx: 84, maxPx: 170 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.55, dx: 0, dy: 44, minPx: 84, maxPx: 170 },
     {
       type: 'target',
       label: 'USA-193',

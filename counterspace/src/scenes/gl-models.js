@@ -678,7 +678,7 @@ export const modelMethods = {
   _pinModel(color, pos) {
     const T = this.T,
       g = new T.Group(),
-      m = new T.MeshBasicMaterial({ color: this._c(color), side: T.DoubleSide }),
+      m = new T.MeshBasicMaterial({ color: this._c(color), side: T.DoubleSide, transparent: true, opacity: 0.8 }), // rings 20% softer
       w = new T.MeshBasicMaterial({ color: 0xffffff, side: T.DoubleSide });
     const ring = new T.Mesh(new T.RingGeometry(0.014, 0.019, 28), m);
     ring.rotation.x = -Math.PI / 2;
@@ -788,11 +788,17 @@ export const modelMethods = {
       const lo = new T.ExtrudeGeometry(sh, { depth: 0.0017, bevelEnabled: false });
       lo.rotateX(Math.PI / 2);
       lo.translate(0, 0.0017, 0);
-      g.add(new T.Mesh(lo, this._mat(0x262e3d)));
+      g.add(new T.Mesh(lo, this._mat(0x151b27))); // a dark keel band
       const hi = new T.ExtrudeGeometry(sh, { depth: 0.0021, bevelEnabled: false });
       hi.rotateX(Math.PI / 2);
       hi.translate(0, 0.0038, 0);
-      g.add(new T.Mesh(hi, this._mat(0x7b8699)));
+      g.add(new T.Mesh(hi, this._mat(0x6a758c)));
+      // a dark weather deck inset in the hull top, so the superstructure stands on it
+      const dk = new T.ExtrudeGeometry(sh, { depth: 0.0006, bevelEnabled: false });
+      dk.rotateX(Math.PI / 2);
+      dk.scale(0.8, 1, 0.9);
+      dk.translate(0, 0.0046, 0);
+      g.add(new T.Mesh(dk, this._mat(0x30394a)));
       // a narrow churned wake that fades astern, a faint bow wave on each side, and a few foam flecks: a ship in the water, not a cone of light
       const fade = (pts, cols, idx, op) => {
         const wg = new T.BufferGeometry();
@@ -801,7 +807,11 @@ export const modelMethods = {
         wg.setIndex(idx);
         g.add(new T.Mesh(wg, new T.MeshBasicMaterial({ vertexColors: true, color: 0xdfeaff, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
       };
-      fade([-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0046, 0.0006, -0.08, 0.0046, 0.0006, -0.08], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.26);
+      fade([-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0006, 0.0006, -0.07, 0.0006, 0.0006, -0.07], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.34);
+      // a tapered V wake: two thin arms that diverge astern and fade out
+      [-1, 1].forEach((sd) =>
+        fade([sd * 0.002, 0.0006, -0.034, sd * 0.0036, 0.0006, -0.034, sd * 0.0165, 0.0006, -0.105, sd * 0.0172, 0.0006, -0.105], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.3),
+      );
       [-1, 1].forEach((sd) =>
         fade([sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0128, 0.0006, -0.03, sd * 0.0134, 0.0006, -0.03], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.22),
       );
