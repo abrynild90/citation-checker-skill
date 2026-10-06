@@ -796,7 +796,7 @@ export function buildSim(cfg) {
             staticPin: m.staticPin,
             labelDx: m.dx ?? 0,
             labelDy: m.dy ?? 0,
-            pos: (t) => (m.apex && t < tApex ? null : scl(d, rAlt(m.alt))),
+            pos: (t) => ((m.apex && t < tApex) || (IS_PHONE && m.phoneFrom && t < m.phoneFrom) ? null : scl(d, rAlt(m.alt))), // phoneFrom (opt-in): on a phone the marker waits until this t
           }),
         );
       }
