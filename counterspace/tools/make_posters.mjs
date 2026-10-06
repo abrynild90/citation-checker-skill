@@ -37,7 +37,7 @@ const POSTER_VIEW = {
   'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
-  spaceplanes: { cam: 1, boost: 1.6 },
+  spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
 };
