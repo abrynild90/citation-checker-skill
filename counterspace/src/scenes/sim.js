@@ -577,6 +577,10 @@ export function buildSim(cfg) {
         }
       });
       ranked.sort((x, y) => x[0] - y[0]);
+      if (a.ring) {
+        const byV = P.map((_, k) => k).sort((x, y) => P[x].dw - P[y].dw);
+        byV.forEach((k, r) => (P[k].ph = Math.PI * (2 * ((r + 0.5) / n) - 1) + (rnd() - 0.5) * 0.02));
+      }
       const cloud = {
         kind: 'cloud',
         labelIdx: kc,
@@ -601,6 +605,9 @@ export function buildSim(cfg) {
         vis: 0,
         fill(t, out, colr) {
           const dt = t - tgt.t;
+          // a.ring { t1, ease }: opt-in closed ring: each fragment's along-track offset grows from 0 at the hit to its own share of the full circle at t1
+          // (ordered by speed, so the ring is evenly filled), then the band keeps widening; the early cloud is a short, fat shell, not a thin wall
+          const rs = a.ring ? 1 - (1 - clamp01(dt / (a.ring.t1 - tgt.t))) ** (a.ring.ease ?? 2) : 0;
           let vis = 0;
           const dens = Math.min(1, Math.sqrt(300 / n));
           for (let k = 0; k < n; k++) {
@@ -609,7 +616,8 @@ export function buildSim(cfg) {
               y = 0,
               z = 0;
             if (dt > 0) {
-              let alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
+              let alt = tgt.alt + p.da * fat * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
                 // decayWin [t0, t1]: the fast-forward decay: every fragment sinks and burns up inside this window (all gone at t1), so the picture matches the text
                 const sw = clamp01((t - a.decayWin[0]) / (a.decayWin[1] - a.decayWin[0]));
@@ -621,9 +629,13 @@ export function buildSim(cfg) {
                 const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
                   q = orbitPos(
                     alt,
-                    tgt.inc + p.di,
+                    tgt.inc + p.di * (a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1),
                     tgt.raan + p.dr * (1 + (a.late?.kr ?? 0) * lt),
-                    tgt.uHit + p.du + tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0)),
+                    tgt.uHit +
+                      p.du +
+                      (a.ring
+                        ? tgt.w * (a.drift ?? 1) * dt + p.ph * rs
+                        : tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0))),
                   );
                 x = q[0];
                 y = q[1];
