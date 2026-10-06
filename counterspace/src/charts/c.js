@@ -31,10 +31,10 @@ const QUOTE = '“[O]nly non-destructive capabilities are actively being used ag
 const QUOTE_BY = 'Secure World Foundation (SWF), 2026 assessment, Executive Summary, p. xxiii';
 const STYLE_OF = { official_government: 'solid', multi_government: 'solid', researcher_osint: 'outline', alleged: 'dashed' };
 
-// stateC.focus: null = the default (the full shared 1957-2026 axis on every screen; the zoom 1995-2026 is opt-in);
+// stateC.focus: null = the default (the zoom 1995-2026 on every screen, since the earliest entry is from 1997; the full shared axis is one click away);
 // true / false = the reader's choice.
 export const stateC = { focus: null };
-export const zoomedC = () => !!stateC.focus;
+export const zoomedC = () => stateC.focus ?? true;
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
 
 const FS = 13, // label size
@@ -353,7 +353,7 @@ export function drawC(el = document.getElementById('svgC')) {
   // ---------------------------------------------------------------- note, key and data table
   const firstYr = Math.min(...NK.map((e) => +e.start.slice(0, 4)));
   document.getElementById('noteC').innerHTML = zoom
-    ? zoomNote('1995 to 2026', stateC.focus === null)
+    ? zoomNote('1995 to 2026', stateC.focus === null, 'the earliest entry in our records is from 1997')
     : fullNote() + (phone ? ` Nothing is in our records before ${firstYr}.` : '');
   document.getElementById('quoteC').innerHTML = `<span class="q">${QUOTE}</span><span class="by">${QUOTE_BY}</span>`;
   document.getElementById('cFocus').setAttribute('aria-pressed', zoom);

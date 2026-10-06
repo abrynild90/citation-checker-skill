@@ -6,7 +6,7 @@
 import { drawA, kinMarkup } from './charts/a.js';
 import { AS_OF, KIN, LEDGER_AS_OF, NK, actorKey, colorOf, setExporting, tw, wrap } from './app.js';
 import { CATS, drawB, stateB } from './charts/b.js';
-import { drawC, stateC } from './charts/c.js';
+import { drawC, zoomedC } from './charts/c.js';
 import { R_SHAPE_KEY, R_STYLE_KEY, R_VERT_NOTE, drawR, zoomedR } from './charts/rpo.js';
 import { drawL } from './charts/lag.js';
 import { ABBR_NOTE, drawLegal, glyphMarkup } from './charts/legal.js';
@@ -96,7 +96,7 @@ const EXPORT_SPEC = {
     }),
     get key() {
       return (
-        (stateC.focus
+        (zoomedC()
           ? 'Zoomed view: the axis runs from 1995 to 2026, not the shared 1957 to 2026 axis (our records have no earlier jamming, laser or cyber entry; ' +
             'the earliest is the 1997 MIRACL laser test). '
           : '') +

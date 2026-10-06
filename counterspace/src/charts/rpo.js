@@ -10,10 +10,10 @@ import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } fr
 import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote } from './kit.js';
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
-// stateR.focus: null = the default (the full shared 1957-2026 axis, except on a phone, where the first view is the zoom 2000-2026 because nothing earlier exists);
+// stateR.focus: null = the default (the zoom 2000-2026 on every screen, because nothing in our records is earlier than 2003; the full shared axis is one click away);
 // true / false = the reader's explicit choice, kept across resizes.
 export const stateR = { focus: null };
-export const zoomedR = () => stateR.focus ?? isPhoneNow();
+export const zoomedR = () => stateR.focus ?? true;
 const R_FOCUS = () => [parse('2000-01-01'), DOMAIN[1]];
 
 // Key lists, shared by the page key and the downloads: [svg inner (drawn in the current ink), label, glyph width].
@@ -224,6 +224,30 @@ export function drawR(el = document.getElementById('svgR')) {
     }
   }
 
+  // Direct labels for a few headline operations (wording taken from the entries themselves). A label goes to the left of its mark, or after it,
+  // only where no other mark in the same row is in the way; otherwise it is left off (the card still names the operation).
+  const HEADLINES = {
+    'us-2010-otv1': 'X-37B OTV-1',
+    'cn-2022-sj21-compass-g2': 'SJ-21 tow of Compass G2',
+    'ru-2014-luch-olymp': 'Luch (Olymp)',
+    'us-2014-gssap': 'GSSAP',
+    'cn-2019-tjs3-roaming': 'TJS-3',
+  };
+  if (!EXPORTING) {
+    const lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true');
+    placed.forEach((p) => {
+      const t = HEADLINES[p.e.id];
+      if (!t) return;
+      const w = tw(t, 12.5, 600),
+        sameRow = placed.filter((q) => q !== p && Math.abs(q.y - p.y) < 2),
+        free = (a, b) => sameRow.every((q) => q.ext[1] < a - 4 || q.ext[0] > b + 4) && !(p.bx != null && p.bx > a && p.bx < b);
+      const left = [p.X0 - 14 - w, p.X0 - 14],
+        right = [p.X1 + (p.ongoing ? 30 : 16), p.X1 + (p.ongoing ? 30 : 16) + w];
+      const side = left[0] > INSET + 8 && free(left[0], left[1]) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && !p.ongoing ? 'r' : null;
+      if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
+    });
+  }
+
   const g = svg
     .append('g')
     .selectAll('g')
@@ -291,7 +315,7 @@ export function drawR(el = document.getElementById('svgR')) {
   if (EXPORTING) return;
 
   // ---------------------------------------------------------------- note, key and data table
-  document.getElementById('noteR').innerHTML = zoomed ? zoomNote('2000 to 2026', stateR.focus === null) : fullNote();
+  document.getElementById('noteR').innerHTML = zoomed ? zoomNote('2000 to 2026', stateR.focus === null, 'the first entry in our records is from 2003') : fullNote();
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);
   const cube =
