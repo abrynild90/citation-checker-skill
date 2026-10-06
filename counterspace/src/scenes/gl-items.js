@@ -344,13 +344,31 @@ const methods = {
         mn = it.minPx ?? (deb ? 3 : 2);
       const pm = this._ptMat(it.size, IS_PHONE ? mn + 1 : mn, it.maxPx ?? (deb ? 11 : 9), IS_PHONE ? 1.15 : 1);
       if (deb) pm.uniforms.uVar.value = 1; // debris: dots differ in size and brightness, and fade with distance from the camera
+      if (it.additive) pm.blending = T.AdditiveBlending; // opt-in: bright additive sprites read against dark terrain
       const pts = new T.Points(g, pm);
       pts.frustumCulled = false;
       pts.renderOrder = 2;
       root.add(pts);
       this.dyn.push({ it, obj: pts });
+      if (it.trail && deb) {
+        // opt-in short trails: earlier positions of every fragment (it.trail.n steps of it.trail.dt) drawn smaller and fainter behind it
+        const K = it.trail.n,
+          tg = new T.BufferGeometry();
+        tg.setAttribute('position', new T.BufferAttribute(new Float32Array(n * K * 3), 3));
+        tg.setAttribute('aCol', new T.BufferAttribute(new Float32Array(n * K * 4), 4));
+        const tm = this._ptMat(it.size * 0.8, Math.max(2, mn - 1), it.maxPx ?? 11, 1);
+        tm.uniforms.uVar.value = 1;
+        tm.blending = T.AdditiveBlending;
+        const tp = new T.Points(tg, tm);
+        tp.frustumCulled = false;
+        tp.renderOrder = 1;
+        root.add(tp);
+        pts.userData.trail = { tg, K, pos: new Float32Array(n * 3), col: new Float32Array(n * 4) };
+      }
       if (deb) {
-        const hz = new T.Points(g, this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, 0.11));
+        const hm = this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, it.additive ? 0.2 : 0.11);
+        if (it.additive) hm.blending = T.AdditiveBlending;
+        const hz = new T.Points(g, hm);
         hz.frustumCulled = false;
         hz.renderOrder = 1;
         root.add(hz);

@@ -36,7 +36,8 @@ const POSTER_VIEW = {
   'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
-  spaceplanes: { cam: 1, boost: 1.6 }, // the X-37B follow view: the plane large on the sunlit limb with its orbit loops
+  spaceplanes: { cam: 1, boost: 1.6 },
+  shakti: { back: 0.82 }, // the interceptor and the satellite larger, the curved limb still in view // the X-37B follow view: the plane large on the sunlit limb with its orbit loops
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });

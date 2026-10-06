@@ -571,6 +571,10 @@ export function buildSim(cfg) {
         dynCol: true,
         alpha: 0.7,
         size: a.size ?? (n > 2000 ? 0.019 : n > 400 ? 0.02 : 0.034),
+        minPx: a.minPx, // opt-ins: dot size limits, additive sprites (a.additive), short trails (a.trail: { n, dt })
+        maxPx: a.maxPx,
+        additive: a.additive,
+        trail: a.trail,
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,

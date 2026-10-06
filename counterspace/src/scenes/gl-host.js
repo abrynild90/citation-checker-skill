@@ -433,6 +433,27 @@ export class GLHost {
         it.fill(t, a.array, it.dynCol ? g.attributes.aCol.array : null);
         a.needsUpdate = true;
         if (it.dynCol) g.attributes.aCol.needsUpdate = true;
+        const tr = obj.userData.trail;
+        if (tr) {
+          const n = it.n,
+            tp = tr.tg.attributes.position.array,
+            tc = tr.tg.attributes.aCol.array;
+          for (let k = 1; k <= tr.K; k++) {
+            it.fill(Math.max(0, t - k * it.trail.dt), tr.pos, tr.col);
+            const f = (1 - k / (tr.K + 1)) * (it.trail.k ?? 0.5);
+            tp.set(tr.pos, (k - 1) * n * 3);
+            for (let q = 0; q < n; q++) {
+              const o = ((k - 1) * n + q) * 4;
+              tc[o] = tr.col[4 * q];
+              tc[o + 1] = tr.col[4 * q + 1];
+              tc[o + 2] = tr.col[4 * q + 2];
+              tc[o + 3] = tr.col[4 * q + 3] * f;
+            }
+          }
+          it.fill(t, a.array, g.attributes.aCol.array); // the main fill state (vis count) stays that of t
+          tr.tg.attributes.position.needsUpdate = true;
+          tr.tg.attributes.aCol.needsUpdate = true;
+        }
       } else if (it.kind === 'beam') {
         const A = it.a(t),
           B = it.b(t),

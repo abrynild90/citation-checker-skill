@@ -22,10 +22,10 @@ export const SHAKTI = {
   orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
-  fitFill: IS_PHONE ? 0.95 : 1.1, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
+  fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
-  liveOff: { 'PDV': [-86, -46], 'Microsat-R': [70, 70] }, // the two pills sit on opposite sides of the strike, one above and one below
-  phoneOff: { 'Abdul Kalam': [-56, 30] }, // 375: the island label hangs clear of the trail head
+  liveOff: { 'Abdul Kalam': [96, 34], 'PDV': [-86, -46], 'Microsat-R': [70, 70] }, // the two pills sit on opposite sides of the strike, one above and one below
+  phoneOff: { 'Abdul Kalam': [60, 34] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
   actors: [
     { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
@@ -34,16 +34,16 @@ export const SHAKTI = {
       label: 'Microsat-R',
       color: C.tgt,
       big: 1.7,
-      minPx: 46,
-      maxPx: 86,
+      minPx: 64,
+      maxPx: 100,
       bright: true,
       wreck: true,
       impactDx: -80,
       impactDy: -30,
-      impactLabel: 'Impact: Microsat-R (wreck)',
+      impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32, rocket: { minPx: 30, maxPx: 54 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.32, rocket: { minPx: 44, maxPx: 70 } },
     {
       type: 'debris',
       count: 130,
@@ -53,8 +53,11 @@ export const SHAKTI = {
       dv: 1.2,
       drift: 0.15,
       decay: 1.5,
-      color: '#ffd2a6',
-      size: 0.075,
+      color: '#ff9c52',
+      size: 0.1,
+      minPx: 4.5,
+      maxPx: 13,
+      additive: true,
       lateGlow: true,
     },
   ],
