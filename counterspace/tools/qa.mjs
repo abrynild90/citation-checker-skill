@@ -443,6 +443,36 @@ await run('ux-phone', { viewport: { width: 375, height: 800 }, colorScheme: 'dar
   return res;
 });
 
+// 3c. Keyboard walk: Tab from the top and record what takes focus; each stop class must be reached and the focus must stay visible below the sticky band.
+await run('keyboard-walk', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark', reducedMotion: 'reduce' }, async (p) => {
+  const seen = new Set(),
+    hidden = [];
+  const kind = (a) =>
+    a.matches('a.skip') ? 'skip link' :
+    a.closest('.scope-dark, header') && a.matches('button') && /theme|dark|light/i.test(a.getAttribute('aria-label') || a.textContent) ? 'theme button' :
+    a.closest('.hero-cap, .cta') ? 'hero buttons' :
+    a.closest('.hero-contents, .toc') ? 'contents list' :
+    a.closest('#legalSvg, #legalBand') && a.classList.contains('mark') ? 'law marks' :
+    a.classList.contains('mark') ? 'chart marks' :
+    a.closest('.tscroll') ? 'tables' :
+    a.matches('summary') ? 'disclosures' : '';
+  for (let i = 0; i < 400; i++) {
+    await p.keyboard.press('Tab');
+    const r = await p.evaluate((src) => {
+      const a = document.activeElement;
+      const k = eval('(' + src + ')')(a);
+      const band = document.getElementById('legalBand')?.getBoundingClientRect();
+      const b = a.getBoundingClientRect();
+      const stuck = band && band.top <= 1 && band.bottom > 0;
+      return { k, covered: !!stuck && b.top >= 0 && b.top < band.bottom - 2 && b.bottom > band.top };
+    }, kind.toString());
+    if (r.k) seen.add(r.k);
+    if (r.covered) hidden.push(i);
+  }
+  const want = ['skip link', 'theme button', 'hero buttons', 'contents list', 'law marks', 'chart marks', 'tables', 'disclosures'];
+  return { missing: want.filter((w) => !seen.has(w)), seen: [...seen], coveredByBand: hidden.length };
+});
+
 // 4. Visual regression against the saved baseline (hashes of SVG sections).
 fs.writeFileSync(`${out}/hashes.json`, JSON.stringify(hashes, null, 1));
 if (process.env.BASELINE) fs.writeFileSync(BASELINE, JSON.stringify(hashes, null, 1));
