@@ -417,6 +417,11 @@ export function buildSim(cfg) {
         beamDy: a.beamDy,
         pos: (t) => pos(Math.min(t, a.t1)),
       };
+      if (a.labelUntil != null) {
+        // labelUntil: the aircraft's pill retires at this time (still frames keep it), so it does not crowd the missile and the collision
+        item.labelFn = (t, narrow, still) => (still || t < a.labelUntil ? a.label : null);
+        item.statusColor = () => item.color;
+      }
       if (!a.gnss) {
         aircraftPos = (t) => P(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         // Climb: altitude rises along the path (exaggerated) and a trail shows where the F-15 has been.
@@ -599,6 +604,7 @@ export function buildSim(cfg) {
         maxPx: a.maxPx,
         additive: a.additive,
         trail: a.trail,
+        hideEmpty: a.hideEmpty,
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,

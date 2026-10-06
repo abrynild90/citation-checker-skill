@@ -31,9 +31,8 @@ export const SOLWIND = {
   camGlide: true,
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [112, 34] }, // the missile's pill sits above the F-15 with a leader down to the arc
-  phoneCamOff: { 3: { 'F-15': [92, -34] } },
-  phoneOff: { 'ASM-135': [-16, -58], 'F-15': [96, -16] },
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [124, 8] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  phoneOff: { 'ASM-135': [-16, -58] },
   actors: [
     {
       type: 'aircraft',
@@ -49,6 +48,7 @@ export const SOLWIND = {
       maxPx: IS_PHONE ? 62 : 104,
       exit: { dur: 0.2, k: 0.6 }, // after the release the F-15 eases down and leaves
       label: 'F-15 zoom climb',
+      labelUntil: 0.22,
       dx: -64,
       dy: 24,
     },
@@ -66,7 +66,7 @@ export const SOLWIND = {
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
     { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42, retire: 0.06 },
-    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6' },
+    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, hideEmpty: true, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6' },
   ],
   still: 0.45,
   status: [
