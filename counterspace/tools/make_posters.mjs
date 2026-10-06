@@ -16,7 +16,7 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.34, // the burst rings over Johnston Island in the tight first camera
+  starfish: 0.6, // the whole globe with the belt lobes and the field lines
   solwind: 0.5, // the textured satellite at the instant the missile reaches it (the textured model is drawn only until impact)
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
@@ -35,7 +35,7 @@ const POSTER_T = {
 const POSTER_VIEW = {
   viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
-  starfish: { cam: 0 }, // the tight cut on the burst over Johnston Island (the first camera glides in on it)
+  starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger

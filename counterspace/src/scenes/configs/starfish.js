@@ -48,7 +48,7 @@ export const STARFISH = {
       t1: 0.14,
       color: C.int,
       label: 'Thor launch',
-      labelEnd: 0.34, // live: the Thor chip goes once the burst has happened (it only crowded the globe at t 0.6 and 0.85); the static views drop it anyway
+      labelEnd: 0.24, // live: the Thor chip goes once the burst has happened (it only crowded the globe at t 0.6 and 0.85); the static views drop it anyway
       opt: true,
       dx: -96,
       dy: 4,
@@ -83,7 +83,7 @@ export const STARFISH = {
         dx: 30,
         dy: 60,
         staticPh: -0.75, // static: drawn further along its orbit, off the Earth's centre
-        fail: { t: 0.8, label: 'Satellite damaged (per SWF)', short: 'Satellite damaged' },
+        fail: { t: 0.8, label: 'Satellite damaged', short: 'Satellite damaged' },
       },
     },
   ],
@@ -91,7 +91,7 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -62], Johnston: [-140, -4], Thor: [70, -70], Artificial: [-60, -21], 'Satellite damaged': [-120, 36] },
+  liveOff: { Detonation: [-150, -62], Johnston: [-140, -4], Thor: [-120, -78], Artificial: [-60, -21], 'Satellite damaged': [-130, 30] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
@@ -105,10 +105,11 @@ export const STARFISH = {
     {
       name: 'Whole scene',
       glide: [
-        [0, [13.5, -172, 1.4], [16.6, -169.3, 1.03]],
-        [0.12, [13.5, -172, 1.4], [16.6, -169.3, 1.03]],
-        [0.3, [19, -176, 2.1], [16.6, -169.4, 1]],
-        [0.55, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15], [0, -194.5, 0]],
+        [0, [13.5, -172, 2], [16.6, -169.3, 1.03]],
+        [0.12, [13.5, -172, 2], [16.6, -169.3, 1.03]],
+        [0.3, [18, -175, 2.45], [16.6, -169.4, 1]],
+        [0.42, [19.5, -184, 3.1], [8, -178, 0.5]],
+        [0.52, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15], [0, -194.5, 0]],
         [1, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15], [0, -194.5, 0]],
       ],
     },
@@ -122,6 +123,7 @@ export const STARFISH = {
   staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
   still: 0.7,
   camDist: 3.5,
+  nightK: 2.4, // the Pacific night side is lifted so the ocean, the island glints and the rocket separate from the dark at t=0
   phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
   staticZoom: 1.7,
   staticCenter: [35, -205],
