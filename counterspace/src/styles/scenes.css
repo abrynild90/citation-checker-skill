@@ -1890,3 +1890,17 @@
 .overlay.is-static .sv-hint {
   display: none !important;
 }
+
+/* While a window is open the page behind it is not painted at all (it is inert already): nothing of it can show through a stale tile */
+.scene-open body > :not(.overlay):not(script):not(style) {
+  visibility: hidden;
+}
+.overlay.open {
+  will-change: opacity;
+}
+/* The window fades in; its panel does not move (a moving panel left a stale tile of its footer over the title in some browsers) */
+.overlay .panel,
+.overlay.open .panel {
+  transform: none;
+  transition: none;
+}

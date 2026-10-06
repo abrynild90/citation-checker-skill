@@ -393,6 +393,7 @@ document.addEventListener('pointerdown', (e) => {
 
 // While the dialog is open the page behind it is inert (no focus, not read out).
 function setInert(on) {
+  document.documentElement.classList.toggle('scene-open', on); // the page behind is also not painted, so no stale tile of it can show through the window
   [...document.body.children].forEach((n) => {
     if (n !== overlay && !/^(script|style|svg|link)$/i.test(n.tagName)) n.inert = on;
   });
@@ -519,6 +520,15 @@ function followStep(li, instant) {
   let dy = 0;
   if (r.bottom > bottom) dy = r.bottom - bottom;
   else if (r.top < top) dy = r.top - top;
+  if (dy && own === asideBody) {
+    // The column rests on a block boundary (a paragraph, a button, a step), never mid-line, so no half line shows under the picture.
+    const pos = (n) => n.getBoundingClientRect().top - box.top + own.scrollTop,
+      want = own.scrollTop + dy,
+      cuts = [...own.children, ...stepsEl.children].filter((n) => n.getClientRects().length).map((n) => pos(n) - 6).filter((v) => v >= want - 0.5 && v <= pos(li) - 2),
+      to = Math.min(own.scrollHeight - own.clientHeight, Math.max(0, cuts.length ? Math.min(...cuts) : want));
+    own.scrollTo({ top: to, behavior: REDUCED || instant ? 'auto' : 'smooth' });
+    return;
+  }
   if (dy) own.scrollBy({ top: dy, behavior: REDUCED || instant ? 'auto' : 'smooth' });
 }
 const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && getComputedStyle(stepsEl).overflowY !== 'visible';
