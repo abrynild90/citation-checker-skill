@@ -302,6 +302,17 @@ export class GLHost {
     cam.up.copy(u);
     cam.lookAt(l);
   }
+  // Opt-in (cfg.actFade): a short cross-fade over the cut between two acts of a playing scene, picture and labels together, instead of a hard jump.
+  _actFade() {
+    if (!this.playing || REDUCED_MOTION || !this.el?.animate) return;
+    try {
+      const ov = (this._fadeEl ||= Object.assign(document.createElement('div'), {}));
+      ov.style.cssText = 'position:absolute;inset:0;background:#05080f;pointer-events:none;opacity:0';
+      if (ov.parentNode !== this.el) this.el.insertBefore(ov, this.labelLayer || null);
+      ov.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 650, easing: 'ease-out' });
+      this.labelLayer?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-out' });
+    } catch (e) {}
+  }
   update(t) {
     const T = this.T;
     this.t = t;
@@ -312,8 +323,10 @@ export class GLHost {
       let ai = acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1));
       ai = Math.max(0, ai);
       if (this._act !== ai) {
+        const first = this._act == null;
         this._act = ai;
         this.setCam(acts[ai].cam, true);
+        if (!first && this.sim.cfg.actFade) this._actFade();
       }
     } else if (acts) {
       // A locked episode preset shows only its own episode. Scrubbed outside it, the camera of the episode actually on screen takes over (so a preset never
@@ -546,10 +559,18 @@ export class GLHost {
       } else if (it.kind === 'flash') {
         const span = it.span ?? (it.big ? 0.3 : 0.14),
           dt = t - it.t0,
-          on = dt > 0 && dt < span;
+          lg = it.linger != null && dt >= span, // opt-in: after the burst a faint ring stays on the impact point
+          on = dt > 0 && (dt < span || lg);
         obj.visible = on;
         obj.userData.on = on;
-        if (on) {
+        if (on && lg) {
+          const { core, ring } = obj.userData;
+          core.material.opacity = 0;
+          ring.scale.setScalar((it.size ? it.size * 1.7 : 0.9) * (it.lingerK ?? 1) + 0.01);
+          ring.userData.s0 = ring.scale.x;
+          ring.material.opacity = it.linger;
+          if (obj.userData.ring2) obj.userData.ring2.material.opacity = 0;
+        } else if (on) {
           const f = dt / span,
             { core, ring } = obj.userData;
           core.scale.setScalar((it.size ?? (it.big ? 0.55 : 0.16)) * Math.sqrt(Math.min(1, f * 3)) + 0.01);
@@ -671,10 +692,11 @@ export class GLHost {
         const d = Math.max(0.15, v.distanceTo(cp)),
           { core, ring } = obj.userData;
         if (core.userData.s0) {
-          core.scale.setScalar(Math.min(core.userData.s0, (110 * k * d) / sc));
-          ring.scale.setScalar(Math.min(ring.userData.s0, (190 * k * d) / sc));
+          const ck = it.capK ?? 1; // opt-in: larger on-screen cap for the burst sprites
+          core.scale.setScalar(Math.min(core.userData.s0, (110 * ck * k * d) / sc));
+          ring.scale.setScalar(Math.min(ring.userData.s0, (190 * ck * k * d) / sc));
           const r2 = obj.userData.ring2;
-          if (r2?.userData.s0) r2.scale.setScalar(Math.min(r2.userData.s0, (260 * k * d) / sc));
+          if (r2?.userData.s0) r2.scale.setScalar(Math.min(r2.userData.s0, (260 * ck * k * d) / sc));
         }
       } else if (it.kind === 'beam' && obj.visible && obj.userData.ends)
         obj.userData.ends.forEach((s) => {

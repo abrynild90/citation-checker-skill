@@ -46,6 +46,7 @@ export const GNSS = {
       radius: 6.2,
       color: C.jam,
       soft: true,
+      clean: true, // a clear red tint with a visible rim
       label: 'Jammer effect zone',
       dx: 50,
       dy: 18,
@@ -64,10 +65,10 @@ export const GNSS = {
       t1: 1,
       label: 'Airliner 1',
       gnss: true,
-      minPx: IS_PHONE ? 38 : 26,
-      maxPx: IS_PHONE ? 70 : 52,
-      dx: -96,
-      dy: -14,
+      minPx: IS_PHONE ? 46 : 44,
+      maxPx: IS_PHONE ? 78 : 78,
+      dx: IS_PHONE ? -52 : -96,
+      dy: IS_PHONE ? -22 : -14,
     },
     {
       type: 'aircraft',
@@ -86,9 +87,9 @@ export const GNSS = {
       beamDx: 0,
       beamDy: 0,
       gnss: true,
-      minPx: IS_PHONE ? 38 : 26,
-      maxPx: IS_PHONE ? 70 : 52,
-      labelDy: 34,
+      minPx: IS_PHONE ? 46 : 44,
+      maxPx: IS_PHONE ? 78 : 78,
+      labelDy: -34,
       dx: 92,
     },
   ],
@@ -106,6 +107,7 @@ export const GNSS = {
   sunView: { az: 30, el: 32 }, // a higher, more frontal sun: the Baltic terrain is lit, not olive and murky
   phoneHide: ['Jammer', 'Ground jammer', 'Jammer effect', 'GPS signal', 'Baltic Sea'], // 375: two labels (the airliners, whose colour is the story); the jammer and zone are named by the status line and the red dome
   insetNoPhone: true, // the phone stage is too small for an inset that would sit on the jammer zone
+  camHide: { 0: ['Baltic Sea', 'GPS signal'], 1: ['Baltic Sea', 'GPS signal'] }, // secondary labels (the place name, the beam tag that floats off the beam) are dropped while the aircraft labels are on
   cameras: [
     {
       name: 'Baltic: airliners and jammer zone',

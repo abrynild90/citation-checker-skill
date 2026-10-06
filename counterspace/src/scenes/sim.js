@@ -192,6 +192,7 @@ export function buildSim(cfg) {
         byIndex: a.byIndex,
         tail: a.tail, // capped wake length (fraction of the whole path) and brightness
         wakeOp: a.wakeOp,
+        taper: a.taper, // opt-in: the wake starts thin and widens toward the craft (a soft wake)
         color: a.color,
         width: 2,
         pts: (t) => {
@@ -582,6 +583,9 @@ export function buildSim(cfg) {
         big: true,
         strong: !!a.strong,
         coreK: a.coreK,
+        capK: a.flashCap, // opt-ins: larger screen cap, faint lingering ring after the burst
+        linger: a.linger,
+        lingerK: a.lingerK,
         size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
         span: a.flashSpan ?? (a.strong ? 0.2 : 0.16), // flashSpan: opt-in shorter shock rings
       });
@@ -644,6 +648,7 @@ export function buildSim(cfg) {
         minPx: a.minPx, // opt-ins: dot size limits, additive sprites (a.additive), short trails (a.trail: { n, dt })
         maxPx: a.maxPx,
         additive: a.additive,
+        darkHalo: a.darkHalo,
         trail: a.trail,
         hideEmpty: a.hideEmpty,
         label: a.label,

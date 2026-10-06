@@ -51,6 +51,8 @@ export const RPO = {
       status: 'USA 271 and SKYNET 5A: a jointly announced US–UK close approach',
     },
   ],
+  labelEase: true, // labels glide instead of jumping each frame
+  actFade: true, // a short cross-fade over the cut between episodes
   inset: 'Top view',
   insetCorner: IS_PHONE ? 'bl' : undefined, // 375: the top view sits at the lower left, clear of the satellites
   insetSizePhone: [92, 74],
@@ -285,19 +287,19 @@ export const RPO = {
   status: [
     [0, 'GEO, June 2025: China’s SJ-21 drifts west along the belt toward SJ-25', 'GEO 2025: SJ-21 drifts toward SJ-25'],
     [0.08, 'Two US GSSAP satellites move to positions that COMSPOC, a tracking firm, calls “flanking”', 'US GSSAP satellites “flanking” them'],
-    [0.16, '13–14 June: close approaches; on 13 June within 1 km, possibly docked, then separated (COMSPOC)', '13 June: within 1 km, possibly docked'],
+    [0.16, '13 June: within 1 km, possibly docked, then separated (COMSPOC)', '13 June: within 1 km, possibly docked'],
     [0.235, '30 June: again close enough to dock; 2–6 July: “thought to have docked”', '30 June–6 July: “thought to have docked”'],
     [0.29, 'SWF: they “remained docked until November 2025”', 'SWF: “remained docked until November 2025”'],
     [0.34, '25 Nov.: SJ-25 fires its engine to separate; imagery on 29 Nov. shows two satellites', '25 Nov.: SJ-25 fires to separate'],
-    [0.385, 'Dec.–Jan.: close approaches continue, closest just under 3 km on 13 Jan.; 130 km apart by 16 Jan.', 'Jan.: closest just under 3 km (13 Jan.)'],
+    [0.385, 'Jan.: closest just under 3 km (13 Jan.); 130 km apart by 16 Jan.', 'Jan.: closest just under 3 km (13 Jan.)'],
     [0.42, 'LEO, 6 Dec. 2019: Russia’s Cosmos 2542 releases a small satellite, Cosmos 2543', 'LEO 2019: Cosmos 2542 releases 2543'],
     [0.47, 'Cosmos 2543 stays within 2 km of Cosmos 2542 for three days', 'Cosmos 2543 stays within 2 km for three days'],
     [0.53, 'It then raises its apogee (highest point) to 590 km by 16 Dec.', 'It raises its highest point to 590 km'],
-    [0.6, 'Amateur analysis “strongly suggests” the aim was to observe USA 245; within 20 km in Jan.' + ' 2020', 'Analysis: aim was to observe USA 245'],
+    [0.6, 'Amateur analysis “strongly suggests” aim was to watch USA 245; within 20 km', 'Analysis: aim was to observe USA 245'],
     [0.665, 'Russia’s Foreign Ministry said Cosmos 2543 posed no threat to USA 245', 'Russia: Cosmos 2543 posed no threat'],
     [0.72, 'GEO, Sept. 2025: USA 271 (US GSSAP) drifts west, about 1.5° per day, toward SKYNET 5A', 'GEO 2025: USA 271 nears SKYNET 5A'],
     [0.8, '4 Sept.: a maneuver along its orbit; USA 271 stops within 0.05° of SKYNET 5A near 95.3° E', '4 Sept.: USA 271 stops near SKYNET 5A'],
-    [0.84, '5–11 Sept.: closest about 13 km. First joint US–UK approach, announced by both space commands', '5–11 Sept.: closest about 13 km'],
+    [0.84, '5–11 Sept.: closest about 13 km; first joint US–UK approach (announced by both)', '5–11 Sept.: closest about 13 km'],
     [0.94, 'The close approach lasted roughly 5–11 Sept. (SWF)', 'Lasted roughly 5–11 Sept. (SWF)'],
   ],
   cameras: [
@@ -305,10 +307,10 @@ export const RPO = {
     {
       name: 'China and the US in GEO',
       act: 0,
-      fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.2 },
+      fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.2, include: [[0, -1.3, 0]] },
     },
     { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: 0.88, t: 0.57 } },
-    { name: 'The US and the UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85 } },
+    { name: 'The US and the UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85, include: [[0, -1.3, 0]] } },
     { name: 'Whole scene: Earth and the GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: IS_PHONE ? ['USA 245', 'SJ-25', 'SJ-21', 'USA 270', 'USA 271'] : ['USA 245', 'SJ-25'] }, // unlocked from the tour
   ],
 };

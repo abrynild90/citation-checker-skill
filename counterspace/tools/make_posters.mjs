@@ -33,11 +33,12 @@ const POSTER_T = {
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
-  viasat: { cam: 3, lift: -0.45, back: 1.05 }, // the whole GEO ring, Europe and the beams down to KA-SAT, which sits inside the frame
+  viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
   'sj21-tug': { pose: [-1.010,0.521,-2.776,-0.538,-0.075,-2.080] }, // the docked pair above the belt line, with the Earth's limb below it
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
-  gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
+  gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
+  solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
 };
@@ -81,13 +82,23 @@ try {
           h.update(tt);
           h.render();
           // the screen box of the craft on show (the picture is cropped around it)
-          const cv = h.renderer.domElement,
-            pts = h.dyn
+          const cv = h.renderer.domElement;
+          let pts = h.dyn
               .filter((d) => d.it.kind === 'point' && d.it.prim && d.it.label && d.it.pos?.(tt))
               .map((d) => {
                 const v = d.obj.position.clone().project(h.camera);
                 return [((v.x + 1) / 2) * cv.clientWidth, ((1 - v.y) / 2) * cv.clientHeight];
               });
+          // with more than two craft, the picture is cropped around the closest pair (the story of that episode), not the whole spread
+          if (pts.length > 2) {
+            let best = null;
+            for (let i = 0; i < pts.length; i++)
+              for (let j = i + 1; j < pts.length; j++) {
+                const d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]);
+                if (!best || d < best.d) best = { d, p: [pts[i], pts[j]] };
+              }
+            pts = best.p;
+          }
           const xs = pts.map((p) => p[0]),
             ys = pts.map((p) => p[1]);
           return { cx: (Math.min(...xs) + Math.max(...xs)) / 2, cy: (Math.min(...ys) + Math.max(...ys)) / 2, bw: Math.max(...xs) - Math.min(...xs), bh: Math.max(...ys) - Math.min(...ys), w: cv.clientWidth, h: cv.clientHeight };
@@ -98,6 +109,9 @@ try {
       }
       const b64 = await page.evaluate(
         async ({ shots, W, H, Q, titles, briefs }) => {
+          // the page's own embedded fonts (a canvas does not fetch them by itself): load before any text is drawn
+          await Promise.all(['600 40px "Newsreader"', '700 40px "IBM Plex Sans"', '600 40px "IBM Plex Sans"', '400 40px "IBM Plex Sans"'].map((f) => document.fonts.load(f).catch(() => null)));
+          const SANS = '"IBM Plex Sans", sans-serif';
           const c = document.createElement('canvas');
           c.width = W;
           c.height = H;
@@ -110,7 +124,7 @@ try {
             ty = H * 0.19;
           x.textBaseline = 'alphabetic';
           x.fillStyle = '#eef2fb';
-          x.font = '600 ' + Math.round(H * 0.058) + 'px Georgia, serif';
+          x.font = '600 ' + Math.round(H * 0.058) + 'px "Newsreader", Georgia, serif';
           x.fillText('Three close approaches, three places', gap, H * 0.115);
           for (let i = 0; i < 3; i++) {
             const img = new Image();
@@ -118,7 +132,7 @@ try {
             await img.decode();
             const b = shots[i].box,
               k = img.width / b.w;
-            let sw = Math.min(img.height, img.width, Math.max(b.bw, b.bh) * k * 1.3 + 60 * k);
+            let sw = Math.min(img.height, img.width, Math.max(0.55 * img.height, Math.max(b.bw, b.bh) * k * 1.3 + 60 * k));
             const sx = Math.max(0, Math.min(img.width - sw, b.cx * k - sw / 2)),
               sy = Math.max(0, Math.min(img.height - sw, b.cy * k - sw / 2));
             const tx = gap + i * (ts + gap);
@@ -135,13 +149,13 @@ try {
             x.roundRect(tx, ty, ts, ts, 10);
             x.stroke();
             x.fillStyle = '#ffc86b';
-            x.font = '700 ' + Math.round(H * 0.052) + 'px sans-serif';
+            x.font = '700 ' + Math.round(H * 0.052) + 'px ' + SANS;
             x.fillText(String(i + 1), tx + 2, ty + ts + H * 0.085);
             x.fillStyle = '#eef2fb';
-            x.font = '600 ' + Math.round(H * 0.038) + 'px sans-serif';
+            x.font = '600 ' + Math.round(H * 0.038) + 'px ' + SANS;
             x.fillText(titles[i], tx + H * 0.05, ty + ts + H * 0.066);
             x.fillStyle = '#b3bdd6';
-            x.font = Math.round(H * 0.032) + 'px sans-serif';
+            x.font = Math.round(H * 0.032) + 'px ' + SANS;
             x.fillText(briefs[i], tx + H * 0.05, ty + ts + H * 0.108);
           }
           return c.toDataURL('image/webp', Q).split(',')[1];

@@ -401,7 +401,7 @@ export const earthMethods = {
     const u = this._eu;
     if (!u) return;
     const alt = this.camera.position.length() - 1;
-    u.uCloudAmt.value = (this.sim.cfg.cloudK ?? 0.6) * Math.min(1, Math.max(0, (alt - 0.6) / 1.6));
+    u.uCloudAmt.value = (this.sim.cfg.cloudK ?? 0.6) * Math.min(1, Math.max(this.sim.cfg.cloudFloor ?? 0, (alt - 0.6) / 1.6)); // cloudFloor (opt-in): some cloud stays at close range
   },
   // The textures belong to the host for the life of the page; only the running fade stops with the scene.
   _disposeEarth() {

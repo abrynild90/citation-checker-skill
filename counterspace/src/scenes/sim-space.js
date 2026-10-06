@@ -144,7 +144,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
     items._gps = sats;
   }
   if (a.type === 'zone') {
-    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy, soft: a.soft });
+    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy, soft: a.soft, clean: a.clean });
     items._zone = a;
     if (a.jammer)
       items.push({
@@ -307,11 +307,19 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         mShow = Math.round(m * (IS_PHONE ? 0.6 : 1)),
         rv = mulberry(4001 + bi * 131);
       for (let k = 0; k < m; k++) {
-        const la = lerp(la0, la1, rv()),
-          lo = lerp(lo0, lo1, rv()),
-          off = wave == null ? lerp(a.t0, a.t1, bi === 0 ? rv() * 0.6 : 0.3 + rv() * 0.7) : lerp(a.t0, a.t1, (wave + rv() * 0.8) / nw);
+        let la = lerp(la0, la1, rv()),
+          lo = lerp(lo0, lo1, rv());
+        if (a.ragged) {
+          // opt-in: a soft-edged, clumpy region (dense core, thinning edges, a few sub-clusters), not a flat rectangle of dots
+          const g3 = () => (rv() + rv() + rv() - 1.5) / 1.5,
+            cl = rv() < 0.35 ? [(rv() - 0.5) * 0.7, (rv() - 0.5) * 0.7] : [0, 0];
+          la = (la0 + la1) / 2 + ((la1 - la0) / 2) * (g3() * 1.15 + cl[0]);
+          lo = (lo0 + lo1) / 2 + ((lo1 - lo0) / 2) * (g3() * 1.15 + cl[1]);
+        }
+        const off = wave == null ? lerp(a.t0, a.t1, bi === 0 ? rv() * 0.6 : 0.3 + rv() * 0.7) : lerp(a.t0, a.t1, (wave + rv() * 0.8) / nw);
+        const jit = a.ragged ? 0.55 + 0.45 * rv() : 1; // drawn for every dot, so the random stream does not depend on how many a phone shows
         canon.push(off);
-        if (k < mShow) P.push({ p: ll(la, lo, 1.004), off });
+        if (k < mShow) P.push({ p: ll(la, lo, 1.004), off, j: jit });
       }
     });
     const n = P.length;
@@ -341,7 +349,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           col[k4] = blink ? 1 : dark ? 1 : 0.35;
           col[k4 + 1] = blink ? 0.85 : dark ? 0.24 : 1.0;
           col[k4 + 2] = blink ? 0.6 : dark ? 0.2 : 0.62;
-          col[k4 + 3] = blink ? 1 : dark ? 0.8 : 0.75;
+          col[k4 + 3] = (blink ? 1 : dark ? 0.8 : 0.75) * P[k].j;
         }
         return n;
       },
@@ -359,6 +367,18 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           if (t < a.pulse0) return 'Before the attack: modems online';
           if (t < a.t0) return 'Attackers reach the ground network';
           return t < a.t1 ? `Malware wipes modems · ${dark(t)}/${a.count} offline` : 'Modems offline · satellite kept working';
+        }
+        if (a.compactStatus) {
+          // opt-in: shorter desktop status lines
+          const c =
+            t < a.pulse0
+              ? 'Before the attack: modems online (green)'
+              : t < a.t0
+                ? 'Attackers push malicious commands'
+                : t < a.t1
+                  ? 'Modems wiped (SWF: ~45 min): red = offline'
+                  : 'Modems offline (red) · satellite kept working';
+          return t >= a.t0 ? `${c} · ${dark(t)} of ${a.count} simulated` : c;
         }
         const tx =
           t < a.pulse0
