@@ -323,6 +323,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
     cams = cfg.launchCam === 'second' ? [orbit, launch, polar] : [launch, orbit, polar];
     if (H && cfg.dolly !== false) cams.unshift(dollyCam());
   } else cams = [wide, { name: 'Close up', pos: ll(f[0], f[1] - 8, Math.max(2.3, dist * 0.55)) }, polar];
+  // narrowK / narrowShift on a preset (opt-in): the phone-width tightening factor and sideways shift for that camera (see GLHost._nar)
+  if (cfg.cameras) cams = cams.map((v, i) => (cfg.cameras[i] && (cfg.cameras[i].narrowK != null || cfg.cameras[i].narrowShift != null) ? { ...v, narrowK: cfg.cameras[i].narrowK, narrowShift: cfg.cameras[i].narrowShift } : v));
   // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.
   const stillCamFor = (t, asp) => {
     if (A && !cfg.stillCam) {

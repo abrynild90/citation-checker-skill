@@ -232,7 +232,17 @@ const methods = {
         if (i < 0 || !pl[i]) return;
         const r = raw[i],
           // the override must not push the chip past the frame when its referent is near an edge (DN-2's GEO label early in the scene)
-          x = Math.max(r.w / 2 + 9, Math.min(w - r.w / 2 - 9, r.px + d[0] * offK)),
+          // a pill that would come within 8 px of the viewer edge flips to the other side of its anchor when that side fits
+          fx = (() => {
+            const a = r.px + d[0] * offK,
+              m = r.w / 2 + 12;
+            if ((a > w - m || a < m) && d[0]) {
+              const b = r.px - d[0] * offK;
+              if (b >= m && b <= w - m) return b;
+            }
+            return a;
+          })(),
+          x = Math.max(r.w / 2 + 12, Math.min(w - r.w / 2 - 12, fx)),
           y = Math.max(r.h / 2 + 9, Math.min(h - r.h / 2 - 9, r.py + d[1] * offK)),
           qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
           qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
@@ -478,7 +488,7 @@ const methods = {
   _makeInset() {
     const c = document.createElement('canvas');
     c.setAttribute('aria-hidden', 'true');
-    c.style.cssText = `position:absolute;right:8px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;pointer-events:none;background:rgba(8,13,28,.84)`;
+    c.style.cssText = `position:absolute;right:12px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;pointer-events:none;background:rgba(5,9,20,.95)`;
     this.labelLayer.appendChild(c);
     this.insetEl = c;
   },
@@ -504,7 +514,7 @@ const methods = {
       c.style.height = h + 'px';
     }
     c.style.top = (bl ? Math.round(this.el.clientHeight - h - (this.statusEl?.offsetHeight || 20) - 24) : phone ? 40 : 42) + 'px';
-    c.style.left = bl ? '8px' : Math.round(this.el.clientWidth - w - 8) + 'px';
+    c.style.left = bl ? '12px' : Math.round(this.el.clientWidth - w - 12) + 'px';
     c.style.right = 'auto';
     const g = c.getContext('2d'),
       t = this.t;
