@@ -631,6 +631,12 @@ export const modelMethods = {
       h.scale.setScalar(0.06);
       g.add(h);
       g.userData.halo = h;
+      // a soft dark shadow under the airframe so it holds against bright land and the red zone
+      const sd = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0x050810, transparent: true, opacity: 0.6, depthWrite: false }));
+      sd.scale.setScalar(0.05);
+      sd.position.y = -0.003;
+      sd.renderOrder = -1;
+      g.add(sd);
     }
     Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
     return g;
@@ -668,7 +674,7 @@ export const modelMethods = {
     Object.assign(g.userData, { span: 0.03, minPx: 9, maxPx: 26 });
     return g;
   },
-  // Map pin (Peresvet shelter sites): a flat ring on the ground, a stem and a bright head, clearly bigger than a dish and with no beam implied.
+  // Map pin (Peresvet shelter sites): a flat target on the ground (ring, tinted disc, centred bright dot), clearly bigger than a dish and with no beam implied.
   _pinModel(color, pos) {
     const T = this.T,
       g = new T.Group(),
@@ -678,14 +684,14 @@ export const modelMethods = {
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.0005;
     g.add(ring);
-    const stem = new T.Mesh(new T.CylinderGeometry(0.0016, 0.0016, 0.03, 6), w);
-    stem.position.y = 0.015;
-    g.add(stem);
-    const head = new T.Mesh(new T.SphereGeometry(0.0085, 14, 10), m);
-    head.position.y = 0.036;
-    g.add(head);
-    const core = new T.Mesh(new T.SphereGeometry(0.0034, 10, 8), w);
-    core.position.y = 0.036;
+    // a translucent disc inside the ring and a bright dot at its exact centre: the marker reads as one target seen from any angle
+    const fill = new T.Mesh(new T.CircleGeometry(0.0145, 28), new T.MeshBasicMaterial({ color: this._c(color), transparent: true, opacity: 0.38, side: T.DoubleSide, depthWrite: false }));
+    fill.rotation.x = -Math.PI / 2;
+    fill.position.y = 0.0004;
+    g.add(fill);
+    const core = new T.Mesh(new T.CircleGeometry(0.0062, 20), w);
+    core.rotation.x = -Math.PI / 2;
+    core.position.y = 0.0007;
     g.add(core);
     g.userData.tintMat = m;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));

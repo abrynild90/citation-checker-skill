@@ -164,6 +164,7 @@ const methods = {
         color,
         avoidDisc: !!L.item?.offGlobe && (!L.item.stillOnly || noBanner),
         noLeader: !!L.item?.noLeader,
+        leaderK: L.role === 'place' && (!this.sim.cfg.leaderCams || this.sim.cfg.leaderCams.includes(this.camIdx)) ? this.sim.cfg.leaderK : undefined, // cfg.leaderCams: only these presets
         onDisc: this.el.clientWidth < 520 && !!this.sim.cfg.phoneOnDisc?.some((h) => text.startsWith(h)), // phone: dark ocean under a label beats a long leader
       });
     }

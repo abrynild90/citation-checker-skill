@@ -475,6 +475,7 @@ export class GLHost {
           const c = it.statusColor(t);
           tint.color.set(c);
           if (ud.halo) ud.halo.material.color.set(c);
+          if (it.shape === 'aircraft' && ud.halo && tint.emissive) tint.emissive.set(c).multiplyScalar(0.35);
         }
         if (it.glow && tint) {
           const on = it.glow(t);

@@ -144,7 +144,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
     items._gps = sats;
   }
   if (a.type === 'zone') {
-    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy, soft: a.soft, clean: a.clean });
+    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy, soft: a.soft, clean: a.clean });
     items._zone = a;
     if (a.jammer)
       items.push({
@@ -401,7 +401,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       a: () => from,
       b: (t) => tgt.pos(t),
       bStatic: (a.staticK ?? cfg.staticK) ? (t) => scl(tgt.pos(t), a.staticK ?? cfg.staticK) : null,
-      on: (t) => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02,
+      on: (t) => t >= (a.tOn ?? 0) && Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, // a.tOn (opt-in): the beam waits for its story step
       color: a.color,
       opacity: 0.95,
       width: 0.022,
@@ -426,13 +426,13 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       kvMin: 26,
       kvMax: 58,
       noStatic: true,
-      pos: (t) => (Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02 ? from : null),
+      pos: (t) => (t >= (a.tOn ?? 0) && Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02 ? from : null),
     });
     // dazzle: a flaring glare on the target while the beam is on (the sensor is overwhelmed, nothing is destroyed)
     items.push({
       kind: 'glare',
       pos: (t) => tgt.pos(t),
-      on: (t) => Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02,
+      on: (t) => t >= (a.tOn ?? 0) && Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02,
       color: a.glareColor || '#ffd6f6',
     });
   }

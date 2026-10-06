@@ -87,7 +87,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       let soft = 0;
       const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)),
         qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)),
-        lead = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
+        lead = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * (c.leaderK ?? 0.9); // c.leaderK (opt-in, cfg.leaderK for place and orbit names): a name with a small gap still gets its leader
       let n = hits(x, y) * 1000 + Math.hypot(x - c.x, y - c.y) * (c.pin === 'hard' ? 3 : c.pin ? 0.6 : c.noLeader ? 0.3 : 0.01);
       if (memo && memo[i]) n += Math.hypot(x - memo[i][0], y - memo[i][1]) * 0.06; // stickiness: keep last frame's slot unless something clearly better exists
       if (lead) {
@@ -187,7 +187,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     boxes.push({ x, y, w, h });
     const qx = Math.max(x - w / 2, Math.min(x + w / 2, c.px)),
       qy = Math.max(y - h / 2, Math.min(y + h / 2, c.py)),
-      leader = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * 0.9;
+      leader = !c.noLeader && Math.hypot(qx - c.px, qy - c.py) > h * (c.leaderK ?? 0.9); // c.leaderK (opt-in, cfg.leaderK for place and orbit names): a name with a small gap still gets its leader
     if (leader) segs.push([c.px, c.py, qx, qy]);
     out[i] = { x, y, leader, ax: c.px, ay: c.py, qx, qy };
   };
