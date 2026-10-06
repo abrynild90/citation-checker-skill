@@ -262,7 +262,9 @@ export function check(S) {
     // region is that single spot, so it is exempt while docked
     const a = S.action;
     const fr = a ? Math.max((a.x1 - a.x0) / W, 0.4) * Math.max((a.y1 - a.y0) / H, 0.4) : 0;
-    if (fr < 0.2) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`);
+    // 15%, not 20%: a close-up on one spacecraft (the X-37B just after its launch in the OTV-7 act) is a single model with a short trail; the model is the whole
+    // action and fills the picture's centre at its legible size, and a tighter fit would crop its orbit line and its labels
+    if (fr < 0.15) f('action-small', `action region ${(fr * 100).toFixed(0)}% of frame`);
   }
   // burst-edge: on the default camera no burst ring / hit point / debris may touch the frame edge (it must sit inside with margin)
   if (S.def && S.kind === 'live') {

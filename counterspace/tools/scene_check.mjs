@@ -10,7 +10,7 @@
 //   label-disc       a label box overlaps the Earth disc although a clear slot exists within reach (leader <= limit, <= 0.10 W away)
 //   leader-long      leader longer than 0.17 W (0.27 W at 375)      leader-cross  a leader crosses another label box or leader
 //   leader-end       the leader ends on empty space (no drawn referent within a few px) or on another labelled referent
-//   ref-small        a labelled craft/satellite is drawn < 6 px on the default camera            action-small  action region < 20% of the frame (default
+//   ref-small        a labelled craft/satellite is drawn < 6 px on the default camera            action-small  action region < 15% of the frame (default
 //                    camera; sides count at least 40%)
 //   ref-hidden       a labelled craft is visible in the sim but off frame or behind Earth on some camera
 //   banner-wrap      the "illustrative" banner wraps to two lines at 375   audit  the page audit() reports overlapping/clipped text
