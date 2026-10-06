@@ -302,6 +302,17 @@ export class GLHost {
     cam.up.copy(u);
     cam.lookAt(l);
   }
+  // Opt-in (cfg.actFade): a short cross-fade over the cut between two acts of a playing scene, picture and labels together, instead of a hard jump.
+  _actFade() {
+    if (!this.playing || REDUCED_MOTION || !this.el?.animate) return;
+    try {
+      const ov = (this._fadeEl ||= Object.assign(document.createElement('div'), {}));
+      ov.style.cssText = 'position:absolute;inset:0;background:#05080f;pointer-events:none;opacity:0';
+      if (ov.parentNode !== this.el) this.el.insertBefore(ov, this.labelLayer || null);
+      ov.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 650, easing: 'ease-out' });
+      this.labelLayer?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-out' });
+    } catch (e) {}
+  }
   update(t) {
     const T = this.T;
     this.t = t;
@@ -312,8 +323,10 @@ export class GLHost {
       let ai = acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1));
       ai = Math.max(0, ai);
       if (this._act !== ai) {
+        const first = this._act == null;
         this._act = ai;
         this.setCam(acts[ai].cam, true);
+        if (!first && this.sim.cfg.actFade) this._actFade();
       }
     } else if (acts) {
       // A locked episode preset shows only its own episode. Scrubbed outside it, the camera of the episode actually on screen takes over (so a preset never

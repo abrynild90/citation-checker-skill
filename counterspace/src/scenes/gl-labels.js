@@ -6,6 +6,7 @@ import { DEG, add, ll, occluded, scl } from './core.js';
 import { LABEL, dotCss, labelBox, offDisc, pillCss, placeLabels } from './labels.js';
 import { SANS } from '../fonts.js';
 
+const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const INSET_PX = 13; // the inset's type is never below the page-wide floor of 12 px
 const methods = {
   _placeLabels: placeLabels, // exposed for tools/scene_check.mjs debugging
@@ -688,6 +689,21 @@ const methods = {
         if (L.ln) L.ln.style.display = L.lc.style.display = L.dot.style.display = 'none';
         return;
       }
+      if (this.sim.cfg.labelEase && this.playing && !REDUCED_MOTION) {
+        // opt-in: while playing, a label glides to its new place instead of jumping each frame (the leader end moves with it); a cut snaps
+        const pv = L._ease;
+        if (pv && pv.cam === this.camIdx && pv.act === this._act && Math.abs(pv.x - q.x) < 90 && Math.abs(pv.y - q.y) < 90) {
+          const ex = (q.x - pv.x) * 0.7,
+            ey = (q.y - pv.y) * 0.7;
+          q.x -= ex;
+          q.y -= ey;
+          if (q.qx != null) {
+            q.qx -= ex;
+            q.qy -= ey;
+          }
+        }
+        L._ease = { x: q.x, y: q.y, cam: this.camIdx, act: this._act };
+      } else L._ease = null;
       L.d.style.display = 'flex';
       L.ax = q.ax; // the referent's screen position (read by tools/scene_check.mjs)
       L.ay = q.ay;
