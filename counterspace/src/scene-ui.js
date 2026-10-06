@@ -553,7 +553,8 @@ function fitSteps() {
   stepsEl.style.flex = '';
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.paddingBottom = '';
-  const one = COMPACT.matches && steps.length > 4;
+  // a phone with more than four steps, or a short phone screen: the list shows the playing step only and the picture keeps the height
+  const one = COMPACT.matches && (steps.length > 4 || innerHeight <= 700);
   overlay.classList.toggle('steps-one', one);
   if (!steps.length) return;
   if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
@@ -854,6 +855,8 @@ function buildViews(cfg, sim) {
     camsEl.appendChild(b);
   });
   requestAnimationFrame(camFade);
+  setTimeout(camFade, 400); // after the panel's opening transition
+  setTimeout(camFade, 1200);
 }
 function chooseView(i) {
   if (!host || !cur || !glOK || stillOnly || !host.sim.cams[i]) return;
@@ -863,10 +866,11 @@ function chooseView(i) {
 }
 // Phone: the views scroll sideways; a fade on the right edge says more lie beyond it.
 function camFade() {
-  camsEl.classList.toggle('at-end', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft <= 4);
-  camsEl.classList.toggle('at-start', camsEl.scrollLeft <= 4);
+  camsEl.classList.toggle('at-end', camsEl.scrollWidth - camsEl.clientWidth - camsEl.scrollLeft <= 1);
+  camsEl.classList.toggle('at-start', camsEl.scrollLeft <= 1);
 }
 camsEl.addEventListener('scroll', camFade, { passive: true });
+if (window.ResizeObserver) new ResizeObserver(() => camFade()).observe(camsEl); // the row's width settles after the panel has opened: the edge fade follows it
 addEventListener('resize', camFade);
 
 // ---------------------------------------------------------------- previous, next, close, related law

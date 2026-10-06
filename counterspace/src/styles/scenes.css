@@ -1820,7 +1820,7 @@
 /* Phone, more than four steps: only the playing step shows, so the picture gets the height */
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px) {
   .overlay.steps-one .panel {
-    grid-template-rows: auto minmax(240px, 40%) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(280px, 40%) minmax(0, 1fr) auto;
   }
   .overlay.steps-one #stepsNote {
     display: none;
@@ -1846,4 +1846,8 @@
   .overlay .sv-srcrow { gap: 4px; padding-inline: 12px; }
   .overlay .sl-btn, .overlay .sv-srcrow .pill { padding: 0 10px; font-size: 13px; gap: 5px; }
   .overlay .sl-links { gap: 4px; }
+}
+/* Tablet in portrait: with the first sentence showing, the story column gets a little more of the height so two or three steps still fit */
+@media (min-width: 761px) and (max-width: 900px) and (max-aspect-ratio: 1/1) {
+  .overlay .panel { grid-template-rows: auto minmax(0, 33%) minmax(0, 1fr) auto; }
 }
