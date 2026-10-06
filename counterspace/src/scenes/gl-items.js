@@ -236,6 +236,11 @@ const methods = {
             Math.hypot(src[0][0] - src[src.length - 1][0], src[0][1] - src[src.length - 1][1], src[0][2] - src[src.length - 1][2]) < 1e-6;
         const vp = (closed ? src.slice(0, -1) : src).map((q) => new T.Vector3(...q)),
           curve = new T.CatmullRomCurve3(vp, closed);
+        if (it.dynamic && it.byIndex) {
+          // byIndex: the tube's segments follow the samples (not equal arc length), so the revealed head sits exactly on the moving craft
+          curve.getPointAt = (u, o) => curve.getPoint(u, o);
+          curve.getTangentAt = (u, o) => curve.getTangent(u, o);
+        }
         const segs = it.dynamic ? src.length - 1 : Math.max(60, vp.length),
           geo = new T.TubeGeometry(curve, segs, it.thick, 5, closed);
         const tube = new T.Mesh(

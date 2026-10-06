@@ -170,6 +170,7 @@ export function buildSim(cfg) {
         dynamic: true,
         all,
         thick: a.thick ?? 0.0035,
+        byIndex: a.byIndex,
         tail: a.tail, // capped wake length (fraction of the whole path) and brightness
         wakeOp: a.wakeOp,
         color: a.color,
@@ -185,24 +186,25 @@ export function buildSim(cfg) {
       items.push({
         kind: 'point',
         shape: 'none',
-        noLeader: true,
+        noLeader: !a.leader, // leader: true draws the usual leader and dot to the tagged point
+        small: a.leader ? true : undefined,
         color: a.color,
         label: a.label,
         short: a.short,
         labelDx: a.dx,
         labelDy: a.dy,
-        pos: (t) => (actOn(t, a.acts) && (flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? aPos(a, t) : null),
+        pos: (t) => (actOn(t, a.acts) && (flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? (a.craftAt ? crafts[a.craftAt[0]].raw(a.craftAt[1]) : aPos(a, t)) : null),
       });
     if (a.type === 'path') {
       // static orbit line, shown only in its act(s)
       const N = a.N ?? 120,
-        all = a.points ? a.points : Array.from({ length: N + 1 }, (_, k) => a.fn(k / N));
+        all = a.points ? a.points : a.offs ? a.offs.map((o) => aPos({ anchor: a.anchor, off: o }, 0)) : Array.from({ length: N + 1 }, (_, k) => a.fn(k / N));
       items.push({
         kind: 'curve',
         gate: true,
-        inset: true,
+        inset: !a.noInset,
         all,
-        pts: (t) => (actOn(t, a.acts) ? all : []),
+        pts: (t) => (actOn(t, a.acts) && (!a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? all : []),
         color: a.color,
         opacity: a.opacity ?? 0.6,
         thick: a.thick,

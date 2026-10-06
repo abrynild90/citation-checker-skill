@@ -212,6 +212,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             // fitCraft.lock: the target stays on the craft itself (a fast eccentric orbit would leave it at the frame edge or off a portrait stage)
             for (const id of ids) if (crafts[id].pos(t)) for (const dt of c.fitCraft.lock && c.fitCraft.tight ? [-0.015, 0, 0.008] : [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
+            // fitCraft.include: extra points in the anchor's local frame that must stay in view (the GEO belt under the pair)
+            for (const o of c.fitCraft.include || []) P.push(add(add(add(an.pos(t), scl(an.frame(t).along, o[0])), scl(an.frame(t).rad, o[1])), scl(an.frame(t).cross, o[2])));
             const f = an.frame(t),
               d = (asp != null && asp < 1.3 && c.fitCraft.phoneDir) || c.fitCraft.dir, // phoneDir: a steeper view on a narrow (phone) stage
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
