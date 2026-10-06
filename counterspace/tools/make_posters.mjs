@@ -18,7 +18,7 @@ const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
   starfish: 0.21,
   solwind: 0.58,
-  fengyun: 0.55,
+  fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
   dn2: 0.6,
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
@@ -38,6 +38,7 @@ const POSTER_VIEW = {
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.6 },
   shakti: { back: 0.82 },
+  fengyun: { back: 1.35 },
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });
