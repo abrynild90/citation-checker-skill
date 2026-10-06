@@ -7,7 +7,9 @@ import { EXPORTING, LAST_DA, PHONE_MAX, esc, fmt, fmtD, fmtMY, fmtY, hasScene, n
 import { hooks } from './shared.js';
 const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
-  card.innerHTML = html;
+  const byKey = !!el?.matches?.(':focus-visible') && !matchMedia('(hover: none)').matches;
+  // a card opened by keyboard carries the one-line key help, so nothing else has to float over the chart
+  card.innerHTML = byKey && !html.includes('kb-line') ? html + '<p class="kb-line">Arrow keys move between marks. Enter opens details. Escape closes this card.</p>' : html;
   card.classList.toggle('full', full);
   // A card opened by keyboard focus is opaque at once (no half-faded card with page text showing through while it moves into place).
   card.classList.toggle('solid', !!el?.matches?.(':focus-visible'));
@@ -67,6 +69,12 @@ function showCard(html, evt, el, full = false) {
           )
       : [];
   const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
+  // Nor the chart's controls, its key or the section heading
+  [...document.querySelectorAll('.seg, .legend, h2')].forEach((n) => {
+    if (el && n.contains(el)) return;
+    const b = n.getBoundingClientRect();
+    if (b.width > 2 && b.height > 2 && b.bottom > 0 && b.top < VH) noText.push(b);
+  });
   // A card never covers a Download chart button, nor the zoom strip when it belongs to a mark on the law band above it.
   [...document.querySelectorAll('.dl-row .btn, .dl-wrap .btn')]
     .concat(el && !el.closest('#legalZoomBox') && el.closest('#legalBand') ? [document.getElementById('legalZoomBox')] : [])
@@ -435,22 +443,6 @@ export function rove(sel) {
     if (!h) {
       document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between marks. Enter opens details. Escape closes a card. Tab leaves the chart.</p>`);
       h = document.getElementById(hid);
-      // The hint sits just above the chart's top edge (below it when the chart starts under the sticky strip), never over the marks or the legend, and is not shown on touch screens.
-      const place = () => {
-        if (matchMedia('(hover: none)').matches) return;
-        const r = box.getBoundingClientRect(),
-          band = document.getElementById('legalBand')?.getBoundingClientRect(),
-          hh = h.offsetHeight || 34,
-          floor = band && band.top <= 1 && band.bottom > 0 ? band.bottom + 6 : 6;
-        let top = r.top - hh - 6;
-        if (box.matches('#legalBand')) top = r.bottom + 6;
-        else if (top < floor) top = Math.min(innerHeight - hh - 8, Math.max(floor, r.bottom + 6 < innerHeight - hh ? r.bottom + 6 : floor));
-        h.style.top = Math.round(top) + 'px';
-        h.style.left = Math.round(Math.min(Math.max(8, r.left), innerWidth - h.offsetWidth - 8)) + 'px';
-        h.classList.add('on');
-      };
-      box.addEventListener('focusin', place);
-      box.addEventListener('focusout', () => h.classList.remove('on'));
     }
     nodes.forEach((n) => n.setAttribute('aria-describedby', hid));
   }
