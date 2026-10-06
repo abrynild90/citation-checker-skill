@@ -1504,6 +1504,9 @@
   overflow: visible;
 }
 /* The slack that is left under the last whole row is shared out as a little extra air in every row (fitSteps sets --sp), so there is no gap under the list */
+.overlay #sceneSteps {
+  box-sizing: content-box;
+}
 .overlay #sceneSteps .st-text {
   padding-block: calc(9px + var(--sp, 0px));
 }
@@ -1518,6 +1521,11 @@
 }
 .overlay #sceneSteps li:last-child .st-rail::before {
   bottom: calc(100% - 19.5px - var(--sp, 0px));
+}
+@media (pointer: coarse) {
+  .overlay #sceneSteps .step {
+    min-height: calc(44px + 2 * var(--sp, 0px));
+  }
 }
 /* A fade shows only at an edge that has hidden rows beyond it */
 .overlay #sceneSteps.can-down {
@@ -1746,5 +1754,48 @@
     grid-area: auto;
     grid-row: 1;
     grid-column: 3 / -1;
+  }
+}
+
+/* Phones and short windows: no hint (it is for keyboards); the steps are set a little tighter so more whole rows fit; a short phone gives the picture less */
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-height: 540px) and (min-aspect-ratio: 11/10) and (min-width: 600px) {
+  .overlay .sv-hint {
+    display: none;
+  }
+}
+@media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px) {
+  .overlay #sceneSteps .step {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .overlay #sceneSteps .st-text {
+    padding-block: calc(7px + var(--sp, 0px));
+  }
+  .overlay #sceneSteps .st-time {
+    padding-top: calc(9px + var(--sp, 0px));
+    font-size: 12px;
+  }
+  .overlay #sceneSteps .st-rail::after {
+    top: calc(11.5px + var(--sp, 0px));
+  }
+  .overlay #sceneSteps li:first-child .st-rail::before {
+    top: calc(17px + var(--sp, 0px));
+  }
+  .overlay #sceneSteps li:last-child .st-rail::before {
+    bottom: calc(100% - 17px - var(--sp, 0px));
+  }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .overlay .panel {
+    grid-template-rows: auto minmax(0, 31%) minmax(0, 1fr) auto;
+  }
+  .overlay .story-scroll {
+    padding-top: 8px;
+  }
+  .overlay .sv-more.lone:not(.open) {
+    top: 2px;
+  }
+  .overlay h2#sceneTitle {
+    font-size: 20px;
   }
 }

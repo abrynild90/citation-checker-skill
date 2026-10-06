@@ -88,6 +88,7 @@ const overlay = $('overlay'),
   stepsEl = $('sceneSteps'),
   stepsNote = $('stepsNote'),
   asideBody = $('asideBody'),
+  footEl = $('sceneFoot'),
   asideWrap = $('asideWrap'),
   lawBox = $('asideLaw'),
   lawBtn = $('scRelated'),
@@ -313,13 +314,13 @@ function splitSentences(text) {
   }
   return out;
 }
-// level 0: two sentences (one on a phone), 1: one sentence, 2: none
-function setLede(level) {
+// level 0: two sentences (one on a phone), 1: one sentence, 2: none; a number above that (from fitSteps, when there is room to spare) adds sentences
+function setLede(level, count) {
   const full = cur?.caption || '';
-  const max = expanded ? Infinity : level === 0 ? (COMPACT.matches ? 1 : 2) : level === 1 ? 1 : 0;
+  const max = expanded ? Infinity : count || (level === 0 ? (COMPACT.matches ? 1 : 2) : level === 1 ? 1 : 0);
   let shown = expanded ? full : sentences.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 360) shown = sentences[0];
-  if (!expanded && COMPACT.matches && shown.length > 230) shown = '';
+  if (!expanded && COMPACT.matches && (shown.length > 230 || overlay.classList.contains('is-static'))) shown = ''; // a phone's still diagram gives the steps the room
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
   moreBtn.hidden = shown === full;
@@ -445,8 +446,7 @@ function renderSteps(cfg) {
         `<span class="st-rail" aria-hidden="true"></span><span class="st-text">${esc(s.text)}</span></button></li>`,
     )
     .join('');
-  liRO?.disconnect();
-  [...stepsEl.children].forEach((li) => liRO?.observe(li));
+  [...stepsEl.children].forEach((li) => liRO?.observe(li)); // (the old rows are gone: their observations end with them)
   stepsBox.open = true; // the list is always there; fitSteps() decides how many whole rows fit
   stepsEl.scrollTop = 0;
   requestAnimationFrame(fitSteps);
@@ -503,7 +503,7 @@ function followStep(li, instant) {
           break;
         }
     }
-    if (Math.abs(to - y) > 1) stepsEl.scrollTo({ top: to, behavior: REDUCED || instant ? 'auto' : 'smooth' });
+    if (Math.abs(to - y) > 1) stepsEl.scrollTo({ top: to, behavior: REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5 ? 'auto' : 'smooth' });
     return;
   }
   const top = box.top + (own === stepsEl ? 4 : 56),
@@ -525,12 +525,17 @@ function rowsFit() {
   let n = 0,
     h = 0;
   if (stepsEl.scrollHeight <= avail + 1) return { n: steps.length, h: 0, avail };
+  const first = stepsEl.firstElementChild;
   for (const li of stepsEl.children) {
     const b = li.offsetTop + li.offsetHeight;
     if (b <= avail + 1) {
       n++;
       h = b;
     } else break;
+  }
+  if (!n && first) {
+    n = 1; // never less than one whole row: the column scrolls a little rather than slice it
+    h = first.offsetHeight;
   }
   return { n, h, avail };
 }
@@ -539,6 +544,7 @@ function fitSteps() {
   stepsEl.style.height = '';
   stepsEl.style.flex = '';
   stepsEl.style.removeProperty('--sp');
+  stepsEl.style.paddingBottom = '';
   if (!steps.length) return;
   if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
   const want = Math.min(steps.length, COMPACT.matches ? 3 : 4);
@@ -547,6 +553,19 @@ function fitSteps() {
     setLede(lvl);
     r = rowsFit();
     if (r.n >= want) break;
+  }
+  if (!r.h && !COMPACT.matches && r.n >= steps.length) {
+    // every row fits and there is room to spare: show more of the account, a sentence at a time, while everything still fits
+    const shownNow = sentences.filter((_, i) => captionEl.textContent.includes(sentences[i])).length;
+    for (let k = Math.max(shownNow, 1) + 1; k <= sentences.length; k++) {
+      setLede(0, k);
+      const ok = asideBody.scrollHeight <= asideBody.clientHeight + 1 && rowsFit().n >= steps.length;
+      if (!ok) {
+        setLede(0, k - 1);
+        break;
+      }
+    }
+    r = rowsFit();
   }
   if (r.h) {
     stepsEl.style.flex = '0 0 auto';
@@ -564,12 +583,25 @@ function fitSteps() {
     stepsEl.style.setProperty('--sp', r.sp.toFixed(2) + 'px');
     if (r.h) stepsEl.style.height = r.h + r.sp * 2 * r.n + 'px';
   }
+  if (r.h) {
+    // so that every row can rest at the top of the list (also the last ones), the end of the list gets the room the last whole window leaves
+    const kids = [...stepsEl.children],
+      H = parseFloat(stepsEl.style.height),
+      total = kids.at(-1).offsetTop + kids.at(-1).offsetHeight;
+    let pad = 0;
+    for (let k = kids.length - 1; k >= 0; k--) {
+      const left = total - kids[k].offsetTop;
+      if (left > H + 0.5) break;
+      pad = H - left;
+    }
+    if (pad > 0.5) stepsEl.style.paddingBottom = pad + 'px';
+  }
   const li = stepsEl.children[Math.max(0, stepIdx)];
   if (li && stepIdx >= 0 && !stillOnly) followStep(li, true);
   fadeSteps();
 }
 function fadeSteps() {
-  const sc = listScrolls();
+  const sc = listScrolls() && stepsEl.clientHeight > 120; // a window of a single row is not faded away
   stepsEl.classList.toggle('can-up', sc && stepsEl.scrollTop > 3);
   stepsEl.classList.toggle('can-down', sc && stepsEl.scrollHeight - stepsEl.clientHeight - stepsEl.scrollTop > 3);
 }
@@ -830,7 +862,7 @@ if ('ResizeObserver' in window) {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => fitSteps());
   });
-  new ResizeObserver(() => fitSteps()).observe(asideBody);
+  [asideBody, captionEl, stepsNote, moreBtn, footEl, scaleEl.closest('details')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
 }
 
 // ---------------------------------------------------------------- keyboard hint, shown once per visit; it sits in the control bar zone, never over the picture
