@@ -114,7 +114,7 @@ function build(stage) {
     wide = W >= 900,
     gutter = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 24,
     edge = wide ? Math.max(gutter, (W - 1240) / 2 + gutter) : gutter,
-    groundH = phone ? 150 : 190,
+    groundH = phone ? 150 : wide ? 165 : 190,
     sag = phone ? 8 : Math.round(Math.min(30, W * 0.02)),
     yL = H - groundH, // the limb at the middle of the picture
     bandTop = yL + sag + (phone ? 8 : 14),
@@ -405,7 +405,7 @@ function build(stage) {
 
   // ---- the law: a tick for every item on the ground, a name and a leader for a few
   let lastRow = 0;
-  const rowsAvail = Math.floor((H - bandTop - (phone ? 40 : 44) - 8 - 24) / LINE),
+  const rowsAvail = Math.floor((H - bandTop - (phone ? 40 : 44) - 8 - (phone || !wide ? 24 : 10)) / LINE),
     rowTop = (r) => bandTop + (phone ? 40 : 44) + r * LINE,
     rowBoxes = [],
     laws = el('g', {}, svg),
