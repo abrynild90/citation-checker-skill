@@ -10,10 +10,10 @@ import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } fr
 import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
 
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
-// stateR.focus: null = the default (the zoom 2000-2026 on every screen, because nothing in our records is earlier than 2003; the full shared axis is one click away);
+// stateR.focus: null = the default (the zoom 2000-2026 on a phone only; wider screens open on the shared years so the sticky law strip lines up);
 // true / false = the reader's explicit choice, kept across resizes.
 export const stateR = { focus: null };
-export const zoomedR = () => stateR.focus ?? true;
+export const zoomedR = () => stateR.focus ?? isPhoneNow();
 const R_FOCUS = () => [parse('2000-01-01'), DOMAIN[1]];
 
 // Key lists, shared by the page key and the downloads: [svg inner (drawn in the current ink), label, glyph width].
@@ -125,7 +125,7 @@ export function drawR(el = document.getElementById('svgR')) {
     }
   });
 
-  const zoomLines = zoomed && !EXPORTING ? wrapLines('Zoomed view: 2000–2026, not the shared 1957–2026 years', W - 2 * PADX, (s) => tw(s, 12.5, 600)) : [],
+  const zoomLines = [], // the zoom message lives once, in the note above the chart
     axisY = yCur - 4,
     H = axisY + 34 + (zoomLines.length ? 8 + zoomLines.length * 17 : 0);
 
@@ -233,9 +233,36 @@ export function drawR(el = document.getElementById('svgR')) {
     'ru-2014-luch-olymp': 'Luch (Olymp)',
     'us-2014-gssap': 'GSSAP',
     'cn-2019-tjs3-roaming': 'TJS-3',
+    'us-2005-xss11': 'XSS-11',
+    'us-2005-dart': 'DART',
+    'us-2009-pan': 'PAN',
+    'us-2011-otv2': 'OTV-2',
+    'us-2012-otv3': 'OTV-3',
+    'us-2015-otv4': 'OTV-4',
+    'us-2017-otv5': 'OTV-5',
+    'us-2020-otv6': 'OTV-6',
+    'us-2025-otv8': 'OTV-8',
+    'us-2014-angels': 'ANGELS',
+    'us-2014-clio': 'Clio',
+    'cn-2013-sy7-sj15-cx3': 'SY-7 / SJ-15',
+    'cn-2016-sj17-chinasat': 'SJ-17',
+    'cn-2020-csshq1': 'CSSHQ-1',
+    'cn-2022-csshq2': 'CSSHQ-2',
+    'cn-2023-csshq3': 'CSSHQ-3',
+    'cn-2026-csshq4': 'CSSHQ-4',
+    'cn-2024-sy24c-sj6': 'SY-24C / SJ-6',
+    'cn-2022-pts2-object-j': 'PTS-2',
+    'cn-2025-sj21-sj25-docking': 'SJ-21 / SJ-25',
+    'ru-2014-cosmos2499': 'Cosmos 2499',
+    'ru-2015-cosmos2504-briz': 'Cosmos 2504',
+    'ru-2022-cosmos2558-usa326': 'Cosmos 2558',
+    'ru-2023-luch-olymp-2': 'Luch/Olymp-2',
+    'ru-2019-cosmos2542-2543-usa245': 'Cosmos 2542',
   };
   if (!EXPORTING) {
-    const lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true');
+    const lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true'),
+      lbox = []; // [x0, x1, y] of every label drawn so far: labels keep 6 px apart
+    const clear = (a, b, yy) => lbox.every((q) => Math.abs(q[2] - yy) > 13 || q[1] < a - 6 || q[0] > b + 6);
     placed.forEach((p) => {
       const t = HEADLINES[p.e.id];
       if (!t) return;
@@ -245,7 +272,7 @@ export function drawR(el = document.getElementById('svgR')) {
       const edge = p.bx != null && p.bx < p.X0 ? p.bx - 14 : p.X0 - 14, // a 3D cube left of the mark pushes the label further left
         left = [edge - w, edge],
         right = [p.X1 + (p.ongoing ? 30 : 16), p.X1 + (p.ongoing ? 30 : 16) + w];
-      const side = left[0] > INSET + 8 && free(left[0], left[1]) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && !p.ongoing ? 'r' : null;
+      const side = left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y) && !p.ongoing ? 'r' : null;
       let dy = 0,
         ax = null;
       if (!side) {
@@ -254,14 +281,16 @@ export function drawR(el = document.getElementById('svgR')) {
         for (const off of [-15, 15]) {
           const a = hi - w,
             yy = p.y + off;
-          if (a > INSET + 8 && hi < R - 4 && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 4 || q.ext[0] > hi + 4)) {
+          if (a > INSET + 8 && hi < R - 4 && clear(a, hi, yy) && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 4 || q.ext[0] > hi + 4)) {
             dy = off;
             ax = hi;
+            lbox.push([a, hi, yy]);
             break;
           }
         }
         if (ax != null) return lg.append('text').attr('class', 'dlabel').attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
       }
+      if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y] : [right[0], right[1], p.y]);
       if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
     });
   }

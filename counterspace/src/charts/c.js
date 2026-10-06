@@ -31,10 +31,10 @@ const QUOTE = '“[O]nly non-destructive capabilities are actively being used ag
 const QUOTE_BY = 'Secure World Foundation (SWF), 2026 assessment, Executive Summary, p. xxiii';
 const STYLE_OF = { official_government: 'solid', multi_government: 'solid', researcher_osint: 'outline', alleged: 'dashed' };
 
-// stateC.focus: null = the default (the zoom 1995-2026 on every screen, since the earliest entry is from 1997; the full shared axis is one click away);
+// stateC.focus: null = the default (the zoom 1995-2026 on a phone only; wider screens open on the shared 1957-2026 years so the sticky law strip lines up);
 // true / false = the reader's choice.
 export const stateC = { focus: null };
-export const zoomedC = () => stateC.focus ?? true;
+export const zoomedC = () => stateC.focus ?? isPhoneNow();
 const C_FOCUS = () => [parse('1995-01-01'), DOMAIN[1]];
 
 const FS = 13, // label size
@@ -151,7 +151,7 @@ export function drawC(el = document.getElementById('svgC')) {
     y = b.y1 + 10;
   });
   const axisY = bands.at(-1).y1 + 6;
-  const zoomLines = zoom && !EXPORTING ? wrapLines('Zoomed view: 1995–2026, not the shared 1957–2026 years', W - 2 * PADX, (s) => tw(s, 12.5, 600)) : [];
+  const zoomLines = []; // the zoom message lives once, in the note above the chart
   const H = axisY + 34 + (zoomLines.length ? 8 + zoomLines.length * 17 : 0);
 
   // ---------------------------------------------------------------- draw

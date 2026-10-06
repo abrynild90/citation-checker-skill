@@ -90,3 +90,5 @@
 .note-line details.about{margin-top:var(--s-1)}
 .note-line details.about>p{margin:var(--s-2) 0 0;color:var(--muted);font-size:14px}
 #chartC #quoteC{margin-top:var(--s-5)}
+
+:is(#chartC,#chartR) .tools p.note{max-width:66ch}
