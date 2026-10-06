@@ -285,3 +285,18 @@ td a{overflow-wrap:anywhere}
 
 details.table>summary{scroll-margin-top:110px}
 .sources .to-top{display:inline-block;margin-top:var(--s-3);font-size:14px}
+/* Capability table: each decade reads "4 demonstrated, 3 developing"; the state names sit behind a small disclosure */
+#tableB .cnt-line{display:block;color:var(--text)}
+#tableB .cn{font-weight:500}
+#tableB details.st{margin-top:4px}
+#tableB details.st>summary{display:inline-flex;align-items:center;min-height:24px;padding:0;border:0;background:none;color:var(--accent);font:600 13px/1.4 var(--sans);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#tableB details.st>summary::before{display:none}
+#tableB details.st p{margin:6px 0 0;font-size:13px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
+#tableB details.st p b{color:var(--text);font-weight:600}
+@media (min-width:641px){
+  #tableB th:first-child,#tableB td:first-child{min-width:210px}
+  #tableB th:not(:first-child),#tableB td:not(:first-child){min-width:150px}
+}
+/* A table opened or focused by keyboard or link must land below the strip that stays in view */
+.tscroll,.scroll-hint,details.table,.more-rows{scroll-margin-top:var(--band-h,180px)}
+@media (max-width:760px){.tscroll,.scroll-hint,details.table,.more-rows{scroll-margin-top:64px}}

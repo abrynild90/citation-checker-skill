@@ -419,10 +419,16 @@ export function drawB(el = document.getElementById('svgB')) {
         const D_ = Object.keys(o).filter((k) => o[k] === 'D'),
           P_ = Object.keys(o).filter((k) => o[k] === 'P' && !isNoData(c.key, d, k)),
           N_ = Object.keys(o).filter((k) => o[k] === 'P' && isNoData(c.key, d, k));
-        return (
-          `${D_.length} demonstrated${D_.length ? ' (' + D_.join(', ') + ')' : ''}; ${P_.length} developing${P_.length ? ' (' + P_.join(', ') + ')' : ''}` +
-          `${N_.length ? `; ${N_.length} developing, our reading, SWF’s table has no data (${N_.join(', ')})` : ''}`
-        );
+        const plural = (n, w) => `${n} ${w}`,
+          counts = [plural(D_.length, 'demonstrated'), plural(P_.length + N_.length, 'developing')].join(', '),
+          groups = [
+            ['Demonstrated', D_],
+            ['Developing', P_],
+            ['Developing, our reading (SWF’s table has no data)', N_],
+          ].filter(([, l]) => l.length);
+        return groups.length
+          ? `<span class="cnt-line"><span class="cn">${counts}</span><details class="st"><summary>States</summary>${groups.map(([h, l]) => `<p><b>${h}:</b> ${l.join(', ')}</p>`).join('')}</details></span>`
+          : `<span class="cnt-line"><span class="cn">${counts}</span></span>`;
       }),
     ]),
     'States that hold each kind of counterspace capability, by decade',

@@ -169,3 +169,4 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 }
 .dl-row{display:flex;justify-content:flex-end;margin-top:var(--s-4)}
 @media print{.dl-row{display:none}}
+.dl-row .dl-menu{top:auto;bottom:calc(100% + 6px);left:auto;right:0}
