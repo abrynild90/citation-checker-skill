@@ -39,8 +39,8 @@ export const VIASAT = {
       hubShort: 'Ground network',
       hubScale: 1.15,
       nodeScale: 0.85,
-      hubDx: -150,
-      hubDy: 70,
+      hubDx: -110,
+      hubDy: 44,
       pulse: [0.1, 0.3],
       beams: [
         [50, 30],
@@ -93,7 +93,26 @@ export const VIASAT = {
   staticZoom: 1.5,
   stillCam: { at: [10, 12, 3.9], look: [24, 13, 0.5], hideShell: true },
   cameras: [
-    { name: 'KA-SAT to Europe', short: 'KA-SAT', at: [10, 11, 3.9], look: [22, 9, 0.5], phone: { at: [10, 12, 4.3], look: [22, 18, 0.5] }, insetRef: true },
+    {
+      name: 'KA-SAT to Europe',
+      short: 'KA-SAT',
+      insetRef: true,
+      // KA-SAT is in frame at the start; from the first commands the view closes in on Europe, where the terminals are
+      glide: [
+        [0, [10, 11, 4.3], [8, 9, 1.0]],
+        [0.26, [10, 11, 4.3], [8, 9, 1.0]],
+        [0.36, [32, 14, 2.4], [50, 19, 1.0]],
+        [1, [32, 14, 2.4], [50, 19, 1.0]],
+      ],
+      phone: {
+        glide: [
+          [0, [10, 12, 4.7], [8, 18, 1.0]],
+          [0.26, [10, 12, 4.7], [8, 18, 1.0]],
+          [0.36, [32, 14, 2.4], [56, 20, 1.0]],
+          [1, [32, 14, 2.4], [56, 20, 1.0]],
+        ],
+      },
+    },
     { name: 'Europe close up', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], insetRef: true, phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] } },
     { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
     { name: 'Whole scene', at: [30, -6, 6.5], hide: ['Ground management'] }, // its label would need a leader across the whole globe

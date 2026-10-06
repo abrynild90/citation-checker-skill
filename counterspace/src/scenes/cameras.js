@@ -264,6 +264,18 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         look: c.look ? ll(c.look[0], c.look[1] + c.drift[1] * (t - 0.5), c.look[2]) : null,
         up: null,
       });
+      if (c.glide) {
+        // glide [[t, at, look], ...]: the camera moves between these views (smooth between keys), e.g. from a wide first view to a close one
+        const G = c.glide,
+          lerpV = (a, b, u) => a.map((x, k) => x + (b[k] - x) * u),
+          gl = (t) => {
+            let i = 0;
+            while (i < G.length - 2 && t > G[i + 1][0]) i++;
+            const u = smooth(Math.max(0, Math.min(1, (t - G[i][0]) / (G[i + 1][0] - G[i][0]))));
+            return { pos: ll(...lerpV(G[i][1], G[i + 1][1], u)), look: ll(...lerpV(G[i][2], G[i + 1][2], u)), up: null };
+          };
+        return { name: c.name, auto: false, ref: c.ref, hide: c.hide, insetRef: c.insetRef, hideShell: true, follow: gl, ...gl(0) };
+      }
       return {
         name: c.name,
         auto: !!c.auto,
