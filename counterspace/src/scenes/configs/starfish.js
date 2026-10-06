@@ -2,7 +2,7 @@
 import { C } from './shared.js';
 import { IS_PHONE } from '../core.js';
 
-const PH = IS_PHONE ? 1.5 : 1; // phoneK, the distance factor of the 375 stage
+const PH = IS_PHONE ? 1.05 : 1; // phoneK, the distance factor of the 375 stage
 
 export const STARFISH = {
   id: 'starfish',
@@ -53,7 +53,7 @@ export const STARFISH = {
       dx: -96,
       dy: 4,
     },
-    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
+    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, strong: true, size: 0.34, span: 0.4, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
     { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14 },
     {
       type: 'belt',
@@ -105,13 +105,14 @@ export const STARFISH = {
     { name: 'From the north', at: [42, -169.5, 4.3 * PH] },
   ],
   phoneHide: ['Thor launch', 'LEO', 'Artificial', 'Johnston'], // 375: two labels only (Detonation, Satellite) plus the caption; Johnston is named in the story text
+  phoneOff: { Satellite: [30, 46] }, // the Satellite pill drops onto the globe, its leader short
   phoneOnDisc: ['Detonation', 'Satellite'], // 375 live: these sit beside their referents (over the dark Pacific), not in a far column
   stillShort: ['Artificial'], // the live still names the belt "Radiation belt" (fits right of the outer arc)
   staticDropPhone: ['Thor launch'], // 375 static: Thor shares the burst spot; Detonation and Johnston keep separate labels, placed apart
   staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
   still: 0.7,
   camDist: 3.5,
-  phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
+  phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
   staticZoom: 1.7,
   staticCenter: [35, -205],
   staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area

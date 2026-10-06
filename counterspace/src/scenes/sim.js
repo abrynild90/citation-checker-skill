@@ -756,6 +756,8 @@ export function buildSim(cfg) {
         size: a.size,
         span: a.span,
         ringColor: a.ringColor,
+        strong: a.strong, // opt-ins: the second white ring and a bolder core
+        coreK: a.coreK,
         label: a.label,
         short: a.short,
         labelDx: a.dx,
