@@ -81,7 +81,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   const S = createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY, R, showGlobe, craftBase });
   if (!hero) drawShells(S);
   drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb, print: !!(opts.print || opts.syncEarth) });
-  if (limb) drawLimbTag(svg, W, fBot, S.marks, S.fs);
+  if (limb) drawLimbTag(svg, W, fBot, S.marks, S.fs, !!(opts.panel && opts.title));
   S.g = svg.append('g').attr('font-family', SANS).attr('font-size', 11);
   Object.assign(S, { GX, GY, GR });
   if (hero) drawHeroShells(S, fTop, stY);
