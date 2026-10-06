@@ -183,6 +183,7 @@ export function drawMethod() {
   <h3 id="srcList">All cited sources (${cites.length})</h3>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
   <ol class="cites">${cites.join('')}</ol>
+  <p class="only-phone"><a class="to-top" href="#top">Back to the top</a></p>
   <p>The data table behind each chart lists every entry with its source and page reference.</p>`;
 
   // Copy the citation: the clipboard when the browser allows it; otherwise the text is selected so a reader can copy it by hand.

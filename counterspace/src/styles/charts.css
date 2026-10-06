@@ -137,7 +137,7 @@
 .legend li.wide span{flex:1 1 0;min-width:0;overflow-wrap:anywhere}
 .lsep{flex-basis:100%;height:0;margin:0}
 .legend li.kgroup{flex-basis:100%;flex-wrap:wrap;gap:var(--s-2) var(--s-5)}
-.kname{flex:0 0 150px;font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.kname{flex:0 0 150px;font:600 13px/1.3 var(--sans);color:var(--muted)}
 .kitems{display:flex;flex:1 1 0;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-5);min-width:0;margin:0;padding:0;list-style:none}
 .kitems li{display:flex;align-items:center;gap:var(--s-2)}
 @media (max-width:640px){.kname{flex-basis:100%}.kitems{flex-basis:100%}}
@@ -146,7 +146,7 @@
 .legend li.bubbles span{line-height:1.45}
 
 /* ------------------------------------------------------------------ data tables: a contained scroll area with a sticky header; cards on phones */
-.tscroll{max-width:100%;max-height:min(70vh,640px);margin-top:var(--s-3);overflow:auto;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
+.tscroll{max-width:100%;max-height:none;margin-top:var(--s-3);overflow:auto;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;line-height:1.45}
 th,td{padding:10px 14px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
 th{position:sticky;top:0;z-index:1;background:var(--surface-2);border-bottom:1px solid var(--line-strong);font:600 13px/1.35 var(--sans);color:var(--muted)}
@@ -282,3 +282,6 @@ td a{overflow-wrap:anywhere}
   .lm-axis{stroke:var(--line-strong);stroke-width:1}
   section.chart{scroll-margin-top:52px}
 }
+
+details.table>summary{scroll-margin-top:110px}
+.sources .to-top{display:inline-block;margin-top:var(--s-3);font-size:14px}

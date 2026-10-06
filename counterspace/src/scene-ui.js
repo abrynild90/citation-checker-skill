@@ -626,10 +626,10 @@ function staticMode(on) {
     staticTxt.textContent = COMPACT.matches
       ? REDUCED
         ? 'Animation is off, so this is a still diagram.'
-        : 'The 3D view could not start here.'
+        : 'The 3D view could not start. Your browser may have 3D switched off.'
       : REDUCED
         ? 'Animation is off on this device, so this is a still diagram.'
-        : 'The 3D view could not start here, so this is a still diagram.';
+        : 'The 3D view could not start, so this is a still diagram. Your browser may have 3D switched off.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
