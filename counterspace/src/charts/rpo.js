@@ -241,9 +241,26 @@ export function drawR(el = document.getElementById('svgR')) {
       const w = tw(t, 12.5, 600),
         sameRow = placed.filter((q) => q !== p && Math.abs(q.y - p.y) < 2),
         free = (a, b) => sameRow.every((q) => q.ext[1] < a - 4 || q.ext[0] > b + 4) && !(p.bx != null && p.bx > a && p.bx < b);
-      const left = [p.X0 - 14 - w, p.X0 - 14],
+      const edge = p.bx != null && p.bx < p.X0 ? p.bx - 14 : p.X0 - 14, // a 3D cube left of the mark pushes the label further left
+        left = [edge - w, edge],
         right = [p.X1 + (p.ongoing ? 30 : 16), p.X1 + (p.ongoing ? 30 : 16) + w];
       const side = left[0] > INSET + 8 && free(left[0], left[1]) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && !p.ongoing ? 'r' : null;
+      let dy = 0,
+        ax = null;
+      if (!side) {
+        // no room in the row: try just above or below the mark, ending where the mark ends, when nothing is there
+        const hi = (p.bx != null && p.bx > p.X1 ? p.X0 - 10 : Math.max(p.X1, p.bx ?? 0) + 4); // ends before a cube on the mark's right
+        for (const off of [-15, 15]) {
+          const a = hi - w,
+            yy = p.y + off;
+          if (a > INSET + 8 && hi < R - 4 && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 4 || q.ext[0] > hi + 4)) {
+            dy = off;
+            ax = hi;
+            break;
+          }
+        }
+        if (ax != null) return lg.append('text').attr('class', 'dlabel').attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
+      }
       if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
     });
   }
