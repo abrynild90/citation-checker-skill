@@ -144,7 +144,7 @@ export class GLHost {
     this.beamTex = null;
     this._pt = null;
     // One sun for every picture (SUN_VIEW in core.js), fixed in space: orbiting the camera or turning the hero reveals the night side.
-    const sunDir = sunFor(sim.sunRef);
+    const sunDir = sunFor(sim.sunRef, sim.cfg.sunView || undefined); // cfg.sunView {az, el}: an opt-in sun direction for a scene
     this.sunDir = sunDir;
     this._buildLights(S, sunDir);
     const root = new T.Group();
