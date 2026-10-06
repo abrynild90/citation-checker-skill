@@ -1804,10 +1804,10 @@
 /* ---------- Round 9 ---------- */
 .overlay .sv-hint{min-width:0;overflow:hidden}
 .overlay .sv-hint span[hidden]{display:none}
-/* In-picture status caption on a wide stage: a calm pill of at most about 60 characters a line, balanced over two lines, not edge to edge */
+/* In-picture status caption on a wide stage: a calm pill of at most about 60 characters a line, capped width, not edge to edge */
 @media (min-width: 761px) {
   .overlay #sceneView .hlabel[style*="bottom: 10px"] {
-    max-width: min(36em, calc(100% - 32px)) !important;
+    max-width: min(56em, calc(100% - 32px)) !important;
     text-wrap: balance;
   }
 }
