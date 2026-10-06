@@ -87,7 +87,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
     const ht = tgt.t,
       arc = items._arc,
       // earlyKey: the camera is already tight on the intercept at mid-approach
-      keys = cfg.earlyKey ? [0, ht * 0.45, ht, ht + 0.1, 0.6, 1] : [0, ht, ht + 0.1, 0.6, 1],
+      keys = cfg.keyTimes || (cfg.earlyKey ? [0, ht * 0.45, ht, ht + 0.1, 0.6, 1] : [0, ht, ht + 0.1, 0.6, 1]), // keyTimes (opt-in): the key times, e.g. a longer pull-back
       core = [tgt.hitPos].concat(arc ? [arc.from] : [], aircraftPos ? [aircraftPos(0)] : []),
       c0 = centroid(core),
       cn = norm(c0);
@@ -106,7 +106,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
           const P = core.slice();
           // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
-          if (burst && tk <= ht + 0.16) P.push(...burstPad);
+          if (burst && tk <= ht + 0.16 && tk >= (cfg.burstPadFrom ?? 0)) P.push(...burstPad); // burstPadFrom (opt-in): the early keys are fitted to the craft alone
           if (arc && tk <= ht + 0.05) P.push(arc.to);
           if (tk <= ht) P.push(tgt.pos(tk));
           if (tk > ht) P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
@@ -194,7 +194,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               P = [
                 all[0],
                 pl.length ? pl[pl.length - 1] : all[1],
-                all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + 0.22) * (all.length - 1)))],
+                all[Math.min(all.length - 1, Math.round(((t - it.t0) / (it.t1 - it.t0) + (c.trackPath.ahead ?? 0.22)) * (all.length - 1)))],
               ];
             if (geo) P.push(scl(up, rAlt(GEO_ALT)));
             // trackPath.ring: the whole GEO ring (8 points in the equatorial plane) and the arc's apex stay in frame

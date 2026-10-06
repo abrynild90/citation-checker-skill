@@ -25,7 +25,10 @@ export const FENGYUN = {
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
   launchCam: 'second',
   orbitAt: [26, 74, 4.6],
-  fitMinKeys: IS_PHONE ? [2.7, 0] : [3.3, 0], // the first key frames the whole Xichang to satellite arc, with the Earth's limb in view
+  fitMinKeys: IS_PHONE ? [1.9, 0] : [1.7, 0], // the first key frames the Xichang to satellite arc close, so the interceptor and the satellite read as craft
+  lookK: IS_PHONE ? 0.8 : 0.93, // the Earth stays whole and centred in the first frames (phone: it was cropped at the left)
+  latePct: IS_PHONE ? 0.8 : 0.62, // the ring steps frame the bulk of the cloud, so the Earth fills more of the frame
+  fitFillKeys: IS_PHONE ? [0.88, 0.88, 0.88, 0.88, 0.88] : [0.78, 0.8, 0.88, 0.95, 0.95],
   phoneK: 1.14,
   fitFill: IS_PHONE ? 0.88 : 0.78, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
   liveOff: { 'Fengyun-1C': [-70, -64], Xichang: [-60, 34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
@@ -36,7 +39,7 @@ export const FENGYUN = {
   stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 34 : 46, maxPx: IS_PHONE ? 60 : 84, impactDx: 150, impactDy: -80, impactUntil: 0.6 },
+    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 46 : 68, maxPx: IS_PHONE ? 72 : 104, impactDx: 150, impactDy: -80, impactUntil: 0.6 },
     { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19', strong: true, coreK: 2.4, flash: 0.36 }, // a bright core and a second white ring: the hit reads against the debris plume
     {
       type: 'debris',

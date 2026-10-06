@@ -29,10 +29,13 @@ export const SOLWIND = {
   fitDebrisT: 0.66, // the camera keeps framing the cloud at its widest, also while it decays away
   latePct: 0.85,
   camGlide: true,
+  burstPadFrom: 0.4,
+  earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
+  fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -30] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [205, -40], Solwind: [178, 0] }, // the missile's pill sits above the F-15 with a leader down to the arc
   phoneOff: { 'ASM-135': [-16, -58] },
   actors: [
     {
@@ -65,6 +68,9 @@ export const SOLWIND = {
       impactShort: 'Impact: Solwind P78-1',
       impactDy: IS_PHONE ? -81 : undefined,
       tickUntil: 0.84, // the tick retires with the last fragment
+      endLabel: 'Impact point: 0 of 285 in orbit',
+      endShort: '0 of 285 in orbit',
+      endFrom: 0.84,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
     { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.5, flashSpan: 0.24, flashCap: 1.8, coreK: 1.8, linger: 0.16, lingerK: 0.55, retire: 0.06 },

@@ -91,7 +91,7 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -62], Johnston: [-140, -4], Thor: [-100, 58], Artificial: [-60, -21], 'Satellite damaged': [-120, 36] },
+  liveOff: { Detonation: [-150, -62], Johnston: [-140, -4], Thor: [70, -70], Artificial: [-60, -21], 'Satellite damaged': [-120, 36] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
@@ -100,7 +100,18 @@ export const STARFISH = {
   },
   // the three presets, written out so Polar can sit lower (42 N, not 80 N): the burst then sits inside the frame instead of on the limb
   cameras: [
-    { name: 'Whole scene', at: [20.02, 165.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15] },
+    // glide: the first steps (the Thor launch, the burst) are cut tight on Johnston Island; the camera then eases out to the whole belt between 0.18 and 0.4
+    // (longitudes written as -194.5 = 165.5 so the move does not swing the long way round)
+    {
+      name: 'Whole scene',
+      glide: [
+        [0, [13.5, -172, 1.4], [16.6, -169.3, 1.03]],
+        [0.12, [13.5, -172, 1.4], [16.6, -169.3, 1.03]],
+        [0.3, [19, -176, 2.1], [16.6, -169.4, 1]],
+        [0.55, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15], [0, -194.5, 0]],
+        [1, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15], [0, -194.5, 0]],
+      ],
+    },
     { name: 'Close up', at: [16.7, -177.5, Math.max(2.3, 3.5 * PH * 0.55)] },
     { name: 'From the north', at: [42, -169.5, 4.3 * PH] },
   ],

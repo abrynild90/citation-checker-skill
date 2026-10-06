@@ -372,6 +372,19 @@ export function buildSim(cfg) {
     // impactUntil: the "Impact" pill is shown only while its step is on screen; a quiet tick keeps marking the point afterwards
     if (a.type === 'target' && tgt && !a.noHit && a.label && a.impactUntil != null)
       items.push({ kind: 'point', shape: 'tick', color: '#fff1c1', pos: (t) => (t >= a.impactUntil && (a.tickUntil == null || t < a.tickUntil) ? tgt.hitPos : null) }); // tickUntil: the tick retires with the last fragment
+    // endLabel (opt-in): from endFrom on, the impact point carries a pill with the final count, so the last frame (the cloud has all decayed) still says what happened
+    if (a.type === 'target' && tgt && !a.noHit && a.endLabel)
+      items.push({
+        kind: 'point',
+        shape: 'tick',
+        color: '#fff1c1',
+        label: a.endLabel,
+        short: a.endShort ?? a.endLabel,
+        labelDx: a.endDx ?? 70,
+        labelDy: a.endDy ?? -50,
+        opt: true,
+        pos: (t) => (t >= a.endFrom ? tgt.hitPos : null),
+      });
     if (a.type === 'target' && tgt && a.wreck)
       // A dim, smaller copy of the satellite stays at the impact point: the wreck marker (its debris is the cloud).
       items.push({
@@ -760,7 +773,7 @@ export function buildSim(cfg) {
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
       });
-      items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: 0.22, role: 'action' });
+      items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: a.ghostOpacity ?? 0.22, role: 'action' }); // ghostOpacity (opt-in): a brighter whole path
       if (a.marks) {
         // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]),

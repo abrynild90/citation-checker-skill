@@ -25,7 +25,7 @@ export const BURNT_FROST = {
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   earlyKey: true,
-  fitFillKeys: [1.0, 1.0], // the first two key frames sit tight on the ship, the interceptor and the satellite
+  fitFillKeys: IS_PHONE ? [0.82, 0.9] : [1.0, 1.0], // the first two key frames sit tight on the ship, the interceptor and the satellite
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
     { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, dx: 0, dy: 44, minPx: 84, maxPx: 170 },

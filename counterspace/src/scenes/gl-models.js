@@ -768,7 +768,7 @@ export const modelMethods = {
       g = new T.Group(),
       hull = this._mat(0x8b95a8),
       deck = this._mat(0x5d6779),
-      up = this._mat(0xdde2ee),
+      up = this._mat(o.shade ? 0xb4bdcc : 0xdde2ee),
       gun = this._mat(0x9aa3b5);
     const sh = new T.Shape();
     sh.moveTo(-0.0036, -0.036);
@@ -782,16 +782,23 @@ export const modelMethods = {
       const lo = new T.ExtrudeGeometry(sh, { depth: 0.0017, bevelEnabled: false });
       lo.rotateX(Math.PI / 2);
       lo.translate(0, 0.0017, 0);
-      g.add(new T.Mesh(lo, this._mat(0x3c4558)));
+      g.add(new T.Mesh(lo, this._mat(0x262e3d)));
       const hi = new T.ExtrudeGeometry(sh, { depth: 0.0021, bevelEnabled: false });
       hi.rotateX(Math.PI / 2);
       hi.translate(0, 0.0038, 0);
-      g.add(new T.Mesh(hi, this._mat(0xaab4c8)));
-      const wg = new T.BufferGeometry();
-      wg.setAttribute('position', new T.Float32BufferAttribute([-0.0034, 0.0006, -0.036, 0.0034, 0.0006, -0.036, -0.011, 0.0006, -0.105, 0.011, 0.0006, -0.105], 3));
-      wg.setAttribute('color', new T.Float32BufferAttribute([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], 3));
-      wg.setIndex([0, 2, 1, 1, 2, 3]);
-      g.add(new T.Mesh(wg, new T.MeshBasicMaterial({ vertexColors: true, color: 0xdfeaff, transparent: true, opacity: 0.4, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+      g.add(new T.Mesh(hi, this._mat(0x7b8699)));
+      // a narrow churned wake that fades astern, a faint bow wave on each side, and a few foam flecks: a ship in the water, not a cone of light
+      const fade = (pts, cols, idx, op) => {
+        const wg = new T.BufferGeometry();
+        wg.setAttribute('position', new T.Float32BufferAttribute(pts, 3));
+        wg.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
+        wg.setIndex(idx);
+        g.add(new T.Mesh(wg, new T.MeshBasicMaterial({ vertexColors: true, color: 0xdfeaff, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+      };
+      fade([-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0046, 0.0006, -0.08, 0.0046, 0.0006, -0.08], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.26);
+      [-1, 1].forEach((sd) =>
+        fade([sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0128, 0.0006, -0.03, sd * 0.0134, 0.0006, -0.03], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.22),
+      );
     } else {
       const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
       hg.rotateX(Math.PI / 2);

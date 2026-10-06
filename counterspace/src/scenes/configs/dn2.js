@@ -35,7 +35,8 @@ export const DN2 = {
       dx: -40,
       dy: -50,
       head: true,
-      rocket: { minPx: IS_PHONE ? 44 : 50, maxPx: IS_PHONE ? 66 : 72, glowMin: IS_PHONE ? 28 : 32, glowMax: IS_PHONE ? 46 : 50 },
+      ghostOpacity: 0.5, // the whole planned path stays readable before the rocket flies it
+      rocket: { minPx: IS_PHONE ? 56 : 66, maxPx: IS_PHONE ? 78 : 92, glowMin: IS_PHONE ? 32 : 38, glowMax: IS_PHONE ? 52 : 58 },
       apexT: 0.47,
       staticAt: [0.6, 0.09],
       marks: [
@@ -88,13 +89,13 @@ export const DN2 = {
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
   phoneHide: ['DN-2 path', 'GEO'],
-  phoneOff: { Xichang: [-64, 14] }, // the pill sits beside its site on the disc, no leader across it
+  phoneOff: { Xichang: [10, -94] }, // the pill sits beside its site on the disc, no leader across it
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
   staticOnDiscPhone: ['Xichang'], // static, 375: Xichang's short label sits beside its site on the disc (off the disc it needed a long leader across the Earth)
   cameras: [
-    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: -0.1, fill: 0.86, zoom: 1.0, lookK: 0.4 } },
+    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.34, ahead: 0.07, fill: 0.86, zoom: 1.0, lookK: 0.4 } },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
     { name: 'Side view', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
     { name: 'From the pole', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },

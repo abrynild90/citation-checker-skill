@@ -22,9 +22,9 @@ export const SHAKTI = {
   orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
+  burstPadFrom: 0.3, // the first key frames are fitted to the island, the interceptor and the satellite, not the later burst ring
   lookK: 0.86, // the Earth sits nearer the middle of the frame, not against its left edge
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
-  phoneHide: ['Abdul Kalam'], // 375: two labels at the burst (the island is in the status line)
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-130, -80], 'Microsat-R': [172, -14] }, // the two pills sit on opposite sides of the strike, one above and one below

@@ -16,10 +16,10 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.3,
-  solwind: 0.68, // debris spread over the ocean and Arctic, not read as city lights on land
+  starfish: 0.34, // the burst rings over Johnston Island in the tight first camera
+  solwind: 0.5, // the textured satellite at the instant the missile reaches it (the textured model is drawn only until impact)
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
-  'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
+  'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
@@ -35,12 +35,14 @@ const POSTER_T = {
 const POSTER_VIEW = {
   viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
   'sj21-tug': { cam: 0 }, // the follow view: the docked pair above the belt line, the Earth's limb below it
-  starfish: { cam: 0, back: 1.0, right: 0.5, lift: 0.0 }, // the whole globe with room around it, the Japan coast lit at the left
+  starfish: { cam: 0 }, // the tight cut on the burst over Johnston Island (the first camera glides in on it)
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
-  shakti: { back: 0.58, right: 0.08 },
+  shakti: { back: 0.58, right: 0.08, boost: 1.7 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
+  dn2: { back: 0.8, boost: 1.3, right: 0.5 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
+  'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
 const TRIPTYCH = [[0.2, 1], [0.57, 2], [0.88, 3]]; // [t, camera preset] per episode (RPO poster)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
