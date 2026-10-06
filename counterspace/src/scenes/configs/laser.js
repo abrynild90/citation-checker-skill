@@ -23,6 +23,7 @@ export const LASER = {
   event: 'us-1997-miracl',
   hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 },
   lift: 30,
+  narrowK: 1, // phone: the fitted tracking views already frame MSTI-3 clear of the caption
   nightK: 2.2, // a lifted night ambient: the dark side of the globe keeps its land and ocean readable behind the beam
   stillShort: ['MIRACL beam'],
   staticT: 0.7, // static: the satellite well along its pass, so the beam is drawn at full length

@@ -73,7 +73,7 @@ export const COSMOS1408 = {
     },
   ],
   still: 0.8,
-  phoneOff: { 'ISS orbit': [-40, 44] }, // 375: the label hangs below the (smaller) ISS model, off the craft
+  phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
   liveOff: { 'Cosmos 1408': [-96, 52] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [

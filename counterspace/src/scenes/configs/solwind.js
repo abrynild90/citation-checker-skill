@@ -35,10 +35,11 @@ export const SOLWIND = {
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [205, -40], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [185, -84], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
   countFrom: 0.08,
-  narrowShift: 0.06, // phone: the view slides so the impact label and badge clear the right edge
-  phoneOff: { 'ASM-135': [52, -46] },
+  narrowK: 0.95, // phone: a lighter tighten, the debris cloud at its widest stays inside the frame
+  narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
+  phoneOff: { 'ASM-135': [70, -84] },
   actors: [
     {
       type: 'aircraft',
