@@ -33,7 +33,7 @@ const POSTER_T = {
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
-  viasat: { cam: 0, back: 0.8, boost: 1.4 }, // KA-SAT, the beams and the regions in one cropped-in frame
+  viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
   'sj21-tug': { pose: [-1.010,0.521,-2.776,-0.538,-0.075,-2.080] }, // the docked pair above the belt line, with the Earth's limb below it
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
