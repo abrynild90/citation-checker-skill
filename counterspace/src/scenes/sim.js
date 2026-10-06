@@ -83,11 +83,13 @@ export function buildSim(cfg) {
   if (cfg.status)
     items.push({
       kind: 'status',
-      // Status entries are [t0, text, phoneText?]: a phone-width stage (one line at 375 px) uses the short text when there is one.
+      // Status entries are [t0, text, phoneText?, caption?]: a phone-width stage (one line at 375 px) uses the short text when there is one; the
+      // optional caption is a short line for the picture at any width, and cfg.captionShort uses the phone text at any width (the full text stays in the
+      // step list).
       text: (t, still, phone) => {
         let e = cfg.status[0];
         for (const x of cfg.status) if (t >= x[0]) e = x;
-        const s = phone && e[2] ? e[2] : e[1],
+        const s = phone && e[2] ? e[2] : e[3] || (cfg.captionShort && e[2]) || e[1],
           c = items._decayCloud;
         if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + 0.02) return s;
         return phone ? `${s} · ${c.vis}/${c.n} in orbit` : `${s} · ${c.vis} of ${c.n} pieces still in orbit`;

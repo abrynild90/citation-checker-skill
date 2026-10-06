@@ -115,6 +115,7 @@ export const SJ21_TUG = {
   staticT: 0.805, // static: just after the docked window, so the two craft are drawn apart (a gap, each at full size) above the belt
   staticStatus: 'SJ-21 pulls Compass G2 above the GEO belt (height and spacing exaggerated)',
   staticCraftScale: { sj21: 2.2, cg2: 2.2 },
+  captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence
   status: [
     [0, 'SJ-21 (China) approaches the defunct Compass G2 (25 Dec. 2021)', 'SJ-21 approaches defunct Compass G2'],
     [0.2, 'For several weeks SJ-21 stays very close to Compass G2', 'SJ-21 stays close to G2 for weeks'],

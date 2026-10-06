@@ -46,6 +46,7 @@ export const LASER = {
       type: 'beam',
       from: [32.4, -106.4],
       window: 0.42,
+      tOn: 0.15, // visual only: the beam starts with the second step, not while the satellite is still rising
       color: C.laser,
       label: 'MIRACL beam',
       short: 'MIRACL beam',

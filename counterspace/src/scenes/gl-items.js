@@ -557,7 +557,7 @@ const methods = {
       root.add(cap);
       // the label's referent is the zone's east edge on the ground (a point of the drawn red ring), so its leader always ends on something drawn
       const edge = ll(it.at[0], it.at[1] + it.radius / Math.max(0.3, Math.cos(it.at[0] * DEG)), 1.006);
-      this._label(it.label, () => edge, null, null, it.labelDy ?? 0, it.labelDx ?? 0, null, it.opt, { place: true });
+      this._label(it.label, () => edge, null, null, it.labelDy ?? 0, it.labelDx ?? 0, it.short, it.opt, { place: true });
     } else if (it.kind === 'flash') {
       // Explosion: warm core sprite (fast fade) + expanding shock ring (slower).
       const m = new T.Group();

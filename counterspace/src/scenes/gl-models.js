@@ -631,6 +631,12 @@ export const modelMethods = {
       h.scale.setScalar(0.06);
       g.add(h);
       g.userData.halo = h;
+      // a soft dark shadow under the airframe so it holds against bright land and the red zone
+      const sd = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0x050810, transparent: true, opacity: 0.6, depthWrite: false }));
+      sd.scale.setScalar(0.05);
+      sd.position.y = -0.003;
+      sd.renderOrder = -1;
+      g.add(sd);
     }
     Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
     return g;

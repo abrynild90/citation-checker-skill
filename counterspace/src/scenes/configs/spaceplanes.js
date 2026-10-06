@@ -242,6 +242,7 @@ export const SPACEPLANES = {
   phoneHide: ['GEO', 'OTV-7 orbit', 'CSSHQ orbit', '~600'], // 375: at most two labels over the picture
   still: 0.5,
   stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
+  captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence
   status: [
     [0, 'X-37B, OTV-1 to OTV-6 (2010–2022): flights of 224, 469, 675, 718, 780 and 908 days (SWF)', 'X-37B OTV-1 to 6: 224 to 908 days'],
     [0.1, 'SWF: X-37B orbits were 300–400 km up, tilted 38°–54° to the equator (hobbyist tracking)', '300–400 km, tilt 38°–54° (SWF)'],
