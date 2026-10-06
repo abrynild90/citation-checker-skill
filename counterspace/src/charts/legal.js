@@ -834,13 +834,13 @@ export function drawLegalKey() {
     'Select a cube icon to open a 3D explainer',
   );
   K.done();
-  // On a phone the key folds into one row; wider screens always show it.
+  // The key is folded at every width; its summary opens it.
   const kb = document.getElementById('keyLegal'),
     mq = matchMedia('(max-width: 640px)');
   if (kb && !kb.dataset.set) {
     kb.dataset.set = '1';
-    kb.open = !mq.matches;
-    mq.addEventListener('change', () => (kb.open = !mq.matches));
+    kb.open = false; // the key is one click away at every width, so the whole timeline fits in one view
+    void mq;
   }
   document.getElementById('glossaryLegal').innerHTML = GLOSSARY.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('');
   // app.js writes this summary once when the page loads; say it again here so the wording lives with the list it introduces

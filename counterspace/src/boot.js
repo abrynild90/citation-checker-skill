@@ -159,7 +159,6 @@ fontsReady.then(() => {
   timed('first-draw', () => {
     chipsB();
     drawLegalKey();
-    if (innerWidth <= 640) document.getElementById('keyLegal')?.setAttribute('open', '');
     drawAll(true);
   });
   performance.mark('cs:first-draw-done');
