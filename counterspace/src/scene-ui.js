@@ -330,8 +330,12 @@ function fillStory(cfg) {
     (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
   // The phone's pinned source line carries the link too, so "Open the source" is reachable without scrolling the story.
   srcLineEl.innerHTML =
-    `Source: ${esc(cfg.cite)}` +
-    (ev ? ` <a href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<span class="sr"> (opens in a new tab)</span></a>` : '');
+    `<span class="sl-cite">Source: ${esc(cfg.cite)}</span><span class="sl-links">` +
+    (ev ? `<a href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<span class="sr"> (opens in a new tab)</span></a>` : '') +
+    (cfg.related ? `<button type="button" class="sl-law">Related law</button>` : '') +
+    `</span>`;
+  const slLaw = srcLineEl.querySelector('.sl-law');
+  if (slLaw) slLaw.onclick = () => lawBtn.click();
   scaleEl.textContent = [
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
