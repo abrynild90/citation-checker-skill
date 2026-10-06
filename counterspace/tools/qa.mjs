@@ -445,6 +445,7 @@ await run('ux-phone', { viewport: { width: 375, height: 800 }, colorScheme: 'dar
 
 // 3c. Keyboard walk: Tab from the top and record what takes focus; each stop class must be reached and the focus must stay visible below the sticky band.
 await run('keyboard-walk', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark', reducedMotion: 'reduce' }, async (p) => {
+  await p.evaluate(() => document.querySelectorAll('details.table').forEach((d) => (d.open = true))); // tables are reachable once their disclosure is open
   const seen = new Set(),
     hidden = [];
   const kind = (a) =>
