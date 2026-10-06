@@ -175,7 +175,7 @@ export function buildSim(cfg) {
         color: a.color,
         width: 2,
         pts: (t) => {
-          if (!actOn(t, a.acts)) return [];
+          if (!actOn(t, a.acts) || (a.until != null && t > a.until)) return []; // a.until: opt-in end of the wake
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
           return s <= 0 ? [] : all.slice(0, Math.max(2, ts ? ts.filter((x) => x <= t).length : Math.round(s * N) + 1));
         },
@@ -206,6 +206,7 @@ export function buildSim(cfg) {
         color: a.color,
         opacity: a.opacity ?? 0.6,
         thick: a.thick,
+        fade: a.fade,
         push: a.push,
         label: a.label,
         short: a.short,
@@ -525,7 +526,7 @@ export function buildSim(cfg) {
         strong: !!a.strong,
         coreK: a.coreK,
         size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
-        span: a.strong ? 0.2 : 0.16,
+        span: a.flashSpan ?? (a.strong ? 0.2 : 0.16), // flashSpan: opt-in shorter shock rings
       });
     }
     if (a.type === 'debris' && tgt) {
@@ -571,6 +572,10 @@ export function buildSim(cfg) {
         dynCol: true,
         alpha: 0.7,
         size: a.size ?? (n > 2000 ? 0.019 : n > 400 ? 0.02 : 0.034),
+        minPx: a.minPx, // opt-ins: dot size limits, additive sprites (a.additive), short trails (a.trail: { n, dt })
+        maxPx: a.maxPx,
+        additive: a.additive,
+        trail: a.trail,
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,

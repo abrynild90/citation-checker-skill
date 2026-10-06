@@ -16,7 +16,8 @@ export const BURNT_FROST = {
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
-  nightK: 2.6, // the scene sits on the dark side: a lifted night ambient separates ocean, debris and ship
+  sunView: { az: -32, el: 24 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
+  nightK: 1.2,
   phoneOff: { 'Larger pieces': [106, -58], 'Pieces falling': [106, -58] }, // 375: the label sits right of the debris cloud, not over it
   launchAt: [3.3, 0.95, 0.8],
   earlyKey: true,
@@ -37,8 +38,8 @@ export const BURNT_FROST = {
         { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
       ],
     },
-    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.36, coreK: 0.4, strong: true, hold: 0.07 },
-    { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.046, lateGlow: true },
+    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.36, coreK: 0.4, strong: true, hold: 0.07, flashSpan: 0.11 },
+    { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.08, minPx: 5, maxPx: 14, additive: true, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
   ],
   still: 0.47,
   status: [

@@ -22,13 +22,14 @@ export const RPO = {
     'Cosmos 2542, pp. 02-09 to 02-10; USA 271 and SKYNET 5A, p. 01-14.',
   related: null,
   event: 'cn-2025-sj21-sj25-docking',
+  epChip: ['China and the US in GEO', 'Russia in LEO', 'The US and the UK in GEO'], // the in-picture chip names the episode on screen
   panels: [
     {
       t: 0.3,
       title: '1 · GEO, 2025',
       brief: 'SJ-21 + SJ-25 appear to dock',
       short: 'SJ-21 + SJ-25',
-      dropPhone: ['GEO belt', 'SJ-21 + SJ-25 docked', 'USA 271'], // 375: the panel title already names the docked pair; USA 271 would sit under the title (USA 270 stays)
+      dropPhone: ['GEO belt', 'SJ-21 + SJ-25', 'USA 271', 'USA 270'], // 375: the panel title already names the docked pair; USA 271 would sit under the title (USA 270 stays)
       status: 'SJ-21 and SJ-25 appear to dock; two US GSSAP satellites sit “flanking” them',
     },
     {
@@ -36,18 +37,21 @@ export const RPO = {
       title: '2 · LEO, 2019–20',
       brief: 'Cosmos 2543 near USA 245',
       short: 'Cosmos 2543',
+      dropPhone: ['Cosmos 2542'], // 375: the pair's labels would cross USA 245's leader
       status: 'Cosmos 2543, released by Cosmos 2542, works near USA 245',
     },
     {
       t: 0.85,
       title: '3 · GEO, 2025',
       brief: 'USA 271 near SKYNET 5A',
-      short: 'USA 271',
-      dropPhone: ['GEO belt'],
+      short: IS_PHONE ? 'USA 271 + SKYNET 5A' : 'USA 271',
+      dropPhone: ['GEO belt', 'USA 271', 'SKYNET 5A'], // 375: the panel title names both satellites
       status: 'USA 271 and SKYNET 5A: a jointly announced US–UK close approach',
     },
   ],
   inset: 'Top view',
+  insetCorner: IS_PHONE ? 'bl' : undefined, // 375: the top view sits at the lower left, clear of the satellites
+  insetSizePhone: [92, 74],
   scaleNote:
     'The distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen. ' +
     'The three episodes happened at different times and in different places.',
@@ -73,8 +77,8 @@ export const RPO = {
       scale: 1.5 * PK,
       label: 'SJ-25 (China)',
       short: 'SJ-25',
-      dx: -20,
-      dy: 44,
+      dx: IS_PHONE ? -20 : 70,
+      dy: IS_PHONE ? 44 : 48,
       labelFn: (t) => (t >= 0.27 && t < 0.335 ? null : 'SJ-25 (China)'),
       key: [
         [0, 0, 0, 0],
@@ -126,8 +130,8 @@ export const RPO = {
       scale: 1.4 * PK,
       label: 'USA 270 (US GSSAP)',
       short: 'USA 270',
-      dx: -10,
-      dy: -40,
+      dx: IS_PHONE ? -10 : -30,
+      dy: IS_PHONE ? -40 : -58,
       key: [
         [0, -1.0, -0.05, 0.02],
         [0.13, -0.5, -0.05, 0.02],
@@ -165,8 +169,8 @@ export const RPO = {
       scale: 1.5 * PK,
       label: 'Cosmos 2542 (Russia)',
       short: 'Cosmos 2542',
-      dx: 104,
-      dy: -36,
+      dx: IS_PHONE ? 62 : 104,
+      dy: IS_PHONE ? -48 : -36,
       key: [
         [0.42, 0, 0, 0],
         [0.72, 0, 0, 0],
@@ -297,6 +301,6 @@ export const RPO = {
     },
     { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: 0.88, t: 0.57 } },
     { name: 'The US and the UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85 } },
-    { name: 'Whole scene: Earth and the GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: ['USA 245'] }, // unlocked from the tour
+    { name: 'Whole scene: Earth and the GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: IS_PHONE ? ['USA 245', 'SJ-25', 'SJ-21', 'USA 270', 'USA 271'] : ['USA 245', 'SJ-25'] }, // unlocked from the tour
   ],
 };

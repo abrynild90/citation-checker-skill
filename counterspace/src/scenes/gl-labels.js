@@ -208,6 +208,7 @@ const methods = {
     this._lastObst = obst;
     const chip = (!noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : [])
       .concat(!noBanner && this.handEl && this.handEl.style.visibility === 'visible' ? [rel(this.handEl)] : [])
+      .concat(!noBanner && this.epEl && this.epEl.style.visibility === 'visible' ? [rel(this.epEl)] : [])
       .concat(!noBanner && this.insetEl && this.insetEl.style.display !== 'none' ? [rel(this.insetEl)] : []);
     this._lastPlace = [raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, null, objs];
     const pl = placeLabels(raw, w, h, (status ? banner.concat([status]) : banner).concat(chip), disc, obst, noBanner ? null : (this._lm ||= {}), objs);

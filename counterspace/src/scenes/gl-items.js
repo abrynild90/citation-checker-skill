@@ -38,11 +38,13 @@ float r = min(uR, uMaxPx * d / uScale) * mix(uTaper, 1.0, pow(uv.x, 1.2));
 vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail;
-uniform vec4 uGap0; uniform vec4 uGap1; varying float vU; varying vec3 vP;
+uniform vec4 uGap0; uniform vec4 uGap1; uniform float uFar; varying float vU; varying vec3 vP;
 // uTail > 0: only the last uTail of the tube length behind the head is visible (a capped wake)
 void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
 if (uTail > 0.0) f *= clamp((vU - (uHead - uTail)) / uTail, 0.0, 1.0);
 // uGap*: the line fades out around a craft (xyz, radius w), so an orbit never runs through a model
+// uFar > 0 (opt-in): the line is thin and fades with its angle to the viewer; the far side of the orbit is dimmer and dashed
+if (uFar > 0.0) { float fc = dot(normalize(vP), normalize(cameraPosition)); float far = 1.0 - smoothstep(-0.25, 0.35, fc); f *= mix(0.55, 1.0, smoothstep(-0.2, 0.8, fc)); f *= mix(1.0, 0.3 + 0.7 * step(0.5, fract(vU * 130.0)), far); }
 if (uGap0.w > 0.0) f *= smoothstep(uGap0.w * 0.7, uGap0.w * 1.5, distance(vP, uGap0.xyz));
 if (uGap1.w > 0.0) f *= smoothstep(uGap1.w * 0.7, uGap1.w * 1.5, distance(vP, uGap1.xyz));
 gl_FragColor = vec4(uColor, uOp * f);\n#include <colorspace_fragment>\n}`;
@@ -119,6 +121,7 @@ const methods = {
           uGap0: { value: new T.Vector4(0, 0, 0, 0) },
           uGap1: { value: new T.Vector4(0, 0, 0, 0) },
           uPush: { value: 0 },
+          uFar: { value: 0 },
         },
       });
     m.userData = { maxPx };
@@ -245,9 +248,10 @@ const methods = {
             it.dynamic ? (it.wakeOp ?? 0.9) : (it.opacity ?? 1),
             it.dynamic ? T.AdditiveBlending : T.NormalBlending,
             it.thick,
-            it.dynamic ? 1.9 : 1.4,
+            it.dynamic ? 1.9 : it.fade ? 0.8 : 1.4,
           ),
         );
+        if (it.fade) tube.material.uniforms.uFar.value = 1; // opt-in thin line, dimmer and dashed on the far side
         if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds });
         if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
         if (it.taper != null) tube.material.uniforms.uTaper.value = it.taper; // thin at the start, full width at the far end: reads apart from the orbit line it crosses
@@ -344,13 +348,31 @@ const methods = {
         mn = it.minPx ?? (deb ? 3 : 2);
       const pm = this._ptMat(it.size, IS_PHONE ? mn + 1 : mn, it.maxPx ?? (deb ? 11 : 9), IS_PHONE ? 1.15 : 1);
       if (deb) pm.uniforms.uVar.value = 1; // debris: dots differ in size and brightness, and fade with distance from the camera
+      if (it.additive) pm.blending = T.AdditiveBlending; // opt-in: bright additive sprites read against dark terrain
       const pts = new T.Points(g, pm);
       pts.frustumCulled = false;
       pts.renderOrder = 2;
       root.add(pts);
       this.dyn.push({ it, obj: pts });
+      if (it.trail && deb) {
+        // opt-in short trails: earlier positions of every fragment (it.trail.n steps of it.trail.dt) drawn smaller and fainter behind it
+        const K = it.trail.n,
+          tg = new T.BufferGeometry();
+        tg.setAttribute('position', new T.BufferAttribute(new Float32Array(n * K * 3), 3));
+        tg.setAttribute('aCol', new T.BufferAttribute(new Float32Array(n * K * 4), 4));
+        const tm = this._ptMat(it.size * 0.8, Math.max(2, mn - 1), it.maxPx ?? 11, 1);
+        tm.uniforms.uVar.value = 1;
+        tm.blending = T.AdditiveBlending;
+        const tp = new T.Points(tg, tm);
+        tp.frustumCulled = false;
+        tp.renderOrder = 1;
+        root.add(tp);
+        pts.userData.trail = { tg, K, pos: new Float32Array(n * 3), col: new Float32Array(n * 4) };
+      }
       if (deb) {
-        const hz = new T.Points(g, this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, 0.11));
+        const hm = this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, it.additive ? 0.2 : 0.11);
+        if (it.additive) hm.blending = T.AdditiveBlending;
+        const hz = new T.Points(g, hm);
         hz.frustumCulled = false;
         hz.renderOrder = 1;
         root.add(hz);
@@ -457,9 +479,22 @@ const methods = {
         rho = it.radius * DEG,
         up = new T.Vector3(...c);
       // The dome fades toward its silhouette (strong where the surface faces the camera) so its edge has a falloff, not a hard shell.
+      // it.soft (opt-in): a soft dome, brightest low and fading upward and toward its silhouette, with a few faint noise rings; a thin ring marks its base
+      const softMat = it.soft
+        ? new T.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            side: T.DoubleSide,
+            uniforms: { uColor: { value: col(it.color) }, uRho: { value: rho } },
+            vertexShader:
+              'uniform float uRho; varying vec3 vN; varying vec3 vV; varying vec3 vL; void main(){ vL = position / uRho; vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
+            fragmentShader:
+              'uniform vec3 uColor; varying vec3 vN; varying vec3 vV; varying vec3 vL; float hh(float x){ return fract(sin(x * 91.3458) * 47453.5453); } void main(){ float d = abs(dot(normalize(vN), normalize(vV))); float h = clamp(vL.y, 0.0, 1.0); float th = acos(h); float az = atan(vL.z, vL.x); float ring = 0.0; for (int k = 0; k < 4; k++){ float fk = float(k); float c = 0.28 + 0.2 * fk + 0.05 * (hh(fk + floor(az * 2.0)) - 0.5); ring += exp(-pow((th - c * 1.5708) / 0.035, 2.0)) * (0.5 + 0.5 * hh(fk * 7.0 + floor(az * 5.0))); } float a = (0.05 + 0.30 * pow(1.0 - h, 1.4) * smoothstep(0.0, 0.7, d) + 0.05 * ring) * (1.0 - smoothstep(0.7, 1.0, 1.0 - h * 0.0) * 0.0) * smoothstep(0.0, 0.08, h + 0.02 * d); gl_FragColor = vec4(uColor * (1.0 + 0.35 * ring), a);\n#include <colorspace_fragment>\n}',
+          })
+        : null;
       const m = new T.Mesh(
-        new T.SphereGeometry(rho, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
-        new T.ShaderMaterial({
+        new T.SphereGeometry(rho, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2),
+        softMat || new T.ShaderMaterial({
           transparent: true,
           depthWrite: false,
           side: T.DoubleSide,
@@ -473,6 +508,17 @@ const methods = {
       m.position.set(...c);
       m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), up);
       root.add(m);
+      if (it.soft) {
+        const pts = [];
+        for (let k = 0; k <= 96; k++) {
+          const a = (k / 96) * Math.PI * 2;
+          pts.push(new T.Vector3(Math.cos(a) * rho, 0, Math.sin(a) * rho));
+        }
+        const base = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: 0.55, depthWrite: false }));
+        base.position.copy(m.position);
+        base.quaternion.copy(m.quaternion);
+        root.add(base);
+      }
       // Ground contact: a dark red cap on the surface, darkest at the centre and fading out toward the zone's edge, so the terrain under the zone dims.
       const cap = new T.Mesh(
         new T.SphereGeometry(1.004, 48, 10, 0, Math.PI * 2, 0, rho),

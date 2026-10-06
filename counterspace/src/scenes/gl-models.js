@@ -388,12 +388,14 @@ export const modelMethods = {
       K = new Kit(T),
       PI = Math.PI,
       body = this._mat(new T.Color(0xdfe3ec).lerp(new T.Color(color), 0.08).getHex(), { metalness: 0.45, roughness: 0.34 }),
-      white = new T.MeshPhysicalMaterial({ color: 0xf4f6fb, metalness: 0.45, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2, envMapIntensity: 1.8 }),
+      white = new T.MeshPhysicalMaterial({ color: 0xc4cad6, metalness: 0.45, roughness: 0.38, clearcoat: 0.35, clearcoatRoughness: 0.3, envMapIntensity: 1.3 }),
+      tile = this._mat(0x14171f, { metalness: 0.25, roughness: 0.7 }), // black thermal tiles of the underside
+      foil = this._mat(0xc99a3e, { metalness: 0.95, roughness: 0.28 }), // gold foil accents
       nose = this._mat(0x1b1f29, { metalness: 0.4, roughness: 0.4 }),
       dark = this._mat(0x2b3140, { metalness: 0.5, roughness: 0.5 }),
       glass = this._mat(0x060a14, { metalness: 0.9, roughness: 0.1 }),
       under = this._mat(new T.Color(color).lerp(new T.Color(0x0c0e14), 0.9).getHex(), { metalness: 0.5, roughness: 0.42 }),
-      deck = this._mat(0xf1f3f8, { metalness: 0.4, roughness: 0.3 }),
+      deck = this._mat(0xd2d7e1, { metalness: 0.4, roughness: 0.34 }),
       rim = (m) => {
         m.onBeforeCompile = (sh) => {
           sh.fragmentShader = sh.fragmentShader.replace(
@@ -420,6 +422,14 @@ export const modelMethods = {
     K.geo(white, new T.LatheGeometry(prof, 48), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
     K.geo(nose, new T.SphereGeometry(0.0017, 12, 8), 0, 0, 0.0214, 0, 0, 0, 1, 0.8, 1.3);
     K.box(nose, 0.0094, 0.0006, 0.026, 0, -0.0043, -0.002); // dark heat-shield belly seen at the edges
+    // Underside: a dark tile belly along the fuselage (wider than the body so it reads from the side), with a few tile seams
+    K.box(tile, 0.0096, 0.0016, 0.044, 0, -0.0034, -0.0008);
+    for (const z of [-0.012, -0.005, 0.002, 0.009]) K.box(dark, 0.0098, 0.0004, 0.0002, 0, -0.0027, z);
+    // Panel lines across the white upper fuselage and a gold foil band at the nose and on the tail tips
+    for (const z of [0.0105, 0.0152, -0.0128, -0.0186]) K.box(dark, 0.0072 - Math.abs(z) * 0.07, 0.0003, 0.00022, 0, 0.0036, z);
+    for (const s of [-1, 1]) K.box(dark, 0.00022, 0.0003, 0.018, s * 0.0033, 0.0034, 0.001);
+    K.box(foil, 0.0068, 0.0004, 0.0026, 0, 0.0033, 0.0182);
+    K.box(foil, 0.0094, 0.0005, 0.0034, 0, -0.0006, -0.0188);
     K.box(glass, 0.0026, 0.0008, 0.0042, 0, 0.0033, 0.0136);
     // Payload-bay doors: a dark frame on the back, two pale door panels with a dark centre seam and hinge lines (the X-37B's most recognisable detail)
     K.box(dark, 0.0072, 0.0007, 0.0188, 0, 0.0043, -0.0036);
@@ -455,12 +465,17 @@ export const modelMethods = {
       K.box(dark, 0.0007, 0.0006, 0.0182, s * 0.0078, -0.0011, -0.0006, 0, -s * 0.36, 0); // leading edge
       // canted tail fin (white, dark tip): the twin V tail
       K.box(white, 0.0008, 0.0072, 0.0100, s * 0.0045, 0.0068, -0.0158, 0, 0, -s * 0.5);
-      K.box(dark, 0.001, 0.0012, 0.0100, s * 0.0068, 0.0105, -0.0158, 0, 0, -s * 0.5);
+      K.box(foil, 0.001, 0.0012, 0.0100, s * 0.0068, 0.0105, -0.0158, 0, 0, -s * 0.5);
     }
     K.cyl(dark, 0.0026, 0.0032, 0.003, 0, 0, -0.0235, PI / 2);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(under);
     g.userData.sat = true;
+    // Engine glow: a small additive blue-white bloom behind the engine bell
+    const eg = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0x9fc8ff, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending }));
+    eg.scale.setScalar(0.011);
+    eg.position.set(0, 0, -0.0262);
+    g.add(eg);
     if (halo) {
       const h = new T.Sprite(
         new T.SpriteMaterial({

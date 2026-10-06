@@ -27,13 +27,14 @@ export const FENGYUN = {
   orbitAt: [26, 74, 4.6],
   phoneK: 1.14,
   fitFill: IS_PHONE ? 0.8 : undefined, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
-  liveOff: { 'Fengyun-1C': [-70, -64] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
+  liveOff: { 'Fengyun-1C': [-70, -64], Xichang: [-60, 34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
   phoneOff: { Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
+  sunView: { az: 60, el: 14 }, // a lower, more sideways sun: a clear terminator and a shaded limb, not a flat disc
   noSimCount: true,
   stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 22 : undefined, impactDx: 100, impactDy: -100, impactUntil: 0.6 },
+    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 34 : 46, maxPx: IS_PHONE ? 60 : 84, impactDx: 100, impactDy: -100, impactUntil: 0.6 },
     { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
     {
       type: 'debris',
@@ -43,6 +44,9 @@ export const FENGYUN = {
       dv: 0.9,
       decay: 0,
       color: C.debris,
+      minPx: IS_PHONE ? 4 : 3.5, // bigger, brighter fragments: the ring stays visible when it spreads wide and thin
+      maxPx: 9,
+      size: 0.034,
       label: 'Debris ring',
       labelEdge: true, // live: the label points at a fragment on the ring's outer edge, so the leader stays short
       dx: 70,

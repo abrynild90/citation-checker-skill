@@ -45,6 +45,7 @@ export const GNSS = {
       at: [57.5, 21.0],
       radius: 6.2,
       color: C.jam,
+      soft: true,
       label: 'Jammer effect zone',
       dx: 50,
       dy: 18,
@@ -98,15 +99,16 @@ export const GNSS = {
   inset: 'GPS orbits (top view)',
   insetSize: [132, 104],
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
-  phoneHide: ['Jammer effect'], // 375: the zone is named by the status line and its red dome; the Jammer pill stays
+  liveOff: { 'Jammer effect zone': [96, -34] }, // desktop: a leader runs from the label to the zone's edge
+  phoneHide: ['Jammer effect', 'GPS signal'], // 375: the zone is named by the status line and its red dome; the Jammer pill stays
   insetNoPhone: true, // the phone stage is too small for an inset that would sit on the jammer zone
   cameras: [
     {
       name: 'Baltic: airliners and jammer zone',
       short: 'Baltic zone',
-      at: [41, 13, 1.46],
-      look: [52.2, 22.2, 0.98],
-      phone: { at: [38, 12, 1.48] },
+      at: [38, 11, 1.42],
+      look: [51.8, 22.6, 0.98],
+      phone: { at: [38, 11, 1.4] },
     },
     {
       name: 'Close up: jammer zone and Airliner 1',
@@ -116,7 +118,7 @@ export const GNSS = {
       phone: { at: [51, 18.5, 1.55] },
       ref: false, // a close-up of the dome: Airliner 2 is outside this frame by design
     },
-    { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], phone: { at: [42, -8, 5.6] }, ref: false, hide: ['Ground jammer', 'Jammer effect'] },
+    { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], phone: { at: [42, -8, 5.6] }, ref: false, hide: IS_PHONE ? ['Ground jammer', 'Jammer effect', 'Airliner 1'] : ['Ground jammer', 'Jammer effect'] },
   ],
   status: [
     [0, 'Both airliners have GNSS (green); the jammer zone is red', 'Airliners have GNSS (green); zone is red'],

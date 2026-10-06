@@ -144,7 +144,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
     items._gps = sats;
   }
   if (a.type === 'zone') {
-    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy });
+    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, labelDx: a.dx, labelDy: a.dy, soft: a.soft });
     items._zone = a;
     if (a.jammer)
       items.push({

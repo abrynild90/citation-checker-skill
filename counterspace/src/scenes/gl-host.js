@@ -144,7 +144,7 @@ export class GLHost {
     this.beamTex = null;
     this._pt = null;
     // One sun for every picture (SUN_VIEW in core.js), fixed in space: orbiting the camera or turning the hero reveals the night side.
-    const sunDir = sunFor(sim.sunRef);
+    const sunDir = sunFor(sim.sunRef, sim.cfg.sunView || undefined); // cfg.sunView {az, el}: an opt-in sun direction for a scene
     this.sunDir = sunDir;
     this._buildLights(S, sunDir);
     const root = new T.Group();
@@ -187,6 +187,18 @@ export class GLHost {
     this._handCss = this.handEl.style.cssText;
     this._tagStacked = false;
     this.labelLayer.appendChild(this.handEl);
+    // Episode chip (cfg.epChip, opt-in): which episode is on screen, in the handover chip's slot, e.g. "Episode 2 of 3: Russia in LEO".
+    this.epEl = null;
+    if (sim.cfg.epChip && sim.cfg.acts) {
+      this.epEl = document.createElement('div');
+      this.epEl.className = 'hlabel';
+      this.epEl.style.cssText = pillCss() + ';left:10px;top:' + (this.el.clientWidth < 520 ? 56 : 44) + 'px;transform:none;visibility:hidden';
+      const d = document.createElement('i');
+      d.style.cssText = dotCss('#ffc86b');
+      this.epTx = document.createElement('span');
+      this.epEl.append(d, this.epTx);
+      this.labelLayer.appendChild(this.epEl);
+    }
     this.insetEl = null;
     if (sim.cfg.inset) this._makeInset();
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -323,6 +335,16 @@ export class GLHost {
         this.setCam(this._lockCam);
       }
     }
+    if (this.epEl) {
+      const ai = Math.max(
+          0,
+          acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1)),
+        ),
+        txt = `Episode ${ai + 1} of ${acts.length}: ${this.sim.cfg.epChip[ai]}`;
+      if (this.epTx.textContent !== txt) this.epTx.textContent = txt;
+      this.epEl.style.color = LABEL.text;
+      this.epEl.style.visibility = this.lock != null && this._fbAct != null ? 'hidden' : 'visible'; // the handover chip takes the slot while it is shown
+    }
     {
       const on = acts && this.lock != null && this._fbAct != null && this.handEl,
         c = this.sim.cfg.cameras?.[this.camIdx],
@@ -433,6 +455,27 @@ export class GLHost {
         it.fill(t, a.array, it.dynCol ? g.attributes.aCol.array : null);
         a.needsUpdate = true;
         if (it.dynCol) g.attributes.aCol.needsUpdate = true;
+        const tr = obj.userData.trail;
+        if (tr) {
+          const n = it.n,
+            tp = tr.tg.attributes.position.array,
+            tc = tr.tg.attributes.aCol.array;
+          for (let k = 1; k <= tr.K; k++) {
+            it.fill(Math.max(0, t - k * it.trail.dt), tr.pos, tr.col);
+            const f = (1 - k / (tr.K + 1)) * (it.trail.k ?? 0.5);
+            tp.set(tr.pos, (k - 1) * n * 3);
+            for (let q = 0; q < n; q++) {
+              const o = ((k - 1) * n + q) * 4;
+              tc[o] = tr.col[4 * q];
+              tc[o + 1] = tr.col[4 * q + 1];
+              tc[o + 2] = tr.col[4 * q + 2];
+              tc[o + 3] = tr.col[4 * q + 3] * f;
+            }
+          }
+          it.fill(t, a.array, g.attributes.aCol.array); // the main fill state (vis count) stays that of t
+          tr.tg.attributes.position.needsUpdate = true;
+          tr.tg.attributes.aCol.needsUpdate = true;
+        }
       } else if (it.kind === 'beam') {
         const A = it.a(t),
           B = it.b(t),
