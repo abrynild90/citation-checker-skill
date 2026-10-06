@@ -498,7 +498,7 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
   // hiddenLast: the last column is kept in the markup but never shown or read out (the last chart keeps its record ids there for tools/qa.mjs).
   const hide = (i) => (hiddenLast && i === head.length - 1 ? ' hidden' : '');
   const cell = (c, i) =>
-    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(head[i])}">${typeof c === 'string' && (c.startsWith('<a') || c.startsWith('<span class="srcc"') || c.startsWith('<span class="cnt-line"')) ? c : esc(c)}</td>`;
+    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(String(head[i]).replace(/<[^>]*>/g, ''))}">${typeof c === 'string' && (c.startsWith('<a') || c.startsWith('<span class="srcc"') || c.startsWith('<span class="cnt-line"') || c.startsWith('<span class="tl"')) ? c : esc(c)}</td>`;
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
   const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}>${h}</th>`).join('');

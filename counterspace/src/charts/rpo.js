@@ -5,7 +5,7 @@
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { CO, DOMAIN, EXPORTING, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
-import { ACTIVITY_LABEL, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
+import { ACTIVITY_LABEL, ACTIVITY_SHORT, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
 import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
 
@@ -45,6 +45,7 @@ const ROW = 26, // every row is at least 24 px tall so each point is a comfortab
   HEAD = 42,
   TOP = 4;
 
+const ORBIT_SHORT = { LEO: 'Low Earth', GEO: 'Geostationary', HEO: 'Elliptical', not_stated: 'Not stated' };
 export function drawR(el = document.getElementById('svgR')) {
   el.innerHTML = ''; // a re-draw replaces the chart (never stacks a second one)
   const zoomed = zoomedR(),
@@ -385,11 +386,11 @@ export function drawR(el = document.getElementById('svgR')) {
         datePrecise(e, e.start),
         e.end ? datePrecise(e, e.end) : 'Ongoing',
         e.actor,
-        ACTIVITY_LABEL[e.activity],
+        `<span class="tl" title="${ACTIVITY_LABEL[e.activity]}">${ACTIVITY_SHORT[e.activity].replace('Spaceplane mission (launch to landing)', 'Spaceplane mission')}</span>`,
         plain(e.system),
         plain(e.target) || '—',
-        ORBIT_LABEL[e.orbit_regime],
-        SURE_LABEL[e.confidence],
+        `<span class="tl" title="${ORBIT_LABEL[e.orbit_regime]}">${ORBIT_SHORT[e.orbit_regime]}</span>`,
+        `<span class="tl" title="${SURE_LABEL[e.confidence]}">${SURE_WORD[e.confidence]}</span>`,
         plain(e.description),
         srcCell(e, 'tableR', `${plain(e.system)}, ${datePrecise(e, e.start)}`),
       ]),

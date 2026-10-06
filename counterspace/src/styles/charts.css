@@ -165,26 +165,11 @@ td a{overflow-wrap:anywhere}
 /* Column widths: keep "Kind of test" and "Source" on two lines at most at laptop width */
 @media (min-width:641px){
   .tscroll th,.tscroll td{padding:10px 12px}
-  #tableA th:nth-child(1),#tableA td:nth-child(1){min-width:104px}
-  #tableA th:nth-child(2),#tableA td:nth-child(2){min-width:96px}
-  #tableA th:nth-child(5),#tableA td:nth-child(5){min-width:200px}
-  #tableA th:nth-child(6),#tableA td:nth-child(6){min-width:110px}
-  #tableA th:nth-child(7),#tableA td:nth-child(7){min-width:150px}
-  #tableA th:nth-child(9),#tableA td:nth-child(9),#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{min-width:170px}
-  #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:240px}
-  #tableR td:nth-child(4),#tableR th:nth-child(4){min-width:150px}
-  #tableR td:nth-child(6),#tableR th:nth-child(6){min-width:140px}
-  #tableR th:last-child,#tableR td:last-child{min-width:120px}
 }
 .scroll-hint{display:none;margin:var(--s-3) 0 0;font:500 13px/1.4 var(--sans);color:var(--muted)}
 @media (min-width:1101px){
-  #tableR table td:nth-child(4),#tableR table th:nth-child(4){min-width:128px}
-  #tableR table td:nth-child(6),#tableR table th:nth-child(6){min-width:116px}
-  #tableR table th:nth-child(8),#tableR table td:nth-child(8){min-width:92px}
-  #tableR table td:nth-child(9),#tableR table th:nth-child(9){min-width:190px}
 }
 @media (min-width:641px){
-  #tableA th:nth-child(8),#tableR th:nth-child(8),#tableC th:nth-child(8){min-width:104px}
 }
 @media (min-width:641px){
   .scroll-hint.on{display:block}
@@ -192,24 +177,11 @@ td a{overflow-wrap:anywhere}
 @media (min-width:1001px) and (max-width:1100px){
   .scroll-hint + .tscroll,.skip-table + .tscroll{margin-top:var(--s-2)}
   .tscroll th,.tscroll td{padding:9px 10px}
-  #tableA th:nth-child(5),#tableA td:nth-child(5){min-width:150px}
-  #tableA th:nth-child(7),#tableA td:nth-child(7){min-width:104px}
-  #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:200px}
-  #tableR td:nth-child(4),#tableR th:nth-child(4){min-width:130px}
-  #tableR td:nth-child(6),#tableR th:nth-child(6){min-width:120px}
 }
 .skip-table{position:absolute;left:-9999px;top:auto;padding:8px 12px;border-radius:var(--r-1);background:var(--surface);color:var(--text);font:600 14px var(--sans)}
 .skip-table:focus{position:static;display:inline-block;margin:var(--s-2) 0;left:auto;outline:3px solid var(--focus);outline-offset:2px}
 .tscroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-/* A wide table keeps its Source column in view at the right edge, with a soft shadow where the other columns slide under it. */
-@media (min-width:1281px){
-  #tableA th:last-child,#tableA td:last-child,#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{position:sticky;right:0;z-index:2;
-    background:var(--surface);box-shadow:-1px 0 0 var(--grid),-12px 0 12px -10px color-mix(in srgb,var(--text) 16%,transparent)}
-  #tableA th:last-child,#tableC th:last-child,#tableR th:last-child{z-index:3;background:var(--surface-2)}
-  #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:200px;max-width:28ch}
-  #tableA td:last-child,#tableA th:last-child,#tableC td:last-child,#tableC th:last-child,#tableR td:last-child,#tableR th:last-child{white-space:normal;min-width:220px;max-width:34ch}
-  .more-rows{display:none}
-}
+@media (min-width:1001px){.more-rows{display:none}}
 @media (max-width:1000px){
   .tscroll.capped tbody tr:nth-child(n+11){display:none}
   .more-rows{margin-top:var(--s-2)}
@@ -296,8 +268,8 @@ details.table>summary{scroll-margin-top:110px}
 #tableB details.st p{margin:6px 0 0;font-size:13px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
 #tableB details.st p b{color:var(--text);font-weight:600}
 @media (min-width:641px){
-  #tableB th:first-child,#tableB td:first-child{min-width:210px}
-  #tableB th:not(:first-child),#tableB td:not(:first-child){min-width:150px}
+  #tableB th:first-child,#tableB td:first-child{min-width:150px}
+  #tableB th:not(:first-child),#tableB td:not(:first-child){min-width:100px}
 }
 /* A table opened or focused by keyboard or link must land below the strip that stays in view */
 .tscroll,.scroll-hint,details.table,.more-rows{scroll-margin-top:var(--band-h,180px)}
@@ -326,14 +298,46 @@ details.table>summary{scroll-margin-top:110px}
   #chipsB .chip{flex:none}
 }
 
-/* 1001-1280: the scroller is narrower than the table, so nothing sticks; the Source column stays narrow and wraps */
-@media (min-width:1001px) and (max-width:1280px){
-  .tscroll th:first-child,.tscroll td:first-child{position:static;box-shadow:none}
-  .tscroll th{top:0}
-  #tableA th:last-child,#tableA td:last-child,#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{min-width:150px;max-width:24ch;white-space:normal}
-  #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:150px;max-width:24ch}
-  .more-rows{display:none}
-}
 @media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}}
 
 .legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
+
+/* Wide tables fit their box: no pinned Source column, narrower cells, short labels where a long one wraps */
+.tl{white-space:normal}
+.cn-short,.th-sub{display:none}
+#tableB th:last-child{color:var(--text)}
+#tableB td:last-child{background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+@media (min-width:641px){
+  .cn-long{display:none}.cn-short{display:inline;font-variant-numeric:tabular-nums}
+  .th-sub{display:block;font-weight:500;font-size:12px}
+  #tableB th:last-child,#tableB td:last-child{border-left:2px solid var(--accent)}
+}
+@media (min-width:641px){
+  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:280px;max-width:none}
+  #tableR th:nth-child(7),#tableR td:nth-child(7),#tableR th:nth-child(8),#tableR td:nth-child(8){min-width:0}
+  #tableR th:last-child,#tableR td:last-child{min-width:120px;max-width:22ch;white-space:normal}
+  #tableA th:last-child,#tableA td:last-child{min-width:140px;max-width:22ch;white-space:normal}
+  #tableC th:last-child,#tableC td:last-child{min-width:140px;max-width:200px;white-space:normal}
+}
+
+@media (min-width:641px){
+  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:300px}
+  #tableR th:last-child,#tableR td:last-child,#tableA th:last-child,#tableA td:last-child{min-width:120px;max-width:20ch;white-space:normal}
+  #tableC th:last-child,#tableC td:last-child{min-width:120px;max-width:190px;white-space:normal}
+  #tableC th:nth-child(6),#tableC td:nth-child(6){min-width:220px}
+  #tableA th:nth-child(5),#tableA td:nth-child(5){min-width:170px}
+}
+@media (min-width:1001px){
+  #tableA th,#tableA td,#tableC th,#tableC td,#tableR th,#tableR td{padding:9px 9px}
+}
+@media (min-width:641px){
+  .tscroll td:last-child a,.tscroll td:last-child .srcc{white-space:normal;overflow-wrap:anywhere}
+}
+@media (min-width:641px){
+  #tableR th:nth-child(5),#tableR td:nth-child(5),#tableR th:nth-child(6),#tableR td:nth-child(6){min-width:88px;max-width:14ch}
+  #tableR th:nth-child(4),#tableR td:nth-child(4){max-width:14ch}
+}
+@media (min-width:1001px) and (max-width:1100px){
+  #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:220px}
+  #tableR th,#tableR td{padding:8px 7px;font-size:13px}
+}

@@ -40,7 +40,7 @@ export const ACTIVITY_LABEL = {
   release: 'Release of an object',
   spaceplane_mission: 'Spaceplane mission (launch to landing)',
 };
-const ACTIVITY_SHORT = { ...ACTIVITY_LABEL, rpo: 'Close approach', spaceplane_mission: 'Spaceplane mission' }; // the hover card's shorter wording
+export const ACTIVITY_SHORT = { ...ACTIVITY_LABEL, rpo: 'Close approach', spaceplane_mission: 'Spaceplane mission' }; // the hover card's shorter wording
 export const ORBIT_LABEL = {
   LEO: 'Low Earth orbit',
   GEO: 'Geostationary orbit, or close to it',
