@@ -13,10 +13,10 @@ function showCard(html, evt, el, full = false) {
   card.classList.toggle('full', full);
   // On a narrow page a hover card for a mark on the law band is slim (name, kind and date): the full text opens on click or Enter, so the card fits the empty
   // part of the band instead of covering the zoom panel, the axis or the chapter heading.
-  if (!full && innerWidth < 1100 && el?.closest?.('#legalBand, #svgL')) {
+  if (!full && innerWidth < 1100 && el?.closest?.('#legalBand, #legalZoomBox, #svgL')) {
     const t = document.createElement('div');
-    t.innerHTML = html;
-    t.querySelectorAll('p:not(.card-title):not(.when), .src').forEach((n) => n.remove());
+    t.innerHTML = card.innerHTML;
+    t.querySelectorAll('p:not(.card-title):not(.when):not(.kb-line), .src').forEach((n) => n.remove());
     card.innerHTML = t.innerHTML;
   }
   // A card opened by keyboard focus is opaque at once (no half-faded card with page text showing through while it moves into place).
