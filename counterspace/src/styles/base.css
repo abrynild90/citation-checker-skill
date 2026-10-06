@@ -127,7 +127,7 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 @media (max-width:640px){.only-phone{display:block}}
 .skip{position:absolute;left:8px;top:-60px;box-shadow:0 2px 12px rgba(0,0,0,.25);z-index:200;background:var(--surface);color:var(--text);border:2px solid var(--focus);border-radius:var(--r-1);padding:8px 12px;font:600 14px var(--sans)}
 .skip{position:fixed}
-.skip:focus{top:0;left:0;right:0;border-radius:0;border-width:0 0 3px;padding:14px max(var(--gutter),calc((100% - var(--container)) / 2 + var(--gutter)));box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.skip:focus{top:0;left:0;right:0;border-radius:0;border-width:0 0 3px;outline-offset:-3px;padding:19px max(var(--gutter),calc((100% - var(--container)) / 2 + var(--gutter)));box-shadow:0 6px 18px rgba(0,0,0,.28)}
 #timeline:focus{outline:none}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .flash-hl{animation:flash 1.6s ease 2}

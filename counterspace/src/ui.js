@@ -13,7 +13,7 @@ function showCard(html, evt, el, full = false) {
   card.classList.toggle('full', full);
   // On a narrow page a hover card for a mark on the law band is slim (name, kind and date): the full text opens on click or Enter, so the card fits the empty
   // part of the band instead of covering the zoom panel, the axis or the chapter heading.
-  if (!full && !byKey && innerWidth < 1100 && el?.closest?.('#legalBand, #svgL')) {
+  if (!full && innerWidth < 1100 && el?.closest?.('#legalBand, #svgL')) {
     const t = document.createElement('div');
     t.innerHTML = html;
     t.querySelectorAll('p:not(.card-title):not(.when), .src').forEach((n) => n.remove());
@@ -105,7 +105,7 @@ function showCard(html, evt, el, full = false) {
   const gapTo = (q) => Math.hypot(Math.max(q.left - r.right, r.left - q.right, 0), Math.max(q.top - r.bottom, r.top - q.bottom, 0));
   // A mark on the sticky law band has only the page text below it to land on, so covering a line of it (briefly, while hovering) costs little next to drifting away.
   const onBand = !!el?.closest?.('#legalBand'),
-    avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 2 : 20) * o.w : 0), 0);
+    avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 60 : 20) * o.w : 0), 0);
   const ax = root?.querySelector('.xaxis, g.axis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -352,6 +352,11 @@ export function bindMark(sel, cardFn, onActivate) {
       this.__card = () => cardFn(d);
       cardEl = this;
       showCard(cardFn(d), ev, this);
+      // The browser scrolls a focused mark into view after this handler runs: place the card again once it has, so it sits by the mark and not where the mark used to be.
+      const me = this;
+      requestAnimationFrame(() => {
+        if (cardEl === me && document.activeElement === me) showCard(cardFn(d), null, me);
+      });
     })
     .on('blur', function () {
       if (!touchMode && cardEl === this) hideCard();
