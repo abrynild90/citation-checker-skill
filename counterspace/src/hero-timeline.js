@@ -345,7 +345,7 @@ function build(stage) {
     }
   }
 
-  specs.forEach((s) => {
+  const placeNote = (s, tol = phone || W < 900 ? 14 : 13) => {
     let best = null,
       lines = [],
       w = 0;
@@ -367,11 +367,15 @@ function build(stage) {
           }
           if (ok && (!best || n < best.n)) best = { dir, al, box, lead, n };
         }
-      if (best && best.n <= (phone || W < 900 ? 14 : 13)) break;
+      if (best && best.n <= tol) break;
     }
-    if (!best || best.n > (phone || W < 900 ? 14 : 13)) return; // no clean room: leave the note out rather than write over the buttons or the dots
+    if (!best || best.n > tol) return false; // no clean room: leave the note out rather than write over the buttons or the dots
     placed.push({ ...best, m: s.m, lines, w });
-  });
+    return true;
+  };
+  specs.forEach((s) => placeNote(s));
+  // A phone shows at least one weapons note: if none found clean room, the last test's note may lie across a mark or two (never across words).
+  if (phone && !placed.some((p) => p.m)) specs.slice().reverse().some((s) => placeNote(s, 60));
   placed
     .filter((p) => p.m)
     .forEach((p) => {

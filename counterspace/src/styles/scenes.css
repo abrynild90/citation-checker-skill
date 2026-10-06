@@ -1895,12 +1895,52 @@
 .scene-open body > :not(.overlay):not(script):not(style) {
   visibility: hidden;
 }
+.overlay,
 .overlay.open {
-  will-change: opacity;
+  transition: none;
 }
 /* The window fades in; its panel does not move (a moving panel left a stale tile of its footer over the title in some browsers) */
 .overlay .panel,
 .overlay.open .panel {
   transform: none;
   transition: none;
+}
+
+/* Tablet portrait, still diagram: "Try again" and "Save" share one row under the sentence, and the picture takes the height that frees, so the Earth is larger */
+@media (min-width: 761px) and (max-width: 900px) and (max-aspect-ratio: 1/1) {
+  .overlay.is-static .ctrl {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    column-gap: 12px;
+  }
+  .overlay.is-static .static-note {
+    display: contents !important;
+  }
+  .overlay.is-static .static-note .sn-text {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+  .overlay.is-static #scRetry {
+    grid-row: 2;
+    grid-column: 1;
+    margin: 0;
+  }
+  .overlay.is-static #scExport {
+    grid-row: 2;
+    grid-column: 2;
+    justify-self: stretch;
+  }
+  .overlay .panel {
+    grid-template-rows: auto minmax(0, 38%) minmax(0, 1fr) auto;
+  }
+}
+
+/* Tablet width: the story uses the whole panel width, so the right half is not left empty */
+@media (min-width: 600px) and (max-width: 900px) and (max-aspect-ratio: 1/1) {
+  .overlay .sv-lede {
+    max-width: none;
+  }
+  .overlay .sv-steps ol,
+  .overlay .sv-steps #sceneSteps {
+    max-width: none;
+  }
 }

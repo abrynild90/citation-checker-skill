@@ -126,7 +126,8 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 @media (max-width:640px){.hide-phone{display:none}.show-phone{display:inline}}
 @media (max-width:640px){.only-phone{display:block}}
 .skip{position:absolute;left:8px;top:-60px;box-shadow:0 2px 12px rgba(0,0,0,.25);z-index:200;background:var(--surface);color:var(--text);border:2px solid var(--focus);border-radius:var(--r-1);padding:8px 12px;font:600 14px var(--sans)}
-.skip:focus{top:8px}
+.skip{position:fixed}
+.skip:focus{top:0;left:0;right:0;border-radius:0;border-width:0 0 3px;padding:14px max(var(--gutter),calc((100% - var(--container)) / 2 + var(--gutter)));box-shadow:0 6px 18px rgba(0,0,0,.28)}
 #timeline:focus{outline:none}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .flash-hl{animation:flash 1.6s ease 2}
@@ -179,6 +180,6 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 .dl-switch[aria-checked="true"] .sw-thumb{transform:translateX(16px);box-shadow:none}
 @media (prefers-reduced-motion:reduce){.dl-switch .sw-track,.dl-switch .sw-thumb{transition:none}}
 
-.kbd-hint{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:60;max-width:min(92vw,520px);margin:0;padding:8px 14px;border:1px solid var(--line-strong);border-radius:var(--r-1);background:var(--surface);color:var(--text);font:500 13px/1.4 var(--sans);box-shadow:0 4px 16px color-mix(in srgb,var(--text) 18%,transparent);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s}
+.kbd-hint{position:fixed;left:8px;top:8px;z-index:60;max-width:min(92vw,520px);margin:0;padding:8px 14px;border:1px solid var(--line-strong);border-radius:var(--r-1);background:var(--surface);color:var(--text);font:500 13px/1.4 var(--sans);box-shadow:0 4px 16px color-mix(in srgb,var(--text) 18%,transparent);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s}
 .kbd-hint.on{opacity:1;visibility:visible}
 @media print{.kbd-hint{display:none}}

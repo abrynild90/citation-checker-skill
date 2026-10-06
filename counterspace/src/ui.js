@@ -435,7 +435,21 @@ export function rove(sel) {
     if (!h) {
       document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between marks. Enter opens details. Escape closes a card. Tab leaves the chart.</p>`);
       h = document.getElementById(hid);
-      box.addEventListener('focusin', () => h.classList.add('on'));
+      // The hint sits just above the chart's top edge (below it when the chart starts under the sticky strip), never over the marks or the legend, and is not shown on touch screens.
+      const place = () => {
+        if (matchMedia('(hover: none)').matches) return;
+        const r = box.getBoundingClientRect(),
+          band = document.getElementById('legalBand')?.getBoundingClientRect(),
+          hh = h.offsetHeight || 34,
+          floor = band && band.top <= 1 && band.bottom > 0 ? band.bottom + 6 : 6;
+        let top = r.top - hh - 6;
+        if (box.matches('#legalBand')) top = r.bottom + 6;
+        else if (top < floor) top = Math.min(innerHeight - hh - 8, Math.max(floor, r.bottom + 6 < innerHeight - hh ? r.bottom + 6 : floor));
+        h.style.top = Math.round(top) + 'px';
+        h.style.left = Math.round(Math.min(Math.max(8, r.left), innerWidth - h.offsetWidth - 8)) + 'px';
+        h.classList.add('on');
+      };
+      box.addEventListener('focusin', place);
       box.addEventListener('focusout', () => h.classList.remove('on'));
     }
     nodes.forEach((n) => n.setAttribute('aria-describedby', hid));
