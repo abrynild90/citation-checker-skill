@@ -39,17 +39,6 @@ themeBtn.onclick = () => {
 lightQuery.addEventListener?.('change', nameThemeButton);
 nameThemeButton();
 
-// "Save charts with a dark background" sits in the top bar; on phones the bar has no room for its words, so the switch moves to the footer.
-{
-  const option = document.getElementById('dlOption'),
-    barSlot = document.getElementById('barSlot'),
-    footSlot = document.getElementById('footSlot'),
-    narrow = matchMedia('(max-width: 719px)');
-  const place = () => (narrow.matches ? footSlot : barSlot).appendChild(option);
-  narrow.addEventListener?.('change', place);
-  place();
-}
-
 // Sources section: the contents list marks the part being read (the last heading above the reading line, 35% down the window).
 {
   const links = [...document.querySelectorAll('.sub-nav a')];

@@ -146,7 +146,7 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 }
 @media print{
   .legal-band{position:static}
-  .tools,.overlay,.rail,.topbar .bar-tools,.hero-figure,.cta{display:none}
+  .tools,.overlay,.rail,.bar-tools,.hero-figure,.cta{display:none}
   header.top{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 
@@ -167,3 +167,5 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
   .sub-nav a{display:flex;align-items:center;min-height:44px;padding-block:0}
   .foot-base a,.foot-cols a{display:inline-flex;align-items:center;min-height:44px}
 }
+.dl-row{display:flex;justify-content:flex-end;margin-top:var(--s-4)}
+@media print{.dl-row{display:none}}
