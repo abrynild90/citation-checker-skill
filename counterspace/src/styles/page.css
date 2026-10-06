@@ -144,12 +144,13 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .sub-nav a{position:relative;display:inline-block;padding:6px 0;font:600 14px/1.3 var(--sans);color:var(--muted);text-decoration:none}
 .sub-nav a[aria-current]{color:var(--text)}
 .sub-nav a[aria-current]::before{content:"";position:absolute;left:calc(var(--s-4) * -1 - 4px);top:50%;width:7px;height:7px;margin-top:-3px;border-radius:50%;background:var(--accent)}
-@media (max-width:999px){.sub-nav ul{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:var(--s-1) var(--s-5)}.sub-nav ul::-webkit-scrollbar{display:none}.sub-nav a{white-space:nowrap;padding:10px 0}.sub-nav a[aria-current]{color:var(--text);text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:var(--accent);text-underline-offset:.45em}.sub-nav a[aria-current]::before{display:none}.sub-nav a[aria-current]{color:var(--accent);text-decoration:underline;text-underline-offset:.25em}}
+@media (max-width:999px){.sub-nav ul{flex-wrap:wrap;gap:0 var(--s-5)}.sub-nav a{white-space:nowrap;padding:10px 0}.sub-nav a[aria-current]{color:var(--text);text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:var(--accent);text-underline-offset:.45em}.sub-nav a[aria-current]::before{display:none}.sub-nav a[aria-current]{color:var(--accent);text-decoration:underline;text-underline-offset:.25em}}
 .sub-nav a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:.25em}
 #methodBody:empty{min-height:60vh}
 #methodBody{font:400 16px/1.65 var(--sans);color:var(--muted);min-width:0}
 #methodBody h3{margin:var(--s-8) 0 var(--s-2);color:var(--text);font-size:22px;line-height:1.25;scroll-margin-top:16px}
 #methodBody h3:first-child{margin-top:0}
+#methodBody>.msec{margin-bottom:var(--s-8)}
 #methodBody p{margin:0 0 var(--s-3);max-width:var(--measure)}
 #methodBody .src-intro{max-width:var(--measure);margin:0 0 var(--s-4);color:var(--text);font-size:17px;line-height:1.55}
 #methodBody ul{margin:0 0 var(--s-3);padding-left:1.25em;max-width:var(--measure)}
@@ -193,7 +194,8 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 
 @media (min-width:1200px){
   #methodBody{columns:2 400px;column-gap:var(--s-7)}
-  #methodBody>*{break-inside:avoid-column}
+  #methodBody>.msec{break-inside:avoid-column}
+  #methodBody>.msec:has(#srcList){column-span:all}
   #methodBody p,#methodBody ul,#methodBody .src-intro{max-width:none}
   #methodBody h3{break-after:avoid-column}
   #methodBody #srcList,#methodBody #srcList + .src-intro{column-span:all}

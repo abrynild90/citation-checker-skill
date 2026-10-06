@@ -96,7 +96,7 @@ export function drawMethod() {
     );
   })();
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
-  document.getElementById('methodBody').innerHTML = `
+  document.getElementById('methodBody').innerHTML = `<div class="msec">
   <h3 id="srcEditions">Editions and dates</h3>
   <p class="src-intro">Which editions the data rests on, and how current it is.</p>
   <h4 class="sub-h">What the data rests on</h4>
@@ -116,7 +116,8 @@ export function drawMethod() {
     <li><b>Check on the last destructive test:</b> No destructive direct-ascent anti-satellite test appears after ${fmtLong(parse(LAST_DA))} in SWF 2026 (Table 5-1
       ends with Cosmos 1408).</li>
   </ul>
-
+</div>
+<div class="msec">
   <h3 id="codingRules" tabindex="-1">How we classified the data</h3>
   <p class="src-intro">The rules each chart follows when it counts and places an entry. Open one to read its rules.</p>
   ${rule('What counts as an anti-satellite test', scopeRule, true)}
@@ -161,7 +162,8 @@ export function drawMethod() {
         35,786 km.</li>
     <li>Debris is drawn as dots, one for each cataloged fragment, up to a limit of ${PARTICLE_BUDGET.toLocaleString()} dots on this device.</li></ul>`,
   )}
-
+</div>
+<div class="msec">
   <h3 id="srcCite">How to cite this page</h3>
   <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
   <div class="panel-card cite-card">
@@ -173,7 +175,8 @@ export function drawMethod() {
     </div>
   </div>
   <p>To cite an individual fact, cite the SWF edition and the source it rests on. The details shown for each point on a chart, and the data tables, give the page reference.</p>
-
+</div>
+<div class="msec">
   <h3 id="srcLicence">Licences and credits</h3>
   <p class="src-intro">What may be reused, and where the pictures come from.</p>
   ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
@@ -183,12 +186,13 @@ export function drawMethod() {
       into the page. The full-size images are fetched from a fixed copy hosted on jsDelivr, a public file host, only when you interact with the globe at the
       top of the page or open a 3D explainer, and never when animation is switched off on your device. Coastlines in the still diagrams come from Natural
       Earth (public domain) through the world-atlas dataset.</p>`)}
-
+</div>
+<div class="msec">
   <h3 id="srcList">All cited sources (${cites.length})</h3>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
   <ol class="cites">${cites.join('')}</ol>
   <p class="only-phone"><a class="to-top" href="#top">Back to the top</a></p>
-  <p>The data table behind each chart lists every entry with its source and page reference.</p>`;
+  <p>The data table behind each chart lists every entry with its source and page reference.</p></div>`;
 
   // Copy the citation: the clipboard when the browser allows it; otherwise the text is selected so a reader can copy it by hand.
   const text = document.getElementById('citeText'),
