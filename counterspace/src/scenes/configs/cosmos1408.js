@@ -59,6 +59,7 @@ export const COSMOS1408 = {
       short: 'Cosmos 1408 debris',
       dx: 0,
       dy: -34,
+      labelTopStatic: true, // static: the same, the top fragment (the static label would otherwise point at the lowest one, far from a label above the cloud)
       labelEdge: true, // live: the label points at a fragment on the cloud's outer edge, not one deep inside it
     },
   ],

@@ -119,11 +119,13 @@ function drawCloud(S, it) {
     col = it.dynCol ? new Float32Array(it.n * 4) : null;
   it.fill(t, arr, col);
   const step = Math.max(1, Math.floor(it.n / (it.limbOnly ? 380 : 900)));
+  let top = null; // it.labelTopStatic: the highest drawn fragment inside the frame, so a label above the cloud has a short leader
   for (let k = 0; k < it.n; k += step) {
     if (!arr[3 * k] && !arr[3 * k + 1] && !arr[3 * k + 2]) continue;
     const p = project([arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]]);
     if (p.hidden || (it.limbOnly && Math.hypot(p.x - CX, p.y - CY) < R * 1.005)) continue;
     dCloud.push([p.x, p.y]);
+    if (it.labelTopStatic && p.y > 0.18 * W * 0.4 && p.x > 0.15 * W && p.x < 0.85 * W && (!top || p.y < top.y)) top = p;
     if (!it.bg) {
       const gx = Math.floor(p.x / pcell),
         gy = Math.floor(p.y / pcell);
@@ -138,7 +140,7 @@ function drawCloud(S, it) {
   }
   if (it.label && (it.labelAt || arr[0] || arr[1] || arr[2]))
     label(
-      project((typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt) || [arr[0], arr[1], arr[2]]),
+      top || project((typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt) || [arr[0], arr[1], arr[2]]),
       it.short && W < 520 ? it.short : it.label,
       it.color || '#dfe6f7',
     );

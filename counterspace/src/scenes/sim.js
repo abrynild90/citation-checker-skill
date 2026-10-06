@@ -572,6 +572,7 @@ export function buildSim(cfg) {
         kind: 'cloud',
         labelIdx: kc,
         labelEdge: a.labelEdge,
+        labelTopStatic: a.labelTopStatic,
         labelCands: ranked
           .slice(0, 8)
           .map((r) => r[1])
