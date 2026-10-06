@@ -36,7 +36,9 @@ function showCard(html, evt, el, full = false) {
     WM = near ? 1.5 : 2.5;
   card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
-  const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
+  // A long bar (a campaign, a negotiation period) is a poor anchor: a hover card sits by the pointer, not by the bar's far end.
+  let r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
+  if (el && r.width > 240 && evt && typeof evt.clientX === 'number' && evt.type?.startsWith('mouse')) r = { left: evt.clientX - 6, right: evt.clientX + 6, top: r.top, bottom: r.bottom };
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
     G = 14,
@@ -78,7 +80,9 @@ function showCard(html, evt, el, full = false) {
     });
   // distance from the card to its mark: proximity matters (a card that drifts a long way from its mark is worse than one that covers a line of lede)
   const gapTo = (q) => Math.hypot(Math.max(q.left - r.right, r.left - q.right, 0), Math.max(q.top - r.bottom, r.top - q.bottom, 0));
-  const avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? 20 * o.w : 0), 0);
+  // A mark on the sticky law band has only the page text below it to land on, so covering a line of it (briefly, while hovering) costs little next to drifting away.
+  const onBand = !!el?.closest?.('#legalBand'),
+    avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 2 : 20) * o.w : 0), 0);
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -123,14 +127,14 @@ function showCard(html, evt, el, full = false) {
         avoidCost(q) +
         (ax && hit(q, ax, 2) ? (near ? 60 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
-        (near ? 0 : gapTo(q) / 4 + Math.max(0, gapTo(q) - 120) / 2) +
+        (near ? 0 : gapTo(q) / (onBand ? 2 : 4) + Math.max(0, gapTo(q) - 120) / 2) +
         Math.abs(L - l) / 40 +
         Math.abs(T - tp) / 40 +
         i * 0.1;
       return { L, T, score };
     });
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
-  if (best.score >= (near ? 14 : 40) || (near && avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0))) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
+  if (best.score >= (near ? 14 : onBand ? 80 : 40) || (near && avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0))) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
     for (let T = TOP; T <= VH - ch - 8; T += 10)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
@@ -232,11 +236,25 @@ export const LEGAL_KIND = {
 };
 export const legalKindOf = (l) => (l.soft_law ? 'soft' : l.kind === 'negotiation_span' ? (l.end || l.id === 'paros-1981' ? 'span' : 'draft') : l.kind);
 export const legalKindWords = (l) => (l.soft_law ? 'Soft law (expert manual, not binding)' : LEGAL_KIND[legalKindOf(l)] || l.kind);
+// A web address in a citation becomes a link named for the publisher (a raw address is long and says nothing).
+const PUBLISHERS = { 'history.state.gov': 'Office of the Historian', 'treaties.unoda.org': 'UN Office for Disarmament Affairs', 'www.itu.int': 'ITU', 'www.icao.int': 'ICAO', 'press.un.org': 'UN Meetings Coverage' };
+const citeHtml = (text) =>
+  esc(text).replace(/https?:\/\/[^\s<]+/g, (m) => {
+    const trail = (m.match(/[.,;)]+$/) || [''])[0],
+      url = m.slice(0, m.length - trail.length);
+    let host = '';
+    try {
+      host = new URL(url.replace(/&amp;/g, '&')).hostname;
+    } catch (e) {
+      /* leave the host empty */
+    }
+    return `<a href="${url}" target="_blank" rel="noopener">${PUBLISHERS[host] || host.replace(/^www\./, '') || 'Source'}</a>${trail}`;
+  });
 export function legalCard(l) {
   const when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start));
   return (
     `<p class="card-title">${esc(l.title || l.label)}</p><p class="when">${legalKindWords(l)} · ${when}</p><p>${esc(l.short_note)}</p>` +
-    `<div class="src">${esc(l.citation)}</div>${hasScene(l) ? hint3d('the related 3D explainer') : ''}`
+    `<div class="src">${citeHtml(l.citation)}</div>${hasScene(l) ? hint3d('the related 3D explainer') : ''}`
   );
 }
 // Keyboard modality: while the user navigates with keys, a mouse hover never replaces the card of the focused mark;

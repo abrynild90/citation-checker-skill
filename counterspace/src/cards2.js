@@ -100,6 +100,23 @@ const sceneHint = `<div class="hint">${cube}Open the 3D explainer</div>`;
 const srcLine = (r) => `<div class="src"><b>Source</b> ${esc(r.source)}, ${esc(r.pin)}</div>`;
 const dl = (rows) => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 
+// Whole sentences only: as many as fit in about `max` characters (always the first one), so a compact card never stops mid-sentence.
+const ABBR = /(?:\b(?:Gen|Maj|Col|Lt|Adm|Sgt|Capt|Dr|Mr|Mrs|Ms|Prof|St|Sen|Rep|Gov|No|Nos|vs|Inc|Corp|Co|Ltd|Jr|Sr|approx|etc|e\.g|i\.e|U\.S|U\.N|Dep't|Dept|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)|\b[A-Z])\.$/;
+export function sentencesUpTo(text, max = 230) {
+  const parts = [];
+  let cur = '';
+  text.split(/(\s+)/).forEach((tok) => {
+    cur += tok;
+    if (/[.!?”"')]$/.test(tok) && /[.!?]["”')]?$/.test(tok) && !ABBR.test(tok.replace(/["”')]+$/, '')) && !/^\s+$/.test(tok)) {
+      parts.push(cur.trim());
+      cur = '';
+    }
+  });
+  if (cur.trim()) parts.push(cur.trim());
+  let out = parts[0] || text;
+  for (let i = 1; i < parts.length && (out + ' ' + parts[i]).length <= max; i++) out += ' ' + parts[i];
+  return out;
+}
 // Compact form (hover on a wide screen): the key facts and the first sentence only, so the card stays small and hides few bars. Click or Enter shows the
 // full card (all facts, notes, source); phones dock the full card, which scrolls inside itself.
 export function nkCard(e, compact = false) {
@@ -115,7 +132,7 @@ export function nkCard(e, compact = false) {
         ['Attribution', ATTRIBUTION_LABEL[e.attribution]],
         ['How sure we are', SURE_WORD[e.confidence]],
       ]) +
-      `<div class="clip3">${esc(plain(e.effect))}</div>` +
+      `<div class="clip3">${esc(sentencesUpTo(plain(e.effect)))}</div>` +
       (hasScene(e) ? sceneHint : '<div class="hint plain">Select the bar, or press Enter, for the full entry.</div>')
     );
   return (
