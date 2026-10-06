@@ -220,3 +220,4 @@
   --card-bw: 0px;
   --card-shadow: var(--shadow-1);
 }
+@media (min-width:1700px){:root{--container:min(1440px,calc(100vw - 480px))}}

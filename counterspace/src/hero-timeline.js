@@ -113,7 +113,7 @@ function build(stage) {
     phone = W < 640,
     wide = W >= 900,
     gutter = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 24,
-    edge = wide ? Math.max(gutter, (W - 1240) / 2 + gutter) : gutter,
+    edge = wide ? Math.max(gutter, (W - (document.querySelector('.hero-grid .wrap, .hero-grid')?.getBoundingClientRect().width > 0 && W >= 1700 ? Math.min(1440, W - 480) : 1240)) / 2 + gutter) : gutter,
     groundH = phone ? 150 : wide ? 165 : 190,
     sag = phone ? 8 : Math.round(Math.min(30, W * 0.02)),
     yL = H - groundH, // the limb at the middle of the picture
