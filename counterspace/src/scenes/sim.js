@@ -91,7 +91,7 @@ export function buildSim(cfg) {
         for (const x of cfg.status) if (t >= x[0]) e = x;
         const s = phone && e[2] ? e[2] : e[3] || (cfg.captionShort && e[2]) || e[1],
           c = items._decayCloud;
-        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + 0.02) return s;
+        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + (cfg.countFrom ?? 0.02)) return s; // countFrom (opt-in): the "N in orbit" count waits until the debris is visible
         return phone ? `${s} · ${c.vis}/${c.n} in orbit` : `${s} · ${c.vis} of ${c.n} pieces still in orbit`;
       },
     });
