@@ -21,13 +21,14 @@ export const BURNT_FROST = {
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,
   seaK: IS_PHONE ? 2.2 : 0.8, // the Pacific is dark even in daylight: lifted so the ship and satellite separate from it
-  phoneOff: { 'Larger pieces': [112, -50], 'Pieces falling': [112, -50] }, // 375: the label sits right of the debris cloud, not over it
+  phoneHide: ['Larger pieces', 'Pieces falling'], // 375: Impact, the illustration pill and the ship label are enough at the top of the frame
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   earlyKey: true,
+  fitFillKeys: [1.0, 1.0], // the first two key frames sit tight on the ship, the interceptor and the satellite
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', dx: 0, dy: 44, minPx: 84, maxPx: 170 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, dx: 0, dy: 44, minPx: 84, maxPx: 170 },
     {
       type: 'target',
       label: 'USA-193',
@@ -35,7 +36,10 @@ export const BURNT_FROST = {
       big: 1.7,
       minPx: 60,
       maxPx: 100,
-      impactFollow: true, // the Impact pill follows the debris centre once the cloud has spread
+      impactUntil: 0.9, // the Impact pill stays on the contact point (where the interceptor met the satellite), not on the drifting debris; a tick keeps marking the point
+      impactDx: -110,
+      impactDy: -46,
+      tickUntil: 0.95,
       bright: true,
       fall: [
         { k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 },

@@ -1,5 +1,5 @@
 // scenes/configs/dn2.js: scene `dn2` (see ../config.js for the list order)
-import { GEO_ALT } from '../core.js';
+import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C } from './shared.js';
 
 export const DN2 = {
@@ -35,7 +35,7 @@ export const DN2 = {
       dx: -40,
       dy: -50,
       head: true,
-      rocket: { minPx: 36, maxPx: 58, glowMin: 22, glowMax: 38 },
+      rocket: { minPx: IS_PHONE ? 44 : 50, maxPx: IS_PHONE ? 66 : 72, glowMin: IS_PHONE ? 28 : 32, glowMax: IS_PHONE ? 46 : 50 },
       apexT: 0.47,
       staticAt: [0.6, 0.09],
       marks: [
@@ -83,7 +83,7 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [58, -6], Xichang: [-60, -40], '10,000': [-22, -34], Apogee: [78, -24], GEO: [38, 58] },
+  liveOff: { 'DN-2 path': [70, -64], Xichang: [-60, -40], '10,000': [-13, -42], Apogee: [78, -24], GEO: [38, 58] },
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
@@ -94,7 +94,7 @@ export const DN2 = {
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
   staticOnDiscPhone: ['Xichang'], // static, 375: Xichang's short label sits beside its site on the disc (off the disc it needed a long leader across the Earth)
   cameras: [
-    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: -0.1, fill: 0.9, zoom: 1.25, lookK: 0.4 } },
+    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: -0.1, fill: 0.86, zoom: 1.0, lookK: 0.4 } },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
     { name: 'Side view', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
     { name: 'From the pole', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },

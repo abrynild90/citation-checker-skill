@@ -51,6 +51,7 @@ export const LASER = {
       short: 'MIRACL beam',
       width: 0.034,
       labelFrac: 0.7,
+      ends: IS_PHONE ? 0.022 : 0.05, // 375: a smaller glow at the satellite end, so the model is not blown out
       dx: 62,
       dy: 0, // the pill sits right beside the beam (a short leader, not a long one along it)
       labelOffDisc: true,
@@ -95,6 +96,7 @@ export const LASER = {
       maxPx: IS_PHONE ? 32 : 66,
     },
   ],
+  camCut: { t: 0.78, cam: 3 }, // the last step is about Peresvet: the view cuts to the Russia preset (unless the reader picked a view)
   phoneHide: ['MIRACL beam'], // 375: two pills only (White Sands, MSTI-3); the status line names the beam
   liveShort: ['White Sands'], // live: the short name, so the pill stays clear of the ground station and the limb
   liveOff: { 'White Sands': [-112, 14], 'MSTI-3': [96, -30] }, // fixed offsets: the ground station and satellite pills keep their places as the pass moves
@@ -102,7 +104,7 @@ export const LASER = {
   status: [
     [0, 'MSTI-3 rises over White Sands'],
     [0.15, 'MIRACL beam tracks the satellite while it is above the horizon', 'MIRACL beam tracks the satellite'],
-    [0.8, 'Same principle, shown with the US test: Russia’s Peresvet is a mobile laser dazzler (SWF)', 'Same principle, shown with the US test'],
+    [0.78, 'Peresvet: Russia’s mobile laser dazzler (SWF). Shelter sites shown', 'Peresvet: a mobile laser dazzler (SWF)'],
   ],
   cameras: [
     { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55, fill: 0.66 } },
@@ -119,7 +121,7 @@ export const LASER = {
       drift: [22, 12], // a slow pan east across the shelter sites: the view differs at every t
       ref: false,
       hide: ['MSTI-3', 'MIRACL', 'White Sands'],
-      status: ['Markers show the shelter sites of Russia’s Peresvet, a mobile laser dazzler (SWF)', 'Peresvet shelter sites (approximate)'],
+      status: ['Peresvet shelter sites, approximate (SWF): a mobile laser dazzler', 'Peresvet shelter sites (approximate)'],
     },
   ],
 };

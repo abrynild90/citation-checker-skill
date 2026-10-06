@@ -107,7 +107,7 @@ export const SJ21_TUG = {
     { type: 'trail', craft: 'cg2', t0: 0.5, t1: 0.8, color: C.dead, byIndex: true },
     // Follow views show almost no Earth: mark the belt itself, the height above it (SWF: 290 to 3,100 km by 27 Jan.) and what each trail is.
     { type: 'tag', anchor: 'g', off: [0.116, 0, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.45, 1], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: -20, dy: 70 },
-    { type: 'path', anchor: 'g', offs: [[0.116, 0, 0], [0.116, 0.135, 0], [0.116, 0.275, 0]], noInset: true, staticHide: true, stillHide: true, staticKeep: false, vis: [0.72, 0.97], color: '#ffe6a8', opacity: 0.55, thick: 0.002, label: '290 to 3,100 km above GEO (SWF)', short: '290–3,100 km above GEO', labelIdx: 1, dx: 110, dy: 6 },
+    { type: 'path', anchor: 'g', offs: [[0.116, 0, 0], [0.116, 0.135, 0], [0.116, 0.275, 0]], noInset: true, staticHide: true, stillHide: true, staticKeep: false, vis: [0.72, 0.97], color: '#ffe6a8', opacity: 0.55, thick: 0.002, label: '290 to 3,100 km above GEO (SWF)', short: '290–3,100 km above GEO', labelIdx: 1, dx: 112, dy: -22 },
   ],
   atmoK: 1.5, // the Earth is only a sliver in the follow views: a faint blue limb glow, lit or not, shows where it is
   atmoFloor: 0.4,
@@ -125,7 +125,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0]] } } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.5, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.42, 0]] } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', at: [36, 104, 3.9], look: [0, 106, 1.9], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',

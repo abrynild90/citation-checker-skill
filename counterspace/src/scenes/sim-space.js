@@ -407,7 +407,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       width: 0.022,
       maxPx: 15,
       coreColor: '#ffe3f9',
-      ends: 0.05,
+      ends: a.ends ?? 0.05, // a.ends (opt-in): the glow size at the beam ends
       labelOffDisc: a.labelOffDisc,
       labelFrac: a.labelFrac, // live: where along the beam its pill is anchored (default the middle)
       label: a.label,

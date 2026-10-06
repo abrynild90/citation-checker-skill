@@ -4,7 +4,7 @@ import { IS_PHONE } from '../core.js';
 
 export const FENGYUN = {
   id: 'fengyun',
-  fitPct: 0.94,
+  fitPct: IS_PHONE ? 0.8 : 0.94,
   date: '2007-01-11',
   title: 'Fengyun-1C: China destroys a weather satellite (2007)',
   shells: ['LEO'],
@@ -25,8 +25,9 @@ export const FENGYUN = {
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
   launchCam: 'second',
   orbitAt: [26, 74, 4.6],
+  fitMinKeys: IS_PHONE ? [2.7, 0] : [3.3, 0], // the first key frames the whole Xichang to satellite arc, with the Earth's limb in view
   phoneK: 1.14,
-  fitFill: IS_PHONE ? 0.8 : undefined, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
+  fitFill: IS_PHONE ? 0.88 : 0.78, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
   liveOff: { 'Fengyun-1C': [-70, -64], Xichang: [-60, 34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
   phoneOff: { Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   sunView: { az: 60, el: 14 }, // a lower, more sideways sun: a clear terminator and a shaded limb, not a flat disc
@@ -36,7 +37,7 @@ export const FENGYUN = {
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
     { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 34 : 46, maxPx: IS_PHONE ? 60 : 84, impactDx: 150, impactDy: -80, impactUntil: 0.6 },
-    { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19' },
+    { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19', strong: true, coreK: 2.4, flash: 0.36 }, // a bright core and a second white ring: the hit reads against the debris plume
     {
       type: 'debris',
       count: 3532,

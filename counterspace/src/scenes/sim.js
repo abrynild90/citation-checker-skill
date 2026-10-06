@@ -266,7 +266,7 @@ export function buildSim(cfg) {
       // a place name with no marker (a sea or region named in the scene's title): a plain label at a lat/lon, no leader
       items.push({ kind: 'point', shape: 'none', pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color || '#cfd8ea', label: a.label, short: a.short, labelDx: a.dx ?? 0, labelDy: a.dy ?? 0, opt: a.opt });
     if (a.type === 'ship')
-      items.push({ kind: 'point', shape: 'ship', pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy });
+      items.push({ kind: 'point', shape: 'ship', shade: a.shade, pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy });
     if (a.type === 'ring') {
       let raan = a.raan,
         phase = a.sat?.phase ?? 0;
@@ -708,7 +708,7 @@ export function buildSim(cfg) {
               colr[k4 + 2] = c[2] * p.br;
               // velocity-sorted: fragments near the parent's speed stay bright and large, the fast and slow tails are dimmer and smaller
               const core = 1 - Math.min(1, Math.abs(p.dw - 1) / (a.dv * 1.6 || 1));
-              colr[k4 + 3] = (0.7 + 0.3 * dens) * 0.9 * fade * (0.4 + 0.6 * core * core) * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1);
+              colr[k4 + 3] = Math.min(1, (0.7 + 0.3 * dens) * 0.9 * fade * (0.4 + 0.6 * core * core) * (dt > 0 && dt < 0.02 ? dt / 0.02 : 1) * (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1)); // lateBoost (opt-in): the old fragments get brighter, so a thin late ring stays visible
             }
           }
           cloud.vis = vis;

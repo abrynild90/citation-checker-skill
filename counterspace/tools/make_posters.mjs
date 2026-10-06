@@ -16,11 +16,11 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.21,
+  starfish: 0.3,
   solwind: 0.68, // debris spread over the ocean and Arctic, not read as city lights on land
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
-  dn2: 0.6,
+  dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.5,
@@ -34,8 +34,8 @@ const POSTER_T = {
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
-  'sj21-tug': { pose: [-1.010,0.521,-2.776,-0.538,-0.075,-2.080] }, // the docked pair above the belt line, with the Earth's limb below it
-  starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
+  'sj21-tug': { cam: 0 }, // the follow view: the docked pair above the belt line, the Earth's limb below it
+  starfish: { cam: 0, back: 1.0, right: 0.5, lift: 0.0 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
