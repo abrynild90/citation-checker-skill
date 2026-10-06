@@ -525,7 +525,7 @@ export function buildSim(cfg) {
         strong: !!a.strong,
         coreK: a.coreK,
         size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
-        span: a.strong ? 0.2 : 0.16,
+        span: a.flashSpan ?? (a.strong ? 0.2 : 0.16), // flashSpan: opt-in shorter shock rings
       });
     }
     if (a.type === 'debris' && tgt) {
