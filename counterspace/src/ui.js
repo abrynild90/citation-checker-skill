@@ -11,6 +11,14 @@ function showCard(html, evt, el, full = false) {
   // a card opened by keyboard carries the one-line key help, so nothing else has to float over the chart
   card.innerHTML = byKey && !html.includes('kb-line') ? html + '<p class="kb-line">Arrow keys move between points. Enter opens details. Escape closes this card.</p>' : html;
   card.classList.toggle('full', full);
+  // On a narrow page a hover card for a mark on the law band is slim (name, kind and date): the full text opens on click or Enter, so the card fits the empty
+  // part of the band instead of covering the zoom panel, the axis or the chapter heading.
+  if (!full && !byKey && innerWidth < 1100 && el?.closest?.('#legalBand')) {
+    const t = document.createElement('div');
+    t.innerHTML = html;
+    t.querySelectorAll('p:not(.card-title):not(.when), .src').forEach((n) => n.remove());
+    card.innerHTML = t.innerHTML;
+  }
   // A card opened by keyboard focus is opaque at once (no half-faded card with page text showing through while it moves into place).
   card.classList.toggle('solid', !!el?.matches?.(':focus-visible'));
   card.classList.add('on');
@@ -98,7 +106,7 @@ function showCard(html, evt, el, full = false) {
   // A mark on the sticky law band has only the page text below it to land on, so covering a line of it (briefly, while hovering) costs little next to drifting away.
   const onBand = !!el?.closest?.('#legalBand'),
     avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 2 : 20) * o.w : 0), 0);
-  const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
+  const ax = root?.querySelector('.xaxis, g.axis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
     cx = (r.left + r.right) / 2;
@@ -140,7 +148,7 @@ function showCard(html, evt, el, full = false) {
         others.filter((o) => hit(q, o)).length * WM +
         noText.filter((o) => hit(q, o)).length * 100 +
         avoidCost(q) +
-        (ax && hit(q, ax, 2) ? (near ? 60 : 18) : 0) +
+        (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
         (near ? 0 : gapTo(q) / (onBand ? 2 : 4) + Math.max(0, gapTo(q) - 120) / 2) +
         Math.abs(L - l) / 40 +
@@ -158,7 +166,7 @@ function showCard(html, evt, el, full = false) {
           others.filter((o) => hit(q, o)).length * WM +
           noText.filter((o) => hit(q, o)).length * 100 +
           avoidCost(q) +
-          (ax && hit(q, ax, 2) ? (near ? 60 : 18) : 0) +
+          (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
           (hit(q, r, 12) ? 120 : 0) +
           (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 15 : gapTo(q) / 4) +
           0.5;
