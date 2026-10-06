@@ -17,14 +17,14 @@ const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
   starfish: 0.21,
-  solwind: 0.58,
+  solwind: 0.68, // debris spread over the ocean and Arctic, not read as city lights on land
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
   dn2: 0.6,
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.5,
-  viasat: 0.7,
+  viasat: 0.55,
   laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.5,
@@ -33,6 +33,7 @@ const POSTER_T = {
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
+  viasat: { cam: 3 }, // the whole GEO ring, Europe and the beams down to KA-SAT
   'sj21-tug': { cam: 0 }, // push in on the docked pair with its arm
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)

@@ -109,7 +109,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           if (burst && tk <= ht + 0.16) P.push(...burstPad);
           if (arc && tk <= ht + 0.05) P.push(arc.to);
           if (tk <= ht) P.push(tgt.pos(tk));
-          if (tk > ht) P.push(...debrisPts(tk, cfg.fitPct ?? 0.8));
+          if (tk > ht) P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
+          if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
           return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
             dMin: cfg.fitMin ?? 0.3,
             dMax: cfg.fitMax ?? 6.5,
@@ -185,7 +186,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               for (let k = 0; k < 8; k++) P.push([R * Math.cos((k * Math.PI) / 4), 0, R * Math.sin((k * Math.PI) / 4)]);
               P.push(all[all.length >> 1]);
             }
-            const look = scl(centroid(P.concat([[0, 0, 0]])), 1);
+            const look = scl(centroid(P.concat([[0, 0, 0]])), c.trackPath.lookK ?? 1); // lookK < 1 pulls the view toward the Earth's centre
             const q = fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp });
             // trackPath.zoom: with the ring in frame, move in by that factor: the Earth gets larger and the far side of the ring is cropped on purpose
             if (ring && c.trackPath.zoom) q.pos = add(look, scl(add(q.pos, scl(look, -1)), 1 / c.trackPath.zoom));
@@ -212,6 +213,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             // fitCraft.lock: the target stays on the craft itself (a fast eccentric orbit would leave it at the frame edge or off a portrait stage)
             for (const id of ids) if (crafts[id].pos(t)) for (const dt of c.fitCraft.lock && c.fitCraft.tight ? [-0.015, 0, 0.008] : [-0.05, 0, 0.02]) P.push(crafts[id].raw(Math.max(0, Math.min(1, t + dt))));
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
+            // fitCraft.include: extra points in the anchor's local frame that must stay in view (the GEO belt under the pair)
+            for (const o of c.fitCraft.include || []) P.push(add(add(add(an.pos(t), scl(an.frame(t).along, o[0])), scl(an.frame(t).rad, o[1])), scl(an.frame(t).cross, o[2])));
             const f = an.frame(t),
               d = (asp != null && asp < 1.3 && c.fitCraft.phoneDir) || c.fitCraft.dir, // phoneDir: a steeper view on a narrow (phone) stage
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));

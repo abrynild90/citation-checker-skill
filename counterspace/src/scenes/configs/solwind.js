@@ -26,9 +26,11 @@ export const SOLWIND = {
   staticMarkerCap: { 'Solwind P78-1': 64 }, // the satellite is the subject: clearly visible (declared in tools/scene_check/rules.mjs MARKER_OVR)
   staticCraftMax: 54, // static: icons stay small (they must not cover the Earth's centre)
   staticK: 1.45, // static: Solwind drawn out in space, clear of the aircraft and the Earth's centre
+  fitDebrisT: 0.66, // the camera keeps framing the cloud at its widest, also while it decays away
+  latePct: 0.85,
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.15, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [64, -56] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [112, 34] }, // the missile's pill sits above the F-15 with a leader down to the arc
   phoneCamOff: { 3: { 'F-15': [92, -34] } },
   phoneOff: { 'ASM-135': [-16, -58], 'F-15': [96, -16] },
   actors: [
@@ -60,8 +62,8 @@ export const SOLWIND = {
       impactShort: 'Impact: Solwind P78-1',
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
-    { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42 },
-    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, decay: 0.9, color: '#ffd2a6' },
+    { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', flash: 0.42, retire: 0.06 },
+    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6' },
   ],
   still: 0.45,
   status: [

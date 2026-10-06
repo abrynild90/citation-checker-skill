@@ -35,7 +35,7 @@ export const DN2 = {
       dx: -40,
       dy: -50,
       head: true,
-      rocket: { minPx: 48, maxPx: 84 },
+      rocket: { minPx: 60, maxPx: 96, glowMin: 34, glowMax: 62 },
       apexT: 0.47,
       staticAt: [0.6, 0.09],
       marks: [
@@ -67,7 +67,7 @@ export const DN2 = {
         { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46, staticAt: [0.88, 0.58], staticPin: 'hard' },
       ],
     },
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9, sats: 10 },
+    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9, sats: 6 },
   ],
   still: 0.62,
   stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it
@@ -82,19 +82,18 @@ export const DN2 = {
   // each with a short
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
-  liveText: { '10,000': '10,000 km (China)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [6, -72], '10,000': [-10, -42], Apogee: [-160, 14], GEO: [38, 58] },
+  liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
+  liveOff: { 'DN-2 path': [78, -96], Xichang: [-60, -40], '10,000': [-22, -34], Apogee: [78, -24], GEO: [38, 58] },
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
   phoneHide: ['DN-2 path', 'GEO'],
-  phoneOff: { '≥30,000': [22, -52] },
   shellLabels: { MEO: null, GEO: null },
   noRing: ['GEO'],
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
   staticOnDiscPhone: ['Xichang'], // static, 375: Xichang's short label sits beside its site on the disc (off the disc it needed a long leader across the Earth)
   cameras: [
-    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.1, fill: 0.97, zoom: 1.3 } },
+    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: -0.1, fill: 0.9, zoom: 1.0, lookK: 0.4 } },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
     { name: 'Side view', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
     { name: 'From the pole', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },

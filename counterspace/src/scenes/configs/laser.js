@@ -23,6 +23,7 @@ export const LASER = {
   event: 'us-1997-miracl',
   hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 },
   lift: 30,
+  nightK: 2.2, // a lifted night ambient: the dark side of the globe keeps its land and ocean readable behind the beam
   stillShort: ['MIRACL beam'],
   staticT: 0.7, // static: the satellite well along its pass, so the beam is drawn at full length
   staticZoom: 2.6,
@@ -49,8 +50,9 @@ export const LASER = {
       label: 'MIRACL beam',
       short: 'MIRACL beam',
       width: 0.034,
-      dx: 70,
-      dy: -26,
+      labelFrac: 0.7,
+      dx: 62,
+      dy: 0, // the pill sits right beside the beam (a short leader, not a long one along it)
       labelOffDisc: true,
       sdx: 120, // static: label to the right of the beam, with a short leader
       sdy: -10, // static: raised so the pill clears the globe limb at 375
@@ -93,13 +95,14 @@ export const LASER = {
       maxPx: IS_PHONE ? 32 : 66,
     },
   ],
+  phoneHide: ['MIRACL beam'], // 375: two pills only (White Sands, MSTI-3); the status line names the beam
   liveShort: ['White Sands'], // live: the short name, so the pill stays clear of the ground station and the limb
   liveOff: { 'White Sands': [-112, 14], 'MSTI-3': [96, -30] }, // fixed offsets: the ground station and satellite pills keep their places as the pass moves
   still: 0.5,
   status: [
     [0, 'MSTI-3 rises over White Sands'],
     [0.15, 'MIRACL beam tracks the satellite while it is above the horizon', 'MIRACL beam tracks the satellite'],
-    [0.8, 'Same principle, shown with the US test: Russia’s Peresvet laser (named in 2018) is a mobile dazzler (SWF)', 'Shown: US test. Same principle: Peresvet (SWF)'],
+    [0.8, 'Same principle, shown with the US test: Russia’s Peresvet is a mobile laser dazzler (SWF)', 'Same principle, shown with the US test'],
   ],
   cameras: [
     { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55, fill: 0.66 } },

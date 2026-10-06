@@ -56,6 +56,10 @@ const methods = {
         raw.push(null);
         continue;
       }
+      if (noBanner && (L.item?.stillHide || this.sim.cfg.stillHideText?.some((h) => L.text.startsWith(h)))) {
+        raw.push(null); // stillHide: a live-view aid (a gauge or a path tag) that the print frame does not need
+        continue;
+      }
       if (noBanner && L.item?.impactMark && !this.sim.cfg.stillImpact) {
         raw.push(null); // the still shows the debris and the flash; the impact marker's label is a live-view aid and crowds the print frame
         continue;
@@ -581,6 +585,12 @@ const methods = {
         g.font = `600 ${INSET_PX}px ${SANS}`;
         g.textBaseline = 'middle';
         g.textAlign = q[0] > w / 2 ? 'right' : 'left';
+        if (this.sim.cfg.insetHalo) {
+          g.lineJoin = 'round';
+          g.lineWidth = 3.5;
+          g.strokeStyle = 'rgba(8,13,28,.92)';
+          g.strokeText(q[3], q[0] + (q[0] > w / 2 ? -9 : 9), q[1] + 14);
+        }
         g.fillText(q[3], q[0] + (q[0] > w / 2 ? -9 : 9), q[1] + 14);
         g.textAlign = 'left';
       }

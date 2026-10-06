@@ -170,6 +170,7 @@ export function buildSim(cfg) {
         dynamic: true,
         all,
         thick: a.thick ?? 0.0035,
+        byIndex: a.byIndex,
         tail: a.tail, // capped wake length (fraction of the whole path) and brightness
         wakeOp: a.wakeOp,
         color: a.color,
@@ -184,25 +185,28 @@ export function buildSim(cfg) {
     if (a.type === 'tag')
       items.push({
         kind: 'point',
-        shape: 'none',
-        noLeader: true,
+        shape: a.leader ? 'tick' : 'none', // a leader needs a mark to end on
+        liveOnly: a.liveOnly,
+        stillHide: a.stillHide,
+        noLeader: !a.leader, // leader: true draws the usual leader and dot to the tagged point
+        small: a.leader ? true : undefined,
         color: a.color,
         label: a.label,
         short: a.short,
         labelDx: a.dx,
         labelDy: a.dy,
-        pos: (t) => (actOn(t, a.acts) && (flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? aPos(a, t) : null),
+        pos: (t) => (actOn(t, a.acts) && (flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? (a.craftAt ? crafts[a.craftAt[0]].raw(a.craftAt[1]) : aPos(a, t)) : null),
       });
     if (a.type === 'path') {
       // static orbit line, shown only in its act(s)
       const N = a.N ?? 120,
-        all = a.points ? a.points : Array.from({ length: N + 1 }, (_, k) => a.fn(k / N));
+        all = a.points ? a.points : a.offs ? a.offs.map((o) => aPos({ anchor: a.anchor, off: o }, 0)) : Array.from({ length: N + 1 }, (_, k) => a.fn(k / N));
       items.push({
         kind: 'curve',
         gate: true,
-        inset: true,
+        inset: !a.noInset,
         all,
-        pts: (t) => (actOn(t, a.acts) ? all : []),
+        pts: (t) => (actOn(t, a.acts) && (!a.vis || (t >= a.vis[0] && t <= a.vis[1])) ? all : []),
         color: a.color,
         opacity: a.opacity ?? 0.6,
         thick: a.thick,
@@ -211,6 +215,7 @@ export function buildSim(cfg) {
         label: a.label,
         short: a.short,
         staticHide: a.staticHide,
+        stillHide: a.stillHide,
         staticKeep: a.staticKeep,
         labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)],
         labelDx: a.dx,
@@ -467,7 +472,9 @@ export function buildSim(cfg) {
       for (let k = 0; k <= N; k++) all.push(bez(k / N));
       items._arc = { from, to, mid: bez(0.5), bez, t0: a.t0 };
       // Faint predicted path (whole arc, always visible) under the bright growing trail.
-      items.push({ kind: 'curve', avoid: true, pts: () => all, color: a.color, opacity: 0.32, thick: 0.0028, role: 'action' });
+      // a.retire: the spent missile arc (predicted path and trail) is removed this long after the hit (t span), so no stub is left beside the aircraft
+      const spent = (t) => a.retire != null && t > tgt.t + a.retire;
+      items.push({ kind: 'curve', gate: a.retire != null, avoid: true, pts: (t) => (spent(t) ? [] : all), color: a.color, opacity: 0.32, thick: 0.0028, role: 'action' });
       items.push({
         kind: 'curve',
         dynamic: true,
@@ -481,6 +488,7 @@ export function buildSim(cfg) {
         labelAt: bez(a.labelS ?? 0.5),
         labelEnd: tgt.t + (a.hold ?? 0.03), // a.hold: the label outlives the hit (the still is taken just after it)
         pts: (t) => {
+          if (spent(t)) return [];
           const s = t >= a.t0 - 1e-6 ? Math.max(0.04, clamp01((t - a.t0) / (tgt.t - a.t0))) : 0;
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
@@ -540,6 +548,7 @@ export function buildSim(cfg) {
           dw: 1 + gauss(rnd) * a.dv,
           du: gauss(rnd) * 0.02,
           dec: a.decay * (0.4 + rnd() * 1.4),
+          u: 0.35 + rnd() * 0.65, // decayWin: where in the window this fragment burns up
           cj: (rnd() - 0.5) * 0.5,
           br: 0.7 + rnd() * 0.3,
         });
@@ -590,7 +599,13 @@ export function buildSim(cfg) {
               y = 0,
               z = 0;
             if (dt > 0) {
-              const alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              let alt = tgt.alt + p.da * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              if (a.decayWin) {
+                // decayWin [t0, t1]: the fast-forward decay: every fragment sinks and burns up inside this window (all gone at t1), so the picture matches the text
+                const sw = clamp01((t - a.decayWin[0]) / (a.decayWin[1] - a.decayWin[0]));
+                const base = tgt.alt + p.da * Math.min(1, dt * 12);
+                alt = sw >= p.u ? 0 : base * (1 - 0.45 * (sw / p.u) ** 2);
+              }
               if (alt > 60) {
                 // optional late phase: the band keeps spreading along and across the orbit (time compressed)
                 const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
@@ -710,7 +725,7 @@ export function buildSim(cfg) {
               f = s - i;
             return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
           };
-          items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: 16, kvMax: 38, pos: headPos });
+          items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: a.rocket.glowMin ?? 16, kvMax: a.rocket.glowMax ?? 38, pos: headPos });
           items.push({ kind: 'point', shape: 'rocket', color: '#ff8a8a', scale: 1, minPx: a.rocket.minPx ?? 30, maxPx: a.rocket.maxPx ?? 54, pos: sm });
         } else
         items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.3, kvMin: 28, kvMax: 64, pos: headPos });
