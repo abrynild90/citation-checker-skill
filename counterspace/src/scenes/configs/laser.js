@@ -41,7 +41,7 @@ export const LASER = {
   staticK: 1.9, // static: MSTI-3 drawn further out in space so it clears the Earth limb
   actors: [
     { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, New Mexico', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
-    { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, big: 2.4, minPx: 64, maxPx: 118, dx: 30, dy: 50 },
+    { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, fadeDisc: true, orbitThick: 0.0016, big: 2.4, minPx: 64, maxPx: 118, dx: 30, dy: 50 },
     {
       type: 'beam',
       from: [32.4, -106.4],

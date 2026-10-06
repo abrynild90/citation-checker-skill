@@ -304,7 +304,7 @@ export function buildSim(cfg) {
     if (a.type === 'target' && tgt) {
       const pts = [];
       for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, (k / 180) * 2 * Math.PI));
-      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35, role: 'orbit' });
+      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35, role: 'orbit', fadeDisc: a.fadeDisc, thick: a.orbitThick }); // fadeDisc: opt-in, the line fades over the Earth's disc
       items.push({
         kind: 'point',
         shape: 'sat',
