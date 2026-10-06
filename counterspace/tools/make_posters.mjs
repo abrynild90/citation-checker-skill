@@ -89,19 +89,18 @@ try {
                 const v = d.obj.position.clone().project(h.camera);
                 return [((v.x + 1) / 2) * cv.clientWidth, ((1 - v.y) / 2) * cv.clientHeight];
               });
-          // with more than two craft, the picture is cropped around the closest pair (the story of that episode), not the whole spread
-          if (pts.length > 2) {
-            let best = null;
-            for (let i = 0; i < pts.length; i++)
-              for (let j = i + 1; j < pts.length; j++) {
-                const d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]);
-                if (!best || d < best.d) best = { d, p: [pts[i], pts[j]] };
-              }
-            pts = best.p;
-          }
           const xs = pts.map((p) => p[0]),
             ys = pts.map((p) => p[1]);
-          return { cx: (Math.min(...xs) + Math.max(...xs)) / 2, cy: (Math.min(...ys) + Math.max(...ys)) / 2, bw: Math.max(...xs) - Math.min(...xs), bh: Math.max(...ys) - Math.min(...ys), w: cv.clientWidth, h: cv.clientHeight };
+          // the whole group (every labelled craft) is centred by shifting the projection, so the square crop never has to clamp against the frame edge
+          const cx = (Math.min(...xs) + Math.max(...xs)) / 2,
+            cy = (Math.min(...ys) + Math.max(...ys)) / 2,
+            w = cv.clientWidth,
+            hh = cv.clientHeight,
+            sh = h._viewShift || 0;
+          h.camera.setViewOffset(w, hh, cx - w / 2, cy + sh - hh / 2, w, hh);
+          h.camera.updateProjectionMatrix();
+          h.render();
+          return { cx: w / 2, cy: hh / 2, bw: Math.max(...xs) - Math.min(...xs), bh: Math.max(...ys) - Math.min(...ys), w, h: hh };
         }, { tt, cam });
         if (process.env.DEBUG_TRI) console.log(JSON.stringify(box));
         await page.waitForTimeout(900);
@@ -126,13 +125,20 @@ try {
           x.fillStyle = '#eef2fb';
           x.font = '600 ' + Math.round(H * 0.058) + 'px "Newsreader", Georgia, serif';
           x.fillText('Three close approaches, three places', gap, H * 0.115);
+          const imgs = [];
           for (let i = 0; i < 3; i++) {
             const img = new Image();
             img.src = 'data:image/png;base64,' + shots[i].png;
             await img.decode();
-            const b = shots[i].box,
+            imgs.push(img);
+          }
+          // the same scale for all three tiles: the crop that fits the widest group
+          const SW = Math.min(imgs[0].height, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.4 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.08 + 44 * (imgs[i].width / s.box.w)))));
+          for (let i = 0; i < 3; i++) {
+            const img = imgs[i],
+              b = shots[i].box,
               k = img.width / b.w;
-            let sw = Math.min(img.height, img.width, Math.max(0.55 * img.height, Math.max(b.bw, b.bh) * k * 1.3 + 60 * k));
+            const sw = SW;
             const sx = Math.max(0, Math.min(img.width - sw, b.cx * k - sw / 2)),
               sy = Math.max(0, Math.min(img.height - sw, b.cy * k - sw / 2));
             const tx = gap + i * (ts + gap);
