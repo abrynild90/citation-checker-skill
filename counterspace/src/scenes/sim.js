@@ -98,7 +98,7 @@ export function buildSim(cfg) {
       const anc = anchors[a.anchor],
         // dock: {with, t0, t1}: while docked the craft sits exactly on its partner (the renderers then set the two models side by side in screen
         // space, touching, at any zoom). Nothing is drawn between them: SWF says docked, not how.
-        raw = (t) => (a.dock && t >= a.dock.t0 && t <= a.dock.t1 ? crafts[a.dock.with].raw(t) : craftPos(anc, a.key, t, a.arcs)),
+        raw = (t) => (a.dock && t >= a.dock.t0 && t <= a.dock.t1 ? crafts[a.dock.with].raw(t) : craftPos(anc, a.key, t, a.arcs, a.spline)),
         inVis = (t) => flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]),
         pos = (t) => (actOn(t, a.acts) && inVis(t) ? raw(t) : null);
       crafts[a.id] = { raw, pos, anc };
@@ -159,6 +159,24 @@ export function buildSim(cfg) {
         big: true,
         size: a.size ?? 0.16,
         span: a.span ?? 0.06,
+      });
+    // range (opt-in): a thin line between two crafts with the separation the sources report, e.g. "within 1 km", shown in [t0, t1]
+    if (a.type === 'range')
+      items.push({
+        kind: 'beam',
+        soft: true,
+        opacity: a.opacity ?? 0.55,
+        width0: 0.0011,
+        color: a.color || '#e6ecf8',
+        a: (t) => (t >= a.t0 && t <= a.t1 ? crafts[a.a].pos(t) : null),
+        b: (t) => (t >= a.t0 && t <= a.t1 ? crafts[a.b].pos(t) : null),
+        on: (t) => t >= a.t0 && t <= a.t1,
+        label: a.label,
+        short: a.short,
+        labelFrac: a.frac ?? 0.5,
+        labelDx: a.dx ?? 0,
+        labelDy: a.dy ?? 0,
+        opt: true,
       });
     if (a.type === 'trail') {
       const N = a.N ?? 60,

@@ -41,6 +41,9 @@ const POSTER_VIEW = {
   shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
 };
+const TRIPTYCH = [[0.2, 1], [0.57, 2], [0.88, 3]]; // [t, camera preset] per episode (RPO poster)
+const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
+const TRIPTYCH_BRIEFS = ['SJ-21 + SJ-25 appear to dock', 'Cosmos 2543 near USA 245', 'USA 271 near SKYNET 5A'];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
 fs.mkdirSync(out, { recursive: true });
 
@@ -59,13 +62,98 @@ try {
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
-  await page.addStyleTag({ content: '#sceneView > :not(canvas) { visibility: hidden !important; }' }); // pictures without labels, caption or inset
+  await page.addStyleTag({ content: '#sceneView > :not(canvas), #sceneView .hlabel { visibility: hidden !important; }' }); // pictures without labels, caption or inset
   for (const id of only) {
     const t = +(process.env['T_' + id.replace(/-/g, '_')] ?? POSTER_T[id] ?? 0.5);
     await page.evaluate((id) => window.__cs.openScene(id), id);
     await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 90000 }); // the full Earth image loads when the first scene opens
     await page.waitForTimeout(1500);
     const key = id.replace(/-/g, '_');
+    if (id === 'rpo' && !process.env.NO_TRIPTYCH) {
+      // RPO: one picture that tells the three-episode story, three tiles side by side (each at its own moment and act camera), numbered with the panel titles
+      const shots = [];
+      for (const [tt, cam] of TRIPTYCH) {
+        const box = await page.evaluate(({ tt, cam }) => {
+          const h = window.__cs.host();
+          h.playing = false;
+          h.update(tt);
+          h.pickCam(cam);
+          h.update(tt);
+          h.render();
+          // the screen box of the craft on show (the picture is cropped around it)
+          const cv = h.renderer.domElement,
+            pts = h.dyn
+              .filter((d) => d.it.kind === 'point' && d.it.prim && d.it.label && d.it.pos?.(tt))
+              .map((d) => {
+                const v = d.obj.position.clone().project(h.camera);
+                return [((v.x + 1) / 2) * cv.clientWidth, ((1 - v.y) / 2) * cv.clientHeight];
+              });
+          const xs = pts.map((p) => p[0]),
+            ys = pts.map((p) => p[1]);
+          return { cx: (Math.min(...xs) + Math.max(...xs)) / 2, cy: (Math.min(...ys) + Math.max(...ys)) / 2, bw: Math.max(...xs) - Math.min(...xs), bh: Math.max(...ys) - Math.min(...ys), w: cv.clientWidth, h: cv.clientHeight };
+        }, { tt, cam });
+        if (process.env.DEBUG_TRI) console.log(JSON.stringify(box));
+        await page.waitForTimeout(900);
+        shots.push({ png: (await page.locator('#sceneView canvas').first().screenshot({ type: 'png' })).toString('base64'), box });
+      }
+      const b64 = await page.evaluate(
+        async ({ shots, W, H, Q, titles, briefs }) => {
+          const c = document.createElement('canvas');
+          c.width = W;
+          c.height = H;
+          const x = c.getContext('2d');
+          x.fillStyle = '#060a16';
+          x.fillRect(0, 0, W, H);
+          // three square tiles in a row, each cropped around its craft, under one title: the three-episode story at a glance
+          const gap = W * 0.0125,
+            ts = (W - 4 * gap) / 3,
+            ty = H * 0.19;
+          x.textBaseline = 'alphabetic';
+          x.fillStyle = '#eef2fb';
+          x.font = '600 ' + Math.round(H * 0.058) + 'px Georgia, serif';
+          x.fillText('Three close approaches, three places', gap, H * 0.115);
+          for (let i = 0; i < 3; i++) {
+            const img = new Image();
+            img.src = 'data:image/png;base64,' + shots[i].png;
+            await img.decode();
+            const b = shots[i].box,
+              k = img.width / b.w;
+            let sw = Math.min(img.height, img.width, Math.max(b.bw, b.bh) * k * 1.3 + 60 * k);
+            const sx = Math.max(0, Math.min(img.width - sw, b.cx * k - sw / 2)),
+              sy = Math.max(0, Math.min(img.height - sw, b.cy * k - sw / 2));
+            const tx = gap + i * (ts + gap);
+            x.imageSmoothingQuality = 'high';
+            x.save();
+            x.beginPath();
+            x.roundRect(tx, ty, ts, ts, 10);
+            x.clip();
+            x.drawImage(img, sx, sy, sw, sw, tx, ty, ts, ts);
+            x.restore();
+            x.strokeStyle = 'rgba(150,175,230,.4)';
+            x.lineWidth = 1.5;
+            x.beginPath();
+            x.roundRect(tx, ty, ts, ts, 10);
+            x.stroke();
+            x.fillStyle = '#ffc86b';
+            x.font = '700 ' + Math.round(H * 0.052) + 'px sans-serif';
+            x.fillText(String(i + 1), tx + 2, ty + ts + H * 0.085);
+            x.fillStyle = '#eef2fb';
+            x.font = '600 ' + Math.round(H * 0.038) + 'px sans-serif';
+            x.fillText(titles[i], tx + H * 0.05, ty + ts + H * 0.066);
+            x.fillStyle = '#b3bdd6';
+            x.font = Math.round(H * 0.032) + 'px sans-serif';
+            x.fillText(briefs[i], tx + H * 0.05, ty + ts + H * 0.108);
+          }
+          return c.toDataURL('image/webp', Q).split(',')[1];
+        },
+        { shots, W, H, Q, titles: TRIPTYCH_TITLES, briefs: TRIPTYCH_BRIEFS },
+      );
+      fs.writeFileSync(path.join(out, `${id}.webp`), Buffer.from(b64, 'base64'));
+      console.log(id, 'triptych', Math.round((b64.length * 3) / 4 / 1024) + ' KB');
+      await page.evaluate(() => window.__cs.closeScene());
+      await page.waitForTimeout(300);
+      continue;
+    }
     const view = { ...(POSTER_VIEW[id] || {}) };
     if (process.env['C_' + key] != null) { view.cam = +process.env['C_' + key]; if (!process.env['P_' + key]) delete view.pose; }
     if (process.env['P_' + key]) view.pose = process.env['P_' + key].split(',').map(Number);

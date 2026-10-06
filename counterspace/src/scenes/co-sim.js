@@ -21,6 +21,41 @@ function keyAt(keys, t) {
   const l = keys[keys.length - 1];
   return [l[1], l[2], l[3]];
 }
+// Opt-in smooth path through the keyframes (craft actor `spline: true`): monotone cubic (PCHIP) per component, so the track bends gently through
+// each key instead of a smoothstep per leg (which stops at every key and leaves a kinked, jagged wake) and never overshoots a hold.
+function keyAtSpline(keys, t) {
+  const n = keys.length;
+  if (t <= keys[0][0]) return [keys[0][1], keys[0][2], keys[0][3]];
+  if (t >= keys[n - 1][0]) return [keys[n - 1][1], keys[n - 1][2], keys[n - 1][3]];
+  let i = 1;
+  while (t > keys[i][0]) i++;
+  const out = [0, 0, 0];
+  for (let c = 1; c <= 3; c++) {
+    const d = (k) => (keys[k + 1][c] - keys[k][c]) / (keys[k + 1][0] - keys[k][0]),
+      slope = (k) => {
+        if (k === 0) return d(0);
+        if (k === n - 1) return d(n - 2);
+        const d0 = d(k - 1),
+          d1 = d(k);
+        if (d0 * d1 <= 0) return 0;
+        const h0 = keys[k][0] - keys[k - 1][0],
+          h1 = keys[k + 1][0] - keys[k][0],
+          w1 = 2 * h1 + h0,
+          w2 = h1 + 2 * h0;
+        return (w1 + w2) / (w1 / d0 + w2 / d1);
+      },
+      a = keys[i - 1],
+      b = keys[i],
+      h = b[0] - a[0],
+      u = (t - a[0]) / h,
+      m0 = slope(i - 1) * h,
+      m1 = slope(i) * h,
+      u2 = u * u,
+      u3 = u2 * u;
+    out[c - 1] = (2 * u3 - 3 * u2 + 1) * a[c] + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * b[c] + (u3 - u2) * m1;
+  }
+  return out;
+}
 // Kepler ellipse. The timing is Kepler's (real eccentricity, mean and eccentric anomaly), but the radius is drawn in the page's compressed radial scale:
 // perigee and apogee altitudes are mapped through rAlt() and the orbit between them is a true ellipse in that scale (so it reads as a smooth ellipse,
 // not a polygon-like spiral that compressing every radius separately would give).
@@ -101,10 +136,10 @@ export function makeAnchor(a) {
 }
 // arcs: [{t0, t1, o:[along, rad, cross]}] bend a leg of the path: the offset grows and fades as sin(pi * progress), so a transfer is a curve, not a
 // straight line.
-export function craftPos(anc, keys, t, arcs = null) {
+export function craftPos(anc, keys, t, arcs = null, spline = false) {
   const p = anc.pos(t),
     f = anc.frame(t),
-    o = keyAt(keys, t);
+    o = spline ? keyAtSpline(keys, t) : keyAt(keys, t);
   if (arcs)
     for (const ar of arcs) {
       const u = (t - ar.t0) / (ar.t1 - ar.t0);

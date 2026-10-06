@@ -341,9 +341,23 @@ export class GLHost {
           acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1)),
         ),
         txt = `Episode ${ai + 1} of ${acts.length}: ${this.sim.cfg.epChip[ai]}`;
-      if (this.epTx.textContent !== txt) this.epTx.textContent = txt;
-      this.epEl.style.color = LABEL.text;
-      this.epEl.style.visibility = this.lock != null && this._fbAct != null ? 'hidden' : 'visible'; // the handover chip takes the slot while it is shown
+      // cfg.epChipMerge (opt-in, phone width): one chip, not two: the episode rides in the "Drawn for illustration" banner (short names from cfg.epChipShort)
+      const ban = this.el.clientWidth < 520 && this.sim.cfg.epChipMerge ? this.el.querySelector(':scope > .illus') : null;
+      if (ban) {
+        let ep = ban.querySelector('.ep-merge');
+        if (!ep) {
+          ep = document.createElement('span');
+          ep.className = 'ep-merge';
+          ban.appendChild(ep);
+        }
+        const mt = ` · ${ai + 1} of ${acts.length}: ${(this.sim.cfg.epChipShort || this.sim.cfg.epChip)[ai]}`;
+        if (ep.textContent !== mt) ep.textContent = mt;
+        this.epEl.style.visibility = 'hidden';
+      } else {
+        if (this.epTx.textContent !== txt) this.epTx.textContent = txt;
+        this.epEl.style.color = LABEL.text;
+        this.epEl.style.visibility = this.lock != null && this._fbAct != null ? 'hidden' : 'visible'; // the handover chip takes the slot while it is shown
+      }
     }
     {
       const on = acts && this.lock != null && this._fbAct != null && this.handEl,
@@ -707,6 +721,7 @@ export class GLHost {
   }
   unload() {
     cancelAnimationFrame(this.raf);
+    this.el?.querySelector(':scope > .illus .ep-merge')?.remove(); // the merged episode note (cfg.epChipMerge) leaves with the scene
     if (this.scene) {
       // Dispose every geometry, material and texture (map, specularMap, sprites) the scene created.
       this.scene.traverse((o) => {
