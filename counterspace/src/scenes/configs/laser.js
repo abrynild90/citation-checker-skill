@@ -62,15 +62,14 @@ export const LASER = {
     {
       type: 'site',
       at: [56.86, 40.53],
-      label: 'Peresvet shelters: Teykovo',
-      short: 'Teykovo',
+      label: 'Teykovo',
       color: C.pin,
       dx: -20,
       dy: -34,
       pin: true,
       liveOnly: true,
-      minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
-      maxPx: IS_PHONE ? 32 : 66,
+      minPx: IS_PHONE ? 36 : 42,
+      maxPx: IS_PHONE ? 50 : 70,
     },
     {
       type: 'site',
@@ -81,8 +80,8 @@ export const LASER = {
       dy: 40,
       pin: true,
       liveOnly: true,
-      minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
-      maxPx: IS_PHONE ? 32 : 66,
+      minPx: IS_PHONE ? 36 : 42,
+      maxPx: IS_PHONE ? 50 : 70,
     },
     {
       type: 'site',
@@ -93,8 +92,8 @@ export const LASER = {
       dy: 40,
       pin: true,
       liveOnly: true,
-      minPx: IS_PHONE ? 22 : 38, // 375: smaller pins so Teykovo and Yoshkar-Ola do not overlap
-      maxPx: IS_PHONE ? 32 : 66,
+      minPx: IS_PHONE ? 36 : 42,
+      maxPx: IS_PHONE ? 50 : 70,
     },
   ],
   camCut: { t: 0.78, cam: 3 }, // the last step is about Peresvet: the view cuts to the Russia preset (unless the reader picked a view)
@@ -118,6 +117,7 @@ export const LASER = {
     {
       name: 'Russia: Peresvet sites',
       at: [50, 55, 2.3],
+      phone: { at: [50, 55, 1.95] },
       look: [56, 58, 1.0],
       drift: [22, 12], // a slow pan east across the shelter sites: the view differs at every t
       ref: false,
