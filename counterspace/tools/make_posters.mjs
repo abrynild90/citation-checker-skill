@@ -17,7 +17,7 @@ const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
   starfish: 0.34, // the burst rings over Johnston Island in the tight first camera
-  solwind: 0.68, // debris spread over the ocean and Arctic, not read as city lights on land
+  solwind: 0.5, // the textured satellite at the instant the missile reaches it (the textured model is drawn only until impact)
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.54, // the debris plume with trails, the shock rings nearly faded
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth

@@ -106,7 +106,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
           const P = core.slice();
           // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
-          if (burst && tk <= ht + 0.16) P.push(...burstPad);
+          if (burst && tk <= ht + 0.16 && tk >= (cfg.burstPadFrom ?? 0)) P.push(...burstPad); // burstPadFrom (opt-in): the early keys are fitted to the craft alone
           if (arc && tk <= ht + 0.05) P.push(arc.to);
           if (tk <= ht) P.push(tgt.pos(tk));
           if (tk > ht) P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
