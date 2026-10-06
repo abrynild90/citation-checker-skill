@@ -45,8 +45,11 @@ const FS = 13, // label size
 export function drawC(el = document.getElementById('svgC')) {
   el.innerHTML = ''; // a re-draw replaces the chart (never stacks a second one)
   const zoom = zoomedC(),
-    { W, M, x } = layout(el, zoom ? C_FOCUS() : DOMAIN),
+    lay = layout(el, zoom ? C_FOCUS() : DOMAIN),
+    { W, M } = lay,
     phone = isPhoneNow();
+  // On a phone the zoom still starts in 1995, but the plot runs nearly edge to edge, so the recent years get the width.
+  const x = phone && zoom ? d3.scaleUtc().domain(C_FOCUS()).range([8, W - M.r]) : lay.x;
   const R = W - M.r, // right end of the plot (and of every band)
     L = phone ? 0 : M.l, // left end of every band
     PADX = 14, // text inset inside a band
