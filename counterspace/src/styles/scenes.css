@@ -1878,3 +1878,15 @@
     grid-template-rows: auto minmax(0, 36%) minmax(0, 1fr) auto;
   }
 }
+@media (min-width: 761px) {
+  .overlay.is-static .ctrl {
+    grid-template-rows: auto;
+    align-content: center;
+    padding-block: 10px;
+    min-height: 0;
+  }
+}
+/* A still diagram has no playback, so the keyboard hint for playing is not shown and leaves no empty row */
+.overlay.is-static .sv-hint {
+  display: none !important;
+}
