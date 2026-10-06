@@ -102,3 +102,7 @@
   #chartB>.chips{order:1;margin-top:var(--s-3)}
   #chartB>:is(ul.legend,.callout,details,.dl-row){order:2}
 }
+
+.ckey{display:flex;flex-wrap:wrap;gap:4px 14px;margin:var(--s-2) 0 0;font:500 13px/1.4 var(--sans);color:var(--muted);flex-basis:100%}
+.ckey .ck{display:inline-flex;align-items:center;gap:6px}
+.ckey i{display:inline-block;width:10px;height:10px;border-radius:50%}

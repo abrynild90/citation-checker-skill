@@ -769,7 +769,8 @@ export function legalScroll() {
   const band = document.getElementById('legalBand'),
     tr = document.getElementById('timeline').getBoundingClientRect();
   // The years-to-law chart has its own 0 to 16 year scale, so the strip (which implies a shared calendar axis) steps aside while that chart is at the top.
-  const lagEl = document.getElementById('lag');
+  // The decade chart before it and the sources after it do not use the shared years either, so the strip steps aside from the decade chart to the end.
+  const lagEl = document.getElementById('chartB') || document.getElementById('lag');
   band.classList.toggle('off', !isPhoneNow() && !!lagEl && lagEl.getBoundingClientRect().top < band.offsetHeight + 24);
   const stuck = !isPhoneNow() && band.getBoundingClientRect().top <= 0.5 && tr.top < -1 && tr.bottom > 200;
   if (stuck === legalCompact) return;

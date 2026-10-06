@@ -359,6 +359,11 @@ export function drawC(el = document.getElementById('svgC')) {
   document.getElementById('noteC').innerHTML = zoom
     ? zoomNote('1995 to 2026', stateC.focus === null, 'the earliest entry in our records is from 1997')
     : fullNote() + (phone ? ` Nothing is in our records before ${firstYr}.` : '');
+  const ck = document.getElementById('ckeyC');
+  if (ck) {
+    const names = [...new Set(NK.map((e) => actorKey(e.actor) || 'Several or other'))];
+    ck.innerHTML = names.map((n) => `<span class="ck"><i style="background:${n === 'Several or other' ? 'var(--c-multi)' : colorOf(n)}"></i>${n}</span>`).join('');
+  }
   document.getElementById('quoteC').innerHTML = `<span class="q">${QUOTE}</span><span class="by">${QUOTE_BY}</span>`;
   document.getElementById('cFocus').setAttribute('aria-pressed', zoom);
   document.getElementById('cFull').setAttribute('aria-pressed', !zoom);
