@@ -647,6 +647,7 @@ export function buildSim(cfg) {
         minPx: a.minPx, // opt-ins: dot size limits, additive sprites (a.additive), short trails (a.trail: { n, dt })
         maxPx: a.maxPx,
         additive: a.additive,
+        darkHalo: a.darkHalo,
         trail: a.trail,
         hideEmpty: a.hideEmpty,
         label: a.label,

@@ -22,6 +22,7 @@ export const SHAKTI = {
   orbitAt: [23, 84, 2.7], // the whole-scene view: close enough that the launch-to-intercept arc reads on a recognisable South Asia
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
+  lookK: 0.86, // the Earth sits nearer the middle of the frame, not against its left edge
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
   phoneHide: ['Abdul Kalam'], // 375: two labels at the burst (the island is in the status line)
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
@@ -45,7 +46,7 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.46, strong: true, coreK: 0.5, flashSpan: 0.12, rocket: { minPx: 44, maxPx: 70 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.62, flashCap: 1.7, strong: true, coreK: 0.9, flashSpan: 0.12, rocket: { minPx: 44, maxPx: 70 } },
     {
       type: 'debris',
       count: 130,
@@ -55,8 +56,9 @@ export const SHAKTI = {
       dv: 1.2,
       drift: 0.15,
       decay: 1.5,
-      color: '#ffe9a0',
-      palette: { hot: [1, 0.97, 0.78], mid: [1, 0.86, 0.4], cool: [1, 0.72, 0.28] },
+      color: '#ff7a3a',
+      palette: { hot: [1, 0.96, 0.9], mid: [1, 0.42, 0.18], cool: [0.95, 0.28, 0.14] }, // white and orange-red, not the amber of the city lights
+      darkHalo: 0.7, // a dark disc behind every fragment
       size: 0.11,
       minPx: 5,
       maxPx: 15,

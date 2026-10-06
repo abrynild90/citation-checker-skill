@@ -378,6 +378,17 @@ const methods = {
         root.add(tp);
         pts.userData.trail = { tg, K, pos: new Float32Array(n * 3), col: new Float32Array(n * 4) };
       }
+      if (deb && it.darkHalo) {
+        // opt-in: a dark soft disc behind every fragment, so bright fragments separate from night-side city lights
+        const dm = this._ptMat(it.size * 2.4, (IS_PHONE ? mn + 1 : mn) * 2, 26, it.darkHalo);
+        dm.fragmentShader = PT_FS.replace('vC.rgb', 'vec3(0.01, 0.015, 0.04)');
+        dm.uniforms.uVar.value = 1;
+        const dp = new T.Points(g, dm);
+        dp.frustumCulled = false;
+        dp.renderOrder = 1;
+        root.add(dp);
+        pts.userData.darkHalo = dp;
+      }
       if (deb) {
         const hm = this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, it.additive ? 0.2 : 0.11);
         if (it.additive) hm.blending = T.AdditiveBlending;
