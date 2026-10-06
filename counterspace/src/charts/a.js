@@ -23,7 +23,7 @@ import {
   tw,
   xAxis,
 } from '../app.js';
-import { KIND_PLAIN, activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
+import { KIND_PLAIN, quiet, activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
 const stateA = { zoom: false }, // phones open on the full span so the early treaties and tests show; the toggle zooms to 2004-2026; other widths ignore it
   ZOOM_A0 = '2004-01-01';
 const ALT_AT = { intercept: 'Intercept', apogee: 'Highest point', detonation: 'Detonation' };
@@ -518,7 +518,7 @@ export function drawA(el = document.getElementById('svgA')) {
         e.state,
         e.system,
         targetWords(e.target),
-        KIND_PLAIN[e.type],
+        e.type === 'non_destructive' ? quiet(KIND_PLAIN[e.type]) : KIND_PLAIN[e.type],
         e.altitude_km == null ? '—' : `${e.altitude_km} km, ${(ALT_AT[e.altitude_kind] || e.altitude_kind).toLowerCase()}`,
         cat == null && orb == null ? '—' : `${cat == null ? 'unknown' : num(cat)} cataloged, ${orb == null ? 'unknown' : num(orb)} in orbit`,
         CONFIDENCE[e.confidence] || e.confidence,

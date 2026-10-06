@@ -490,10 +490,13 @@ function shortPin(pin) {
   const cut = first.length > 56 ? first.slice(0, 56).replace(/[\s,;(]+\S*$/, '') + '...' : first; // long free-text pins: the full page reference stays in the link name and the title
   return cut;
 }
+// A value that repeats on nearly every row shows as a dash; screen readers still hear it, and the cards on small screens leave it out.
+export const quiet = (full) => `<span class="qc"><span aria-hidden="true">\u2013</span><span class="sr">${esc(full)}</span></span>`;
 export const srcCell = (r, tableId, entry) => {
   const tn = SRC_TABLE[tableId] || 'data',
     label = `${r.source}, ${r.pin}. Source for the ${tn} table, ${entry}`;
-  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}">${esc(r.source)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin))}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
+  const shown = r.source.length > 34 ? r.source.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim() : r.source;
+  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}" title="${esc(r.source)}">${esc(shown)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin))}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
 };
 // Accessible data table. Each cell carries data-label so CSS can stack entries as cards on phones (no sideways scrolling). Columns whose cells are
 // all numbers are right-aligned; date columns never wrap on a wide screen.
@@ -518,7 +521,7 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
   // hiddenLast: the last column is kept in the markup but never shown or read out (the last chart keeps its record ids there for tools/qa.mjs).
   const hide = (i) => (hiddenLast && i === head.length - 1 ? ' hidden' : '');
   const cell = (c, i) =>
-    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(String(head[i]).replace(/<[^>]*>/g, ''))}">${typeof c === 'string' && (c.startsWith('<a') || c.startsWith('<span class="srcc"') || c.startsWith('<span class="cnt-line"') || c.startsWith('<span class="tl"')) ? c : esc(c)}</td>`;
+    `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(String(head[i]).replace(/<[^>]*>/g, ''))}">${typeof c === 'string' && (c.startsWith('<a') || c.startsWith('<span class="srcc"') || c.startsWith('<span class="cnt-line"') || c.startsWith('<span class="tl"') || c.startsWith('<span class="qc"')) ? c : esc(c)}</td>`;
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
   const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}>${h}</th>`).join('');

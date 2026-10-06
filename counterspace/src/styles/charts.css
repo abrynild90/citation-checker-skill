@@ -190,7 +190,7 @@ td a{overflow-wrap:anywhere}
   .tscroll table,.tscroll tbody,.tscroll tr,.tscroll td,.tscroll caption{display:block;width:100%}
   .tscroll thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .tscroll tr{margin:0 0 var(--s-3);padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
-  .tscroll td{display:grid;grid-template-columns:38% 1fr;gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
+  .tscroll td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
   .tscroll td.num{text-align:left}
   .tscroll td.date{white-space:normal}
   .tscroll td:last-child,.tscroll td:has(+ td[hidden]:last-child){border-bottom:0}
@@ -342,3 +342,30 @@ details.table>summary{scroll-margin-top:110px}
   #tableR th:nth-child(9),#tableR td:nth-child(9){min-width:220px}
   #tableR th,#tableR td{padding:8px 7px;font-size:13px}
 }
+
+/* Close approaches and jamming tables: too wide for a 1024 px page, so they stack as cards up to 1100 px */
+@media (min-width:1001px) and (max-width:1100px){
+  #tableC.tscroll.capped tbody tr:nth-child(n+11),#tableR.tscroll.capped tbody tr:nth-child(n+11){display:none}
+  #tableC.tscroll,#tableR.tscroll{max-height:none;overflow:visible;border:0;background:none}
+  #tableC.tscroll table,#tableR.tscroll table,#tableC.tscroll tbody,#tableR.tscroll tbody,#tableC.tscroll tr,#tableR.tscroll tr,#tableC.tscroll td,#tableR.tscroll td,#tableC.tscroll caption,#tableR.tscroll caption{display:block;width:100%}
+  #tableC.tscroll thead,#tableR.tscroll thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  #tableC.tscroll tr,#tableR.tscroll tr{margin:0 0 var(--s-3);padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
+  #tableC.tscroll td,#tableR.tscroll td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
+  #tableC.tscroll td.num,#tableR.tscroll td.num{text-align:left}
+  #tableC.tscroll td.date,#tableR.tscroll td.date{white-space:normal}
+  #tableC.tscroll td:last-child,#tableR.tscroll td:last-child,#tableC.tscroll td:has(+ td[hidden]:last-child),#tableR.tscroll td:has(+ td[hidden]:last-child){border-bottom:0}
+  #tableC.tscroll td[hidden],#tableR.tscroll td[hidden]{display:none}
+  #tableC.tscroll td a,#tableR.tscroll td a{display:inline-block;align-self:center;min-height:24px;line-height:24px}
+  #tableC.tscroll td .srcc,#tableR.tscroll td .srcc{align-self:center}
+  #tableC.tscroll td .srcc a,#tableR.tscroll td .srcc a{display:inline;min-height:0;line-height:inherit}
+  .pin-s,.pin-s{display:none}.pin-f{display:inline}
+  #tableC.tscroll td::before,#tableR.tscroll td::before{content:attr(data-label);color:var(--muted);font-weight:600}
+  #tableC.tscroll td,#tableR.tscroll td{min-width:0;max-width:none;padding:6px 12px}
+  #tableC.tscroll td:last-child .srcc,#tableR.tscroll td:last-child .srcc{white-space:normal}
+  #tableC.tscroll.capped + .more-rows,#tableR.tscroll.capped + .more-rows{display:inline-flex}
+}
+@media (min-width:1001px) and (max-width:1100px){.skip-table:has(+ #tableC),.skip-table:has(+ #tableR){display:none}}
+/* a value that repeats on nearly every row is a dash in the table and absent from the cards */
+.qc{color:var(--faint)}
+@media (max-width:1100px){#tableC td:has(.qc){display:none!important}}
+@media (max-width:1000px){#tableA td:has(.qc){display:none!important}}

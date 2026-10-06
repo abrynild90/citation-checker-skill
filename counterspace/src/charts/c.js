@@ -5,7 +5,7 @@
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { DOMAIN, EXPORTING, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, PHONE_MAX, layout, parse, tw, xAxis } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
-import { activate, addGuide, bindMark, nkCard, rove, srcCell, table } from '../ui.js';
+import { activate, addGuide, bindMark, nkCard, quiet, rove, srcCell, table } from '../ui.js';
 import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
 
 const GROUPS = [
@@ -402,7 +402,7 @@ export function drawC(el = document.getElementById('svgC')) {
       CATEGORY_LABEL[e.category],
       ATTRIBUTION_LABEL[e.attribution],
       `${e.target_system} · ${TARGET_LABEL[e.target_regime]}`,
-      e.operational_use ? 'In a conflict' : 'A test, a demonstration or peacetime',
+      e.operational_use ? 'In a conflict' : quiet('A test, a demonstration or peacetime'),
       SURE_WORD[e.confidence],
       srcCell(e, 'tableC', `${e.target_system}, ${e.actor}, ${e.start}`),
     ]),
