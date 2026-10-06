@@ -317,7 +317,7 @@ function splitSentences(text) {
 // level 0: two sentences (one on a phone), 1: one sentence, 2: none; a number above that (from fitSteps, when there is room to spare) adds sentences
 function setLede(level, count) {
   const full = cur?.caption || '';
-  const max = expanded ? Infinity : count || (level === 0 ? (COMPACT.matches ? 1 : 2) : level === 1 ? 1 : 0);
+  const max = expanded ? Infinity : count ?? (level === 0 ? (COMPACT.matches ? 1 : 2) : level === 1 ? 1 : 0);
   let shown = expanded ? full : sentences.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 360) shown = sentences[0];
   if (!expanded && COMPACT.matches && (shown.length > 230 || overlay.classList.contains('is-static'))) shown = ''; // a phone's still diagram gives the steps the room
@@ -557,7 +557,7 @@ function fitSteps() {
   if (!r.h && !COMPACT.matches && r.n >= steps.length) {
     // every row fits and there is room to spare: show more of the account, a sentence at a time, while everything still fits
     const shownNow = sentences.filter((_, i) => captionEl.textContent.includes(sentences[i])).length;
-    for (let k = Math.max(shownNow, 1) + 1; k <= sentences.length; k++) {
+    for (let k = shownNow + 1; k <= sentences.length; k++) {
       setLede(0, k);
       const ok = asideBody.scrollHeight <= asideBody.clientHeight + 1 && rowsFit().n >= steps.length;
       if (!ok) {
@@ -597,10 +597,30 @@ function fitSteps() {
     if (pad > 0.5) stepsEl.style.paddingBottom = pad + 'px';
   }
   const li = stepsEl.children[Math.max(0, stepIdx)];
-  if (li && stepIdx >= 0 && !stillOnly) followStep(li, true);
+  if (li && stepIdx >= 0) followStep(li, true);
   fadeSteps();
+  trimSteps();
 }
+// Rows differ in height, so the window of a fixed height can show a sliver of the row after the last whole one: the box is clipped at that row's edge.
+function trimSteps() {
+  if (!stepsEl.style.height) {
+    stepsEl.style.clipPath = '';
+    return;
+  }
+  const H = stepsEl.clientHeight,
+    y = stepsEl.scrollTop;
+  let end = 0;
+  for (const li of stepsEl.children) {
+    const b = li.offsetTop + li.offsetHeight - y;
+    if (b <= H + 0.5) end = Math.max(end, b);
+  }
+  const gap = Math.max(0, H - end);
+  stepsEl.style.clipPath = gap > 1 && end > 0 ? `inset(0 0 ${gap}px 0)` : '';
+}
+let trimTimer = 0;
 function fadeSteps() {
+  clearTimeout(trimTimer);
+  trimTimer = setTimeout(trimSteps, 90);
   const sc = listScrolls() && stepsEl.clientHeight > 120; // a window of a single row is not faded away
   stepsEl.classList.toggle('can-up', sc && stepsEl.scrollTop > 3);
   stepsEl.classList.toggle('can-down', sc && stepsEl.scrollHeight - stepsEl.clientHeight - stepsEl.scrollTop > 3);
@@ -728,8 +748,7 @@ function staticMode(on) {
   if (on && curSim) {
     stepIdx = stepAt(curSim.cfg.staticT ?? curSim.still ?? 0);
     markStep(stepIdx); // the step the still shows
-    const now = stepsEl.children[stepIdx];
-    if (now) requestAnimationFrame(() => (fitSteps(), now.scrollIntoView({ block: 'nearest' })));
+    requestAnimationFrame(fitSteps);
   }
   exportBtn.querySelector('span').textContent = on ? 'Save this diagram' : 'Save image';
   stepsEl.querySelectorAll('.step').forEach((b) => (on ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));

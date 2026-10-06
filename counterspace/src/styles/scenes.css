@@ -1505,7 +1505,7 @@
 }
 /* The slack that is left under the last whole row is shared out as a little extra air in every row (fitSteps sets --sp), so there is no gap under the list */
 .overlay #sceneSteps {
-  box-sizing: content-box;
+  box-sizing: border-box; /* the padding at its end (fitSteps) is inside the fixed height: it only lets the last rows rest at the top */
 }
 .overlay #sceneSteps .st-text {
   padding-block: calc(9px + var(--sp, 0px));
