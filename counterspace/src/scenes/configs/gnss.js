@@ -104,7 +104,7 @@ export const GNSS = {
   inset: 'GPS orbits (top view)',
   insetSize: [132, 104],
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
-  liveOff: { 'Jammer effect zone': [80, -30], 'Airliner 1': [-140, -30] }, // desktop: a leader runs from the label to the zone's edge
+  liveOff: { 'Jammer effect zone': [80, -30], 'Airliner 1': [-10, -58] }, // desktop: a leader runs from the label to the zone's edge
   stillHideText: ['Baltic Sea'], // the print drops the place name: it would sit on Airliner 1's leader
   noJamArrow: true, // the jammed link gets no edge arrowhead (it would read as a stray marker at the frame border)
   sunView: { az: 30, el: 32 }, // a higher, more frontal sun: the Baltic terrain is lit, not olive and murky

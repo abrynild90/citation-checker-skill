@@ -236,7 +236,10 @@ const methods = {
           fx = (() => {
             const a = r.px + d[0] * offK,
               m = r.w / 2 + 12;
-            if ((a > w - m || a < m) && d[0]) {
+            // (only when the clamped pill would sit on the anchor itself: a pill that stays clear above or below it just slides in)
+            const cl = Math.max(m, Math.min(w - m, a)),
+              covers = Math.abs(cl - r.px) < r.w / 2 + 6 && Math.abs(d[1] * offK) < r.h / 2 + 8;
+            if ((a > w - m || a < m) && d[0] && covers) {
               const b = r.px - d[0] * offK;
               if (b >= m && b <= w - m) return b;
             }
@@ -501,7 +504,8 @@ const methods = {
     const bl = (phone && this.sim.cfg.insetCornerPhone ? this.sim.cfg.insetCornerPhone : this.sim.cfg.insetCorner) === 'bl', // insetCornerPhone: an opt-in corner for a phone-width stage // bottom-left, above the caption (scenes whose action fills the top right)
       sz = phone && this.sim.cfg.insetSizePhone ? this.sim.cfg.insetSizePhone : this.sim.cfg.insetSize,
       mc = (this._insetMeasure ||= document.createElement('canvas').getContext('2d')),
-      title = phone && this.sim.cfg.insetPhone ? this.sim.cfg.insetPhone : this.sim.cfg.inset;
+      ie = this.sim.cfg.insetEnd, // insetEnd { from, title, phone } (opt-in): a faint badge: from this t the inset's title carries a closing note
+      title = ie && this.t >= ie.from ? (phone && ie.phone ? ie.phone : ie.title) : phone && this.sim.cfg.insetPhone ? this.sim.cfg.insetPhone : this.sim.cfg.inset;
     mc.font = `600 ${INSET_PX}px ${SANS}`;
     // the box is as wide as its title needs at 12 px (never squeezed), and a little taller than before to make room for the larger type
     const w = Math.min(Math.round(this.el.clientWidth * 0.62), Math.max(phone ? (sz ? sz[0] : 128) : sz ? sz[0] : 188, Math.ceil(mc.measureText(title).width) + 18)),

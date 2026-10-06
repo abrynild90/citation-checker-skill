@@ -128,7 +128,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.5, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.42, 0]] } } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.16, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', at: [36, 104, 3.9], look: [0, 106, 1.9], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',
@@ -147,8 +147,8 @@ export const SJ21_TUG = {
       name: 'Looking down at the pair, Earth below',
       short: 'Looking down',
       ...ARM_TAG,
-      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.5, 0]] },
-      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.42, 0]] } },
+      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.16, 0]] },
+      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } },
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
   ],

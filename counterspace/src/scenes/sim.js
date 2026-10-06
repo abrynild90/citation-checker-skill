@@ -854,7 +854,7 @@ export function buildSim(cfg) {
         };
         ac.state = true; // the airliner's colour is the story (GNSS lost or fine): its model keeps a glow in that colour
         ac.statusColor = (t) => (inZone(t) ? C.jam : C.ok);
-        ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GPS signal lost' : ac.label + ' · GPS signal fine');
+        ac.labelFn = (t, narrow) => (narrow && ac.short ? ac.short + (inZone(t) ? ' · GPS lost' : ' · GPS fine') : inZone(t) ? ac.label + ' · GPS signal lost' : ac.label + ' · GPS signal fine'); // short (opt-in): the phone text
         for (let k = 0; k < 1; k++)
           items.push({
             kind: 'beam',

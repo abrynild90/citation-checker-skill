@@ -227,9 +227,10 @@ export const SPACEPLANES = {
       ],
     },
     { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0018, tail: 0.12, wakeOp: 0.2, taper: 0.1 }, // a soft wake: thin at its tail, faint, capped in length
-    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 }, // the wake ends soon after Object J does
-    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
+    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 }, // the wake ends soon after Object J does
+    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 },
   ],
+  liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee
   fillK: 0.5,
   cloudK: 1.2,
   cloudFloor: 0.8, // a cloud layer stays on the Earth even in the close China views, so it is not a flat tan
