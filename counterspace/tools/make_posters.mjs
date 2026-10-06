@@ -38,6 +38,7 @@ const POSTER_VIEW = {
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
+  solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
 };

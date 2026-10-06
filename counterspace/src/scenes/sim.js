@@ -582,6 +582,9 @@ export function buildSim(cfg) {
         big: true,
         strong: !!a.strong,
         coreK: a.coreK,
+        capK: a.flashCap, // opt-ins: larger screen cap, faint lingering ring after the burst
+        linger: a.linger,
+        lingerK: a.lingerK,
         size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
         span: a.flashSpan ?? (a.strong ? 0.2 : 0.16), // flashSpan: opt-in shorter shock rings
       });
