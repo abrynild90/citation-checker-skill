@@ -27,7 +27,7 @@
 .legal-band::after{content:'';position:absolute;left:0;right:0;top:100%;height:18px;background:linear-gradient(var(--bg),transparent);pointer-events:none;opacity:0;
   transition:opacity var(--dur-1)}
 .legal-band.compact::after{opacity:1}
-.legal-band.reading #legalSvg{max-height:56px;overflow:hidden}
+.legal-band.reading #legalSvg{max-height:var(--row-h,60px);overflow:hidden}
 .legal-band svg{display:block;width:100%}
 #legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
 #legalSvg[role="region"] svg{width:auto;max-width:none}
@@ -193,6 +193,7 @@ td a{overflow-wrap:anywhere}
   .tscroll tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(21rem,100%),1fr));gap:var(--s-3);align-items:start}
   .tscroll tr{margin:0;padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
   .tscroll td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
+  .tscroll td:first-child{position:static;box-shadow:none;background:none;border-radius:var(--r-1) var(--r-1) 0 0}
   .tscroll td.num{text-align:left}
   .tscroll td.date{white-space:normal}
   .tscroll td:last-child,.tscroll td:has(+ td[hidden]:last-child){border-bottom:0}
@@ -347,6 +348,7 @@ details.table>summary{scroll-margin-top:110px}
   #tableC.tscroll tbody,#tableR.tscroll tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(21rem,100%),1fr));gap:var(--s-3);align-items:start}
   #tableC.tscroll tr,#tableR.tscroll tr{margin:0;padding:4px 0;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
   #tableC.tscroll td,#tableR.tscroll td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:var(--s-2);padding:6px 12px;border-bottom:1px solid var(--grid);overflow-wrap:anywhere;text-align:left}
+  #tableC.tscroll td:first-child,#tableR.tscroll td:first-child{position:static;box-shadow:none;background:none;border-radius:var(--r-1) var(--r-1) 0 0}
   #tableC.tscroll td.num,#tableR.tscroll td.num{text-align:left}
   #tableC.tscroll td.date,#tableR.tscroll td.date{white-space:normal}
   #tableC.tscroll td:last-child,#tableR.tscroll td:last-child,#tableC.tscroll td:has(+ td[hidden]:last-child),#tableR.tscroll td:has(+ td[hidden]:last-child){border-bottom:0}

@@ -390,6 +390,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     .attr('height', H)
     .attr('role', 'group')
     .attr('aria-label', zoom ? 'Law and policy timeline, enlarged to 2021 to 2026' : 'Law and policy timeline, 1957 to 2026');
+  if (compact) document.getElementById('legalBand')?.style.setProperty('--row-h', Math.ceil(yMark + 30) + 'px'); // the one row of symbols and names kept while a table is read
   svg.append('title').text(zoom ? 'Law and policy, enlarged to 2021 to 2026' : 'Law and policy, 1957 to 2026');
   // A quiet grid at every decade (every year in the zoom), behind everything else.
   if (!compact)
