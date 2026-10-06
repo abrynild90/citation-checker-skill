@@ -189,7 +189,7 @@ td a{overflow-wrap:anywhere}
 @media (min-width:641px){
   .scroll-hint.on{display:block}
 }
-@media (min-width:641px) and (max-width:1100px){
+@media (min-width:1001px) and (max-width:1100px){
   .scroll-hint + .tscroll,.skip-table + .tscroll{margin-top:var(--s-2)}
   .tscroll th,.tscroll td{padding:9px 10px}
   #tableA th:nth-child(5),#tableA td:nth-child(5){min-width:150px}
@@ -202,14 +202,14 @@ td a{overflow-wrap:anywhere}
 .skip-table:focus{position:static;display:inline-block;margin:var(--s-2) 0;left:auto;outline:3px solid var(--focus);outline-offset:2px}
 .tscroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* A wide table keeps its Source column in view at the right edge, with a soft shadow where the other columns slide under it. */
-@media (min-width:641px){
+@media (min-width:1001px){
   #tableA th:last-child,#tableA td:last-child,#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{position:sticky;right:0;z-index:2;
     background:var(--surface);box-shadow:-1px 0 0 var(--grid),-12px 0 12px -10px color-mix(in srgb,var(--text) 16%,transparent)}
   #tableA th:last-child,#tableC th:last-child,#tableR th:last-child{z-index:3;background:var(--surface-2)}
   #tableR td:nth-child(9),#tableR th:nth-child(9){min-width:200px;max-width:28ch}
   .more-rows{display:none}
 }
-@media (max-width:640px){
+@media (max-width:1000px){
   .tscroll.capped tbody tr:nth-child(n+11){display:none}
   .more-rows{margin-top:var(--s-2)}
   .tscroll{max-height:none;overflow:visible;border:0;background:none}
@@ -241,6 +241,7 @@ td a{overflow-wrap:anywhere}
 .card dt{color:var(--faint);font-size:13px;line-height:1.5}
 .card dd{margin:0}
 .card p{margin:var(--s-3) 0 0}
+.card .src b{font-weight:600;color:var(--text)}
 .card .src{margin-top:var(--s-3);padding-top:var(--s-2);border-top:1px solid var(--grid);color:var(--muted);font-size:13px;line-height:1.4}
 .card .hint{display:flex;align-items:center;gap:6px;margin-top:var(--s-3);color:var(--accent-2);font:600 13px/1.3 var(--sans)}
 .card .hint .ico{width:16px;height:16px}
@@ -255,7 +256,7 @@ td a{overflow-wrap:anywhere}
 .card .note{margin-top:var(--s-2)}
 .card.cc .card-title,.card.cc h4{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* phones: the card docks at the bottom of the screen, its text scrolls inside it, and the last line says how to dismiss it */
-.card.dock{left:var(--s-2)!important;right:var(--s-2);top:auto!important;bottom:var(--s-2);max-width:none;max-height:46vh;display:flex;flex-direction:column;overflow:hidden;
+.card.dock{left:8px!important;right:8px;width:auto;top:auto!important;bottom:var(--s-2);max-width:none;overflow-wrap:anywhere;max-height:46vh;display:flex;flex-direction:column;overflow:hidden;
   pointer-events:auto;padding-top:var(--s-4)}
 .card.dock.top{top:var(--s-2)!important;bottom:auto}
 .card.dock .cbody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
@@ -309,3 +310,8 @@ details.table>summary{scroll-margin-top:110px}
 .legal-ov .lm-year{fill:var(--faint);font:500 12px var(--sans)}
 .legal-ov[hidden]{display:none}
 .legal-ov:not([hidden]) ~ .strip-edge{top:84px}
+
+/* page references never break across lines; the cell before the pinned Source column keeps clear of its edge */
+.tscroll td a,.tscroll .srcc{white-space:nowrap}
+@media (min-width:1001px){#tableA th:nth-last-child(2),#tableA td:nth-last-child(2),#tableC th:nth-last-child(2),#tableC td:nth-last-child(2),#tableR th:nth-last-child(2),#tableR td:nth-last-child(2){padding-right:var(--s-5)}}
+@media (max-width:1000px){.tscroll td a,.tscroll .srcc{white-space:normal}.tscroll td .srcc a{white-space:nowrap}}

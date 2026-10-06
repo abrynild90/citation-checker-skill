@@ -2,7 +2,7 @@
    disclosure, callout, panel card and chapter heading. Section 2 of design/DESIGN.md describes each one. Chart rules belong in charts.css or
    charts2.css, scene viewer rules in scenes.css. */
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;accent-color:var(--accent);scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+html{scroll-padding-top:var(--band-h,64px);-webkit-text-size-adjust:100%;accent-color:var(--accent);scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 var(--sans);font-synthesis:style;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 ::selection{background:var(--selection)}
 input,textarea,select{caret-color:var(--accent)}

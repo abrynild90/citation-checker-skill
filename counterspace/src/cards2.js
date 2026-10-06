@@ -97,7 +97,7 @@ export const noteOf = (e) => (e.notes ? plain(NOTE_PLAIN[e.id] ?? e.notes) : '')
 // ---------------------------------------------------------------- cards
 const cube = '<svg class="ico" aria-hidden="true"><use href="#i-cube"/></svg>';
 const sceneHint = `<div class="hint">${cube}Open the 3D explainer</div>`;
-const srcLine = (r) => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
+const srcLine = (r) => `<div class="src"><b>Source</b> ${esc(r.source)}, ${esc(r.pin)}</div>`;
 const dl = (rows) => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 
 // Compact form (hover on a wide screen): the key facts and the first sentence only, so the card stays small and hides few bars. Click or Enter shows the

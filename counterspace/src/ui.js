@@ -123,7 +123,7 @@ function showCard(html, evt, el, full = false) {
         avoidCost(q) +
         (ax && hit(q, ax, 2) ? (near ? 60 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
-        (near ? 0 : gapTo(q) / 4) +
+        (near ? 0 : gapTo(q) / 4 + Math.max(0, gapTo(q) - 120) / 2) +
         Math.abs(L - l) / 40 +
         Math.abs(T - tp) / 40 +
         i * 0.1;
@@ -188,7 +188,7 @@ export function hideCard() {
 // The line that offers the 3D explainer, with the cube icon from the page's icon set. Every card builder uses it.
 export const hint3d = (what = 'the 3D explainer') =>
   `<div class="hint"><svg class="ico" aria-hidden="true"><use href="#i-cube"/></svg>Select to open ${what}</div>`;
-const srcLine = (r) => `<div class="src">Source: ${esc(r.source)}, ${esc(r.pin)}</div>`;
+const srcLine = (r) => `<div class="src"><b>Source</b> ${esc(r.source)}, ${esc(r.pin)}</div>`;
 const ALT_KIND = { intercept: 'intercept', apogee: 'its highest point', detonation: 'detonation' };
 const CONFIDENCE = { high: 'High', medium: 'Medium', low: 'Low' };
 // What each kind of test was, in everyday words (the data stores a code; cards, the table and screen-reader labels all use these).
