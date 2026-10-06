@@ -283,7 +283,9 @@ export function drawR(el = document.getElementById('svgR')) {
   if (!EXPORTING) {
     const lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true'),
       lbox = []; // [x0, x1, y] of every label drawn so far: labels keep 6 px apart
-    const clear = (a, b, yy) => lbox.every((q) => Math.abs(q[2] - yy) > 13 || q[1] < a - 6 || q[0] > b + 6);
+    // the same name twice close together (two entries of one programme) is drawn once
+    const clear = (a, b, yy, t) =>
+      lbox.every((q) => Math.abs(q[2] - yy) > 13 || q[1] < a - 9 || q[0] > b + 9) && !lbox.some((q) => q[3] === t && Math.abs(q[2] - yy) < 45 && q[1] > a - 160 && q[0] < b + 160);
     // a label never sits on any 3D cube
     const cubeHit = (a, b, yy) => placed.some((q) => q.bx != null && q.bx + 8 > a && q.bx - 8 < b && q.by + 9 > yy - 9 && q.by - 9 < yy + 7);
     placed.forEach((p) => {
@@ -295,7 +297,7 @@ export function drawR(el = document.getElementById('svgR')) {
       const edge = p.bx != null && p.bx < p.X0 ? p.bx - 14 : p.X0 - 14, // a 3D cube left of the mark pushes the label further left
         left = [edge - w, edge],
         right = [p.X1 + (p.ongoing ? 30 : 16), p.X1 + (p.ongoing ? 30 : 16) + w];
-      const side = left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y) && !cubeHit(left[0], left[1], p.y) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y) && !cubeHit(right[0], right[1], p.y) && !p.ongoing ? 'r' : null;
+      const side = left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y, t) && !cubeHit(left[0], left[1], p.y) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y, t) && !cubeHit(right[0], right[1], p.y) && !p.ongoing ? 'r' : null;
       let dy = 0,
         ax = null;
       if (!side) {
@@ -304,16 +306,16 @@ export function drawR(el = document.getElementById('svgR')) {
         for (const [off, hi] of [-15, 15].flatMap((o) => [hi0, p.bx != null ? p.bx - 10 : null, p.X0 - 10].filter((v) => v != null).map((h) => [o, h]))) {
           const a = hi - w,
             yy = p.y + off;
-          if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy) && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 4 || q.ext[0] > hi + 4)) {
+          if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy, t) && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 10 || q.ext[0] > hi + 10)) {
             dy = off;
             ax = hi;
-            lbox.push([a, hi, yy]);
+            lbox.push([a, hi, yy, t]);
             break;
           }
         }
         if (ax != null) return lg.append('text').attr('class', 'dlabel').attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
       }
-      if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y] : [right[0], right[1], p.y]);
+      if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y, t] : [right[0], right[1], p.y, t]);
       if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
     });
   }
