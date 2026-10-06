@@ -212,10 +212,10 @@ export function drawB(el = document.getElementById('svgB')) {
         return {
           color: `var(${u.v})`,
           name: u.label,
-          text: dv || pv ? [dv && `${dv} demonstrated`, pv && `${pv} developing`].filter(Boolean).join(', ') : 'None',
+          text: dv || pv ? [dv && `${dv} demonstrated`, pv && `${pv} developing`].filter(Boolean).join(', ') : 'None demonstrated or developing',
         };
       }),
-      total: `${tot[i]} ${kin ? 'in all (a state in both groups counts twice)' : 'pairs in all'}${dem[i] < tot[i] ? `, ${dem[i]} demonstrated` : ''}.`,
+      total: `${tot[i]} ${kin ? 'in all (a state in both groups counts twice)' : tot[i] === 1 ? 'pair in all' : 'pairs in all'}${dem[i] < tot[i] ? `, ${dem[i]} demonstrated` : ''}.`,
     };
   };
   const g = svg

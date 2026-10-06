@@ -33,7 +33,7 @@ function showCard(html, evt, el, full = false) {
   // Dense strips (the close-approach chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
-    WM = near ? 1.5 : 6;
+    WM = near ? 1.5 : 2.5;
   card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
   const r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
@@ -73,8 +73,12 @@ function showCard(html, evt, el, full = false) {
       const rg = document.createRange();
       rg.selectNodeContents(n);
       const rs = n.matches('ul, div') ? [...n.children].map((c) => c.getBoundingClientRect()) : [...rg.getClientRects()];
-      return rs.filter((b) => b.width > 2 && b.height > 2 && b.bottom > 0 && b.top < VH);
+      const w = n.matches('h2, .callout') ? 3 : 1; // a heading or a callout must stay readable: covering one costs three times as much
+      return rs.filter((b) => b.width > 2 && b.height > 2 && b.bottom > 0 && b.top < VH).map((b) => Object.assign(b.toJSON(), { w }));
     });
+  // distance from the card to its mark: proximity matters (a card that drifts a long way from its mark is worse than one that covers a line of lede)
+  const gapTo = (q) => Math.hypot(Math.max(q.left - r.right, r.left - q.right, 0), Math.max(q.top - r.bottom, r.top - q.bottom, 0));
+  const avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? 20 * o.w : 0), 0);
   const ax = root?.querySelector('.xaxis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -88,8 +92,11 @@ function showCard(html, evt, el, full = false) {
             [cx - cw / 2, bottom + 8],
           ])(root.getBoundingClientRect())
         : [],
+    below = [cx - cw / 2, r.bottom + 10],
+    above = [cx - cw / 2, r.top - ch - 10],
     cands = [
       ...outside,
+      ...(near ? [] : mid < VH / 2 ? [below, above] : [above, below]),
       [r.right + G, mid - ch / 2],
       [r.left - cw - G, mid - ch / 2],
       [cx - cw / 2, r.top - ch - G],
@@ -113,16 +120,17 @@ function showCard(html, evt, el, full = false) {
       const score =
         others.filter((o) => hit(q, o)).length * WM +
         noText.filter((o) => hit(q, o)).length * 100 +
-        avoid.filter((o) => hit(q, o, 0)).length * 20 +
-        (ax && hit(q, ax, 2) ? 60 : 0) +
-        (hit(q, r, 12) ? 120 : 0) +
+        avoidCost(q) +
+        (ax && hit(q, ax, 2) ? (near ? 60 : 18) : 0) +
+        (hit(q, r, 6) ? 120 : 0) +
+        (near ? 0 : gapTo(q) / 4) +
         Math.abs(L - l) / 40 +
         Math.abs(T - tp) / 40 +
         i * 0.1;
       return { L, T, score };
     });
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
-  if (best.score >= (near ? 14 : 6) || avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0)) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
+  if (best.score >= (near ? 14 : 40) || (near && avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0))) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
     for (let T = TOP; T <= VH - ch - 8; T += 10)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
@@ -130,10 +138,10 @@ function showCard(html, evt, el, full = false) {
         const score =
           others.filter((o) => hit(q, o)).length * WM +
           noText.filter((o) => hit(q, o)).length * 100 +
-          avoid.filter((o) => hit(q, o, 0)).length * 20 +
-          (ax && hit(q, ax, 2) ? 60 : 0) +
+          avoidCost(q) +
+          (ax && hit(q, ax, 2) ? (near ? 60 : 18) : 0) +
           (hit(q, r, 12) ? 120 : 0) +
-          Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (near ? 15 : 60) +
+          (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 15 : gapTo(q) / 4) +
           0.5;
         if (score < best.score) best = { L, T, score };
       }
