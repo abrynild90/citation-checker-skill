@@ -144,7 +144,7 @@ export function drawL(el = document.getElementById('svgL')) {
     kx += wd;
     return at;
   });
-  const top = EXPORTING ? 6 : ky + 26;
+  const top = EXPORTING ? 6 : ky + 26 + 24; // the page repeats the years scale above the first row (24 px)
   // Geometry of each row: the words first, then a track from 0 to 16 years with the bar on it.
   info.forEach((r) => {
     const runs = [
@@ -206,6 +206,19 @@ export function drawL(el = document.getElementById('svgL')) {
         .tickFormat((d) => d)
         .tickSizeOuter(0),
     );
+  if (!EXPORTING)
+    svg
+      .append('g')
+      .attr('class', 'axis xaxis top-axis')
+      .attr('aria-hidden', 'true')
+      .attr('transform', `translate(0,${top - 8})`)
+      .call(
+        d3
+          .axisTop(x)
+          .tickValues(d3.range(0, MAX_YEARS + 1, phone ? 4 : 2))
+          .tickFormat((d) => (d === 0 ? '0 years' : d))
+          .tickSizeOuter(0),
+      );
   svg
     .append('text')
     .attr('class', 'axis-title')

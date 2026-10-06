@@ -335,3 +335,5 @@ details.table>summary{scroll-margin-top:110px}
   .more-rows{display:none}
 }
 @media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}}
+
+.legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}

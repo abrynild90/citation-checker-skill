@@ -92,3 +92,13 @@
 #chartC #quoteC{margin-top:var(--s-5)}
 
 :is(#chartC,#chartR) .tools p.note{max-width:66ch}
+
+.b-read{margin:var(--s-2) 0 0;max-width:var(--measure)}
+.b-read b{font-weight:600;color:var(--text)}
+/* Phone: the chart comes first and the kind chips (which also work as filters) sit under it */
+@media (max-width:640px){
+  #chartB{display:flex;flex-direction:column}
+  #chartB>*{order:0}
+  #chartB>.chips{order:1;margin-top:var(--s-3)}
+  #chartB>:is(ul.legend,.callout,details,.dl-row){order:2}
+}
