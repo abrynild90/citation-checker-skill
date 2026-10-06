@@ -389,6 +389,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       coreColor: '#ffe3f9',
       ends: 0.05,
       labelOffDisc: a.labelOffDisc,
+      labelFrac: a.labelFrac, // live: where along the beam its pill is anchored (default the middle)
       label: a.label,
       short: a.short,
       labelDx: a.dx,
