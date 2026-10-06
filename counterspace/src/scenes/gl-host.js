@@ -469,6 +469,7 @@ export class GLHost {
         it.fill(t, a.array, it.dynCol ? g.attributes.aCol.array : null);
         a.needsUpdate = true;
         if (it.dynCol) g.attributes.aCol.needsUpdate = true;
+        if (it.hideEmpty) obj.visible = it.vis > 0; // opt-in: a cloud with no fragment left is not drawn
         const tr = obj.userData.trail;
         if (tr) {
           const n = it.n,

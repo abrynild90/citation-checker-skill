@@ -2,7 +2,7 @@
 import { C } from './shared.js';
 import { IS_PHONE } from '../core.js';
 
-const PH = IS_PHONE ? 1.5 : 1; // phoneK, the distance factor of the 375 stage
+const PH = IS_PHONE ? 1.05 : 1; // phoneK, the distance factor of the 375 stage
 
 export const STARFISH = {
   id: 'starfish',
@@ -53,7 +53,7 @@ export const STARFISH = {
       dx: -96,
       dy: 4,
     },
-    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
+    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, strong: true, size: 0.34, span: 0.4, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
     { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14 },
     {
       type: 'belt',
@@ -91,7 +91,7 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -44], Johnston: [-140, -4], Thor: [-100, 58], Artificial: [-60, -21] },
+  liveOff: { Detonation: [-150, -44], Johnston: [-140, -4], Thor: [-100, 58], Artificial: [-60, -21], 'Satellite damaged': [-120, 36] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
@@ -111,7 +111,7 @@ export const STARFISH = {
   staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
   still: 0.7,
   camDist: 3.5,
-  phoneK: 1.5, // 375: zoomed out so the whole belt (L up to 1.7, field-line arches included) and the globe fit
+  phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
   staticZoom: 1.7,
   staticCenter: [35, -205],
   staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area

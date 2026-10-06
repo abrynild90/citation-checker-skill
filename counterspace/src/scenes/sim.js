@@ -289,6 +289,7 @@ export function buildSim(cfg) {
         thick: a.thick,
         push: a.push,
         gapIds: a.gapCrafts,
+        fadeDisc: a.fadeDisc, // opt-in: the line fades where it crosses the Earth's disc
         label: a.label,
         labelAt: pts[a.sat ? 118 : 45],
       });
@@ -325,7 +326,7 @@ export function buildSim(cfg) {
     if (a.type === 'target' && tgt) {
       const pts = [];
       for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, (k / 180) * 2 * Math.PI));
-      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35, role: 'orbit' });
+      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35, role: 'orbit', fadeDisc: a.fadeDisc, thick: a.orbitThick }); // fadeDisc: opt-in, the line fades over the Earth's disc
       items.push({
         kind: 'point',
         shape: 'sat',
@@ -369,7 +370,7 @@ export function buildSim(cfg) {
       });
     // impactUntil: the "Impact" pill is shown only while its step is on screen; a quiet tick keeps marking the point afterwards
     if (a.type === 'target' && tgt && !a.noHit && a.label && a.impactUntil != null)
-      items.push({ kind: 'point', shape: 'tick', color: '#fff1c1', pos: (t) => (t >= a.impactUntil ? tgt.hitPos : null) });
+      items.push({ kind: 'point', shape: 'tick', color: '#fff1c1', pos: (t) => (t >= a.impactUntil && (a.tickUntil == null || t < a.tickUntil) ? tgt.hitPos : null) }); // tickUntil: the tick retires with the last fragment
     if (a.type === 'target' && tgt && a.wreck)
       // A dim, smaller copy of the satellite stays at the impact point: the wreck marker (its debris is the cloud).
       items.push({
@@ -447,6 +448,11 @@ export function buildSim(cfg) {
         beamDy: a.beamDy,
         pos: (t) => pos(Math.min(t, a.t1)),
       };
+      if (a.labelUntil != null) {
+        // labelUntil: the aircraft's pill retires at this time (still frames keep it), so it does not crowd the missile and the collision
+        item.labelFn = (t, narrow, still) => (still || t < a.labelUntil ? a.label : null);
+        item.statusColor = () => item.color;
+      }
       if (!a.gnss) {
         aircraftPos = (t) => P(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         // Climb: altitude rises along the path (exaggerated) and a trail shows where the F-15 has been.
@@ -457,6 +463,17 @@ export function buildSim(cfg) {
         };
         aircraftPos = (t) => Pc(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         item.pos = (t) => (t >= a.t0 - 1e-6 ? aircraftPos(t) : null);
+        if (a.exit) {
+          // exit { dur, k }: after the release the aircraft keeps its heading, eases down and leaves; it is gone dur later (k: path lengths flown by then)
+          const ex = (t) => {
+            const u = clamp01((t - a.t1) / a.exit.dur),
+              s = 1 + a.exit.k * u * (2 - u),
+              la = lerp(a.path[0][0], a.path[1][0], s),
+              lo = lerp(a.path[0][1], a.path[1][1], s);
+            return ll(la, lo, r + 0.03 * (1 - 0.7 * u));
+          };
+          item.pos = (t) => (t < a.t0 - 1e-6 || t > a.t1 + a.exit.dur ? null : t <= a.t1 ? aircraftPos(t) : ex(t));
+        }
         const all = [];
         for (let k = 0; k <= 30; k++) all.push(Pc(k / 30));
         items.push({
@@ -469,6 +486,7 @@ export function buildSim(cfg) {
           width: 2,
           pts: (t) => {
             const s = clamp01((t - a.t0) / (a.t1 - a.t0));
+            if (a.exit && t > a.t1 + a.exit.dur) return []; // the trail leaves with the aircraft
             return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * 30) + 1));
           },
         });
@@ -627,6 +645,7 @@ export function buildSim(cfg) {
         maxPx: a.maxPx,
         additive: a.additive,
         trail: a.trail,
+        hideEmpty: a.hideEmpty,
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,
@@ -793,6 +812,8 @@ export function buildSim(cfg) {
         size: a.size,
         span: a.span,
         ringColor: a.ringColor,
+        strong: a.strong, // opt-ins: the second white ring and a bolder core
+        coreK: a.coreK,
         label: a.label,
         short: a.short,
         labelDx: a.dx,

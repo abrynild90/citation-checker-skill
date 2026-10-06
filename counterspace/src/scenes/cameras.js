@@ -123,6 +123,23 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       const poses = posesFor(asp);
       let i = 0;
       while (i < keys.length - 2 && t > keys[i + 1]) i++;
+      if (cfg.camGlide) {
+        // camGlide: one Catmull-Rom curve through the key poses (no stop at each key), so the view re-centres in a single smooth move
+        const h = keys[i + 1] - keys[i],
+          u = Math.max(0, Math.min(1, (t - keys[i]) / h)),
+          i0 = Math.max(0, i - 1),
+          i3 = Math.min(keys.length - 1, i + 2),
+          g = (f) =>
+            poses[i][f].map((p1, k) => {
+              const p2 = poses[i + 1][f][k],
+                m1 = i === 0 ? 0 : ((p2 - poses[i0][f][k]) / (keys[i + 1] - keys[i0])) * h,
+                m2 = i3 === i + 1 ? 0 : ((poses[i3][f][k] - p1) / (keys[i3] - keys[i])) * h,
+                u2 = u * u,
+                u3 = u2 * u;
+              return (2 * u3 - 3 * u2 + 1) * p1 + (u3 - 2 * u2 + u) * m1 + (-2 * u3 + 3 * u2) * p2 + (u3 - u2) * m2;
+            });
+        return { pos: g('pos'), look: g('look'), up: null };
+      }
       const s = smooth((t - keys[i]) / (keys[i + 1] - keys[i])),
         a = poses[i],
         b = poses[i + 1];
@@ -247,6 +264,18 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         look: c.look ? ll(c.look[0], c.look[1] + c.drift[1] * (t - 0.5), c.look[2]) : null,
         up: null,
       });
+      if (c.glide) {
+        // glide [[t, at, look], ...]: the camera moves between these views (smooth between keys), e.g. from a wide first view to a close one
+        const G = c.glide,
+          lerpV = (a, b, u) => a.map((x, k) => x + (b[k] - x) * u),
+          gl = (t) => {
+            let i = 0;
+            while (i < G.length - 2 && t > G[i + 1][0]) i++;
+            const u = smooth(Math.max(0, Math.min(1, (t - G[i][0]) / (G[i + 1][0] - G[i][0]))));
+            return { pos: ll(...lerpV(G[i][1], G[i + 1][1], u)), look: ll(...lerpV(G[i][2], G[i + 1][2], u)), up: null };
+          };
+        return { name: c.name, auto: false, ref: c.ref, hide: c.hide, insetRef: c.insetRef, hideShell: true, follow: gl, ...gl(0) };
+      }
       return {
         name: c.name,
         auto: !!c.auto,

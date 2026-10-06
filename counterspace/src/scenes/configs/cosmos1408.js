@@ -24,7 +24,7 @@ export const COSMOS1408 = {
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',
   hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 },
-  phoneHide: ['Plesetsk', 'Nudol'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
+  phoneHide: ['Plesetsk', 'Nudol', 'Debris of'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
   camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact', 'Debris of'] },
   launchCam: 'second',
   orbitAt: [52, 28, 4.5],
@@ -43,8 +43,8 @@ export const COSMOS1408 = {
       opacity: 0.85,
       sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.9, minPx: 66, maxPx: 120, dx: 96, dy: 14 },
     },
-    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: 78, impactDy: -44, dx: -40, dy: 62 },
-    { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true },
+    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: -84, impactDy: -46, dx: -40, dy: 62 },
+    { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true, flash: 0.2, coreK: 0.4, flashSpan: 0.12 },
     {
       type: 'debris',
       count: 1807,
@@ -53,6 +53,7 @@ export const COSMOS1408 = {
       spreadRaan: 2.2,
       dv: 1.0,
       decay: 0.25,
+      late: { t0: 0.34, k: 7, kr: 1.2 }, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
       color: C.debris,
       label: 'Debris of Cosmos 1408',
