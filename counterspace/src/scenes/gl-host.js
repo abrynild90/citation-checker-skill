@@ -208,6 +208,8 @@ export class GLHost {
     this.labelLayer.prepend(this.leaders);
     this.lock = null;
     this._act = null;
+    this._manual = false;
+    this._cutOn = false;
     this.setCam(0, true);
     this.t = 0;
     this.update(0);
@@ -224,6 +226,7 @@ export class GLHost {
       acts = this.sim.cfg.acts;
     this.lock = null;
     this._fbAct = null;
+    this._manual = true; // cfg.camCut: a view the viewer picked is never cut away from
     this._pinned = !!acts && !c.auto && c.act == null; // an episode scene's Wide preset stays put at every t (the acts do not cut away from it)
     if (acts && c.auto) {
       this._act = null;
@@ -305,7 +308,13 @@ export class GLHost {
   update(t) {
     const T = this.T;
     this.t = t;
-    const acts = this.sim.cfg.acts;
+    const acts = this.sim.cfg.acts,
+      cut = this.sim.cfg.camCut;
+    // cfg.camCut { t, cam, from } (opt-in): while the viewer has not picked a view, the camera cuts to preset `cam` from time t and back to `from` (0) before it
+    if (cut && !this._manual && this._cutOn !== t >= cut.t) {
+      this._cutOn = t >= cut.t;
+      this.setCam(this._cutOn ? cut.cam : (cut.from ?? 0), true);
+    }
     if (acts && this._pinned) {
       // pinned Wide preset: the camera never cuts to an act's camera
     } else if (acts && this.lock == null) {
