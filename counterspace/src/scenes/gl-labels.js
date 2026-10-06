@@ -228,6 +228,7 @@ const methods = {
       offK = noBanner ? w / 1000 : w >= 700 ? Math.min(1, w / 798) : 1; // cfg.stillOff (PNG stills): px at a 1000 px wide frame
     if (offs)
       Object.entries(offs).forEach(([n, d]) => {
+        if (this.sim.cfg.offFrom?.[n] > this.t) return; // cfg.offFrom { 'Label start': t } (opt-in): the fixed offset applies only from this time
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
         const r = raw[i],
