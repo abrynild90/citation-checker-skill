@@ -38,7 +38,7 @@ const POSTER_VIEW = {
   starfish: { cam: 0, back: 1.5, right: 0.1, lift: 0.18 }, // the whole globe with room around it, the Japan coast lit at the left
   gnss: { cam: 0, lift: 0.1 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.6 },
-  shakti: { back: 0.82 },
+  shakti: { back: 0.58, right: 0.08 },
   fengyun: { back: 1.35 },
 };
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
