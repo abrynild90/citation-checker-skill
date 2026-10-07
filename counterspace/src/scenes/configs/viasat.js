@@ -97,7 +97,7 @@ export const VIASAT = {
   camDist: 5.6,
   focus: [33, 12],
   shellLabels: { GEO: null },
-  offFrom: { 'Ground network': 0.3 }, // before this the placer's own slot above the hub is clear
+  offFrom: { 'Ground network': 0.32 }, // before this the placer's own slot above the hub is clear
   liveOff: { 'Ground network': [40, 72] }, // desktop: the label sits in the Atlantic to the west, off the modem field
   liveShort: ['Ground terminals', 'Ground management'], // the full text puts a corner of the label on the Earth at 900 px on the wide camera
   staticZoom: 1.5,
