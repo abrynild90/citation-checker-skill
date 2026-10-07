@@ -770,14 +770,29 @@ function miniShow() {
 let legalCompact = false;
 let bandFullH = 0;
 let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
+// The zoom panel scrolls up under the pinned strip: it fades out along the strip's bottom edge, so it is never cut off mid-line.
+function fadeZoom() {
+  const band = document.getElementById('legalBand'),
+    zb = document.getElementById('legalZoomBox');
+  if (!band || !zb) return;
+  const bb = band.getBoundingClientRect(),
+    zr = zb.getBoundingClientRect(),
+    overlap = isPhoneNow() ? 0 : bb.bottom - zr.top;
+  zb.classList.toggle('under-strip', overlap > 1 && zr.bottom > bb.bottom && getComputedStyle(band).visibility !== 'hidden');
+  zb.style.setProperty('--under', Math.max(0, Math.round(overlap)) + 'px');
+}
 export function legalScroll() {
+  legalScrollMain();
+  fadeZoom();
+}
+function legalScrollMain() {
   miniShow();
   const band = document.getElementById('legalBand'),
     tr = document.getElementById('timeline').getBoundingClientRect();
   // The years-to-law chart has its own 0 to 16 year scale, so the strip (which implies a shared calendar axis) steps aside while that chart is at the top.
   // The decade chart before it and the sources after it do not use the shared years either, so the strip steps aside from the decade chart to the end.
   const lagEl = document.getElementById('chartB') || document.getElementById('lag');
-  band.classList.toggle('off', !isPhoneNow() && !!lagEl && lagEl.getBoundingClientRect().top < band.offsetHeight + 24);
+  band.classList.toggle('off', !isPhoneNow() && ((!!lagEl && lagEl.getBoundingClientRect().top < band.offsetHeight + 24) || (tr.bottom < band.offsetHeight + 120 && tr.top < 0)));
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).
   const topY = document.getElementById('bandTop').getBoundingClientRect().top,

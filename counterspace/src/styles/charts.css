@@ -439,3 +439,8 @@ details.table>summary{scroll-margin-top:110px}
   .glossary{display:block;columns:2;column-gap:var(--s-6)}
   .glossary>div{break-inside:avoid}
 }
+/* The zoom panel passing under the pinned strip fades out along the strip's bottom edge; the strip itself steps aside at the end of the chapter (see legal.js) */
+@media (min-width:761px){
+  #legalZoomBox.under-strip{-webkit-mask-image:linear-gradient(to bottom,transparent var(--under,0px),#000 calc(var(--under,0px) + 36px));mask-image:linear-gradient(to bottom,transparent var(--under,0px),#000 calc(var(--under,0px) + 36px))}
+  .legal-band.off{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
+}
