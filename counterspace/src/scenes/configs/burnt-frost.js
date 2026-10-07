@@ -34,7 +34,7 @@ export const BURNT_FROST = {
   fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.55, dx: 0, dy: 44, minPx: 84, maxPx: 170 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.8, dx: 0, dy: 44, minPx: 72, maxPx: 135 },
     {
       type: 'target',
       label: 'USA-193',
