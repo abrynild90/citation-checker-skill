@@ -321,6 +321,36 @@ export function drawR(el = document.getElementById('svgR')) {
       if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y, t] : [right[0], right[1], p.y, t]);
       if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
     });
+    // Second pass, so that a wider chart never shows fewer names than a narrower one: a headline the first pass could not place gets more positions to try
+    // (further above or below the row, ends anchored to either side of the mark, start-anchored after it).
+    placed.forEach((p) => {
+      const t = HEADLINES[p.e.id];
+      if (!t || named.has(p)) return;
+      const w = tw(t, 12.5, 600),
+        ends = [Math.max(p.X1, p.bx ?? 0) + 4, p.X0 - 10, p.X0 - 14, p.X1 + 40, p.bx != null ? p.bx - 10 : null].filter((v) => v != null);
+      const okRow = (a, b, yy) => placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 8 || q.ext[0] > b + 8);
+      for (const off of [0, -15, 15, -13, 13, -26, 26, -37, 37]) {
+        const yy = p.y + off;
+        for (const hi of ends) {
+          const a = hi - w;
+          if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy, t) && okRow(a, hi, yy)) {
+            named.add(p);
+            lbox.push([a, hi, yy, t]);
+            lg.append('text').attr('class', 'dlabel').attr('x', hi).attr('y', yy + 4.4).attr('text-anchor', 'end').text(t);
+            return;
+          }
+        }
+        for (const lo of [p.X1 + (p.ongoing ? 30 : 16), p.X1 + 6]) {
+          const b = lo + w;
+          if (b < R - 8 && !cubeHit(lo, b, yy) && clear(lo, b, yy, t) && okRow(lo, b, yy)) {
+            named.add(p);
+            lbox.push([lo, b, yy, t]);
+            lg.append('text').attr('class', 'dlabel').attr('x', lo).attr('y', yy + 4.4).attr('text-anchor', 'start').text(t);
+            return;
+          }
+        }
+      }
+    });
     // a band header says how many marks carry no name on the chart, so a reader knows to hover for the rest
     bands.forEach((b) => {
       const un = placed.filter((q) => lane(q.e) === b.li && !named.has(q)).length;
