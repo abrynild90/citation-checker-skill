@@ -180,7 +180,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       short: a.short,
       labelDy: a.dy ?? -30,
       labelDx: a.dx,
-      scale: 1.7,
+      scale: a.scale ?? 1.7,
       bright: true,
       minPx: a.minPx,
       maxPx: a.maxPx,
