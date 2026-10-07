@@ -155,6 +155,7 @@ export function drawR(el = document.getElementById('svgR')) {
         'shape is stated plainly by the source, an outlined shape is stated with caution and a dashed outline is unclear or conflicting. A data table follows the chart.',
     );
   const ticks = x.ticks(d3.utcYear.every(zoomed ? (phone ? 10 : 5) : 10));
+  const glossOf = {};
   bands.forEach((b) => {
     svg
       .append('rect')
@@ -189,7 +190,7 @@ export function drawR(el = document.getElementById('svgR')) {
       .attr('x', INSET + 18)
       .attr('y', hy)
       .text(b.l.key);
-    svg
+    glossOf[b.li] = svg
       .append('text')
       .attr('class', 'band-gloss')
       .attr('x', INSET + 18 + tw(b.l.key, 14, 600) + 12)
@@ -281,7 +282,8 @@ export function drawR(el = document.getElementById('svgR')) {
     'ru-2019-cosmos2542-2543-usa245': 'Cosmos 2542',
   };
   if (!EXPORTING) {
-    const lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true'),
+    const named = new Set(),
+      lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true'),
       lbox = []; // [x0, x1, y] of every label drawn so far: labels keep 6 px apart
     // the same name twice close together (two entries of one programme) is drawn once
     const clear = (a, b, yy, t) =>
@@ -313,10 +315,16 @@ export function drawR(el = document.getElementById('svgR')) {
             break;
           }
         }
-        if (ax != null) return lg.append('text').attr('class', 'dlabel').attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
+        if (ax != null) return named.add(p), lg.append('text').attr('class', 'dlabel').attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
       }
+      if (side) named.add(p);
       if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y, t] : [right[0], right[1], p.y, t]);
       if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
+    });
+    // a band header says how many marks carry no name on the chart, so a reader knows to hover for the rest
+    bands.forEach((b) => {
+      const un = placed.filter((q) => lane(q.e) === b.li && !named.has(q)).length;
+      if (un > 0) glossOf[b.li].text(`${b.count} operations, ${un} unnamed here: hover or focus to read`);
     });
   }
 
