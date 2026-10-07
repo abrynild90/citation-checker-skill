@@ -89,7 +89,7 @@ export const VIASAT = {
 
   insetHalo: true, // dark casing on the inset's KA-SAT text (it sat on the blue globe)
   insetPhone: 'Top view',
-  insetEnd: { from: 0.62, title: 'Top view: KA-SAT keeps working', phone: 'KA-SAT works' }, // the closing note on the satellite, which is out of the Europe frame
+  insetEnd: { from: 0.3, title: 'Top view: KA-SAT (off frame) still works', phone: 'KA-SAT works' }, // the closing note on the satellite, which is out of the Europe frame
   insetSizePhone: [92, 76], // 375: a small inset in the corner, clear of the Terminals pill
   still: 0.75,
   stillOff: { KA: [-250, 20] }, // the still: the satellite pill sits left of the satellite, clear of the caption
@@ -97,7 +97,7 @@ export const VIASAT = {
   focus: [33, 12],
   shellLabels: { GEO: null },
   offFrom: { 'Ground network': 0.45 }, // before this the placer's own slot above the hub is clear
-  liveOff: { 'Ground network': [-165, 30] }, // desktop: the label sits in the Atlantic to the west, off the modem field
+  liveOff: { 'Ground network': [40, 72] }, // desktop: the label sits in the Atlantic to the west, off the modem field
   liveShort: ['Ground terminals', 'Ground management'], // the full text puts a corner of the label on the Earth at 900 px on the wide camera
   staticZoom: 1.5,
   stillCam: { at: [10, 12, 3.9], look: [24, 13, 0.5], hideShell: true },
@@ -110,8 +110,8 @@ export const VIASAT = {
       glide: [
         [0, [10, 11, 4.3], [8, 9, 1.0]],
         [0.3, [10, 11, 4.3], [8, 9, 1.0]],
-        [0.37, [30, 13, 2.35], [48, 17, 1.0]],
-        [1, [30, 13, 2.35], [48, 17, 1.0]],
+        [0.37, [30, 13, 2.35], [55, 25, 1.0]],
+        [1, [30, 13, 2.35], [55, 25, 1.0]],
       ],
       narrowK: 1, // phone: the glide's own distances carry the zoom (about 12% in, KA-SAT still in frame)
       phone: {

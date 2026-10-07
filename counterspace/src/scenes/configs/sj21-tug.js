@@ -106,8 +106,9 @@ export const SJ21_TUG = {
     { type: 'trail', craft: 'sj21', t0: 0.47, t1: 0.97, color: C.cn, byIndex: true },
     { type: 'trail', craft: 'cg2', t0: 0.5, t1: 0.8, color: C.dead, byIndex: true },
     // Follow views show almost no Earth: mark the belt itself, the height above it (SWF: 290 to 3,100 km by 27 Jan.) and what each trail is.
-    { type: 'tag', anchor: 'g', off: [0.2, 0, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.45, 1], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: -112, dy: 36 },
-    { type: 'path', anchor: 'g', offs: [[0.2, 0, 0], [0.2, 0.22, 0], [0.2, 0.44, 0]], noInset: true, staticHide: true, stillHide: true, staticKeep: false, vis: [0.72, 0.97], color: '#ffe6a8', opacity: 0.9, thick: 0.0045, label: '290 to 3,100 km above GEO (SWF)', short: '290–3,100 km above GEO', labelIdx: 1, dx: -118, dy: -22 },
+    { type: 'tag', anchor: 'g', off: [0.2, 0, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.45, 1], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: 120, dy: 30 },
+    { type: 'path', anchor: 'g', offs: [[0.2, 0, 0], [0.2, 0.22, 0], [0.2, 0.44, 0]], noInset: true, staticHide: true, stillHide: true, staticKeep: false, vis: [0.72, 0.97], color: '#ffe6a8', opacity: 0.85, thick: 0.0018, dash: 16 },
+    { type: 'tag', anchor: 'g', off: [0.2, 0.22, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.72, 0.97], color: '#ffe6a8', label: '290 to 3,100 km above GEO (SWF)', short: '290–3,100 km above GEO', dx: -128, dy: -26 },
   ],
   atmoK: 1.5, // the Earth is only a sliver in the follow views: a faint blue limb glow, lit or not, shows where it is
   atmoFloor: 0.4,
@@ -126,7 +127,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.98, include: [[0.21, -0.02, 0], [0.04, -0.16, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 1.0, lookCraft: true, include: [[0.14, -0.04, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', narrowK: 1, at: [36, 104, 4.9], look: [-2, 106, 2.4], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',
@@ -145,7 +146,7 @@ export const SJ21_TUG = {
       name: 'Looking down at the pair, Earth below',
       short: 'Looking down',
       ...ARM_TAG,
-      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.16, 0]] },
+      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.95, lookCraft: true, include: [[0.12, -0.04, 0], [0.04, -0.16, 0]] },
       phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } },
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader

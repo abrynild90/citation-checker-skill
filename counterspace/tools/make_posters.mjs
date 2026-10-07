@@ -24,7 +24,7 @@ const POSTER_T = {
   shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
-  viasat: 0.22,
+  viasat: 0.56, // the modems going red region by region over Europe, the beams still lit
   laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.3,
@@ -37,7 +37,7 @@ const POSTER_VIEW = {
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
-  spaceplanes: { cam: 2, boost: 1.3, back: 1.7 }, // OTV-7's elongated orbit around the Earth
+  spaceplanes: { cam: 2, boost: 1.3, back: 3.4, lift: -1.6 }, // OTV-7's elongated orbit around the Earth
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08, boost: 1.7 },

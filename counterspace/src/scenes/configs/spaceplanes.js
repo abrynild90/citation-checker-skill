@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 86 : 146; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 86 : 200; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -54,14 +54,14 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: IS_PHONE ? 68 : 99,
+      minPx: IS_PHONE ? 68 : 140,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 2.86 * PK,
+      scale: 4.3 * PK,
       label: 'X-37B (US)',
       short: 'X-37B',
       dx: 46,
@@ -88,8 +88,8 @@ export const SPACEPLANES = {
       opt: true,
       staticHide: true,
       labelIdx: 92,
-      dx: 20,
-      dy: 20,
+      dx: -60,
+      dy: -46,
     },
     {
       type: 'path',
@@ -103,20 +103,22 @@ export const SPACEPLANES = {
       label: 'OTV-7 orbit: 323 to 38,838 km up, tilt 59.1° (Feb. 2024)',
       short: 'OTV-7 orbit',
       labelIdx: 180,
-      dx: 40,
-      dy: -20,
+      labelNear: 'x37h', // the name rides the orbit near the craft, so it stays in the following frame with a leader
+      labelStep: 45,
+      dx: -10,
+      dy: -70,
     },
     {
       type: 'craft',
       id: 'x37h',
-      minPx: IS_PHONE ? 68 : 99,
+      minPx: IS_PHONE ? 68 : 140,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 4.0 * PK,
+      scale: 6.0 * PK,
       label: 'X-37B OTV-7 (US)',
       short: 'OTV-7',
       dx: -60,
@@ -144,21 +146,23 @@ export const SPACEPLANES = {
       staticHide: true,
       staticKeep: false,
       labelIdx: 30,
+      labelNear: 'csshq',
+      labelStep: 22,
       dx: 30,
-      dy: -30,
+      dy: -50,
     },
     {
       type: 'craft',
       id: 'csshq',
       variant: 'winged', // a generic winged vehicle: the sources show no more, so it is not drawn as an X-37B
-      minPx: IS_PHONE ? 38 : 54,
-      maxPx: IS_PHONE ? 52 : 76,
+      minPx: IS_PHONE ? 38 : 80,
+      maxPx: IS_PHONE ? 52 : 114,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
       color: C.cn,
       bright: true,
-      scale: 0.55 * PK,
+      scale: 0.85 * PK,
       label: 'CSSHQ (China)',
       short: 'CSSHQ',
       dx: 36,
@@ -230,6 +234,7 @@ export const SPACEPLANES = {
     { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 }, // the wake ends soon after Object J does
     { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 },
   ],
+  camOff: { 2: { 'GEO ring': [-30, -64] } }, // OTV-7 view: the ring's name sits above its line with a leader
   leaderK: 0.3, // an orbit name that sits just off its line still gets a leader
   liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee
   fillK: 0.5,
@@ -285,7 +290,7 @@ export const SPACEPLANES = {
       name: 'China: CSSHQ and released objects',
       chip: 'China CSSHQ',
       act: 2,
-      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: 0.93, dMin: 0.1, t: 0.75 },
+      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: 0.93, dMin: 0.1, t: 0.75, include: IS_PHONE ? undefined : [[0, -1.45, 0]] },
     },
     // unlocked from the tour
     { name: 'Whole scene: Earth and every orbit', at: [32, -25, 5.8], phone: { at: [32, -25, 8] }, ref: false, hide: ['OTV-7 orbit'] },

@@ -233,13 +233,27 @@ export function buildSim(cfg) {
         opacity: a.opacity ?? 0.6,
         thick: a.thick,
         fade: a.fade,
+        dash: a.dash,
         push: a.push,
         label: a.label,
         short: a.short,
         staticHide: a.staticHide,
         stillHide: a.stillHide,
         staticKeep: a.staticKeep,
-        labelAt: all[Math.min(all.length - 1, a.labelIdx ?? 0)],
+        // labelNear (opt-in): the name sits on the sample of the line that is labelStep samples from the named craft, so it stays in a following frame
+        labelAt: a.labelNear
+          ? (t) => {
+              const c = crafts[a.labelNear]?.raw(t);
+              if (!c) return all[Math.min(all.length - 1, a.labelIdx ?? 0)];
+              let k = 0,
+                best = 1e9;
+              all.forEach((p, i) => {
+                const d = Math.hypot(p[0] - c[0], p[1] - c[1], p[2] - c[2]);
+                if (d < best) (best = d), (k = i);
+              });
+              return all[(((k + (a.labelStep ?? 0)) % all.length) + all.length) % all.length];
+            }
+          : all[Math.min(all.length - 1, a.labelIdx ?? 0)],
         labelDx: a.dx,
         labelDy: a.dy,
         opt: a.opt,
@@ -865,6 +879,7 @@ export function buildSim(cfg) {
             soft: true,
             opacity: 0.7,
             width0: 0.0018,
+            maxPx: ac.beamMaxPx, // opt-in: the beam is at most this many screen pixels wide (a close camera would draw a fat green bar)
             a: (t) => ac.pos(t),
             b: (t) => {
               const p = ac.pos(t);

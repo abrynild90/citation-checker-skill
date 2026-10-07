@@ -33,7 +33,7 @@ export const COSMOS1408 = {
   orbitAt: [52, 28, 4.5],
   phoneK: 1.16,
   narrowK: 1, // phone: the fitted frame already keeps Cosmos 1408 above the caption
-  fitFill: 0.8, // desktop and phone: the follow frame pulled back about 10% so the ISS ring is not clipped
+  fitFill: IS_PHONE ? 0.8 : 0.94, // desktop and phone: the follow frame pulled back about 10% so the ISS ring is not clipped
   liveText: { 'ISS orbit': 'ISS orbit' }, // the shorter text keeps its leader within the limit at 900 px
   noSimCount: true,
   actors: [
@@ -60,8 +60,8 @@ export const COSMOS1408 = {
       decay: 0.25,
       late: { t0: 0.34, k: 7, kr: 1.2 },
       lateBoost: 1.9, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end
-      minPx: 4.2,
-      maxPx: 9, // the band keeps spreading along and across the orbit instead of a smear over the pole
+      minPx: 5,
+      maxPx: 11, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
       color: C.debris,
       label: 'Debris of Cosmos 1408',

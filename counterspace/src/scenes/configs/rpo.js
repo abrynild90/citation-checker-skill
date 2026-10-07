@@ -56,6 +56,7 @@ export const RPO = {
   narrowK: 1, // phone: the act cameras are fitted to the craft already; a further tighten cut USA 245 off
   leaderK: 0.3, // a place or orbit name that sits just off its line still gets a leader (the GEO belt name floated free)
   leaderCams: [1, 3], // only in the two GEO episode views
+  camOff: { 1: { 'SJ-25': [70, 62], 'SJ-21': [-64, -62] } }, // act 1 view: // the two names on opposite sides (leaders never overlap) once the pair separates
   labelEase: true, // labels glide instead of jumping each frame
   actFade: true, // a short cross-fade over the cut between episodes
   inset: 'Top view',
@@ -72,7 +73,7 @@ export const RPO = {
   ],
   actors: [
     { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.004, opacity: 0.6, inset: true, push: 0.2, label: 'GEO belt' },
-    { type: 'ring', alt: 600, inc: 97.9, raan: 40, color: '#8fd0ff', thick: 0.0025, opacity: 0.5, inset: true, push: 0.08 },
+    { type: 'ring', alt: 600, inc: 97.9, raan: 40, color: '#8fd0ff', thick: 0.0016, opacity: 0.1, inset: true, push: 0.08, fadeDisc: true }, // fadeDisc: no long orbit lines drawn across the Earth
     // ---- 1 · China + US in GEO (SJ-21, SJ-25, USA 270, USA 271), June 2025 to January 2026
     {
       type: 'craft',
