@@ -32,7 +32,7 @@ export const FENGYUN = {
   phoneK: 1.14,
   narrowK: 1, // phone: the fitted dolly already frames the debris; a further tighten cut it at the frame edge
   fitFill: IS_PHONE ? 0.88 : 0.78, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
-  liveOff: { 'Fengyun-1C': [0, -70], Xichang: [-60, 34], 'Debris ring': [120, 18] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
+  liveOff: { 'Fengyun-1C': [0, -70], Xichang: [-60, 34], 'Debris ring': [120, 18], 'SC-19': [-140, -34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
   offFrom: { 'Fengyun-1C': 0.18 }, // 375: before the launch the placer's own slot is clear; from here the pill hangs below-right of the satellite
   phoneOff: { 'Fengyun-1C': [18, 52], Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   sunView: { az: 60, el: 14 }, // a lower, more sideways sun: a clear terminator and a shaded limb, not a flat disc
