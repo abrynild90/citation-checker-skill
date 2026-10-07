@@ -127,7 +127,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 1.0, lookCraft: true, include: [[0.14, -0.04, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 1.0, fillRamp: [[0.14, 0.58], [0.32, 1.0]], lookCraft: true, include: [[0.14, -0.04, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', narrowK: 1, at: [36, 104, 4.9], look: [-2, 106, 2.4], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',
@@ -151,7 +151,7 @@ export const SJ21_TUG = {
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
   ],
-  liveOff: { 'SJ-21': [-98, -6], 'Compass G2': [104, -4] }, // once undocked each name sits beside its own satellite, left and right, clear of the models
+  liveOff: { 'SJ-21': [-98, -6], 'Compass G2': [122, -4] }, // once undocked each name sits beside its own satellite, left and right, clear of the models
   offFrom: { 'SJ-21': 0.84, 'Compass G2': 0.84 },
   camHide: { 1: ['GEO belt line', '290'], 2: ['GEO belt line', '290'], 5: ['GEO belt line', '290'] },
   stillHideText: ['290'], // the print frame leaves out the height gauge

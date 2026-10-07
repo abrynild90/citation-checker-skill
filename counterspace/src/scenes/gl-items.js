@@ -266,6 +266,7 @@ const methods = {
         if (it.dash) tube.material.uniforms.uDash.value = it.dash; // opt-in dashed line (dash count along its length)
         if (it.fadeDisc) tube.material.uniforms.uDisc.value = 1;
         if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds });
+        if (it.fadeT) (this.fadeRings ||= []).push({ mat: tube.material, op: it.opacity ?? 1, T: it.fadeT, cams: it.fadeCams, mesh: tube });
         if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
         if (it.taper != null) tube.material.uniforms.uTaper.value = it.taper; // thin at the start, full width at the far end: reads apart from the orbit line it crosses
         if (it.push) tube.material.uniforms.uPush.value = it.push; // orbit line pushed back from the camera: craft on it are drawn in front

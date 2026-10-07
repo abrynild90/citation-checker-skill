@@ -56,11 +56,12 @@ export const RPO = {
   narrowK: 1, // phone: the act cameras are fitted to the craft already; a further tighten cut USA 245 off
   leaderK: 0.3, // a place or orbit name that sits just off its line still gets a leader (the GEO belt name floated free)
   leaderCams: [1, 3], // only in the two GEO episode views
-  camOff: { 1: { 'SJ-25': [70, 62], 'SJ-21': [-64, -62] } }, // act 1 view: // the two names on opposite sides (leaders never overlap) once the pair separates
+  camOff: { 0: { 'Within 20': [-110, -122], 'USA 245': [-30, -100] }, 2: { 'Within 20': [-110, -122], 'USA 245': [-30, -100] }, 1: { 'SJ-25': [70, 62], 'SJ-21': [56, -78] } }, // act 1 view: // the two names on opposite sides (leaders never overlap) once the pair separates
   labelEase: true, // labels glide instead of jumping each frame
   actFade: true, // a short cross-fade over the cut between episodes
   inset: 'Top view',
   insetCorner: IS_PHONE ? 'bl' : undefined, // 375: the top view sits at the lower left, clear of the satellites
+  insetSize: [150, 114], // desktop: 20% smaller than the default, off the GEO craft at the top right
   insetSizePhone: [92, 74],
   scaleNote:
     'The distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen. ' +

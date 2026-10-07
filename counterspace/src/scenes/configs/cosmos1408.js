@@ -74,7 +74,7 @@ export const COSMOS1408 = {
   ],
   still: 0.8,
   phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
-  liveOff: { 'Cosmos 1408': [-96, 52], Plesetsk: [-96, 44], 'ISS orbit': [150, 0] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
+  liveOff: { 'Cosmos 1408': [-100, 14], Plesetsk: [-96, 44], 'ISS orbit': [150, 0], Impact: [34, -112] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],
