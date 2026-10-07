@@ -2109,3 +2109,34 @@
   font: 500 12px/1 var(--sans);
   color: var(--faint);
 }
+
+/* ---------- Desktop: the list of steps gets the height (a tighter lede, no visible hint line: the rows are buttons, and the cue says when more follow) */
+@media (min-width: 901px) {
+  .overlay .story-scroll {
+    padding-top: 18px;
+    padding-bottom: 14px;
+  }
+  .overlay .sv-lede {
+    font-size: 16.5px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .overlay .sv-steps {
+    margin-top: 6px;
+  }
+  .overlay:not(.is-static) .sv-note#stepsNote {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    margin: 0;
+    white-space: nowrap;
+  }
+  .overlay .sv-steps #sceneSteps {
+    margin-top: 4px;
+  }
+  .overlay .sv-about {
+    margin-top: var(--s-1);
+  }
+}

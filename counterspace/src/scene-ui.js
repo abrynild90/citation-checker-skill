@@ -547,6 +547,11 @@ const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && get
 // rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
 // (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
 function rowsFit() {
+  // the cue under the list takes its room before the rows are counted (updateCue hides it again if every row fits)
+  if (!STACKED.matches && !expanded) {
+    stepsCue.hidden = false;
+    stepsCue.querySelector('span').textContent ||= '0 more steps';
+  }
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.height = '';
   stepsEl.style.flex = '';
@@ -631,6 +636,13 @@ function fitSteps() {
       pad = H - left;
     }
     if (pad > 0.5) stepsEl.style.paddingBottom = pad + 'px';
+  }
+  // desktop: if the column still overflows (a rounding, a late font), take the last whole row out of the window rather than let the column scroll under the cue
+  if (r.h && !STACKED.matches) {
+    const kids = [...stepsEl.children];
+    for (let k = r.n; k > 1 && asideBody.scrollHeight > asideBody.clientHeight + 0.5; k--) {
+      stepsEl.style.height = kids[k - 2].offsetTop + kids[k - 2].offsetHeight + 'px';
+    }
   }
   const li = stepsEl.children[Math.max(0, stepIdx)];
   if (li && stepIdx >= 0) followStep(li, true);
