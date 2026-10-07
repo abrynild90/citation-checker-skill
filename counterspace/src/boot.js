@@ -66,7 +66,7 @@ nameThemeButton();
   const mark = () => {
     const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
     links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
-    rail.classList.toggle('on', now >= 0);
+    rail.classList.toggle('on', now >= 0 && now < links.length - 1); // hidden over the sources section and footer
     // One tab stop for the whole rail: the current chapter's dot (the first, until the reader has reached the timeline). Up and down arrows move along it.
     links.forEach((a, i) => a.setAttribute('tabindex', i === Math.max(now, 0) ? '0' : '-1'));
   };
