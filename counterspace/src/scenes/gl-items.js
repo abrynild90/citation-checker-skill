@@ -280,7 +280,10 @@ const methods = {
       if (it.label)
         this._label(
           it.label,
-          (t) => (it.labelEnd != null && t > it.labelEnd ? null : it.labelStart != null && t < it.labelStart ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt),
+          (t) => {
+            const la = typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt; // a function (opt-in, path labelNear): the label follows a point of the line
+            return it.labelEnd != null && t > it.labelEnd ? null : it.labelStart != null && t < it.labelStart ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? la : null) : la;
+          },
           null,
           null,
           it.labelDy ?? 0,
