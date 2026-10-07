@@ -37,7 +37,7 @@ export const SOLWIND = {
   lightsK: 0.5, // softer city lights: the break-up pieces and the missile stay readable over the coast
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.45, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [185, -84], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [188, -98], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 0.95, // phone: a lighter tighten, the debris cloud at its widest stays inside the frame
