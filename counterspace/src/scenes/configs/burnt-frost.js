@@ -53,8 +53,8 @@ export const BURNT_FROST = {
         { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
       ],
     },
-    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.4, coreK: 1.2, strong: true, hold: -0.14, flashSpan: 0.11 },
-    { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.08, minPx: 5, maxPx: 14, additive: true, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
+    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3 interceptor', short: 'SM-3', rocket: { style: 'slim', minPx: 46, maxPx: 72, glowMin: 24, glowMax: 40 }, flash: 0.4, flashCap: 1.2, coreK: 0.8, strong: true, hold: -0.14, flashSpan: 0.16, linger: 0.2, lingerK: 0.5, lingerEnd: 0.6 },
+    { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] }, darkHalo: 0.7, size: 0.1, minPx: 6, maxPx: 16, additive: false, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
   ],
   still: 0.47,
   status: [
