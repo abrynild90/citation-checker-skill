@@ -420,3 +420,7 @@ details.table>summary{scroll-margin-top:110px}
 /* the long data tables get a taller window so the page scrolls rather than a small nested box */
 @media (min-width:1001px){#tableA.tscroll,#tableC.tscroll,#tableR.tscroll{max-height:min(78vh,820px)}}
 .kb-key{margin:var(--s-2) 0 0;font-size:13px;line-height:1.4;color:var(--muted)}@media (hover:none){.kb-key{display:none}}
+/* the "Zoomed" chip is a fixed column: wrapped lines of the note hang under the text, not under the chip */
+:has(> .zbadge){display:flex;align-items:baseline;gap:var(--s-2)}
+:has(> .zbadge)>.zbadge{flex:none;margin-right:0!important}
+:has(> .zbadge)>.ztext{min-width:0}
