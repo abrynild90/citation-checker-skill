@@ -87,7 +87,7 @@ export const SPACEPLANES = {
       short: 'GEO',
       opt: true,
       staticHide: true,
-      labelIdx: 92,
+      labelIdx: 70,
       dx: -60,
       dy: -46,
     },
