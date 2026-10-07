@@ -225,6 +225,14 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         // the target point and the distance are fitted at every t to the craft (now and a little ahead), so the action always fills the frame.
         const an = anchors[c.fitCraft.anchor],
           ids = c.fitCraft.ids,
+          // fillRamp (opt-in): [[t, fill], ...] piecewise-linear fill over the timeline (a looser frame while the craft are far apart)
+          fillAt = (t) => {
+            const R = c.fitCraft.fillRamp;
+            if (!R) return c.fitCraft.fill ?? 0.8;
+            if (t <= R[0][0]) return R[0][1];
+            for (let i = 1; i < R.length; i++) if (t <= R[i][0]) return R[i - 1][1] + ((R[i][1] - R[i - 1][1]) * (t - R[i - 1][0])) / (R[i][0] - R[i - 1][0]);
+            return R[R.length - 1][1];
+          },
           at = (t, asp) => {
             const P = [];
             // fitCraft.lock: the target stays on the craft itself (a fast eccentric orbit would leave it at the frame edge or off a portrait stage)
@@ -240,8 +248,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               up: f.rad,
               dMin: c.fitCraft.dMin ?? 0.14,
               dMax: 6,
-              fillX: c.fitCraft.fill ?? 0.8,
-              fillY: (c.fitCraft.fill ?? 0.8) * 0.8,
+              fillX: fillAt(t),
+              fillY: fillAt(t) * 0.8,
               asp,
             });
             if (c.fitCraft.lock) {
