@@ -602,7 +602,7 @@ function fitSteps() {
     }
     r = rowsFit();
   }
-  r.h = 0; // never a fixed-height window
+  if (STACKED.matches) r.h = 0; // phone and tablet: every row at its natural height, the column scrolls; desktop: a window of whole rows
   if (r.h) {
     stepsEl.style.flex = '0 0 auto';
     stepsEl.style.height = r.h + 'px';
@@ -669,8 +669,37 @@ function trimSteps() {
   const gap = Math.max(0, H - end);
   stepsEl.style.clipPath = gap > 1 && end > 0 ? `inset(0 0 ${gap}px 0)` : '';
 }
+// "n more steps" under the list while rows are hidden: it says how many lie beyond the window and moves the list by one window when pressed.
+const stepsCue = document.createElement('button');
+stepsCue.type = 'button';
+stepsCue.className = 'steps-cue';
+stepsCue.hidden = true;
+stepsCue.innerHTML = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-down"/></svg><span></span>';
+stepsEl.after(stepsCue);
+stepsCue.onclick = () => {
+  const H = stepsEl.clientHeight,
+    y = stepsEl.scrollTop,
+    down = !stepsCue.classList.contains('up'),
+    kids = [...stepsEl.children];
+  let to = down ? y : 0;
+  if (down) for (const li of kids) if (li.offsetTop + li.offsetHeight - y <= H + 1) to = Math.max(to, li.offsetTop + li.offsetHeight);
+  lastUserScroll = performance.now();
+  stepsEl.scrollTo({ top: down ? Math.min(to, stepsEl.scrollHeight - H) : 0, behavior: REDUCED ? 'auto' : 'smooth' });
+};
+function updateCue() {
+  const sc = !STACKED.matches && !expanded && !!stepsEl.style.height && listScrolls();
+  if (!sc) return void (stepsCue.hidden = true);
+  const H = stepsEl.clientHeight,
+    y = stepsEl.scrollTop,
+    below = [...stepsEl.children].filter((li) => li.offsetTop + li.offsetHeight - y > H + 1).length;
+  stepsCue.hidden = false;
+  stepsCue.classList.toggle('up', !below);
+  stepsCue.querySelector('span').textContent = below ? `${below} more ${below === 1 ? 'step' : 'steps'}` : 'Back to the first step';
+  stepsCue.setAttribute('aria-label', below ? `Show ${below} more ${below === 1 ? 'step' : 'steps'}` : 'Back to the first step');
+}
 let trimTimer = 0;
 function fadeSteps() {
+  updateCue();
   clearTimeout(trimTimer);
   trimTimer = setTimeout(trimSteps, 90);
   const sc = listScrolls() && stepsEl.clientHeight > 120; // a window of a single row is not faded away

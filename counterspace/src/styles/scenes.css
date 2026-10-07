@@ -1853,16 +1853,64 @@
 }
 
 /* ---------- Round 10: the steps are read-only, so every row is drawn whole at its natural height; the story column scrolls when it must */
-.overlay .story-scroll > .sv-steps,
-.overlay .sv-steps #sceneSteps {
-  flex: 0 0 auto;
+@media (max-width: 900px) {
+  .overlay .story-scroll > .sv-steps,
+  .overlay .sv-steps #sceneSteps {
+    flex: 0 0 auto;
+  }
+  .overlay .sv-steps #sceneSteps {
+    max-height: none !important;
+    overflow-y: visible !important;
+    height: auto !important;
+    clip-path: none !important;
+    padding-bottom: 0 !important;
+  }
 }
-.overlay .sv-steps #sceneSteps {
-  max-height: none !important;
-  overflow-y: visible !important;
-  height: auto !important;
-  clip-path: none !important;
-  padding-bottom: 0 !important;
+/* Desktop: the list is a window of whole rows (fitSteps cuts it at a row edge); a cue under it counts the rows beyond, so no row is ever sliced by a fade */
+@media (min-width: 901px) {
+  .overlay #sceneSteps.can-down,
+  .overlay #sceneSteps.can-up,
+  .overlay #sceneSteps.can-up.can-down {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+.overlay .steps-cue {
+  flex: none;
+  align-self: flex-start;
+  margin: var(--s-1) 0 0;
+  padding: 4px 10px 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 13px/1.3 var(--sans);
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: var(--r-1);
+  cursor: pointer;
+}
+.overlay .steps-cue[hidden] {
+  display: none;
+}
+.overlay .steps-cue:hover {
+  color: var(--text);
+}
+.overlay .steps-cue:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 1px;
+}
+.overlay .steps-cue svg {
+  width: 14px;
+  height: 14px;
+}
+.overlay .steps-cue.up svg {
+  transform: rotate(180deg);
+}
+@media (max-width: 900px) {
+  .overlay .steps-cue {
+    display: none;
+  }
 }
 @media (min-width: 600px) and (max-width: 900px) and (max-aspect-ratio: 1/1) {
   .overlay .panel {
