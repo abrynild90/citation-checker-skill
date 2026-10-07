@@ -146,7 +146,7 @@ export const SJ21_TUG = {
       name: 'Looking down at the pair, Earth below',
       short: 'Looking down',
       ...ARM_TAG,
-      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.98, include: [[0.12, -0.02, 0], [0.04, -0.16, 0]] },
+      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.95, lookCraft: true, include: [[0.12, -0.04, 0], [0.04, -0.16, 0]] },
       phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } },
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
