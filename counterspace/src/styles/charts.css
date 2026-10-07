@@ -205,7 +205,7 @@ td a{overflow-wrap:anywhere}
 /* ------------------------------------------------------------------ hover and focus card: serif title, a short list, a quiet source line */
 .card{position:fixed;z-index:60;width:max-content;max-width:min(380px,calc(100vw - 16px));padding:var(--s-4) var(--s-4) var(--s-3);background:var(--surface);color:var(--text);
   border:var(--edge-line);border-radius:var(--r-2);box-shadow:var(--edge-shadow);font:400 13.5px/1.45 var(--sans);pointer-events:none;opacity:0;
-  transition:opacity 60ms var(--ease)}
+  transition:none}
 .card.on{opacity:1}
 .card.solid{transition:none}
 @media (prefers-reduced-motion:reduce){.card{transition:none;transform:none}}

@@ -181,6 +181,20 @@ function showCard(html, evt, el, full = false) {
         if (score < best.score) best = { L, T, score };
       }
   }
+  // The two dense strip charts (jamming and cyber, close approaches): the card sits centred above or below its own mark, clamped to the chart column and
+  // clear of the rail and the pinned strip; it moves to the side only when neither has room, and never covers the mark. It never drifts across the chart.
+  if (el && (near || el.closest('#svgC')) && !onBand) {
+    const L0 = Math.min(Math.max(8, cx - cw / 2), VW - cw - 8),
+      roomB = r0.bottom + 10 + ch <= VH - 8,
+      roomA = r0.top - 10 - ch >= TOP,
+      order = mid < VH / 2 ? ['b', 'a'] : ['a', 'b'];
+    const pick = order.find((k) => (k === 'b' ? roomB : roomA));
+    if (pick) best = { L: L0, T: pick === 'b' ? r0.bottom + 10 : r0.top - 10 - ch, score: 0 };
+    else {
+      const right = r.right + G + cw <= VW - 8;
+      best = { L: right ? r.right + G : Math.max(8, r.left - G - cw), T: Math.min(Math.max(TOP, mid - ch / 2), VH - ch - 8), score: 0 };
+    }
+  }
   card.style.left = best.L + 'px';
   card.style.top = best.T + 'px';
   // a small tail on the edge nearest the mark points at it
