@@ -466,6 +466,9 @@ export function rove(sel) {
       h = document.getElementById(hid);
     }
     nodes.forEach((n) => n.setAttribute('aria-describedby', hid));
+    // the chart's key line says how to use the keyboard, so the hint is there before anyone tabs in
+    const lg = box.closest('section')?.querySelector('ul.legend');
+    if (lg && !lg.nextElementSibling?.classList.contains('kb-key')) lg.insertAdjacentHTML('afterend', '<p class="kb-key">Tab once to enter a chart; arrow keys move between points.</p>');
   }
   nodes.forEach((n, i) => {
     n.addEventListener('keydown', (ev) => {
