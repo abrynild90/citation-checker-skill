@@ -195,6 +195,15 @@ function showCard(html, evt, el, full = false) {
       best = { L: right ? r.right + G : Math.max(8, r.left - G - cw), T: Math.min(Math.max(TOP, mid - ch / 2), VH - ch - 8), score: 0 };
     }
   }
+  // Decade chart: the card sits above the whole chart, centred on its bar and clamped to the chart box, so it never covers another decade or the 2020s header.
+  const boxB = el?.closest?.('#svgB') ? root?.getBoundingClientRect() : null;
+  const topB = document.getElementById('legalBand')?.classList.contains('off') ? 8 : TOP; // the pinned strip steps aside over this chart
+  if (boxB) best = { L: Math.min(Math.max(boxB.left, cx - cw / 2), Math.max(boxB.left, boxB.right - cw)), T: Math.max(topB, boxB.top - ch - 8), score: 0 };
+  // Pinned law strip: the card hangs just under the strip, centred on its symbol and clamped to the strip's width, never at the page edge.
+  if (el && onBand && bandR && bandR.top <= 1 && bandR.bottom > 0 && root) {
+    const rb = root.getBoundingClientRect();
+    best = { L: Math.min(Math.max(rb.left, cx - cw / 2), Math.max(rb.left, rb.right - cw)), T: Math.min(bandR.bottom + 8, VH - ch - 8), score: 0 };
+  }
   card.style.left = best.L + 'px';
   card.style.top = best.T + 'px';
   // a small tail on the edge nearest the mark points at it
