@@ -505,8 +505,11 @@ function followStep(li, instant) {
         }
     }
     if (Math.abs(to - y) > 1) {
-      const smooth = !(REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5);
+      // The active row is never seen half-way: a row below the window jumps in at once; the glide is only for a row already whole in view
+      const inView = li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1;
+      const smooth = inView && !(REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5);
       stepsEl.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' });
+      if (!smooth) trimSteps(); // the clip follows the jump at once, so the active row is whole on the very next frame
       // a smooth scroll that did not arrive (a busy page, a browser that skips it) is finished at once, so the list always rests on its row
       if (smooth)
         setTimeout(() => {
