@@ -200,7 +200,7 @@ export class GLHost {
       this.labelLayer.appendChild(this.epEl);
     }
     this.insetEl = null;
-    if (sim.cfg.inset) this._makeInset();
+    if (sim.cfg.inset && !sim.cfg.noInset) this._makeInset(); // cfg.noInset: a scene whose own picture is already the overview opts out of the Top-view inset
     this.leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.leaders.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;overflow:visible');
     this.leaders.setAttribute('aria-hidden', 'true');
