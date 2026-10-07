@@ -151,7 +151,7 @@ export const SJ21_TUG = {
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
   ],
-  liveOff: { 'SJ-21': [-98, -6], 'Compass G2': [104, -4] }, // once undocked each name sits beside its own satellite, left and right, clear of the models
+  liveOff: { 'SJ-21': [-98, -6], 'Compass G2': [122, -4] }, // once undocked each name sits beside its own satellite, left and right, clear of the models
   offFrom: { 'SJ-21': 0.84, 'Compass G2': 0.84 },
   camHide: { 1: ['GEO belt line', '290'], 2: ['GEO belt line', '290'], 5: ['GEO belt line', '290'] },
   stillHideText: ['290'], // the print frame leaves out the height gauge
