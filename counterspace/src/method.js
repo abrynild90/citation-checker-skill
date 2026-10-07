@@ -96,7 +96,9 @@ export function drawMethod() {
     );
   })();
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
-  document.getElementById('methodBody').innerHTML = `<div class="msec">
+  document.getElementById('methodBody').innerHTML = `<div class="mcols">
+<div class="mcol">
+<div class="msec">
   <h3 id="srcEditions">Editions and dates</h3>
   <p class="src-intro">Which editions the data rests on, and how current it is.</p>
   <h4 class="sub-h">What the data rests on</h4>
@@ -117,6 +119,21 @@ export function drawMethod() {
       ends with Cosmos 1408).</li>
   </ul>
 </div>
+<div class="msec">
+  <h3 id="srcCite">How to cite this page</h3>
+  <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
+  <div class="panel-card cite-card">
+    <p class="cite-text" id="citeText">Aaron Brynildson, “Counterspace Timeline, 1957–2026,” companion to <i>Space Security Law: Governance Beyond the Atmosphere</i>
+      (data from the Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed., April 2026; last updated ${DATA_DATE}).</p>
+    <div class="cite-actions">
+      <button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button>
+      <span class="cite-status" id="citeStatus" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+  <p>To cite an individual fact, cite the SWF edition and the source it rests on. The details shown for each point on a chart, and the data tables, give the page reference.</p>
+</div>
+</div>
+<div class="mcol">
 <div class="msec">
   <h3 id="codingRules" tabindex="-1">How we classified the data</h3>
   <p class="src-intro">The rules each chart follows when it counts and places an entry. Open one to read its rules.</p>
@@ -163,20 +180,6 @@ export function drawMethod() {
     <li>Debris is drawn as dots, one for each cataloged fragment, up to a limit of ${PARTICLE_BUDGET.toLocaleString()} dots on this device.</li></ul>`,
   )}
 </div>
-<div class="mrow">
-<div class="msec">
-  <h3 id="srcCite">How to cite this page</h3>
-  <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
-  <div class="panel-card cite-card">
-    <p class="cite-text" id="citeText">Aaron Brynildson, “Counterspace Timeline, 1957–2026,” companion to <i>Space Security Law: Governance Beyond the Atmosphere</i>
-      (data from the Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed., April 2026; last updated ${DATA_DATE}).</p>
-    <div class="cite-actions">
-      <button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button>
-      <span class="cite-status" id="citeStatus" role="status" aria-live="polite"></span>
-    </div>
-  </div>
-  <p>To cite an individual fact, cite the SWF edition and the source it rests on. The details shown for each point on a chart, and the data tables, give the page reference.</p>
-</div>
 <div class="msec">
   <h3 id="srcLicence">Licences and credits</h3>
   <p class="src-intro">What may be reused, and where the pictures come from.</p>
@@ -187,6 +190,7 @@ export function drawMethod() {
       into the page. The full-size images are fetched from a fixed copy hosted on jsDelivr, a public file host, only when you interact with the globe at the
       top of the page or open a 3D explainer, and never when animation is switched off on your device. Coastlines in the still diagrams come from Natural
       Earth (public domain) through the world-atlas dataset.</p>`)}
+</div>
 </div>
 </div>
 <div class="msec">
