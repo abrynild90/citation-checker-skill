@@ -42,7 +42,7 @@ function showCard(html, evt, el, full = false) {
   card.classList.remove('more');
   // Dense strips (the close-approach chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
-  const near = !!el?.closest?.('#svgR'),
+  const near = !!el?.closest?.('#svgR, #svgC'),
     WM = near || el?.closest?.('#svgL') ? 1.5 : 60; // the years-to-law rows are full-width strips: covering a bar or two beats covering a heading
   card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
@@ -78,7 +78,7 @@ function showCard(html, evt, el, full = false) {
               : [n.getBoundingClientRect()],
           )
       : [];
-  const noText = [...texts].map((n) => n.getBoundingClientRect()); // covering annotation or zone-label text costs more than any distance
+  const noText = [...texts].map((n) => Object.assign(n.getBoundingClientRect().toJSON(), { cheap: near && !!n.closest('.mark') })); // on a strip chart a row's own name costs little to cover for a moment // covering annotation or zone-label text costs more than any distance
   // Nor the chart's controls, its key or the section heading
   [...document.querySelectorAll('.seg, .legend, h2')].forEach((n) => {
     if (el && n.contains(el)) return;
@@ -148,7 +148,7 @@ function showCard(html, evt, el, full = false) {
         q = { left: L, right: L + cw, top: T, bottom: T + ch };
       const score =
         others.filter((o) => hit(q, o)).length * WM +
-        noText.filter((o) => hit(q, o)).length * 100 +
+        noText.reduce((a, o) => a + (hit(q, o) ? (o.cheap ? 22 : 100) : 0), 0) +
         avoidCost(q) +
         (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
@@ -160,19 +160,19 @@ function showCard(html, evt, el, full = false) {
       return { L, T, score };
     });
   let best = cands.reduce((a, b) => (b.score < a.score ? b : a));
-  if (best.score >= (near ? 14 : onBand ? 80 : 40) || (near && avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0))) || noText.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
+  if (best.score >= (near ? 14 : onBand ? 80 : 40) || (near && avoid.some((o) => hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o, 0))) || noText.some((o) => !o.cheap && hit({ left: best.L, right: best.L + cw, top: best.T, bottom: best.T + ch }, o))) {
     // every side placement covers something: search the viewport for the nearest spot that covers no mark, annotation or axis
     for (let T = TOP; T <= VH - ch - 8; T += 5)
       for (let L = 8; L <= VW - cw - 8; L += 10) {
         const q = { left: L, right: L + cw, top: T, bottom: T + ch };
         const score =
           others.filter((o) => hit(q, o)).length * WM +
-          noText.filter((o) => hit(q, o)).length * 100 +
+          noText.reduce((a, o) => a + (hit(q, o) ? (o.cheap ? 22 : 100) : 0), 0) +
           avoidCost(q) +
           (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
           (hit(q, r, 12) ? 120 : 0) +
           (rowsChart && hit(q, r0, 2) ? 150 : 0) +
-          (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 15 : gapTo(q) / 4) +
+          (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (el?.closest?.('#svgC') ? 5 : 15) : gapTo(q) / 2.2) +
           0.5;
         if (score < best.score) best = { L, T, score };
       }
