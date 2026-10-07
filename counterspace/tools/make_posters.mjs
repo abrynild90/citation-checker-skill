@@ -24,7 +24,7 @@ const POSTER_T = {
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
-  viasat: 0.55,
+  viasat: 0.22,
   laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.3,
@@ -33,7 +33,7 @@ const POSTER_T = {
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
-  viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
+  viasat: { cam: 0, back: 1.12, boost: 2.4 }, // the ground network and the KA-SAT beams: the satellite at the foot of the beams, Europe above
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
