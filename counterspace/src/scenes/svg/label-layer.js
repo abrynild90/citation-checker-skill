@@ -6,7 +6,7 @@ import { offDisc, placeLabels } from '../labels.js';
 import { SANS } from '../../fonts.js';
 import { INK, PILL, WARM, drawLeader, drawPill, pillSize, textW } from './pill.js';
 
-const KEY_FS = 12; // the key's type: the floor for any text in a diagram
+const KEY_FS = 13; // the key type, in screen pixels (the diagram is drawn at the size of its stage)
 
 // Key (cfg.staticKey: [colour, text, phoneText] rows) instead of a label per orbit or object: bottom-left, above the caption.
 export function legendBox(sim, opts, W, stY) {

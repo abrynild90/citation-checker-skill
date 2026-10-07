@@ -98,7 +98,7 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
   // The caption is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
     stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true, true) : ''),
-    stFs = !opts.panel && W >= 700 ? 14 : opts.panel || W < 520 ? 13 : 12, // a panel caption is at least 13 px; // the caption matches the live caption: 14 px on a desktop stage
+    stFs = !opts.panel && W >= 700 ? 14 : 13, // a panel caption is at least 13 px; // the caption matches the live caption: 14 px on a desktop stage
     stLh = Math.round(stFs * 1.35),
     maxW = W - (opts.panel ? 16 : 32) - 2 * PILL.padX,
     hasStatus = !!(opts.panel ? stTxt : st),
