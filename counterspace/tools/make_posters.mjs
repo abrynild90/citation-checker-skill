@@ -28,7 +28,7 @@ const POSTER_T = {
   laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.5,
-  spaceplanes: 0.15,
+  spaceplanes: 0.42,
 };
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
@@ -37,7 +37,8 @@ const POSTER_VIEW = {
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
-  spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
+  spaceplanes: { cam: 2, boost: 1.3, back: 1.7 }, // OTV-7's elongated orbit around the Earth
+  rpo: {},
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08, boost: 1.7 },
   fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
@@ -72,7 +73,7 @@ try {
     await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 90000 }); // the full Earth image loads when the first scene opens
     await page.waitForTimeout(1500);
     const key = id.replace(/-/g, '_');
-    if (id === 'rpo' && !process.env.NO_TRIPTYCH) {
+    if (id === 'rpo' && process.env.TRIPTYCH) {
       // RPO: one picture that tells the three-episode story, three tiles side by side (each at its own moment and act camera), numbered with the panel titles
       const shots = [];
       for (const [tt, cam, back] of TRIPTYCH) {
