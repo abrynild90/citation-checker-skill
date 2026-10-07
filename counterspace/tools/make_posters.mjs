@@ -36,7 +36,7 @@ const POSTER_VIEW = {
   viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
-  gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
+  gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08, boost: 1.7 },
