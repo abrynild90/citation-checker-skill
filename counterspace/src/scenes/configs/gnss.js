@@ -86,6 +86,7 @@ export const GNSS = {
       short: 'Plane 2',
       beamLabel: 'GPS signal',
       beamShort: 'GPS signal',
+      beamMaxPx: IS_PHONE ? undefined : 2,
       beamFrac: 0.3, // the label sits on the beam's midpoint (the visible part), not beside the aircraft
       beamDx: 0,
       beamDy: 0,
@@ -104,7 +105,7 @@ export const GNSS = {
   inset: 'GPS orbits (top view)',
   insetSize: [132, 104],
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
-  liveOff: { 'Jammer effect zone': [58, -22], 'Airliner 1': [-96, -62] }, // desktop: a leader runs from the label to the zone's edge
+  liveOff: { 'Jammer effect zone': [38, -22], 'Airliner 1': [-34, -50] }, // desktop: a leader runs from the label to the zone's edge
   stillHideText: ['Baltic Sea'], // the print drops the place name: it would sit on Airliner 1's leader
   noJamArrow: true, // the jammed link gets no edge arrowhead (it would read as a stray marker at the frame border)
   sunView: { az: 30, el: 32 }, // a higher, more frontal sun: the Baltic terrain is lit, not olive and murky
@@ -115,7 +116,7 @@ export const GNSS = {
     {
       name: 'Baltic: airliners and jammer zone',
       short: 'Baltic zone',
-      at: [38, 11, 1.42],
+      at: [39, 11, 1.52],
       look: [51.0, 21.0, 0.98],
       phone: { at: [40, 12, 1.4], look: [52.4, 21, 0.98] },
     },

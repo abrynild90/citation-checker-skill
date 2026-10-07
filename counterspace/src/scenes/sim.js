@@ -879,6 +879,7 @@ export function buildSim(cfg) {
             soft: true,
             opacity: 0.7,
             width0: 0.0018,
+            maxPx: ac.beamMaxPx, // opt-in: the beam is at most this many screen pixels wide (a close camera would draw a fat green bar)
             a: (t) => ac.pos(t),
             b: (t) => {
               const p = ac.pos(t);
