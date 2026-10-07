@@ -99,7 +99,7 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -62], Johnston: [-140, -4], Thor: [-120, -78], Artificial: [-60, -21], 'Satellite damaged': [-130, 30] },
+  liveOff: { Detonation: [-190, -62], Johnston: [-150, -4], Thor: [-120, -78], Artificial: [-60, -21], 'Satellite damaged': [-130, 30] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
