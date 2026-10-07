@@ -31,7 +31,7 @@ export const SHAKTI = {
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-130, -80], 'Microsat-R': [172, -14] }, // the two pills sit on opposite sides of the strike, one above and one below
   phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
-  hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.15, wf: 0.5 },
+  hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.45, wf: 0.5 },
   actors: [
     { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },
     {
@@ -43,12 +43,12 @@ export const SHAKTI = {
       maxPx: 100,
       bright: true,
       wreck: true,
-      impactDx: -80,
-      impactDy: -30,
+      impactDx: -170,
+      impactDy: -100,
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.5, flashCap: 1.35, strong: true, coreK: 0.9, flashSpan: 0.12, rocket: { minPx: 44, maxPx: 70 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55, flashCap: 1.6, strong: true, coreK: 1.5, flashSpan: 0.2, linger: 0.14, lingerK: 0.5, lingerEnd: 0.62, rocket: { minPx: 44, maxPx: 70 } },
     {
       type: 'debris',
       count: 130,
@@ -59,11 +59,11 @@ export const SHAKTI = {
       drift: 0.15,
       decay: 1.5,
       color: '#e6ecff',
-      palette: { hot: [1, 1, 1], mid: [0.86, 0.9, 1], cool: [0.66, 0.74, 0.95] }, // pale white and steel-blue sparks: nothing that reads as fires on land
+      palette: { hot: [1, 0.97, 0.86], mid: [1, 0.8, 0.52], cool: [0.95, 0.62, 0.4] }, // warm white-orange fragments, a dark halo behind each so they stay apart from the amber city lights
       darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
-      size: 0.1,
-      minPx: 5,
-      maxPx: 13,
+      size: 0.14,
+      minPx: 6,
+      maxPx: 16,
       additive: false,
       lateGlow: true,
     },
