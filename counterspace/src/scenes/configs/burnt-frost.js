@@ -18,7 +18,7 @@ export const BURNT_FROST = {
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
   phoneOff: { 'USS Lake Erie': [46, 34] }, // 375: the ship pill clears the caption pill below it
-  sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -62, el: 14 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
+  sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -95, el: 8 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,
   seaK: IS_PHONE ? 2.2 : 0.8, // the Pacific is dark even in daylight: lifted so the ship and satellite separate from it
@@ -36,7 +36,7 @@ export const BURNT_FROST = {
   fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.8, hideFrom: 0.62, dx: 0, dy: 44, minPx: 72, maxPx: 135 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.56, hideFrom: 0.58, dx: 0, dy: 44, minPx: IS_PHONE ? 72 : 100, maxPx: IS_PHONE ? 135 : 160 },
     {
       type: 'target',
       label: 'USA-193',
