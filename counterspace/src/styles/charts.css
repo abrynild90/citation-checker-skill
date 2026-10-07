@@ -433,3 +433,9 @@ details.table>summary{scroll-margin-top:110px}
 }
 @media (min-width:761px){.tscroll{scroll-padding-top:44px;scroll-padding-bottom:30px}}
 #tableR td:nth-child(3) .tl{white-space:nowrap}
+/* desktop: an opened data table closes its chapter with a modest gap, not a full chapter's padding */
+@media (min-width:1001px){
+  section.chart:has(> details.table[open]),section.chart:has(> .dl-group > details.table[open]){padding-bottom:var(--s-5)}
+  .glossary{display:block;columns:2;column-gap:var(--s-6)}
+  .glossary>div{break-inside:avoid}
+}
