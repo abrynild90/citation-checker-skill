@@ -414,7 +414,7 @@ export function drawB(el = document.getElementById('svgB')) {
       },
     ]),
   );
-  const cnt = (d, p) => `<b>${d}</b> demonstrated, <b>${p}</b> developing`;
+  const cnt = (d, p) => `<span class="nw"><b>${d}</b> demonstrated</span>, <span class="nw"><b>${p}</b> developing</span>`;
   table(
     'tableB',
     ['Kind of capability', ...CAPS.decades.map((d) => (d === CAPS.decades[CAPS.decades.length - 1] ? `${d}<span class="th-sub"> (SWF-assessed)</span>` : d))],

@@ -411,3 +411,4 @@ details.table>summary{scroll-margin-top:110px}
   #tableA td .tl{display:block}
   #tableA td .obj-b{display:block;color:var(--muted);font-size:13px}
 }
+.nw{white-space:nowrap}
