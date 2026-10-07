@@ -61,6 +61,7 @@ export const RPO = {
   actFade: true, // a short cross-fade over the cut between episodes
   inset: 'Top view',
   insetCorner: IS_PHONE ? 'bl' : undefined, // 375: the top view sits at the lower left, clear of the satellites
+  insetSize: [150, 114], // desktop: 20% smaller than the default, off the GEO craft at the top right
   insetSizePhone: [92, 74],
   scaleNote:
     'The distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen. ' +
