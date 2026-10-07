@@ -24,7 +24,7 @@ const POSTER_T = {
   shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
-  viasat: 0.22,
+  viasat: 0.56, // the modems going red region by region over Europe, the beams still lit
   laser: 0.5,
   'sj21-tug': 0.6,
   rpo: 0.3,
