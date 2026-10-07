@@ -91,7 +91,7 @@ export function buildSim(cfg) {
         for (const x of cfg.status) if (t >= x[0]) e = x;
         const s = phone && e[2] ? e[2] : e[3] || (cfg.captionShort && e[2]) || e[1],
           c = items._decayCloud;
-        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + 0.02) return s;
+        if (still || !c || cfg.noSimCount || !tgt || t < tgt.t + (cfg.countFrom ?? 0.02)) return s; // countFrom (opt-in): the "N in orbit" count waits until the debris is visible
         return phone ? `${s} · ${c.vis}/${c.n} in orbit` : `${s} · ${c.vis} of ${c.n} pieces still in orbit`;
       },
     });
@@ -268,7 +268,7 @@ export function buildSim(cfg) {
       // a place name with no marker (a sea or region named in the scene's title): a plain label at a lat/lon, no leader
       items.push({ kind: 'point', shape: 'none', pos: () => ll(a.at[0], a.at[1], 1.003), color: a.color || '#cfd8ea', label: a.label, short: a.short, labelDx: a.dx ?? 0, labelDy: a.dy ?? 0, opt: a.opt });
     if (a.type === 'ship')
-      items.push({ kind: 'point', shape: 'ship', shade: a.shade, pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy });
+      items.push({ kind: 'point', shape: 'ship', shade: a.shade, pos: () => ll(a.at[0], a.at[1], 1.004), color: '#cfd8ea', minPx: a.minPx, maxPx: a.maxPx, label: a.label, labelDx: a.dx, labelDy: a.dy, ...(a.labelUntil != null ? { labelFn: (t, narrow, still) => (still || t < a.labelUntil ? a.label : null), statusColor: () => '#cfd8ea' } : {}) }); // labelUntil (opt-in): the ship's pill retires after the intercept
     if (a.type === 'ring') {
       let raan = a.raan,
         phase = a.sat?.phase ?? 0;
@@ -796,7 +796,7 @@ export function buildSim(cfg) {
             staticPin: m.staticPin,
             labelDx: m.dx ?? 0,
             labelDy: m.dy ?? 0,
-            pos: (t) => (m.apex && t < tApex ? null : scl(d, rAlt(m.alt))),
+            pos: (t) => ((m.apex && t < tApex) || (IS_PHONE && m.phoneFrom && t < m.phoneFrom) ? null : scl(d, rAlt(m.alt))), // phoneFrom (opt-in): on a phone the marker waits until this t
           }),
         );
       }
@@ -854,7 +854,7 @@ export function buildSim(cfg) {
         };
         ac.state = true; // the airliner's colour is the story (GNSS lost or fine): its model keeps a glow in that colour
         ac.statusColor = (t) => (inZone(t) ? C.jam : C.ok);
-        ac.labelFn = (t) => (inZone(t) ? ac.label + ' · GPS signal lost' : ac.label + ' · GPS signal fine');
+        ac.labelFn = (t, narrow) => (narrow && ac.short ? ac.short + (inZone(t) ? ' · GPS lost' : ' · GPS fine') : inZone(t) ? ac.label + ' · GPS signal lost' : ac.label + ' · GPS signal fine'); // short (opt-in): the phone text
         for (let k = 0; k < 1; k++)
           items.push({
             kind: 'beam',

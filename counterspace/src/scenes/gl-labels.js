@@ -228,11 +228,25 @@ const methods = {
       offK = noBanner ? w / 1000 : w >= 700 ? Math.min(1, w / 798) : 1; // cfg.stillOff (PNG stills): px at a 1000 px wide frame
     if (offs)
       Object.entries(offs).forEach(([n, d]) => {
+        if (this.sim.cfg.offFrom?.[n] > this.t) return; // cfg.offFrom { 'Label start': t } (opt-in): the fixed offset applies only from this time
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
         const r = raw[i],
           // the override must not push the chip past the frame when its referent is near an edge (DN-2's GEO label early in the scene)
-          x = Math.max(r.w / 2 + 9, Math.min(w - r.w / 2 - 9, r.px + d[0] * offK)),
+          // a pill that would come within 8 px of the viewer edge flips to the other side of its anchor when that side fits
+          fx = (() => {
+            const a = r.px + d[0] * offK,
+              m = r.w / 2 + 12;
+            // (only when the clamped pill would sit on the anchor itself: a pill that stays clear above or below it just slides in)
+            const cl = Math.max(m, Math.min(w - m, a)),
+              covers = Math.abs(cl - r.px) < r.w / 2 + 6 && Math.abs(d[1] * offK) < r.h / 2 + 8;
+            if ((a > w - m || a < m) && d[0] && covers) {
+              const b = r.px - d[0] * offK;
+              if (b >= m && b <= w - m) return b;
+            }
+            return a;
+          })(),
+          x = Math.max(r.w / 2 + 12, Math.min(w - r.w / 2 - 12, fx)),
           y = Math.max(r.h / 2 + 9, Math.min(h - r.h / 2 - 9, r.py + d[1] * offK)),
           qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
           qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
@@ -478,7 +492,7 @@ const methods = {
   _makeInset() {
     const c = document.createElement('canvas');
     c.setAttribute('aria-hidden', 'true');
-    c.style.cssText = `position:absolute;right:8px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;pointer-events:none;background:rgba(8,13,28,.84)`;
+    c.style.cssText = `position:absolute;right:12px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;pointer-events:none;background:rgba(5,9,20,.95)`;
     this.labelLayer.appendChild(c);
     this.insetEl = c;
   },
@@ -491,7 +505,8 @@ const methods = {
     const bl = (phone && this.sim.cfg.insetCornerPhone ? this.sim.cfg.insetCornerPhone : this.sim.cfg.insetCorner) === 'bl', // insetCornerPhone: an opt-in corner for a phone-width stage // bottom-left, above the caption (scenes whose action fills the top right)
       sz = phone && this.sim.cfg.insetSizePhone ? this.sim.cfg.insetSizePhone : this.sim.cfg.insetSize,
       mc = (this._insetMeasure ||= document.createElement('canvas').getContext('2d')),
-      title = phone && this.sim.cfg.insetPhone ? this.sim.cfg.insetPhone : this.sim.cfg.inset;
+      ie = this.sim.cfg.insetEnd, // insetEnd { from, title, phone } (opt-in): a faint badge: from this t the inset's title carries a closing note
+      title = ie && this.t >= ie.from ? (phone && ie.phone ? ie.phone : ie.title) : phone && this.sim.cfg.insetPhone ? this.sim.cfg.insetPhone : this.sim.cfg.inset;
     mc.font = `600 ${INSET_PX}px ${SANS}`;
     // the box is as wide as its title needs at 12 px (never squeezed), and a little taller than before to make room for the larger type
     const w = Math.min(Math.round(this.el.clientWidth * 0.62), Math.max(phone ? (sz ? sz[0] : 128) : sz ? sz[0] : 188, Math.ceil(mc.measureText(title).width) + 18)),
@@ -504,7 +519,7 @@ const methods = {
       c.style.height = h + 'px';
     }
     c.style.top = (bl ? Math.round(this.el.clientHeight - h - (this.statusEl?.offsetHeight || 20) - 24) : phone ? 40 : 42) + 'px';
-    c.style.left = bl ? '8px' : Math.round(this.el.clientWidth - w - 8) + 'px';
+    c.style.left = bl ? '12px' : Math.round(this.el.clientWidth - w - 12) + 'px';
     c.style.right = 'auto';
     const g = c.getContext('2d'),
       t = this.t;

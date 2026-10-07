@@ -44,6 +44,7 @@ export const DN2 = {
           alt: 10000,
           label: '10,000 km · China’s stated figure',
           short: '10,000 km',
+          phoneFrom: 0.3,
           opt: true,
           color: '#ffd9a0',
           dx: -20,
@@ -73,6 +74,7 @@ export const DN2 = {
   still: 0.62,
   stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it
   camDist: 7.5,
+  narrowK: 1.1, // phone: the tracking view backs out a little (the rocket and the ring stay whole)
   stillCam: { at: [22, 8, 7.9], look: [0, 90, 0.7] },
   status: [
     [0, 'The DN-2 rocket climbs from Xichang toward GEO'],
@@ -84,7 +86,7 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [70, -64], Xichang: [-60, -40], '10,000': [-13, -42], Apogee: [78, -24], GEO: [38, 58] },
+  liveOff: { 'DN-2 path': [-30, -62], Xichang: [-60, -40], '10,000': [-13, -42], Apogee: [78, -24], GEO: [38, 58] },
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)

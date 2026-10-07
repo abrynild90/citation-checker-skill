@@ -185,6 +185,13 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       minPx: a.minPx,
       maxPx: a.maxPx,
       pos: () => g,
+      // endLabel (opt-in): from endFrom on the satellite's pill says it keeps working
+      ...(a.endLabel
+        ? {
+            labelFn: (t, narrow, still) => (!still && t >= a.endFrom ? (narrow ? a.endShort : a.endLabel) : narrow ? a.short : a.label),
+            statusColor: () => a.color,
+          }
+        : {}),
     });
     a.beams.forEach((b, bi) => {
       // space side stays bright; only the ground-side segment dims once the ground network is hit

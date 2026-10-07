@@ -23,6 +23,7 @@ export const LASER = {
   event: 'us-1997-miracl',
   hit: { lat: 32.4, lon: -106.4, alt: 420, inc: 97.0, t: 0.5, wa: 0.3, wf: 0.22 },
   lift: 30,
+  narrowK: 1, // phone: the fitted tracking views already frame MSTI-3 clear of the caption
   nightK: 2.2, // a lifted night ambient: the dark side of the globe keeps its land and ocean readable behind the beam
   stillShort: ['MIRACL beam'],
   staticT: 0.7, // static: the satellite well along its pass, so the beam is drawn at full length
@@ -99,7 +100,7 @@ export const LASER = {
   camCut: { t: 0.78, cam: 3 }, // the last step is about Peresvet: the view cuts to the Russia preset (unless the reader picked a view)
   phoneHide: ['MIRACL beam'], // 375: two pills only (White Sands, MSTI-3); the status line names the beam
   liveShort: ['White Sands'], // live: the short name, so the pill stays clear of the ground station and the limb
-  liveOff: { 'White Sands': [-112, 14], 'MSTI-3': [96, -30] }, // fixed offsets: the ground station and satellite pills keep their places as the pass moves
+  liveOff: { 'White Sands': [-112, 14], 'MSTI-3': [90, -30] }, // fixed offsets: the ground station and satellite pills keep their places as the pass moves
   still: 0.5,
   status: [
     [0, 'MSTI-3 rises over White Sands'],

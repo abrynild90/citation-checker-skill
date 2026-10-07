@@ -23,9 +23,11 @@ export const SHAKTI = {
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
   burstPadFrom: 0.3, // the first key frames are fitted to the island, the interceptor and the satellite, not the later burst ring
-  lookK: 0.86, // the Earth sits nearer the middle of the frame, not against its left edge
+  lookK: 0.9, // the Earth sits nearer the middle of the frame, not against its left edge
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
+  phoneHide: ['PDV'], // 375: Microsat-R and the island are enough around the strike
+  fitFillKeys: IS_PHONE ? undefined : [0.9, 0.7, 0.6, 0.6, 0.6, 0.6], // desktop: the opening is tight on the pad, then eases out
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-130, -80], 'Microsat-R': [172, -14] }, // the two pills sit on opposite sides of the strike, one above and one below
   phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
@@ -56,13 +58,13 @@ export const SHAKTI = {
       dv: 1.2,
       drift: 0.15,
       decay: 1.5,
-      color: '#ff7a3a',
-      palette: { hot: [1, 0.96, 0.9], mid: [1, 0.42, 0.18], cool: [0.95, 0.28, 0.14] }, // white and orange-red, not the amber of the city lights
-      darkHalo: 0.7, // a dark disc behind every fragment
-      size: 0.11,
+      color: '#e6ecff',
+      palette: { hot: [1, 1, 1], mid: [0.86, 0.9, 1], cool: [0.66, 0.74, 0.95] }, // pale white and steel-blue sparks: nothing that reads as fires on land
+      darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
+      size: 0.1,
       minPx: 5,
-      maxPx: 15,
-      additive: true,
+      maxPx: 13,
+      additive: false,
       lateGlow: true,
     },
   ],

@@ -16,14 +16,14 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.34, // the burst rings over Johnston Island in the tight first camera
+  starfish: 0.6, // the whole globe with the belt lobes and the field lines
   solwind: 0.5, // the textured satellite at the instant the missile reaches it (the textured model is drawn only until impact)
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
   cosmos1408: 0.6,
-  gnss: 0.5,
+  gnss: 0.35, // both airliners in view: one already red, one still fine
   viasat: 0.55,
   laser: 0.5,
   'sj21-tug': 0.6,
@@ -35,16 +35,16 @@ const POSTER_T = {
 const POSTER_VIEW = {
   viasat: { cam: 1, back: 0.85 }, // Europe close up: the modem regions fill the frame
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
-  starfish: { cam: 0 }, // the tight cut on the burst over Johnston Island (the first camera glides in on it)
+  starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 1, boost: 1.5, back: 1.9, lift: -0.15 },
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08, boost: 1.7 },
-  fengyun: { back: 0.95, boost: 1.7, right: 0.1 },
+  fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
   dn2: { back: 0.8, boost: 1.3, right: 0.5 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
-const TRIPTYCH = [[0.2, 1], [0.57, 2], [0.88, 3]]; // [t, camera preset] per episode (RPO poster)
+const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
 const TRIPTYCH_BRIEFS = ['SJ-21 + SJ-25 appear to dock', 'Cosmos 2543 near USA 245', 'USA 271 near SKYNET 5A'];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : Object.keys(POSTER_T);
@@ -75,8 +75,8 @@ try {
     if (id === 'rpo' && !process.env.NO_TRIPTYCH) {
       // RPO: one picture that tells the three-episode story, three tiles side by side (each at its own moment and act camera), numbered with the panel titles
       const shots = [];
-      for (const [tt, cam] of TRIPTYCH) {
-        const box = await page.evaluate(({ tt, cam }) => {
+      for (const [tt, cam, back] of TRIPTYCH) {
+        const box = await page.evaluate(({ tt, cam, back }) => {
           const h = window.__cs.host();
           h.playing = false;
           h.update(tt);
@@ -86,7 +86,7 @@ try {
           // the screen box of the craft on show (the picture is cropped around it)
           const cv = h.renderer.domElement;
           let pts = h.dyn
-              .filter((d) => d.it.kind === 'point' && d.it.prim && d.it.label && d.it.pos?.(tt))
+              .filter((d) => d.it.kind === 'point' && (d.it.prim || d.it.label) && d.obj.visible && d.it.pos?.(tt))
               .map((d) => {
                 const v = d.obj.position.clone().project(h.camera);
                 return [((v.x + 1) / 2) * cv.clientWidth, ((1 - v.y) / 2) * cv.clientHeight];
@@ -103,7 +103,7 @@ try {
           h.camera.updateProjectionMatrix();
           h.render();
           return { cx: w / 2, cy: hh / 2, bw: Math.max(...xs) - Math.min(...xs), bh: Math.max(...ys) - Math.min(...ys), w, h: hh };
-        }, { tt, cam });
+        }, { tt, cam, back });
         if (process.env.DEBUG_TRI) console.log(JSON.stringify(box));
         await page.waitForTimeout(900);
         shots.push({ png: (await page.locator('#sceneView canvas').first().screenshot({ type: 'png' })).toString('base64'), box });
@@ -122,11 +122,12 @@ try {
           // three square tiles in a row, each cropped around its craft, under one title: the three-episode story at a glance
           const gap = W * 0.0125,
             ts = (W - 4 * gap) / 3,
-            ty = H * 0.19;
+            th = ts * 1.12, // the tiles are 12% taller than square: the pictures use the space under the row
+            ty = H * 0.165; // and the title sits closer to them
           x.textBaseline = 'alphabetic';
           x.fillStyle = '#eef2fb';
           x.font = '600 ' + Math.round(H * 0.058) + 'px "Newsreader", Georgia, serif';
-          x.fillText('Three close approaches, three places', gap, H * 0.115);
+          x.fillText('Three close approaches, three places', gap, H * 0.105);
           const imgs = [];
           for (let i = 0; i < 3; i++) {
             const img = new Image();
@@ -135,36 +136,37 @@ try {
             imgs.push(img);
           }
           // the same scale for all three tiles: the crop that fits the widest group
-          const SW = Math.min(imgs[0].height, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.4 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.08 + 44 * (imgs[i].width / s.box.w)))));
+          const SW = Math.min(imgs[0].height / 1.12, imgs[0].width, Math.max(...shots.map((s, i) => Math.max(0.36 * imgs[i].height, Math.max(s.box.bw, s.box.bh) * (imgs[i].width / s.box.w) * 1.1 + 200 * (imgs[i].width / s.box.w)))));
           for (let i = 0; i < 3; i++) {
             const img = imgs[i],
               b = shots[i].box,
               k = img.width / b.w;
-            const sw = SW;
+            const sw = SW,
+              sh = SW * 1.12;
             const sx = Math.max(0, Math.min(img.width - sw, b.cx * k - sw / 2)),
-              sy = Math.max(0, Math.min(img.height - sw, b.cy * k - sw / 2));
+              sy = Math.max(0, Math.min(img.height - sh, b.cy * k - sh / 2));
             const tx = gap + i * (ts + gap);
             x.imageSmoothingQuality = 'high';
             x.save();
             x.beginPath();
-            x.roundRect(tx, ty, ts, ts, 10);
+            x.roundRect(tx, ty, ts, th, 10);
             x.clip();
-            x.drawImage(img, sx, sy, sw, sw, tx, ty, ts, ts);
+            x.drawImage(img, sx, sy, sw, sh, tx, ty, ts, th);
             x.restore();
             x.strokeStyle = 'rgba(150,175,230,.4)';
             x.lineWidth = 1.5;
             x.beginPath();
-            x.roundRect(tx, ty, ts, ts, 10);
+            x.roundRect(tx, ty, ts, th, 10);
             x.stroke();
             x.fillStyle = '#ffc86b';
             x.font = '700 ' + Math.round(H * 0.052) + 'px ' + SANS;
-            x.fillText(String(i + 1), tx + 2, ty + ts + H * 0.085);
+            x.fillText(String(i + 1), tx + 2, ty + th + H * 0.085);
             x.fillStyle = '#eef2fb';
             x.font = '600 ' + Math.round(H * 0.038) + 'px ' + SANS;
-            x.fillText(titles[i], tx + H * 0.05, ty + ts + H * 0.066);
+            x.fillText(titles[i], tx + H * 0.05, ty + th + H * 0.066);
             x.fillStyle = '#b3bdd6';
             x.font = Math.round(H * 0.032) + 'px ' + SANS;
-            x.fillText(briefs[i], tx + H * 0.05, ty + ts + H * 0.108);
+            x.fillText(briefs[i], tx + H * 0.05, ty + th + H * 0.108);
           }
           return c.toDataURL('image/webp', Q).split(',')[1];
         },

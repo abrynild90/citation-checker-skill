@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 66 : 112; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 86 : 146; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -54,14 +54,14 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: IS_PHONE ? 52 : 76,
+      minPx: IS_PHONE ? 68 : 99,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 2.2 * PK,
+      scale: 2.86 * PK,
       label: 'X-37B (US)',
       short: 'X-37B',
       dx: 46,
@@ -109,14 +109,14 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: IS_PHONE ? 52 : 76,
+      minPx: IS_PHONE ? 68 : 99,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
       model: 'plane',
       color: C.us,
       bright: true,
-      scale: 3.1 * PK,
+      scale: 4.0 * PK,
       label: 'X-37B OTV-7 (US)',
       short: 'OTV-7',
       dx: -60,
@@ -227,9 +227,11 @@ export const SPACEPLANES = {
       ],
     },
     { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0018, tail: 0.12, wakeOp: 0.2, taper: 0.1 }, // a soft wake: thin at its tail, faint, capped in length
-    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 }, // the wake ends soon after Object J does
-    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.4 },
+    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 }, // the wake ends soon after Object J does
+    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 },
   ],
+  leaderK: 0.3, // an orbit name that sits just off its line still gets a leader
+  liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee
   fillK: 0.5,
   cloudK: 1.2,
   cloudFloor: 0.8, // a cloud layer stays on the Earth even in the close China views, so it is not a flat tan

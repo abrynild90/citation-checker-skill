@@ -245,6 +245,29 @@ export class GLHost {
     }
     this.setCam(i);
   }
+  // Narrow stage (phone width): the picture is only about 320 px wide, so the camera moves in by cfg.narrowK (default 0.88; a camera may override it with
+  // its own `narrowK`; 1 opts out). cfg.narrowShift moves the view sideways by that fraction of the frame width (positive: the subject sits further left).
+  _nar(v, c) {
+    if (this.sim.cfg.spin || this.el.clientWidth >= 520 || this.camera.aspect > 2) return v;
+    const k = c?.narrowK ?? this.sim.cfg.narrowK ?? 0.88,
+      sh = c?.narrowShift ?? this.sim.cfg.narrowShift ?? 0,
+      L = v.look,
+      P = v.pos;
+    let pos = P.map((x, j) => L[j] + (x - L[j]) * k),
+      look = L;
+    if (sh) {
+      const f = [L[0] - pos[0], L[1] - pos[1], L[2] - pos[2]],
+        up = v.up || [0, 1, 0],
+        r = [f[1] * up[2] - f[2] * up[1], f[2] * up[0] - f[0] * up[2], f[0] * up[1] - f[1] * up[0]],
+        rl = Math.hypot(...r) || 1,
+        D = Math.hypot(...f),
+        m = sh * 2 * Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect * D;
+      // the view moves right by m, so the subject moves left in the frame
+      pos = pos.map((x, j) => x + (r[j] / rl) * m);
+      look = L.map((x, j) => x + (r[j] / rl) * m);
+    }
+    return { ...v, pos, look };
+  }
   setCam(i, instant) {
     const c = this.sim.cams[i],
       prev = this._camSeen ? { p: this.camera.position.clone(), l: this.target.clone(), u: this.camera.up.clone() } : null;
@@ -252,8 +275,9 @@ export class GLHost {
     this._user = false;
     this.hideShell = !!c.hideShell;
     this._syncShell();
-    this.target.set(...(c.look || [0, 0, 0]));
-    this.camera.position.set(...c.pos);
+    const nv = this._nar({ pos: c.pos, look: c.look || [0, 0, 0], up: c.up }, c);
+    this.target.set(...nv.look);
+    this.camera.position.set(...nv.pos);
     this.camera.up.set(...(c.up || [0, 1, 0]));
     this.camera.lookAt(this.target);
     this._heroFit();
@@ -281,7 +305,7 @@ export class GLHost {
     if (!c || this._user || (!tw && !drift)) return;
     const T = this.T,
       cam = this.camera,
-      v = c.follow ? c.follow(this.t, cam.aspect) : { pos: c.pos, look: c.look || [0, 0, 0], up: c.up };
+      v = this._nar(c.follow ? c.follow(this.t, cam.aspect) : { pos: c.pos, look: c.look || [0, 0, 0], up: c.up }, c);
     let e = 1;
     if (tw) {
       const f = Math.min(1, (performance.now() - tw.t0) / 700);
@@ -398,7 +422,7 @@ export class GLHost {
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
     const fc = this.sim.cams[this.camIdx];
     if (fc?.follow && !this._user) {
-      const v = fc.follow(t, this.camera.aspect);
+      const v = this._nar(fc.follow(t, this.camera.aspect), fc);
       this.target.set(...v.look);
       this.camera.position.set(...v.pos);
       this.camera.up.set(...(v.up || [0, 1, 0]));
