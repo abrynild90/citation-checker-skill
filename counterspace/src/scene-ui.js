@@ -549,7 +549,7 @@ const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && get
 // The list shows whole steps at rest. The story column is a flex column whose list takes what the lede and the foot leave; this measures how many whole
 // rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
 // (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
-const MAX_ROWS = 6;
+const MAX_ROWS = Infinity; // the room decides how many whole rows show, not a count
 function rowsFit() {
   // the cue under the list takes its room before the rows are counted (updateCue hides it again if every row fits)
   if (!STACKED.matches && !expanded) {
@@ -687,6 +687,7 @@ function fitSteps() {
   snapList(li);
   fadeSteps();
   trimSteps();
+  requestAnimationFrame(() => requestAnimationFrame(trimSteps)); // and again once the rows have settled at their final sizes
 }
 // After a re-fit the list may rest between two rows (the rows changed size): move it to the nearest row edge that keeps the active row in view.
 function snapList(active) {
