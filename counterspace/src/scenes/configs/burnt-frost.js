@@ -25,7 +25,8 @@ export const BURNT_FROST = {
   phoneHide: ['Larger pieces', 'Pieces falling'], // 375: Impact, the illustration pill and the ship label are enough at the top of the frame
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
-  liveOff: { Impact: [-150, -26], 'Larger pieces': [140, -36] }, // the collision frame: Impact to the left, the falling pieces to the right
+  liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62] }, // the collision frame: Impact to the left, the falling pieces to the right
+  camOff: { 2: { 'USA-193': [150, -30] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   earlyKey: true,
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.9, 1.1], // desktop: the first two key frames sit tight on the ship and the satellite, the second tighter, so the camera is already pushing in from the first second
   burstPadFrom: IS_PHONE ? undefined : 0.3, // desktop: the early keys are fitted to the craft alone (the burst ring is not in frame yet)
