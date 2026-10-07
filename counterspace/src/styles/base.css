@@ -169,7 +169,7 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
   .foot-base a,.foot-cols a{display:inline-flex;align-items:center;min-height:44px}
 }
 .dl-row{height:0;margin:0;position:relative;z-index:2}
-.dl-row .dl-wrap{position:absolute;right:0;top:var(--s-4)}
+.dl-row .dl-wrap{position:absolute;right:0;top:calc(var(--s-4) + 5px)}
 @media (max-width:700px){.dl-row{height:auto;margin-top:var(--s-4)}.dl-row .dl-wrap{position:relative;top:auto;right:auto}}
 @media print{.dl-row{display:none}}
 .dl-row .dl-menu{top:auto;bottom:calc(100% + 6px);left:auto;right:0}

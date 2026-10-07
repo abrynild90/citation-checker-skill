@@ -421,3 +421,14 @@ details.table>summary{scroll-margin-top:110px}
 :has(> .zbadge){display:flex;align-items:baseline;gap:var(--s-2)}
 :has(> .zbadge)>.zbadge{flex:none;margin-right:0!important}
 :has(> .zbadge)>.ztext{min-width:0}
+
+/* Tables: a scrolling table fades out at its bottom edge while more rows lie below, so a row cut at the edge reads as intentional; a focused row scrolls clear of the sticky
+   header (the page itself already scrolls focused marks clear of the pinned strip through html scroll-padding-top). */
+@property --fb{syntax:'<length>';inherits:false;initial-value:0px}
+@keyframes tfade{from{--fb:30px}92%{--fb:30px}to{--fb:0px}}
+@supports (animation-timeline:scroll()){
+  @media (min-width:1001px){
+    .tscroll{animation:tfade linear both;animation-timeline:scroll(self block);-webkit-mask-image:linear-gradient(#000 calc(100% - var(--fb)),transparent);mask-image:linear-gradient(#000 calc(100% - var(--fb)),transparent)}
+  }
+}
+@media (min-width:761px){.tscroll{scroll-padding-top:44px;scroll-padding-bottom:30px}}
