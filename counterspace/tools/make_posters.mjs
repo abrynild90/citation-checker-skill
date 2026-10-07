@@ -34,7 +34,7 @@ const POSTER_T = {
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   viasat: { cam: 0, back: 1.12, boost: 2.4 }, // the ground network and the KA-SAT beams: the satellite at the foot of the beams, Europe above
-  'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
+  'sj21-tug': { cam: 4, back: 1.35, lift: -0.4, right: -0.12, boost: 1.5 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
   spaceplanes: { cam: 2, boost: 1.3, back: 3.4, lift: -1.6 }, // OTV-7's elongated orbit around the Earth
