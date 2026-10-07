@@ -777,7 +777,12 @@ export function legalScroll() {
   // The decade chart before it and the sources after it do not use the shared years either, so the strip steps aside from the decade chart to the end.
   const lagEl = document.getElementById('chartB') || document.getElementById('lag');
   band.classList.toggle('off', !isPhoneNow() && !!lagEl && lagEl.getBoundingClientRect().top < band.offsetHeight + 24);
-  const stuck = !isPhoneNow() && band.getBoundingClientRect().top <= 0.5 && tr.top < -1 && tr.bottom > 200;
+  // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
+  // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).
+  const topY = document.getElementById('bandTop').getBoundingClientRect().top,
+    bandH = parseFloat(document.documentElement.style.getPropertyValue('--band-h')) || 0,
+    shrink = bandH ? Math.max(0, (legalCompact ? bandFullH : band.offsetHeight) - bandH) : 0;
+  const stuck = !isPhoneNow() && topY <= -shrink - 0.5 && tr.top < -1 && tr.bottom > 200;
   // which chart is under the strip decides the years it shows (a zoomed chart: its own window)
   const under = ['chartR', 'chartC'].find((id) => document.getElementById(id).getBoundingClientRect().top < band.offsetHeight + 40 && document.getElementById(id).getBoundingClientRect().bottom > band.offsetHeight);
   const want = stuck && under ? chartWindow[under] : null;
