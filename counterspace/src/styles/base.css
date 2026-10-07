@@ -195,3 +195,5 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 .dl-menu button:not(.dl-switch)+button:not(.dl-switch){border-top:1px solid var(--grid);border-top-left-radius:0;border-top-right-radius:0}
 .dl-menu button.dl-switch{margin-top:4px;border-top:1px solid var(--line-strong);border-top-left-radius:0;border-top-right-radius:0;background:var(--surface-2)}
 .dl-menu button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.dl-group{display:flex;flex-direction:column}
+.dl-group>.dl-row{order:-1}

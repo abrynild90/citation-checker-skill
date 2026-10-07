@@ -266,7 +266,7 @@ export function drawA(el = document.getElementById('svgA')) {
         `${d.altitude_km == null ? 'not reported' : d.altitude_km + ' km'}` +
         `.${d.fragments_cataloged ? ' ' + d.fragments_cataloged + ' fragments cataloged.' : ''}${hasScene(d) ? ' Select to open a 3D explainer.' : ''}`,
     );
-  g.append('circle').attr('class', 'hit').attr('r', 12);
+  g.append('circle').attr('class', 'hit').attr('r', 16);
   g.each(function (d) {
     const s = d3.select(this);
     s.append('g')
