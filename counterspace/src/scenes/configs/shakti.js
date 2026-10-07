@@ -60,11 +60,12 @@ export const SHAKTI = {
       drift: 0.15,
       decay: 1.5,
       color: '#ffc27a',
-      palette: { hot: [1, 0.9, 0.62], mid: [1, 0.66, 0.3], cool: [1, 0.55, 0.25] }, // warm fragments with short trails; the dark halo separates them from the amber city lights
+      palette: { hot: [1, 0.98, 0.82], mid: [1, 0.88, 0.5], cool: [1, 0.8, 0.42] }, // warm fragments with short trails; the dark halo separates them from the amber city lights
       darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
+      hard: true, // crisp gold-white fragments with a bright centre: not another soft amber town light
       size: 0.1,
-      minPx: 5,
-      maxPx: 13,
+      minPx: 4,
+      maxPx: 11,
       additive: true,
       trail: { n: 5, dt: 0.012, k: 0.6 },
       lateGlow: true,
