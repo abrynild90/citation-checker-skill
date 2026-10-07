@@ -43,11 +43,13 @@ function showCard(html, evt, el, full = false) {
   // Dense strips (the close-approach chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
-    WM = near ? 1.5 : 60;
+    WM = near || el?.closest?.('#svgL') ? 1.5 : 60; // the years-to-law rows are full-width strips: covering a bar or two beats covering a heading
   card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
   // A long bar (a campaign, a negotiation period) is a poor anchor: a hover card sits by the pointer, not by the bar's far end.
   let r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
+  const r0 = r,
+    rowsChart = !!el?.closest?.('#svgL'); // a full-width row: the card sits above or below its own row, never over it
   if (el && r.width > 240 && evt && typeof evt.clientX === 'number' && evt.type?.startsWith('mouse')) r = { left: evt.clientX - 6, right: evt.clientX + 6, top: r.top, bottom: r.bottom };
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
@@ -105,7 +107,7 @@ function showCard(html, evt, el, full = false) {
   const gapTo = (q) => Math.hypot(Math.max(q.left - r.right, r.left - q.right, 0), Math.max(q.top - r.bottom, r.top - q.bottom, 0));
   // A mark on the sticky law band has only the page text below it to land on, so covering a line of it (briefly, while hovering) costs little next to drifting away.
   const onBand = !!el?.closest?.('#legalBand'),
-    avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 60 : 20) * o.w : 0), 0);
+    avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 120 : 300) * o.w : 0), 0);
   const ax = root?.querySelector('.xaxis, g.axis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   const mid = (r.top + r.bottom) / 2,
@@ -150,6 +152,7 @@ function showCard(html, evt, el, full = false) {
         avoidCost(q) +
         (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
+        (rowsChart && hit(q, r0, 2) ? 150 : 0) +
         (near ? 0 : gapTo(q) / (onBand ? 2 : 4) + Math.max(0, gapTo(q) - 120) / 2) +
         Math.abs(L - l) / 40 +
         Math.abs(T - tp) / 40 +
@@ -168,6 +171,7 @@ function showCard(html, evt, el, full = false) {
           avoidCost(q) +
           (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
           (hit(q, r, 12) ? 120 : 0) +
+          (rowsChart && hit(q, r0, 2) ? 150 : 0) +
           (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 15 : gapTo(q) / 4) +
           0.5;
         if (score < best.score) best = { L, T, score };
