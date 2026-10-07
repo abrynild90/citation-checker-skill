@@ -78,7 +78,7 @@ export const SOLWIND = {
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
     { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', thick: 0.0065, rocket: { minPx: 62, maxPx: 78 }, strong: true, flash: 0.45, flashSpan: 0.24, flashCap: 1.1, coreK: 0.6, linger: 0.3, lingerK: 0.5, lingerEnd: 0.93, retire: 0.06 },
-    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, hideEmpty: true, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6', size: 0.1, minPx: 7, maxPx: 16, additive: true, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
+    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, hideEmpty: true, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6', palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] }, darkHalo: 0.8, size: 0.09, minPx: 6, maxPx: 14, additive: false, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
   ],
   still: 0.45,
   status: [
