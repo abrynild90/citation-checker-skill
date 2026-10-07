@@ -5,16 +5,29 @@ import { PILL, labelFs, pillSize, textW } from './pill.js';
 
 // Wrap the caption to maxW px (measured with the caption's own type); its height is part of the fit.
 function wrapStatus(text, maxW, fs) {
-  const lines = [];
-  let cur = '';
-  for (const wd of text.split(' ')) {
-    if (cur && textW((cur + ' ' + wd).trim(), fs, 500) > maxW) {
-      lines.push(cur);
-      cur = wd;
-    } else cur = (cur + ' ' + wd).trim();
+  const greedy = (w) => {
+    const lines = [];
+    let cur = '';
+    for (const wd of text.split(' ')) {
+      if (cur && textW((cur + ' ' + wd).trim(), fs, 500) > w) {
+        lines.push(cur);
+        cur = wd;
+      } else cur = (cur + ' ' + wd).trim();
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  };
+  // Balanced: the narrowest measure that still gives the same number of lines, so the last line is never a single orphaned word.
+  const first = greedy(maxW);
+  if (first.length < 2) return first;
+  let lo = maxW / 2,
+    hi = maxW;
+  for (let i = 0; i < 12; i++) {
+    const mid = (lo + hi) / 2;
+    if (greedy(mid).length <= first.length) hi = mid;
+    else lo = mid;
   }
-  if (cur) lines.push(cur);
-  return lines;
+  return greedy(hi);
 }
 
 // Extent (unit-sphere coordinates, y down) that the globe and every drawn subject must fit; `unit` projects a 3D point.
@@ -85,7 +98,7 @@ export function fitFrame(sim, el, t, opts, W, H, unit) {
   // The caption is wrapped first: its height is part of the fit.
   const st = sim.items.find((i) => i.kind === 'status'),
     stTxt = opts.panel ? opts.status || '' : (W < 520 && sim.cfg.staticStatusPhone) || sim.cfg.staticStatus || (st ? st.text(t, true, true) : ''),
-    stFs = !opts.panel && W >= 700 ? 14 : W < 520 ? 13 : 12, // the caption matches the live caption: 14 px on a desktop stage
+    stFs = !opts.panel && W >= 700 ? 14 : opts.panel || W < 520 ? 13 : 12, // a panel caption is at least 13 px; // the caption matches the live caption: 14 px on a desktop stage
     stLh = Math.round(stFs * 1.35),
     maxW = W - (opts.panel ? 16 : 32) - 2 * PILL.padX,
     hasStatus = !!(opts.panel ? stTxt : st),
