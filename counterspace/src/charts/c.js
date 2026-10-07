@@ -100,6 +100,9 @@ export function drawC(el = document.getElementById('svgC')) {
     const end = markL - 12 - cube,
       room = end - INSET;
     if (measure(full) <= room) return { ...p, mode: 'left', lines: [full], tx: end, anchor: 'end', h: 34 };
+    // a label that fits on one line beside the bar's far end stays on one line (rows stay one line each)
+    const startR = markR + 12 + cube;
+    if (!ongoing && measure(full) <= R - 12 - startR) return { ...p, mode: 'right', lines: [full], tx: startR, anchor: 'start', h: 34 };
     if (room >= 170) {
       const lines = wrapLines(full, room, measure);
       if (lines.length <= 2) return { ...p, mode: 'left', lines, tx: end, anchor: 'end', h: Math.max(34, 16 + lines.length * LH) };
