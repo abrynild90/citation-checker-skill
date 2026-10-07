@@ -29,7 +29,7 @@ export const SHAKTI = {
   phoneHide: ['PDV'], // 375: Microsat-R and the island are enough around the strike
   fitFillKeys: IS_PHONE ? undefined : [0.9, 0.7, 0.6, 0.6, 0.6, 0.6], // desktop: the opening is tight on the pad, then eases out
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
-  liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-130, -80], 'Microsat-R': [172, -14] }, // the two pills sit on opposite sides of the strike, one above and one below
+  liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-40, -120], 'Microsat-R': [165, 6] }, // the two pills sit on opposite sides of the strike, one above and one below
   camOff: { 1: { PDV: [95, -135] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
   phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.45, wf: 0.5 },
@@ -49,7 +49,7 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55, flashCap: 1.6, strong: true, coreK: 1.5, flashSpan: 0.2, linger: 0.14, lingerK: 0.5, lingerEnd: 0.62, rocket: { minPx: 44, maxPx: 70 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55, flashCap: 1.25, strong: true, coreK: 0.95, flashSpan: 0.3, linger: 0.2, lingerK: 0.6, lingerEnd: 0.7, rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 } },
     {
       type: 'debris',
       count: 130,
@@ -60,12 +60,12 @@ export const SHAKTI = {
       drift: 0.15,
       decay: 1.5,
       color: '#e6ecff',
-      palette: { hot: [1, 0.97, 0.86], mid: [1, 0.8, 0.52], cool: [0.95, 0.62, 0.4] }, // warm white-orange fragments, a dark halo behind each so they stay apart from the amber city lights
+      palette: { hot: [0.92, 1, 1], mid: [0.55, 0.9, 1], cool: [0.4, 0.75, 1] }, // bright white-cyan fragments: a clear colour difference from the amber city lights
       darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
-      size: 0.14,
-      minPx: 6,
-      maxPx: 16,
-      additive: false,
+      size: 0.2,
+      minPx: 9,
+      maxPx: 22,
+      additive: true,
       lateGlow: true,
     },
   ],

@@ -16,7 +16,7 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.35, // the detonation flash with the first field lines and the Hawaiian chain
+  starfish: 0.6, // the belt pulled out around the whole Earth, the burst inside it
   solwind: 0.4, // the F-15, the released missile and the textured satellite all in frame
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)

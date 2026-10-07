@@ -26,7 +26,7 @@ export const BURNT_FROST = {
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62] }, // the collision frame: Impact to the left, the falling pieces to the right
-  camOff: { 2: { 'USA-193': [150, -30] } }, // From orbit: the satellite pill sits off the disc, right of the limb
+  camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.9, 1.1], // desktop: the first two key frames sit tight on the ship and the satellite, the second tighter, so the camera is already pushing in from the first second
@@ -34,7 +34,7 @@ export const BURNT_FROST = {
   fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.55, dx: 0, dy: 44, minPx: 84, maxPx: 170 },
+    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.8, dx: 0, dy: 44, minPx: 72, maxPx: 135 },
     {
       type: 'target',
       label: 'USA-193',
@@ -53,8 +53,8 @@ export const BURNT_FROST = {
         { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
       ],
     },
-    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.4, coreK: 1.2, strong: true, hold: -0.14, flashSpan: 0.11 },
-    { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.08, minPx: 5, maxPx: 14, additive: true, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
+    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3 interceptor', short: 'SM-3', rocket: { style: 'slim', minPx: 46, maxPx: 72, glowMin: 24, glowMax: 40 }, flash: 0.4, flashCap: 1.2, coreK: 0.8, strong: true, hold: -0.14, flashSpan: 0.16, linger: 0.2, lingerK: 0.5, lingerEnd: 0.6 },
+    { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] }, darkHalo: 0.7, size: 0.1, minPx: 6, maxPx: 16, additive: false, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
   ],
   still: 0.47,
   status: [

@@ -69,7 +69,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       n,
       bg: true,
       color: a.color,
-      alpha: 0.95,
+      alpha: a.alpha ?? 0.95,
       size: a.size ?? 0.017,
       label: a.label,
       short: a.short,
