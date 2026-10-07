@@ -2160,3 +2160,8 @@
     transform-origin: bottom left;
   }
 }
+
+/* A still diagram is height-limited on a wide screen (the Earth and its ring fill the height): a narrower dialog removes the dead margins either side of it */
+@media (min-width: 1500px) {
+  .overlay.is-static .panel { width: min(1320px, 100%); }
+}
