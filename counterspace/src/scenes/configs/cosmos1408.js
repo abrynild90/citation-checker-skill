@@ -46,7 +46,7 @@ export const COSMOS1408 = {
       crossHit: 0.55,
       thick: 0.0032,
       opacity: 0.85,
-      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: 1.35, minPx: IS_PHONE ? 54 : 46, maxPx: 84, dx: 134, dy: 8 },
+      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: IS_PHONE ? 1.35 : 2, minPx: IS_PHONE ? 54 : 64, maxPx: IS_PHONE ? 84 : 120, dx: 134, dy: 8 },
     },
     { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: -84, impactDy: -46, dx: -40, dy: 62 },
     { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true, flash: 0.2, coreK: 0.4, flashSpan: 0.12 },
@@ -74,7 +74,7 @@ export const COSMOS1408 = {
   ],
   still: 0.8,
   phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
-  liveOff: { 'Cosmos 1408': [-96, 52] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
+  liveOff: { 'Cosmos 1408': [-96, 52], Plesetsk: [-96, 44], 'ISS orbit': [150, 0] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],
