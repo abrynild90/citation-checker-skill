@@ -36,7 +36,7 @@ const POSTER_VIEW = {
   viasat: { cam: 0, back: 1.12, boost: 2.4 }, // the ground network and the KA-SAT beams: the satellite at the foot of the beams, Europe above
   'sj21-tug': { cam: 4 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
-  gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
+  gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
   spaceplanes: { cam: 2, boost: 1.3, back: 1.7 }, // OTV-7's elongated orbit around the Earth
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
