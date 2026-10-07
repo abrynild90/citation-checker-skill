@@ -37,7 +37,7 @@ export const DN2 = {
       dy: -50,
       head: true,
       ghostOpacity: 0.5, // the whole planned path stays readable before the rocket flies it
-      rocket: { style: 'slim', minPx: IS_PHONE ? 56 : 66, maxPx: IS_PHONE ? 78 : 92, glowMin: IS_PHONE ? 32 : 38, glowMax: IS_PHONE ? 52 : 58 },
+      rocket: { style: 'slim', minPx: IS_PHONE ? 56 : 66, maxPx: IS_PHONE ? 78 : 92, glowMin: IS_PHONE ? 32 : 8, glowMax: IS_PHONE ? 52 : 14 },
       apexT: 0.47,
       rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth
       staticAt: [0.6, 0.09],
@@ -88,7 +88,7 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [-30, -34], Xichang: [-60, -40], '10,000': [-13, -42], '≥30,000': [76, -44], GEO: [78, 62] }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
+  liveOff: { 'DN-2 path': [-30, -34], Xichang: [-60, -40], '10,000': [-120, -24], '≥30,000': [80, -70], GEO: [20, 74] }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
@@ -99,7 +99,7 @@ export const DN2 = {
   staticFitRing: true, // static: the whole GEO ring fits inside the panel at every width (no clipping at the edges)
   staticOnDiscPhone: ['Xichang'], // static, 375: Xichang's short label sits beside its site on the disc (off the disc it needed a long leader across the Earth)
   cameras: [
-    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.34, ahead: 0.07, fill: 0.86, zoom: 1.3, lookK: 0.4 } },
+    { name: 'Follow the rocket', short: 'Follow', trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: 0.34, ahead: 0.07, fill: IS_PHONE ? 0.86 : 0.76, zoom: 1.3, lookK: 0.4 } },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
     { name: 'Side view', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
     { name: 'From the pole', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
