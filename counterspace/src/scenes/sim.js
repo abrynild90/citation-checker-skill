@@ -307,6 +307,8 @@ export function buildSim(cfg) {
         push: a.push,
         gapIds: a.gapCrafts,
         fadeDisc: a.fadeDisc, // opt-in: the line fades where it crosses the Earth's disc
+        fadeT: a.fadeT, // opt-in [t0, t1] (+ fadeCams: camera indices): the 3D line fades out over that time span (the inset keeps it)
+        fadeCams: a.fadeCams,
         label: a.label,
         labelAt: pts[a.sat ? 118 : 45],
       });

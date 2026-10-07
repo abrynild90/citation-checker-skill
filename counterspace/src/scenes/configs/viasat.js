@@ -20,7 +20,7 @@ export const VIASAT = {
   related: 'tallinn-2017',
   event: 'ru-2022-viasat',
   actors: [
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.003, opacity: 0.5, inset: true },
+    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.003, opacity: 0.5, inset: true, fadeT: [0.3, 0.4], fadeCams: [0, 1] }, // the GEO line leaves the Europe views (it entered from the right edge as a stray line)
     {
       type: 'geo',
       lon: 9,
