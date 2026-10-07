@@ -30,7 +30,7 @@ export const SHAKTI = {
   fitFillKeys: IS_PHONE ? undefined : [0.95, 0.85, 0.8, 0.76, 0.68, 0.62], // desktop: the opening is tight on the pad, then eases out
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: { Impact: [-200, -50], 'Abdul Kalam': [-34, 66], 'PDV': [-40, -120], 'Microsat-R': [165, 6] }, // the two pills sit on opposite sides of the strike, one above and one below
-  camOff: { 1: { PDV: [95, -135] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
+  camOff: { 1: { PDV: [95, -135], 'Abdul Kalam': [-150, 40] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
   phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.45, wf: 0.5 },
   actors: [
