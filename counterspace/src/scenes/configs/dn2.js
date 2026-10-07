@@ -88,7 +88,7 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [-30, -34], Xichang: [-60, -40], '10,000': [-13, -42], '≥30,000': [76, -44], GEO: [62, 42] }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
+  liveOff: { 'DN-2 path': [-30, -34], Xichang: [-60, -40], '10,000': [-13, -42], '≥30,000': [76, -44], GEO: [78, 62] }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
