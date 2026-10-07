@@ -16,12 +16,17 @@ const PT_VS = `attribute vec4 aCol; uniform float uScale; uniform float uSize; u
 void main(){ vC = aCol; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv;
 float dz = max(-mv.z, 0.1);
 float k = 1.0;
-if (uVar > 0.0) { k = mix(1.0, 0.55 + 0.9 * clamp(aCol.a, 0.0, 1.0), uVar); vC.a *= mix(1.0, clamp(1.2 - 1.1 * (dz - uD0) / uD0, 0.45, 1.0), uVar); }
+if (uVar > 1.5) { k = mix(0.5, 2.0, clamp(aCol.a, 0.0, 1.0)); } else if (uVar > 0.0) { k = mix(1.0, 0.55 + 0.9 * clamp(aCol.a, 0.0, 1.0), uVar); vC.a *= mix(1.0, clamp(1.2 - 1.1 * (dz - uD0) / uD0, 0.45, 1.0), uVar); }
 gl_PointSize = clamp(k * uSize * uScale / dz, uMin, uMax); }`;
 // Soft gaussian falloff, normal alpha blending: dense clumps saturate to the particle colour, never to white.
 const PT_FS = `uniform float uGain; varying vec4 vC;
 void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r));
 gl_FragColor = vec4(vC.rgb, vC.a * f * uGain); }`;
+// Opt-in hard fragment (debris `hard`): a small bright centre and a crisp edge, no glow halo; sizes vary 0.5x to 2x.
+const PT_FS_HARD = `uniform float uGain; varying vec4 vC;
+void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float e = 1.0 - smoothstep(0.55, 0.85, r);
+vec3 c = mix(vC.rgb, vec3(1.0, 0.96, 0.88), 0.75 * (1.0 - smoothstep(0.0, 0.5, r)));
+gl_FragColor = vec4(c, e * min(1.0, vC.a * 1.5 + 0.25) * uGain); }`;
 const SHELL_FS = `uniform vec3 uColor; uniform float uGain; varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vec3 v = normalize(-vP); float d = clamp(dot(normalize(vN), v), 0.0, 1.0); float rim = pow(1.0 - d, 5.0);
 gl_FragColor = vec4(uColor, clamp(rim * uGain, 0.0, 1.0)); }`;
@@ -364,7 +369,8 @@ const methods = {
       const deb = it.dynCol && !it.colored,
         mn = it.minPx ?? (deb ? 3 : 2);
       const pm = this._ptMat(it.size, IS_PHONE ? mn + 1 : mn, it.maxPx ?? (deb ? 11 : 9), IS_PHONE ? 1.15 : 1);
-      if (deb) pm.uniforms.uVar.value = 1; // debris: dots differ in size and brightness, and fade with distance from the camera
+      if (deb) pm.uniforms.uVar.value = it.hard ? 2 : 1; // debris: dots differ in size and brightness, and fade with distance from the camera
+      if (deb && it.hard) pm.fragmentShader = PT_FS_HARD;
       if (it.additive) pm.blending = T.AdditiveBlending; // opt-in: bright additive sprites read against dark terrain
       const pts = new T.Points(g, pm);
       pts.frustumCulled = false;
@@ -397,7 +403,7 @@ const methods = {
         root.add(dp);
         pts.userData.darkHalo = dp;
       }
-      if (deb) {
+      if (deb && !it.hard) {
         const hm = this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, it.additive ? 0.2 : 0.11);
         if (it.additive) hm.blending = T.AdditiveBlending;
         const hz = new T.Points(g, hm);

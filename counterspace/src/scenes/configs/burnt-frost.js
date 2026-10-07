@@ -56,7 +56,7 @@ export const BURNT_FROST = {
       ],
     },
     { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3 interceptor', short: 'SM-3', rocket: { style: 'slim', minPx: 46, maxPx: 72, glowMin: 24, glowMax: 40 }, flash: 0.4, flashCap: 1.2, coreK: 0.8, strong: true, retire: 0.14, hold: -0.14, flashSpan: 0.16, linger: 0.2, lingerK: 0.5, lingerEnd: 0.6 },
-    { type: 'debris', count: 175, spreadAlt: 110, spreadInc: 3.6, spreadRaan: 3.2, dv: 0.85, drift: 0.9, decay: 2.2, color: '#ffb066', palette: { hot: [1, 0.86, 0.55], mid: [1, 0.6, 0.25], cool: [1, 0.5, 0.22] }, darkHalo: 0.55, size: 0.085, minPx: 4, maxPx: 15, additive: false, lateGlow: true }, // warm orange fragments, uneven in size and spread: no lattice, separate from the blue ocean
+    { type: 'debris', count: 175, spreadAlt: 110, spreadInc: 3.6, spreadRaan: 3.2, dv: 0.85, drift: 0.9, decay: 2.2, color: '#ffb066', palette: { hot: [1, 0.86, 0.55], mid: [1, 0.6, 0.25], cool: [1, 0.5, 0.22] }, hard: true, size: 0.085, minPx: 3, maxPx: 12, additive: false, lateGlow: true }, // warm orange fragments, uneven in size and spread: no lattice, separate from the blue ocean
   ],
   still: 0.47,
   status: [
