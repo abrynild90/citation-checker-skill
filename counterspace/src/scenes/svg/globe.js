@@ -189,7 +189,7 @@ export function drawLimbTag(svg, W, fBot, marks, fs, titled = false) {
   const text = 'Earth, not to scale',
     { w, h } = pillSize(text, { dot: false, fs }),
     lx = W - w / 2 - 8, // a corner tag: bottom-right of the panel's free area, over the limb and clear of the caption's centre
-    ly = Math.max(fBot - h / 2 - 2, titled ? h + 20 : 0); // a panel title runs along the top: a short panel keeps the tag below it, not over its last words
+    ly = Math.max(fBot - h / 2 - 10, titled ? h + 20 : 0); // a panel title runs along the top: a short panel keeps the tag below it, not over its last words
   drawPill(svg, { x: lx, y: ly, w, h, text, dot: false, secondary: true, fs });
   // the tag as a row of small circles: labels placed by the shared placer stay off it
   for (let cx = lx - w / 2 + h / 2; cx < lx + w / 2; cx += h * 0.9) marks.push({ x: Math.min(cx, lx + w / 2 - h / 2), y: ly, r: h / 2 + 1, n: 'earth-cue' });

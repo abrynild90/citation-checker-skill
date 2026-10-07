@@ -204,6 +204,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   #methodBody .cites{max-width:none}
   #methodBody>.mrow{column-span:all;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s-7);align-items:start}
   #methodBody>.mrow>.msec{margin-bottom:var(--s-7)}
+  #methodBody>.msec:has(details.rule){padding-bottom:36px}
 }
 
 /* ---- footer ---- */
