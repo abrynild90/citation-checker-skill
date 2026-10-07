@@ -5,6 +5,27 @@ import { fitBanner } from '../labels.js';
 import { requestFullEarth, wantsFullEarth } from './upgrade.js';
 import { fontFaceCSS, rememberSim } from './still-frame.js';
 
+// The panels are drawn once for the stage they find. When the dialog settles to a different size (or the window changes), they are drawn again for the new
+// stage, so the picture always fills it and its type is shown at the size it was drawn (never scaled down to 11 px). A saved image never watches.
+const watchedP = new WeakMap();
+function watchPanels(sim, el, renderSVG, popts, W, H) {
+  if (popts.print || el.getAttribute('aria-hidden') === 'true' || typeof ResizeObserver === 'undefined') return;
+  const st = watchedP.get(el);
+  if (st) return Object.assign(st, { sim, renderSVG, popts, W, H });
+  const w = { sim, renderSVG, popts, W, H, timer: 0 };
+  watchedP.set(el, w);
+  new ResizeObserver(() => {
+    clearTimeout(w.timer);
+    w.timer = setTimeout(() => {
+      const root = el.querySelector(':scope > svg');
+      if (el.querySelector(':scope > canvas') || !root || !root.__lay?.panels) return; // the live globe, or a different picture, is on the stage
+      const nw = el.clientWidth,
+        nh = el.clientHeight;
+      if (nw && nh && (Math.abs(nw - w.W) > 3 || Math.abs(nh - w.H) > 3)) renderPanels(w.sim, el, w.renderSVG, w.popts);
+    }, 120);
+  }).observe(el);
+}
+
 export function renderPanels(sim, el, renderSVG, popts = {}) {
   const W = el.clientWidth || 640,
     H = el.clientHeight || 420,
@@ -90,5 +111,6 @@ export function renderPanels(sim, el, renderSVG, popts = {}) {
   el.querySelector(':scope > svg')?.remove();
   el.prepend(root.node());
   if (full) requestFullEarth(sim);
+  watchPanels(sim, el, renderSVG, popts, W, H);
   return root.node();
 }
