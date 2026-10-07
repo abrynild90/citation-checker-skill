@@ -18,7 +18,8 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     parts = ex.parts || null;
   const boxes = reserved.map((r) => ({ x: r[0] + r[2] / 2, y: r[1] + r[3] / 2, w: r[2], h: r[3] })),
     segs = [],
-    M = (ex.edge ?? 12) * (ex.scale || 1);
+    M = (ex.edge ?? 12) * (ex.scale || 1),
+    MX = (ex.edgeX ?? ex.edge ?? 12) * (ex.scale || 1); // ex.edgeX (desktop live view: 24): the pill's x stays this far from the left and right edges (the leader is not clamped)
   const out = new Array(list.length).fill(null);
   const order = list
     .map((_, i) => i)
@@ -78,7 +79,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     // An object hidden under the banner or caption band gets no label (nothing visible to point at).
     if (reserved.some((r) => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) return null;
     const { w, h } = c;
-    const cx = (x) => Math.max(w / 2 + M, Math.min(W - w / 2 - M, x)),
+    const cx = (x) => Math.max(w / 2 + MX, Math.min(W - w / 2 - MX, x)),
       cy = (y) => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
     const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + (ex.gap ?? 5) && Math.abs(y - b.y) < (h + b.h) / 2 + (ex.gap ?? 5) ? 1 : 0), 0);
     // A leader longer than this (share of the canvas width) is a defect: the label belongs next to its object.
@@ -93,6 +94,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       if (lead) {
         const ll0 = Math.hypot(qx - c.px, qy - c.py);
         if (ll0 > lim * 0.92) n += 330 + (ll0 - lim * 0.92) * 2;
+        if (ex.leaderCap && ll0 > ex.leaderCap) n += 260 + (ll0 - ex.leaderCap) * 3; // ex.leaderCap (desktop live view, ~120 px): a long leader is a defect, the pill belongs near its item
         n += ll0 * 0.12;
         for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600;
         for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500;
@@ -178,7 +180,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     // Nothing clean nearby (crowded frame or a reserved band in the way): search the whole free area on a grid.
     if (bestN >= 500)
       for (let gy = h / 2 + M; gy <= H - h / 2 - M; gy += ex.fine ? Math.max(3, h * 0.15) : Math.max(4, h * 0.4))
-        for (let gx = w / 2 + M; gx <= W - w / 2 - M; gx += ex.fine ? Math.max(5, w * 0.05) : Math.max(6, w * 0.12)) tryAt2(gx, gy);
+        for (let gx = w / 2 + MX; gx <= W - w / 2 - MX; gx += ex.fine ? Math.max(5, w * 0.05) : Math.max(6, w * 0.12)) tryAt2(gx, gy);
     return [best[0], best[1], bestN, bestSoft];
   };
   const fin = (i, x, y, boxes, segs, out) => {

@@ -133,6 +133,7 @@ const methods = {
     this._modelBoost = conf.modelBoost ?? 1.4; // print stills draw craft larger; a scene may raise it (conf.modelBoost)
     const amb0 = this.ambient?.intensity;
     if (this.ambient) this.ambient.intensity = 0.62; // a lighter night side in the print
+    for (const g of this.gapRings || []) if (g.near) g.mat.uniforms.uNear.value.w = 0; // the print frames its own view: the whole ring (the next live update restores the arc)
     this._fitModels();
     this._ptUniforms();
     this.renderer.render(this.scene, this.camera);
