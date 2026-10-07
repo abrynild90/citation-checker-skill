@@ -421,7 +421,7 @@ export function drawR(el = document.getElementById('svgR')) {
       .map((e) => [
         coWhenShort(e),
         e.actor,
-        `<span class="tl" title="${ACTIVITY_LABEL[e.activity]}">${ACTIVITY_SHORT[e.activity].replace('Spaceplane mission (launch to landing)', 'Spaceplane mission')}</span>`,
+        `<span class="tl" title="${ACTIVITY_LABEL[e.activity]}">${ACTIVITY_SHORT[e.activity].replace('Spaceplane mission (launch to landing)', 'Spaceplane')}</span>`,
         `<span class="tl"><span class="obj-a">${esc(plain(e.system))}</span>${e.target ? `<span class="obj-b">with ${esc(plain(e.target))}</span>` : ''}</span>`,
         `<span class="tl" title="${ORBIT_LABEL[e.orbit_regime]}">${ORBIT_SHORT[e.orbit_regime]}</span>`,
         `<span class="tl" title="${SURE_LABEL[e.confidence]}">${SURE_WORD[e.confidence]}</span>`,
