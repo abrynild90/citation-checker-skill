@@ -49,7 +49,7 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55, flashCap: 1.6, strong: true, coreK: 1.5, flashSpan: 0.3, linger: 0.2, lingerK: 0.6, lingerEnd: 0.7, rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55, flashCap: 1.25, strong: true, coreK: 0.95, flashSpan: 0.3, linger: 0.2, lingerK: 0.6, lingerEnd: 0.7, rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 } },
     {
       type: 'debris',
       count: 130,
