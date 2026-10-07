@@ -2021,7 +2021,7 @@
   .overlay .ctrl .seg button:not(.more-views) {
     flex: 0 1 auto;
     min-width: 0;
-    max-width: 17ch;
+    max-width: 24ch;
     padding: 0 12px;
     overflow: hidden;
     text-overflow: ellipsis;
