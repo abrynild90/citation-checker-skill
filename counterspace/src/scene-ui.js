@@ -761,14 +761,16 @@ function drawTicks() {
   ticksFor = epi;
   const a0 = epi ? epi.a0 + 0.001 : 0,
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
-  // Ticks closer than 48 px merge into one, so a scene with many steps does not draw a crowd (every step is still reachable from the list and the keys).
-  const wpx = scrub.clientWidth || 300;
+  // Ticks closer than a spacing that allows about eight along the bar merge into one (the first step of a cluster marks it), so a scene with many steps
+  // does not draw a crowd (every step is still reachable from the list and the keys).
+  const wpx = scrub.clientWidth || 300,
+    gap = Math.max(48, wpx / 8);
   let lastX = -99;
   ticksEl.innerHTML = steps
     .filter((s) => s.t > a0 + 0.004 && s.t < a1 - 0.004)
     .filter((s) => {
       const px = ((s.t - a0) / (a1 - a0)) * wpx;
-      if (px - lastX < 48) return false;
+      if (px - lastX < gap) return false;
       lastX = px;
       return true;
     })
@@ -782,11 +784,15 @@ function syncCams() {
     on = wideSel >= 0 && host.lock == null ? wideSel : tour >= 0 ? tour : host.camIdx;
   if (on === camOn) return;
   camOn = on;
-  [...camsEl.children].forEach((b, i) => {
-    b.setAttribute('aria-pressed', String(i === on));
+  [...camsEl.querySelectorAll('button[data-i]'), ...(moreMenu?.querySelectorAll('[data-i]') || [])].forEach((b) => {
+    const i = +b.dataset.i,
+      inMenu = b.getAttribute('role') === 'menuitemradio';
+    if (inMenu) b.setAttribute('aria-checked', String(i === on));
+    else b.setAttribute('aria-pressed', String(i === on));
     b.title = `${b.dataset.name ? b.dataset.name + ' ' : ''}(key ${i + 1})`;
-    if (i === on && camsEl.scrollWidth > camsEl.clientWidth) b.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    if (i === on && !inMenu && camsEl.scrollWidth > camsEl.clientWidth) b.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   });
+  if (moreBtn2) moreBtn2.classList.toggle('on', !!moreMenu?.querySelector(`[data-i="${on}"]`));
 }
 function syncScrub(t) {
   if (!cur) return;
@@ -892,26 +898,104 @@ function phoneLabel(label) {
   }
   return s.replace(/^./, (m) => m.toUpperCase());
 }
+// Desktop shows at most four view pills (the scene's own first view comes first); any others sit in a "More views" menu button (ARIA menu button pattern:
+// Enter, Space or the arrow keys open it, the arrows, Home and End move, Enter chooses, Escape and Tab close it). The keys 1 to 5 still reach every view.
+const MAX_PILLS = 4;
+let moreBtn2 = null,
+  moreMenu = null;
+function closeMore(focus) {
+  if (!moreMenu || moreMenu.hidden) return;
+  moreMenu.hidden = true;
+  moreBtn2.setAttribute('aria-expanded', 'false');
+  if (focus) moreBtn2.focus();
+}
+function openMore(first) {
+  moreMenu.hidden = false;
+  moreBtn2.setAttribute('aria-expanded', 'true');
+  moreMenu.style.left = Math.max(0, moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left) + 'px';
+  const items = [...moreMenu.children];
+  (first === 'last' ? items.at(-1) : items.find((b) => b.getAttribute('aria-checked') === 'true' && first !== 'first') || items[0]).focus();
+}
 function buildViews(cfg, sim) {
   camsEl.textContent = '';
+  moreMenu?.remove();
+  moreBtn2 = moreMenu = null;
   camOn = -2;
+  const pills = phoneViews.matches ? sim.cams.length : Math.min(sim.cams.length, MAX_PILLS);
   $('sceneCtrl')?.toggleAttribute('data-many-views', sim.cams.length >= 4); // four or more views: they take their own row on a wide window so the time bar keeps its length
+  const names = sim.cams.map((c, i) => viewName(cfg.cameras?.[i], c.name));
   sim.cams.forEach((c, i) => {
-    const label = viewName(cfg.cameras?.[i], c.name),
+    if (i >= pills) return;
+    const label = names[i],
       b = document.createElement('button');
     b.type = 'button';
     const short = phoneViews.matches ? phoneLabel(label) : narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^Follow the action$/i, 'Follow').replace(/^./, (m) => m.toUpperCase()) : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
+    b.dataset.i = i;
     b.dataset.name = label === c.name ? '' : c.name;
     b.setAttribute('aria-keyshortcuts', String(i + 1));
     b.onclick = () => chooseView(i);
     camsEl.appendChild(b);
   });
+  if (pills < sim.cams.length) {
+    moreBtn2 = document.createElement('button');
+    moreBtn2.type = 'button';
+    moreBtn2.className = 'more-views';
+    moreBtn2.id = 'scMoreViews';
+    moreBtn2.setAttribute('aria-haspopup', 'menu');
+    moreBtn2.setAttribute('aria-expanded', 'false');
+    moreBtn2.setAttribute('aria-controls', 'scMoreMenu');
+    moreBtn2.innerHTML = '<span>More views</span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-down"/></svg>';
+    camsEl.appendChild(moreBtn2);
+    moreMenu = document.createElement('div');
+    moreMenu.id = 'scMoreMenu';
+    moreMenu.className = 'more-menu';
+    moreMenu.setAttribute('role', 'menu');
+    moreMenu.setAttribute('aria-labelledby', 'scMoreViews');
+    moreMenu.hidden = true;
+    for (let i = pills; i < sim.cams.length; i++) {
+      const it = document.createElement('button');
+      it.type = 'button';
+      it.setAttribute('role', 'menuitemradio');
+      it.setAttribute('aria-checked', 'false');
+      it.tabIndex = -1;
+      it.dataset.i = i;
+      it.dataset.name = names[i] === sim.cams[i].name ? '' : sim.cams[i].name;
+      it.setAttribute('aria-keyshortcuts', String(i + 1));
+      it.innerHTML = `<span>${esc(names[i])}</span><kbd aria-hidden="true">${i + 1}</kbd>`;
+      it.onclick = () => {
+        chooseView(i);
+        closeMore(true);
+      };
+      moreMenu.appendChild(it);
+    }
+    viewsEl.appendChild(moreMenu);
+    moreBtn2.onclick = () => (moreMenu.hidden ? openMore() : closeMore(true));
+    moreBtn2.onkeydown = (e) => {
+      if (e.key === 'ArrowDown') (e.preventDefault(), openMore('first'));
+      else if (e.key === 'ArrowUp') (e.preventDefault(), openMore('last'));
+    };
+    moreMenu.onkeydown = (e) => {
+      const items = [...moreMenu.children],
+        k = items.indexOf(document.activeElement);
+      const go = (n) => (e.preventDefault(), items[(n + items.length) % items.length].focus());
+      if (e.key === 'ArrowDown') go(k + 1);
+      else if (e.key === 'ArrowUp') go(k - 1);
+      else if (e.key === 'Home') go(0);
+      else if (e.key === 'End') go(items.length - 1);
+      else if (e.key === 'Escape') (e.preventDefault(), e.stopPropagation(), closeMore(true));
+      else if (e.key === 'Tab') closeMore(false);
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') (e.preventDefault(), e.stopPropagation()); // they change scene elsewhere, not inside a menu
+    };
+  }
   requestAnimationFrame(camFade);
   setTimeout(camFade, 400); // after the panel's opening transition
   setTimeout(camFade, 1200);
 }
+document.addEventListener('pointerdown', (e) => {
+  if (moreMenu && !moreMenu.hidden && !e.target.closest('#scMoreMenu, #scMoreViews')) closeMore(false);
+});
 function chooseView(i) {
   if (!host || !cur || !glOK || stillOnly || !host.sim.cams[i]) return;
   host.pickCam(i);
