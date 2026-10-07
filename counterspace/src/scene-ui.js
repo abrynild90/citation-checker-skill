@@ -732,14 +732,14 @@ function drawTicks() {
   ticksFor = epi;
   const a0 = epi ? epi.a0 + 0.001 : 0,
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
-  // Ticks closer than 13 px merge into one, so a scene with many steps does not draw a crowd (every step is still reachable from the list and the keys).
+  // Ticks closer than 48 px merge into one, so a scene with many steps does not draw a crowd (every step is still reachable from the list and the keys).
   const wpx = scrub.clientWidth || 300;
   let lastX = -99;
   ticksEl.innerHTML = steps
     .filter((s) => s.t > a0 + 0.004 && s.t < a1 - 0.004)
     .filter((s) => {
       const px = ((s.t - a0) / (a1 - a0)) * wpx;
-      if (px - lastX < 13) return false;
+      if (px - lastX < 48) return false;
       lastX = px;
       return true;
     })
@@ -866,6 +866,7 @@ function phoneLabel(label) {
 function buildViews(cfg, sim) {
   camsEl.textContent = '';
   camOn = -2;
+  $('sceneCtrl')?.toggleAttribute('data-many-views', sim.cams.length >= 4); // four or more views: they take their own row on a wide window so the time bar keeps its length
   sim.cams.forEach((c, i) => {
     const label = viewName(cfg.cameras?.[i], c.name),
       b = document.createElement('button');

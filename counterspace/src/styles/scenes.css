@@ -1958,3 +1958,15 @@
     height: 40px;
   }
 }
+
+/* Wide window, four or more views: the views take a second row so the time bar stays long enough to use */
+@media (min-width: 1181px) {
+  .overlay .ctrl { grid-template-columns: auto auto minmax(360px, 1fr) auto; }
+  .overlay .ctrl:not([data-many-views]) { grid-template-columns: auto auto minmax(360px, 1fr) auto auto; }
+  .overlay .ctrl[data-many-views] {
+    grid-template-areas:
+      "play time scrub save"
+      "views views views views";
+  }
+  .overlay .ctrl[data-many-views] #scExport { grid-area: save; }
+}
