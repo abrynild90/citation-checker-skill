@@ -204,7 +204,7 @@ function showCard(html, evt, el, full = false) {
       lab = [...el.querySelectorAll(':scope > text')].map((t) => t.getBoundingClientRect()),
       aTop = Math.min(barR ? barR.top : r0.bottom, ...lab.map((t) => t.top)),
       head = document.querySelector('#chartB .chapter-head')?.getBoundingClientRect(),
-      lim = Math.max(topB, head && head.bottom > 0 ? head.bottom + 10 : 0),
+      lim = Math.max(topB, boxB.top + 4, head && head.bottom > 0 ? head.bottom + 10 : 0), // never above the chart box: the heading and lede stay clear
       L1 = Math.min(Math.max(boxB.left, cx - cw / 2), Math.max(boxB.left, boxB.right - cw));
     if (aTop - ch - 10 >= lim) best = { L: L1, T: aTop - ch - 10, score: 0 };
     else {
@@ -213,7 +213,7 @@ function showCard(html, evt, el, full = false) {
         rightRoom = VW - 8 - bx.right,
         leftRoom = bx.left - 8,
         toRight = rightRoom >= cw + 12 || rightRoom >= leftRoom;
-      best = { L: toRight ? Math.min(bx.right + 12, VW - cw - 8) : Math.max(8, bx.left - cw - 12), T: Math.min(Math.max(lim, aTop), Math.max(lim, VH - ch - 8)), score: 0 };
+      best = { L: toRight ? Math.min(bx.right + 12, VW - cw - 8) : Math.max(8, bx.left - cw - 12), T: Math.min(lim, Math.max(8, VH - ch - 8)), score: 0 };
     }
   }
   // Pinned law strip: the card hangs just under the strip, centred on its symbol and clamped to the strip's width, never at the page edge.
