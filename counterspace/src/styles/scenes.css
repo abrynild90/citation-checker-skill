@@ -1970,3 +1970,22 @@
   }
   .overlay .ctrl[data-many-views] #scExport { grid-area: save; }
 }
+
+/* Wide window: the lede, the "What happens" heading and the foot stay put, and only the list of steps scrolls inside what is left (never under 190 px, so
+   three whole rows always show; below that the column scrolls as one). The open full account keeps the whole column scrolling. */
+@media (min-width: 1181px) {
+  .overlay:not(.is-static) .story-scroll:not(.expanded) > .sv-steps {
+    flex: 0 1 auto;
+    min-height: 190px;
+  }
+  .overlay:not(.is-static) .story-scroll:not(.expanded) .sv-all {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .overlay:not(.is-static) .story-scroll:not(.expanded) .sv-steps #sceneSteps {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
+  }
+  .overlay .story-scroll { padding-bottom: 28px; }
+}
