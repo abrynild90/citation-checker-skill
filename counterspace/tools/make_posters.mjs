@@ -21,7 +21,7 @@ const POSTER_T = {
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
-  shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
+  shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
   viasat: 0.55,
