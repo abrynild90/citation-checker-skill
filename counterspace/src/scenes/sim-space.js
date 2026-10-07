@@ -43,7 +43,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         items.push({
           kind: 'curve',
           dynamic: true,
-          uniformA: 0.2,
+          uniformA: a.arcOpacity ?? 0.2,
           staticKeep: lo % 3 === 0 && Li !== 1, // the static diagram draws a third of the arches: a cage, not a tangle
           limbOnly: true, // ... and only where they stand out against the sky, never across the Earth's face
           opacity: 0.2,
@@ -112,7 +112,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           rr = L * Math.cos(la) ** 2;
         pts.push(ll(la / DEG, a.lon, rAlt((rr - 1) * 6371)));
       }
-      items.push({ kind: 'curve', avoid: true, soft: true, pts: () => pts, color: a.color, opacity: 0.6, thick: 0.0035 });
+      items.push({ kind: 'curve', avoid: true, soft: true, pts: () => pts, color: a.color, opacity: a.opacity ?? 0.6, thick: 0.0035 });
     });
   }
   if (a.type === 'constellation') {
