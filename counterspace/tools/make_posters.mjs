@@ -27,7 +27,7 @@ const POSTER_T = {
   viasat: 0.55,
   laser: 0.5,
   'sj21-tug': 0.6,
-  rpo: 0.5,
+  rpo: 0.3,
   spaceplanes: 0.42,
 };
 // Optional per-scene poster view: a camera preset index (CAM) and/or a free pose [px,py,pz, lx,ly,lz, fov?] (POSE), applied after the time is set.
@@ -38,7 +38,7 @@ const POSTER_VIEW = {
   starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, lift: 0.1, boost: 1.5 }, // the jammer zone whole, not cut by the top of the frame (lift: camera and target move up by this many Earth radii)
   spaceplanes: { cam: 2, boost: 1.3, back: 1.7 }, // OTV-7's elongated orbit around the Earth
-  rpo: {},
+  rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.58, right: 0.08, boost: 1.7 },
   fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
