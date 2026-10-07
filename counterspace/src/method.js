@@ -163,6 +163,7 @@ export function drawMethod() {
     <li>Debris is drawn as dots, one for each cataloged fragment, up to a limit of ${PARTICLE_BUDGET.toLocaleString()} dots on this device.</li></ul>`,
   )}
 </div>
+<div class="mrow">
 <div class="msec">
   <h3 id="srcCite">How to cite this page</h3>
   <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
@@ -186,6 +187,7 @@ export function drawMethod() {
       into the page. The full-size images are fetched from a fixed copy hosted on jsDelivr, a public file host, only when you interact with the globe at the
       top of the page or open a 3D explainer, and never when animation is switched off on your device. Coastlines in the still diagrams come from Natural
       Earth (public domain) through the world-atlas dataset.</p>`)}
+</div>
 </div>
 <div class="msec">
   <h3 id="srcList">All cited sources (${cites.length})</h3>

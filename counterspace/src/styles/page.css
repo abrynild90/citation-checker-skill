@@ -177,6 +177,8 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .licence-card p:last-child{margin-bottom:0}
 .cites{margin:var(--s-3) 0 0;padding-left:2.6em;font-size:15px;line-height:1.5;max-width:560px}
 .cites .ct{display:block;font-weight:500}
+.cites .ct a,.cites a{text-decoration-thickness:1px;text-underline-offset:.18em;text-decoration-color:color-mix(in srgb,currentColor 55%,transparent)}
+.cites .ct a{font-weight:400}
 .cites .cd{display:block;margin-top:2px;font-size:14px;line-height:1.5;color:var(--muted)}
 .cites .cd-more{margin:6px 0 4px}
 .cites .cd-more>summary{display:inline-flex;align-items:center;gap:6px;min-height:24px;cursor:pointer;list-style:none;font:500 13.5px/1.4 var(--sans);color:var(--accent)}
@@ -200,6 +202,8 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   #methodBody h3{break-after:avoid-column}
   #methodBody #srcList,#methodBody #srcList + .src-intro{column-span:all}
   #methodBody .cites{max-width:none}
+  #methodBody>.mrow{column-span:all;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s-7);align-items:start}
+  #methodBody>.mrow>.msec{margin-bottom:var(--s-7)}
 }
 
 /* ---- footer ---- */
