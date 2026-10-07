@@ -2149,3 +2149,14 @@
     margin-top: var(--s-1);
   }
 }
+
+/* Laptop-width stage: the Top-view inset (a canvas the scene draws in a corner of the picture) is about a fifth smaller, so it crowds the action less */
+@media (min-width: 901px) and (max-width: 1600px) {
+  .overlay .view canvas[aria-hidden="true"][style*="border"] {
+    transform: scale(0.78);
+    transform-origin: top right;
+  }
+  .overlay .view canvas[aria-hidden="true"][style*="border"][style*="left: 12px"] {
+    transform-origin: bottom left;
+  }
+}
