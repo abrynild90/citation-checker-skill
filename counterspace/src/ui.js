@@ -42,7 +42,7 @@ function showCard(html, evt, el, full = false) {
   card.classList.remove('more');
   // Dense strips (the close-approach chart) have no side that covers nothing: the card stays beside its mark (wider, so shorter), accepts covering a
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
-  const near = !!el?.closest?.('#svgR, #svgC'),
+  const near = !!el?.closest?.('#svgR'),
     WM = near || el?.closest?.('#svgL') ? 1.5 : 60; // the years-to-law rows are full-width strips: covering a bar or two beats covering a heading
   card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
@@ -54,7 +54,8 @@ function showCard(html, evt, el, full = false) {
   const cw = card.offsetWidth,
     ch = card.offsetHeight,
     G = 14,
-    VW = innerWidth,
+    railB = document.getElementById('rail')?.getBoundingClientRect(),
+    VW = railB && railB.width > 2 && railB.left > innerWidth / 2 ? Math.min(innerWidth, railB.left - 6) : innerWidth, // a card never reaches the chapter rail
     VH = innerHeight;
   // The sticky law band (when stuck to the top) is never covered by a card.
   const bandR = document.getElementById('legalBand')?.getBoundingClientRect(),
@@ -78,7 +79,7 @@ function showCard(html, evt, el, full = false) {
               : [n.getBoundingClientRect()],
           )
       : [];
-  const noText = [...texts].map((n) => Object.assign(n.getBoundingClientRect().toJSON(), { cheap: near && !!n.closest('.mark') })); // on a strip chart a row's own name costs little to cover for a moment // covering annotation or zone-label text costs more than any distance
+  const noText = [...texts].map((n) => Object.assign(n.getBoundingClientRect().toJSON(), { cheap: near && !!n.closest('.mark'), ann: !!n.matches('.ann, .ann-sub') || !!n.querySelector('.ann, .ann-sub') })); // on a strip chart a row's own name costs little to cover for a moment // covering annotation or zone-label text costs more than any distance
   // Nor the chart's controls, its key or the section heading
   [...document.querySelectorAll('.seg, .legend, h2')].forEach((n) => {
     if (el && n.contains(el)) return;
@@ -148,10 +149,12 @@ function showCard(html, evt, el, full = false) {
         q = { left: L, right: L + cw, top: T, bottom: T + ch };
       const score =
         others.filter((o) => hit(q, o)).length * WM +
-        noText.reduce((a, o) => a + (hit(q, o) ? (o.cheap ? 22 : 100) : 0), 0) +
+        noText.reduce((a, o) => a + (hit(q, o) ? (o.cheap ? 22 : o.ann ? 260 : 100) : 0), 0) +
         avoidCost(q) +
         (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
+        (el && hit(q, r0, 3) ? 1e6 : 0) + // a card never covers the mark it describes
+        
         (rowsChart && hit(q, r0, 2) ? 150 : 0) +
         (near ? 0 : gapTo(q) / (onBand ? 2 : 4) + Math.max(0, gapTo(q) - 120) / 2) +
         Math.abs(L - l) / 40 +
@@ -167,12 +170,13 @@ function showCard(html, evt, el, full = false) {
         const q = { left: L, right: L + cw, top: T, bottom: T + ch };
         const score =
           others.filter((o) => hit(q, o)).length * WM +
-          noText.reduce((a, o) => a + (hit(q, o) ? (o.cheap ? 22 : 100) : 0), 0) +
+          noText.reduce((a, o) => a + (hit(q, o) ? (o.cheap ? 22 : o.ann ? 260 : 100) : 0), 0) +
           avoidCost(q) +
           (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
           (hit(q, r, 12) ? 120 : 0) +
+          (el && hit(q, r0, 3) ? 1e6 : 0) +
           (rowsChart && hit(q, r0, 2) ? 150 : 0) +
-          (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / (el?.closest?.('#svgC') ? 5 : 15) : gapTo(q) / 2.2) +
+          (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 15 : gapTo(q) / 2.2) +
           0.5;
         if (score < best.score) best = { L, T, score };
       }
