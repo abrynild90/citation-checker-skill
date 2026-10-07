@@ -944,6 +944,7 @@ function buildViews(cfg, sim) {
     const short = phoneViews.matches ? phoneLabel(label) : narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^Follow the action$/i, 'Follow').replace(/^./, (m) => m.toUpperCase()) : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
+    b.title = label;
     b.dataset.i = i;
     b.dataset.name = label === c.name ? '' : c.name;
     b.setAttribute('aria-keyshortcuts', String(i + 1));
