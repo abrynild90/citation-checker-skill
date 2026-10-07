@@ -32,11 +32,12 @@ export const DN2 = {
       label: 'DN-2 path: no intercept',
       short: 'DN-2 path · no target',
       labelIdx: 0.17,
+      labelStart: 0.22, // the pill waits until the rocket has left it behind (it sat on the rocket, its leader hanging off the frame, at the start)
       dx: -40,
       dy: -50,
       head: true,
       ghostOpacity: 0.5, // the whole planned path stays readable before the rocket flies it
-      rocket: { minPx: IS_PHONE ? 56 : 66, maxPx: IS_PHONE ? 78 : 92, glowMin: IS_PHONE ? 32 : 38, glowMax: IS_PHONE ? 52 : 58 },
+      rocket: { style: 'slim', minPx: IS_PHONE ? 56 : 66, maxPx: IS_PHONE ? 78 : 92, glowMin: IS_PHONE ? 32 : 38, glowMax: IS_PHONE ? 52 : 58 },
       apexT: 0.47,
       staticAt: [0.6, 0.09],
       marks: [
@@ -86,7 +87,7 @@ export const DN2 = {
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
   liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [-30, -62], Xichang: [-60, -40], '10,000': [-13, -42], Apogee: [78, -24], GEO: [38, 58] },
+  liveOff: { 'DN-2 path': [-30, -62], Xichang: [-60, -40], '10,000': [-13, -42], '≥30,000': [76, -44], GEO: [62, 42] }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)

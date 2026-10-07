@@ -48,7 +48,12 @@ export const STARFISH = {
       t1: 0.14,
       color: C.int,
       label: 'Thor launch',
-      labelEnd: 0.24, // live: the Thor chip goes once the burst has happened (it only crowded the globe at t 0.6 and 0.85); the static views drop it anyway
+      labelStart: 0.05, // live: the pill waits until the rocket is in view
+      labelEnd: 0.135, // live: the Thor chip goes just before the burst (it stacked with Detonation and Johnston); the static views drop it anyway
+      head: true,
+      thick: 0.0035,
+      ghostOpacity: 0.45,
+      rocket: { minPx: 54, maxPx: 70, glowMin: 24, glowMax: 40 },
       opt: true,
       dx: -96,
       dy: 4,
@@ -77,7 +82,9 @@ export const STARFISH = {
       sat: {
         phase: 1.05,
         speed: 0.25,
-        big: 1.5,
+        big: 3.4,
+        minPx: 38,
+        maxPx: 64,
         label: 'Satellite in belt',
         short: 'Satellite',
         dx: 30,
@@ -87,11 +94,12 @@ export const STARFISH = {
       },
     },
   ],
+  pushApart: { near: 40, dist: 120 }, // two pills at one anchor fan out radially
   liveLabelK: 1.25, // live at desktop width: the labels carry the story, so the type is 25% larger than the default 11 px
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-150, -62], Johnston: [-140, -4], Thor: [-120, -78], Artificial: [-60, -21], 'Satellite damaged': [-130, 30] },
+  liveOff: { Detonation: [-190, -62], Johnston: [-150, -4], Thor: [-120, -78], Artificial: [-60, -21], 'Satellite damaged': [-130, 30] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
@@ -105,8 +113,8 @@ export const STARFISH = {
     {
       name: 'Whole scene',
       glide: [
-        [0, [13.5, -172, 2], [16.6, -169.3, 1.03]],
-        [0.12, [13.5, -172, 2], [16.6, -169.3, 1.03]],
+        [0, [9, -170.5, 1.45], [16.6, -169.3, 1.05]],
+        [0.12, [9, -170.5, 1.45], [16.6, -169.3, 1.05]],
         [0.3, [18, -175, 2.45], [16.6, -169.4, 1]],
         [0.42, [19.5, -184, 3.1], [8, -178, 0.5]],
         [0.52, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.15], [0, -194.5, 0]],

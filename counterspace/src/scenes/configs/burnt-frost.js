@@ -25,8 +25,13 @@ export const BURNT_FROST = {
   phoneHide: ['Larger pieces', 'Pieces falling'], // 375: Impact, the illustration pill and the ship label are enough at the top of the frame
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
+  liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62] }, // the collision frame: Impact to the left, the falling pieces to the right
+  camOff: { 2: { 'USA-193': [150, -30] } }, // From orbit: the satellite pill sits off the disc, right of the limb
+  offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
-  fitFillKeys: IS_PHONE ? [0.82, 0.9] : [1.0, 1.0], // the first two key frames sit tight on the ship, the interceptor and the satellite
+  fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.9, 1.1], // desktop: the first two key frames sit tight on the ship and the satellite, the second tighter, so the camera is already pushing in from the first second
+  burstPadFrom: IS_PHONE ? undefined : 0.3, // desktop: the early keys are fitted to the craft alone (the burst ring is not in frame yet)
+  fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
     { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.55, dx: 0, dy: 44, minPx: 84, maxPx: 170 },
@@ -38,8 +43,8 @@ export const BURNT_FROST = {
       minPx: 60,
       maxPx: 100,
       impactUntil: 0.9, // the Impact pill stays on the contact point (where the interceptor met the satellite), not on the drifting debris; a tick keeps marking the point
-      impactDx: -110,
-      impactDy: -46,
+      impactDx: -150,
+      impactDy: -30,
       tickUntil: 0.95,
       bright: true,
       fall: [
@@ -48,12 +53,13 @@ export const BURNT_FROST = {
         { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
       ],
     },
-    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.36, coreK: 0.4, strong: true, hold: 0.07, flashSpan: 0.11 },
+    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3', flash: 0.4, coreK: 1.2, strong: true, hold: -0.14, flashSpan: 0.11 },
     { type: 'debris', count: 175, spreadAlt: 90, spreadInc: 2.6, spreadRaan: 1.6, dv: 0.6, decay: 2.2, color: '#ffd2a6', size: 0.08, minPx: 5, maxPx: 14, additive: true, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
   ],
   still: 0.47,
   status: [
     [0, 'Interceptor rises toward the satellite'],
+    [0.25, 'Interceptor closes on the satellite', 'Interceptor closing in'],
     [0.44, 'Collision at about 220 km; fragments fall back quickly', 'Collision at about 220 km'],
     [0.6, 'Fast-forward: all out of orbit after about 20 months (SWF)', 'SWF: about 20 months to come down'],
   ],

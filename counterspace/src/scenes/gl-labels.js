@@ -254,6 +254,40 @@ const methods = {
         if (pl.some((q, j) => j !== i && q && raw[j] && Math.abs(q.x - x) < (raw[j].w + r.w) / 2 && Math.abs(q.y - y) < (raw[j].h + r.h) / 2)) return;
         Object.assign(pl[i], { x, y, leader: true, ax: r.px, ay: r.py, qx, qy });
       });
+    // cfg.pushApart { near, dist, gap } (opt-in): two pills whose referents lie within `near` px (default 40) and whose boxes touch or overlap: the later one
+    // is pushed radially away from the pair's midpoint (at least `dist` px, default 110), turning in 40 degree steps until it clears every other pill
+    const pa = this.sim.cfg.pushApart;
+    if (pa) {
+      const near = (pa.near ?? 40) * offK,
+        gap = pa.gap ?? 8,
+        live = raw.map((r, i) => (r && pl[i] ? i : -1)).filter((i) => i >= 0),
+        hit = (a, b) => Math.abs(a.x - b.x) < (a.w + b.w) / 2 + gap && Math.abs(a.y - b.y) < (a.h + b.h) / 2 + gap;
+      for (let a = 0; a < live.length; a++)
+        for (let b = a + 1; b < live.length; b++) {
+          const i = live[a],
+            j = live[b],
+            ri = raw[i],
+            rj = raw[j];
+          if (Math.hypot(ri.px - rj.px, ri.py - rj.py) > near) continue;
+          const bi = { ...pl[i], w: ri.w, h: ri.h },
+            bj = { ...pl[j], w: rj.w, h: rj.h };
+          if (!hit(bi, bj)) continue;
+          const mx = (ri.px + rj.px) / 2,
+            my = (ri.py + rj.py) / 2;
+          let ang = Math.atan2(bj.y - my, bj.x - mx);
+          const d = Math.max(pa.dist ?? 110, Math.hypot(bj.x - mx, bj.y - my)) * (noBanner ? w / 1000 : 1);
+          for (let s = 0; s < 9; s++) {
+            const sg = s % 2 ? -1 : 1,
+              an = ang + sg * Math.ceil(s / 2) * 0.7,
+              x = Math.max(rj.w / 2 + 12, Math.min(w - rj.w / 2 - 12, mx + Math.cos(an) * d)),
+              y = Math.max(rj.h / 2 + 9, Math.min(h - rj.h / 2 - 9, my + Math.sin(an) * d)),
+              c = { x, y, w: rj.w, h: rj.h };
+            if (live.some((o) => o !== j && hit(c, { ...pl[o], w: raw[o].w, h: raw[o].h }))) continue;
+            Object.assign(pl[j], { x, y, leader: true, ax: rj.px, ay: rj.py, qx: Math.max(x - rj.w / 2, Math.min(x + rj.w / 2, rj.px)), qy: Math.max(y - rj.h / 2, Math.min(y + rj.h / 2, rj.py)) });
+            break;
+          }
+        }
+    }
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   // Everything drawn that a label must stay off, in screen px for a w x h canvas: sprites (marks, with their drawn radius), dense particle

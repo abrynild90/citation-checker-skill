@@ -600,6 +600,7 @@ export function buildSim(cfg) {
         coreK: a.coreK,
         capK: a.flashCap, // opt-ins: larger screen cap, faint lingering ring after the burst
         linger: a.linger,
+        lingerEnd: a.lingerEnd,
         lingerK: a.lingerK,
         size: (a.flash ?? 0.3) * (IS_PHONE ? 0.42 : 1),
         span: a.flashSpan ?? (a.strong ? 0.2 : 0.16), // flashSpan: opt-in shorter shock rings
@@ -770,6 +771,7 @@ export function buildSim(cfg) {
         staticAt: a.staticAt,
         labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
         labelEnd: a.labelEnd,
+        labelStart: a.labelStart, // opt-in: the label waits until this t (the rocket is in view by then)
         pts: (t) => {
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
@@ -815,7 +817,7 @@ export function buildSim(cfg) {
             return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
           };
           items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: a.rocket.glowMin ?? 16, kvMax: a.rocket.glowMax ?? 38, pos: headPos });
-          items.push({ kind: 'point', shape: 'rocket', color: '#ff8a8a', scale: 1, minPx: a.rocket.minPx ?? 30, maxPx: a.rocket.maxPx ?? 54, pos: sm });
+          items.push({ kind: 'point', shape: 'rocket', rocketStyle: a.rocket.style, color: '#ff8a8a', scale: 1, minPx: a.rocket.minPx ?? 30, maxPx: a.rocket.maxPx ?? 54, pos: sm });
         } else
         items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.3, kvMin: 28, kvMax: 64, pos: headPos });
         if (!a.rocket) items.push({ kind: 'point', shape: 'kv', color: a.headColor ?? '#fff1e6', kvSize: 0.14, kvMin: 14, kvMax: 30, pos: headPos });

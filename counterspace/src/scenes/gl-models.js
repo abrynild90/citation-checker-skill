@@ -559,7 +559,43 @@ export const modelMethods = {
     return g;
   },
   // Sounding rocket (DN-2): white body, red nose cone, four fins, an engine bell and a glowing exhaust flame behind. Nose along +z, length about 0.06.
-  _rocketModel(color) {
+  // style 'slim' (opt-in, DN-2): a slender grey-white stage, a small dark nose cone, dark fins and a soft additive plume (no yellow cone flame)
+  _rocketSlim() {
+    const T = this.T,
+      K = new Kit(T),
+      PI = Math.PI,
+      body = this._mat(0xcfd4dc, { metalness: 0.35, roughness: 0.42 }),
+      dark = this._mat(0x262b36, { metalness: 0.6, roughness: 0.45 });
+    K.cyl(body, 0.0026, 0.0026, 0.05, 0, 0, 0, PI / 2, 0, 0, 20);
+    K.cyl(dark, 0.0002, 0.0026, 0.008, 0, 0, 0.029, PI / 2, 0, 0, 20);
+    K.cyl(dark, 0.0027, 0.0027, 0.0016, 0, 0, 0.012, PI / 2, 0, 0, 20);
+    K.cyl(dark, 0.0023, 0.0017, 0.004, 0, 0, -0.027, PI / 2, 0, 0, 16);
+    for (let k = 0; k < 4; k++) {
+      const a = (k * PI) / 2;
+      K.box(dark, 0.0005, 0.005, 0.008, Math.cos(a) * 0.0038, Math.sin(a) * 0.0038, -0.021, 0, 0, a - PI / 2);
+    }
+    const g = K.build();
+    const plume = (len, r, col, op, z) => {
+      const m = new T.Mesh(
+        new T.ConeGeometry(r, len, 16, 1, true),
+        new T.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide }),
+      );
+      m.rotation.x = -PI / 2;
+      m.position.z = z;
+      return m;
+    };
+    g.add(plume(0.07, 0.0036, 0xff9a52, 0.26, -0.062), plume(0.04, 0.0021, 0xffe3b8, 0.5, -0.047));
+    const halo = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xffb070, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
+    halo.scale.setScalar(0.022);
+    halo.position.z = -0.032;
+    g.add(halo);
+    g.userData.sat = true;
+    g.userData.body = g.userData.meshes.get(body);
+    Object.assign(g.userData, { span: 0.062, minPx: 30, maxPx: 52 });
+    return g;
+  },
+  _rocketModel(color, style) {
+    if (style === 'slim') return this._rocketSlim();
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,

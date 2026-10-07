@@ -16,12 +16,12 @@ const W = +(process.env.W || 960);
 const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
-  starfish: 0.6, // the whole globe with the belt lobes and the field lines
-  solwind: 0.5, // the textured satellite at the instant the missile reaches it (the textured model is drawn only until impact)
+  starfish: 0.35, // the detonation flash with the first field lines and the Hawaiian chain
+  solwind: 0.4, // the F-15, the released missile and the textured satellite all in frame
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
-  shakti: 0.36, // the interceptor and the satellite both in view over the Bay of Bengal
+  shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
   viasat: 0.22,
