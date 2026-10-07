@@ -24,9 +24,6 @@
   scroll-margin-top:var(--law-head-h,220px)}
 @media (min-width:761px){.legal-band{position:sticky;top:0}}
 .legal-band.compact{padding:0;border-top-color:transparent;border-bottom-color:var(--line-strong)}
-.legal-band::after{content:'';position:absolute;left:0;right:0;top:100%;height:18px;background:linear-gradient(var(--bg),transparent);pointer-events:none;opacity:0;
-  transition:opacity var(--dur-1)}
-.legal-band.compact::after{opacity:1}
 .legal-band.reading #legalSvg{max-height:var(--row-h,60px);overflow:hidden}
 .legal-band svg{display:block;width:100%}
 #legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
@@ -306,7 +303,7 @@ details.table>summary{scroll-margin-top:110px}
 
 @media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}.tscroll th[data-sure]{white-space:nowrap}#tableR th[data-sure]{white-space:normal;min-width:0;overflow-wrap:normal}}
 
-.legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
+.legal-band.reading.compact,.legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
 
 /* Wide tables fit their box: no pinned Source column, narrower cells, short labels where a long one wraps */
 .tl{white-space:normal}

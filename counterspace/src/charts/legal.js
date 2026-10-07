@@ -790,7 +790,7 @@ export function legalScroll() {
   // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it.
   const reading =
     stuck &&
-    [...document.querySelectorAll('details.table[open] .tscroll')].some((t) => {
+    [...document.querySelectorAll('details.table[open] .tscroll, details.about[open]')].some((t) => {
       const r = t.getBoundingClientRect();
       return r.top < innerHeight - 80 && r.bottom > 140;
     });
