@@ -183,7 +183,7 @@ td a{overflow-wrap:anywhere}
 .skip-table{position:absolute;left:-9999px;top:auto;padding:8px 12px;border-radius:var(--r-1);background:var(--surface);color:var(--text);font:600 14px var(--sans)}
 .skip-table:focus{position:static;display:inline-block;margin:var(--s-2) 0;left:auto;outline:3px solid var(--focus);outline-offset:2px}
 .tscroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-@media (min-width:1001px){.more-rows{display:none}}
+@media (min-width:1001px){.more-rows{display:none}.tscroll td[data-label="Country"]{white-space:nowrap}}
 @media (max-width:1000px){
   .tscroll.capped tbody tr:nth-child(n+11){display:none}
   .more-rows{margin-top:var(--s-2)}
