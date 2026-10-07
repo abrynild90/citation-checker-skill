@@ -602,7 +602,7 @@ export class GLHost {
           core.material.opacity = 0;
           ring.scale.setScalar((it.size ? it.size * 1.7 : 0.9) * (it.lingerK ?? 1) + 0.01);
           ring.userData.s0 = ring.scale.x;
-          ring.material.opacity = it.linger;
+          ring.material.opacity = it.lingerEnd != null ? it.linger * Math.max(0, 1 - (t - it.t0 - span) / Math.max(1e-6, it.lingerEnd - it.t0 - span)) : it.linger; // lingerEnd (opt-in): the faint ring fades to 0 at this t
           if (obj.userData.ring2) obj.userData.ring2.material.opacity = 0;
         } else if (on) {
           const f = dt / span,
