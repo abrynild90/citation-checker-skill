@@ -420,8 +420,8 @@ export const modelMethods = {
     rim(deck);
     rim(body);
     // Fuselage: a smooth rounded lathe (flattened), white above; a darker, slightly wider lower hull gives the dark tile belly
-    K.geo(white, new T.LatheGeometry(prof, 56), 0, 0.0004, 0, PI / 2, 0, 0, 1.12, 1, 0.72);
-    K.geo(under, new T.LatheGeometry(prof, 48), 0, -0.0012, 0, PI / 2, 0, 0, 1.2, 1, 0.4);
+    K.geo(white, new T.LatheGeometry(prof, 40), 0, 0.0004, 0, PI / 2, 0, 0, 1.12, 1, 0.72);
+    K.geo(under, new T.LatheGeometry(prof, 32), 0, -0.0012, 0, PI / 2, 0, 0, 1.2, 1, 0.4);
     K.geo(nose, new T.SphereGeometry(0.0018, 14, 10), 0, -0.0002, 0.0216, 0, 0, 0, 1, 0.75, 1.3);
     K.geo(glass, new T.SphereGeometry(0.0015, 12, 8), 0, 0.0027, 0.0146, 0, 0, 0, 1.2, 0.5, 2.2);
     // Payload-bay doors: a long recessed panel on the back with a centre seam and two hinge lines
@@ -442,7 +442,7 @@ export const modelMethods = {
     };
     K.geo(
       under,
-      new T.ExtrudeGeometry(shape(1), { depth: 0.0008, bevelEnabled: true, bevelThickness: 0.0006, bevelSize: 0.0007, bevelSegments: 4, curveSegments: 12 }),
+      new T.ExtrudeGeometry(shape(1), { depth: 0.0008, bevelEnabled: true, bevelThickness: 0.0006, bevelSize: 0.0007, bevelSegments: 2, curveSegments: 6 }),
       0,
       -0.0016,
       0,
@@ -450,7 +450,7 @@ export const modelMethods = {
       0,
       0,
     );
-    K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0004, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 3, curveSegments: 12 }), 0, -0.0007, -0.0004, PI / 2, 0, 0);
+    K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0004, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 2, curveSegments: 6 }), 0, -0.0007, -0.0004, PI / 2, 0, 0);
     // Tail: two small tapered fins canted outward (the X-37B's V tail), white with a dark tip
     const fin = new T.Shape();
     fin.moveTo(0, 0);
