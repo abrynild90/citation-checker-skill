@@ -198,7 +198,24 @@ function showCard(html, evt, el, full = false) {
   // Decade chart: the card sits above the whole chart, centred on its bar and clamped to the chart box, so it never covers another decade or the 2020s header.
   const boxB = el?.closest?.('#svgB') ? root?.getBoundingClientRect() : null;
   const topB = document.getElementById('legalBand')?.classList.contains('off') ? 8 : TOP; // the pinned strip steps aside over this chart
-  if (boxB) best = { L: Math.min(Math.max(boxB.left, cx - cw / 2), Math.max(boxB.left, boxB.right - cw)), T: Math.max(topB, boxB.top - ch - 8), score: 0 };
+  if (boxB) {
+    // anchored to the bar itself (its top, or its range label when it has one), never to the chart band; it stays below the chapter heading and lede
+    const barR = el.querySelector('.bar')?.getBoundingClientRect(),
+      lab = [...el.querySelectorAll(':scope > text')].map((t) => t.getBoundingClientRect()),
+      aTop = Math.min(barR ? barR.top : r0.bottom, ...lab.map((t) => t.top)),
+      head = document.querySelector('#chartB .chapter-head')?.getBoundingClientRect(),
+      lim = Math.max(topB, head && head.bottom > 0 ? head.bottom + 10 : 0),
+      L1 = Math.min(Math.max(boxB.left, cx - cw / 2), Math.max(boxB.left, boxB.right - cw));
+    if (aTop - ch - 10 >= lim) best = { L: L1, T: aTop - ch - 10, score: 0 };
+    else {
+      // no room above a tall bar: beside it, on the side with more room, top held clear of the heading
+      const bx = barR || r0,
+        rightRoom = VW - 8 - bx.right,
+        leftRoom = bx.left - 8,
+        toRight = rightRoom >= cw + 12 || rightRoom >= leftRoom;
+      best = { L: toRight ? Math.min(bx.right + 12, VW - cw - 8) : Math.max(8, bx.left - cw - 12), T: Math.min(Math.max(lim, aTop), Math.max(lim, VH - ch - 8)), score: 0 };
+    }
+  }
   // Pinned law strip: the card hangs just under the strip, centred on its symbol and clamped to the strip's width, never at the page edge.
   if (el && onBand && bandR && bandR.top <= 1 && bandR.bottom > 0 && root) {
     const rb = root.getBoundingClientRect();
