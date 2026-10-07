@@ -782,7 +782,7 @@ export function buildSim(cfg) {
         // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]),
           tApex = a.t0 + (a.t1 - a.t0) * (a.apexT ?? 0.5);
-        items.push({ kind: 'curve', pts: () => [scl(d, 1), scl(d, rAlt(GEO_ALT) * 1.02)], color: '#dfe6f7', opacity: 0.5 });
+        items.push({ kind: 'curve', pts: () => [scl(d, a.rulerFrom != null ? rAlt(a.rulerFrom) : 1), scl(d, rAlt(GEO_ALT) * 1.02)], color: '#dfe6f7', opacity: 0.5 }); // rulerFrom (opt-in): the ruler starts at this altitude (km), not on the surface
         a.marks.forEach((m) =>
           items.push({
             kind: 'point',

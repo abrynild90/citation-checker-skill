@@ -39,6 +39,7 @@ export const DN2 = {
       ghostOpacity: 0.5, // the whole planned path stays readable before the rocket flies it
       rocket: { style: 'slim', minPx: IS_PHONE ? 56 : 66, maxPx: IS_PHONE ? 78 : 92, glowMin: IS_PHONE ? 32 : 38, glowMax: IS_PHONE ? 52 : 58 },
       apexT: 0.47,
+      rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth
       staticAt: [0.6, 0.09],
       marks: [
         {
