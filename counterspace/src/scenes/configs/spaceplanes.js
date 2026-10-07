@@ -290,7 +290,7 @@ export const SPACEPLANES = {
       name: 'China: CSSHQ and released objects',
       chip: 'China CSSHQ',
       act: 2,
-      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: 0.93, dMin: 0.1, t: 0.75, include: IS_PHONE ? undefined : [[0, -1.45, 0]] },
+      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: 0.93, aspCap: 1.33, dMin: 0.1, t: 0.75, include: IS_PHONE ? undefined : [[0, -1.45, 0]] },
     },
     // unlocked from the tour
     { name: 'Whole scene: Earth and every orbit', at: [32, -25, 5.8], phone: { at: [32, -25, 8] }, ref: false, hide: ['OTV-7 orbit'] },

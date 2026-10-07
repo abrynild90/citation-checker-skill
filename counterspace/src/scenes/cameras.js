@@ -250,7 +250,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               dMax: 6,
               fillX: fillAt(t),
               fillY: fillAt(t) * 0.8,
-              asp,
+              asp: c.fitCraft.aspCap ? Math.min(asp ?? ASPECT, c.fitCraft.aspCap) : asp, // aspCap (opt-in): a wide stage keeps the distance of a narrower one (more sky at the sides, same framing)
             });
             if (c.fitCraft.lock) {
               // slide the view so the craft sits left of and below the middle (clear of the context inset in the top right corner), whatever the stage shape
