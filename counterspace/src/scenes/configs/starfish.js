@@ -92,6 +92,7 @@ export const STARFISH = {
       },
     },
   ],
+  pushApart: { near: 40, dist: 120 }, // two pills at one anchor fan out radially
   liveLabelK: 1.25, // live at desktop width: the labels carry the story, so the type is 25% larger than the default 11 px
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
