@@ -240,7 +240,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             if (!P.length) for (const id of ids) P.push(crafts[id].raw(t));
             // fitCraft.include: extra points in the anchor's local frame that must stay in view (the GEO belt under the pair)
             const f = an.frame(t),
-              d = (asp != null && asp < 1.3 && c.fitCraft.phoneDir) || c.fitCraft.dir, // phoneDir: a steeper view on a narrow (phone) stage
+              d = (asp != null && (c.fitCraft.aspFloor ? Math.max(asp, c.fitCraft.aspFloor) : asp) < 1.3 && c.fitCraft.phoneDir) || c.fitCraft.dir, // phoneDir: a steeper view on a narrow (phone) stage
               n = norm(add(add(scl(f.along, d[0]), scl(f.rad, d[1])), scl(f.cross, d[2])));
             const nCraft = P.length; // lookCraft (opt-in): the target is the craft's centroid; the include points only widen the fitted distance
             for (const o of c.fitCraft.include || []) P.push(add(add(add(an.pos(t), scl(an.frame(t).along, o[0])), scl(an.frame(t).rad, o[1])), scl(an.frame(t).cross, o[2])));
