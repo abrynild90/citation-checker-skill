@@ -57,7 +57,15 @@ const q25 = (b64, fg, opacity) =>
 const failures = [];
 for (const [scheme, w, h] of CONFIGS) {
   const p = await browser.newPage({ viewport: { width: w, height: h } });
-  await p.goto(`http://localhost:${PORT}/index.html`);
+  if (process.env.CDN_DIR) {
+    const js = (f) => ({ path: process.env.CDN_DIR + '/' + f, contentType: 'application/javascript', headers: { 'access-control-allow-origin': '*' } }),
+      jpg = (f) => ({ path: process.env.CDN_DIR + '/' + f, contentType: 'image/jpeg', headers: { 'access-control-allow-origin': '*' } });
+    await p.route('**/d3.min.js', (r) => r.fulfill(js('d3.js')));
+    await p.route('**/three.module.js', (r) => r.fulfill(js('three.js')));
+    await p.route('**/earth-blue-marble.jpg', (r) => r.fulfill(jpg('bm.jpg')));
+    await p.route('**/earth-night.jpg', (r) => r.fulfill(jpg('nt.jpg')));
+  }
+  await p.goto(`http://localhost:${PORT}/index.html`, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(2500);
   await p.evaluate((s) => (document.documentElement.dataset.theme = s), scheme);
   await p.waitForTimeout(800);
