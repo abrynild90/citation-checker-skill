@@ -74,7 +74,10 @@
   .hero-notes{padding-left:var(--edge);padding-right:var(--edge);max-width:none;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:var(--s-3) var(--s-8);align-items:start}
   .hero-notes>p{max-width:none}
   .hero-notes .orbit-note{font-size:15px}
-  .hero-notes .cta-note{grid-column:1/-1;max-width:none}
+  .hero-notes .lede-note{grid-column:1;grid-row:1 / span 2}
+  .hero-notes .orbit-note{grid-column:2;grid-row:1}
+  .hero-notes .cta-note{grid-column:2;grid-row:2;max-width:none}
+  .hero-cap{justify-content:flex-start;align-items:flex-start;gap:var(--s-3)}
   .hero-contents{padding-left:var(--edge);padding-right:var(--edge);max-width:none}
 }
 @supports (height:100svh){
