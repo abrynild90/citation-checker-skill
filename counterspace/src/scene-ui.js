@@ -546,6 +546,7 @@ const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && get
 // The list shows whole steps at rest. The story column is a flex column whose list takes what the lede and the foot leave; this measures how many whole
 // rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
 // (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
+const MAX_ROWS = 6;
 function rowsFit() {
   // the cue under the list takes its room before the rows are counted (updateCue hides it again if every row fits)
   if (!STACKED.matches && !expanded) {
@@ -558,11 +559,12 @@ function rowsFit() {
   const avail = stepsEl.clientHeight;
   let n = 0,
     h = 0;
-  if (stepsEl.scrollHeight <= avail + 1) return { n: steps.length, h: 0, avail };
+  const cap = STACKED.matches ? Infinity : MAX_ROWS; // a long list shows about six rows at a time on a desktop window, never a list taller than the picture
+  if (stepsEl.scrollHeight <= avail + 1 && steps.length <= cap) return { n: steps.length, h: 0, avail };
   const first = stepsEl.firstElementChild;
   for (const li of stepsEl.children) {
     const b = li.offsetTop + li.offsetHeight;
-    if (b <= avail + 1) {
+    if (b <= avail + 1 && n < cap) {
       n++;
       h = b;
     } else break;
@@ -608,6 +610,39 @@ function fitSteps() {
     r = rowsFit();
   }
   if (STACKED.matches) r.h = 0; // phone and tablet: every row at its natural height, the column scrolls; desktop: a window of whole rows
+  if (r.h && !STACKED.matches) {
+    // The window rests on a row at every step of the story, so the rows left under the last resting place can be shorter than the window and leave a blank band
+    // above the cue. Of the heights that are a whole number of consecutive rows, take the one that leaves the least blank at any resting place.
+    const kids = [...stepsEl.children],
+      top = kids.map((k) => k.offsetTop),
+      bot = kids.map((k) => k.offsetTop + k.offsetHeight),
+      total = bot.at(-1),
+      blank = (H) => {
+        let worst = 0;
+        for (let k = 0; k < kids.length; k++) {
+          let end = top[k];
+          for (let m = k; m < kids.length && bot[m] - top[k] <= H + 0.5; m++) end = bot[m];
+          worst = Math.max(worst, H - (end - top[k]));
+          if (total - top[k] <= H + 0.5) break;
+        }
+        return worst;
+      };
+    let best = r.h,
+      bestCost = blank(r.h);
+    for (let i = 0; i < kids.length; i++)
+      for (let j = i; j < kids.length; j++) {
+        const H = bot[j] - top[i];
+        if (H > r.avail + 0.5 || H < r.avail * 0.7 || j - i + 1 > MAX_ROWS) continue;
+        const c = blank(H);
+        if (c < bestCost - 1 || (Math.abs(c - bestCost) <= 1 && H > best)) (best = H), (bestCost = c);
+      }
+    if (best < r.h || best > r.h) {
+      r.h = best;
+      r.n = 0;
+      for (const b of bot) if (b <= best + 0.5) r.n++;
+      r.n = Math.max(1, r.n);
+    }
+  }
   if (r.h) {
     stepsEl.style.flex = '0 0 auto';
     stepsEl.style.height = r.h + 'px';
@@ -944,6 +979,7 @@ function buildViews(cfg, sim) {
     const short = phoneViews.matches ? phoneLabel(label) : narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^Follow the action$/i, 'Follow').replace(/^./, (m) => m.toUpperCase()) : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
+    b.title = label;
     b.dataset.i = i;
     b.dataset.name = label === c.name ? '' : c.name;
     b.setAttribute('aria-keyshortcuts', String(i + 1));

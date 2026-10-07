@@ -2007,16 +2007,25 @@
   }
 }
 
-/* Wide window, four or more views: the views take a second row so the time bar stays long enough to use */
+/* Wide window: play, time, scrubber, views and save share one row. The scrubber takes what the pills leave; a long view name is cut with an ellipsis (the full name is the title and the aria-label) */
 @media (min-width: 1181px) {
-  .overlay .ctrl { grid-template-columns: auto auto minmax(360px, 1fr) auto; }
-  .overlay .ctrl:not([data-many-views]) { grid-template-columns: auto auto minmax(360px, 1fr) auto auto; }
-  .overlay .ctrl[data-many-views] {
-    grid-template-areas:
-      "play time scrub save"
-      "views views views views";
+  .overlay .ctrl,
+  .overlay .ctrl:not([data-many-views]) {
+    grid-template-columns: auto auto minmax(200px, 1fr) minmax(0, auto) auto;
+    grid-template-areas: "play time scrub views save";
+    column-gap: var(--s-3);
   }
-  .overlay .ctrl[data-many-views] #scExport { grid-area: save; }
+  .overlay .ctrl .seg {
+    flex: 0 1 auto;
+  }
+  .overlay .ctrl .seg button:not(.more-views) {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 24ch;
+    padding: 0 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* Wide window: the lede, the "What happens" heading and the foot stay put, and only the list of steps scrolls inside what is left (never under 190 px, so
@@ -2138,5 +2147,16 @@
   }
   .overlay .sv-about {
     margin-top: var(--s-1);
+  }
+}
+
+/* Laptop-width stage: the Top-view inset (a canvas the scene draws in a corner of the picture) is about a fifth smaller, so it crowds the action less */
+@media (min-width: 901px) and (max-width: 1600px) {
+  .overlay .view canvas[aria-hidden="true"][style*="border"] {
+    transform: scale(0.78);
+    transform-origin: top right;
+  }
+  .overlay .view canvas[aria-hidden="true"][style*="border"][style*="left: 12px"] {
+    transform-origin: bottom left;
   }
 }
