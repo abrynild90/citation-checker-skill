@@ -38,13 +38,15 @@ float r = min(uR, uMaxPx * d / uScale) * mix(uTaper, 1.0, pow(uv.x, 1.2));
 vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail;
-uniform vec4 uGap0; uniform vec4 uGap1; uniform float uFar; uniform float uDisc; varying float vU; varying vec3 vP;
+uniform vec4 uGap0; uniform vec4 uGap1; uniform float uFar; uniform float uDisc; uniform float uDash; varying float vU; varying vec3 vP;
 // uTail > 0: only the last uTail of the tube length behind the head is visible (a capped wake)
 void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
 if (uTail > 0.0) f *= clamp((vU - (uHead - uTail)) / uTail, 0.0, 1.0);
 // uGap*: the line fades out around a craft (xyz, radius w), so an orbit never runs through a model
 // uFar > 0 (opt-in): the line is thin and fades with its angle to the viewer; the far side of the orbit is dimmer and dashed
 if (uFar > 0.0) { float fc = dot(normalize(vP), normalize(cameraPosition)); float far = 1.0 - smoothstep(-0.25, 0.35, fc); f *= mix(0.55, 1.0, smoothstep(-0.2, 0.8, fc)); f *= mix(1.0, 0.3 + 0.7 * step(0.5, fract(vU * 130.0)), far); }
+// uDash > 0 (opt-in): the line is broken into that many dashes along its length (a measuring line)
+if (uDash > 0.0) f *= step(0.42, fract(vU * uDash));
 // uDisc > 0 (opt-in): the line fades where it projects onto the Earth's disc (an orbit seen across the globe reads as an orbit, not a scratch)
 if (uDisc > 0.0) { vec3 dr = normalize(vP - cameraPosition); vec3 cl = cameraPosition + dr * dot(-cameraPosition, dr); f *= smoothstep(uDisc, uDisc * 1.03, length(cl)); }
 if (uGap0.w > 0.0) f *= smoothstep(uGap0.w * 0.7, uGap0.w * 1.5, distance(vP, uGap0.xyz));
@@ -124,6 +126,7 @@ const methods = {
           uGap1: { value: new T.Vector4(0, 0, 0, 0) },
           uPush: { value: 0 },
           uFar: { value: 0 },
+          uDash: { value: 0 },
           uDisc: { value: 0 },
         },
       });
@@ -260,6 +263,7 @@ const methods = {
           ),
         );
         if (it.fade) tube.material.uniforms.uFar.value = 1; // opt-in thin line, dimmer and dashed on the far side
+        if (it.dash) tube.material.uniforms.uDash.value = it.dash; // opt-in dashed line (dash count along its length)
         if (it.fadeDisc) tube.material.uniforms.uDisc.value = 1;
         if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds });
         if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
