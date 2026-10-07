@@ -419,56 +419,52 @@ export const modelMethods = {
     rim(white);
     rim(deck);
     rim(body);
-    K.geo(white, new T.LatheGeometry(prof, 48), 0, 0, 0, PI / 2, 0, 0, 1, 1, 0.78);
-    K.geo(nose, new T.SphereGeometry(0.0017, 12, 8), 0, 0, 0.0214, 0, 0, 0, 1, 0.8, 1.3);
-    K.box(nose, 0.0094, 0.0006, 0.026, 0, -0.0043, -0.002); // dark heat-shield belly seen at the edges
-    K.geo(under, new T.LatheGeometry(prof, 36), 0, -0.0016, 0, PI / 2, 0, 0, 1.04, 1, 0.42); // a dark lower hull: the belly reads dark from the side
-    // Underside: a dark tile belly along the fuselage (wider than the body so it reads from the side), with a few tile seams
-    K.box(tile, 0.0096, 0.0016, 0.044, 0, -0.0034, -0.0008);
-    for (const z of [-0.012, -0.005, 0.002, 0.009]) K.box(dark, 0.0098, 0.0004, 0.0002, 0, -0.0027, z);
-    // Panel lines across the white upper fuselage and a gold foil band at the nose and on the tail tips
-    for (const z of [0.0105, 0.0152, -0.0128, -0.0186]) K.box(dark, 0.0072 - Math.abs(z) * 0.07, 0.0003, 0.00022, 0, 0.0036, z);
-    for (const s of [-1, 1]) K.box(dark, 0.00022, 0.0003, 0.018, s * 0.0033, 0.0034, 0.001);
-    K.box(foil, 0.0068, 0.0004, 0.0026, 0, 0.0033, 0.0182);
-    K.box(foil, 0.0094, 0.0005, 0.0034, 0, -0.0006, -0.0188);
-    K.box(glass, 0.0026, 0.0008, 0.0042, 0, 0.0033, 0.0136);
-    // Payload-bay doors: a dark frame on the back, two pale door panels with a dark centre seam and hinge lines (the X-37B's most recognisable detail)
-    K.box(dark, 0.0072, 0.0007, 0.0188, 0, 0.0043, -0.0036);
-    for (const s of [-1, 1]) K.box(white, 0.0028, 0.0005, 0.0172, s * 0.0017, 0.0047, -0.0036);
-    K.box(dark, 0.0004, 0.0006, 0.0176, 0, 0.0049, -0.0036);
-    for (const z of [-0.0072, 0.0004]) K.box(dark, 0.0068, 0.0005, 0.0003, 0, 0.0049, z);
-    // Wing: a thin bevelled slab, dark below (the national colour darkened) with a pale tile deck on top and a dark leading edge; a short, low-aspect
-    // trapezoid (X-37B: span about half its length) set low on the rear body
+    // Fuselage: a smooth rounded lathe (flattened), white above; a darker, slightly wider lower hull gives the dark tile belly
+    K.geo(white, new T.LatheGeometry(prof, 56), 0, 0.0004, 0, PI / 2, 0, 0, 1.12, 1, 0.72);
+    K.geo(under, new T.LatheGeometry(prof, 48), 0, -0.0012, 0, PI / 2, 0, 0, 1.2, 1, 0.4);
+    K.geo(nose, new T.SphereGeometry(0.0018, 14, 10), 0, -0.0002, 0.0216, 0, 0, 0, 1, 0.75, 1.3);
+    K.geo(glass, new T.SphereGeometry(0.0015, 12, 8), 0, 0.0027, 0.0146, 0, 0, 0, 1.2, 0.5, 2.2);
+    // Payload-bay doors: a long recessed panel on the back with a centre seam and two hinge lines
+    K.geo(deck, new T.CapsuleGeometry(0.0021, 0.015, 4, 12), 0, 0.0043, -0.0034, PI / 2, 0, 0, 1, 1, 0.22);
+    K.box(dark, 0.00018, 0.00022, 0.0172, 0, 0.0049, -0.0034);
+    for (const z of [-0.0098, 0.0030]) K.box(dark, 0.0042, 0.00018, 0.00018, 0, 0.0047, z);
+    // Wing: a thin rounded slab (generous bevel), dark below with a pale deck on top, set low on the rear body
     const shape = (k) => {
       const q = new T.Shape();
-      q.moveTo(0.0052 * k, 0.0085 * k);
-      q.lineTo(0.0108 * k, -0.0105 * k);
-      q.lineTo(0.0108 * k, -0.0185 * k);
-      q.lineTo(-0.0108 * k, -0.0185 * k);
-      q.lineTo(-0.0108 * k, -0.0105 * k);
-      q.lineTo(-0.0052 * k, 0.0085 * k);
+      q.moveTo(0.0046 * k, 0.0078 * k);
+      q.quadraticCurveTo(0.0098 * k, -0.0012 * k, 0.0112 * k, -0.0108 * k);
+      q.lineTo(0.0112 * k, -0.0174 * k);
+      q.lineTo(-0.0112 * k, -0.0174 * k);
+      q.lineTo(-0.0112 * k, -0.0108 * k);
+      q.quadraticCurveTo(-0.0098 * k, -0.0012 * k, -0.0046 * k, 0.0078 * k);
       q.closePath();
       return q;
     };
     K.geo(
       under,
-      new T.ExtrudeGeometry(shape(1), { depth: 0.0013, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 1 }),
+      new T.ExtrudeGeometry(shape(1), { depth: 0.0008, bevelEnabled: true, bevelThickness: 0.0006, bevelSize: 0.0007, bevelSegments: 4, curveSegments: 12 }),
       0,
-      -0.0014,
+      -0.0016,
       0,
       PI / 2,
       0,
       0,
     );
-    K.geo(deck, new T.ExtrudeGeometry(shape(0.9), { depth: 0.0004, bevelEnabled: false }), 0, -0.0008, -0.0004, PI / 2, 0, 0);
-    for (const [z, wd] of [[-0.0105, 0.0185], [-0.0045, 0.0145]]) K.box(dark, wd, 0.0003, 0.0003, 0, -0.0004, z);
+    K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0004, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 3, curveSegments: 12 }), 0, -0.0007, -0.0004, PI / 2, 0, 0);
+    // Tail: two small tapered fins canted outward (the X-37B's V tail), white with a dark tip
+    const fin = new T.Shape();
+    fin.moveTo(0, 0);
+    fin.lineTo(0.0124, 0);
+    fin.lineTo(0.0092, 0.0074);
+    fin.lineTo(0.0044, 0.0074);
+    fin.closePath();
     for (const s of [-1, 1]) {
-      K.box(dark, 0.0007, 0.0006, 0.0182, s * 0.0078, -0.0011, -0.0006, 0, -s * 0.36, 0); // leading edge
-      // canted tail fin (white, dark tip): the twin V tail
-      K.box(white, 0.0008, 0.0072, 0.0100, s * 0.0045, 0.0068, -0.0158, 0, 0, -s * 0.5);
-      K.box(foil, 0.001, 0.0012, 0.0100, s * 0.0068, 0.0105, -0.0158, 0, 0, -s * 0.5);
+      K.group(s * 0.0034, 0.0016, -0.0245, 0, 0, -s * 0.5, () => {
+        K.geo(white, new T.ExtrudeGeometry(fin, { depth: 0.0007, bevelEnabled: true, bevelThickness: 0.0002, bevelSize: 0.0002, bevelSegments: 2 }), -0.00035, 0, 0, 0, PI / 2, 0);
+        K.box(dark, 0.0009, 0.0004, 0.0044, 0, 0.0074, -0.0068);
+      });
     }
-    K.cyl(dark, 0.0026, 0.0032, 0.003, 0, 0, -0.0235, PI / 2);
+    K.cyl(dark, 0.0022, 0.0030, 0.0030, 0, 0, -0.0242, PI / 2);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(under);
     g.userData.sat = true;
