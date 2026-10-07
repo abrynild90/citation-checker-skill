@@ -582,7 +582,7 @@ export function table(id, head, rows, caption = CAPTIONS[id], hiddenLast = false
     `<td${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)} data-label="${esc(String(head[i]).replace(/<[^>]*>/g, ''))}">${typeof c === 'string' && (c.startsWith('<a') || c.startsWith('<span class="srcc"') || c.startsWith('<span class="cnt-line"') || c.startsWith('<span class="tl"') || c.startsWith('<span class="qc"')) ? c : esc(c)}</td>`;
   const tr = (r) => `<tr>${r.map(cell).join('')}</tr>`;
   const cap = caption ? `<caption>${esc(caption)}</caption>` : '';
-  const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}${h === 'How sure we are' ? ' data-sure' : ''}>${h}</th>`).join('');
+  const th = head.map((h, i) => `<th scope="col"${kind[i] ? ` class="${kind[i]}"` : ''}${hide(i)}${/^How sure/.test(h) ? ' data-sure' : ''}>${h}</th>`).join('');
   const host = document.getElementById(id);
   if (host && !host.hasAttribute('role')) {
     host.setAttribute('role', 'region');

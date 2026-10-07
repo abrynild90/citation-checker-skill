@@ -301,7 +301,7 @@ details.table>summary{scroll-margin-top:110px}
   #chipsB .chip{flex:none}
 }
 
-@media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}.tscroll th[data-sure]{white-space:nowrap}#tableR th[data-sure]{white-space:normal;min-width:0;overflow-wrap:normal}}
+@media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}.tscroll th[data-sure]{white-space:nowrap}}
 
 .legal-band.reading.compact,.legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
 

@@ -415,7 +415,7 @@ export function drawR(el = document.getElementById('svgR')) {
   );
   table(
     'tableR',
-    ['When', 'Actor', 'Activity', 'Spacecraft and other object', 'Orbit', 'How sure we are', 'What happened', 'Source'],
+    ['When', 'Actor', 'Activity', 'Spacecraft', 'Orbit', 'How sure', 'What happened', 'Source'],
     CO.slice()
       .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0))
       .map((e) => [
