@@ -82,7 +82,9 @@ export const STARFISH = {
       sat: {
         phase: 1.05,
         speed: 0.25,
-        big: 1.5,
+        big: 3.4,
+        minPx: 38,
+        maxPx: 64,
         label: 'Satellite in belt',
         short: 'Satellite',
         dx: 30,
