@@ -102,8 +102,8 @@ export const GNSS = {
   phoneK: 0.82,
   stillCam: { at: [49, 14, 1.85], look: [51.5, 16, 0.98], hideShell: true },
   focus: [55, 18],
-  inset: 'GPS orbits (top view)',
-  insetSize: [132, 104],
+  inset: 'GPS (top view)',
+  insetSize: [100, 80], // 25% smaller than before
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
   liveOff: { 'Jammer effect zone': [38, -22], 'Airliner 1': [-34, -50] }, // desktop: a leader runs from the label to the zone's edge
   stillHideText: ['Baltic Sea'], // the print drops the place name: it would sit on Airliner 1's leader
