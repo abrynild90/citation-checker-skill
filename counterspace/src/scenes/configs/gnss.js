@@ -106,7 +106,7 @@ export const GNSS = {
   insetSize: [100, 80], // 25% smaller than before
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
   liveOff: { 'Jammer effect zone': [62, -30], 'Airliner 1': [-34, -50] },
-  offSteps: { 'Airliner 1': [[0, -100, 40], [0.17, null]] }, // desktop: the pill sits left of the zone while the airliner is outside it, then the placer's own slot // desktop: a leader runs from the label to the zone's edge
+  offSteps: { 'Airliner 1': [[0, -84, -46], [0.17, null]] }, // desktop: the pill sits left of the zone while the airliner is outside it, then the placer's own slot // desktop: a leader runs from the label to the zone's edge
   stillHideText: ['Baltic Sea'], // the print drops the place name: it would sit on Airliner 1's leader
   noJamArrow: true, // the jammed link gets no edge arrowhead (it would read as a stray marker at the frame border)
   sunView: { az: 30, el: 32 }, // a higher, more frontal sun: the Baltic terrain is lit, not olive and murky

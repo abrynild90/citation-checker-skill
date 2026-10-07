@@ -63,6 +63,9 @@ export const COSMOS1408 = {
       minPx: 5,
       maxPx: 11, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
+      hard: true, // crisp fragments with a bright centre: not another soft orange town light
+      palette: { hot: [1, 0.98, 0.9], mid: [1, 0.9, 0.74], cool: [1, 0.8, 0.62] }, // warm white fragments: separate from the amber city lights
+      darkHalo: 0.7,
       color: C.debris,
       label: 'Debris of Cosmos 1408',
       short: 'Cosmos 1408 debris',
