@@ -226,8 +226,12 @@ const methods = {
     const camOffs = w >= 700 ? this.sim.cfg.camOff?.[this.camIdx] : w < 520 ? this.sim.cfg.phoneCamOff?.[this.camIdx] : null, // cfg.phoneCamOff: the same at phone width
       offs = noBanner ? this.sim.cfg.stillOff : camOffs || (this.camIdx === 0 ? (w >= 700 ? this.sim.cfg.liveOff : w < 520 ? this.sim.cfg.phoneOff : null) : null),
       offK = noBanner ? w / 1000 : w >= 700 ? Math.min(1, w / 798) : 1; // cfg.stillOff (PNG stills): px at a 1000 px wide frame
-    if (offs)
-      Object.entries(offs).forEach(([n, d]) => {
+    // cfg.offSteps { 'Label start': [[from t, dx, dy], ...] } (opt-in, live default camera, desktop width): the fixed offset changes with time
+    // (a pill that must sit outside a zone early and inside it later); it replaces that label's liveOff entry (a step with dx null: no fixed offset, the placer's own slot).
+    const stepOffs = !noBanner && this.camIdx === 0 && w >= 700 && !camOffs && this.sim.cfg.offSteps;
+    const offsAll = stepOffs ? { ...Object.fromEntries(Object.entries(offs || {}).filter(([n]) => !(n in stepOffs))), ...Object.fromEntries(Object.entries(stepOffs).map(([n, st]) => { const k = st.filter((e) => e[0] <= this.t).pop() || st[0]; return [n, k[1] == null ? null : [k[1], k[2]]]; }).filter((e) => e[1])) } : offs;
+    if (offsAll)
+      Object.entries(offsAll).forEach(([n, d]) => {
         if (this.sim.cfg.offFrom?.[n] > this.t) return; // cfg.offFrom { 'Label start': t } (opt-in): the fixed offset applies only from this time
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
