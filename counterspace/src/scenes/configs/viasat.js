@@ -70,8 +70,8 @@ export const VIASAT = {
       labelOffDisc: true, // stills: the label sits beside the globe, not on it
       label: 'Ground terminals (modems)',
       short: 'Terminals',
-      labelDx: IS_PHONE ? 125 : 150,
-      labelDy: IS_PHONE ? -104 : -130,
+      labelDx: IS_PHONE ? 125 : 168,
+      labelDy: IS_PHONE ? -104 : -150,
     },
     // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
     { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
@@ -89,14 +89,15 @@ export const VIASAT = {
 
   insetHalo: true, // dark casing on the inset's KA-SAT text (it sat on the blue globe)
   insetPhone: 'Top view',
-  insetEnd: { from: 0.3, title: 'Top view: KA-SAT (off frame) still works', phone: 'KA-SAT works' }, // the closing note on the satellite, which is out of the Europe frame
+  insetEnd: { from: 0.3, title: 'Top view: KA-SAT still works', phone: 'KA-SAT works' }, // the closing note on the satellite, which is out of the Europe frame
+  insetSize: [168, 108], // desktop: a smaller top view, out of the way of the Europe frame
   insetSizePhone: [92, 76], // 375: a small inset in the corner, clear of the Terminals pill
   still: 0.75,
   stillOff: { KA: [-250, 20] }, // the still: the satellite pill sits left of the satellite, clear of the caption
   camDist: 5.6,
   focus: [33, 12],
   shellLabels: { GEO: null },
-  offFrom: { 'Ground network': 0.45 }, // before this the placer's own slot above the hub is clear
+  offFrom: { 'Ground network': 0.3 }, // before this the placer's own slot above the hub is clear
   liveOff: { 'Ground network': [40, 72] }, // desktop: the label sits in the Atlantic to the west, off the modem field
   liveShort: ['Ground terminals', 'Ground management'], // the full text puts a corner of the label on the Earth at 900 px on the wide camera
   staticZoom: 1.5,
@@ -110,8 +111,8 @@ export const VIASAT = {
       glide: [
         [0, [10, 11, 4.3], [8, 9, 1.0]],
         [0.3, [10, 11, 4.3], [8, 9, 1.0]],
-        [0.37, [30, 13, 2.35], [55, 25, 1.0]],
-        [1, [30, 13, 2.35], [55, 25, 1.0]],
+        [0.37, [30, 13, 2.65], [55, 25, 1.0]],
+        [1, [30, 13, 2.65], [55, 25, 1.0]],
       ],
       narrowK: 1, // phone: the glide's own distances carry the zoom (about 12% in, KA-SAT still in frame)
       phone: {
