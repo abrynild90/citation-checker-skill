@@ -18,7 +18,7 @@ export const BURNT_FROST = {
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
   phoneOff: { 'USS Lake Erie': [46, 34] }, // 375: the ship pill clears the caption pill below it
-  sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -32, el: 24 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
+  sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -62, el: 14 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,
   seaK: IS_PHONE ? 2.2 : 0.8, // the Pacific is dark even in daylight: lifted so the ship and satellite separate from it
