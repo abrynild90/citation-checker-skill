@@ -253,6 +253,14 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
                 sh = add(scl(r, 0.14 * tH * D), scl(u, 0.12 * tV * D));
               return { pos: add(pose.pos, sh), look: add(pose.look, sh), up: f.rad };
             }
+            if (c.fitCraft.shiftR) {
+              // shiftR: the picture slides right by this fraction of the half-width (the camera moves left), e.g. to clear labels at the left edge
+              const fw = norm(add(pose.look, scl(pose.pos, -1))),
+                r = norm(cross3(fw, f.rad)),
+                D = Math.hypot(...add(pose.look, scl(pose.pos, -1))),
+                sh = scl(r, -c.fitCraft.shiftR * tanFor(asp ?? ASPECT)[0] * D);
+              return { pos: add(pose.pos, sh), look: add(pose.look, sh), up: f.rad };
+            }
             return { ...pose, up: f.rad };
           };
         return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };

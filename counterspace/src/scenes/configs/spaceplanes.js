@@ -23,7 +23,7 @@ export const SPACEPLANES = {
   cite: 'Secure World Foundation, 2026: Table 1-1 (p. 01-08), Figure 1-3 (p. 01-07), pp. 01-04 to 01-09; Table 3-1 (p. 03-08), pp. 03-06 to 03-08.',
   related: null,
   event: 'us-2023-otv7',
-  inset: 'Top view',
+  noInset: true,
   scaleNote: 'The distances to the released objects are exaggerated and orbital motion is slowed.',
   anchors: {
     us: { orbit: { alt: 350, inc: 45, raan: 288, u0: 0.47, du: 3.4 } },
