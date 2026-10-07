@@ -58,8 +58,8 @@ export const STARFISH = {
       dx: -96,
       dy: 4,
     },
-    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, strong: true, size: 0.34, span: 0.4, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
-    { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14 },
+    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, strong: IS_PHONE, size: IS_PHONE ? 0.34 : 0.27, span: 0.4, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
+    { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14, opacity: IS_PHONE ? 0.6 : 0.5 },
     {
       type: 'belt',
       at: [16.5, -169.2],
@@ -67,7 +67,8 @@ export const STARFISH = {
       t0: 0.18,
       t1: 0.9,
       count: 1700,
-      alpha: 0.6,
+      arcOpacity: IS_PHONE ? 0.2 : 0.11, // desktop: the arches thinned so the Earth does not read as a mesh
+      alpha: IS_PHONE ? 0.6 : 0.38, // desktop: thinner, so the Earth stays readable under the belt
       color: C.belt,
       size: 0.026,
       nLon: 12,

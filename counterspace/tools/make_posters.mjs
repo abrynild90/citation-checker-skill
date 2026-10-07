@@ -20,7 +20,7 @@ const POSTER_T = {
   solwind: 0.4, // the F-15, the released missile and the textured satellite all in frame
   fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
-  dn2: 0.5, // the rocket well inside the frame, the whole GEO ring around the Earth
+  dn2: 0.55, // the rocket well inside the frame, the whole GEO ring around the Earth
   shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
@@ -34,15 +34,15 @@ const POSTER_T = {
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   viasat: { cam: 0, back: 1.12, boost: 2.4 }, // the ground network and the KA-SAT beams: the satellite at the foot of the beams, Europe above
-  'sj21-tug': { cam: 4, back: 1.35, lift: -0.4, right: -0.12, boost: 1.5 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
+  'sj21-tug': { cam: 4, back: 1.1, lift: -0.05, right: 0.0, boost: 1.5 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0 }, // the full-globe composition of the first camera
   gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
   spaceplanes: { cam: 2, boost: 1.3, back: 3.4, lift: -1.6 }, // OTV-7's elongated orbit around the Earth
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
-  shakti: { back: 0.58, right: 0.08, boost: 1.7 },
+  shakti: { back: 0.4, right: 0.12, boost: 1.7 },
   fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
-  dn2: { back: 0.8, boost: 1.3, right: 0.5 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
+  dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
 const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)

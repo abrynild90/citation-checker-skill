@@ -111,7 +111,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: IS_PHONE ? 68 : 140,
+      minPx: IS_PHONE ? 68 : 172,
       maxPx: MX,
       anchor: 'heo',
       acts: [1],
@@ -234,7 +234,8 @@ export const SPACEPLANES = {
     { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 }, // the wake ends soon after Object J does
     { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 },
   ],
-  camOff: { 2: { 'GEO ring': [-30, -64] } }, // OTV-7 view: the ring's name sits above its line with a leader
+  camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [88, -8] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
+
   leaderK: 0.3, // an orbit name that sits just off its line still gets a leader
   liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee
   fillK: 0.5,

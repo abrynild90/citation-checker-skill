@@ -63,6 +63,9 @@ export const COSMOS1408 = {
       minPx: 5,
       maxPx: 11, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
+      hard: true, // crisp fragments with a bright centre: not another soft orange town light
+      palette: { hot: [1, 0.98, 0.9], mid: [1, 0.9, 0.74], cool: [1, 0.8, 0.62] }, // warm white fragments: separate from the amber city lights
+      darkHalo: 0.7,
       color: C.debris,
       label: 'Debris of Cosmos 1408',
       short: 'Cosmos 1408 debris',
@@ -74,7 +77,7 @@ export const COSMOS1408 = {
   ],
   still: 0.8,
   phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
-  liveOff: { 'Cosmos 1408': [-100, 14], Plesetsk: [-96, 44], 'ISS orbit': [150, 0], Impact: [34, -112] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
+  liveOff: { 'Cosmos 1408': [-100, 14], Plesetsk: [-96, 44], 'ISS orbit': [150, 0], Impact: [26, -134] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],

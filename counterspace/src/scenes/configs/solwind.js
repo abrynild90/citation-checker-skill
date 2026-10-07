@@ -33,10 +33,11 @@ export const SOLWIND = {
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
   fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
+  sunView: IS_PHONE ? undefined : { az: -45, el: 22 }, // desktop: the Pacific coast and the Earth under the pair are in daylight, not a dull night side
   lightsK: 0.5, // softer city lights: the break-up pieces and the missile stay readable over the coast
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
   hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.45, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [185, -84], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [188, -98], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 0.95, // phone: a lighter tighten, the debris cloud at its widest stays inside the frame
@@ -52,9 +53,9 @@ export const SOLWIND = {
       alt: 12,
       t0: 0.0,
       t1: 0.24,
-      scale: 3.0, // follow view: the F-15 20% smaller against the satellite
-      minPx: IS_PHONE ? 55 : 62,
-      maxPx: IS_PHONE ? 78 : 104,
+      scale: IS_PHONE ? 3.0 : 4.4, // desktop: 1.5x so the aircraft reads next to the satellite
+      minPx: IS_PHONE ? 55 : 92,
+      maxPx: IS_PHONE ? 78 : 150,
       exit: { dur: 0.2, k: 0.6 }, // after the release the F-15 eases down and leaves
       label: 'F-15 zoom climb',
       labelUntil: 0.22,
