@@ -402,3 +402,12 @@ details.table>summary{scroll-margin-top:110px}
   #tableR td .obj-a{font-weight:600}
   #tableR td .obj-b{display:block;color:var(--muted)}
 }
+
+/* ---- desktop tables: Source keeps "Table n" and "PDF p. n" whole; the printed page stays in the link's title and name */
+@media (min-width:1101px){
+  #tableA th:last-child,#tableA td:last-child,#tableC th:last-child,#tableC td:last-child,#tableR th:last-child,#tableR td:last-child{min-width:11rem;max-width:none;width:11rem}
+  #tableA td:last-child .srcc,#tableC td:last-child .srcc,#tableR td:last-child .srcc{white-space:normal}
+  #tableC th:nth-last-child(2),#tableR th:nth-last-child(3),#tableA th:nth-last-child(2){min-width:6.5rem}
+  #tableA td .tl{display:block}
+  #tableA td .obj-b{display:block;color:var(--muted);font-size:13px}
+}

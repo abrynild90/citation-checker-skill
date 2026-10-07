@@ -530,7 +530,7 @@ export const srcCell = (r, tableId, entry) => {
   const tn = SRC_TABLE[tableId] || 'data',
     label = `${r.source}, ${r.pin}. Source for the ${tn} table, ${entry}`;
   const shown = r.source.length > 34 ? r.source.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim() : r.source;
-  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}" title="${esc(r.source)}">${esc(shown)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin)).replace(/^(Table [\d.-]+|Section [\d.]+)/, '<span class="nw">$1</span>')}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
+  return `<span class="srcc"><a href="${esc(r.source_url)}" target="_blank" rel="noopener" aria-label="${esc(label)}" title="${esc(r.source)}">${esc(shown)}</a><span class="pin-s" title="${esc(r.pin)}">, ${esc(shortPin(r.pin)).replace(/(Table [\d.-]+|Section [\d.]+|PDF p\. [\d-]+)/g, '<span class="nw">$1</span>')}</span><span class="pin-f">, ${esc(r.pin)}</span></span>`;
 };
 // Accessible data table. Each cell carries data-label so CSS can stack entries as cards on phones (no sideways scrolling). Columns whose cells are
 // all numbers are right-aligned; date columns never wrap on a wide screen.
