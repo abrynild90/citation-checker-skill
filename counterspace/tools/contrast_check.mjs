@@ -61,7 +61,7 @@ for (const [scheme, w, h] of CONFIGS) {
   await p.waitForTimeout(2500);
   await p.evaluate((s) => (document.documentElement.dataset.theme = s), scheme);
   await p.waitForTimeout(800);
-  await p.addScriptTag({ url: AXE });
+  await (process.env.AXE_FILE ? p.addScriptTag({ path: process.env.AXE_FILE }) : p.addScriptTag({ url: AXE }));
   const meta = await p.evaluate(async () => {
     const r = await window.axe.run(document, { runOnly: ['color-contrast'], resultTypes: ['incomplete', 'violations'] });
     window.__els = (r.incomplete[0]?.nodes || []).map((n) => document.querySelector(n.target[n.target.length - 1])).filter(Boolean);
