@@ -48,7 +48,7 @@ export const STARFISH = {
       t1: 0.14,
       color: C.int,
       label: 'Thor launch',
-      labelStart: 0.05, // live: the pill waits until the rocket is in view
+      labelStart: 0, // live: labelled from the first frame
       labelEnd: 0.135, // live: the Thor chip goes just before the burst (it stacked with Detonation and Johnston); the static views drop it anyway
       head: true,
       thick: 0.0035,
@@ -114,10 +114,13 @@ export const STARFISH = {
     {
       name: 'Whole scene',
       glide: [
-        [0, [9, -170.5, 1.8], [16.6, -169.3, 1.05]],
-        [0.12, [9, -170.5, 1.8], [16.6, -169.3, 1.05]],
-        [0.3, [18, -175, 2.45], [16.6, -169.4, 1]],
+        [0, [9, -170.5, 1.45], [16.6, -169.3, 1.05]],
+        [0.12, [9, -170.5, 1.5], [16.6, -169.3, 1.05]],
+        [0.22, [12, -172, 1.9], [16.6, -169.3, 1.04]],
+        [0.3, [18, -175, 2.35], [16.6, -169.4, 1]],
+        [0.36, [18.8, -179, 2.7], [12, -174, 0.75]],
         [0.42, [19.5, -184, 3.1], [8, -178, 0.5]],
+        [0.47, [19.8, -189, 3.7], [4, -186, 0.25]],
         [0.52, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.5], [0, -194.5, 0]],
         [1, [20.02, -194.5, IS_PHONE ? 3.5 * PH * 1.1 : 4.5], [0, -194.5, 0]],
       ],

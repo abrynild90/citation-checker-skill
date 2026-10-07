@@ -27,7 +27,7 @@ export const SHAKTI = {
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   phoneHide: ['PDV'], // 375: Microsat-R and the island are enough around the strike
-  fitFillKeys: IS_PHONE ? undefined : [0.9, 0.7, 0.6, 0.6, 0.6, 0.6], // desktop: the opening is tight on the pad, then eases out
+  fitFillKeys: IS_PHONE ? undefined : [0.95, 0.85, 0.8, 0.76, 0.68, 0.62], // desktop: the opening is tight on the pad, then eases out
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: { 'Abdul Kalam': [-34, 66], 'PDV': [-40, -120], 'Microsat-R': [165, 6] }, // the two pills sit on opposite sides of the strike, one above and one below
   camOff: { 1: { PDV: [95, -135] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
@@ -49,7 +49,7 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.55, flashCap: 1.25, strong: true, coreK: 0.95, flashSpan: 0.3, linger: 0.2, lingerK: 0.6, lingerEnd: 0.7, rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 } },
+    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.5, flashCap: 0.9, strong: true, coreK: 0.5, flashSpan: 0.26, linger: 0.2, lingerK: 0.6, lingerEnd: 0.7, rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 } },
     {
       type: 'debris',
       count: 130,
@@ -59,13 +59,14 @@ export const SHAKTI = {
       dv: 1.2,
       drift: 0.15,
       decay: 1.5,
-      color: '#e6ecff',
-      palette: { hot: [0.92, 1, 1], mid: [0.55, 0.9, 1], cool: [0.4, 0.75, 1] }, // bright white-cyan fragments: a clear colour difference from the amber city lights
+      color: '#ffc27a',
+      palette: { hot: [1, 0.9, 0.62], mid: [1, 0.66, 0.3], cool: [1, 0.55, 0.25] }, // warm fragments with short trails; the dark halo separates them from the amber city lights
       darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
-      size: 0.2,
-      minPx: 9,
-      maxPx: 22,
+      size: 0.1,
+      minPx: 5,
+      maxPx: 13,
       additive: true,
+      trail: { n: 5, dt: 0.012, k: 0.6 },
       lateGlow: true,
     },
   ],

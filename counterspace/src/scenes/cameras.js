@@ -104,14 +104,14 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
       posesFor = (asp) =>
         (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
-          const P = core.slice();
+          const P = (cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? [tgt.hitPos] : core).slice(); // dropCoreFrom (opt-in): later keys frame the hit and debris only
           // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
           if (burst && tk <= ht + 0.16 && tk >= (cfg.burstPadFrom ?? 0)) P.push(...burstPad); // burstPadFrom (opt-in): the early keys are fitted to the craft alone
           if (arc && tk <= ht + 0.05) P.push(arc.to);
           if (tk <= ht) P.push(tgt.pos(tk));
           if (tk > ht) P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
           if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
-          return fitPose(P, n, scl(add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
+          return fitPose(P, n, scl(cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97), {
             dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time
             dMax: cfg.fitMax ?? 6.5,
             fillX: cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9, // fitFillKeys (opt-in): the frame fill per key time
