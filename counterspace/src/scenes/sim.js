@@ -770,6 +770,7 @@ export function buildSim(cfg) {
         staticAt: a.staticAt,
         labelAt: all[Math.round(N * (a.labelIdx ?? 0.5))],
         labelEnd: a.labelEnd,
+        labelStart: a.labelStart, // opt-in: the label waits until this t (the rocket is in view by then)
         pts: (t) => {
           const s = clamp01((t - a.t0) / (a.t1 - a.t0));
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));

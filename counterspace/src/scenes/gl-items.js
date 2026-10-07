@@ -276,7 +276,7 @@ const methods = {
       if (it.label)
         this._label(
           it.label,
-          (t) => (it.labelEnd != null && t > it.labelEnd ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt),
+          (t) => (it.labelEnd != null && t > it.labelEnd ? null : it.labelStart != null && t < it.labelStart ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? it.labelAt : null) : it.labelAt),
           null,
           null,
           it.labelDy ?? 0,
