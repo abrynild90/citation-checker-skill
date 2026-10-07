@@ -529,8 +529,7 @@ function shortPin(pin) {
     pg = first.match(/PDF p\. [\d-]+/);
   if (t && pg) return `${t[1]}, ${pg[0]}`;
   if (pg) return pg[0];
-  const cut = first.length > 40 ? first.slice(0, 40).replace(/[\s,;(]+\S*$/, '') + '...' : first; // long free-text pins: the full page reference stays in the link name and the title
-  return cut;
+  return first; // a free-text page reference is shown whole: no fact is cut off
 }
 // A value that repeats on nearly every row shows as a dash; screen readers still hear it, and the cards on small screens leave it out.
 export const quiet = (full) => `<span class="qc"><span aria-hidden="true">\u2013</span><span class="sr">${esc(full)}</span></span>`;
