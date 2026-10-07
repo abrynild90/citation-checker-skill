@@ -359,7 +359,8 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         }
       });
   }
-  const yMark = compact ? TP * maxT + 10 : Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + (strip ? 20 : 28)),
+  const yMark = compact ? TP * Math.max(maxT, 2) + 10 : // the pinned strip keeps one height whatever the window shows
+     Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + (strip ? 20 : 28)),
     dnSpace = !compact && maxDn >= 0 ? OFF0 + maxDn * PITCH + 8 : 0;
   // Negotiation periods: bars in rows below the symbol line (and below any labels hanging under it), each named just above its bar.
   const lanes = [];
@@ -380,7 +381,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     });
   const laneP = compact ? 8 : 26,
     lane0 = yMark + (compact ? 20 : Math.max(32, dnSpace + 26));
-  const yAx = lane0 + (lanes.length ? (lanes.length - 1) * laneP + (compact ? 8 : 14) : 8),
+  const yAx = lane0 + (compact ? (Math.max(lanes.length, 2) - 1) * laneP + 8 : lanes.length ? (lanes.length - 1) * laneP + 14 : 8),
     H = yAx + (compact ? 23 : 38);
   const svg = d3
     .select(el)
