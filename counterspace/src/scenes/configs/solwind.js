@@ -50,9 +50,9 @@ export const SOLWIND = {
       alt: 12,
       t0: 0.0,
       t1: 0.24,
-      scale: 3.75, // follow view: the F-15 about 25% larger beside the satellite
-      minPx: IS_PHONE ? 55 : 78,
-      maxPx: IS_PHONE ? 78 : 130,
+      scale: 3.0, // follow view: the F-15 20% smaller against the satellite
+      minPx: IS_PHONE ? 55 : 62,
+      maxPx: IS_PHONE ? 78 : 104,
       exit: { dur: 0.2, k: 0.6 }, // after the release the F-15 eases down and leaves
       label: 'F-15 zoom climb',
       labelUntil: 0.22,
@@ -76,7 +76,7 @@ export const SOLWIND = {
       endFrom: 0.84,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
-    { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', thick: 0.0065, rocket: { minPx: 62, maxPx: 78 }, strong: true, flash: 0.45, flashSpan: 0.24, flashCap: 1.8, coreK: 1.3, linger: 0.16, lingerK: 0.55, lingerEnd: 0.667, retire: 0.06 },
+    { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', thick: 0.0065, rocket: { minPx: 62, maxPx: 78 }, strong: true, flash: 0.45, flashSpan: 0.24, flashCap: 1.1, coreK: 0.6, linger: 0.16, lingerK: 0.55, lingerEnd: 0.667, retire: 0.06 },
     { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, hideEmpty: true, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6', size: 0.06, minPx: 5, maxPx: 12, additive: true, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
   ],
   still: 0.45,
