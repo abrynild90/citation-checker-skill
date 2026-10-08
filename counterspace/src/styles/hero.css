@@ -199,3 +199,19 @@
 @keyframes rc-pill{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.hero-done.in .rc-link,.sv-recap .rc-link,.hero-done.in .rc-pill,.sv-recap .rc-pill{animation:none}}
 @media (max-width:639px){.rc-links li{grid-template-columns:1fr;gap:4px}.rc-a{text-align:left}.rc-b{flex-basis:45%;max-width:45%}.rc-link{flex-basis:calc((100% - 45%) * var(--k,1))}}
+
+/* Wide windows: three sentences from the data fill the empty sky at the top right, and the picture is taller. */
+.hero-glance{display:none}
+@media (min-width:1600px){
+  .hero-glance{display:block;position:absolute;z-index:2;top:var(--s-6);right:var(--edge);width:min(460px,28vw);padding:0;color:var(--muted);pointer-events:none;animation:rise var(--dur-hero) var(--ease) 260ms both}
+  .hero-glance[hidden]{display:none}
+  .hg-t{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
+  .hero-glance ul{margin:0;padding:0;list-style:none;display:grid;gap:var(--s-2)}
+  .hero-glance li{font:400 16px/1.5 var(--sans);padding-left:var(--s-4);position:relative}
+  .hero-glance li::before{content:"";position:absolute;left:0;top:.72em;width:8px;border-top:2px solid var(--hero-accent-2)}
+  .hero-glance b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+}
+@media (min-width:1800px){
+  .stage{height:clamp(560px,calc(100svh - 268px),900px)}
+}
+@media (prefers-reduced-motion:reduce){.hero-glance{animation:none}}

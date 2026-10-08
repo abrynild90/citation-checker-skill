@@ -3,9 +3,9 @@
 // Earth's limb (height on a log scale), and the laws and policies as ticks on the ground. It plays once (a time marker sweeps left to right and each event
 // rises at its year) and then stays as the final picture. Provides: mountHero(). Needs the data and text measurement from app.js.
 // ============================================================================
-import { D, DOMAIN, KIN, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
+import { D, DOMAIN, KIN, byId, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
-import { NO_LATER, hasLaterLaw, linkText, pairsAt, tagSpot } from './links.js';
+import { NO_LATER, gap, hasLaterLaw, linkText, pairsAt, tagSpot, yearsBetween } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
@@ -61,6 +61,7 @@ export function mountHero(fontsReady, actions = {}) {
   stage.id = 'heroStage';
   replay.hidden = STILL;
   writeText(stage);
+  writeGlance();
   let lastW = 0;
   // The first sweep draws each real link (a weapon, a dashed line, the wait, the law) one after another; the button becomes "Skip" while it runs.
   const cap = replay.closest('.hero-cap'),
@@ -148,6 +149,22 @@ function writeText(stage) {
     `<p>Laws and policies, in date order.</p><ul>${laws}</ul>`;
 }
 
+// A wide window has empty sky at the top right: three plain sentences there, each counted from the data.
+function writeGlance() {
+  const box = document.getElementById('heroGlance');
+  if (!box) return;
+  const first = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1))[0],
+    laws = [...LEGAL].sort((a, b) => (a.start < b.start ? -1 : 1)),
+    waits = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start))),
+    long = gap(Math.max(...waits));
+  box.innerHTML =
+    `<p class="hg-t">In our records</p><ul>` +
+    `<li>The first test was in <b>${fmtY(parse(first.date))}</b>. The last one that destroyed a satellite was in <b>${fmtMonthYear(parse(LAST_DA))}</b>.</li>` +
+    `<li><b>${laws.length}</b> laws and policies, from <b>${fmtY(parse(laws[0].start))}</b> to <b>${fmtY(parse(laws.at(-1).start))}</b>.</li>` +
+    `<li>The longest wait from a weapon to the first later law: <b>${long.num} ${long.unit}</b>.</li></ul>`;
+  box.hidden = false;
+}
+
 // ---------------------------------------------------------------- the drawing
 function build(stage) {
   stage.querySelector('svg')?.remove();
@@ -182,6 +199,8 @@ function build(stage) {
         })
       : [],
     wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
+    glance = document.getElementById('heroGlance'),
+    gr = wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null,
     pxDec = wide ? Math.min(118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
     steps = d3.range(0, W + 1, 24).concat(W);
@@ -240,6 +259,7 @@ function build(stage) {
   });
 
   // ---- events
+  if (gr) words.push({ x0: gr.left - rect.left - 12, y0: gr.top - rect.top - 10, x1: gr.right - rect.left + 12, y1: gr.bottom - rect.top + 12 });
   const obstacles = [...words],
     marks = [],
     pts = el('g', {}, svg);
