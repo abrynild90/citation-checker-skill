@@ -578,7 +578,7 @@ function mountHits(stage, S, actions) {
       for (const dx of [G + 6, 80, 140, 200, 260, 330, 400, 480]) for (const sh of [0, -50, 50, -100, 100, -150, 150]) cands.push([cx + dx, cy - ph / 2 + sh], [cx - dx - pw, cy - ph / 2 + sh]);
       for (const dx of [0, -70, 70, -140, 140]) cands.push([cx - pw / 2 + dx, cy - ph - G - 4], [cx - pw / 2 + dx, cy + G + 4]);
     } else {
-      for (const up of [0, 24, 48, 90]) for (let dx = -320; dx <= 320; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
+      for (const up of [0, 24, 48, 90, 140]) for (let dx = -560; dx <= 560; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
     }
     const lk = tagOf(h).flatMap(({ ev, law, w, sp }) => {
       const n = Math.max(1, Math.round(Math.hypot(law.px - ev.px, law.py - ev.py) / 16)),
