@@ -57,7 +57,15 @@
       <figure class="hero-figure" id="heroFigure">
         <div class="stage" id="heroPic" role="img" aria-describedby="heroAlt"></div>
         <figcaption class="hero-cap">
-          <p>Each dot is a test with a reported altitude; each tick on the ground is a law or policy. A thin ring means a 3D scene. Point at any one for details.</p>
+          <div class="hero-cap-main">
+            <ul class="hero-key" aria-label="How to read the picture">
+              <li><svg class="kg" viewBox="0 0 24 18" aria-hidden="true"><circle cx="12" cy="9" r="5.5" class="k-dot"/></svg>Dot: a test in orbit</li>
+              <li><svg class="kg" viewBox="0 0 24 18" aria-hidden="true"><path d="M12 1v16" class="k-tick"/></svg>Tick on the ground: a law or policy</li>
+              <li><svg class="kg wide" viewBox="0 0 40 18" aria-hidden="true"><path d="M2 14L38 4" class="k-dash"/><circle cx="2" cy="14" r="3" class="k-dot"/></svg>Dashed line: a test and the first law after it</li>
+              <li><svg class="kg" viewBox="0 0 24 18" aria-hidden="true"><circle cx="12" cy="9" r="8" class="k-ring"/><circle cx="12" cy="9" r="4.5" class="k-dot"/></svg>Ring: a 3D scene</li>
+            </ul>
+            <p class="hero-live" id="heroLive" aria-hidden="true"></p>
+          </div>
           <button class="btn small" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
             href="#i-replay"/></svg><span>Replay</span></button>
         </figcaption>

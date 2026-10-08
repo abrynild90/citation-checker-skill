@@ -3,7 +3,7 @@
 // Earth's limb (height on a log scale), and the laws and policies as ticks on the ground. It plays once (a time marker sweeps left to right and each event
 // rises at its year) and then stays as the final picture. Provides: mountHero(). Needs the data and text measurement from app.js.
 // ============================================================================
-import { DOMAIN, KIN, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
+import { D, DOMAIN, KIN, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
 import { NO_LATER, hasLaterLaw, linkText, pairsAt, tagSpot } from './links.js';
 import { SCENES } from './scenes/config.js';
@@ -62,19 +62,56 @@ export function mountHero(fontsReady, actions = {}) {
   replay.hidden = STILL;
   writeText(stage);
   let lastW = 0;
+  // The first sweep draws each real link (a weapon, a dashed line, the wait, the law) one after another; the button becomes "Skip" while it runs.
+  const cap = replay.closest('.hero-cap'),
+    label = replay.querySelector('span'),
+    icon = replay.querySelector('use');
+  let sweepT = 0;
+  const skipMode = (on) => {
+    const name = on ? 'Skip' : 'Replay';
+    label.textContent = name;
+    icon.setAttribute('href', on ? '#i-next' : '#i-replay');
+    replay.dataset.skip = on ? '1' : '';
+    replay.title = on ? 'Skip the introduction' : 'Replay the history';
+    replay.setAttribute('aria-label', replay.title);
+  };
+  const stopSweep = () => {
+    clearTimeout(sweepT);
+    drawn?.sweep?.stop();
+    cap.classList.remove('live');
+    skipMode(false);
+  };
+  const runSweep = (after) => {
+    clearTimeout(sweepT);
+    skipMode(true);
+    sweepT = setTimeout(() => {
+      if (!drawn?.sweep || !drawn.sweep.run(() => (cap.classList.remove('live'), skipMode(false)))) skipMode(false);
+    }, after);
+  };
+  let first = true;
   const draw = (animate) => {
     lastW = stage.clientWidth;
     stopAnims();
+    stopSweep();
     drawn = build(stage);
     mountHits(stage, drawn, actions);
     loadEmbeddedEarth().then((ok) => ok && drawn && paintEarth(drawn));
     if (animate && !STILL) play();
+    // once, after the first paint, at the top of the page: the thesis shows itself without a pointer
+    if (first && !STILL && scrollY < 160) runSweep(900);
+    first = false;
   };
-  // The picture appears finished (every dot and tick at once); the replay button runs the history as an animation.
+  // The picture appears finished (every dot and tick at once); the replay button runs the history as an animation, then the links.
   fontsReady.then(() => draw(false));
   replay.addEventListener('click', () => {
+    if (replay.dataset.skip) {
+      stopAnims();
+      stopSweep();
+      return;
+    }
     stopAnims();
     play();
+    runSweep(SWEEP_MS + 350);
   });
   let rz = 0;
   addEventListener('resize', () => {
@@ -82,7 +119,7 @@ export function mountHero(fontsReady, actions = {}) {
     clearTimeout(rz);
     rz = setTimeout(() => draw(false), 150);
   });
-  addEventListener('beforeprint', stopAnims);
+  addEventListener('beforeprint', () => (stopAnims(), stopSweep()));
 }
 
 // ---------------------------------------------------------------- words for screen readers
@@ -795,6 +832,71 @@ function mountHits(stage, S, actions) {
     }
     return bd <= (ev.pointerType === 'touch' ? 24 : 15) ? best : null;
   };
+  // The first sweep: the real links drawn one after another, oldest law first (each step is the same drawing the pointer brings, with the dashed line growing
+  // from the weapon to the law and the wait appearing last), then everything fades to the resting picture. Any pointer on a dot or tick, or a key, ends it.
+  const STEP = 1500,
+    pairText = (h) => {
+      const q = linksOf(h)[0];
+      return D.lag_pairs.pairs.find((p) => p.event === q.p.event && p.law === q.p.law)?.text || '';
+    },
+    live = document.getElementById('heroLive'),
+    capEl = live?.closest('.hero-cap');
+  let sw = null;
+  const sweepEnd = () => {
+    if (!sw) return;
+    const { timers, raf, done } = sw;
+    timers.forEach(clearTimeout);
+    cancelAnimationFrame(raf());
+    sw = null;
+    S.links.getAnimations?.().forEach((a) => a.cancel());
+    [S.ring, S.bar].forEach((n) => n.getAnimations?.().forEach((a) => a.cancel()));
+    mark(null);
+    capEl?.classList.remove('live');
+    done?.();
+  };
+  S.sweep = {
+    stop: sweepEnd,
+    run(done) {
+      sweepEnd();
+      const list = hits.filter((h) => h.k === 'ev' && linksOf(h).length).sort((a, b) => (linksOf(a)[0].law.date < linksOf(b)[0].law.date ? -1 : 1));
+      if (!list.length || active || pinned) return false;
+      let i = 0,
+        rid = 0;
+      sw = { timers: [], raf: () => rid, done };
+      const after = (ms, f) => sw.timers.push(setTimeout(f, ms)),
+        step = () => {
+          if (i >= list.length) {
+            [S.links, S.ring, S.bar].forEach((n) => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 480, easing: EASE, fill: 'forwards' }));
+            capEl?.classList.remove('live');
+            return after(520, sweepEnd);
+          }
+          const h = list[i++];
+          mark(h);
+          if (live) live.textContent = pairText(h) + '.';
+          capEl?.classList.add('live');
+          const ln = S.links.querySelector('.ht-lk-line');
+          if (ln) {
+            const [x1, y1, x2, y2] = ['x1', 'y1', 'x2', 'y2'].map((k) => +ln.getAttribute(k)),
+              t0 = performance.now(),
+              tick = (t) => {
+                const k = Math.min(1, (t - t0) / 650),
+                  e = 1 - (1 - k) ** 3;
+                ln.setAttribute('x2', x1 + (x2 - x1) * e);
+                ln.setAttribute('y2', y1 + (y2 - y1) * e);
+                if (k < 1) rid = requestAnimationFrame(tick);
+              };
+            ln.setAttribute('x2', x1);
+            ln.setAttribute('y2', y1);
+            rid = requestAnimationFrame(tick);
+          }
+          S.links.querySelectorAll('.ht-lk-pill,.ht-lk-tag,.ht-law-hi').forEach((n) => n.animate([{ opacity: 0 }, { opacity: +n.getAttribute('opacity') || 1 }], { duration: 280, delay: 520, easing: EASE, fill: 'backwards' }));
+          after(STEP, step);
+        };
+      step();
+      return true;
+    },
+  };
+
   // The pointer's last few positions: is it heading for the card (its buttons), or merely passing over the picture?
   const trail = [];
   let nearH = null;
@@ -822,6 +924,7 @@ function mountHits(stage, S, actions) {
       y = ev.clientY - r.top,
       h = nearest(ev);
     nearH = h;
+    if (h && sw) sweepEnd();
     layer.style.cursor = h ? 'pointer' : '';
     if (h === active) return void (stopHide(), clearTimeout(switchT));
     if (!active || pop.hidden || !pop.classList.contains('on')) return void (h ? show(h) : active && !hideT && hide());
@@ -879,6 +982,7 @@ function mountHits(stage, S, actions) {
   group.addEventListener('focusin', (ev) => {
     const i = btns.indexOf(ev.target);
     if (i < 0) return;
+    sweepEnd();
     btns.forEach((b, k) => (b.tabIndex = k === i ? 0 : -1));
     pinned = false;
     show(hits[i]);

@@ -143,3 +143,22 @@
 }
 @media (min-width:900px) and (max-width:1279px){.ht-pop{width:420px}}
 @media (min-width:1600px){.ht-pop{width:520px}}
+
+/* The key under the picture says what the marks are, always; while the first sweep draws the links it gives way to the sentence of the pair being drawn. */
+.hero-cap-main{position:relative;flex:1 1 auto;min-width:0}
+.hero-key{display:flex;flex-wrap:wrap;gap:6px var(--s-4);margin:0;padding:0;list-style:none;font:500 14px/1.4 var(--sans);color:var(--muted);transition:opacity 260ms var(--ease)}
+.hero-key li{display:inline-flex;align-items:center;gap:8px}
+.hero-key .kg{flex:none;width:24px;height:18px}
+.hero-key .kg.wide{width:40px}
+.k-dot{fill:var(--hero-accent)}
+.k-ring{fill:none;stroke:var(--hero-accent);stroke-width:1.2;opacity:.7}
+.k-tick{stroke:var(--hero-accent-2);stroke-width:2.4;stroke-linecap:round}
+.k-dash{stroke:var(--text);stroke-width:1.6;stroke-dasharray:4 3;stroke-linecap:round}
+.hero-cap .hero-live{position:absolute;inset:0;margin:0;max-width:none;font:500 14px/1.45 var(--sans);color:var(--text);opacity:0;pointer-events:none;transition:opacity 260ms var(--ease)}
+.hero-cap.live .hero-key{opacity:0}
+.hero-cap.live .hero-live{opacity:1}
+.hero-cap .hero-cap-main{min-height:2.9em}
+@media (max-width:639px){.hero-key{display:grid;grid-template-columns:1fr;gap:4px;font-size:13.5px}.hero-cap .hero-live{position:static;display:none}.hero-cap.live .hero-key{opacity:1}}
+@media (prefers-reduced-motion:reduce){.hero-key,.hero-cap .hero-live{transition:none}}
+@media (min-width:1600px){.hero-key,.hero-cap .hero-live{font-size:15.5px}}
+@media (max-width:1199px) and (min-width:640px){.hero-key{gap:4px var(--s-3);font-size:13.5px}}
