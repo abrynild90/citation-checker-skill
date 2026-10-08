@@ -106,6 +106,11 @@
 /* a word the time tag could not avoid is quietened while the link shows */
 .ht-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
 .ht-gone{opacity:0!important;transition:opacity 120ms var(--ease)}
+.ht-lk-line.rest{stroke-width:1.2;opacity:.55}
+.ht-ring.rest{stroke:var(--hero-accent);stroke-opacity:.55;stroke-width:1.3}
+.ht-law-hi.rest{stroke:var(--hero-accent-2);stroke-width:3;opacity:.35}
+.ht-lk-pill.rest{stroke:rgba(150,175,230,.3)}
+.ht-lk-tag.rest{fill:var(--muted)}
 .ht-lk-dot{fill:var(--hero-accent);stroke:var(--hero-bg);stroke-width:2;paint-order:stroke;pointer-events:none}
 .hp-none{margin-top:var(--s-2)!important;font:500 13px/1.4 var(--sans);color:var(--faint)}
 

@@ -51,6 +51,7 @@ const hits = (a, b, pad = 0) => a.x0 < b.x1 + pad && a.x1 > b.x0 - pad && a.y0 <
 const STILL = REDUCED || /[?&]still\b/.test(location.search);
 
 let K = 1; // type and tag scale: 1, rising to 1.1 on a window of 1600 px and more, so the words keep their size next to the larger screen
+let revealedKeys = []; // 'event|law' of the links the reader has earned so far this visit (never stored)
 let drawn = null, // the current drawing, kept for the replay and for the Earth photograph that arrives later
   anims = [];
 
@@ -124,6 +125,11 @@ export function mountHero(fontsReady, actions = {}) {
   });
   addEventListener('beforeprint', () => (stopAnims(), stopSweep()));
 }
+
+// The mid-way reward (called from discover.js): one more real pair is drawn on the resting picture. It prefers a pair whose weapon the reader has just watched in
+// 3D, and never one whose dashed line would run through words. Returns the plain words for it, or null when there is nothing left to show.
+export const revealPair = (watched = []) => drawn?.reveal?.next(watched) || null;
+export const replayReveal = () => drawn?.reveal?.replay();
 
 // ---------------------------------------------------------------- words for screen readers
 function writeText(stage) {
@@ -543,6 +549,7 @@ function build(stage) {
   S.marker = { out: mkOut, inn: mkIn, dx: x(DOMAIN[1]) - x(DOMAIN[0]) };
 
   // the ring and the bar that mark the point or law being looked at (moved by mountHits)
+  S.rest = el('g', { 'aria-hidden': 'true', class: 'ht-rest' }, svg); // links kept on the resting picture (the mid-way reward, in memory only)
   S.ring = el('circle', { r: 13, class: 'ht-ring', opacity: 0 }, svg);
   S.bar = el('line', { class: 'ht-law-hi', opacity: 0 }, svg);
   S.links = el('g', { 'aria-hidden': 'true' }, svg); // the dashed line from a weapon to the first later law, with the time between (moved by mountHits)
@@ -699,9 +706,11 @@ function mountHits(stage, S, actions) {
   const RING = (h) => (h.e.type === 'nuclear' ? 17 : h.e.type === 'destructive' ? 13 : 11);
   // Where each pair's time tag sits: slid along the dashed line to the first spot clear of every word in the picture (notes, zone names, year numbers, law
   // names, the headline); a word it cannot avoid is quietened while the link shows.
-  const tagOf = (h) => {
+  const tagOf = (h, rest = false) => {
     const words = [
       ...S.avoid,
+      // a tag kept on the resting picture also keeps off the dots (the one it starts from excepted)
+      ...(rest ? S.hits.filter((o) => o.k === 'ev' && o !== h).map((o) => ({ x0: o.px - o.r - 6, x1: o.px + o.r + 6, y0: o.py - o.r - 6, y1: o.py + o.r + 6 })) : []),
       ...[...S.svg.querySelectorAll('text:not(.ht-lk-tag)')].map((n) => {
         const r = n.getBBox();
         return { x0: r.x, x1: r.x + r.width, y0: r.y, y1: r.y + r.height, node: n };
@@ -709,7 +718,20 @@ function mountHits(stage, S, actions) {
     ];
     return linksOf(h).map(({ p, ev, law }) => {
       const w = tw(linkText(p.g), 12.5 * K, 600) + 16 * K,
-        sp = tagSpot({ x: ev.px, y: ev.py }, { x: law.px, y: law.py }, w, 22 * K, words, { x0: 0, x1: S.W, y0: 4, y1: S.H - 4 });
+        // the time tags of the links kept on the resting picture are in the way too (the pair's own kept tag is not: it is the same tag)
+        kept = [...S.rest.querySelectorAll('.rest-link')]
+          .filter((g) => g.dataset.k !== p.event + '|' + p.law)
+          .flatMap((g) => {
+            const r = g.querySelector('.ht-lk-pill')?.getBBox(),
+              l = g.querySelector('.ht-lk-line'),
+              [x1, y1, x2, y2] = ['x1', 'y1', 'x2', 'y2'].map((k) => +l.getAttribute(k)),
+              n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / 10));
+            return [
+              r && { x0: r.x, x1: r.x + r.width, y0: r.y, y1: r.y + r.height },
+              ...Array.from({ length: n + 1 }, (_, i) => ({ x0: x1 + ((x2 - x1) * i) / n - 4, x1: x1 + ((x2 - x1) * i) / n + 4, y0: y1 + ((y2 - y1) * i) / n - 4, y1: y1 + ((y2 - y1) * i) / n + 4 })),
+            ].filter(Boolean);
+          }),
+        sp = tagSpot({ x: ev.px, y: ev.py }, { x: law.px, y: law.py }, w, 22 * K, words.concat(kept), { x0: 0, x1: S.W, y0: 4, y1: S.H - 4 });
       return { p, ev, law, w, sp };
     });
   };
@@ -754,6 +776,75 @@ function mountHits(stage, S, actions) {
       }
     });
   };
+  // ---- links kept on the resting picture: a thin dashed line from the dot to the tick, the ring on the dot, the time on a small tag
+  const crossesWords = (ev, law) => {
+    const dx = law.px - ev.px,
+      dy = law.py - ev.py,
+      n = Math.ceil(Math.hypot(dx, dy) / 5);
+    return textBoxes().some((o) => {
+      for (let i = 0; i <= n; i++) {
+        const x = ev.px + (dx * i) / n,
+          y = ev.py + (dy * i) / n;
+        if (x > o.x0 - 3 && x < o.x1 + 3 && y > o.y0 - 2 && y < o.y1 + 2) return true;
+      }
+      return false;
+    });
+  };
+  const key = (q) => q.p.event + '|' + q.p.law,
+    allPairs = () => hits.filter((h) => h.k === 'ev').flatMap((h) => linksOf(h)),
+    paintRest = (q, animate) => {
+      const { p, ev, law } = q,
+        g = el('g', { class: 'rest-link', 'data-k': key(q) }, S.rest),
+        dx = law.px - ev.px,
+        dy = law.py - ev.py,
+        d = Math.hypot(dx, dy),
+        r0 = RING(ev) + 1,
+        x1 = ev.px + (dx / d) * r0,
+        y1 = ev.py + (dy / d) * r0;
+      el('circle', { cx: ev.px, cy: ev.py, r: RING(ev), class: 'ht-ring rest' }, g);
+      el('line', { x1: law.px, x2: law.px, y1: law.py, y2: law.y1, class: 'ht-law-hi rest' }, g);
+      const ln = el('line', { x1, y1, x2: law.px, y2: law.py, class: 'ht-lk-line rest' }, g),
+        tg = tagOf(ev, true).find((t) => t.law === law),
+        w = tg.w,
+        sp = tg.sp,
+        t = text(g, { x: sp.x, y: sp.y, class: 'ht-lk-tag rest', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g));
+      g.insertBefore(el('rect', { x: sp.x - w / 2, y: sp.y - 11 * K, width: w, height: 22 * K, rx: 11 * K, class: 'ht-lk-pill rest' }), t);
+      if (!animate || STILL) return g;
+      const t0 = performance.now(),
+        tick = (now) => {
+          const k = Math.min(1, (now - t0) / 1000),
+            e = 1 - (1 - k) ** 3;
+          ln.setAttribute('x2', x1 + (law.px - x1) * e);
+          ln.setAttribute('y2', y1 + (law.py - y1) * e);
+          if (k < 1 && g.isConnected) requestAnimationFrame(tick);
+        };
+      ln.setAttribute('x2', x1);
+      ln.setAttribute('y2', y1);
+      requestAnimationFrame(tick);
+      g.querySelectorAll('.ht-lk-pill,.ht-lk-tag,.ht-ring,.ht-law-hi').forEach((n) => n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 700, easing: EASE, fill: 'backwards' }));
+      return g;
+    };
+  S.reveal = {
+    next(watched) {
+      const free = allPairs().filter((q) => !revealedKeys.includes(key(q)) && !crossesWords(q.ev, q.law)),
+        pick = watched.map((id) => free.find((q) => q.ev.e.scene_3d === id)).find(Boolean) || free.sort((a, b) => (a.ev.date < b.ev.date ? -1 : 1))[0];
+      if (!pick) return null;
+      revealedKeys.push(key(pick));
+      paintRest(pick, true);
+      return { event: WORDS[pick.p.event]?.name ?? byId[pick.p.event].system, law: LAW_WORDS[pick.p.law] ?? byId[pick.p.law].title };
+    },
+    replay() {
+      const k = revealedKeys.at(-1),
+        q = k && allPairs().find((x) => key(x) === k);
+      if (!q) return;
+      S.rest.querySelector(`[data-k="${k}"]`)?.remove();
+      paintRest(q, true);
+    },
+  };
+  revealedKeys.forEach((k) => {
+    const q = allPairs().find((x) => key(x) === k);
+    if (q) paintRest(q, false);
+  });
   const mark = (h) => {
     drawLinks(h);
     if (h?.k === 'ev') {
