@@ -107,20 +107,43 @@
 .ckey .ck{display:inline-flex;align-items:center;gap:6px}
 .ckey i{display:inline-block;width:10px;height:10px;border-radius:50%}
 
-/* "Which came first?": three pairs from the lag data, a pick in each, the true gap revealed. One panel, three columns, no score. */
-.quiz{margin:var(--s-5) 0 var(--s-5);padding:var(--s-5);border:var(--card-bw) solid var(--line);border-radius:var(--r-2);background:var(--surface);box-shadow:var(--card-shadow)}
-.quiz h3{margin:0;font:500 clamp(24px,2.4vw,30px)/1.2 var(--serif)}
-.quiz-lede{margin:var(--s-2) 0 var(--s-4);max-width:62ch;font:400 16px/1.55 var(--sans);color:var(--muted)}
-.q-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-5)}
-@media (min-width:900px){.q-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.q{display:flex;flex-direction:column;gap:var(--s-3);padding-top:var(--s-3);border-top:1px solid var(--line-strong)}
-.q-ask{margin:0;font:600 15px/1.3 var(--sans);color:var(--accent-2)}
+/* "Test yourself: which came first?": its own band after the scene strip. Four cards, a pick commits (the pair locks), the verdict and the real gap are shown
+   in words and in a tick or a cross (never colour alone), and a small tally counts. */
+.quiz-band{border-top:1px solid var(--line);padding:var(--s-7) 0 var(--s-6);scroll-margin-top:16px}
+.quiz-head{margin-bottom:var(--s-5)}
+.quiz{margin:0}
+.q-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-4)}
+@media (min-width:640px){.q-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.q-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.q{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-4);border:var(--card-bw) solid var(--line);border-radius:var(--r-2);background:var(--surface);box-shadow:var(--card-shadow)}
+.q-ask{margin:0;font:500 19px/1.3 var(--serif);text-wrap:balance}
+.q-hint{margin:0 0 var(--s-1);font:600 13px/1.3 var(--sans);color:var(--accent-2)}
 .q-opts{display:grid;gap:var(--s-2)}
-.q-opt{appearance:none;display:flex;align-items:center;min-height:56px;padding:var(--s-2) var(--s-4);border:1px solid var(--line-strong);border-radius:var(--r-2);background:var(--surface-2);color:var(--text);font:500 15px/1.35 var(--sans);text-align:left;cursor:pointer;transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease)}
-.q-opt:hover{border-color:var(--accent);background:var(--surface-3)}
+.q-opt{appearance:none;display:flex;align-items:center;gap:var(--s-2);min-height:56px;padding:var(--s-2) var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-2);background:var(--surface-2);color:var(--text);font:500 15px/1.35 var(--sans);text-align:left;cursor:pointer;transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),opacity var(--dur-2) var(--ease),transform var(--dur-1) var(--ease)}
+.q-opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface-3)}
+.q-opt:active:not(:disabled){transform:scale(.99)}
 .q-opt:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.q-opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
-.q-out{margin:0;min-height:1.5em;font:400 15.5px/1.55 var(--sans);color:var(--muted)}
+.q-opt:disabled{cursor:default;color:var(--text)}
+.q-mark{flex:none;display:grid;place-items:center;width:0;height:22px;overflow:hidden;border-radius:50%;opacity:0;transition:width var(--dur-2) var(--ease),opacity var(--dur-2) var(--ease)}
+.q-mark .ico{grid-area:1/1;width:16px;height:16px;display:none}
+.q.done .q-opt.right .q-mark,.q.done .q-opt.wrong .q-mark{width:22px;opacity:1}
+.q-opt.right .q-mark{background:var(--accent);color:var(--bg)}
+.q-opt.right .q-yes{display:block}
+.q-opt.wrong .q-mark{background:var(--accent-2);color:var(--bg)}
+.q-opt.wrong .q-no{display:block}
+.q-opt.right{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.q-opt.wrong{border-style:dashed;border-color:var(--accent-2);box-shadow:inset 0 0 0 1px var(--accent-2)}
+.q.done .q-opt:not(.right):not(.wrong){opacity:.62}
+.q-out{margin:var(--s-2) 0 0;font:400 15px/1.55 var(--sans);color:var(--muted)}
 .q-out:empty{display:none}
 .q-out b{font-weight:600;color:var(--text)}
+.q-out .q-verdict{display:block;margin-bottom:2px;font:600 17px/1.3 var(--serif)}
+.q-verdict.yes{color:var(--accent)}
+.q-verdict.no{color:var(--accent-2)}
 .q-gap{font-weight:600;color:var(--accent-2);white-space:nowrap}
+.q-foot{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-4);margin-top:var(--s-5);padding-top:var(--s-4);border-top:1px solid var(--line)}
+.q-tally{margin:0 auto 0 0;font:600 17px/1.4 var(--serif);color:var(--text)}
+.q-tally:not(.done){font:400 15px/1.5 var(--sans);color:var(--muted)}
+.q-foot .btn .ico{margin-inline:0 6px}
+.q-foot .btn:last-child .ico{margin:0 0 0 6px}
+@media (prefers-reduced-motion:reduce){.q-opt,.q-mark{transition:none}}

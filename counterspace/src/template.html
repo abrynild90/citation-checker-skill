@@ -73,9 +73,10 @@
         <div class="start" id="start" role="group" aria-labelledby="startH">
           <h2 class="start-h" id="startH">Start here</h2>
           <ol class="start-path">
-            <li><a class="sp-go" href="#timeline"><b>See</b> law and weapons on one timeline<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></li>
-            <li><a class="sp-go" href="#chartA"><b>Pick</b> an event that has a <svg class="ico sp-cube" aria-hidden="true"><use href="#i-cube"/></svg> cube icon<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></li>
+            <li><a class="sp-go" href="#timeline"><b>See</b> law and weapons on one timeline</a></li>
+            <li><a class="sp-go" href="#chartA"><b>Pick</b> an event with a <svg class="ico sp-cube" aria-hidden="true"><use href="#i-cube"/></svg> cube icon</a></li>
             <li><span class="sp-go sp-last"><b>Watch</b> it in 3D, or <button class="sp-link" id="surpriseBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg>Surprise me</button></span></li>
+            <li><a class="sp-go" href="#quizBand"><b>Test yourself:</b> which came first?</a></li>
           </ol>
         </div>
         <p class="lede-note">Tests that destroy a satellite have paused since <strong>November 2021</strong>. Jamming, lasers and cyber operations have not.</p>
@@ -92,14 +93,15 @@
         <nav class="pagenav" aria-labelledby="pnH">
           <h2 class="pn-h" id="pnH">What is on this page</h2>
           <ul class="toc" id="glance">
-            <li data-ch="scenes"><a class="t-name" href="#scenes">3D scenes</a><span class="t-text"></span></li>
-            <li data-ch="law"><a class="t-name" href="#legalBand">Law and policy</a><span class="t-text"></span></li>
-            <li data-ch="tests"><a class="t-name" href="#chartA">Anti-satellite tests</a><span class="t-text"></span></li>
-            <li data-ch="jam"><a class="t-name" href="#chartC">Jamming, lasers and cyber</a><span class="t-text"></span></li>
-            <li data-ch="close"><a class="t-name" href="#chartR">Close approaches</a><span class="t-text"></span></li>
-            <li data-ch="who"><a class="t-name" href="#chartB">Who can do what</a><span class="t-text"></span></li>
-            <li data-ch="lag"><a class="t-name" href="#lag">How long the law took</a><span class="t-text"></span></li>
-            <li data-ch="src"><a class="t-name" href="#sources">Sources and method</a><span class="t-text"></span></li>
+            <li data-ch="scenes"><a class="t-name" href="#scenes">3D scenes</a></li>
+            <li data-ch="quiz"><a class="t-name" href="#quizBand">Test yourself</a></li>
+            <li data-ch="law"><a class="t-name" href="#legalBand">Law and policy</a></li>
+            <li data-ch="tests"><a class="t-name" href="#chartA">Anti-satellite tests</a></li>
+            <li data-ch="jam"><a class="t-name" href="#chartC">Jamming, lasers and cyber</a></li>
+            <li data-ch="close"><a class="t-name" href="#chartR">Close approaches</a></li>
+            <li data-ch="who"><a class="t-name" href="#chartB">Who can do what</a></li>
+            <li data-ch="lag"><a class="t-name" href="#lag">How long the law took</a></li>
+            <li data-ch="src"><a class="t-name" href="#sources">Sources and method</a></li>
           </ul>
         </nav>
       </div>
@@ -127,6 +129,16 @@
       </div>
     </header>
     <ol class="posters" id="posterGrid"></ol>
+  </div>
+</section>
+
+<section class="quiz-band" id="quizBand" aria-labelledby="hQuiz">
+  <div class="wrap">
+    <header class="chapter-head quiz-head">
+      <h2 data-avoid id="hQuiz">Test yourself: which came first?</h2>
+      <p data-avoid class="lede">Four quick guesses about real pairs from our records. Pick an answer and the page shows the real order and the gap in time. Two of them tend to surprise people.</p>
+    </header>
+    <div id="quiz"></div>
   </div>
 </section>
 
@@ -260,7 +272,6 @@
         
       </header>
       <p data-avoid class="note block">Unlike the other charts, this one does not use the shared years. Every bar starts at zero on the same scale, so a longer bar is a longer wait.</p>
-      <div id="quiz"></div>
       <div class="svgbox" id="svgL"></div>
       <details class="about keybox chart-key"><summary>Key to the pairs</summary><ul data-avoid class="legend" id="legendL"></ul></details>
       <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableL"></div></details><div class="dl-row"><button class="btn small" data-export="L" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
@@ -294,6 +305,7 @@
 <nav class="rail" id="rail" aria-label="Chapter progress">
   <ul>
     <li><a href="#scenes" title="3D scenes" aria-label="3D scenes"><span class="r-lab">3D scenes</span></a></li>
+    <li><a href="#quizBand" title="Test yourself" aria-label="Test yourself"><span class="r-lab">Test yourself</span></a></li>
     <li><a href="#legalBand" title="Law and policy" aria-label="Law and policy"><span class="r-lab">Law and policy</span></a></li>
     <li><a href="#chartA" title="Anti-satellite tests" aria-label="Anti-satellite tests"><span class="r-lab">Anti-satellite tests</span></a></li>
     <li><a href="#chartC" title="Jamming, lasers and cyber" aria-label="Jamming, lasers and cyber"><span class="r-lab">Jamming, lasers and cyber</span></a></li>

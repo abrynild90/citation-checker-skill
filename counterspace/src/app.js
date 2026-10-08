@@ -104,6 +104,7 @@ document.getElementById('asof').innerHTML =
     who: `${nStates} countries`,
     lag: `${pairs} pairs`,
     scenes: `${SCENES.length} scenes`,
+    quiz: 'four questions',
     src: `${nSources} sources`,
   };
   const long = {
@@ -116,11 +117,13 @@ document.getElementById('asof').innerHTML =
     who: `Which countries can do what: ${nStates} countries and ${word(caps.length)} kinds of capability, decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
     lag: `How long the law took to follow a new capability: ${pairs} milestones with a later legal step, and ${open} with none in our records.`,
     scenes: `${SCENES.length} short scenes, one for each key event on the charts, each with its story and its source.`,
+    quiz: 'Four quick guesses about real pairs: which came first, and which waited longer for the law.',
     src: `Where every fact comes from: ${nSources} cited sources, how current the data is, and the rules used to classify each entry.`,
   };
   document.querySelectorAll('#glance [data-ch]').forEach((li) => {
-    li.querySelector('.t-text').textContent = text[li.dataset.ch] || '';
-    li.querySelector('a').title = long[li.dataset.ch] || '';
+    const a = li.querySelector('a');
+    a.title = long[li.dataset.ch] || '';
+    if (text[li.dataset.ch]) a.setAttribute('aria-description', text[li.dataset.ch]);
   });
 }
 // The phone list's heading keeps its own wording; only a count in it follows the data.

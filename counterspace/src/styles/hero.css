@@ -104,10 +104,11 @@ a.sp-go>.ico:last-child{transition:transform var(--dur-2) var(--ease)}
   .hero-notes{padding-left:var(--edge);padding-right:var(--edge);max-width:none;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-7)}
   .hero-notes>p{max-width:var(--measure)}
   .hero-more{max-width:var(--measure)}
-  .hero-notes .start{flex:1 0 100%;flex-direction:row;align-items:center;gap:var(--s-5);padding-bottom:var(--s-4)}
-  .start-path{flex-direction:row;align-items:center;gap:0}
-  .start-path>li{display:flex;align-items:center}
-  .start-path>li+li::before{content:"";width:28px;height:1px;margin-inline:var(--s-3);background:var(--line-strong)}
+  .hero-notes .start{flex:1 0 100%;flex-direction:column;align-items:stretch;gap:var(--s-2);padding-bottom:var(--s-4)}
+  .start-path{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 var(--s-4)}
+  .start-path>li{display:flex;align-items:center;padding-top:var(--s-1);border-top:1px solid var(--line-strong)}
+  .start-path>li+li::before{content:none}
+  .sp-go{font-size:15px;align-items:center;flex-wrap:nowrap}
   .hero-notes .lede-note{flex:0 1 auto}
   .hero-notes .hero-more{flex:0 1 auto}
   .hero-cap{justify-content:flex-start;align-items:flex-start;gap:var(--s-3)}
@@ -126,5 +127,5 @@ a.sp-go>.ico:last-child{transition:transform var(--dur-2) var(--ease)}
 .no-cdn .stage{height:0}
 .no-cdn .hero-cap{display:none}
 @media (min-width:900px){.no-cdn .stage{height:350px}}
-.no-cdn .start-path li:last-child{display:none}
+.no-cdn .start-path li:nth-child(n+3){display:none}
 .no-cdn :is(#tourBtn,#tourBtn2,#surpriseBtn,#surpriseBtn2,#heroReplay,.scenes-tools,.posters,.rail){display:none!important}

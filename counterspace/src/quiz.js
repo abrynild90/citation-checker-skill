@@ -1,57 +1,132 @@
 // ============================================================================
-// quiz.js: "Which came first?", a short guessing game placed before the lag chart. Three real pairs from the lag data (one where the law came first);
-// the reader picks a side, the real gap is revealed. No score, nothing stored. Needs: app.js (data), charts/lag.js (the chart's own wording and gap format).
+// quiz.js: "Test yourself: which came first?", a short guessing game placed right after the scene strip. Every pair is a real pair from the lag data
+// (data/lag_pairs.json, through byId); every gap is computed from the two dates. Click a side to commit: the choice locks, the page says plainly whether
+// it was right and shows the real gap. A small tally keeps count (nothing is stored). Needs: app.js (data), charts/lag.js (wording and gap format).
+// Two of the four questions are ones where the likely guess is wrong: the cyberattack that came after its rules (Viasat), and the treaty that took
+// 13 months against the jamming that has waited 15 years.
 // ============================================================================
 import { byId, esc, fmtMY, parse } from './app.js';
 import { LAW_WORDS, WORDS, gap, yearsBetween } from './charts/lag.js';
 
-// event id, law id. Starfish and Shakti are pairs of the chart; Viasat is the chart's open ring, where the related law (soft law) came first.
-const PAIRS = [
-  ['us-1962-starfish-prime', 'ltbt-1963', 'A nuclear test and a treaty'],
-  ['in-2019-shakti', 'unga-77-41', 'A missile test and a UN resolution'],
-  ['ru-2022-viasat', 'tallinn-2017', 'A cyberattack and expert rules'],
-];
 const LAW_PLAIN = { ...LAW_WORDS, 'tallinn-2017': 'Tallinn Manual 2.0, expert rules on cyber operations (soft law)' };
+// kind 'order': two things, which came first. [event id, law id, prompt, which side shows first: 'ev' or 'law']
+// kind 'wait': two pairs, which waited longer for a legal step. [[event, law], [event, law], prompt]
+const QUESTIONS = [
+  { kind: 'order', ev: 'us-1962-starfish-prime', law: 'ltbt-1963', ask: 'A nuclear test in space and a treaty', first: 'ev' },
+  { kind: 'order', ev: 'in-2019-shakti', law: 'unga-77-41', ask: 'A missile test and a UN resolution', first: 'law' },
+  { kind: 'order', ev: 'ru-2022-viasat', law: 'tallinn-2017', ask: 'A cyberattack and a set of expert rules', first: 'ev' },
+  { kind: 'wait', a: ['kp-2010-gps', 'icao-2025'], b: ['us-1962-starfish-prime', 'ltbt-1963'], ask: 'Which waited longer for a legal step to follow?' },
+];
 const when = (r) => parse(r.date || r.start);
+const evName = (id) => WORDS[id]?.name || byId[id].system;
+const lawName = (id) => LAW_PLAIN[id] || byId[id].label;
+const span = (ev, law) => yearsBetween(when(byId[ev]), when(byId[law]));
+const gapText = (y) => {
+  const g = gap(y);
+  return `${g.num} ${g.unit}`;
+};
+const mark = '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
+
+// What each question shows: the two options (in display order, flagged right or not) and the sentence that explains the truth.
+function build(q) {
+  if (q.kind === 'order') {
+    const e = byId[q.ev],
+      l = byId[q.law],
+      evFirst = when(e) <= when(l),
+      opts = [
+        { key: 'ev', text: evName(q.ev), right: evFirst },
+        { key: 'law', text: lawName(q.law), right: !evFirst },
+      ];
+    if (q.first === 'law') opts.reverse();
+    const a = evFirst ? [evName(q.ev), when(e), lawName(q.law), when(l)] : [lawName(q.law), when(l), evName(q.ev), when(e)],
+      note = WORDS[e.id]?.note;
+    const truth =
+      `<b>${esc(a[0])}</b> came first (${esc(fmtMY(a[1]))}). <b>${esc(a[2])}</b> followed <span class="q-gap">${gapText(Math.abs(yearsBetween(a[1], a[3])))}</span> later (${esc(fmtMY(a[3]))}).` +
+      (!evFirst ? ' The manual is soft law, so it does not bind anyone.' : '') +
+      ` This is order in time, not cause.${note && evFirst ? ' ' + esc(note) : ''}`;
+    return { opts, truth };
+  }
+  const [ea, la] = q.a,
+    [eb, lb] = q.b,
+    ya = span(ea, la),
+    yb = span(eb, lb),
+    opts = [
+      { key: 'a', text: `${evName(ea)} (${when(byId[ea]).getUTCFullYear()})`, right: ya >= yb },
+      { key: 'b', text: `${evName(eb)} (${when(byId[eb]).getUTCFullYear()})`, right: yb > ya },
+    ];
+  const [longP, shortP] = ya >= yb ? [[ea, la, ya], [eb, lb, yb]] : [[eb, lb, yb], [ea, la, ya]];
+  const truth =
+    `<b>${esc(evName(longP[0]))}</b> waited <span class="q-gap">${gapText(longP[2])}</span> for ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
+    `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])} for ${esc(lawName(shortP[1]))}. This is order in time, not cause.`;
+  return { opts, truth };
+}
 
 export function mountQuiz() {
   const host = document.getElementById('quiz');
   if (!host) return;
-  const cards = PAIRS.map(([ev, lw, topic], i) => {
-    const e = byId[ev],
-      l = byId[lw];
-    if (!e || !l) return '';
-    const eName = WORDS[ev]?.name || e.system,
-      lName = LAW_PLAIN[lw] || l.label;
-    return `<li class="q" data-ev="${esc(ev)}" data-law="${esc(lw)}">
-  <p class="q-ask" id="q${i}">${esc(topic)}</p>
-  <div class="q-opts" role="group" aria-labelledby="quizH q${i}">
-    <button type="button" class="q-opt" data-pick="ev" aria-pressed="false">${esc(eName)}</button>
-    <button type="button" class="q-opt" data-pick="law" aria-pressed="false">${esc(lName)}</button>
+  const N = QUESTIONS.length;
+  const built = QUESTIONS.map(build);
+  const cards = QUESTIONS.map((q, i) => {
+    const b = built[i];
+    return `<li class="q" data-i="${i}">
+  <p class="q-ask" id="q${i}">${esc(q.ask)}</p>
+  <p class="q-hint">${q.kind === 'order' ? 'Which came first?' : 'Pick one.'}</p>
+  <div class="q-opts" role="group" aria-labelledby="q${i}">
+    ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
   </div>
   <p class="q-out" aria-live="polite"></p>
 </li>`;
   }).join('');
-  host.innerHTML = `<section class="quiz" aria-labelledby="quizH">
-  <h3 id="quizH">Which came first?</h3>
-  <p class="quiz-lede">Three pairs from the chart below. Pick the one you think came first. There is no score: the answer shows the real gap.</p>
-  <ol class="q-list">${cards}</ol></section>`;
+  host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
+  <div class="q-foot"><p class="q-tally" id="qTally" aria-live="polite">Pick an answer in each question. Your guesses are not stored.</p>
+    <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
+    <a class="btn small" href="#lag">See all the gaps<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
+  const tally = host.querySelector('#qTally'),
+    again = host.querySelector('#qAgain'),
+    state = new Array(N).fill(null); // null (open), true (called it) or false
+  const sync = () => {
+    const done = state.filter((s) => s !== null).length,
+      right = state.filter(Boolean).length;
+    if (!done) tally.textContent = 'Pick an answer in each question. Your guesses are not stored.';
+    else tally.textContent = done < N ? `You called ${right} of ${done} so far.` : `You called ${right} of ${N}.`;
+    tally.classList.toggle('done', done === N);
+    again.hidden = !done;
+  };
   host.addEventListener('click', (ev) => {
-    const b = ev.target.closest('.q-opt');
-    if (!b) return;
-    const q = b.closest('.q'),
-      e = byId[q.dataset.ev],
-      l = byId[q.dataset.law];
-    q.querySelectorAll('.q-opt').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
-    const first = when(e) <= when(l) ? 'ev' : 'law',
-      g = gap(yearsBetween(first === 'ev' ? when(e) : when(l), first === 'ev' ? when(l) : when(e))),
-      eName = WORDS[e.id]?.name || e.system,
-      lName = LAW_PLAIN[l.id] || l.label,
-      note = WORDS[e.id]?.note;
-    const a = first === 'ev' ? [eName, fmtMY(when(e)), lName, fmtMY(when(l))] : [lName, fmtMY(when(l)), eName, fmtMY(when(e))];
-    q.querySelector('.q-out').innerHTML =
-      `<b>${esc(a[0])}</b> came first (${esc(a[1])}). <b>${esc(a[2])}</b> followed <span class="q-gap">${g.num} ${g.unit}</span> later (${esc(a[3])}).` +
-      (first === 'law' ? ' The manual is soft law, so it does not bind anyone.' : '') +
-      ` This is order in time, not cause.${note && first === 'ev' ? ' ' + esc(note) : ''}`;
+    const btn = ev.target.closest('.q-opt');
+    if (!btn) return;
+    const li = btn.closest('.q'),
+      i = +li.dataset.i;
+    if (state[i] !== null) return; // committed: the answer stands
+    const b = built[i],
+      k = +btn.dataset.k,
+      ok = b.opts[k].right;
+    state[i] = ok;
+    li.classList.add('done');
+    li.querySelectorAll('.q-opt').forEach((o, j) => {
+      o.setAttribute('aria-pressed', String(j === k));
+      o.disabled = true;
+      o.classList.toggle('pick', j === k);
+      o.classList.toggle('right', b.opts[j].right);
+      o.classList.toggle('wrong', j === k && !ok);
+      o.querySelector('.q-t').insertAdjacentHTML('beforeend', b.opts[j].right ? '<span class="sr"> (the right answer)</span>' : '');
+    });
+    li.querySelector('.q-out').innerHTML = `<b class="q-verdict ${ok ? 'yes' : 'no'}">${ok ? 'Correct.' : 'Not quite.'}</b> ${b.truth}`;
+    sync();
+  });
+  again.addEventListener('click', () => {
+    state.fill(null);
+    host.querySelectorAll('.q').forEach((li) => {
+      li.classList.remove('done');
+      li.querySelector('.q-out').textContent = '';
+      li.querySelectorAll('.q-opt').forEach((o) => {
+        o.disabled = false;
+        o.setAttribute('aria-pressed', 'false');
+        o.classList.remove('pick', 'right', 'wrong');
+        o.querySelector('.sr')?.remove();
+      });
+    });
+    sync();
+    host.querySelector('.q-opt')?.focus();
   });
 }
