@@ -287,3 +287,6 @@
 @media (min-width:1600px){.hero-cue{font-size:15.5px}}
 @keyframes cue-ping{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(2.6)}}
 @media (prefers-reduced-motion:reduce){.hero-cue,.hero-cue.on{transition:none}.hero-cue.on .cue-ping{animation:none}}
+
+/* While the 13 of 13 card is up the picture is shorter, and the facts row (which stands over the sky) steps aside so no dot or ring ever lands on its words. */
+.hero.has-done .hero-glance{display:none}

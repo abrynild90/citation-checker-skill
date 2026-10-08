@@ -317,10 +317,11 @@ function build(stage) {
   const noteSize = (phone ? 13 : 14) * K,
     noteW = K * (phone ? Math.min(190, W - 2 * gutter - 8) : W < 900 ? Math.round(Math.max(236, W * 0.3)) : W < 1100 ? Math.round(Math.max(200, W * 0.25)) : Math.round(Math.min(250, Math.max(190, W * 0.2)))),
     placed = [],
+    GAP = Math.round(9 * K), // the least air between two captions (zone names and notes stack no closer than this)
     // what a candidate spot costs: overlapping the words is worst, then another note, then a mark; zero means free
     clash = (box, lead) =>
       obstacles.reduce((n, o, i) => n + (hits(box, o, 4) || (lead && hits(lead, o, 1)) ? (i < words.length ? 80 : 14) : 0), 0) +
-      placed.reduce((n, p) => n + (hits(box, p.box, 4) || hits(box, p.lead, 4) || (lead && (hits(lead, p.box, 1) || hits(lead, p.lead, 1))) ? 8 : 0), 0),
+      placed.reduce((n, p) => n + (hits(box, p.box, GAP) || hits(box, p.lead, 4) || (lead && (hits(lead, p.box, 1) || hits(lead, p.lead, 1))) ? 8 : 0), 0),
     markOf = (id) => marks.find((m) => m.e.id === id),
     sorted = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1)),
     topD = KIN.filter((e) => e.type === 'destructive').sort((a, b) => b.altitude_km - a.altitude_km)[0],
