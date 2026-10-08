@@ -359,8 +359,16 @@ export function drawR(el = document.getElementById('svgR')) {
     // A name that still touches any mark, cube or another name (measured on the drawn text, not estimated) is put out of sight; it shows again while its mark
     // is pointed at or focused. Names of marks with a 3D explainer are kept first. So a crowded chart ("Show all") never shows a clipped or overlapping name.
     const lbls = lg.selectAll('.dlabel').nodes(),
-      mbox = placed.map((q) => [q.X0 - 8, Math.max(q.X1, q.X0 + (q.bar ? 12 : 0)) + (q.ongoing ? 12 : 8), q.y - 8, q.y + 8]).concat(placed.filter((q) => q.bx != null).map((q) => [q.bx - 7, q.bx + 7, q.by - 8, q.by + 8])),
+      mbox = placed.map((q) => [q.X0 - 8, Math.max(q.X1, q.X0 + (q.bar ? 12 : 0)) + (q.ongoing ? 12 : 8), q.y - 9, q.y + 9]).concat(placed.filter((q) => q.bx != null).map((q) => [q.bx - 7, q.bx + 7, q.by - 9, q.by + 9])),
       kept = [],
+      // the band headers are words too: a name that would sit against one (the first row's name under "N highlighted of M operations") is put out of sight
+      heads = Object.values(glossOf).map((g) => {
+        const t = g.text(); // measured with the longer wording it may be given just below
+        g.text(`${t}, 9 unnamed here: hover or focus to read`);
+        const r = g.node().getBBox();
+        g.text(t);
+        return [r.x - 2, r.x + r.width + 2, r.y - 3, r.y + r.height + 4];
+      }),
       byId = new Map(placed.map((q) => [q.e.id, q]));
     lbls
       .map((node) => {
@@ -369,7 +377,7 @@ export function drawR(el = document.getElementById('svgR')) {
       })
       .sort((a, b) => a.sc - b.sc)
       .forEach((l) => {
-        if (mbox.some((m) => clash(l.box, m)) || kept.some((k) => clash(l.box, k))) {
+        if (mbox.some((m) => clash(l.box, m)) || heads.some((h) => clash(l.box, h)) || kept.some((k) => clash([l.box[0], l.box[1], l.box[2] - 5, l.box[3] + 5], k))) { // a name keeps clear of a mark by a little air, and of the name above or below it by a line of air
           l.node.classList.add('dl-hid');
           named.delete(byId.get(l.node.dataset.id));
         } else kept.push(l.box);
