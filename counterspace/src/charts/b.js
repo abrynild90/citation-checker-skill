@@ -221,7 +221,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('class', 'axis-title')
     .attr('x', phone ? 0 : 12)
     .attr('y', 14)
-    .text(kin ? 'States in each group' : 'Capabilities, counted once for each state that has one');
+    .text(kin ? 'States in each group' : 'Capabilities, counted by state');
   // decade boundaries share the other charts' year ticks
   const gx = svg.append('g').attr('class', 'gridline');
   bandsX.slice(1).forEach(([xa]) =>

@@ -469,8 +469,8 @@ await run('keyboard-walk', { viewport: { width: 1440, height: 900 }, colorScheme
   const kind = (a) =>
     a.matches('a.skip') ? 'skip link' :
     a.closest('.scope-dark, header') && a.matches('button') && /theme|dark|light/i.test(a.getAttribute('aria-label') || a.textContent) ? 'theme button' :
-    a.closest('.hero-cap, .cta') ? 'hero buttons' :
-    a.closest('.hero-contents, .toc') ? 'contents list' :
+    a.closest('.hero-cap, .hero-actions') ? 'hero buttons' :
+    a.closest('#rail') ? 'contents list' : // the chapter rail is the contents list now (the hero keeps one row of actions)
     a.closest('#legalSvg, #legalBand') && a.classList.contains('mark') ? 'law marks' :
     a.classList.contains('mark') ? 'chart marks' :
     a.closest('.tscroll') ? 'tables' :
