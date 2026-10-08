@@ -1,8 +1,10 @@
 /* Scene gallery, "Surprise me" and reveal. A poster per 3D scene; on hover or focus the picture eases in and a "Did you know" line rises over it. */
 .scenes{border-top:1px solid var(--line);scroll-margin-top:16px}
 /* a strip of cards that scrolls sideways: the next card always peeks in, so it is plain there is more */
-.scenes{--seam:176px;padding:calc(var(--s-7) + 72px) 0 var(--s-5);border-top:0;background:linear-gradient(180deg,var(--hero-bg) 0,color-mix(in srgb,var(--hero-bg) 80%,var(--bg)) 22%,
-  color-mix(in srgb,var(--hero-bg) 46%,var(--bg)) 46%,color-mix(in srgb,var(--hero-bg) 16%,var(--bg)) 72%,var(--bg) 100%) no-repeat;background-size:100% var(--seam)}
+.scenes{--seam:176px;position:relative;padding:120px 0 var(--s-5);border-top:0}
+.scenes::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--seam);pointer-events:none;
+  background:linear-gradient(180deg,#050813 0,rgba(5,8,19,.8) 22%,rgba(5,8,19,.46) 46%,rgba(5,8,19,.16) 72%,rgba(5,8,19,0) 100%)}
+.scenes>.wrap{position:relative}
 /* the dark hero ends in a soft fade into the page, never a hard edge (it matters most in the light theme) */
 .scenes-head{margin-bottom:var(--s-4)}
 .scenes-tools{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4)}
