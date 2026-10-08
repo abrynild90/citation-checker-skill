@@ -113,9 +113,7 @@ export const dot = (r = 6) => `<path d="${circlePath(0, 0, r)}" {p}/>`;
 // "Zoomed" flag shown above a chart whose axis is not the shared one.
 export const zoomNote = (years, isDefault, why = '') =>
   `<span class="zbadge">Zoomed</span><span class="ztext">${years}${isDefault && why ? ', because ' + why : ''}. ` +
-  (innerWidth > 760
-    ? 'The law timeline that stays in view shows the same years while you read this chart. '
-    : 'The years no longer line up with the law timeline. ') +
+  (innerWidth > 760 ? '' : 'The years no longer line up with the law timeline. ') +
   'Choose “Full span” to see 1957 to 2026.</span>';
 // The note under a chapter heading when the chart shows the shared years.
 export const fullNote = () =>
