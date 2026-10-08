@@ -223,3 +223,10 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .foot-nav{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-5)}
 /* The "Back to the top" button keeps a clear margin from the right edge of the footer rule on tablet and phone widths. */
 @media (max-width:1100px){.foot-base .btn.quiet{margin-right:var(--s-3)}}
+
+/* Sources: the suggested citation stays in view; everything else opens from one disclosure */
+.sources.folded .sub-nav{display:none}
+.sources.folded .sources-layout{grid-template-columns:minmax(0,1fr)}
+.src-fold{margin:0}
+.src-fold>.mcols{margin-top:var(--s-6)}
+#methodBody>.msec-cite,#methodBody>.msec:first-child{margin-bottom:var(--s-6)}

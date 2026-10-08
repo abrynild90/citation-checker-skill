@@ -93,6 +93,28 @@ nameThemeButton();
   }
 }
 
+// A link to something inside a closed disclosure opens it first (a chart's "How we classified these" points into the sources section, for one).
+{
+  const reveal = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    let t = document.getElementById(id);
+    if (!t) {
+      hooks.drawRest?.();
+      t = document.getElementById(id);
+    }
+    let d = t?.closest('details'),
+      opened = false;
+    while (d) {
+      if (!d.open) ((d.open = true), (opened = true));
+      d = d.parentElement?.closest('details');
+    }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView({ block: 'start' }));
+  };
+  addEventListener('hashchange', reveal);
+  addEventListener('load', reveal);
+}
+
 // Segmented controls: the raised thumb slides to the chosen button. Without script the chosen button carries the raised look itself.
 function placeThumb(seg) {
   const on = seg.querySelector('[aria-pressed="true"],[aria-selected="true"]');
