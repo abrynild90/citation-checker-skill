@@ -190,6 +190,7 @@ function openPairs(focus = true) {
   document.getElementById('hdLinks').innerHTML = recapLinks();
   document.getElementById('hdLine').textContent = `${recapLine()} ${drawnNote(revealCapacity())}`.trim();
   c.hidden = false;
+  document.body.classList.add('pairs-open');
   placePairs();
   c.classList.remove('in');
   void c.offsetWidth;
@@ -201,6 +202,7 @@ function closePairs(back = false) {
   const c = card();
   if (!c || c.hidden) return;
   c.hidden = true;
+  document.body.classList.remove('pairs-open');
   const b = document.querySelector('.hs-again');
   b?.setAttribute('aria-expanded', 'false');
   if (back) b?.focus({ preventScroll: true });
