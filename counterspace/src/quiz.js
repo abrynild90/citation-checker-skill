@@ -8,7 +8,11 @@
 import { byId, esc, fmtMY, parse } from './app.js';
 import { LAW_WORDS, WORDS, gap, yearsBetween } from './charts/lag.js';
 
-const LAW_PLAIN = { ...LAW_WORDS, 'tallinn-2017': 'Tallinn Manual 2.0, expert rules on cyber operations (soft law)' };
+const LAW_PLAIN = {
+  ...LAW_WORDS,
+  'tallinn-2017': 'Tallinn Manual 2.0, expert rules on cyber operations (soft law)',
+  'icao-2025': 'Finding by the Assembly of the International Civil Aviation Organization (ICAO)',
+};
 // kind 'order': two things, which came first. [event id, law id, prompt, which side shows first: 'ev' or 'law']
 // kind 'wait': two pairs, which waited longer for a legal step. [[event, law], [event, law], prompt]
 const QUESTIONS = [

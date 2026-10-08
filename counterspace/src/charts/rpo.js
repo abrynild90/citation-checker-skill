@@ -18,7 +18,10 @@ const coWhenShort = (e) => {
 const R_LANES = [{ key: 'United States' }, { key: 'China' }, { key: 'Russia' }];
 // stateR.focus: null = the default (the zoom 2000-2026 on a phone only; wider screens open on the shared years so the sticky law strip lines up);
 // true / false = the reader's explicit choice, kept across resizes.
-export const stateR = { focus: null };
+export const stateR = { focus: null, all: false };
+// The chart opens on the highlighted operations (the ones that have a 3D explainer, and every docking, tow and spaceplane mission); "Show all" brings in the
+// rest. Downloads and the data table below always carry every entry.
+export const isHighlight = (e) => hasScene(e) || e.activity === 'docking' || e.activity === 'capture_tow' || e.activity === 'spaceplane_mission';
 export const zoomedR = () => stateR.focus ?? true;
 const R_FOCUS = () => [parse('2000-01-01'), DOMAIN[1]];
 
@@ -58,7 +61,8 @@ export function drawR(el = document.getElementById('svgR')) {
     dom = zoomed ? R_FOCUS() : DOMAIN,
     { W, M, x } = layout(el, dom),
     phone = isPhoneNow();
-  const k = phone ? 0.95 : 1,
+  const SHOWN = stateR.all || EXPORTING ? CO : CO.filter(isHighlight),
+    k = phone ? 0.95 : 1,
     R = W - M.r,
     L = phone ? 0 : M.l,
     PADX = 14,
@@ -68,7 +72,7 @@ export function drawR(el = document.getElementById('svgR')) {
   // ---------------------------------------------------------------- pack the entries of each actor into rows that never overlap
   const lanes = R_LANES.map((l, li) => {
     const rows = [];
-    CO.filter((e) => lane(e) === li)
+    SHOWN.filter((e) => lane(e) === li)
       .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.id < b.id ? -1 : 1))
       .forEach((e) => {
         // a mark's outer edge stays 10 px inside the band edge (late marks shift a few px left)
@@ -90,11 +94,11 @@ export function drawR(el = document.getElementById('svgR')) {
       });
     return rows;
   });
-  let yCur = TOP + (zoomed && !EXPORTING ? TOP_AXIS_H : 0);
+  let yCur = TOP + (zoomed && !EXPORTING && phone ? TOP_AXIS_H : 0); // desktop: the pinned law strip above already carries these years, so the chart keeps no second top axis
   const placed = [];
   const bands = R_LANES.map((l, li) => {
     const n = Math.max(1, lanes[li].length),
-      b = { l, li, y0: yCur, n, count: CO.filter((e) => lane(e) === li).length };
+      b = { l, li, y0: yCur, n, count: SHOWN.filter((e) => lane(e) === li).length, all: CO.filter((e) => lane(e) === li).length };
     b.y1 = yCur + HEAD + n * ROW + 10;
     lanes[li].forEach((row, ri) =>
       row.forEach((p) => {
@@ -195,10 +199,10 @@ export function drawR(el = document.getElementById('svgR')) {
       .attr('class', 'band-gloss')
       .attr('x', INSET + 18 + tw(b.l.key, 14, 600) + 12)
       .attr('y', hy)
-      .text(`${b.count} operations`);
+      .text(SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`);
   });
   xAxis(svg, x, axisY, zoomed ? (phone ? 10 : 5) : undefined);
-  if (zoomed && !EXPORTING) topAxis(svg, x, TOP + TOP_AXIS_H - 6, phone ? 10 : 5);
+  if (zoomed && !EXPORTING && phone) topAxis(svg, x, TOP + TOP_AXIS_H - 6, 10);
   if (zoomLines.length) {
     const t = svg
       .append('text')
@@ -214,7 +218,7 @@ export function drawR(el = document.getElementById('svgR')) {
     );
   }
   // Full view: the left of every band is empty, so the earliest entry says so, with a dotted leader to its point.
-  if (!zoomed && !EXPORTING && !phone) {
+  if (!zoomed && !EXPORTING && !phone && SHOWN.length === CO.length) {
     const first = placed.reduce((a, b) => (b.e.start < a.e.start ? b : a)),
       txt = 'No earlier entries in our records',
       tW = tw(txt, 13, 400);
@@ -354,7 +358,7 @@ export function drawR(el = document.getElementById('svgR')) {
     // a band header says how many marks carry no name on the chart, so a reader knows to hover for the rest
     bands.forEach((b) => {
       const un = placed.filter((q) => lane(q.e) === b.li && !named.has(q)).length;
-      if (un > 0) glossOf[b.li].text(`${b.count} operations, ${un} unnamed here: hover or focus to read`);
+      if (un > 0) glossOf[b.li].text(`${SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`}, ${un} unnamed here: hover or focus to read`);
     });
   }
 
@@ -430,6 +434,13 @@ export function drawR(el = document.getElementById('svgR')) {
     queueMicrotask(() => dispatchEvent(new Event('scroll')));
   }
   document.getElementById('noteR').innerHTML = zoomed ? zoomNote('2000 to 2026', stateR.focus === null, 'the first entry in our records is from 2003') : fullNote();
+  const allBtn = document.getElementById('rAll'),
+    nHi = CO.filter(isHighlight).length;
+  allBtn.textContent = stateR.all ? 'Show highlights only' : `Show all ${CO.length}`;
+  allBtn.setAttribute('aria-expanded', String(stateR.all));
+  document.getElementById('noteR2').textContent = stateR.all
+    ? `Showing all ${CO.length} entries.`
+    : `Showing the ${nHi} highlighted operations: those with a 3D explainer, and every docking, tow and spaceplane mission. The other ${CO.length - nHi} are one press away.`;
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);
   const cube =
@@ -463,6 +474,10 @@ export function drawR(el = document.getElementById('svgR')) {
 }
 document.getElementById('rFocus').onclick = () => {
   stateR.focus = true;
+  drawR();
+};
+document.getElementById('rAll').onclick = () => {
+  stateR.all = !stateR.all;
   drawR();
 };
 document.getElementById('rFull').onclick = () => {

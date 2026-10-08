@@ -147,3 +147,9 @@
 .q-foot .btn .ico{margin-inline:0 6px}
 .q-foot .btn:last-child .ico{margin:0 0 0 6px}
 @media (prefers-reduced-motion:reduce){.q-opt,.q-mark{transition:none}}
+
+/* One plain sentence above each chart: what to notice before looking. A short rule above it marks it as the point of the chart. */
+.takeaway{position:relative;max-width:62ch;margin:var(--s-4) 0 var(--s-4);padding-top:var(--s-3);font:500 clamp(19px,1.7vw,22px)/1.4 var(--serif);color:var(--text);text-wrap:pretty}
+.takeaway::before{content:"";position:absolute;left:0;top:0;width:40px;height:2px;border-radius:2px;background:var(--accent-2)}
+.takeaway:empty{display:none}
+#lawHead .takeaway{margin-bottom:0}

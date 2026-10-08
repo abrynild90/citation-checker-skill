@@ -20,6 +20,7 @@ import { exportSVG } from './export.js';
 import { audit } from './audit.js';
 import { mountDiscover } from './discover.js';
 import { mountQuiz } from './quiz.js';
+import { fillTakeaways } from './takeaways.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
@@ -192,6 +193,7 @@ fontsReady.then(() => {
 mountHero(fontsReady, { openScene });
 mountDiscover();
 mountQuiz();
+fillTakeaways();
 let rz = 0,
   lastW = innerWidth;
 addEventListener('resize', () => {

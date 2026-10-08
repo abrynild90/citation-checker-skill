@@ -79,7 +79,7 @@
             <li><a class="sp-go" href="#quizBand"><b>Test yourself:</b> which came first?</a></li>
           </ol>
         </div>
-        <p class="lede-note">Tests that destroy a satellite have paused since <strong>November 2021</strong>. Jamming, lasers and cyber operations have not.</p>
+        <p class="lede-note">Tests that destroy a satellite have paused since <strong>November 2021</strong>. Jamming, lasers and cyber operations have not. Most of the facts come from the Secure World Foundation (SWF), a space-security nonprofit.</p>
         <details class="about hero-more"><summary>The main source, and orbits in plain words</summary>
           <p class="src-note">The Secure World Foundation (SWF), whose 2026 report is the main source of the facts here, finds that “only non-destructive capabilities are actively
             being used against satellites in current military operations” (Executive Summary, p.&nbsp;xxiii).</p>
@@ -119,8 +119,8 @@
         thing about it, or take the tour: all thirteen play one after another in about four minutes.</p>
       <div class="tools scenes-tools">
         <span class="scenes-acts">
-          <button class="btn primary" id="tourBtn2" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
-          <button class="btn" id="surpriseBtn2" type="button"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg>Surprise me</button>
+          <button class="btn" id="tourBtn2" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
+          <button class="btn quiet" id="surpriseBtn2" type="button"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg>Surprise me</button>
         </span>
         <span class="strip-nav" role="group" aria-label="Move along the scenes">
           <button class="btn icon" id="stripPrev" type="button" aria-label="Show earlier scenes" disabled><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
@@ -148,7 +148,9 @@
       <h2 data-avoid id="hLaw">Law and policy on one timeline</h2>
       <p data-avoid class="lede">Each symbol is a treaty, resolution, pledge or expert manual about weapons in space, placed on the year it was made. The timeline
         stays in view as you scroll, so every chart below can be read against it.</p>
-      
+
+      <p data-avoid class="takeaway" id="tkLaw"></p>
+      <p data-avoid class="words-line"><b>Words on this page:</b> <abbr title="Global navigation satellite system">GNSS</abbr> means satellite navigation such as GPS. ICAO is the International Civil Aviation Organization, the United Nations agency for flight. DA-ASAT means direct-ascent anti-satellite, a missile launched from Earth to hit a satellite. PAROS stands for the prevention of an arms race in outer space.</p>
     </header>
     <details class="about keybox" id="keyLegal"><summary>Key to the symbols</summary>
       <ul data-avoid class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul></details>
@@ -187,6 +189,7 @@
           much debris the destructive tests created.</p>
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
       </header>
+      <p data-avoid class="takeaway" id="tkA"></p>
       <div class="svgbox" id="svgA"></div>
       <details class="about keybox chart-key"><summary>Key to the points and bubbles</summary><ul data-avoid class="legend" id="legendA"></ul></details>
       <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableA"></div></details><div class="dl-row"><button class="btn small" data-export="A" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
@@ -206,6 +209,7 @@
           <p class="ckey" id="ckeyC" role="group" aria-label="Colour of each country"></p>
         </div>
       </header>
+      <p data-avoid class="takeaway" id="tkC"></p>
       <div class="svgbox" id="svgC"></div>
       <details class="about keybox chart-key"><summary>Key to the bars and dots</summary><ul data-avoid class="legend" id="legendC" aria-label="Key to the jamming, laser and cyber chart"></ul></details>
       <p data-avoid class="callout quote" id="quoteC"></p>
@@ -217,16 +221,19 @@
     <section class="chart" id="chartR" aria-labelledby="hR">
       <header class="chapter-head">
         <h2 data-avoid id="hR">Satellites that fly close to other satellites</h2>
-        <p data-avoid class="lede">Each shape is one close approach (also called a rendezvous or proximity operation) between a satellite and another object in orbit, placed at its
+        <p data-avoid class="lede">Each shape is one close approach (also called a rendezvous or proximity operation, RPO) between a satellite and another object in orbit, placed at its
           start date. Arrows show those still going.</p>
         <div class="tools">
           <span class="seg" role="group" aria-label="Years shown in the close-approach chart">
             <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
             <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
           </span>
+          <button class="btn small" id="rAll" type="button" aria-expanded="false" aria-controls="svgR">Show all 68</button>
           <p data-avoid class="note block" id="noteR"></p>
+          <p data-avoid class="note block" id="noteR2" aria-live="polite"></p>
         </div>
       </header>
+      <p data-avoid class="takeaway" id="tkR"></p>
       <div class="note-line" id="noteR0"><p data-avoid><b>A close approach is not an attack.</b> Most are inspections, servicing missions or technology tests.</p>
         <details class="about"><summary>What the source does and does not say</summary>
           <p>A close approach, or proximity operation, is two objects in orbit coming near each other. The Secure World Foundation (SWF) records that an operation took place, not why. SWF itself is cautious about intent, using words such as “possibly” and “appeared to”; an outlined shape shows those entries.</p></details></div>
@@ -247,6 +254,7 @@
           </span>
         </div>
       </header>
+      <p data-avoid class="takeaway" id="tkB"></p>
       <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
       <div class="svgbox" id="svgB"></div>
       <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
@@ -269,8 +277,9 @@
         <h2 data-avoid id="hL">How long the law took to follow</h2>
         <p data-avoid class="lede">Each pair links a space weapon or attack to the first later legal step our records connect with it. The large number is the time
           between them. It shows the order of events and says nothing about cause.</p>
-        
+
       </header>
+      <p data-avoid class="takeaway" id="tkL"></p>
       <p data-avoid class="note block">Unlike the other charts, this one does not use the shared years. Every bar starts at zero on the same scale, so a longer bar is a longer wait.</p>
       <div class="svgbox" id="svgL"></div>
       <details class="about keybox chart-key"><summary>Key to the pairs</summary><ul data-avoid class="legend" id="legendL"></ul></details>

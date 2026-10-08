@@ -246,3 +246,10 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   .toc .t-name{font-size:15.5px}
   .btn:not(.small):not(.icon){font-size:15px}
 }
+
+/* "Words on this page": the few abbreviations the law timeline uses, in plain words, right where the reader first meets them */
+.words-line{max-width:var(--measure);margin:var(--s-3) 0 0;font:400 14px/1.55 var(--sans);color:var(--muted)}
+.words-line b{font-weight:600;color:var(--text)}
+.words-line abbr{text-decoration:none}
+.chapter-head>.takeaway,.chapter-head>.words-line{grid-column:1 / -1}
+.chapter-head>.takeaway{margin-top:var(--s-3);margin-bottom:0}
