@@ -430,7 +430,9 @@ function fillStory(cfg) {
   fillNext(cfg);
   lawBtn.disabled = !cfg.related;
   lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
-  lawTxt.textContent = cfg.related ? `Related law: ${byId[cfg.related]?.label}` : 'Related law';
+  // a related law that our records also pair with this event (the first law that followed it) is simply "Related law"; one that is related in general, not a pair
+  // in data/lag_pairs.json, says so, so it cannot read as a contradiction of the picture card's "No law in our records follows this test as a pair"
+  lawTxt.textContent = cfg.related ? `Related law${pairedLaw(cfg) ? '' : ' (general, not a paired follow-up)'}: ${byId[cfg.related]?.label}` : 'Related law';
   fillLawCard(cfg);
   renderSteps(cfg);
 }
@@ -1194,6 +1196,7 @@ $('scNext').onclick = () => go(1);
 // The related law opens as a card in the scene: its date, whether it binds, its source, and a quiet way to see it on the timeline. Nothing scrolls away.
 const lawCard = $('lawCard');
 const BINDS = { treaty: 'A treaty: it binds the states that joined it.', resolution: 'Not binding: a call or a finding, not a rule that carries enforcement.', unilateral: 'A pledge by one country, not a treaty.' };
+const pairedLaw = (cfg) => !!(cfg.event && cfg.related && pairsAt(cfg.event).some((p) => p.law === cfg.related));
 function fillLawCard(cfg) {
   const l = byId[cfg.related];
   toggleLawCard(false);
@@ -1208,6 +1211,7 @@ function fillLawCard(cfg) {
     `<p class="lc-title">${esc(l.title || l.label)}</p>` +
     `<p class="lc-when">${esc(legalKindWords(l))} · ${esc(when)}${link ? `<span class="gap-pill" title="The first law our records link to this event">${esc(linkText(link.g))}</span>` : ''}</p>` +
     (l.soft_law ? '' : `<p class="lc-bind">${esc(binds)}</p>`) +
+    (link ? '' : `<p class="lc-bind">General background: our records do not pair this event with a later law.</p>`) +
     `<p class="lc-src"><span class="lc-cite"><b>Source:</b> ${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span></p>` +
     `<div class="lc-acts"><button type="button" class="btn small" id="lcTimeline"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>See it on the timeline</button>` +
     `${src}<button type="button" class="btn small quiet" id="lcClose">Close</button></div>`;

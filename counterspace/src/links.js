@@ -26,10 +26,12 @@ export function pairsAt(id) {
     });
 }
 export const linkText = (g) => `${g.num} ${g.unit} later`;
-// A weapon with no later law linked to it in data/lag_pairs.json says so, calmly, in its card only (no line is drawn). Returns the sentence, or '' when a law is linked.
-export const NO_LATER = 'No later law linked to it in our records.';
+// A weapon with no pair in data/lag_pairs.json says so, calmly, in its card only (no line is drawn). Says "pair" because a scene's "Related law" can still name a
+// law that is related in general (background, not the first law that followed it), so the two never read as a contradiction. Returns the sentence, or '' when a
+// law is paired with it. `noun` is "test" for the kinds of event that are tests, else "event".
+export const noLaterText = (e) => `No law in our records follows this ${e?.type && /^(destructive|non_destructive|flyby|midcourse_intercept|nuclear|apogee_only)$/.test(e.type) ? 'test' : 'event'} as a pair.`;
 export const hasLaterLaw = (id) => D.lag_pairs.pairs.some((p) => p.event === id);
-export const noLater = (e) => (hasLaterLaw(e.id) ? '' : `<p class="nolaw">${NO_LATER}</p>`);
+export const noLater = (e) => (hasLaterLaw(e.id) ? '' : `<p class="nolaw">${noLaterText(e)}</p>`);
 
 // Where a time tag sits so it never lies on words: slides along the dashed line (then a little to either side of it) to the first spot clear of every box in
 // `boxes` ({x0,x1,y0,y1}, same coordinates as the points). Falls back to the least-bad spot; `hit` lists the boxes it still touches so the caller can quiet them.

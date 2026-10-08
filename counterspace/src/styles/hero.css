@@ -256,12 +256,11 @@
 /* At 13 of 13 on a wide window the card is two columns (the words and the way on at the left, the six pairs at the right) and takes its room from the picture
    (down to its smallest height), while the key line and the two start buttons step aside, so the whole card stays inside the first screen. */
 @media (min-width:900px){
-  .hero-done{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,2fr);grid-template-rows:auto auto 1fr;column-gap:var(--s-6);align-items:start;padding:var(--s-4) var(--s-5) var(--s-4)}
-  .hero-done h2{grid-column:1;margin:0 0 var(--s-2);padding-right:0;font-size:clamp(24px,2.1vw,28px)}
+  .hero-done{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,2fr);grid-template-rows:auto auto 1fr;column-gap:var(--s-6);align-items:start;padding:var(--s-4) var(--s-5)}
+  .hero-done h2{grid-column:1;margin:0 0 var(--s-2);padding-right:0;font-size:clamp(21px,1.7vw,24px)}
   .hero-done #hdLinks{grid-column:2;grid-row:1/4;padding-right:56px}
   .hero-done .hd-line{grid-column:1;margin:0;font-size:14.5px;line-height:1.45}
   .hero-done .hd-next{grid-column:1;margin:var(--s-3) 0 0;gap:var(--s-2)}
-  .hero-done .hd-next-h{flex:1 0 100%}
   .hero-done .rc-links{gap:6px}
 }
 

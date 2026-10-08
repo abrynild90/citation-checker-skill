@@ -5,7 +5,7 @@
 // ============================================================================
 import { D, DOMAIN, KIN, byId, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
-import { NO_LATER, gap, hasLaterLaw, linkText, pairsAt, tagSpot, yearsBetween } from './links.js';
+import { gap, hasLaterLaw, noLaterText, linkText, pairsAt, tagSpot, yearsBetween } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { posterURL } from './scenes/posters.js';
@@ -671,7 +671,7 @@ function popHTML(h) {
     return (
       `<div class="hp-head">${thumb(scene ? e.scene_3d : '')}<div class="hp-ht"><p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p></div></div>` +
       `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
-      (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${NO_LATER}</p>`) +
+      (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${noLaterText(e)}</p>`) +
       (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
     );
   }
