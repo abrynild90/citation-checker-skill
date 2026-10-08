@@ -270,13 +270,16 @@ await run('desktop-scenes', { viewport: { width: 1440, height: 900 }, colorSchem
   res.bytesBeforeInteraction = p.netBytes();
   res.canvasesBeforeInteraction = await p.evaluate(() => window.__cs.contexts());
   await p.screenshot({ path: `${out}/desktop-dark-full.png`, fullPage: true });
-  // Intent: pointer entering the hero upgrades it to WebGL (three.js + Earth imagery load now).
-  await p.hover('#heroStage');
-  await p.waitForFunction(() => window.__cs.contexts() > 0, null, { timeout: 20000 }).catch(() => {});
+  // The hero is a still picture drawn from the data (no WebGL), and its hit layer lies over #heroStage, so a hover goes to a dot through the layer:
+  // Playwright's own hover('#heroStage') waits for a target the layer intercepts. Pointing at a dot must load no 3D library.
+  const dot = await p.locator('.ht-hit.ev').first().boundingBox();
+  await p.mouse.move(dot.x + dot.width / 2, dot.y + dot.height / 2);
+  await p.waitForTimeout(600);
+  await p.waitForFunction(() => window.__cs.contexts() > 0, null, { timeout: 1500 }).catch(() => {});
   res.bytesAfterHeroIntent = p.netBytes();
   res.heroRotateHidden = await p.evaluate(() => document.getElementById('heroRot')?.hidden ?? true);
   const t0 = Date.now();
-  await p.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 20000 }).catch(() => {});
+  await p.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 3000 }).catch(() => {});
   res.earthReady = await p.evaluate(() => window.__cs.earthReady());
   res.earthWaitMs = Date.now() - t0;
   res.earthAfterLoad = await p.evaluate(
