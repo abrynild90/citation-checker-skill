@@ -171,12 +171,12 @@ no wording errors.
 
 ## 4. Page anatomy
 
-1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede on the left, the Earth large on the right (the photographic Earth, lit, with the three
-   orbit shells and their labels). One primary action ("Take the 3D tour") and one secondary ("Jump to the charts"). No big-number strip. Under the lede, a contents list of seven
-   plain rows (not cards): the chapter name as a link and one factual sentence that carries the relevant count. Before any interaction no 3D library is loaded: the first picture
-   is drawn from the embedded Earth image. The hero is the page's one authored motion moment (a short entrance, then the live globe).
-2. **Chapter navigation.** The contents list in the hero (six plain links), plus on screens at least 1360 px wide a slim rail on the right edge with six dots (the name shows on hover and
-   focus). It does not compete with the sticky law timeline and shows no numbers.
+1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede at the upper left of the picture, which is the page's thesis: every test with a reported
+   altitude as a dot rising from the Earth's limb, every law as a tick on the ground, on the shared years. Under it one caption line (what the dots and ticks are, and that a thin ring
+   means a 3D scene) and one row of actions: "See the timeline" (primary), "Take the 3D tour", "Surprise me", "Test yourself". Nothing else: no start-here strip, no contents row, no
+   source note (the main source and the orbit words live in "Sources and method"). Pointing at a dot or tick opens a small card and, where our records link a weapon to the first later law,
+   rings both ends and draws a dashed line with the time between them. Before any interaction no 3D library is loaded.
+2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list.
 3. **Two layers.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, the quiz, one timeline chapter (the law strip and the
    anti-satellite test chart on the same years) and "What the pattern shows" (four findings computed from the data, each linking to its chart). Layer two is "Explore the data": one panel with
    a tab for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, key,
