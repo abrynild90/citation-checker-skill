@@ -8,7 +8,7 @@
 /* One thin sticky row under the pinned law strip: the round Play button sits in the left margin of the axis, a line of words (the title, or a caption when the slider
    passes a named event, and the running tally) over the line itself. Pinned, it is about 36 px tall, so the strip and the row take about 112 px of a 900 px window.
    It lets go of the top once the "Key, data table and download" fold below the chart is open (the table is read at its own place), and it ends with its chart. */
-.yr-bar{--cs:1;position:sticky;top:var(--yr-top,var(--band-h,64px));z-index:19;display:grid;grid-template-columns:calc(64px * var(--cs)) minmax(0,1fr) calc(68px * var(--cs));grid-template-rows:auto auto;margin:var(--s-2) 0 var(--s-2);padding:1px 0 0;background:var(--bg);border-bottom:1px solid var(--line)}
+.yr-bar{--cs:1;position:sticky;top:var(--yr-top,var(--band-h,64px));z-index:19;display:grid;grid-template-columns:calc(64px * var(--cs)) minmax(0,1fr) calc(68px * var(--cs));grid-template-rows:auto auto;margin:var(--s-2) 0 var(--s-2);padding:0 0 4px;background:var(--bg);border-bottom:1px solid var(--line)}
 #chartA:has(#foldA[open]) .yr-bar{position:static}
 .yr-play{grid-column:1;grid-row:1 / span 2;place-self:center;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:var(--accent);color:var(--on-accent,#fff);cursor:pointer;transition:transform var(--dur-1,120ms) var(--ease),box-shadow var(--dur-1,120ms) var(--ease)}
 .yr-play:hover{box-shadow:0 0 0 4px var(--accent-soft)}
@@ -31,7 +31,7 @@
 @keyframes yr-cap{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 .yr-rail{grid-column:2;grid-row:2;margin:0;padding:0}
-.yr-track{position:relative;height:19px;border-radius:var(--r-1);cursor:ew-resize;touch-action:none;outline:none}
+.yr-track{position:relative;height:16px;border-radius:var(--r-1);cursor:ew-resize;touch-action:none;outline:none}
 .yr-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:var(--line-strong)}
 .yr-fill{position:absolute;left:0;top:50%;height:2px;margin-top:-1px;width:100%;border-radius:2px;background:var(--accent);pointer-events:none}
 .yr-ticks{position:absolute;inset:0;pointer-events:none}
