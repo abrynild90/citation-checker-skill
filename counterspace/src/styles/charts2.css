@@ -233,3 +233,8 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .q-reward[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.q-reward{animation:none}}
 .q-foot .btn .ico.up{margin:0 6px 0 0}
+
+/* a name that would touch another mark or name stays out of sight until its mark is pointed at or focused */
+:is(#chartR) svg.k2 .dlabel.dl-hid{opacity:0;transition:opacity 120ms var(--ease)}
+:is(#chartR) svg.k2 .dlabel.dl-hid.dl-show{opacity:1}
+@media (prefers-reduced-motion:reduce){:is(#chartR) svg.k2 .dlabel.dl-hid{transition:none}}

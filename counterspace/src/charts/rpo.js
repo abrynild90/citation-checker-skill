@@ -319,11 +319,11 @@ export function drawR(el = document.getElementById('svgR')) {
             break;
           }
         }
-        if (ax != null) return named.add(p), lg.append('text').attr('class', 'dlabel').attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
+        if (ax != null) return named.add(p), lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
       }
       if (side) named.add(p);
       if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y, t] : [right[0], right[1], p.y, t]);
-      if (side) lg.append('text').attr('class', 'dlabel').attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
+      if (side) lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
     });
     // Second pass, so that a wider chart never shows fewer names than a narrower one: a headline the first pass could not place gets more positions to try
     // (further above or below the row, ends anchored to either side of the mark, start-anchored after it).
@@ -337,10 +337,11 @@ export function drawR(el = document.getElementById('svgR')) {
         const yy = p.y + off;
         for (const hi of ends) {
           const a = hi - w;
+          if (off === 0 && hi > p.X0 - 9) continue; // in its own row a name ends before its own mark, never on it
           if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy, t) && okRow(a, hi, yy)) {
             named.add(p);
             lbox.push([a, hi, yy, t]);
-            lg.append('text').attr('class', 'dlabel').attr('x', hi).attr('y', yy + 4.4).attr('text-anchor', 'end').text(t);
+            lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', hi).attr('y', yy + 4.4).attr('text-anchor', 'end').text(t);
             return;
           }
         }
@@ -349,12 +350,30 @@ export function drawR(el = document.getElementById('svgR')) {
           if (b < R - 8 && !cubeHit(lo, b, yy) && clear(lo, b, yy, t) && okRow(lo, b, yy)) {
             named.add(p);
             lbox.push([lo, b, yy, t]);
-            lg.append('text').attr('class', 'dlabel').attr('x', lo).attr('y', yy + 4.4).attr('text-anchor', 'start').text(t);
+            lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', lo).attr('y', yy + 4.4).attr('text-anchor', 'start').text(t);
             return;
           }
         }
       }
     });
+    // A name that still touches any mark, cube or another name (measured on the drawn text, not estimated) is put out of sight; it shows again while its mark
+    // is pointed at or focused. Names of marks with a 3D explainer are kept first. So a crowded chart ("Show all") never shows a clipped or overlapping name.
+    const lbls = lg.selectAll('.dlabel').nodes(),
+      mbox = placed.map((q) => [q.X0 - 8, Math.max(q.X1, q.X0 + (q.bar ? 12 : 0)) + (q.ongoing ? 12 : 8), q.y - 8, q.y + 8]).concat(placed.filter((q) => q.bx != null).map((q) => [q.bx - 7, q.bx + 7, q.by - 8, q.by + 8])),
+      kept = [],
+      byId = new Map(placed.map((q) => [q.e.id, q]));
+    lbls
+      .map((node) => {
+        const r = node.getBBox();
+        return { node, box: [r.x - 1, r.x + r.width + 1, r.y + 3, r.y + r.height - 3], sc: hasScene(byId.get(node.dataset.id).e) ? 0 : 1 };
+      })
+      .sort((a, b) => a.sc - b.sc)
+      .forEach((l) => {
+        if (mbox.some((m) => clash(l.box, m)) || kept.some((k) => clash(l.box, k))) {
+          l.node.classList.add('dl-hid');
+          named.delete(byId.get(l.node.dataset.id));
+        } else kept.push(l.box);
+      });
     // a band header says how many marks carry no name on the chart, so a reader knows to hover for the rest
     bands.forEach((b) => {
       const un = placed.filter((q) => lane(q.e) === b.li && !named.has(q)).length;
@@ -425,6 +444,9 @@ export function drawR(el = document.getElementById('svgR')) {
     (d, elx, evt) => activate(d.e, elx, evt),
   );
   rove(g);
+  // a name put out of sight (it would have touched another mark or name) shows while its mark is pointed at or focused
+  const showName = (d, on) => svg.selectAll('.dlabel.dl-hid').filter(function () { return this.dataset.id === d.e.id; }).classed('dl-show', on);
+  g.on('mouseenter.dl focus.dl', (ev, d) => showName(d, true)).on('mouseleave.dl blur.dl', (ev, d) => showName(d, false));
   addGuide(svg, x, TOP, axisY, 'R');
   if (EXPORTING) return;
 
