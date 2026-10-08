@@ -126,6 +126,7 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 
 // Text of the page as a visitor can read or hear it: visible text, plus labels read out by screen readers.
 const pageText = () => {
+  document.querySelectorAll('.xpanel[data-off]').forEach((e) => e.removeAttribute('data-off')); // the tabbed charts of "Explore the data": read them all
   document.querySelectorAll('details').forEach((d) => (d.open = true));
   // A bare dash in a table cell is the empty-cell mark, not prose.
   document.querySelectorAll('td,th').forEach((c) => {

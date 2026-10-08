@@ -16,7 +16,7 @@ const out = path.resolve(process.env.OUT || 'packet');
 const PORT = +(process.env.PORT || 9340);
 const themes = (process.env.THEMES || 'dark,light').split(',');
 const scenes = (process.env.SCENES || 'starfish,fengyun,rpo,laser,sj21-tug,spaceplanes').split(',').filter(Boolean);
-const sections = (process.env.SECTIONS || 'top,legalBand,chartA,chartC,chartR,chartB,lag,sources').split(',');
+const sections = (process.env.SECTIONS || 'top,legalBand,chartA,pattern,chartC,chartR,chartB,lag,sources').split(',');
 const times = (process.env.TIMES || '0.25,0.7').split(',').map(Number);
 const sizes = [
   [1440, 900],
@@ -50,7 +50,10 @@ try {
       await ready(page);
       for (const s of sections) {
         await page.evaluate(
-          (id) => (id === 'top' ? window.scrollTo(0, 0) : document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' })),
+          (id) => {
+            window.__cs?.showTab?.(id); // a chart in "Explore the data" is a tab: open it first
+            return id === 'top' ? window.scrollTo(0, 0) : document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' });
+          },
           s,
         );
         await page.waitForTimeout(500);

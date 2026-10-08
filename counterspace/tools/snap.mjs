@@ -11,7 +11,7 @@ const file = path.resolve(process.env.FILE || 'index.html');
 const out = path.resolve(process.env.OUT || 'snaps');
 const vps = (process.env.VPS || '1440x900,390x844').split(',').map((v) => v.split('x').map(Number));
 const themes = (process.env.THEMES || 'dark,light').split(',');
-const sections = (process.env.SECTIONS || 'top,legalBand,chartA,chartC,chartR,chartB,lag,sources').split(',');
+const sections = (process.env.SECTIONS || 'top,legalBand,chartA,pattern,chartC,chartR,chartB,lag,sources').split(',');
 fs.mkdirSync(out, { recursive: true });
 
 const srv = http.createServer((q, r) => {
@@ -41,6 +41,7 @@ try {
       for (const s of sections) {
         await page.evaluate((id) => {
           if (id === 'top') return window.scrollTo(0, 0);
+          window.__cs?.showTab?.(id); // a chart in "Explore the data" is a tab: open it first
           const el = document.getElementById(id);
           if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); // honours the section's scroll-margin-top, like a real link
         }, s);

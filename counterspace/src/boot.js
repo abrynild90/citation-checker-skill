@@ -21,7 +21,7 @@ import { audit } from './audit.js';
 import { mountDiscover } from './discover.js';
 import { mountQuiz } from './quiz.js';
 import { fillTakeaways } from './takeaways.js';
-import { mountExplore } from './explore.js';
+import { mountExplore, showTab } from './explore.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
@@ -229,6 +229,7 @@ window.__cs = {
   exportSVG,
   audit,
   openScene,
+  showTab,
   startTour,
   closeScene,
   exportStill,

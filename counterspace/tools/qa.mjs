@@ -74,6 +74,8 @@ async function run(name, opts, fn) {
   page.on('pageerror', (e) => errs.push('pageerror: ' + e.message));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);
+  // The four "Explore the data" charts share one tabbed panel; the checks below read and scroll to each of them, so lay them all out (as print does).
+  await page.addStyleTag({ content: '.xpanel[data-off]{position:static!important;height:auto!important;overflow:visible!important;visibility:visible!important;pointer-events:auto!important}' });
   const r = await fn(page);
   report[name] = { errs, ...r };
   await ctx.close();
