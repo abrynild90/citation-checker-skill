@@ -238,3 +238,22 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 :is(#chartR) svg.k2 .dlabel.dl-hid{opacity:0;transition:opacity 120ms var(--ease)}
 :is(#chartR) svg.k2 .dlabel.dl-hid.dl-show{opacity:1}
 @media (prefers-reduced-motion:reduce){:is(#chartR) svg.k2 .dlabel.dl-hid{transition:none}}
+
+/* An answered card is only as tall as what it says (no empty space under it, whatever its neighbours hold), and says it a little tighter: the hint and the pale
+   option are not needed once the answer is in. */
+.q.done{align-self:start}
+.q.done .q-hint{display:none}
+.q.done .q-opt{min-height:46px}
+.q.done .q-out{margin-top:var(--s-1)}
+@media (min-width:1100px){
+  .q.done .q-out{font-size:14.5px;line-height:1.5}
+  .q.done .q-out .q-verdict{font-size:16.5px;margin-bottom:var(--s-1)}
+  .q.done .q-line{gap:var(--s-2)}
+  .q-foot{margin-top:var(--s-4)}
+  .q-sum{flex:1 1 0;min-width:420px;max-width:80ch}
+  .q-trail{height:36px;margin-top:var(--s-3)}
+}
+
+/* the beads between the dots: static when motion is reduced */
+.qt-bead{position:absolute;left:var(--p);top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--accent);opacity:.7;animation:qt-pop 300ms var(--ease) calc(240ms + var(--i) * 95ms) both}
+@media (prefers-reduced-motion:reduce){.qt-bead{animation:none}}

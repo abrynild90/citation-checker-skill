@@ -171,7 +171,18 @@ export function mountQuiz() {
     trail.className = 'q-trail' + (right === N ? ' perfect' : '');
     trail.innerHTML =
       '<span class="qt-line"></span>' +
-      state.map((s, i) => `<i class="qt-dot ${s ? 'ok' : 'miss'}" style="--p:${((i + 0.5) / N) * 100}%;--i:${i}"></i>`).join('') +
+      // small beads along the dashed line, three in each stretch between one dot and the next (the last stretch ends at the tick): the line reads as a line of
+      // dots even in a still picture
+      state
+        .map((s, i) => {
+          const a = ((i + 0.5) / N) * 100,
+            z = i + 1 < N ? ((i + 1.5) / N) * 100 : 100;
+          return (
+            [1, 2, 3].map((k) => `<i class="qt-bead" style="--p:${(a + ((z - a) * k) / 4).toFixed(2)}%;--i:${i * 3 + k}"></i>`).join('') +
+            `<i class="qt-dot ${s ? 'ok' : 'miss'}" style="--p:${a}%;--i:${i}"></i>`
+          );
+        })
+        .join('') +
       '<i class="qt-tick"></i>';
     if (r) {
       rew.textContent = `${right === N ? 'All four right.' : 'Three right.'} That earns a new link on the picture at the top of the page: ${r.event} and ${r.law}.`;
