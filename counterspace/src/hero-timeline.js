@@ -563,7 +563,7 @@ function mountHits(stage, S, actions) {
       const x = cx - pw / 2;
       cands = h.k === 'ev' ? [[x, cy + 18], [x, cy - 18 - ph]] : [[x, S.yL - ph - 6]];
     } else if (h.k === 'ev') {
-      for (const sh of [0, -40, 40, -80, 80, -120, 120]) cands.push([cx + G + 6, cy - ph / 2 + sh], [cx - G - 6 - pw, cy - ph / 2 + sh]);
+      for (const dx of [G + 6, 80, 140, 200, 260, 330, 400, 480]) for (const sh of [0, -50, 50, -100, 100, -150, 150]) cands.push([cx + dx, cy - ph / 2 + sh], [cx - dx - pw, cy - ph / 2 + sh]);
       for (const dx of [0, -70, 70, -140, 140]) cands.push([cx - pw / 2 + dx, cy - ph - G - 4], [cx - pw / 2 + dx, cy + G + 4]);
     } else {
       for (const up of [0, 24, 48, 90]) for (let dx = -320; dx <= 320; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
@@ -575,7 +575,7 @@ function mountHits(stage, S, actions) {
         R = { x0: x, x1: x + pw, y0: y, y1: y + ph };
       let cost = Math.abs(x - rx) * 2 + Math.abs(y - ry) * 2; // pushed off its first choice by the picture's edge
       if (overlap(R, { x0: cx - 5, x1: cx + 5, y0: h.py - 5, y1: h.k === 'ev' ? h.py + 5 : h.y1 }, 0)) cost += 400; // never over its own point
-      for (const o of S.avoid || []) if (overlap(R, o, 2)) cost += 300;
+      for (const o of S.avoid || []) if (overlap(R, o, 8)) cost += 300;
       for (const o of S.hits) if (o !== h && o.k === 'ev' && overlap(R, { x0: o.px - 7, x1: o.px + 7, y0: o.py - 7, y1: o.py + 7 }, 2)) cost += o.e.type === 'nuclear' ? 200 : 45;
       for (const o of S.hits) if (o !== h && o.k === 'law' && overlap(R, { x0: o.px - 2, x1: o.px + 2, y0: o.py, y1: o.y1 }, 2)) cost += 30;
       const dx = Math.max(R.x0 - cx, 0, cx - R.x1),
