@@ -7,6 +7,7 @@
 // ============================================================================
 import { D, byId, esc, fmtMY, parse } from './app.js';
 import { LAW_WORDS, WORDS, gap, yearsBetween } from './charts/lag.js';
+import { linkText } from './links.js';
 import { SHORT } from './discover-data.js';
 import { openScene } from './scene-ui.js';
 import { seenScenes } from './shared.js';
@@ -43,6 +44,20 @@ function pattern() {
     (odd.length ? ` The exception: the ${odd.join(' and the ')}, which came after its expert rules.` : '')
   );
 }
+// The little pair-line: the same drawing as the hero's links (a dot, a dashed gap with the time on it, a tick), drawn in when the answer is given.
+// It repeats what the sentences say, so it is hidden from screen readers.
+const endHTML = (k) => `<i class="ql-end ql-${k}"></i>`;
+const lineHTML = (rows) =>
+  `<div class="q-line${rows.length > 1 ? ' two' : ''}" aria-hidden="true">` +
+  rows
+    .map(
+      (r) =>
+        `<div class="ql" style="--k:${r.k.toFixed(3)}">${r.cap ? `<span class="ql-cap">${esc(r.cap)}</span>` : ''}` +
+        `<span class="ql-track">${endHTML(r.left)}<span class="ql-gap"><b class="ql-pill">${esc(r.text)}</b></span>${endHTML(r.right)}</span>` +
+        `<span class="ql-years"><span>${r.yl}</span><span>${r.yr}</span></span></div>`,
+    )
+    .join('') +
+  '</div>';
 const mark = '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
 
 // What each question shows: the two options (in display order, flagged right or not) and the sentence that explains the truth.
@@ -58,11 +73,24 @@ function build(q) {
     if (q.first === 'law') opts.reverse();
     const a = evFirst ? [evName(q.ev), when(e), lawName(q.law), when(l)] : [lawName(q.law), when(l), evName(q.ev), when(e)],
       note = WORDS[e.id]?.note;
+    const years = Math.abs(yearsBetween(a[1], a[3])),
+      g = gap(years);
+    // two short sentences: the dates (the gap itself is drawn and named in the little line above them)
     const truth =
-      `<b>${esc(a[0])}</b> came first (${esc(fmtMY(a[1]))}). <b>${esc(a[2])}</b> followed <span class="q-gap">${gapText(Math.abs(yearsBetween(a[1], a[3])))} later</span> (${esc(fmtMY(a[3]))}).` +
+      `<b>${esc(a[0])}</b> came first (${esc(fmtMY(a[1]))}). <b>${esc(a[2])}</b> followed in ${esc(fmtMY(a[3]))}.` +
       (!evFirst ? ' The manual is soft law, so it does not bind anyone.' : '') +
       ` This is order in time, not cause.${note && evFirst ? ' ' + esc(note) : ''}`;
-    return { opts, truth, scene: e.scene_3d };
+    // the pair drawn the way the hero draws it: a dot for the weapon, a tick for the law, the first one on the left
+    const line = [{ left: evFirst ? 'dot' : 'tick', right: evFirst ? 'tick' : 'dot', yl: a[1].getUTCFullYear(), yr: a[3].getUTCFullYear(), text: linkText(g), k: 1 }];
+    const verdict = (ok) =>
+      evFirst
+        ? ok
+          ? 'Right: the weapon came first.'
+          : 'Easy to guess the other way: the weapon came first and the law followed.'
+        : ok
+          ? 'Right: this time the rules came first.'
+          : 'Easy to guess the other way: the rules came first.';
+    return { opts, truth, line, verdict, scene: e.scene_3d };
   }
   const [ea, la] = q.a,
     [eb, lb] = q.b,
@@ -74,9 +102,13 @@ function build(q) {
     ];
   const [longP, shortP] = ya >= yb ? [[ea, la, ya], [eb, lb, yb]] : [[eb, lb, yb], [ea, la, ya]];
   const truth =
-    `<b>${esc(evName(longP[0]))}</b> waited <span class="q-gap">${gapText(longP[2])}</span> for ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
+    `<b>${esc(evName(longP[0]))}</b> waited for ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
     `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])} for ${esc(lawName(shortP[1]))}. This is order in time, not cause.`;
-  return { opts, truth, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
+  const top = Math.max(ya, yb),
+    one = (e, l, y) => ({ cap: evName(e), left: 'dot', right: 'tick', yl: when(byId[e]).getUTCFullYear(), yr: when(byId[l]).getUTCFullYear(), text: linkText(gap(y)), k: Math.max(0.74, y / top) }),
+    line = [one(ea, la, ya), one(eb, lb, yb)];
+  const verdict = (ok) => (ok ? 'Right: that one waited the longest.' : 'Easy to guess the other way: the other one waited the longest.');
+  return { opts, truth, line, verdict, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
 }
 // After a wrong answer: the scene that shows the event, and whether it has been watched yet (in memory only).
 const watchLabel = (id) => `Watch ${SHORT[id] || 'the scene'}`;
@@ -95,7 +127,7 @@ export function mountQuiz() {
   <div class="q-opts" role="group" aria-labelledby="q${i}">
     ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
   </div>
-  <p class="q-out" aria-live="polite"></p>
+  <div class="q-out" aria-live="polite"></div>
 </li>`;
   }).join('');
   host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
@@ -141,7 +173,7 @@ export function mountQuiz() {
       o.querySelector('.q-t').insertAdjacentHTML('beforeend', b.opts[j].right ? '<span class="sr"> (the right answer)</span>' : '');
     });
     li.querySelector('.q-out').innerHTML =
-      `<b class="q-verdict ${ok ? 'yes' : 'no'}">${ok ? 'Correct.' : 'Not quite.'}</b> ${b.truth}` +
+      `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<p class="q-truth">${b.truth}</p>` +
       (!ok && b.scene
         ? `<span class="q-watch">Want to see it? <button type="button" class="q-go" data-scene="${esc(b.scene)}"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>` +
           `${esc(watchLabel(b.scene))}</button> <span class="q-seen">(${watchNote(b.scene)})</span></span>`
@@ -157,7 +189,7 @@ export function mountQuiz() {
     state.fill(null);
     host.querySelectorAll('.q').forEach((li) => {
       li.classList.remove('done');
-      li.querySelector('.q-out').textContent = '';
+      li.querySelector('.q-out').replaceChildren();
       li.querySelectorAll('.q-opt').forEach((o) => {
         o.disabled = false;
         o.setAttribute('aria-pressed', 'false');
