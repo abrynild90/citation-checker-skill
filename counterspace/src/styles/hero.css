@@ -270,13 +270,15 @@
   .hero-glance li{padding-left:var(--s-4)}
 }
 
-/* The first-visit cue: once the opening sweep is over, one quiet line in the actions row says the picture answers to a pointer. It fades after the first
-   time a dot or tick is pointed at or focused. Only where the row has room for it beside the two buttons (a phone and a narrow tablet go without). */
+/* The first-visit cue: once the opening sweep is over, one quiet line directly under the key (same weight and colour) says the picture answers to a pointer. It fades after the first
+   time a dot or tick is pointed at or focused. A phone and a narrow tablet go without. */
 .hero-cue{display:none}
 @media (min-width:1000px){
-  .hero-cue{display:inline-flex;align-items:center;gap:8px;margin:0 0 0 auto;font:500 14px/1.4 var(--sans);color:var(--hero-muted);opacity:0;visibility:hidden;pointer-events:none;
+  .hero-cap .hero-cue{display:flex;align-items:center;gap:8px;margin:6px 0 0;font:500 14px/1.4 var(--sans);color:var(--muted);opacity:0;visibility:hidden;pointer-events:none;
     transition:opacity 420ms var(--ease),visibility 0s linear 420ms}
-  .hero-cue.on{opacity:1;visibility:visible;transition:opacity 520ms var(--ease),visibility 0s}
+  .hero-cap .hero-cue.on{opacity:1;visibility:visible;transition:opacity 520ms var(--ease),visibility 0s}
+  .hero-cap.live .hero-cue,.hero-cap.live .hero-cue.on{opacity:0;visibility:hidden;transition:none}
+  .scene-open .hero-cue,.scene-open .hero-cue.on{visibility:hidden;opacity:0;transition:none}
   .hero-cue .kg{flex:none;width:24px;height:18px;overflow:visible}
   .hero-cue .k-dot{fill:var(--hero-accent)}
   .hero-cue .cue-ping{fill:none;stroke:var(--hero-accent);stroke-width:1.5;opacity:0;transform-origin:12px 9px}
@@ -284,7 +286,7 @@
   .hero-cue .cue-touch{display:none}
 }
 @media (min-width:1000px) and (hover:none){.hero-cue .cue-point{display:none}.hero-cue .cue-touch{display:inline}}
-@media (min-width:1600px){.hero-cue{font-size:15.5px}}
+@media (min-width:1600px){.hero-cap .hero-cue{font-size:15.5px}}
 @keyframes cue-ping{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(2.6)}}
 @media (prefers-reduced-motion:reduce){.hero-cue,.hero-cue.on{transition:none}.hero-cue.on .cue-ping{animation:none}}
 
