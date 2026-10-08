@@ -173,25 +173,25 @@ no wording errors.
 
 1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede at the upper left of the picture, which is the page's thesis: every test with a reported
    altitude as a dot rising from the Earth's limb, every law as a tick on the ground, on the shared years. Under it one key line with a small drawn sign for each mark (dot: a test in
-   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of actions: "See the timeline" (primary), "Take the 3D tour",
-   "Surprise me", "Test yourself". On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right. Once, after the first paint and only at the top of
-   the page, a sweep of about four seconds draws each linked pair (dashed line growing from the weapon to the law, then "N years later") one after another, with that pair's sentence from
-   the data replacing the key line; the Replay button becomes "Skip" while it runs, and Replay runs the history and then the sweep again. It is off under reduced motion and ends at the first
-   pointer on a dot or tick. Pointing at a dot or tick opens a short, wide card on the clearest spot of the sky (never over a dot, tick, note, zone name, year, law name or the headline words),
-   rings both ends of a link, draws the dashed line with the time between, and quietens any caption the line or its tag would cross. A new card replaces the open one at once; the old one is
-   kept only while the pointer is plainly heading for its buttons. When all 13 scenes have been seen, closing the last one returns to the top and opens a card above the buttons with the real pairs
-   drawn as links, one plain line and "Where to next" (the quiz, or the full timeline); the tour's closing slide carries the same recap. Before any interaction no 3D library is loaded.
+   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of two actions: "See the timeline" (primary) and "Take the 3D tour". ("Surprise me" is the first tile of the 3D strip, and the quiz is a chapter, not a hero button.) On a window of 900 px or more the hero fills the first screen exactly and the picture takes the spare height. On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right. Once, after the first paint and only at the top of
+   the page, a sweep draws each linked pair (dashed line growing from the weapon to the law, then "N years later") one after another, with that pair's sentence from
+   the data replacing the key line and ending in "Watch ... in 3D" where the pair has a scene (the key leaves before the sentence arrives and the other way round, so the two never overlap).
+   It ends on one beat: the longest wait in the pair data (15.1 years), drawn along the horizon between its two dates and named in the caption; the Replay button becomes "Skip" while it runs, and Replay runs the history and then the sweep again. It is off under reduced motion and ends at the first
+   pointer on a dot or tick. Pointing at a dot or tick opens a short, wide card on the clearest spot of the sky (never over a dot, tick, note, zone name, year, law name or the headline words; a dot or tick with a 3D scene shows that scene's picture as a small thumbnail beside the words),
+   rings both ends of a link, draws the dashed line with the time between, and hides any caption the line crosses and quietens any its tag would cross. A new card replaces the open one at once; the old one is
+   kept for 700 ms while the pointer stays in the corridor between the dot and the card, and Escape closes a card pinned by a click. After 3 and after 7 scenes seen, one more real pair is drawn
+   on the resting picture as a thin dashed link (memory only), with a note beside the "seen" count. When all 13 scenes have been seen, closing the last one opens a card docked under the buttons
+   (never over the picture) with the real pairs drawn as links, one plain line and "Where to next" (the quiz, or the full timeline); the tour's closing slide carries the same recap. Before any interaction no 3D library is loaded.
 2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list.
-3. **Two layers.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, the quiz, one timeline chapter (the law strip and the
-   anti-satellite test chart on the same years) and "What the pattern shows" (four findings computed from the data, each linking to its chart). Layer two is "Explore the data": one panel with
-   a tab for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, key,
-   data table and download, and a way on to the next chart at its foot. Nothing is removed: every chart, table and download stays, and print shows every tab. Tabs follow the ARIA tabs pattern
+3. **Two layers.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, one timeline chapter (the law strip and the
+   anti-satellite test chart on the same years), "What the pattern shows" (it opens on one large line, the range of the waits, with the longest pair drawn between its dates, then four findings computed from the data, each linking to its chart) and the quiz, which sits just after the pattern it echoes. Layer two is "Explore the data": four cards that are also the tabs, one for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, key,
+   data table and download, and a way on to the next chart at its foot. Nothing is removed: every chart, table and download stays, and print shows every tab. The cards follow the ARIA tabs pattern
    (arrow keys, Home, End, one tab stop), and an address that names a chart or something inside one (`#chartC`, `#lag`, `#tableC`) opens its tab first. Panels not chosen stay laid out at full width,
-   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open.
+   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline, pattern, quiz, explore, sources.
 4. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, a one-line key, an optional callout, and a "Show the data" disclosure. No label above
    the title, no number. A chart inside a chapter or a tab takes an h3 and a quieter lede.
 5. **Law strip.** Stays in view as the reader scrolls the test chart and the two tabs that share its years (jamming; close approaches), with the years it shows following the chart under it. It steps
-   aside over the findings and over the two tabs with their own scales (decades; years to law).
+   aside over the findings and the quiz, over the two tabs with their own scales (decades; years to law), and once "Explore the data" has been read to its end (by that section's own bounds, at any window height).
 6. **Sources and method.** A short head, then one row: the closed "Read the sources and method" disclosure with the copy-citation button at its end. Inside, readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
 7. **Footer.** Three short columns: about this page, data and licence, type and images.
 
@@ -212,6 +212,7 @@ no wording errors.
   selecting a step jumps to it.
 - Control bar: play or pause (icon), a scrubber with a tick for each step, the time, a segmented control for views, and "Save image".
 - Keyboard: Space plays or pauses, Left and Right change scene, Esc closes, 1 to 5 choose a view. A small hint is shown once.
+- The tour: Previous and Next (and the arrow keys) move the tour along and it keeps running; only "Stop the tour" or choosing a scene from the dots ends it. Its closing slide is one column: the six pairs, one plain line, a "Revisit a scene or a chart" disclosure (the 13 scenes and the 4 chart links), and the actions pinned at the foot so they are never clipped.
 - Open and close with a short fade and scale. Phones: picture on top, story below, controls pinned at the bottom with 44 px targets.
 
 ## 7. 3D picture quality
