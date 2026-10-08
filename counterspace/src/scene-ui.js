@@ -10,6 +10,7 @@ import { HERO, SCENES } from './scenes/config.js';
 import { buildSim } from './scenes/sim.js';
 import { renderSVG } from './scenes/svg-fallback.js';
 import { hideCard, legalKindWords, setGuide } from './ui.js';
+import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
@@ -1424,7 +1425,24 @@ export function startTour(originEl) {
   tour = { i: 0, timer: 0 };
   openScene(ORDER[0].id, originEl, true);
 }
+// While the tour plays, the last fifth of each scene shows a small "Next up" card with the next scene's picture and name; pressing it moves on at once.
+const nextUp = $('svNextUp');
+function showNextUp(on) {
+  const n = tour && ORDER[tour.i + 1];
+  if (!on || !n) return void (nextUp.hidden = true);
+  if (nextUp.dataset.id !== n.id) {
+    nextUp.dataset.id = n.id;
+    const img = nextUp.querySelector('img'),
+      src = posterURL(n.id);
+    img.src = src;
+    img.hidden = !src;
+    $('svNextUpName').textContent = `${SHORT_NAME[n.id] || n.title}, ${n.date.slice(0, 4)}`;
+  }
+  nextUp.hidden = false;
+}
+nextUp.onclick = () => tour && (showNextUp(false), tourNext());
 function tourTick(t) {
+  if (tour) showNextUp(t > 0.8);
   if (!tour || t < 1 || tour.timer) return;
   host.playing = false; // hold the last frame for a moment; the run would otherwise start over
   setPlayBtn(false);
@@ -1434,6 +1452,7 @@ function tourNext() {
   if (!tour || !cur) return;
   clearTimeout(tour.timer);
   tour.timer = 0;
+  showNextUp(false);
   if (tour.i + 1 < ORDER.length) {
     tour.i++;
     openScene(ORDER[tour.i].id, null, true);
@@ -1445,6 +1464,7 @@ function endTour(finished) {
   if (!tour) return;
   clearTimeout(tour.timer);
   tour = null;
+  showNextUp(false);
   tourEl.hidden = true;
   if (host) host.onTick = null;
   if (finished) showRecap();
@@ -1468,6 +1488,15 @@ function showRecap() {
   $('svRecapSum').textContent =
     `You watched all ${ORDER.length} events, oldest first: ${w('test')} tests that destroyed a satellite, ${w('high')} high-altitude events (a nuclear explosion and a rocket launch), ` +
     `${w('attack')} attacks that leave satellites in orbit and ${w('near')} cases of satellites flying close to others.`;
+  // The law line: every number below is counted from the scenes and the data (each scene's date, and the date of the law it is tied to).
+  const yrs = ORDER.filter((s) => s.related && byId[s.related]).map((s) => ({ s, y: (parse(byId[s.related].start) - parse(s.date)) / (365.25 * 864e5) })),
+    after = yrs.filter((x) => x.y > 0).map((x) => x.y),
+    before = yrs.length - after.length,
+    num = (n) => NUM[n] || String(n),
+    span = (y) => (y < 1 ? `${Math.round(y * 12)} month${Math.round(y * 12) === 1 ? '' : 's'}` : `${y.toFixed(1)} years`);
+  $('svRecapLaw').textContent =
+    `${num(yrs.length).replace(/^./, (m) => m.toUpperCase())} of them are tied to a law or policy on the timeline. In ${num(after.length)} the law followed the event, after ${span(Math.min(...after))} at the quickest and ${span(Math.max(...after))} at the slowest` +
+    (before ? `; in ${num(before)} the related law, an expert manual, came first.` : '.');
   $('svRecapList').innerHTML = ORDER.map((s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`).join('');
   recapEl.hidden = false;
   setStatus('The tour is over. Here is what you saw.');
@@ -1478,6 +1507,7 @@ recapEl.addEventListener('click', (e) => {
   if (b) return openScene(b.dataset.id);
   if (e.target.closest('#svRecapAgain')) return startTour();
   if (e.target.closest('#svRecapClose')) return closeScene();
+  if (e.target.closest('#svRecapQuiz')) return closeScene(); // the link then scrolls to the quiz
   if (e.target.closest('a[href^="#"]')) closeScene(); // the link then scrolls to the chart
 });
 

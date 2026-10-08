@@ -30,6 +30,7 @@
     <div class="view" id="sceneView" role="group" aria-label="Picture for this scene, drawn for illustration" aria-describedby="sceneCaption sceneSteps">
       <div class="illus"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><span class="full">Drawn for illustration.
         Orbit heights are squeezed to fit.</span><span class="short">Drawn for illustration</span></div>
+      <button class="sv-nextup" id="svNextUp" type="button" hidden aria-live="polite"><img alt="" width="96" height="54"><span class="nu-t"><span class="nu-h">Next up</span><span class="nu-n" id="svNextUpName"></span></span></button>
       <div class="sv-state" id="sceneState" hidden>
         <div class="sv-orb" aria-hidden="true"><svg class="ico" focusable="false"><use href="#i-info"/></svg></div>
         <p id="sceneStateTxt"></p>
@@ -77,6 +78,7 @@
       <div class="sv-recap-in">
         <h2 id="svRecapH" tabindex="-1">What you saw</h2>
         <p class="sv-recap-sum" id="svRecapSum"></p>
+        <p class="sv-recap-law" id="svRecapLaw"></p>
         <ol class="sv-recap-list" id="svRecapList" aria-label="Watch one again"></ol>
         <p class="sv-recap-h">See them on the charts</p>
         <p class="sv-recap-links">
@@ -86,7 +88,8 @@
           <a class="btn" href="#lag">How long the law took</a>
         </p>
         <p class="sv-recap-acts">
-          <button class="btn primary" id="svRecapAgain" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-replay"/></svg>Watch the tour again</button>
+          <a class="btn primary" id="svRecapQuiz" href="#quizBand"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg>Test yourself: which came first?</a>
+          <button class="btn" id="svRecapAgain" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-replay"/></svg>Watch the tour again</button>
           <button class="btn" id="svRecapClose" type="button">Close</button>
         </p>
       </div>
