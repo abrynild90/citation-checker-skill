@@ -767,7 +767,7 @@ export class GLHost {
     let last = performance.now();
     const loop = (now) => {
       this.raf = requestAnimationFrame(loop);
-      const dt = Math.min(0.1, (now - last) / 1000);
+      const dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); // never negative: a slow first frame (the frame's own time is older than `last`) must not rewind the scene
       last = now;
       if (this.playing && !this.dragging) {
         let t = this.t + dt / this.sim.cfg.duration;
