@@ -9,7 +9,7 @@ const ARM_TAG = { tag: 'Arm drawn for illustration (SWF does not describe it)', 
 export const SJ21_TUG = {
   id: 'sj21-tug',
   date: '2022-01-21',
-  title: 'SJ-21 pulls a defunct satellite out of the geostationary belt (2022)',
+  title: 'China’s SJ-21 tows a dead satellite into a higher orbit (2022)',
   shells: [],
   duration: 24,
   caption:

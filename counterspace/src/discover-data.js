@@ -30,9 +30,9 @@ export const SHORT = {
   gnss: 'Baltic jamming',
   viasat: 'Viasat cyberattack',
   laser: 'MIRACL laser',
-  'sj21-tug': 'SJ-21 tow',
+  'sj21-tug': 'Dead-satellite tow',
   rpo: 'Close approaches',
-  spaceplanes: 'Spaceplanes',
+  spaceplanes: 'Reusable craft',
 };
 
 // Which kind of event each scene shows, and what a neighbour of the same kind is called.
