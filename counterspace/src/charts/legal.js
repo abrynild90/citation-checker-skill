@@ -141,7 +141,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   const page = !EXPORTING && el.id === 'legalSvg',
     // On phones the band becomes a sideways-scrolling strip (desktop layout at 1100 px), scrolled to the recent cluster.
     strip = isPhoneNow() && !zoom && !EXPORTING && el.id === 'legalSvg',
-    compact = legalCompact && !isPhoneNow() && !EXPORTING && !zoom;
+    compact = legalCompact && !isPhoneNow() && !EXPORTING && !zoom,
+    // On a window of 950 px or less the pinned strip gives up its names (they show on hover and focus) and keeps one thin row of symbols, so it takes about 65 px
+    tight = compact && innerHeight <= 950;
   if (page) drawLawMini();
   if (page) drawOverview(strip);
   if (page) {
@@ -173,7 +175,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       : L.x;
   const FS = 13,
     PITCH = compact ? 14 : 17,
-    TP = compact ? 12 : strip ? 21 : 31, // vertical distance between the rows that crowded symbols are stacked in
+    TP = tight ? 10 : compact ? 12 : strip ? 21 : 31, // vertical distance between the rows that crowded symbols are stacked in
     SEP = compact ? 18 : 24, // symbols closer than this (in px) go into the next row; each keeps its true date on the axis
     GS = compact ? 0.7 : 1,
     OFF0 = 22; // first label row, below the line
@@ -337,7 +339,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   }
   // Sticky (compact) band: short names sit under the line where they fit; symbols that do not fit keep the hover and focus card.
   const cLabels = [];
-  if (compact) {
+  if (compact && !tight) {
     const p2 = new Placer({ x0: 2, x1: W - M.r + 2, y0: -999, y1: 999 }); // labels stop at the end of the axis
     pts
       .slice()
@@ -359,7 +361,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         }
       });
   }
-  const yMark = compact ? TP * Math.max(maxT, 2) + 10 : // the pinned strip keeps one height whatever the window shows
+  const yMark = compact ? TP * Math.max(maxT, 2) + (tight ? 6 : 10) : // the pinned strip keeps one height whatever the window shows
      Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + (strip ? 20 : 28)),
     dnSpace = !compact && maxDn >= 0 ? OFF0 + maxDn * PITCH + 8 : 0;
   // Negotiation periods: bars in rows below the symbol line (and below any labels hanging under it), each named just above its bar.
@@ -379,10 +381,10 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       d._a = a;
       d._b = b;
     });
-  const laneP = compact ? 8 : 26,
-    lane0 = yMark + (compact ? 20 : Math.max(32, dnSpace + 26));
-  const yAx = lane0 + (compact ? (Math.max(lanes.length, 2) - 1) * laneP + 8 : lanes.length ? (lanes.length - 1) * laneP + 14 : 8),
-    H = yAx + (compact ? 23 : 38);
+  const laneP = tight ? 5 : compact ? 8 : 26,
+    lane0 = yMark + (tight ? 10 : compact ? 20 : Math.max(32, dnSpace + 26));
+  const yAx = lane0 + (compact ? (Math.max(lanes.length, 2) - 1) * laneP + (tight ? 6 : 8) : lanes.length ? (lanes.length - 1) * laneP + 14 : 8),
+    H = yAx + (tight ? 18 : compact ? 23 : 38);
   const svg = d3
     .select(el)
     .append('svg')
