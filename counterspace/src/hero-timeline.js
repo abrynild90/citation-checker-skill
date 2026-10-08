@@ -72,6 +72,14 @@ export function mountHero(fontsReady, actions = {}) {
     label = replay.querySelector('span'),
     icon = replay.querySelector('use');
   let sweepT = 0;
+  // The cue under the picture ("Point at any dot or tick ...") shows once the sweep is over, and goes for good after the first dot or tick is pointed at or focused.
+  const cue = document.getElementById('heroCue');
+  let cueGone = false;
+  const cueOn = () => !cueGone && cue?.classList.add('on');
+  const cueOff = () => {
+    cueGone = true;
+    cue?.classList.remove('on');
+  };
   const skipMode = (on) => {
     const name = on ? 'Skip' : 'Replay';
     label.textContent = name;
@@ -90,7 +98,7 @@ export function mountHero(fontsReady, actions = {}) {
     clearTimeout(sweepT);
     skipMode(true);
     sweepT = setTimeout(() => {
-      if (!drawn?.sweep || !drawn.sweep.run(() => (cap.classList.remove('live'), skipMode(false)))) skipMode(false);
+      if (!drawn?.sweep || !drawn.sweep.run(() => (cap.classList.remove('live'), skipMode(false), cueOn()))) (skipMode(false), cueOn());
     }, after);
   };
   let first = true;
@@ -100,11 +108,12 @@ export function mountHero(fontsReady, actions = {}) {
     stopAnims();
     stopSweep();
     drawn = build(stage);
-    mountHits(stage, drawn, actions);
+    mountHits(stage, drawn, { ...actions, pointed: cueOff });
     loadEmbeddedEarth().then((ok) => ok && drawn && paintEarth(drawn));
     if (animate && !STILL) play();
     // once, after the first paint, at the top of the page: the thesis shows itself without a pointer
     if (first && !STILL && scrollY < 160) runSweep(900);
+    else if (first) cueOn(); // no sweep to wait for
     first = false;
   };
   // The picture appears finished (every dot and tick at once); the replay button runs the history as an animation, then the links.
@@ -891,6 +900,7 @@ function mountHits(stage, S, actions) {
   // out quickly, and a card that is fading out cannot be touched, so nothing ghosts.
   let fadeT = 0;
   const show = (h) => {
+    actions.pointed?.(); // the first card of the visit: the "Point at any dot or tick" cue has done its work
     stopHide();
     clearTimeout(fadeT);
     clearTimeout(switchT);
