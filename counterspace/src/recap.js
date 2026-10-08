@@ -29,6 +29,21 @@ const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eigh
 // How many pairs the records link, in a word ("six").
 export const pairWord = () => WORD[D.lag_pairs.pairs.length] || String(D.lag_pairs.pairs.length);
 
+const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+// Which of the pairs have a point in the sky to draw a line from: the ones whose weapon has a reported altitude.
+const undrawn = () => D.lag_pairs.pairs.filter((p) => byId[p.event]?.altitude_km == null);
+// One honest sentence about the picture: how many of the pairs are drawn on it (`drawn`, counted from the picture itself) and why the rest are not. '' when all are.
+export function drawnNote(drawn) {
+  const all = D.lag_pairs.pairs.length,
+    rest = all - drawn,
+    word = (n) => WORD[n] || String(n);
+  if (rest <= 0 || drawn <= 0) return '';
+  const jam = undrawn().length === rest && undrawn().every((p) => /jamming|^ew_/.test(byId[p.event]?.category || '')),
+    one = rest === 1,
+    what = jam ? (one ? 'a jamming campaign' : 'jamming campaigns') : one ? 'a pair' : 'pairs';
+  return `${cap(word(drawn))} of the ${pairWord()} ${drawn === 1 ? 'is' : 'are'} drawn on the picture; the other ${word(rest)} ${one ? 'is' : 'are'} ${what}, which ${one ? 'has' : 'have'} no point in the sky.`;
+}
+
 // One row per pair: the weapon on the left, the law on the right, and between them a dashed link whose length follows the wait.
 export function recapLinks() {
   return (

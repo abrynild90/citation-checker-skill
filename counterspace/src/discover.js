@@ -3,7 +3,7 @@
 // Needs: scene-ui.js (openScene, ORDER), posters.js, discover-data.js. Provides: mountDiscover().
 // ============================================================================
 import { REDUCED, esc } from './app.js';
-import { pairWord, recapLine, recapLinks } from './recap.js';
+import { drawnNote, pairWord, recapLine, recapLinks } from './recap.js';
 import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
@@ -188,7 +188,7 @@ function openPairs(focus = true) {
   if (!c) return;
   document.getElementById('hdH').textContent = `The ${pairWord()} pairs our records link`;
   document.getElementById('hdLinks').innerHTML = recapLinks();
-  document.getElementById('hdLine').textContent = recapLine();
+  document.getElementById('hdLine').textContent = `${recapLine()} ${drawnNote(revealCapacity())}`.trim();
   c.hidden = false;
   placePairs();
   c.classList.remove('in');
