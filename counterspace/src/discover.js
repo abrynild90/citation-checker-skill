@@ -2,8 +2,8 @@
 // discover.js: the scene gallery and "Surprise me". Pictures load at once (they are embedded in the page), so the strip is never blank.
 // Needs: scene-ui.js (openScene, ORDER), posters.js, discover-data.js. Provides: mountDiscover().
 // ============================================================================
-import { D, REDUCED, byId, esc, parse } from './app.js';
-import { gap, yearsBetween } from './links.js';
+import { REDUCED, esc } from './app.js';
+import { recapLine, recapLinks } from './recap.js';
 import { ORDER, openScene, startTour } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
@@ -87,8 +87,11 @@ export function mountDiscover() {
   });
 }
 
-// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13"; at 13 of 13 it becomes a one-line payoff and the main button says where to go.
+// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13". At 13 of 13, when the last scene is closed, the page returns to the top and
+// a card above the buttons shows the real pairs as links, the plain line and where to go next (unless the tour's own closing slide just showed them).
 // Everything is counted from the scenes opened in this visit and from the linked pairs in the data; nothing is stored.
+let pending = false,
+  shown = false;
 function heroSeen() {
   const el = document.getElementById('heroSeen'),
     go = document.getElementById('heroGo'),
@@ -102,7 +105,35 @@ function heroSeen() {
     el.textContent = `Seen ${n} of ${STRIP.length} scenes`;
     return;
   }
-  const waits = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start))),
-    say = (y) => `${gap(y).num} ${gap(y).unit}`;
-  el.textContent = `You have seen all ${STRIP.length}. In every pair our records link, the law came later: after ${say(Math.min(...waits))} to ${say(Math.max(...waits))}.`;
+  el.innerHTML = `You have seen all ${STRIP.length} scenes. <button type="button" class="hs-again">Show what you found</button>`;
+  if (!shown) pending = true;
 }
+function showDone() {
+  const card = document.getElementById('heroDone');
+  if (!card) return;
+  shown = true;
+  pending = false;
+  document.getElementById('hdLinks').innerHTML = recapLinks();
+  document.getElementById('hdLine').textContent = recapLine();
+  card.hidden = false;
+  if (innerWidth >= 640) card.style.bottom = Math.round(card.parentElement.getBoundingClientRect().bottom - document.getElementById('start').getBoundingClientRect().top) + 'px';
+  card.classList.remove('in');
+  void card.offsetWidth;
+  card.classList.add('in');
+  scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+  document.getElementById('hdH').focus({ preventScroll: true });
+}
+function hideDone() {
+  const card = document.getElementById('heroDone');
+  if (card) card.hidden = true;
+}
+document.addEventListener('cs:closed', () => pending && showDone());
+document.addEventListener('cs:recap', () => ((shown = true), (pending = false)));
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#hdClose')) {
+    hideDone();
+    document.getElementById('heroGo')?.closest('a')?.focus({ preventScroll: true });
+  } else if (e.target.closest('.hs-again')) showDone();
+  else if (e.target.closest('#heroDone a')) hideDone();
+});
+document.addEventListener('keydown', (e) => e.key === 'Escape' && !document.getElementById('heroDone')?.hidden && hideDone());

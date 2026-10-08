@@ -2248,7 +2248,7 @@
 .overlay .sv-nextup .nu-n { font: 500 15px/1.3 var(--serif); }
 .overlay .sv-nextup:hover { border-color: var(--accent); background: var(--surface-2); }
 .overlay .sv-nextup:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.overlay .sv-recap-law { margin: 0; max-width: 40em; font: 400 17px/1.55 var(--sans); color: var(--muted); }
+.overlay .sv-recap-line { margin: 0; max-width: 40em; font: 400 17px/1.55 var(--sans); color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .overlay .sv-nextup { animation: none; } }
 
 /* ---------- Wide window (1500 px and up): the story opens with a "Did you know" line, and the foot of the column rests at the bottom of it */
@@ -2278,3 +2278,4 @@
 .overlay .sv-lawcard .lc-acts { margin-top: var(--s-2); }
 .overlay .sv-lawcard .lc-when { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .overlay .sv-lawcard .lc-when .gap-pill { margin: 0; }
+.overlay .sv-recap-links2 { width: 100%; }

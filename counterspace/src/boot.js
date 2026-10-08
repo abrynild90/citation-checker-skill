@@ -13,7 +13,7 @@ import { drawLegal, drawLegalKey, legalOff, legalScroll } from './charts/legal.j
 import { hooks } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
-import { ORDER, closeScene, exportStill, host, openScene, startTour } from './scene-ui.js';
+import { ORDER, closeScene, exportStill, host, openScene, showRecap, startTour } from './scene-ui.js';
 import { mountHero } from './hero-timeline.js';
 import { EARTH_URL, earthReady } from './scenes/earth.js';
 import { exportSVG } from './export.js';
@@ -252,6 +252,7 @@ window.__cs = {
   openScene,
   showTab,
   startTour,
+  showRecap,
   closeScene,
   exportStill,
   memory: () => host?.memory(),
