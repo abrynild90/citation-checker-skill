@@ -65,7 +65,8 @@ export function mountHero(fontsReady, actions = {}) {
   replay.hidden = STILL;
   writeText(stage);
   writeGlance();
-  let lastW = 0;
+  let lastW = 0,
+    lastH = 0;
   // The first sweep draws each real link (a weapon, a dashed line, the wait, the law) one after another; the button becomes "Skip" while it runs.
   const cap = replay.closest('.hero-cap'),
     label = replay.querySelector('span'),
@@ -95,6 +96,7 @@ export function mountHero(fontsReady, actions = {}) {
   let first = true;
   const draw = (animate) => {
     lastW = stage.clientWidth;
+    lastH = stage.clientHeight;
     stopAnims();
     stopSweep();
     drawn = build(stage);
@@ -118,11 +120,14 @@ export function mountHero(fontsReady, actions = {}) {
     runSweep(SWEEP_MS + 350);
   });
   let rz = 0;
-  addEventListener('resize', () => {
-    if (stage.clientWidth === lastW) return;
+  const again = () => {
+    if (stage.clientWidth === lastW && Math.abs(stage.clientHeight - lastH) < 24) return;
     clearTimeout(rz);
     rz = setTimeout(() => draw(false), 150);
-  });
+  };
+  addEventListener('resize', again);
+  // the picture takes the height the rest of the first screen leaves: when that changes (the 13 of 13 card opens or closes), it is drawn again to fit
+  if (window.ResizeObserver) new ResizeObserver(again).observe(stage);
   addEventListener('beforeprint', () => (stopAnims(), stopSweep()));
 }
 

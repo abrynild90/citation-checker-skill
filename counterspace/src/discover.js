@@ -163,6 +163,7 @@ function showDone() {
   document.getElementById('hdLinks').innerHTML = recapLinks();
   document.getElementById('hdLine').textContent = recapLine();
   card.hidden = false;
+  card.closest('.hero')?.classList.add('has-done');
   card.classList.remove('in');
   void card.offsetWidth;
   card.classList.add('in');
@@ -173,6 +174,7 @@ function showDone() {
 function hideDone() {
   const card = document.getElementById('heroDone');
   if (card) card.hidden = true;
+  card?.closest('.hero')?.classList.remove('has-done');
 }
 document.addEventListener('cs:closed', () => pending && showDone());
 document.addEventListener('cs:reward', () => heroSeen());
