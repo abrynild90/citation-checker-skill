@@ -81,7 +81,7 @@ a.sp-go>.ico:last-child{transition:transform var(--dur-2) var(--ease)}
   .hero-figure{margin:0}
   .stage{height:clamp(496px,calc(92vh - 72px - 64px - 24px),716px)}
   .hero-cap{padding:var(--s-3) var(--edge) 0}
-  .hero-notes{padding-left:var(--edge);padding-right:var(--edge);max-width:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-7)}
+  .hero-notes{padding-left:var(--edge);padding-right:var(--edge);max-width:none;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-7)}
   .hero-notes>p{max-width:var(--measure)}
   .hero-more{max-width:var(--measure)}
   .hero-notes .start{flex:1 0 100%;flex-direction:row;align-items:center;gap:var(--s-5);padding-bottom:var(--s-4)}
@@ -98,3 +98,13 @@ a.sp-go>.ico:last-child{transition:transform var(--dur-2) var(--ease)}
 }
 @media print{.hero-cap .btn{display:none}}
 
+
+/* If the chart library cannot load, the headline and the start links stay and a plain message takes the picture's place; buttons that need the charts are hidden. */
+.cdn-fail{display:none}
+.no-cdn .cdn-fail{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-4);margin:0;padding:var(--s-5) var(--gutter) 0;font:500 18px/1.5 var(--sans);color:var(--text)}
+@media (min-width:900px){.no-cdn .cdn-fail{padding-inline:var(--edge)}}
+.no-cdn .stage{height:0}
+.no-cdn .hero-cap{display:none}
+@media (min-width:900px){.no-cdn .stage{height:350px}}
+.no-cdn .start-path li:last-child{display:none}
+.no-cdn :is(#tourBtn,#tourBtn2,#surpriseBtn,#surpriseBtn2,#heroReplay,.scenes-tools,.posters,.rail){display:none!important}

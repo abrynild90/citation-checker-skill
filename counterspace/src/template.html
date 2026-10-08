@@ -65,6 +65,8 @@
           <button class="btn small" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
             href="#i-replay"/></svg><span>Replay</span></button>
         </figcaption>
+        <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Check your connection and reload.<button class="btn small" type="button" onclick="location.reload()"><svg
+          class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Reload</button></p>
         <div class="sr" id="heroAlt"></div>
       </figure>
       <div class="hero-notes">
@@ -336,7 +338,8 @@
 <script id="cs-land" type="application/json">/*__LAND__*/</script>
 <script id="cs-earth" type="application/json">/*__EARTH__*/</script>
 <script id="cs-posters" type="application/json">/*__POSTERS__*/</script>
-<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" onerror="document.documentElement.classList.add('no-cdn')"></script>
+<script>addEventListener('load',function(){if(typeof d3==='undefined')document.documentElement.classList.add('no-cdn')})</script>
 <script type="module">
 /*__APP__*/
 </script>

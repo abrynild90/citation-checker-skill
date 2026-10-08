@@ -936,7 +936,7 @@ function staticMode(on) {
   if (on) {
     staticTxt.textContent = REDUCED
       ? 'Animation is off on this device, so this is a still diagram.'
-      : 'The 3D view could not start, so this is a still diagram. Your browser may have 3D switched off.';
+      : 'The 3D view could not load, so this is a still diagram. Check your connection and try again; your browser may also have 3D switched off.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
