@@ -9,7 +9,6 @@
 .hero-text{margin-top:var(--s-3);animation:rise var(--dur-hero) var(--ease) 90ms both}
 .hero-text .lede{max-width:var(--measure);color:var(--muted);font-size:var(--fs-lede)}
 @media (max-width:639px){.hero-figure{margin-top:var(--s-3)}}
-@media (max-width:639px){.hero-cap .btn{width:var(--h);padding:0}.hero-cap .btn span{display:none}.hero-cap{position:relative;padding-top:var(--s-3);padding-right:calc(var(--gutter) + 52px);min-height:64px}.hero-cap .btn{position:absolute;top:8px;right:var(--gutter);background:rgba(7,11,22,.72)}}
 
 
 /* the picture: a full-bleed drawing; the caption row sits under it */
@@ -19,11 +18,12 @@
 .hero-cap{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-3) var(--gutter) 0}
 .hero-cap p{margin:0;max-width:72ch;font:400 14px/1.5 var(--sans);color:var(--muted)}
 .hero-cap .btn{flex:none}
+@media (max-width:639px){.hero-cap .btn{width:var(--h);padding:0}.hero-cap .btn span{display:none}.hero-cap{position:relative;padding-top:var(--s-3);padding-right:calc(var(--gutter) + 52px);min-height:64px}.hero-cap .btn{position:absolute;top:8px;right:var(--gutter);background:rgba(7,11,22,.72)}}
 /* One row of actions under the picture: the whole first impression is the picture and these four ways in */
 .hero-actions{grid-area:acts;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-3);padding:var(--s-4) var(--gutter) 0;animation:rise var(--dur-hero) var(--ease) 420ms both}
 .hero-actions .btn.quiet{padding-inline:var(--s-3)}
 @media (max-width:639px){.hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-2)}.hero-actions .btn{min-width:0;padding-inline:10px;white-space:nowrap;font-size:15px}
-  .hero-actions .btn.primary{grid-column:1/-1}}
+  .hero-actions .btn.primary,.hero-actions .btn.quiet{grid-column:1/-1}}
 
 /* The picture answers to a pointer and the arrow keys: an invisible layer of buttons sits over it, and a small card names the dot or tick and offers the 3D scene. */
 .ht-layer{position:absolute;left:0;right:0;top:0;z-index:1;overflow:hidden}
