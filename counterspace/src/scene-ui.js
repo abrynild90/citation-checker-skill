@@ -499,7 +499,7 @@ function togglePair(which) {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
     pairBodies[k].hidden = !on;
-    if (on) anchorNote(pairBodies[k]);
+    if (on) pairBodies[k].scrollIntoView({ block: 'nearest', behavior: 'auto' });
   });
 }
 Object.keys(pairBtns).forEach((k) => (pairBtns[k].onclick = () => togglePair(pairBodies[k].hidden ? k : null)));
@@ -1195,9 +1195,15 @@ function seeLawOnTimeline(byKeyboard) {
   const id = cur?.related;
   if (!id) return;
   closeScene();
+  showLawOnTimeline(id, byKeyboard);
+}
+// The same arrival for the hero's "See it on the timeline" button: the page scrolls to the chapter heading with the strip under it, the law's symbol is ringed
+// and flashes, and the card opens only for a keyboard user.
+export function showLawOnTimeline(id, byKeyboard) {
   const m = document.querySelector(`#legalSvg [data-id="${id}"]`);
   if (!m) return;
   $('lawHead')?.scrollIntoView({ block: 'start', behavior: 'auto' });
+  hooks.legalScroll?.(); // the strip and the zoom panel settle for the new place at once, not on the next scroll event
   m.classList.add('hl', 'flash-hl');
   m.focus({ preventScroll: true });
   if (!byKeyboard) hideCard();
@@ -1571,4 +1577,5 @@ addEventListener('resize', () => {
   }, 200);
 });
 hooks.openScene = openScene;
+hooks.showLaw = showLawOnTimeline;
 hooks.prefetchEarth = prefetchEarth;

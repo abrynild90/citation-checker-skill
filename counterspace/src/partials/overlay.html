@@ -55,6 +55,8 @@
             <button class="sv-pbtn" id="svAboutBtn" type="button" aria-expanded="false" aria-controls="svAboutBody">About this picture</button>
             <button class="sv-pbtn" id="svNextBtn" type="button" aria-expanded="false" aria-controls="sceneNext">Where to go next</button>
           </div>
+          <div class="sv-pbody" id="svAboutBody" hidden><p id="sceneScale"></p></div>
+          <div class="sv-pbody sv-next" id="sceneNext" hidden><div class="sv-next-links" id="nextLinks"></div></div>
           <div class="story-foot" id="sceneFoot">
             <p class="sv-src" id="sceneSrc"></p>
             <div class="aside-law" id="asideLaw">
@@ -63,9 +65,7 @@
             </div>
           </div>
         </div>
-        <!-- these three open over the story column (never inside it), so opening one cannot push the steps around while the scene plays -->
-        <div class="sv-pbody" id="svAboutBody" hidden><p id="sceneScale"></p></div>
-        <div class="sv-pbody sv-next" id="sceneNext" hidden><div class="sv-next-links" id="nextLinks"></div></div>
+        <!-- the related-law card opens over the story column (never inside it); the two notes under "About this picture" open in the column under their row, pushing only the source line and the related-law button down -->
         <div class="sv-pbody sv-lawcard" id="lawCard" role="region" aria-label="Related law" hidden></div>
       </div>
       <div class="sv-srcrow" id="sceneSrcLine">

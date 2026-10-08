@@ -2199,6 +2199,7 @@
 .overlay .sv-pbtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .overlay .sv-pbody { margin: var(--s-1) 0 0; padding: var(--s-3) var(--s-4); border-radius: var(--r-2); background: var(--surface-2); }
 .overlay .sv-pbody[hidden] { display: none; }
+.overlay .story-scroll > .sv-pbody { margin: var(--s-1) 0 var(--s-2); border: 1px solid var(--line); animation: sv-pop var(--dur-3) var(--ease) both; }
 .overlay .sv-pbody p { margin: 0; max-width: 36em; font: 400 13.5px/1.55 var(--sans); color: var(--muted); }
 .overlay .sv-pbody .sv-next-links { padding: 0; }
 @media (pointer: coarse) { .overlay .sv-pbtn { min-height: 44px; } }

@@ -118,6 +118,26 @@ nameThemeButton();
   addEventListener('load', reveal);
 }
 
+// An address that names the timeline strip (#legalBand) cannot be scrolled to natively: the strip is sticky, and the charts below it are drawn after the first
+// jump, so the browser lands a whole chapter too far down. The charts are drawn first, then the page scrolls to the chapter heading, where the strip sits just
+// beneath it; it is repeated once the fonts and images have settled, unless the reader has already scrolled.
+{
+  let moved = false;
+  ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
+  const toBand = (again) => {
+    if (location.hash !== '#legalBand' || (again === true && moved)) return;
+    hooks.drawRest?.();
+    const head = document.getElementById('lawHead');
+    if (head && (again !== true || Math.abs(head.getBoundingClientRect().top) > 3)) (head.scrollIntoView({ block: 'start', behavior: 'auto' }), hooks.legalScroll?.());
+  };
+  addEventListener('hashchange', () => (moved = false, toBand()));
+  addEventListener('load', () => {
+    toBand();
+    document.fonts?.ready.then(() => toBand(true));
+    setTimeout(() => toBand(true), 700);
+  });
+}
+
 // Segmented controls: the raised thumb slides to the chosen button. Without script the chosen button carries the raised look itself.
 function placeThumb(seg) {
   const on = seg.querySelector('[aria-pressed="true"],[aria-selected="true"]');
@@ -194,7 +214,7 @@ fontsReady.then(() => {
   watchSegs(); // the chart controls exist now and their words have their final font
 });
 // The hero picture is drawn from the page's own data and the embedded Earth image; no 3D library is involved.
-mountHero(fontsReady, { openScene });
+mountHero(fontsReady, { openScene, showLaw: (id, kb) => hooks.showLaw?.(id, kb) });
 mountDiscover();
 mountQuiz();
 fillTakeaways();

@@ -977,7 +977,14 @@ function mountHits(stage, S, actions) {
       pinned = false;
       actions.openScene?.(b.dataset.scene, b);
     }
-    if (ev.target.closest('a')) hide(true);
+    const a = ev.target.closest('a');
+    if (a?.getAttribute('href') === '#legalBand' && active?.k === 'law') {
+      // the same arrival as the scene's related-law card: scroll, ring the law's symbol, flash it
+      ev.preventDefault();
+      const id = active.id;
+      hide(true);
+      actions.showLaw?.(id, ev.detail === 0);
+    } else if (a) hide(true);
   });
   group.addEventListener('focusin', (ev) => {
     const i = btns.indexOf(ev.target);
