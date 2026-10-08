@@ -1567,11 +1567,29 @@ export function showRecap() {
   setStatus('The tour is over. Here is what you saw.');
   $('svRecapH').focus();
 }
-// a soft fade at the foot of the slide's body while more of it lies below (the "Revisit" list opened on a short window)
+// While more of the slide's body lies below (the "Revisit" block opened on a short window): a soft fade at its foot and a small button that says how many
+// of the scene and chart links are still out of sight and takes the reader down to them.
 const recapBody = recapEl.querySelector('.sv-recap-body'),
-  recapMore = () => recapBody.classList.toggle('more', recapBody.scrollTop + recapBody.clientHeight < recapBody.scrollHeight - 6);
+  recapCue = $('svRecapCue'),
+  recapMore = () => {
+    const edge = recapBody.getBoundingClientRect().bottom - 2,
+      below = recapBody.lastElementChild.getBoundingClientRect().bottom > edge + 2, // content of the body (not its padding) still out of sight
+      hidden = below ? [...recapBody.querySelectorAll('.sv-recap-more[open] button[data-id], .sv-recap-more[open] .sv-recap-links a')].filter((n) => n.getBoundingClientRect().bottom > edge).length : 0;
+    recapBody.classList.toggle('more', below);
+    recapCue.hidden = !below;
+    if (below) $('svRecapCueTxt').textContent = hidden ? `${hidden} more below` : 'More below';
+  };
 recapBody.addEventListener('scroll', recapMore, { passive: true });
-recapEl.querySelector('.sv-recap-more').addEventListener('toggle', () => requestAnimationFrame(recapMore));
+const recapDetails = recapEl.querySelector('.sv-recap-more');
+// opening the block brings it to the top of the slide, so the scenes and the chart links are in view at once
+recapDetails.addEventListener('toggle', () => {
+  if (recapDetails.open) {
+    const top = recapDetails.getBoundingClientRect().top - recapBody.getBoundingClientRect().top + recapBody.scrollTop - 8;
+    recapBody.scrollTo({ top: Math.max(0, top), behavior: REDUCED ? 'auto' : 'smooth' });
+  }
+  requestAnimationFrame(recapMore);
+});
+recapCue.addEventListener('click', () => recapBody.scrollBy({ top: Math.round(recapBody.clientHeight * 0.7), behavior: REDUCED ? 'auto' : 'smooth' }));
 addEventListener('resize', recapMore);
 recapEl.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-id]');
