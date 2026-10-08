@@ -814,8 +814,9 @@ function legalScrollMain() {
   const pat = document.getElementById('pattern'),
     ex = document.getElementById('explore'),
     bh = band.offsetHeight + 24,
+    exOver = !!ex && ex.getBoundingClientRect().bottom < innerHeight * 0.7, // the chart section has been read to its end: the sources and the footer are what is on screen
     exAligned = !!ex && ex.dataset.years === '1' && ex.getBoundingClientRect().top < bh;
-  band.classList.toggle('off', !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (tr.bottom < band.offsetHeight + 120 && tr.top < 0)));
+  band.classList.toggle('off', !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (exOver && tr.top < 0)));
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).
   const topY = document.getElementById('bandTop').getBoundingClientRect().top,
