@@ -8,10 +8,10 @@ import { hooks } from './shared.js';
 
 // years: the chart uses the shared year axis, so the pinned law strip above it lines up. svg: the box the chart is drawn into.
 const TABS = [
-  { id: 'chartC', svg: 'svgC', years: true },
-  { id: 'chartR', svg: 'svgR', years: true },
-  { id: 'chartB', svg: 'svgB', years: false },
-  { id: 'lag', svg: 'svgL', years: false },
+  { id: 'chartC', svg: 'svgC', years: true, name: 'Jamming, lasers and cyber' },
+  { id: 'chartR', svg: 'svgR', years: true, name: 'Close approaches' },
+  { id: 'chartB', svg: 'svgB', years: false, name: 'Who can do what' },
+  { id: 'lag', svg: 'svgL', years: false, name: 'How long the law took' },
 ];
 const $ = (id) => document.getElementById(id);
 let bar,
@@ -68,6 +68,18 @@ export function mountExplore() {
   if (!bar || !explore) return;
   const btns = [...bar.querySelectorAll('[role="tab"]')];
   bar.hidden = false;
+  // The tabs scroll away on a tall chart, so each panel ends with the way to the next one.
+  TABS.forEach((t, i) => {
+    const next = TABS[(i + 1) % TABS.length],
+      row = document.createElement('p');
+    row.className = 'xnext';
+    row.innerHTML = `<button class="btn small" type="button" data-next="${next.id}"><span>${i === TABS.length - 1 ? 'Back to' : 'Next chart:'} ${next.name}</span><svg class="ico" aria-hidden="true"><use href="#i-${i === TABS.length - 1 ? 'arrow-up' : 'next'}"/></svg></button>`;
+    row.querySelector('button').addEventListener('click', () => {
+      showTab(next.id);
+      $(next.id).scrollIntoView({ block: 'start', behavior: 'auto' });
+    });
+    $(t.id).append(row);
+  });
   showTab(active);
   btns.forEach((b) => b.addEventListener('click', () => showTab(b.id.slice(4))));
   bar.addEventListener('keydown', (e) => {
