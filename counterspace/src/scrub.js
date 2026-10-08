@@ -5,7 +5,8 @@
 // Everything is counted from the same entries the charts draw; nothing is typed in. With reduced motion there is no Play: the slider is moved by hand.
 // Provides: mountScrub(). Registers hooks.scrubVeil, which the chart modules call after a draw so the fog survives every redraw. Needs: app.js, charts/lag.js, links.js.
 // ============================================================================
-import { DOMAIN, KIN, LEGAL, REDUCED, byId, chartScale, D, fmtY, parse } from './app.js';
+import { DOMAIN, EVENTS, KIN, LEGAL, REDUCED, byId, chartScale, D, esc, fmtY, parse } from './app.js';
+import { SHORT } from './discover-data.js';
 import { LAW_WORDS, WORDS } from './charts/lag.js';
 import { gap, yearsBetween } from './links.js';
 import { hooks } from './shared.js';
@@ -41,7 +42,12 @@ hooks.scrubVeil = (svg, x, y0, y1) => {
     .attr('y', y0)
     .attr('height', Math.max(0, y1 - y0));
   g.append('line').attr('class', 'sv-edge').attr('y1', y0).attr('y2', y1);
-  const v = { g, x, svg: svg.node(), W: +svg.attr('width') || 0 };
+  // The fog goes under the notes and labels (they are drawn last), so it can never cut a word in half. Each note carries the x of the thing it names
+  // (data-fx) and is faded as a whole while that thing is still ahead of the slider; notes with no x (the orbit names) stay as they are.
+  const first = svg.node().querySelector('.ann-g, .lbls');
+  if (first) first.parentNode.insertBefore(g.node(), first);
+  svg.selectAll('.above-fog').raise();
+  const v = { g, x, svg: svg.node(), W: +svg.attr('width') || 0, notes: [...svg.node().querySelectorAll('[data-fx]')].map((n) => [n, +n.dataset.fx]) };
   veils.add(v);
   paint(v);
   futureSig = ''; // a redrawn chart has new marks: they are dimmed again
@@ -49,7 +55,10 @@ hooks.scrubVeil = (svg, x, y0, y1) => {
 };
 function paint(v) {
   if (!v.svg.isConnected) return veils.delete(v);
-  if (cut == null) return v.g.style('display', 'none');
+  if (cut == null) {
+    v.notes.forEach(([n]) => n.classList.remove('scrub-future'));
+    return v.g.style('display', 'none');
+  }
   const [r0, r1] = v.x.range(),
     px = Math.max(r0, Math.min(r1, v.x(new Date(cut)))); // the left gutter (the altitude numbers) is never fogged
   v.g.style('display', null);
@@ -58,6 +67,7 @@ function paint(v) {
     .attr('x', px)
     .attr('width', Math.max(0, v.W - px));
   v.g.select('.sv-edge').attr('x1', px).attr('x2', px);
+  v.notes.forEach(([n, fx]) => n.classList.toggle('scrub-future', fx > px + 0.5));
 }
 // Marks that are still in the fog cannot be pointed at: no card opens for something the slider has not reached.
 function dimMarks() {
@@ -81,12 +91,72 @@ function longest() {
   return rows.reduce((m, r) => (r.years > m.years ? r : m));
 }
 
+// ---------------------------------------------------------------- named events
+// While the slider passes a named event, its caption takes the place of the title for a few seconds (or, with the slider moved by hand, for as long as it rests on
+// that year). The events are the ones the page has a 3D scene for, so the caption can offer to open it; each line is built from the entry's own fields.
+const NAMED = [];
+{
+  const seen = new Set();
+  EVENTS.filter((e) => e.scene_3d && (e.date || e.start))
+    .map((e) => ({ e, t: +parse(e.date || e.start) }))
+    .sort((a, b) => a.t - b.t)
+    .forEach(({ e, t }) => {
+      if (seen.has(e.scene_3d)) return;
+      seen.add(e.scene_3d);
+      NAMED.push({ id: e.scene_3d, t, year: new Date(t).getUTCFullYear(), line: captionLine(e) });
+    });
+}
+function captionLine(e) {
+  const name = SHORT[e.scene_3d] ?? e.system,
+    km = e.altitude_km != null ? `${e.altitude_km.toLocaleString('en-US')} km` : '';
+  if (e.type === 'nuclear' && km) return `${name}: a nuclear explosion in space, at ${km}`;
+  if (e.type === 'destructive' && km) return `${name}: a test that destroyed a satellite, at ${km}`;
+  if (e.type === 'apogee_only' && km) return `${name}: a rocket that rose to about ${km}, with no target`;
+  return name;
+}
+const CAP_HOLD = 3200; // how long a caption stays while the slider keeps moving
+let capTimer = 0,
+  capId = null,
+  lastCut = T0;
+function showCap(n, ms) {
+  if (capId === n.id) return;
+  capId = n.id;
+  capEl.innerHTML = `<span class="yr-year">${n.year}</span>${esc(n.line)}<a href="#scenes" data-scene="${esc(n.id)}">Watch in 3D</a>`;
+  capEl.hidden = false;
+  titleEl.hidden = true;
+  clearTimeout(capTimer);
+  if (ms) capTimer = setTimeout(function tick() {
+    if (capEl.matches(':hover, :focus-within')) return void (capTimer = setTimeout(tick, 1200)); // being read or about to be pressed: it stays
+    hideCap();
+  }, ms);
+}
+function hideCap() {
+  clearTimeout(capTimer);
+  capId = null;
+  capEl.hidden = true;
+  titleEl.hidden = false;
+}
+// playing: a caption pops as the slider crosses the event; by hand: the caption belongs to the year the slider rests on
+function captionFor(prev, now) {
+  if (finale) return hideCap();
+  if (playing) {
+    const hit = NAMED.filter((n) => n.t > prev && n.t <= now).at(-1);
+    if (hit) showCap(hit, CAP_HOLD);
+    return;
+  }
+  const rest = NAMED.find((n) => n.year === year);
+  if (rest) showCap(rest, 0);
+  else hideCap();
+}
+
 // ---------------------------------------------------------------- the control
 let el,
   track,
   thumb,
   fill,
   tally,
+  titleEl,
+  capEl,
   playBtn,
   liveEl,
   gapEl,
@@ -110,7 +180,7 @@ function render(announce) {
   } else tally.textContent = cut == null && !touched ? `1957 to 2026: ${plural(kinT.length, 'test')}, ${plural(lawT.length, 'law')}` : txt;
   el.classList.toggle('is-finale', finale);
   el.classList.toggle('is-on', cut != null);
-  if (announce) liveEl.textContent = finale ? tally.textContent : txt;
+  if (announce) liveEl.textContent = finale ? tally.textContent : capId ? `${txt}. ${NAMED.find((n) => n.id === capId).line}.` : txt;
   veils.forEach(paint);
   dimMarks();
   lightTicks();
@@ -125,6 +195,7 @@ function setYear(y, announce = true) {
   year = Math.max(Y0, Math.min(Y1, Math.round(y)));
   cut = year >= Y1 ? null : yearEnd(year);
   setPlayLabel();
+  captionFor(0, 0);
   render(announce);
 }
 function setFrac(f) {
@@ -138,9 +209,10 @@ function stop() {
   setPlayLabel();
 }
 function setPlayLabel() {
-  playBtn.querySelector('span').textContent = playing ? 'Skip' : finale ? 'Play again' : 'Play';
+  const label = playing ? 'Skip to the end' : finale ? 'Play again from 1957' : 'Play from 1957';
   playBtn.querySelector('use').setAttribute('href', playing ? '#i-next' : finale ? '#i-replay' : '#i-play');
-  playBtn.setAttribute('aria-label', playing ? 'Skip to the end' : finale ? 'Play again from 1957' : 'Play from 1957');
+  playBtn.setAttribute('aria-label', label);
+  playBtn.title = label;
 }
 function showFinale() {
   stop();
@@ -148,6 +220,7 @@ function showFinale() {
   finale = true;
   year = Y1;
   cut = null;
+  hideCap();
   const L = longest();
   gapEl.style.left = frac(+L.a) * 100 + '%';
   gapEl.style.width = (frac(+L.b) - frac(+L.a)) * 100 + '%';
@@ -164,12 +237,15 @@ function play() {
   gapEl.hidden = true;
   playing = true;
   setPlayLabel();
+  lastCut = T0;
   const t0 = performance.now();
   const step = (now) => {
     if (!playing) return;
     const f = Math.min(1, (now - t0) / PLAY_MS);
     cut = T0 + f * (T1 - T0) - 1;
     year = Math.max(Y0, Math.min(Y1, new Date(cut).getUTCFullYear()));
+    captionFor(lastCut, cut);
+    lastCut = cut;
     render(false);
     if (f >= 1) return showFinale();
     raf = requestAnimationFrame(step);
@@ -224,6 +300,8 @@ export function mountScrub() {
   thumb = el.querySelector('.yr-thumb');
   fill = el.querySelector('.yr-fill');
   tally = $('yrTally');
+  titleEl = $('yrTitle');
+  capEl = $('yrCap');
   playBtn = $('yrPlay');
   liveEl = $('yrLive');
   gapEl = el.querySelector('.yr-gap');
@@ -233,6 +311,17 @@ export function mountScrub() {
   addEventListener('resize', align);
   render(false);
   if (REDUCED) playBtn.hidden = true;
+  // when the pinned law strip steps aside, the row takes its place at the very top
+  const band = $('legalBand');
+  if (band) new MutationObserver(() => el.style.setProperty('--yr-top', band.classList.contains('off') ? '0px' : '')).observe(band, { attributes: true, attributeFilter: ['class'] });
+  // "Watch in 3D" in a caption: playback stops where it is, and the scene opens
+  capEl.addEventListener('click', (ev) => {
+    const a = ev.target.closest('a[data-scene]');
+    if (!a) return;
+    ev.preventDefault();
+    stop();
+    hooks.openScene?.(a.dataset.scene, a);
+  });
 
   playBtn.addEventListener('click', () => (playing ? showFinale() : bring(play)));
   // pointer: press or drag anywhere on the line

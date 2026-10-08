@@ -218,7 +218,7 @@ export function drawA(el = document.getElementById('svgA')) {
     .style('fill', 'var(--surface-2)');
   svg
     .append('text')
-    .attr('class', 'band-label')
+    .attr('class', 'band-label above-fog')
     .attr('x', M.l)
     .attr('y', sy - 9)
     .text(phone ? 'Altitude not reported' : 'Altitude not reported: placed by date only');
@@ -328,9 +328,11 @@ export function drawA(el = document.getElementById('svgA')) {
           py = sy2 + ((ey - sy2) * i) / Math.ceil(len / 8);
         pl.add([px - 2, py - 2, px + 2, py + 2], 'L');
       }
-      svg.append('line').attr('class', 'ann-leader').attr('x1', sx).attr('y1', sy2).attr('x2', ex).attr('y2', ey);
-      svg.append('circle').attr('class', 'ann-dot').attr('cx', sx).attr('cy', sy2).attr('r', 2.5);
-      const t = svg.append('text').attr('x', tx).attr('y', ty).attr('text-anchor', anchor);
+      // one group per note: "Scrub through time" fades the whole note (leader, dot and words) when its event is still ahead of the slider, never part of a word
+      const ag = svg.append('g').attr('class', 'ann-g').attr('data-fx', X);
+      ag.append('line').attr('class', 'ann-leader').attr('x1', sx).attr('y1', sy2).attr('x2', ex).attr('y2', ey);
+      ag.append('circle').attr('class', 'ann-dot').attr('cx', sx).attr('cy', sy2).attr('r', 2.5);
+      const t = ag.append('text').attr('x', tx).attr('y', ty).attr('text-anchor', anchor);
       t.append('tspan').attr('class', 'ann').text(t1);
       if (t2) t.append('tspan').attr('class', 'ann-sub').attr('x', tx).attr('dy', 16).text(t2);
       return;
@@ -422,16 +424,16 @@ export function drawA(el = document.getElementById('svgA')) {
       }
       if (placed) {
         pl.add(placed.q);
+        const ng = svg.append('g').attr('class', 'ann-g').attr('data-fx', gx1); // shown once the slider has passed the last of the gaps it names
         gaps.forEach((q) => {
           if (q.x1 - q.x0 > 6 && Math.abs(placed.cxx - gm) < 1)
-            svg
-              .append('path')
+            ng.append('path')
               .attr('d', `M${q.x0},${placed.ty - 22}V${placed.ty - 28}H${q.x1}V${placed.ty - 22}`)
               .style('fill', 'none')
               .style('stroke', 'var(--faint)')
               .attr('aria-hidden', 'true');
         });
-        const tt = svg.append('text').attr('class', 'empty-note').attr('text-anchor', 'middle').attr('x', placed.cxx).attr('y', placed.ty);
+        const tt = ng.append('text').attr('class', 'empty-note').attr('text-anchor', 'middle').attr('x', placed.cxx).attr('y', placed.ty);
         tt.append('tspan').attr('x', placed.cxx).text(l1);
         if (placed.withL2) tt.append('tspan').attr('x', placed.cxx).attr('dy', 16).text(l2);
       }
@@ -453,7 +455,7 @@ export function drawA(el = document.getElementById('svgA')) {
     });
     best ??= { bx: left, ly: ly0, label: labels.at(-1), lw: tw(labels.at(-1), 12, 600) };
     pl.add(pl.textRect(best.bx, best.ly, 'start', best.lw, 13));
-    svg.append('text').attr('class', 'band-label').attr('x', best.bx).attr('y', best.ly).text(best.label);
+    svg.append('text').attr('class', 'band-label above-fog').attr('x', best.bx).attr('y', best.ly).text(best.label);
   });
   addGuide(svg, x, top, sy + stripH, 'A');
   if (!EXPORTING) hooks.scrubVeil?.(svg, x, top, sy + stripH); // "Scrub through time" fogs the years the slider has not reached

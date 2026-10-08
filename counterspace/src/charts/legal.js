@@ -450,10 +450,11 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   // labels and their leaders
   const lg = svg.append('g').attr('class', 'lbls').attr('aria-hidden', 'true');
   const TONE = { normal: ['var(--text)', 'var(--muted)'], soft: ['var(--accent-2)', 'var(--accent-2)'], quiet: ['var(--muted)', 'var(--muted)'] };
-  const putLabel = (g, x0, y0, anchor, name, date, tone) => {
+  const putLabel = (g, x0, y0, anchor, name, date, tone, fx) => {
     const t = g
       .append('text')
       .attr('class', 'lab')
+      .attr('data-fx', fx) // the x of the symbol the label names: "Scrub through time" fades the whole label while that symbol is still ahead of the slider
       .attr('x', x0)
       .attr('y', y0)
       .attr('text-anchor', anchor)
@@ -470,6 +471,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         .attr('x2', d._cx)
         .attr('y1', yMark + off + 3)
         .attr('y2', yMark - d._t * TP - 10)
+        .attr('data-fx', d._cx)
         .style('stroke', 'var(--line-strong)');
     else if (dir === 'dn' && off - FS > 10)
       lg.append('line')
@@ -477,10 +479,11 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         .attr('x2', d._cx)
         .attr('y1', yMark + 10)
         .attr('y2', yMark + off - FS)
+        .attr('data-fx', d._cx)
         .style('stroke', 'var(--line-strong)');
-    putLabel(lg, tx, yMark + off, anchor, name, date, d.soft_law ? 'soft' : 'normal');
+    putLabel(lg, tx, yMark + off, anchor, name, date, d.soft_law ? 'soft' : 'normal', d._cx);
   });
-  cLabels.forEach(({ d, s, tx, anchor }) => putLabel(lg, tx, yMark + 18, anchor, s, '', d.soft_law ? 'soft' : 'normal'));
+  cLabels.forEach(({ d, s, tx, anchor }) => putLabel(lg, tx, yMark + 18, anchor, s, '', d.soft_law ? 'soft' : 'normal', d._cx));
   // negotiation periods: soft rounded bars with a direct label above each
   const sg = svg
     .append('g')
@@ -529,7 +532,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
           if (spot || (force && size === 2)) {
             const [anchor, tx] = spot ?? (d._a + w > W - 6 ? ['end', Math.min(W - 6, d._b)] : ['start', d._a]);
             sp.add(sp.textRect(tx, y, anchor, w, FS));
-            out.push([tx, y, anchor, name]);
+            out.push([tx, y, anchor, name, d._a]);
             done = true;
             break;
           }
@@ -547,7 +550,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       placed = attempt(false);
     }
     if (typeof placed === 'number') placed = attempt(true);
-    placed.forEach(([tx, y, anchor, name]) => putLabel(lg, tx, y, anchor, name, '', 'quiet'));
+    placed.forEach(([tx, y, anchor, name, fx]) => putLabel(lg, tx, y, anchor, name, '', 'quiet', fx));
   }
   bindMark(sg, strip ? null : legalCard, strip ? tapLegal : activate);
   // symbols
