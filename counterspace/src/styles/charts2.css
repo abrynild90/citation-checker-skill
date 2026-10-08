@@ -144,6 +144,11 @@
 .q-foot{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-4);margin-top:var(--s-5);padding-top:var(--s-4);border-top:1px solid var(--line)}
 .q-tally{margin:0 auto 0 0;font:600 17px/1.4 var(--serif);color:var(--text)}
 .q-tally:not(.done){font:400 15px/1.5 var(--sans);color:var(--muted)}
+.q-sum{margin:0 auto 0 0;max-width:var(--measure)}
+.q-sum .q-tally{margin:0}
+.q-pattern{margin:var(--s-1) 0 0;font:400 15px/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) both}
+@keyframes q-rise{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){.q-pattern{animation:none}}
 .q-foot .btn .ico{margin-inline:0 6px}
 .q-foot .btn:last-child .ico{margin:0 0 0 6px}
 @media (prefers-reduced-motion:reduce){.q-opt,.q-mark{transition:none}}

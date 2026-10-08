@@ -5,7 +5,7 @@
 // Two of the four questions are ones where the likely guess is wrong: the cyberattack that came after its rules (Viasat), and the treaty that took
 // 13 months against the jamming that has waited 15 years.
 // ============================================================================
-import { byId, esc, fmtMY, parse } from './app.js';
+import { D, byId, esc, fmtMY, parse } from './app.js';
 import { LAW_WORDS, WORDS, gap, yearsBetween } from './charts/lag.js';
 
 const LAW_PLAIN = {
@@ -29,6 +29,17 @@ const gapText = (y) => {
   const g = gap(y);
   return `${g.num} ${g.unit}`;
 };
+// The pattern the four questions point at, worked out from every linked pair in the lag data: how often the capability came first, and how long the law took.
+function pattern() {
+  const ys = D.lag_pairs.pairs.map((p) => span(p.event, p.law)),
+    first = ys.filter((y) => y > 0).sort((a, b) => a - b);
+  if (!first.length) return '';
+  const odd = QUESTIONS.filter((q) => q.kind === 'order' && when(byId[q.law]) < when(byId[q.ev])).map((q) => evName(q.ev)); // the questions where the rules came first
+  return (
+    `The pattern: the weapon came first in ${first.length} of ${ys.length} pairs, and the law followed after ${gapText(first[0])} to ${gapText(first.at(-1))}.` +
+    (odd.length ? ` The exception: the ${odd.join(' and the ')}, which came after its expert rules.` : '')
+  );
+}
 const mark = '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
 
 // What each question shows: the two options (in display order, flagged right or not) and the sentence that explains the truth.
@@ -82,11 +93,14 @@ export function mountQuiz() {
 </li>`;
   }).join('');
   host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
-  <div class="q-foot"><p class="q-tally" id="qTally" aria-live="polite">Pick an answer in each question. Your guesses are not stored.</p>
+  <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Pick an answer in each question. Your guesses are not stored.</p>
+    <p class="q-pattern" id="qPattern" hidden></p></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
-    <a class="btn small" href="#lag">See all the gaps<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
+    <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
   const tally = host.querySelector('#qTally'),
     again = host.querySelector('#qAgain'),
+    pat = host.querySelector('#qPattern'),
+    gaps = host.querySelector('#qGaps'),
     state = new Array(N).fill(null); // null (open), true (called it) or false
   const sync = () => {
     const done = state.filter((s) => s !== null).length,
@@ -94,6 +108,11 @@ export function mountQuiz() {
     if (!done) tally.textContent = 'Pick an answer in each question. Your guesses are not stored.';
     else tally.textContent = done < N ? `You called ${right} of ${done} so far.` : `You called ${right} of ${N}.`;
     tally.classList.toggle('done', done === N);
+    // all answered: the score is joined by what the four pairs have in common, and the way to the chart that shows every pair becomes the main step
+    pat.textContent = done === N ? pattern() : '';
+    pat.hidden = done !== N || !pat.textContent;
+    gaps.classList.toggle('primary', done === N);
+    gaps.querySelector('span').textContent = done === N ? 'See every gap' : 'See all the gaps';
     again.hidden = !done;
   };
   host.addEventListener('click', (ev) => {
