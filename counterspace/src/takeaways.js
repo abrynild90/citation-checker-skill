@@ -5,6 +5,7 @@
 import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, REDUCED, byId, esc, fmtMY, fmtMonthYear, parse } from './app.js';
 import { LAW_WORDS, WORDS as PAIR_WORDS, gap, yearsBetween } from './charts/lag.js';
 import { capSentence } from './charts/b.js';
+import { recapLinks } from './recap.js';
 
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'],
   word = (n) => WORDS[n] ?? String(n),
@@ -71,6 +72,8 @@ function patBig(waits, longP, g) {
     `<span class="pb-rail"><i class="pb-dot"></i><i class="pb-draw"></i><b class="pb-pill">${esc(g(Math.max(...waits)))} later</b><i class="pb-tick"></i></span>` +
     `<span class="pb-end b"><b>${esc(fmtMY(parse(law.start)))}</b><span>${esc(LAW_WORDS[law.id] ?? law.title)}</span></span>`;
   document.getElementById('pbNote').textContent = `${cap(word(waits.length))} pairs from our records. The line shows the longest wait. This is order in time, not cause.`;
+  // on a wide window the right of the panel carries all the pairs, one dashed line each (the same drawing as the hero's links)
+  document.getElementById('pbPairs').innerHTML = `<p class="pb-ph">Every pair, oldest first</p>${recapLinks()}`;
   box.hidden = false;
   if (!REDUCED && 'IntersectionObserver' in window) {
     box.dataset.armed = '';

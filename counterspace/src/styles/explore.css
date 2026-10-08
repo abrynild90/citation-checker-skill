@@ -97,3 +97,28 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 .explore[data-years="0"] #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
 @media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}
 @media print{.xcards{display:none}}
+
+/* A wide window (1560 px and more): the panel is two columns. The large line and the longest wait stay at the left; the right carries every pair, oldest first, each as a
+   dashed line from the weapon to the law (the drawing the hero uses), so the empty right of the panel says something. */
+.pb-pairs{display:none}
+@media (min-width:1560px){
+  .pat-big{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);column-gap:var(--s-7);align-items:center}
+  .pat-big .pb-num{font-size:clamp(40px,4.3vw,84px)}
+  .pb-pairs{display:block;padding-left:var(--s-6);border-left:1px solid var(--line-strong)}
+  .pb-ph{margin:0 0 var(--s-3);font:600 14px/1.3 var(--sans);color:var(--muted)}
+  .pb-pairs .rc-links{gap:12px}
+  .pb-pairs .rc-links li{grid-template-columns:minmax(0,.85fr) minmax(0,2fr);font-size:14px;line-height:1.3}
+  .pb-pairs .rc-a{color:var(--text)}
+  .pb-pairs .rc-b{flex-basis:180px;max-width:180px;color:var(--accent-2)}
+  .pb-pairs .rc-link{flex-basis:calc((100% - 180px) * var(--k,1))}
+  .pb-pairs .rc-link::before{border-top-color:var(--muted)}
+  .pb-pairs .rc-dot{background:var(--accent);box-shadow:0 0 0 2px var(--surface-2)}
+  .pb-pairs .rc-tick{background:var(--accent-2)}
+  .pb-pairs .rc-pill{border-color:var(--line-strong);background:var(--surface);color:var(--text)}
+  /* each line is drawn in as the panel scrolls into view, one after another (still under reduced motion) */
+  .pat-big[data-armed]:not(.in) :is(.rc-link,.rc-pill){opacity:0}
+  .pat-big[data-armed] .rc-link{transition:opacity 500ms var(--ease) calc(500ms + var(--i,0) * 150ms)}
+  .pat-big[data-armed] .rc-pill{transition:opacity 400ms var(--ease) calc(700ms + var(--i,0) * 150ms)}
+  .pat-big.in .rc-link{animation:rc-draw 700ms var(--ease) both;animation-delay:calc(500ms + var(--i,0) * 150ms)}
+}
+@media (min-width:1560px) and (prefers-reduced-motion:reduce){.pat-big.in .rc-link{animation:none}}
