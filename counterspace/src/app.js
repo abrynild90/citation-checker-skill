@@ -72,7 +72,7 @@ document.getElementById('asof').innerHTML =
   `debris counts as of February 2026. The Center for Strategic and International Studies (CSIS) <i>Space Threat Assessment 2025</i> was consulted ` +
   `for cross-checking; no entry cites it.`;
 
-// The chapter list at the foot of the hero: one sentence of fact per chapter, every number computed from the data.
+// The chapter rail: one sentence of fact per chapter, as its description, every number computed from the data.
 {
   const first = (rows, key) => fmtY(parse(rows.map((r) => r[key]).sort()[0])),
     last = (rows, key) =>
@@ -116,7 +116,7 @@ document.getElementById('asof').innerHTML =
       `${nStates} countries and ${word(caps.length)} kinds of capability, decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}; and ${pairs} milestones with a later legal step, with ${open} that have none in our records.`,
     src: `Where every fact comes from: ${nSources} cited sources, how current the data is, and the rules used to classify each entry.`,
   };
-  document.querySelectorAll('#glance [data-ch]').forEach((li) => {
+  document.querySelectorAll('#rail [data-ch]').forEach((li) => {
     const a = li.querySelector('a');
     a.title = long[li.dataset.ch] || '';
     if (text[li.dataset.ch]) a.setAttribute('aria-description', text[li.dataset.ch]);

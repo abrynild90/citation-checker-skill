@@ -130,7 +130,7 @@ function build(stage) {
   // The words sit in the empty sky at the upper left. The height scale is chosen so the marks of the first decades stay clear below them.
   const rect = stage.getBoundingClientRect(),
     words = wide
-      ? ['.hero-title', '.hero-text .lede', '.hero-text .cta'].map((s) => {
+      ? ['.hero-title', '.hero-text .lede'].map((s) => {
           const node = document.querySelector(s),
             r = node.getBoundingClientRect();
           let dy = 0; // the words rise into place when the page opens: measure them where they will rest, not where they are now
