@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { duplicateIds } from './check_ids.mjs';
 
 const file = path.resolve(process.env.FILE || 'index.html');
 const PORT = +(process.env.PORT || 9310);
@@ -40,6 +41,8 @@ const fail = (m) => {
   bad++;
   console.log('FAIL', m);
 };
+const dupStatic = duplicateIds(fs.readFileSync(file, 'utf8'));
+if (dupStatic.length) fail(`duplicate ids in the built page: ${dupStatic.join(', ')}`);
 try {
   for (const [w, h] of [
     [1440, 900],
@@ -58,6 +61,14 @@ try {
     );
     if (r.sw > r.iw) fail(`${w}: horizontal scroll (${r.sw} > ${r.iw})`);
     if (r.missing.length) fail(`${w}: missing ids ${r.missing.join(', ')}`);
+    const dupIds = () =>
+      page.evaluate(() => {
+        const n = {};
+        document.querySelectorAll('[id]').forEach((e) => (n[e.id] = (n[e.id] || 0) + 1));
+        return Object.keys(n).filter((k) => n[k] > 1);
+      });
+    const dup0 = await dupIds();
+    if (dup0.length) fail(`${w}: duplicate ids in the live page: ${dup0.join(', ')}`);
     if (w === 1440) {
       await page.evaluate((id) => window.__cs.openScene(id), scene);
       await page.waitForTimeout(2500);
@@ -67,6 +78,10 @@ try {
       await page.waitForTimeout(600);
       const closed = await page.evaluate(() => document.getElementById('overlay').getAttribute('aria-hidden'));
       if (closed !== 'true') fail(`scene ${scene} did not close (aria-hidden=${closed})`);
+      const dup1 = await dupIds();
+      if (dup1.length) fail(`${w}: duplicate ids after a scene: ${dup1.join(', ')}`);
+      const yr = await page.evaluate(() => document.getElementById('yrPlay')?.getAttribute('aria-label'));
+      if (yr !== 'Play from 1957') fail(`${w}: the year slider's Play changed after a scene (aria-label=${yr})`);
     }
     await page.close();
     console.log(`${w}x${h} checked`);

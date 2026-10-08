@@ -125,7 +125,7 @@
     <details class="about keybox" id="keyLegal"><summary>How to read this chart</summary>
       <ul data-avoid class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul>
       <p data-avoid class="words-line in-fold"><b>Words on this page:</b> <abbr title="Global navigation satellite system">GNSS</abbr> means satellite navigation such as GPS. ICAO is the International Civil Aviation Organization, the United Nations agency for flight. DA-ASAT means direct-ascent anti-satellite, a missile launched from Earth to hit a satellite. PAROS stands for the prevention of an arms race in outer space.</p></details>
-      <button class="btn small sc-intro" id="scIntro" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Scrub through time</button>
+      <button class="btn small yr-intro" id="yrIntro" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Scrub through time</button>
     </div>
   </div>
   <div id="bandTop" aria-hidden="true" style="height:0"></div>
@@ -162,21 +162,21 @@
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
       </header>
       <p data-avoid class="takeaway" id="tkA"></p>
-      <div class="scrub" id="scrub" role="group" aria-labelledby="scTitle">
-        <div class="sc-top">
-          <button class="btn small sc-play" id="scPlay" type="button" aria-label="Play from 1957"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg><span>Play</span></button>
-          <p class="sc-title" id="scTitle">Scrub through time</p>
-          <p class="sc-tally" id="scTally"></p>
+      <div class="yr-bar" id="yrBar" role="group" aria-labelledby="yrTitle">
+        <div class="yr-top">
+          <button class="btn small yr-play" id="yrPlay" type="button" aria-label="Play from 1957"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg><span>Play</span></button>
+          <p class="yr-title" id="yrTitle">Scrub through time</p>
+          <p class="yr-tally" id="yrTally"></p>
         </div>
-        <div class="sc-rail">
-          <div class="sc-track" id="scTrack" role="slider" tabindex="0" aria-labelledby="scTitle" aria-describedby="scHelp" aria-valuemin="1957" aria-valuemax="2026" aria-valuenow="2026">
-            <i class="sc-fill"></i><span class="sc-ticks" aria-hidden="true"></span>
-            <span class="sc-gap" hidden aria-hidden="true"><i class="sc-gd"></i><b class="sc-gp"></b><i class="sc-gt"></i></span>
-            <i class="sc-thumb"></i>
+        <div class="yr-rail">
+          <div class="yr-track" id="yrTrack" role="slider" tabindex="0" aria-labelledby="yrTitle" aria-describedby="yrHelp" aria-valuemin="1957" aria-valuemax="2026" aria-valuenow="2026">
+            <i class="yr-fill"></i><span class="yr-ticks" aria-hidden="true"></span>
+            <span class="yr-gap" hidden aria-hidden="true"><i class="yr-gd"></i><b class="yr-gp"></b><i class="yr-gt"></i></span>
+            <i class="yr-thumb"></i>
           </div>
         </div>
-        <p class="sr" id="scHelp">Left and right arrow keys move one year, Page Up and Page Down ten years, Home and End go to the ends. Space plays or skips.</p>
-        <p class="sr" id="scLive" role="status" aria-live="polite"></p>
+        <p class="sr" id="yrHelp">Left and right arrow keys move one year, Page Up and Page Down ten years, Home and End go to the ends. Space plays or skips.</p>
+        <p class="sr" id="yrLive" role="status" aria-live="polite"></p>
       </div>
       <div class="svgbox" id="svgA"></div>
       <details class="table refold" id="foldA"><summary>Key, data table and download</summary>

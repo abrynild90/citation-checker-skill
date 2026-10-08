@@ -39,12 +39,17 @@ function pattern() {
   const ys = D.lag_pairs.pairs.map((p) => span(p.event, p.law)),
     first = ys.filter((y) => y > 0).sort((a, b) => a - b);
   if (!first.length) return '';
-  const odd = QUESTIONS.filter((q) => q.kind === 'order' && when(byId[q.law]) < when(byId[q.ev])).map((q) => evName(q.ev)); // the questions where the rules came first
+  // Viasat is not one of the linked pairs (the rules came before the attack, so no later law pairs with it): it is named on its own, as the different case
+  const odd = QUESTIONS.filter((q) => q.kind === 'order' && when(byId[q.law]) < when(byId[q.ev])).map((q) => evName(q.ev));
+  const all = first.length === ys.length,
+    n = NUM[ys.length] ?? String(ys.length),
+    lead = all ? `In the ${n} linked pairs, the weapon came first` : `In ${NUM[first.length] ?? first.length} of the ${n} linked pairs, the weapon came first`;
   return (
-    `The pattern: the weapon came first in ${first.length} of ${ys.length} pairs, and the law followed after ${gapText(first[0])} to ${gapText(first.at(-1))}.` +
-    (odd.length ? ` The exception: the ${odd.join(' and the ')}, which came after its expert rules.` : '')
+    `${lead}, and the law followed after ${gapText(first[0])} to ${gapText(first.at(-1))}.` +
+    (odd.length ? ` The ${odd.join(' and the ')} ${odd.length > 1 ? 'are different cases' : 'is a different case'}: the rules came first.` : '')
   );
 }
+const NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 // The little pair-line: the same drawing as the hero's links (a dot, a dashed gap with the time on it, a tick), drawn in when the answer is given.
 // It repeats what the sentences say, so it is hidden from screen readers.
 const endHTML = (k) => `<i class="ql-end ql-${k}"></i>`;
@@ -114,9 +119,10 @@ function build(q) {
           [eb, lb, yb],
           [ea, la, ya],
         ];
+  // each sentence names the legal step after a colon, so it reads the same whatever the step is called ("Finding by the Assembly...", "Limited Test Ban Treaty")
   const truth =
-    `<b>${esc(evName(longP[0]))}</b> waited for ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
-    `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])} for ${esc(lawName(shortP[1]))}. This is order in time, not cause.`;
+    `<b>${esc(evName(longP[0]))}</b> waited ${gapText(longP[2])} for a legal step: ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
+    `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])}: ${esc(lawName(shortP[1]))} (${esc(fmtMY(when(byId[shortP[1]])))}). This is order in time, not cause.`;
   const top = Math.max(ya, yb),
     one = (e, l, y) => ({
       cap: evName(e),

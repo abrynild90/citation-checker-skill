@@ -41,7 +41,7 @@ export const LAW_WORDS = {
   'icao-2025': 'ICAO Assembly finding',
   'unga-77-41': 'UN General Assembly resolution 77/41',
   'us-moratorium-2022': 'US moratorium on destructive tests',
-  'itu-rrb-2024': 'ITU Radio Regulations Board: grave concern',
+  'itu-rrb-2024': 'ITU Radio Regulations Board’s grave concern',
 };
 const NONE = 'No later legal step in our records';
 const capDate = (r) => parse(r.date || r.start);

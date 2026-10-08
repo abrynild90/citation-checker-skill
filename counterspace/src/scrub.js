@@ -208,26 +208,26 @@ function align() {
 
 function buildTicks() {
   ticksEl.innerHTML =
-    KIN.map((e, i) => `<i class="sc-t kin" style="left:${(frac(kinT[i]) * 100).toFixed(2)}%" data-t="${kinT[i]}"></i>`).join('') +
-    LEGAL.map((l, i) => `<i class="sc-t law" style="left:${(frac(lawT[i]) * 100).toFixed(2)}%" data-t="${lawT[i]}"></i>`).join('');
+    KIN.map((e, i) => `<i class="yr-t kin" style="left:${(frac(kinT[i]) * 100).toFixed(2)}%" data-t="${kinT[i]}"></i>`).join('') +
+    LEGAL.map((l, i) => `<i class="yr-t law" style="left:${(frac(lawT[i]) * 100).toFixed(2)}%" data-t="${lawT[i]}"></i>`).join('');
 }
 // ticks the slider has passed read as counted
 function lightTicks() {
   const t = cut ?? (touched ? yearEnd(year) : Infinity);
-  ticksEl.querySelectorAll('.sc-t').forEach((n) => n.classList.toggle('past', +n.dataset.t <= t));
+  ticksEl.querySelectorAll('.yr-t').forEach((n) => n.classList.toggle('past', +n.dataset.t <= t));
 }
 
 export function mountScrub() {
-  el = $('scrub');
+  el = $('yrBar');
   if (!el) return;
-  track = $('scTrack');
-  thumb = el.querySelector('.sc-thumb');
-  fill = el.querySelector('.sc-fill');
-  tally = $('scTally');
-  playBtn = $('scPlay');
-  liveEl = $('scLive');
-  gapEl = el.querySelector('.sc-gap');
-  ticksEl = el.querySelector('.sc-ticks');
+  track = $('yrTrack');
+  thumb = el.querySelector('.yr-thumb');
+  fill = el.querySelector('.yr-fill');
+  tally = $('yrTally');
+  playBtn = $('yrPlay');
+  liveEl = $('yrLive');
+  gapEl = el.querySelector('.yr-gap');
+  ticksEl = el.querySelector('.yr-ticks');
   buildTicks();
   align();
   addEventListener('resize', align);
@@ -267,7 +267,7 @@ export function mountScrub() {
     if (k === 'Escape' && playing) return (ev.preventDefault(), showFinale());
   });
   // the entry in the chapter's head: bring the slider into place, then play (by hand under reduced motion: the slider goes to 1957 and takes the focus)
-  $('scIntro')?.addEventListener('click', () => {
+  $('yrIntro')?.addEventListener('click', () => {
     bring(() => {
       if (REDUCED) {
         setYear(Y0);
