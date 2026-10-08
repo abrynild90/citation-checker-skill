@@ -25,7 +25,7 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 @media (pointer:coarse){.pat-go{min-height:44px}}
 
 /* the opening statement: the range of the waits in one large line, and the longest pair drawn between its two dates on a quiet tinted panel */
-.pat-big{margin:0 0 var(--s-6);padding:var(--s-7) var(--s-7) var(--s-6);border-radius:var(--r-3);background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--surface-2);border:1px solid var(--line)}
+.pat-big{margin:0 0 var(--s-6);padding:var(--s-6) var(--s-7) var(--s-5);border-radius:var(--r-3);background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--surface-2);border:1px solid var(--line)}
 .pat-big[hidden]{display:none}
 .pb-lead{margin:0 0 var(--s-2);font:500 clamp(17px,1.6vw,20px)/1.4 var(--sans);color:var(--muted)}
 .pb-num{margin:0;font:500 clamp(40px,6.4vw,92px)/1.04 var(--serif);letter-spacing:-.02em;color:var(--text);text-wrap:balance}

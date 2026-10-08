@@ -70,7 +70,7 @@ function patBig(waits, longP, g) {
     `<span class="pb-end a"><b>${esc(fmtMY(from))}</b><span>${esc(PAIR_WORDS[ev.id]?.name ?? ev.system)} begins</span></span>` +
     `<span class="pb-rail"><i class="pb-dot"></i><i class="pb-draw"></i><b class="pb-pill">${esc(g(Math.max(...waits)))} later</b><i class="pb-tick"></i></span>` +
     `<span class="pb-end b"><b>${esc(fmtMY(parse(law.start)))}</b><span>${esc(LAW_WORDS[law.id] ?? law.title)}</span></span>`;
-  document.getElementById('pbNote').textContent = `${cap(word(waits.length))} pairs from our records, each a weapon and the first legal step that came after it. The line shows the longest wait. This is order in time, not cause.`;
+  document.getElementById('pbNote').textContent = `${cap(word(waits.length))} pairs from our records. The line shows the longest wait. This is order in time, not cause.`;
   box.hidden = false;
   if (!REDUCED && 'IntersectionObserver' in window) {
     box.dataset.armed = '';
