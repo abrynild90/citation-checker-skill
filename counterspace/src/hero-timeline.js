@@ -65,7 +65,8 @@ export function mountHero(fontsReady) {
     loadEmbeddedEarth().then((ok) => ok && drawn && paintEarth(drawn));
     if (animate && !STILL) play();
   };
-  fontsReady.then(() => draw(scrollY < innerHeight * 0.4)); // a deep link lands further down: the picture is finished before anyone sees it
+  // The picture appears finished (every dot and tick at once); the replay button runs the history as an animation.
+  fontsReady.then(() => draw(false));
   replay.addEventListener('click', () => {
     stopAnims();
     play();
