@@ -2308,3 +2308,20 @@
 @media (min-width: 901px) {
   .overlay .story-scroll.has-note:not(.expanded) > .sv-steps { flex: none; min-height: 0; }
 }
+
+/* The tour's closing slide on a wide window: the words stand at the left and the six pairs fill the right, so the slide is not a narrow column in a large empty panel */
+@media (min-width: 1500px) {
+  .overlay .sv-recap-in { width: min(1320px, 100%); padding-inline: var(--s-7); }
+  .overlay .sv-recap-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); align-content: start; align-items: start; gap: var(--s-4) 56px; }
+  .overlay .sv-recap-body > * { grid-column: 1; }
+  .overlay .sv-recap-body > #svRecapPairs { grid-column: 2; grid-row: 1 / span 5; padding-top: var(--s-2); }
+  .overlay .sv-recap-sum { font-size: 21px; }
+  .overlay .sv-recap-line { font-size: 18px; }
+  .overlay .sv-recap-links2 .rc-links { gap: 14px; }
+  .overlay .sv-recap-links2 .rc-links li { font-size: 15px; }
+  .overlay .sv-recap-links2 .rc-pill { font-size: 13px; }
+}
+@media (min-width: 1500px) {
+  .overlay .sv-recap-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
+  .overlay .sv-recap-links2 .rc-links li { grid-template-columns: minmax(0, 0.6fr) minmax(0, 2fr); }
+}

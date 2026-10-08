@@ -207,7 +207,7 @@
 .rc-a{text-align:right;color:var(--text)}
 .rc-track{display:flex;align-items:center;min-width:0}
 .rc-b{flex:0 0 190px;max-width:190px;padding-left:10px;color:var(--hero-accent-2)}
-.rc-link{position:relative;display:flex;align-items:center;flex:0 0 calc((100% - 190px) * var(--k,1));height:22px}
+.rc-link{position:relative;display:flex;align-items:center;flex:0 1 max(calc((100% - 190px) * var(--k,1)),calc(var(--hw,64px) * 2 + 40px));min-width:0;height:22px}
 .rc-link::before{content:"";position:absolute;left:4px;right:2px;top:50%;border-top:1.6px dashed rgba(238,242,251,.7)}
 /* the dashed line leaves a gap where the time sits, so it never runs behind the pill (a line behind a pill that is still fading in reads as struck through) */
 .rc-link::before{-webkit-mask-image:linear-gradient(90deg,#000 calc(50% - var(--hw,64px)),transparent calc(50% - var(--hw,64px)),transparent calc(50% + var(--hw,64px)),#000 calc(50% + var(--hw,64px)));mask-image:linear-gradient(90deg,#000 calc(50% - var(--hw,64px)),transparent calc(50% - var(--hw,64px)),transparent calc(50% + var(--hw,64px)),#000 calc(50% + var(--hw,64px)))}
@@ -220,7 +220,7 @@
 @keyframes rc-draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @keyframes rc-pill{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.hero-done.in .rc-link,.sv-recap .rc-link,.hero-done.in .rc-pill,.sv-recap .rc-pill{animation:none}}
-@media (max-width:639px){.rc-links li{grid-template-columns:1fr;gap:4px}.rc-a{text-align:left}.rc-b{flex-basis:45%;max-width:45%}.rc-link{flex-basis:calc((100% - 45%) * var(--k,1))}}
+@media (max-width:639px){.rc-links li{grid-template-columns:1fr;gap:4px}.rc-a{text-align:left}.rc-b{flex-basis:45%;max-width:45%}.rc-link{flex-basis:max(calc((100% - 45%) * var(--k,1)),calc(var(--hw,64px) * 2 + 40px))}}
 
 /* Wide windows: three sentences from the data fill the empty sky at the top right, and the picture is taller. */
 .hero-glance{display:none}
