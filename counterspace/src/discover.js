@@ -1,5 +1,5 @@
 // ============================================================================
-// discover.js: the scene gallery, "Surprise me", and the gentle reveal of the gallery cards as they scroll into view.
+// discover.js: the scene gallery and "Surprise me". Pictures load at once (they are embedded in the page), so the strip is never blank.
 // Needs: scene-ui.js (openScene, ORDER), posters.js, discover-data.js. Provides: mountDiscover().
 // ============================================================================
 import { REDUCED, esc } from './app.js';
@@ -18,13 +18,12 @@ const STRIP = [...ORDER].sort((a, b) => STRIKING.indexOf(a.id) - STRIKING.indexO
 function drawGallery() {
   const grid = document.getElementById('posterGrid');
   if (!grid) return;
-  const tile = `<li class="ptile"><p class="pt-h">Not sure where to start?</p><p class="pt-t">Let the page pick a scene for you.</p><button class="btn primary lg" id="surpriseBtn2" type="button"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg>Surprise me</button></li>`;
-  grid.innerHTML = tile + STRIP.map((s, i) => {
+  grid.innerHTML = STRIP.map((s, i) => {
     const img = posterURL(s.id);
     const fact = esc(FACTS[s.id] || '');
     return `<li class="pcard" style="--i:${i}">
   <button type="button" class="pc-btn" data-id="${esc(s.id)}" aria-labelledby="pn-${esc(s.id)}" aria-describedby="pf-${esc(s.id)}">
-    <span class="pc-pic">${img ? `<img src="${img}" alt="" width="640" height="360" loading="lazy" decoding="async">` : ''}<span class="pc-play" aria-hidden="true"><svg class="ico"><use href="#i-play"/></svg></span><span class="pc-fact" id="pf-${esc(s.id)}"><b>Did you know</b> ${fact}</span></span>
+    <span class="pc-pic">${img ? `<img src="${img}" alt="" width="640" height="360" loading="eager" decoding="${i < 6 ? 'sync' : 'async'}">` : ''}<span class="pc-play" aria-hidden="true"><svg class="ico"><use href="#i-play"/></svg></span><span class="pc-fact" id="pf-${esc(s.id)}"><b>Did you know</b> ${fact}</span></span>
     <span class="pc-year">${esc(yearOf(s))}</span>
     <span class="pc-name" id="pn-${esc(s.id)}">${esc(nameOf(s))}</span>
     <span class="pc-fact-s" aria-hidden="true">${fact}</span>
@@ -46,6 +45,9 @@ function stripControls(grid) {
   const sync = () => {
     prev.disabled = grid.scrollLeft < 4;
     next.disabled = grid.scrollLeft + grid.clientWidth > grid.scrollWidth - 4;
+    // a soft fade on the end that is cut off, so a half-visible card reads as "more this way", never as a mistake
+    grid.classList.toggle('more-l', !prev.disabled);
+    grid.classList.toggle('more-r', !next.disabled);
   };
   const go = (dir) => grid.scrollBy({ left: dir * grid.clientWidth * 0.85, behavior: REDUCED ? 'auto' : 'smooth' });
   prev.onclick = () => go(-1);
@@ -56,27 +58,8 @@ function stripControls(grid) {
   // A card that takes focus (Tab) is scrolled fully into view by the browser; the arrows then catch up through the scroll event.
 }
 
-// Cards slide up a few pixels and fade in the first time they are seen, one after another within a row. With reduced motion, or without
-// IntersectionObserver, they are simply there.
-function reveal() {
-  const cards = [...document.querySelectorAll('.pcard')];
-  if (REDUCED || !('IntersectionObserver' in window)) return;
-  document.documentElement.classList.add('reveal-on');
-  const io = new IntersectionObserver(
-    (es) =>
-      es.forEach((e) => {
-        if (!e.isIntersecting) return;
-        e.target.classList.add('in');
-        io.unobserve(e.target);
-      }),
-    { rootMargin: '0px 0px -8% 0px' },
-  );
-  cards.forEach((c) => io.observe(c));
-}
-
 export function mountDiscover() {
   drawGallery();
-  reveal();
   const go = (e) => {
     const s = pickSurprise(ORDER);
     openScene(s.id, e.currentTarget);
