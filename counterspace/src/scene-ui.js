@@ -13,7 +13,7 @@ import { setGuide } from './ui.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
-import { SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
+import { KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 export let THREE = null,
   host = null,
   glOK = null;
@@ -234,9 +234,11 @@ function syncDots() {
 }
 
 // ---------------------------------------------------------------- open
-export async function openScene(id, originEl) {
+export async function openScene(id, originEl, viaTour) {
   const cfg = SCENES.find((s) => s.id === id);
   if (!cfg) return;
+  if (!viaTour) endTour(false); // choosing a scene by hand ends the tour
+  recapEl.hidden = true;
   clearTimeout(closeTimer);
   const wasOpen = overlay.classList.contains('open'),
     onDot = wasOpen && dotsEl.contains(document.activeElement),
@@ -251,6 +253,7 @@ export async function openScene(id, originEl) {
   document.body.style.overflow = 'hidden';
   setInert(true);
   fillStory(cfg);
+  markSeen(cfg);
   syncDots();
   const sim = buildSim(cfg);
   curSim = sim;
@@ -276,6 +279,7 @@ export async function openScene(id, originEl) {
     setPlayBtn(true);
     buildViews(cfg, sim);
     h.play();
+    if (tour) h.onTick = tourTick; // the tour moves on when the scene has played to its end
     h.handEl && (h.handEl.style.visibility = 'hidden');
     setState(null);
   } else {
@@ -289,6 +293,7 @@ export async function openScene(id, originEl) {
   }
   stillOnly = !h;
   staticMode(!h);
+  if (tour && !h) tour.timer = setTimeout(tourNext, REDUCED ? 12000 : 9000); // a still diagram has no run: it stays up for a while, then the tour moves on
   syncScrub(h ? h.t : 0);
   asideBody.scrollTop = 0;
   panel.scrollTop = 0; // a short window scrolls the whole panel
@@ -446,6 +451,8 @@ function setInert(on) {
 // ---------------------------------------------------------------- close
 export function closeScene() {
   sheet.hidden = true;
+  endTour(false);
+  recapEl.hidden = true;
   if (!cur) return;
   const closing = cur;
   cur = null;
@@ -1344,7 +1351,82 @@ exportBtn.onclick = async () => {
   }
 };
 const tourBtn = $('tourBtn');
-if (tourBtn) tourBtn.onclick = (e) => openScene(ORDER[0].id, e.currentTarget);
+if (tourBtn) tourBtn.onclick = (e) => startTour(e.currentTarget);
+
+// ---------------------------------------------------------------- the tour, and the scenes seen so far
+// The tour plays every scene in date order, each to its end, then moves on; "Stop the tour" is always in the header. After the last scene a short
+// summary says what the reader saw and links back to the charts. Which scenes have been opened is kept in memory only (nothing is stored).
+const seen = new Set(),
+  tourEl = $('svTour'),
+  seenEl = $('svSeen'),
+  recapEl = $('svRecap');
+let tour = null; // { i, timer } while the tour runs
+function markSeen(cfg) {
+  seen.add(cfg.id);
+  seenEl.textContent = `You’ve now seen ${seen.size} of ${ORDER.length} scenes`;
+  tourEl.hidden = !tour;
+  if (tour) $('svTourTxt').textContent = `Tour: scene ${tour.i + 1} of ${ORDER.length}`;
+}
+export function startTour(originEl) {
+  tour = { i: 0, timer: 0 };
+  openScene(ORDER[0].id, originEl, true);
+}
+function tourTick(t) {
+  if (!tour || t < 1 || tour.timer) return;
+  host.playing = false; // hold the last frame for a moment; the run would otherwise start over
+  setPlayBtn(false);
+  tour.timer = setTimeout(tourNext, 1600);
+}
+function tourNext() {
+  if (!tour || !cur) return;
+  clearTimeout(tour.timer);
+  tour.timer = 0;
+  if (tour.i + 1 < ORDER.length) {
+    tour.i++;
+    openScene(ORDER[tour.i].id, null, true);
+  } else {
+    endTour(true);
+  }
+}
+function endTour(finished) {
+  if (!tour) return;
+  clearTimeout(tour.timer);
+  tour = null;
+  tourEl.hidden = true;
+  if (host) host.onTick = null;
+  if (finished) showRecap();
+  else setStatus('The tour has stopped.');
+}
+$('svTourStop').onclick = () => {
+  endTour(false);
+  if (host && cur && !stillOnly && glOK) {
+    host.playing = true; // the scene on screen carries on in a loop, as it does when opened by hand
+    if (host.t >= 1) host.t = 0;
+    setPlayBtn(true);
+  }
+  playBtn.focus();
+};
+// What the 13 scenes are, counted from the same kinds the "Where to go next" row uses.
+const NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
+function showRecap() {
+  const n = (k) => ORDER.filter((s) => KINDS[s.id] === k).length,
+    w = (k) => NUM[n(k)] || String(n(k));
+  const year = (s) => s.date.slice(0, 4);
+  $('svRecapSum').textContent =
+    `You watched all ${ORDER.length} events, oldest first: ${w('test')} tests that destroyed a satellite, ${w('high')} high-altitude events (a nuclear explosion and a rocket launch), ` +
+    `${w('attack')} attacks that leave satellites in orbit and ${w('near')} cases of satellites flying close to others.`;
+  $('svRecapList').innerHTML = ORDER.map((s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`).join('');
+  recapEl.hidden = false;
+  setStatus('The tour is over. Here is what you saw.');
+  $('svRecapH').focus();
+}
+recapEl.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-id]');
+  if (b) return openScene(b.dataset.id);
+  if (e.target.closest('#svRecapAgain')) return startTour();
+  if (e.target.closest('#svRecapClose')) return closeScene();
+  if (e.target.closest('a[href^="#"]')) closeScene(); // the link then scrolls to the chart
+});
 
 // ---------------------------------------------------------------- hero
 // Hero overview uses the same single renderer; it is unloaded whenever a scene opens.

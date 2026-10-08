@@ -90,6 +90,8 @@
         <p class="toc-intro">All the charts share the same years. Start with the law timeline, then read each chart against it.</p>
         <nav aria-label="Chapters">
           <ul class="toc" id="glance">
+            <li data-ch="scenes"><a class="t-name" href="#scenes">3D scenes</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
+              href="#i-arrow-right"/></svg></li>
             <li data-ch="law"><a class="t-name" href="#legalBand">Law and policy</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
               href="#i-arrow-right"/></svg></li>
             <li data-ch="tests"><a class="t-name" href="#chartA">Anti-satellite tests</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
@@ -102,8 +104,6 @@
               href="#i-arrow-right"/></svg></li>
             <li data-ch="lag"><a class="t-name" href="#lag">How long the law took</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
               href="#i-arrow-right"/></svg></li>
-            <li data-ch="scenes"><a class="t-name" href="#scenes">3D scenes</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
-              href="#i-arrow-right"/></svg></li>
             <li data-ch="src"><a class="t-name" href="#sources">Sources and method</a><p class="t-text"></p><svg class="ico t-go" aria-hidden="true"><use
               href="#i-arrow-right"/></svg></li>
           </ul>
@@ -115,6 +115,24 @@
 </header>
 
 <main>
+
+<section class="scenes" id="scenes" aria-labelledby="hScenes">
+  <div class="wrap">
+    <header class="chapter-head scenes-head">
+      <h2 data-avoid id="hScenes">Thirteen events, each in a short 3D scene</h2>
+      <p data-avoid class="lede">Every scene explains one event from the charts further down, in under a minute, with its story and its source. Point at a picture to learn one
+        thing about it, or take the tour: all thirteen play one after another in about four minutes.</p>
+      <div class="tools scenes-tools">
+        <button class="btn primary" id="tourBtn2" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
+        <span class="strip-nav" role="group" aria-label="Move along the scenes">
+          <button class="btn icon" id="stripPrev" type="button" aria-label="Show earlier scenes" disabled><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
+          <button class="btn icon" id="stripNext" type="button" aria-label="Show more scenes"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
+        </span>
+      </div>
+    </header>
+    <ol class="posters" id="posterGrid"></ol>
+  </div>
+</section>
 
 <div id="timeline" tabindex="-1">
   <div class="wrap law-intro" id="law">
@@ -253,16 +271,6 @@
   </div>
 </div>
 
-<section class="scenes" id="scenes" aria-labelledby="hScenes">
-  <div class="wrap">
-    <header class="chapter-head">
-      <h2 data-avoid id="hScenes">Thirteen events, each in a short 3D scene</h2>
-      <p data-avoid class="lede">Every scene explains one event from the charts above, in under a minute, with its story and its source. Point at a picture to learn one thing about it.</p>
-    </header>
-    <ol class="posters" id="posterGrid"></ol>
-  </div>
-</section>
-
 <section class="sources folded" id="sources" aria-labelledby="hS">
   <div class="wrap">
     <header class="chapter-head">
@@ -288,13 +296,13 @@
 
 <nav class="rail" id="rail" aria-label="Chapter progress">
   <ul>
+    <li><a href="#scenes" title="3D scenes" aria-label="3D scenes"><span class="r-lab">3D scenes</span></a></li>
     <li><a href="#legalBand" title="Law and policy" aria-label="Law and policy"><span class="r-lab">Law and policy</span></a></li>
     <li><a href="#chartA" title="Anti-satellite tests" aria-label="Anti-satellite tests"><span class="r-lab">Anti-satellite tests</span></a></li>
     <li><a href="#chartC" title="Jamming, lasers and cyber" aria-label="Jamming, lasers and cyber"><span class="r-lab">Jamming, lasers and cyber</span></a></li>
     <li><a href="#chartR" title="Close approaches" aria-label="Close approaches"><span class="r-lab">Close approaches</span></a></li>
     <li><a href="#chartB" title="Who can do what" aria-label="Who can do what"><span class="r-lab">Who can do what</span></a></li>
     <li><a href="#lag" title="How long the law took" aria-label="How long the law took"><span class="r-lab">How long the law took</span></a></li>
-    <li><a href="#scenes" title="3D scenes" aria-label="3D scenes"><span class="r-lab">3D scenes</span></a></li>
     <li><a href="#sources" title="Sources and method" aria-label="Sources and method"><span class="r-lab">Sources and method</span></a></li>
   </ul>
 </nav>

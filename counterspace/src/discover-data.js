@@ -36,7 +36,7 @@ export const SHORT = {
 };
 
 // Which kind of event each scene shows, and what a neighbour of the same kind is called.
-const KIND = {
+export const KIND = {
   solwind: 'test',
   fengyun: 'test',
   'burnt-frost': 'test',

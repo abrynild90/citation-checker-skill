@@ -10,6 +10,9 @@
       <div class="sv-meta">
         <div class="sv-dots" id="sceneDots" role="group" aria-label="All scenes"></div>
         <span class="sv-count" id="sceneDate" aria-hidden="true"></span>
+        <span class="sv-seen" id="svSeen"></span>
+        <span class="sv-tour" id="svTour" hidden><span class="sv-tour-dot" aria-hidden="true"></span><span id="svTourTxt">Tour</span><button class="btn small" id="svTourStop"
+          type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg>Stop the tour</button></span>
       </div>
       <button class="sv-list-btn" id="scList" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="sceneSheet"><svg class="ico"
         aria-hidden="true" focusable="false"><use href="#i-list"/></svg>All scenes</button>
@@ -69,6 +72,25 @@
         <div class="sl-pop" id="slPop" role="region" aria-label="Source and notes" hidden></div>
       </div>
     </aside>
+
+    <div class="sv-recap" id="svRecap" role="region" aria-labelledby="svRecapH" hidden>
+      <div class="sv-recap-in">
+        <h2 id="svRecapH" tabindex="-1">What you saw</h2>
+        <p class="sv-recap-sum" id="svRecapSum"></p>
+        <ol class="sv-recap-list" id="svRecapList" aria-label="Watch one again"></ol>
+        <p class="sv-recap-h">See them on the charts</p>
+        <p class="sv-recap-links">
+          <a class="btn" href="#chartA">Anti-satellite tests</a>
+          <a class="btn" href="#chartC">Jamming, lasers and cyber</a>
+          <a class="btn" href="#chartR">Close approaches</a>
+          <a class="btn" href="#lag">How long the law took</a>
+        </p>
+        <p class="sv-recap-acts">
+          <button class="btn primary" id="svRecapAgain" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-replay"/></svg>Watch the tour again</button>
+          <button class="btn" id="svRecapClose" type="button">Close</button>
+        </p>
+      </div>
+    </div>
 
     <div class="ctrl" id="sceneCtrl">
     <div class="sv-hint" id="sceneHint" aria-hidden="true">

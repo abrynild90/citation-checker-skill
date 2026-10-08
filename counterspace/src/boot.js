@@ -13,7 +13,7 @@ import { drawLegal, drawLegalKey, legalScroll } from './charts/legal.js';
 import { hooks } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
-import { ORDER, closeScene, exportStill, host, openScene } from './scene-ui.js';
+import { ORDER, closeScene, exportStill, host, openScene, startTour } from './scene-ui.js';
 import { mountHero } from './hero-timeline.js';
 import { EARTH_URL, earthReady } from './scenes/earth.js';
 import { exportSVG } from './export.js';
@@ -62,7 +62,7 @@ nameThemeButton();
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
-    starts = ['timeline', 'chartA', 'chartC', 'chartR', 'chartB', 'lag', 'scenes', 'sources'].map((id) => document.getElementById(id)),
+    starts = ['scenes', 'timeline', 'chartA', 'chartC', 'chartR', 'chartB', 'lag', 'sources'].map((id) => document.getElementById(id)),
     passed = new Map();
   const mark = () => {
     const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
@@ -221,6 +221,7 @@ window.__cs = {
   exportSVG,
   audit,
   openScene,
+  startTour,
   closeScene,
   exportStill,
   memory: () => host?.memory(),

@@ -2209,3 +2209,28 @@
     box-shadow: var(--shadow-2);
   }
 }
+
+/* ---------- The tour pill, the "scenes seen" line and the summary after the tour */
+.overlay .sv-meta { flex-wrap: wrap; row-gap: var(--s-1); }
+.overlay .sv-seen { font: 500 13px/1.3 var(--sans); color: var(--muted); white-space: nowrap; }
+.overlay .sv-seen::before { content: ""; display: inline-block; width: 1px; height: 12px; margin-right: var(--s-3); vertical-align: -1px; background: var(--line-strong); }
+.overlay .sv-tour { display: inline-flex; align-items: center; gap: var(--s-2); padding: 2px 3px 2px 12px; border: 1px solid var(--accent); border-radius: var(--r-pill); background: var(--accent-soft); font: 600 13px/1.3 var(--sans); color: var(--text); }
+.overlay .sv-tour[hidden] { display: none; }
+.overlay .sv-tour-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.overlay .sv-tour .btn.small { --h: 28px; padding: 0 10px 0 8px; gap: 5px; font-size: 13px; }
+.overlay .sv-tour .btn .ico { width: 15px; height: 15px; }
+.overlay .sv-recap { position: absolute; inset: 0; z-index: 12; display: grid; place-items: center; overflow: auto; padding: var(--s-6) var(--s-5); border-radius: 16px; background: var(--bg-2); }
+.overlay .sv-recap[hidden] { display: none; }
+.overlay .sv-recap-in { width: min(780px, 100%); display: grid; gap: var(--s-4); justify-items: start; }
+.overlay .sv-recap h2 { margin: 0; font: 500 clamp(30px, 3.4vw, 42px)/1.15 var(--serif); }
+.overlay .sv-recap h2:focus { outline: none; }
+.overlay .sv-recap-sum { margin: 0; max-width: 40em; font: 400 19px/1.55 var(--serif); color: var(--text); }
+.overlay .sv-recap-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.overlay .sv-recap-list button { appearance: none; min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: transparent; color: var(--text); font: 500 13.5px/1.2 var(--sans); cursor: pointer; }
+.overlay .sv-recap-list button:hover { background: var(--surface-3); border-color: var(--accent); }
+.overlay .sv-recap-list button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.overlay .sv-recap-h { margin: var(--s-2) 0 calc(var(--s-2) * -1); font: 600 15px/1.3 var(--sans); color: var(--muted); }
+.overlay .sv-recap-links, .overlay .sv-recap-acts { margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-3); }
+.overlay .sv-recap-links .btn { color: var(--accent); }
+.overlay .sv-recap-acts { margin-top: var(--s-3); }
+@media (max-width: 760px) { .overlay .sv-seen::before { display: none; } .overlay .sv-recap { padding: var(--s-5) var(--s-4); place-items: start center; } }
