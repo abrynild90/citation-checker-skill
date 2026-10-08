@@ -1432,10 +1432,11 @@ function showNextUp(on) {
   if (!on || !n) return void (nextUp.hidden = true);
   if (nextUp.dataset.id !== n.id) {
     nextUp.dataset.id = n.id;
-    const img = nextUp.querySelector('img'),
+    const pic = nextUp.querySelector('.nu-pic'),
       src = posterURL(n.id);
-    img.src = src;
-    img.hidden = !src;
+    pic.textContent = '';
+    if (src) pic.appendChild(Object.assign(new Image(64, 36), { src, alt: '' }));
+    pic.hidden = !src;
     $('svNextUpName').textContent = `${SHORT_NAME[n.id] || n.title}, ${n.date.slice(0, 4)}`;
   }
   nextUp.hidden = false;
