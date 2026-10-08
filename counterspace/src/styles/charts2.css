@@ -107,7 +107,7 @@
 .ckey .ck{display:inline-flex;align-items:center;gap:6px}
 .ckey i{display:inline-block;width:10px;height:10px;border-radius:50%}
 
-/* "Test yourself: which came first?": its own band after the scene strip. Four cards, a pick commits (the pair locks), the verdict and the real gap are shown
+/* "Test yourself: which came first?": its own band after "What the pattern shows". Four cards, a pick commits (the pair locks), the verdict and the real gap are shown
    in words and in a tick or a cross (never colour alone), and a small tally counts. */
 .quiz-band{border-top:1px solid var(--line);padding:var(--s-6) 0 var(--s-6);scroll-margin-top:16px}
 .quiz-head{margin-bottom:var(--s-4)}

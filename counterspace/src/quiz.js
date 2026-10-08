@@ -1,5 +1,5 @@
 // ============================================================================
-// quiz.js: "Test yourself: which came first?", a short guessing game placed right after the scene strip. Every pair is a real pair from the lag data
+// quiz.js: "Test yourself: which came first?", a short guessing game placed right after "What the pattern shows", which it echoes. Every pair is a real pair from the lag data
 // (data/lag_pairs.json, through byId); every gap is computed from the two dates. Click a side to commit: the choice locks, the page says plainly whether
 // it was right and shows the real gap. A small tally keeps count (nothing is stored). Needs: app.js (data), charts/lag.js (wording and gap format).
 // Two of the four questions are ones where the likely guess is wrong: the cyberattack that came after its rules (Viasat), and the treaty that took

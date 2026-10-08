@@ -65,7 +65,7 @@ nameThemeButton();
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
-    starts = ['scenes', 'quizBand', 'timeline', 'pattern', 'explore', 'sources'].map((id) => document.getElementById(id)),
+    starts = ['scenes', 'timeline', 'pattern', 'quizBand', 'explore', 'sources'].map((id) => document.getElementById(id)),
     passed = new Map();
   const mark = () => {
     const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
