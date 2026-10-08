@@ -161,7 +161,7 @@ function writeGlance() {
     `<p class="hg-t">In our records</p><ul>` +
     `<li>The first test was in <b>${fmtY(parse(first.date))}</b>. The last one that destroyed a satellite was in <b>${fmtMonthYear(parse(LAST_DA))}</b>.</li>` +
     `<li><b>${laws.length}</b> laws and policies, from <b>${fmtY(parse(laws[0].start))}</b> to <b>${fmtY(parse(laws.at(-1).start))}</b>.</li>` +
-    `<li>The longest wait from a weapon to the first later law: <b>${long.num} ${long.unit}</b>.</li></ul>`;
+    `<li>The longest wait from a weapon to the first later law: <b>${long.num}&nbsp;${long.unit}</b>.</li></ul>`;
   box.hidden = false;
 }
 
