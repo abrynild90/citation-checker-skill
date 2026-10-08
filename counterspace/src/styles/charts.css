@@ -466,3 +466,4 @@ details.table>summary{scroll-margin-top:110px}
 .lk-pill{fill:var(--surface);stroke:var(--line-strong);stroke-width:1}
 .lk-tag{fill:var(--text);font:600 12.5px var(--sans);font-variant-numeric:tabular-nums}
 @media print{.link-layer{display:none}}
+.lk-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}

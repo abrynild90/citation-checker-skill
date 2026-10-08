@@ -5,7 +5,7 @@
 // ============================================================================
 import { DOMAIN, KIN, LAST_DA, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
-import { linkText, pairsAt } from './links.js';
+import { linkText, pairsAt, tagSpot } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
@@ -575,13 +575,13 @@ function mountHits(stage, S, actions) {
     } else {
       for (const up of [0, 24, 48, 90]) for (let dx = -320; dx <= 320; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
     }
-    const lk = linksOf(h).flatMap(({ ev, law }) => {
+    const lk = tagOf(h).flatMap(({ ev, law, w, sp }) => {
       const n = Math.max(1, Math.round(Math.hypot(law.px - ev.px, law.py - ev.py) / 16)),
         box = (x, y, hw, hh) => ({ x0: x - hw, x1: x + hw, y0: y - hh, y1: y + hh });
       return [
         box(ev.px, ev.py, 14, 14),
         box(law.px, (law.py + law.y1) / 2, 4, (law.y1 - law.py) / 2),
-        box((ev.px + law.px) / 2, (ev.py + law.py) / 2, 46, 12),
+        box(sp.x, sp.y, w / 2 + 2, 13),
         ...Array.from({ length: n + 1 }, (_, i) => box(ev.px + ((law.px - ev.px) * i) / n, ev.py + ((law.py - ev.py) * i) / n, 3, 3)),
       ];
     });
@@ -613,9 +613,31 @@ function mountHits(stage, S, actions) {
           .filter((q) => q.ev && q.law)
       : [];
   const RING = (h) => (h.e.type === 'nuclear' ? 17 : h.e.type === 'destructive' ? 13 : 11);
+  // Where each pair's time tag sits: slid along the dashed line to the first spot clear of every word in the picture (notes, zone names, year numbers, law
+  // names, the headline); a word it cannot avoid is quietened while the link shows.
+  const tagOf = (h) => {
+    const words = [
+      ...S.avoid,
+      ...[...S.svg.querySelectorAll('text:not(.ht-lk-tag)')].map((n) => {
+        const r = n.getBBox();
+        return { x0: r.x, x1: r.x + r.width, y0: r.y, y1: r.y + r.height, node: n };
+      }),
+    ];
+    return linksOf(h).map(({ p, ev, law }) => {
+      const w = tw(linkText(p.g), 12.5, 600) + 16,
+        sp = tagSpot({ x: ev.px, y: ev.py }, { x: law.px, y: law.py }, w, 22, words, { x0: 0, x1: S.W, y0: 4, y1: S.H - 4 });
+      return { p, ev, law, w, sp };
+    });
+  };
+  let dimmed = [];
+  const undim = () => {
+    dimmed.forEach((n) => n.classList.remove('ht-dim'));
+    dimmed = [];
+  };
   const drawLinks = (h) => {
     S.links.replaceChildren();
-    linksOf(h).forEach(({ p, ev, law }) => {
+    undim();
+    tagOf(h).forEach(({ p, ev, law, w, sp }) => {
       const dx = law.px - ev.px,
         dy = law.py - ev.py,
         d = Math.hypot(dx, dy),
@@ -623,11 +645,9 @@ function mountHits(stage, S, actions) {
       if (d > r0 + 4) el('line', { x1: ev.px + (dx / d) * r0, y1: ev.py + (dy / d) * r0, x2: law.px, y2: law.py, class: 'ht-lk-line' }, S.links);
       if (ev !== h) el('circle', { cx: ev.px, cy: ev.py, r: RING(ev), class: 'ht-ring' }, S.links);
       if (law !== h) el('line', { x1: law.px, x2: law.px, y1: law.py, y2: law.y1, class: 'ht-law-hi' }, S.links).setAttribute('opacity', 0.45);
-      const mx = (ev.px + law.px) / 2,
-        my = (ev.py + law.py) / 2,
-        t = text(S.links, { x: mx, y: my, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g)),
-        w = tw(linkText(p.g), 12.5, 600) + 16;
-      S.links.insertBefore(el('rect', { x: mx - w / 2, y: my - 11, width: w, height: 22, rx: 11, class: 'ht-lk-pill' }), t);
+      const t = text(S.links, { x: sp.x, y: sp.y, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g));
+      S.links.insertBefore(el('rect', { x: sp.x - w / 2, y: sp.y - 11, width: w, height: 22, rx: 11, class: 'ht-lk-pill' }), t);
+      sp.hit.forEach((o) => o.node && (o.node.classList.add('ht-dim'), dimmed.push(o.node)));
     });
   };
   const mark = (h) => {
