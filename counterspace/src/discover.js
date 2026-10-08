@@ -6,6 +6,7 @@ import { REDUCED, esc } from './app.js';
 import { ORDER, openScene, startTour } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
+import { seenScenes } from './shared.js';
 
 const yearOf = (s) => s.date.slice(0, 4);
 // Titles end with the year in brackets; the card shows the year on its own line.
@@ -23,7 +24,7 @@ function drawGallery() {
     const fact = esc(FACTS[s.id] || '');
     return `<li class="pcard" style="--i:${i}">
   <button type="button" class="pc-btn" data-id="${esc(s.id)}" aria-labelledby="pn-${esc(s.id)}" aria-describedby="pf-${esc(s.id)}">
-    <span class="pc-pic">${img ? `<img src="${img}" alt="" width="640" height="360" loading="eager" decoding="${i < 6 ? 'sync' : 'async'}">` : ''}<span class="pc-play" aria-hidden="true"><svg class="ico"><use href="#i-play"/></svg></span><span class="pc-fact" id="pf-${esc(s.id)}"><b>Did you know</b> ${fact}</span></span>
+    <span class="pc-pic">${img ? `<img src="${img}" alt="" width="640" height="360" loading="eager" decoding="${i < 6 ? 'sync' : 'async'}">` : ''}<span class="pc-play" aria-hidden="true"><svg class="ico"><use href="#i-play"/></svg></span><span class="pc-seen" hidden><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Seen</span><span class="pc-fact" id="pf-${esc(s.id)}"><b>Did you know</b> ${fact}</span></span>
     <span class="pc-year">${esc(yearOf(s))}</span>
     <span class="pc-name" id="pn-${esc(s.id)}">${esc(nameOf(s))}</span>
     <span class="pc-fact-s" aria-hidden="true">${fact}</span>
@@ -35,6 +36,18 @@ function drawGallery() {
     if (b) openScene(b.dataset.id, b);
   });
   stripControls(grid);
+  // Scenes already watched wear a small "Seen" tag, and one line says how many (in memory only)
+  const count = document.getElementById('scenesSeen');
+  const sync = () => {
+    grid.querySelectorAll('.pc-btn').forEach((b) => {
+      const on = seenScenes.has(b.dataset.id);
+      b.querySelector('.pc-seen').hidden = !on;
+      b.classList.toggle('seen', on);
+    });
+    if (count) count.textContent = `${seenScenes.size} of ${STRIP.length} scenes seen`;
+  };
+  document.addEventListener('cs:seen', sync);
+  sync();
 }
 
 // The arrows move the strip by about one screenful of cards and switch off at either end; the cards themselves stay the way in for keyboards.

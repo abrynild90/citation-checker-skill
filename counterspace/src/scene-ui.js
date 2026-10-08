@@ -12,7 +12,7 @@ import { renderSVG } from './scenes/svg-fallback.js';
 import { hideCard, legalKindWords, setGuide } from './ui.js';
 import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
-import { hooks } from './shared.js';
+import { hooks, seenScenes } from './shared.js';
 import { revealIn } from './explore.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
 import { FACTS, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
@@ -1423,13 +1423,14 @@ if (tourBtn) tourBtn.onclick = (e) => startTour(e.currentTarget);
 // ---------------------------------------------------------------- the tour, and the scenes seen so far
 // The tour plays every scene in date order, each to its end, then moves on; "Stop the tour" is always in the header. After the last scene a short
 // summary says what the reader saw and links back to the charts. Which scenes have been opened is kept in memory only (nothing is stored).
-const seen = new Set(),
+const seen = seenScenes,
   tourEl = $('svTour'),
   seenEl = $('svSeen'),
   recapEl = $('svRecap');
 let tour = null; // { i, timer } while the tour runs
 function markSeen(cfg) {
   seen.add(cfg.id);
+  document.dispatchEvent(new CustomEvent('cs:seen', { detail: cfg.id }));
   seenEl.textContent = `You’ve now seen ${seen.size} of ${ORDER.length} scenes`;
   tourEl.hidden = !tour;
   if (tour) $('svTourTxt').textContent = `Tour: scene ${tour.i + 1} of ${ORDER.length}`;

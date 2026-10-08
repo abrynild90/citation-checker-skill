@@ -7,6 +7,9 @@
 // ============================================================================
 import { D, byId, esc, fmtMY, parse } from './app.js';
 import { LAW_WORDS, WORDS, gap, yearsBetween } from './charts/lag.js';
+import { SHORT } from './discover-data.js';
+import { openScene } from './scene-ui.js';
+import { seenScenes } from './shared.js';
 
 const LAW_PLAIN = {
   ...LAW_WORDS,
@@ -59,7 +62,7 @@ function build(q) {
       `<b>${esc(a[0])}</b> came first (${esc(fmtMY(a[1]))}). <b>${esc(a[2])}</b> followed <span class="q-gap">${gapText(Math.abs(yearsBetween(a[1], a[3])))}</span> later (${esc(fmtMY(a[3]))}).` +
       (!evFirst ? ' The manual is soft law, so it does not bind anyone.' : '') +
       ` This is order in time, not cause.${note && evFirst ? ' ' + esc(note) : ''}`;
-    return { opts, truth };
+    return { opts, truth, scene: e.scene_3d };
   }
   const [ea, la] = q.a,
     [eb, lb] = q.b,
@@ -73,8 +76,11 @@ function build(q) {
   const truth =
     `<b>${esc(evName(longP[0]))}</b> waited <span class="q-gap">${gapText(longP[2])}</span> for ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
     `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])} for ${esc(lawName(shortP[1]))}. This is order in time, not cause.`;
-  return { opts, truth };
+  return { opts, truth, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
 }
+// After a wrong answer: the scene that shows the event, and whether it has been watched yet (in memory only).
+const watchLabel = (id) => `Watch ${SHORT[id] || 'the scene'}`;
+const watchNote = (id) => (seenScenes.has(id) ? 'watched already' : 'not watched yet');
 
 export function mountQuiz() {
   const host = document.getElementById('quiz');
@@ -134,9 +140,19 @@ export function mountQuiz() {
       o.classList.toggle('wrong', j === k && !ok);
       o.querySelector('.q-t').insertAdjacentHTML('beforeend', b.opts[j].right ? '<span class="sr"> (the right answer)</span>' : '');
     });
-    li.querySelector('.q-out').innerHTML = `<b class="q-verdict ${ok ? 'yes' : 'no'}">${ok ? 'Correct.' : 'Not quite.'}</b> ${b.truth}`;
+    li.querySelector('.q-out').innerHTML =
+      `<b class="q-verdict ${ok ? 'yes' : 'no'}">${ok ? 'Correct.' : 'Not quite.'}</b> ${b.truth}` +
+      (!ok && b.scene
+        ? `<span class="q-watch">Want to see it? <button type="button" class="q-go" data-scene="${esc(b.scene)}"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>` +
+          `${esc(watchLabel(b.scene))}</button> <span class="q-seen">(${watchNote(b.scene)})</span></span>`
+        : '');
     sync();
   });
+  host.addEventListener('click', (ev) => {
+    const w = ev.target.closest('.q-go');
+    if (w) openScene(w.dataset.scene, w);
+  });
+  document.addEventListener('cs:seen', () => host.querySelectorAll('.q-watch').forEach((n) => (n.querySelector('.q-seen').textContent = `(${watchNote(n.querySelector('.q-go').dataset.scene)})`)));
   again.addEventListener('click', () => {
     state.fill(null);
     host.querySelectorAll('.q').forEach((li) => {

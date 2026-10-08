@@ -177,3 +177,12 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 #quoteC .q{display:block;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:15.5px;line-height:1.45}
 #quoteC .by{margin-top:2px}
 @media (min-width:1100px){#chartC .callout-row{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:stretch}}
+
+/* after a wrong answer: the scene that shows the event, as a link inside the sentence */
+.q-watch{display:block;margin-top:var(--s-3);color:var(--text)}
+.q-go{all:unset;display:inline;cursor:pointer;font:600 15px/1.55 var(--sans);color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.22em}
+.q-go:hover{text-decoration-thickness:2px}
+.q-go:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:var(--r-1)}
+.q-go .ico{width:14px;height:14px;margin:0 5px -2px 0}
+.q-watch .q-seen{color:var(--muted);white-space:nowrap}
+@media (pointer:coarse){.q-go{padding:10px 0;display:inline-block}}
