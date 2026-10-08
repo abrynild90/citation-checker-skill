@@ -287,7 +287,7 @@ export function drawB(el = document.getElementById('svgB')) {
       // the figure above the bar, and the range as a quiet second line
       let range = dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : 'no range';
       if (range && range !== 'no range' && !phone && xb - xa >= 100) range = `range ${range}`;
-      if (range && tw(range, 12.5, 400) > xb - xa + (range === 'no range' ? -6 : 14)) range = ''; // a note that would touch the axis is left to the card
+      if (range && tw(range, 13, 400) > xb - xa + (range === 'no range' ? -6 : 14)) range = ''; // a note that would touch the axis is left to the card
       s.append('text')
         .attr('class', 'fig')
         .attr('x', cx)
@@ -317,7 +317,7 @@ export function drawB(el = document.getElementById('svgB')) {
     // the label starts to the right of the 1950s bar, so that bar's focus ring never crosses it
     const lx = Math.max(M.l + 14, bandsX[0][1] + 12),
       lim = Math.max(150, X2020 - lx - 14 - (phone ? 92 : 0)),
-      ls = wrapLines('Earlier decades are reconstructed (not SWF-assessed)', lim, (q) => tw(q, 12.5, 600)),
+      ls = wrapLines('Earlier decades are reconstructed (not SWF-assessed)', lim, (q) => tw(q, 13, 600)),
       t = svg
         .append('text')
         .attr('class', 'panel-label panel-in')
@@ -348,7 +348,7 @@ export function drawB(el = document.getElementById('svgB')) {
     if (phone && i === 0) {
       // the 1950s band is only three years wide: its name sits on a second row so it never touches the 1960s name
       ax.append('text').attr('x', M.l - 2).attr('y', 42).attr('text-anchor', 'start').text(d);
-    } else if ((phone ? i % 2 === 1 : true) && tw(d, 12, 500) <= xb - xa + 14)
+    } else if ((phone ? i % 2 === 1 : true) && tw(d, 13, 500) <= xb - xa + 14)
       ax.append('text')
         .attr('x', (xa + xb) / 2)
         .attr('y', 24)

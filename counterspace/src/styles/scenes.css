@@ -2234,3 +2234,10 @@
 .overlay .sv-recap-links .btn { color: var(--accent); }
 .overlay .sv-recap-acts { margin-top: var(--s-3); }
 @media (max-width: 760px) { .overlay .sv-seen::before { display: none; } .overlay .sv-recap { padding: var(--s-5) var(--s-4); place-items: start center; } }
+
+/* 1800 px and up: a wider viewer and a roomier story column */
+@media (min-width: 1800px) {
+  .overlay .panel { width: min(1680px, 100%); grid-template-columns: minmax(0, 1fr) clamp(480px, 41%, 700px); }
+  .overlay .sv-lede { font-size: 18px; }
+  .overlay.is-static .panel { width: min(1480px, 100%); }
+}

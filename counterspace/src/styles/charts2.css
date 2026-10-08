@@ -8,29 +8,29 @@
 /* ---- the drawings: type roles */
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band{fill:var(--band)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-title{fill:var(--text);font:600 14px var(--sans);letter-spacing:normal}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-gloss{fill:var(--muted);font:400 12.5px var(--sans);letter-spacing:normal}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-gloss{fill:var(--muted);font:400 13px var(--sans);letter-spacing:normal}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 :is(.band-title,.band-gloss,.lbl){paint-order:stroke;stroke:var(--band);stroke-width:4px}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .lbl{fill:var(--text);font:400 13px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .plate{fill:var(--band)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .lbl .who{font-weight:600}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote-box{fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote{fill:var(--text);font:400 17px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote-by{fill:var(--muted);font:400 12.5px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis text{fill:var(--muted);font:500 12px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote-by{fill:var(--muted);font:400 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis text{fill:var(--muted);font:500 13px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 :is(.axis path,.axis line){stroke:var(--line)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .gridline line{stroke:var(--grid)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff line{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:2 3}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff circle{fill:var(--warn)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff text{fill:var(--warn);font:600 12.5px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff text{fill:var(--warn);font:600 13px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .first-note text{fill:var(--muted);font:400 13px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .first-note line{stroke:var(--faint);stroke-width:1.5;stroke-dasharray:.1 5}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .span{stroke-width:3;stroke-opacity:.45}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-swf{fill:var(--accent-soft)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-label{fill:var(--muted);font:600 12.5px var(--sans);letter-spacing:normal}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-label{fill:var(--muted);font:600 13px var(--sans);letter-spacing:normal}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-label .panel-sub{font-weight:400}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis-title{fill:var(--muted);font:500 12.5px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis-title{fill:var(--muted);font:500 13px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .fig{fill:var(--text);font:600 18px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .range{fill:var(--muted);font:400 12.5px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .range{fill:var(--muted);font:400 13px var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .whisker{fill:none;stroke:var(--text);stroke-width:1.6}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .whisker-halo{fill:none;stroke:var(--bg);stroke-width:4.6}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .bar.recon{opacity:.55}
@@ -38,7 +38,7 @@
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .xaxis .domain{stroke:var(--line-strong)}
 :is(#chartC,#chartR,#chartB) svg.k2 .bar{transition:opacity var(--dur-1) var(--ease)}
 :is(#chartC,#chartR,#chartB) svg.k2 :is(.mark:hover,.mark:focus-visible) .bar.recon{opacity:.85}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .zoom-flag{fill:var(--accent-2);font:600 12.5px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .zoom-flag{fill:var(--accent-2);font:600 13px var(--sans)}
 
 /* ---- the drawings: marks. Each mark is a separating outline in the page colour under the painted shape; a soft ring and a slight growth show on hover and focus. */
 :is(#chartC,#chartR,#chartB) svg.k2 .mark{cursor:pointer}
@@ -78,7 +78,7 @@
   :is(#chartC,#chartR) .callout::before{display:none}
   :is(#chartC,#chartR) #quoteC .q{font-size:16px;line-height:1.45}
 }
-:is(#chartR) svg.k2 .dlabel{fill:var(--text);font:600 12.5px var(--sans);paint-order:stroke;stroke:var(--band);stroke-width:4px;stroke-linejoin:round}
+:is(#chartR) svg.k2 .dlabel{fill:var(--text);font:600 13px var(--sans);paint-order:stroke;stroke:var(--band);stroke-width:4px;stroke-linejoin:round}
 :is(#chartB,.xbox) svg.k2 .panel-label.panel-in{paint-order:stroke;stroke:var(--band);stroke-width:4px;stroke-linejoin:round}
 
 /* the zoom notice sits on one line beside the segmented control; the close-approach caution is one line with the rest behind a disclosure */

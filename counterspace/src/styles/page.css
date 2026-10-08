@@ -224,3 +224,14 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .src-fold{margin:0}
 .src-fold>.mcols{margin-top:var(--s-6)}
 #methodBody>.msec-cite,#methodBody>.msec:first-child{margin-bottom:var(--s-6)}
+
+/* 1800 px and up: supporting text steps up with the body so a wide page does not read as small print */
+@media (min-width:1800px){
+  .chapter-head>.lede{font-size:22px}
+  .about,.about>summary,details.table>summary,.note,:is(#chartC,#chartR,#chartB) p.note,.note-line,.hero-notes p,.hero-cap p,.zoom-head p{font-size:15px}
+  .legend,:is(#chartC,#chartR,#chartB) .legend,:is(#chartC,#chartR,#chartB) .legend .kwide,.keynote{font-size:14.5px}
+  table,.legal-list,.toc .t-text,.brand-credit{font-size:15px}
+  .callout{font-size:20px}
+  .toc .t-name{font-size:17px}
+  .btn:not(.small):not(.icon){font-size:15px}
+}

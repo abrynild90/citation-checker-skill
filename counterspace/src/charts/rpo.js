@@ -293,7 +293,7 @@ export function drawR(el = document.getElementById('svgR')) {
     placed.forEach((p) => {
       const t = HEADLINES[p.e.id];
       if (!t) return;
-      const w = tw(t, 12.5, 600),
+      const w = tw(t, 13, 600),
         sameRow = placed.filter((q) => q !== p && Math.abs(q.y - p.y) < 2),
         free = (a, b) => sameRow.every((q) => q.ext[1] < a - 4 || q.ext[0] > b + 4) && !(p.bx != null && p.bx > a && p.bx < b);
       const edge = p.bx != null && p.bx < p.X0 ? p.bx - 14 : p.X0 - 14, // a 3D cube left of the mark pushes the label further left
@@ -326,7 +326,7 @@ export function drawR(el = document.getElementById('svgR')) {
     placed.forEach((p) => {
       const t = HEADLINES[p.e.id];
       if (!t || named.has(p)) return;
-      const w = tw(t, 12.5, 600),
+      const w = tw(t, 13, 600),
         ends = [Math.max(p.X1, p.bx ?? 0) + 4, p.X0 - 10, p.X0 - 14, p.X1 + 40, p.bx != null ? p.bx - 10 : null].filter((v) => v != null);
       const okRow = (a, b, yy) => placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 8 || q.ext[0] > b + 8);
       for (const off of [0, -15, 15, -13, 13, -26, 26, -37, 37]) {

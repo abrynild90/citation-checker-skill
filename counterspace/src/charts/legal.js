@@ -171,7 +171,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
           .domain(ZOOM)
           .range([M.l, W - M.r])
       : L.x;
-  const FS = 12,
+  const FS = 13,
     PITCH = compact ? 14 : 17,
     TP = compact ? 12 : strip ? 21 : 31, // vertical distance between the rows that crowded symbols are stacked in
     SEP = compact ? 18 : 24, // symbols closer than this (in px) go into the next row; each keeps its true date on the axis

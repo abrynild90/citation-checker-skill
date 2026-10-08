@@ -114,7 +114,7 @@ export function drawL(el = document.getElementById('svgL')) {
       .domain([0, MAX_YEARS])
       .range([PAD + 26, W - PAD - ROOM]);
   const TS = 13, // title size
-    NS = 12.5, // note size
+    NS = 13, // note size
     TL = 19, // title line height
     NL = 17;
   const info = LAG.map(pairInfo);
@@ -130,7 +130,7 @@ export function drawL(el = document.getElementById('svgL')) {
   let kx = PAD,
     ky = 14;
   const keyAt = KEY.map(([m, label], i) => {
-    const wd = 24 + tw(label, 12.5, 500) + 20;
+    const wd = 24 + tw(label, 13, 500) + 20;
     if (phone) {
       const at = { m, label, x: PAD + (i % 2) * Math.round((W - 2 * PAD) * 0.46), y: 14 + Math.floor(i / 2) * 24 };
       ky = at.y;

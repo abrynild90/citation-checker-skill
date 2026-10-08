@@ -63,10 +63,10 @@ export function drawC(el = document.getElementById('svgC')) {
     qLH = qSize + 7,
     qW = Math.min(phone ? W - 2 * PADX : 600, HX - INSET - 24),
     qLines = wrapBalanced(QUOTE, Math.max(220, qW), (s) => tw(s, qSize, 400)),
-    byLines = wrapLines(QUOTE_BY, W - INSET - PADX, (s) => tw(s, 12.5, 400)),
+    byLines = wrapLines(QUOTE_BY, W - INSET - PADX, (s) => tw(s, 13, 400)),
     hand = phone ? 'Last destructive test, Nov 2021' : 'Last destructive anti-satellite test, Nov 2021',
-    handW = tw(hand, 12.5, 600),
-    byW = Math.max(...byLines.map((s) => tw(s, 12.5, 400)));
+    handW = tw(hand, 13, 600),
+    byW = Math.max(...byLines.map((s) => tw(s, 13, 400)));
   // The quotation is a callout of its own (a quiet box); the hand-off label sits on a row below it, beside nothing, at the top of its dotted line.
   const BP = 12, // padding inside the callout
     boxX = INSET - BP,
@@ -129,7 +129,7 @@ export function drawC(el = document.getElementById('svgC')) {
   const planHeader = (g) => {
     const avail = Math.min(R - L - 2 * PADX, 760),
       title = wrapBalanced(g.title, avail, (s) => tw(s, titleSize, 600)),
-      gloss = wrapBalanced(g.gloss, avail, (s) => tw(s, 12.5, 400));
+      gloss = wrapBalanced(g.gloss, avail, (s) => tw(s, 13, 400));
     return { title, gloss, h: 18 + title.length * LH + 3 + gloss.length * 17 + 10 };
   };
 

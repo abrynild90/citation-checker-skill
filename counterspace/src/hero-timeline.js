@@ -114,7 +114,7 @@ function build(stage) {
     phone = W < 640,
     wide = W >= 900,
     gutter = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 24,
-    edge = wide ? Math.max(gutter, (W - (document.querySelector('.hero-grid .wrap, .hero-grid')?.getBoundingClientRect().width > 0 && W >= 1700 ? Math.min(1440, W - 480) : 1240)) / 2 + gutter) : gutter,
+    edge = wide ? Math.max(gutter, (W - (document.querySelector('.topbar-in')?.getBoundingClientRect().width || Math.min(1240, W))) / 2 + gutter) : gutter,
     groundH = phone ? 150 : wide ? 165 : 190,
     sag = phone ? 8 : Math.round(Math.min(30, W * 0.02)),
     yL = H - groundH, // the limb at the middle of the picture
@@ -191,7 +191,7 @@ function build(stage) {
   decades.forEach((d) => {
     const cx = x(d),
       yl = String(d.getUTCFullYear()),
-      half = tw(yl, 12, 500) / 2 + 3,
+      half = tw(yl, 13, 500) / 2 + 3,
       cross = named.find((px) => Math.abs(px - cx) < half + 2);
     text(svg, cross === undefined ? { x: cx, y: bandTop + 19, class: 'ht-year-t' } : { x: cross - 6, y: bandTop + 19, class: 'ht-year-t', style: 'text-anchor:end' }, yl);
   });
@@ -294,7 +294,7 @@ function build(stage) {
   const placeZones = () =>
     zones.forEach((z) => {
       for (const t of phone ? [...z.ts].reverse() : z.ts) {
-        const w = tw(t, 12.5, 500);
+        const w = tw(t, 13, 500);
         for (let shift = 0; shift < W; shift += 12)
           for (const where of z.order) {
             const px = phone ? edge + shift : W - edge - shift,
@@ -327,7 +327,7 @@ function build(stage) {
     }
     for (const sp of spots) {
       const n = sp.lines.length,
-        w = Math.max(...sp.lines.map((l) => tw(l, 12.5, 500))),
+        w = Math.max(...sp.lines.map((l) => tw(l, 13, 500))),
         base0 = nuke.py + (sp.line ?? 4) - (sp.line == null ? (n - 1) * 8 : 0),
         box = { x0: sp.al === 'start' ? sp.x : sp.x - w, x1: sp.al === 'start' ? sp.x + w : sp.x, y0: base0 - 13, y1: base0 + (n - 1) * 16 + 3 },
         down = sp.line > 0,

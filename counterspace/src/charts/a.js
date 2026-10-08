@@ -112,8 +112,8 @@ export function drawA(el = document.getElementById('svgA')) {
       (e) => y(e.altitude_km) - (e.fragments_cataloged ? (phone ? 22 : 30) : 14),
     );
   const roomV = Math.min(top + plotH, ...nearX) - top - 14,
-    handoffLines = Math.max(tw(HN, 12, 600), tw(HD, 12)) <= roomV ? [HN, HD] : [HN],
-    handoffLen = Math.max(...handoffLines.map((t, i) => tw(t, 12, i ? 400 : 600)));
+    handoffLines = Math.max(tw(HN, 13, 600), tw(HD, 13)) <= roomV ? [HN, HD] : [HN],
+    handoffLen = Math.max(...handoffLines.map((t, i) => tw(t, 13, i ? 400 : 600)));
   // Zone labels are obstacles too: each takes the longest of its wordings that finds room clear of every mark, its cube icon and every debris bubble,
   // looking near the top of its zone first and as far left as it can.
   const obst = KV.filter((e) => e.altitude_km != null).map((e) => {
@@ -300,7 +300,7 @@ export function drawA(el = document.getElementById('svgA')) {
     const e = byId[id],
       X = x(parse(e.date)),
       Y = y(e.altitude_km),
-      w = Math.max(tw(t1, 13, 600), t2 ? tw(t2, 12.5) : 0);
+      w = Math.max(tw(t1, 13, 600), t2 ? tw(t2, 13) : 0);
     for (const [dx, dy, anchor] of prefs) {
       let tx = X + dx,
         x0 = anchor === 'end' ? tx - w : tx;
@@ -401,7 +401,7 @@ export function drawA(el = document.getElementById('svgA')) {
       const gx0 = Math.min(...gaps.map((q) => q.x0)),
         gx1 = Math.max(...gaps.map((q) => q.x1)),
         gm = (gx0 + gx1) / 2,
-        w = Math.max(tw(l1, 12.5), l2 ? tw(l2, 12.5) : 0),
+        w = Math.max(tw(l1, 13), l2 ? tw(l2, 13) : 0),
         gy = y(32); // the empty lower part of the plot: a calm place for the note, away from the marks
       let placed = null;
       for (const withL2 of l2 ? [true, false] : [false]) {
@@ -441,17 +441,17 @@ export function drawA(el = document.getElementById('svgA')) {
       yMax = Math.min(y(a) - 8, ly0 + depth);
     let best = null;
     labels.forEach((label, vi) => {
-      const lw = tw(label, 12, 600);
+      const lw = tw(label, 13, 600);
       for (let ly = ly0; ly <= Math.max(ly0, yMax); ly += 14)
         for (let bx = left; bx + lw <= W - M.r - 8 && bx < W * 0.7; bx += 4) {
-          const q = pl.textRect(bx, ly, 'start', lw, 12);
+          const q = pl.textRect(bx, ly, 'start', lw, 13);
           if (!pl.free(q, [], 3) || obst.some(([x0, y0, x1, y1]) => x0 < q[2] + 3 && x1 > q[0] - 3 && y0 < q[3] + 2 && y1 > q[1] - 2)) continue;
           const cost = bx - left + (ly - ly0) * 0.8 + vi * 120;
           if (!best || cost < best.cost) best = { bx, ly, label, lw, cost };
         }
     });
     best ??= { bx: left, ly: ly0, label: labels.at(-1), lw: tw(labels.at(-1), 12, 600) };
-    pl.add(pl.textRect(best.bx, best.ly, 'start', best.lw, 12));
+    pl.add(pl.textRect(best.bx, best.ly, 'start', best.lw, 13));
     svg.append('text').attr('class', 'band-label').attr('x', best.bx).attr('y', best.ly).text(best.label);
   });
   addGuide(svg, x, top, sy + stripH, 'A');
@@ -493,7 +493,7 @@ export function drawA(el = document.getElementById('svgA')) {
     return (
       `<circle cx="${mx + 1}" cy="${cy}" r="${r}" style="fill:none;stroke:var(--muted);stroke-dasharray:2 2"/>` +
       `<path d="M${mx + 1},${top}H${mx * 2 + 8}" style="fill:none;stroke:var(--line-strong)"/>` +
-      `<text x="${mx * 2 + 12}" y="${top + 4}" style="fill:var(--muted);font:12px var(--sans)">${d3.format(',')(sz)}</text>`
+      `<text x="${mx * 2 + 12}" y="${top + 4}" style="fill:var(--muted);font:13px var(--sans)">${d3.format(',')(sz)}</text>`
     );
   };
   K.raw(
