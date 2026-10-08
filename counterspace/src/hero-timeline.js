@@ -462,6 +462,7 @@ function build(stage) {
     });
   });
 
+  S.avoid = placed.map((p) => p.box).concat(words); // the notes, zone names and title words: a card never stands on them
   // ---- the time marker: a thin line that moves along the years; it never crosses the words
   const clip = el('clipPath', { id: 'htMarkClip' }, defs),
     hole = words.map((b) => `M${b.x0},${b.y0}H${b.x1}V${b.y1}H${b.x0}Z`).join('');
@@ -524,8 +525,12 @@ function mountHits(stage, S, actions) {
   pop.className = 'ht-pop';
   pop.setAttribute('role', 'region');
   pop.hidden = true;
+  const GRACE = 260; // the card stays this long after the pointer leaves, so the way to its button is never cut short
+  const stopHide = () => (clearTimeout(hideT), (hideT = 0));
   let active = null,
     hideT = 0,
+    switchT = 0,
+    switchFor = null,
     pinned = false;
   const btns = hits.map((h, i) => {
     const b = document.createElement('button');
@@ -544,21 +549,42 @@ function mountHits(stage, S, actions) {
   layer.append(group, pop);
   fig.insertBefore(layer, stage.nextSibling);
 
+  // Where the card stands. Candidates around the point or tick are scored: standing on a note or a zone name costs most, covering a neighbouring dot costs
+  // some, and distance from the point costs a little, so the card sits close (the pointer has a short way to it) yet clear of the words and the crowd.
+  const overlap = (a, b, pad = 0) => a.x0 < b.x1 + pad && a.x1 > b.x0 - pad && a.y0 < b.y1 + pad && a.y1 > b.y0 - pad;
   const place = (h) => {
     const pw = pop.offsetWidth,
       ph = pop.offsetHeight,
       cx = h.px,
-      cy = h.k === 'ev' ? h.py : (h.py + h.y1) / 2;
-    // beside the point (right if there is room, else left), level with it, kept inside the picture and off the phone's edge
-    let x = cx + 22 + pw <= S.W - 8 ? cx + 22 : cx - 22 - pw;
-    let y = cy - ph / 2;
-    if (h.k === 'law') (x = cx - pw / 2), (y = h.py - ph - 16); // a law's card stands in the sky above its tick, clear of the ground labels
+      cy = h.k === 'ev' ? h.py : (h.py + h.y1) / 2,
+      G = 14; // the gap between the point and the card: small, so the pointer crosses it quickly
+    let cands = [];
     if (S.phone) {
-      x = Math.min(Math.max(8, cx - pw / 2), S.W - pw - 8);
-      y = h.k === 'ev' ? (cy + 18 + ph <= S.H - 8 ? cy + 18 : cy - 18 - ph) : S.yL - ph - 6;
+      const x = cx - pw / 2;
+      cands = h.k === 'ev' ? [[x, cy + 18], [x, cy - 18 - ph]] : [[x, S.yL - ph - 6]];
+    } else if (h.k === 'ev') {
+      for (const sh of [0, -40, 40, -80, 80, -120, 120]) cands.push([cx + G + 6, cy - ph / 2 + sh], [cx - G - 6 - pw, cy - ph / 2 + sh]);
+      for (const dx of [0, -70, 70, -140, 140]) cands.push([cx - pw / 2 + dx, cy - ph - G - 4], [cx - pw / 2 + dx, cy + G + 4]);
+    } else {
+      for (const up of [0, 24, 48, 90]) for (let dx = -320; dx <= 320; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
     }
-    pop.style.left = Math.min(Math.max(8, x), S.W - pw - 8) + 'px';
-    pop.style.top = Math.min(Math.max(8, y), S.H - ph - 8) + 'px';
+    let best = null;
+    for (const [rx, ry] of cands) {
+      const x = Math.min(Math.max(8, rx), S.W - pw - 8),
+        y = Math.min(Math.max(8, ry), S.H - ph - 8),
+        R = { x0: x, x1: x + pw, y0: y, y1: y + ph };
+      let cost = Math.abs(x - rx) * 2 + Math.abs(y - ry) * 2; // pushed off its first choice by the picture's edge
+      if (overlap(R, { x0: cx - 5, x1: cx + 5, y0: h.py - 5, y1: h.k === 'ev' ? h.py + 5 : h.y1 }, 0)) cost += 400; // never over its own point
+      for (const o of S.avoid || []) if (overlap(R, o, 2)) cost += 300;
+      for (const o of S.hits) if (o !== h && o.k === 'ev' && overlap(R, { x0: o.px - 7, x1: o.px + 7, y0: o.py - 7, y1: o.py + 7 }, 2)) cost += o.e.type === 'nuclear' ? 200 : 45;
+      for (const o of S.hits) if (o !== h && o.k === 'law' && overlap(R, { x0: o.px - 2, x1: o.px + 2, y0: o.py, y1: o.y1 }, 2)) cost += 30;
+      const dx = Math.max(R.x0 - cx, 0, cx - R.x1),
+        dy = Math.max(R.y0 - cy, 0, cy - R.y1);
+      cost += Math.hypot(dx, dy) * 0.6;
+      if (!best || cost < best.cost) best = { cost, x, y };
+    }
+    pop.style.left = best.x + 'px';
+    pop.style.top = best.y + 'px';
   };
   const mark = (h) => {
     if (h?.k === 'ev') {
@@ -578,29 +604,75 @@ function mountHits(stage, S, actions) {
       S.bar.setAttribute('opacity', 0);
     }
   };
+  // The card shows at once (a short fade, never longer than 120 ms). Moving to another point swaps its words in place without fading again; leaving fades it
+  // out quickly, and a card that is fading out cannot be touched, so nothing ghosts.
+  let fadeT = 0;
   const show = (h) => {
-    clearTimeout(hideT);
+    stopHide();
+    clearTimeout(fadeT);
+    clearTimeout(switchT);
     if (active !== h) {
+      const fresh = pop.hidden || !pop.classList.contains('on');
       active = h;
       pop.innerHTML = popHTML(h);
       pop.hidden = false;
-      pop.classList.remove('on');
       place(h);
-      requestAnimationFrame(() => pop.classList.add('on'));
+      if (fresh) {
+        pop.classList.remove('on');
+        void pop.offsetWidth;
+      }
+      pop.classList.add('on');
       mark(h);
     }
   };
   const hide = (now) => {
-    clearTimeout(hideT);
+    stopHide();
     const go = () => {
+      hideT = 0;
       if (pinned || pop.contains(document.activeElement)) return;
       active = null;
-      pop.hidden = true;
       pop.classList.remove('on');
       mark(null);
+      clearTimeout(fadeT);
+      fadeT = setTimeout(() => !active && (pop.hidden = true), 100);
     };
     if (now) go();
-    else hideT = setTimeout(go, 280);
+    else hideT = setTimeout(go, GRACE);
+  };
+  // The path from the point to its card: every pointer position inside this shape belongs to the journey, so crossing a neighbouring dot on the way
+  // neither swaps the card nor starts it fading. (The convex hull of the point and the card, a little padded.)
+  const onWay = (x, y) => {
+    if (!active || pop.hidden) return false;
+    const h = active,
+      ax = h.px,
+      ay = h.k === 'ev' ? h.py : (h.py + h.y1) / 2,
+      L = pop.offsetLeft - 6,
+      T = pop.offsetTop - 6,
+      R = pop.offsetLeft + pop.offsetWidth + 6,
+      B = pop.offsetTop + pop.offsetHeight + 6;
+    if (x >= L && x <= R && y >= T && y <= B) return true;
+    const pts = [[ax, ay], [L, T], [R, T], [R, B], [L, B]];
+    // convex hull (monotone chain), then a point-in-polygon test with a 10 px margin
+    pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]),
+      lo = [],
+      up = [];
+    for (const q of pts) {
+      while (lo.length > 1 && cr(lo.at(-2), lo.at(-1), q) <= 0) lo.pop();
+      lo.push(q);
+    }
+    for (const q of [...pts].reverse()) {
+      while (up.length > 1 && cr(up.at(-2), up.at(-1), q) <= 0) up.pop();
+      up.push(q);
+    }
+    const hull = lo.slice(0, -1).concat(up.slice(0, -1));
+    for (let i = 0; i < hull.length; i++) {
+      const a = hull[i],
+        b = hull[(i + 1) % hull.length],
+        len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+      if (cr(a, b, [x, y]) / len < -10) return false;
+    }
+    return true;
   };
   // the nearest dot or tick to the pointer, within a small reach (dots are close together in the 1960s)
   const nearest = (ev) => {
@@ -620,13 +692,29 @@ function mountHits(stage, S, actions) {
   };
   layer.addEventListener('pointermove', (ev) => {
     if (ev.pointerType === 'touch' || pinned) return;
-    const h = nearest(ev);
+    if (pop.contains(ev.target)) return void (stopHide(), clearTimeout(switchT)); // on the card: it stays, whatever lies beneath it
+    const r = layer.getBoundingClientRect(),
+      h = nearest(ev),
+      way = onWay(ev.clientX - r.left, ev.clientY - r.top);
     layer.style.cursor = h ? 'pointer' : '';
-    if (h) show(h);
-    else if (!pop.matches(':hover')) hide();
+    if (h === active) return void (stopHide(), clearTimeout(switchT));
+    if (!active || pop.hidden || !pop.classList.contains('on')) return void (h ? show(h) : active && !hideT && hide());
+    // a card is open and the pointer is over something else (or nothing)
+    if (way) return void stopHide(); // on its way to the card: hold everything
+    if (h) {
+      stopHide();
+      if (switchT && switchFor === h) return; // already waiting to switch to this one
+      clearTimeout(switchT);
+      switchFor = h;
+      switchT = setTimeout(() => ((switchT = 0), show(h)), 90); // a short settle, so a glance across a crowded stretch does not flicker the card
+    } else {
+      clearTimeout(switchT);
+      switchT = 0;
+      if (!hideT) hide();
+    }
   });
   layer.addEventListener('pointerleave', (ev) => !pop.contains(ev.relatedTarget) && hide());
-  pop.addEventListener('pointerenter', () => clearTimeout(hideT));
+  pop.addEventListener('pointerenter', () => (stopHide(), clearTimeout(switchT)));
   pop.addEventListener('pointerleave', () => !pinned && hide());
   layer.addEventListener('click', (ev) => {
     if (ev.target.closest('.ht-pop')) return;
