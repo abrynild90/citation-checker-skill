@@ -323,21 +323,53 @@ export function drawL(el = document.getElementById('svgL')) {
     y0 += r.rowH;
   });
   const marks = svg.selectAll('.lagrow');
-  bindMark(marks, lagCard, (p, node, ev) => {
-    const c = byId[p.cap],
-      l = p.law ? byId[p.law] : null,
+  // Selecting a row opens a small panel by it: the weapon, the law it waited for and how long, and "Watch it in 3D" where a scene exists (the scene no longer
+  // opens on the first touch, so a reader can look before leaving the chart).
+  let pick = null,
+    pickNode = null;
+  const closePick = (back) => {
+    pick?.remove();
+    marks.classed('picked hl', false);
+    if (back) pickNode?.focus();
+    pick = pickNode = null;
+  };
+  bindMark(marks, lagCard, (p, node) => {
+    if (pickNode === node) return closePick(false);
+    closePick(false);
+    const { c, l, w, g, lawName } = pairInfo(p),
       s = c.scene_3d && hasScene(c) ? c : l && hasScene(l) ? l : null;
-    if (s) {
-      hideCard();
-      hooks.openScene(s.scene_3d, node);
-    } else
-      openCard(
-        '<div class="ack-line"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Details shown. No 3D explainer for this item.</div>' +
-          lagCard(p),
-        ev,
-        node,
-      );
+    hideCard();
+    pickNode = node;
+    d3.select(node).classed('picked hl', true);
+    pick = document.createElement('div');
+    pick.className = 'lag-pick';
+    pick.setAttribute('role', 'group');
+    pick.setAttribute('aria-label', `${w.name}: details`);
+    pick.innerHTML =
+      `<p class="lp-t">${esc(w.name)}</p>` +
+      (l
+        ? `<p class="lp-w">Waited <b>${g.num} ${g.unit}</b> for the ${esc(lawName)}.</p><p class="lp-d">${esc(fmtMY(capDate(c)))} to ${esc(fmtMY(parse(l.start)))} · ${esc(legalKindWords(l))}</p>`
+        : `<p class="lp-w">${NONE}.</p><p class="lp-d">From ${esc(fmtMY(capDate(c)))}</p>`) +
+      `<div class="lp-acts">${s ? '<button type="button" class="btn small primary lp-3d"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Watch it in 3D</button>' : ''}` +
+      `<button type="button" class="btn small lp-x">Close</button></div>`;
+    el.appendChild(pick);
+    // beside its row: under it, or over it for the last rows, kept inside the chart's width
+    const er = el.getBoundingClientRect(),
+      nr = node.getBoundingClientRect(),
+      ph = pick.offsetHeight,
+      below = nr.bottom - er.top + 4,
+      top = below + ph > el.clientHeight + 8 ? Math.max(4, nr.top - er.top - ph - 4) : below - 10;
+    pick.style.top = top + 'px';
+    pick.style.left = Math.max(8, phone ? 8 : er.width - pick.offsetWidth - 12) + 'px'; // at the right, over the empty end of the next row's track, so no row's words are covered
+    requestAnimationFrame(() => pick?.classList.add('on'));
+    pick.querySelector('.lp-x').onclick = () => closePick(true);
+    const go = pick.querySelector('.lp-3d');
+    if (go) go.onclick = () => hooks.openScene(s.scene_3d, go);
+    (go || pick.querySelector('.lp-x')).focus({ preventScroll: true });
+    pick.addEventListener('keydown', (ev) => ev.key === 'Escape' && (ev.stopPropagation(), closePick(true)));
+    pick.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
+  document.addEventListener('pointerdown', (ev) => pick && !pick.contains(ev.target) && !ev.target.closest?.('.lagrow') && closePick(false), { passive: true });
   rove(marks);
   if (EXPORTING) return;
   // ---- key
