@@ -105,6 +105,8 @@
 .ht-lk-tag{fill:var(--text);font:600 calc(12.5px * var(--htk,1)) var(--sans);font-variant-numeric:tabular-nums;pointer-events:none}
 /* a word the time tag could not avoid is quietened while the link shows */
 .ht-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
+.ht-gone{opacity:0!important;transition:opacity 120ms var(--ease)}
+.ht-lk-dot{fill:var(--hero-accent);stroke:var(--hero-bg);stroke-width:2;paint-order:stroke;pointer-events:none}
 .hp-none{margin-top:var(--s-2)!important;font:500 13px/1.4 var(--sans);color:var(--faint)}
 
 /* A wide window (1600 px and more): the hero's words grow by about a tenth (the picture's own labels follow through --htk) and the empty space under the
@@ -148,7 +150,7 @@
 
 /* The key under the picture says what the marks are, always; while the first sweep draws the links it gives way to the sentence of the pair being drawn. */
 .hero-cap-main{position:relative;flex:1 1 auto;min-width:0}
-.hero-key{display:flex;flex-wrap:wrap;gap:6px var(--s-4);margin:0;padding:0;list-style:none;font:500 14px/1.4 var(--sans);color:var(--muted);transition:opacity 260ms var(--ease)}
+.hero-key{display:flex;flex-wrap:wrap;gap:6px var(--s-4);margin:0;padding:0;list-style:none;font:500 14px/1.4 var(--sans);color:var(--muted);transition:opacity 220ms var(--ease) 240ms}
 .hero-key li{display:inline-flex;align-items:center;gap:8px}
 .hero-key .kg{flex:none;width:24px;height:18px}
 .hero-key .kg.wide{width:40px}
@@ -156,12 +158,17 @@
 .k-ring{fill:none;stroke:var(--hero-accent);stroke-width:1.2;opacity:.7}
 .k-tick{stroke:var(--hero-accent-2);stroke-width:2.4;stroke-linecap:round}
 .k-dash{stroke:var(--text);stroke-width:1.6;stroke-dasharray:4 3;stroke-linecap:round}
-.hero-cap .hero-live{position:absolute;inset:0;margin:0;max-width:none;font:500 14px/1.45 var(--sans);color:var(--text);opacity:0;pointer-events:none;transition:opacity 260ms var(--ease)}
-.hero-cap.live .hero-key{opacity:0}
-.hero-cap.live .hero-live{opacity:1}
+.hero-cap .hero-live{position:absolute;inset:0;margin:0;max-width:none;font:500 14px/1.45 var(--sans);color:var(--text);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 220ms var(--ease),visibility 0s linear 220ms}
+/* the two never show together: going live, the key leaves first and the sentence follows; coming back, the sentence leaves first and the key follows */
+.hero-cap.live .hero-key{opacity:0;transition-delay:0s}
+.hero-cap.live .hero-live{opacity:1;visibility:visible;transition:opacity 220ms var(--ease) 240ms,visibility 0s}
+.hl-go{appearance:none;display:inline-flex;align-items:center;gap:6px;min-height:24px;margin:0 0 0 2px;padding:0;border:0;background:none;color:var(--hero-accent);font:600 14px/1.45 var(--sans);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer;pointer-events:auto}
+.hl-go .ico{width:14px;height:14px}
+.hl-go:hover{text-decoration-thickness:2px}
+.hl-go:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 .hero-cap .hero-cap-main{min-height:2.9em}
-@media (max-width:639px){.hero-key{display:grid;grid-template-columns:1fr 1fr;gap:6px var(--s-3);font-size:13px;line-height:1.3}.hero-key li{align-items:flex-start;gap:6px}.hero-key .kg{width:20px}.hero-key .kg.wide{width:30px}.hero-cap .hero-live{position:static;display:none}.hero-cap.live .hero-key{opacity:1}}
-@media (prefers-reduced-motion:reduce){.hero-key,.hero-cap .hero-live{transition:none}}
+@media (max-width:639px){.hero-key{display:grid;grid-template-columns:1fr 1fr;gap:6px var(--s-3);font-size:13px;line-height:1.3}.hero-key li{align-items:flex-start;gap:6px}.hero-key .kg{width:20px}.hero-key .kg.wide{width:30px}.hero-cap .hero-live{position:static;display:none}.hero-cap.live .hero-key{opacity:1;transition-delay:0s}}
+@media (prefers-reduced-motion:reduce){.hero-key,.hero-cap .hero-live,.hero-cap.live .hero-live,.hero-cap.live .hero-key{transition:none}}
 @media (min-width:1600px){.hero-key,.hero-cap .hero-live{font-size:15.5px}}
 @media (max-width:1199px) and (min-width:640px){.hero-key{gap:4px var(--s-3);font-size:13.5px}}
 

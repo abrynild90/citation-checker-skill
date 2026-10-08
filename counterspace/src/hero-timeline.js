@@ -9,6 +9,7 @@ import { NO_LATER, gap, hasLaterLaw, linkText, pairsAt, tagSpot, yearsBetween } 
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { posterURL } from './scenes/posters.js';
+import { LAW_WORDS, WORDS } from './charts/lag.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
 
 const NS = 'http://www.w3.org/2000/svg',
@@ -215,7 +216,7 @@ function build(stage) {
         .concat(W)
         .map((px) => `${px},${limbY(px).toFixed(1)}`)
         .join('L'),
-    S = { svg, W, H, yL, groundH, sag, limbY, tracks: [], earthImg: null, hits: [], phone };
+    S = { svg, W, H, yL, groundH, sag, limbY, x, tracks: [], earthImg: null, hits: [], phone };
   el('clipPath', { id: 'htEarthClip' }, defs).appendChild(el('path', { d: `${limbPath}L${W},${H}L0,${H}Z` }));
 
   // ---- the Earth: a flat dark ground until the photograph is drawn, and its thin atmosphere line
@@ -720,7 +721,7 @@ function mountHits(stage, S, actions) {
     }));
   let dimmed = [];
   const undim = () => {
-    dimmed.forEach((n) => n.classList.remove('ht-dim'));
+    dimmed.forEach((n) => n.classList.remove('ht-dim', 'ht-gone'));
     dimmed = [];
   };
   const drawLinks = (h) => {
@@ -737,7 +738,7 @@ function mountHits(stage, S, actions) {
       const t = text(S.links, { x: sp.x, y: sp.y, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g));
       S.links.insertBefore(el('rect', { x: sp.x - w / 2, y: sp.y - 11 * K, width: w, height: 22 * K, rx: 11 * K, class: 'ht-lk-pill' }), t);
       sp.hit.forEach((o) => o.node && (o.node.classList.add('ht-dim'), dimmed.push(o.node)));
-      // a caption the dashed line itself crosses is quietened too, so the line never runs through words
+      // a caption the dashed line itself crosses steps out of sight while the link shows, so the line never runs through words, faint or not
       const n = Math.ceil(d / 5);
       for (const o of textBoxes()) {
         if (dimmed.includes(o.node)) continue;
@@ -745,7 +746,7 @@ function mountHits(stage, S, actions) {
           const x = ev.px + (dx * i) / n,
             y = ev.py + (dy * i) / n;
           if (x > o.x0 - 3 && x < o.x1 + 3 && y > o.y0 - 2 && y < o.y1 + 2) {
-            o.node.classList.add('ht-dim');
+            o.node.classList.add('ht-gone');
             dimmed.push(o.node);
             break;
           }
@@ -875,25 +876,109 @@ function mountHits(stage, S, actions) {
   // The first sweep: the real links drawn one after another, oldest law first (each step is the same drawing the pointer brings, with the dashed line growing
   // from the weapon to the law and the wait appearing last), then everything fades to the resting picture. Any pointer on a dot or tick, or a key, ends it.
   const STEP = 1500,
+    HOLD = 4600, // the closing beat, the longest wait, stays up this long
     pairText = (h) => {
       const q = linksOf(h)[0];
       return D.lag_pairs.pairs.find((p) => p.event === q.p.event && p.law === q.p.law)?.text || '';
     },
     live = document.getElementById('heroLive'),
     capEl = live?.closest('.hero-cap');
+  // The longest wait in data/lag_pairs.json. Its weapon is a jamming campaign with no height, so it has no dot in this picture: the closing beat draws it along
+  // the horizon, from the year it began to the law's tick, with the same dashed line the other pairs use.
+  const longest = D.lag_pairs.pairs
+    .map((p) => {
+      const ev = byId[p.event],
+        law = byId[p.law];
+      return { p, ev, law, years: yearsBetween(parse(ev.date || ev.start), parse(law.start)) };
+    })
+    .sort((a, b) => b.years - a.years)[0];
+  const longText = () => {
+    const yr = (r) => fmtY(parse(r.date || r.start)),
+      g = gap(longest.years);
+    return `The longest wait: ${WORDS[longest.ev.id]?.name ?? longest.ev.system} (${longest.ev.date ? '' : 'from '}${yr(longest.ev)}) and the ${LAW_WORDS[longest.law.id] ?? longest.law.title} (${yr(longest.law)}), ${g.num} ${g.unit} apart.`;
+  };
+  const drawLong = () => {
+    const lawHit = S.hits.find((k) => k.k === 'law' && k.id === longest.law.id);
+    if (!lawHit) return false;
+    mark(lawHit); // rings the law's tick; clears the links group, which is then drawn here
+    const ax = S.x(parse(longest.ev.date || longest.ev.start)),
+      ay = S.limbY(ax) - 14,
+      bx = lawHit.px,
+      by = S.limbY(bx) - 14,
+      g = linkText(gap(longest.years)),
+      w = tw(g, 12.5 * K, 600) + 16 * K,
+      mx = (ax + bx) / 2,
+      my = (ay + by) / 2 - 20 * K;
+    el('circle', { cx: ax, cy: ay, r: 4.5, class: 'ht-lk-dot' }, S.links);
+    const ln = el('line', { x1: ax, y1: ay, x2: ax, y2: ay, class: 'ht-lk-line' }, S.links);
+    const t = text(S.links, { x: mx, y: my, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, g);
+    S.links.insertBefore(el('rect', { x: mx - w / 2, y: my - 11 * K, width: w, height: 22 * K, rx: 11 * K, class: 'ht-lk-pill' }), t);
+    const t0 = performance.now(),
+      tick = (now) => {
+        const k = Math.min(1, (now - t0) / 1400),
+          e = 1 - (1 - k) ** 3;
+        ln.setAttribute('x2', ax + (bx - ax) * e);
+        ln.setAttribute('y2', ay + (by - ay) * e);
+        if (k < 1 && sw) sw.rid = requestAnimationFrame(tick);
+      };
+    sw.rid = requestAnimationFrame(tick);
+    S.links.querySelectorAll('.ht-lk-pill,.ht-lk-tag').forEach((n) => n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: 1100, easing: EASE, fill: 'backwards' }));
+    return true;
+  };
+  // The caption is the sentence on screen; when its weapon has a 3D scene it ends in a link that opens it.
+  const setCaption = (str, sceneId) => {
+    if (!live) return;
+    const inner = document.createElement('span');
+    inner.className = 'hl-in';
+    inner.append(str);
+    if (sceneId) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hl-go';
+      b.dataset.scene = sceneId;
+      b.innerHTML = `<svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>`;
+      b.append(`Watch ${SHORT[sceneId] || sceneName(sceneId) || 'it'} in 3D`);
+      inner.append(' ', b);
+    }
+    live.replaceChildren(inner);
+    inner.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: EASE });
+  };
   let sw = null;
   const sweepEnd = () => {
     if (!sw) return;
-    const { timers, raf, done } = sw;
+    const { timers, done } = sw;
     timers.forEach(clearTimeout);
-    cancelAnimationFrame(raf());
+    cancelAnimationFrame(sw.rid);
     sw = null;
-    S.links.getAnimations?.().forEach((a) => a.cancel());
+    S.links.getAnimations?.({ subtree: true }).forEach((a) => a.cancel());
     [S.ring, S.bar].forEach((n) => n.getAnimations?.().forEach((a) => a.cancel()));
     mark(null);
     capEl?.classList.remove('live');
     done?.();
+    // the words are cleared once they have faded out, so no frame of them is left behind
+    setTimeout(() => !sw && !capEl?.classList.contains('live') && live?.replaceChildren(), 400);
   };
+  // Pointing at or tabbing into the caption holds the sweep where it is, so its link can be reached; leaving lets it carry on.
+  const hold = (on) => {
+    if (!sw) return;
+    if (on) {
+      sw.timers.splice(0).forEach(clearTimeout);
+      sw.held = true;
+    } else if (sw.held) {
+      sw.held = false;
+      sw.timers.push(setTimeout(sw.next, 900));
+    }
+  };
+  live?.addEventListener('pointerenter', () => hold(true));
+  live?.addEventListener('pointerleave', () => hold(false));
+  live?.addEventListener('focusin', () => hold(true));
+  live?.addEventListener('focusout', () => hold(false));
+  live?.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.hl-go');
+    if (!b) return;
+    sweepEnd();
+    actions.openScene?.(b.dataset.scene, b);
+  });
   S.sweep = {
     stop: sweepEnd,
     run(done) {
@@ -901,18 +986,33 @@ function mountHits(stage, S, actions) {
       const list = hits.filter((h) => h.k === 'ev' && linksOf(h).length).sort((a, b) => (linksOf(a)[0].law.date < linksOf(b)[0].law.date ? -1 : 1));
       if (!list.length || active || pinned) return false;
       let i = 0,
-        rid = 0;
-      sw = { timers: [], raf: () => rid, done };
-      const after = (ms, f) => sw.timers.push(setTimeout(f, ms)),
+        closed = false;
+      sw = { timers: [], rid: 0, done, held: false, next: null };
+      const after = (ms, f) => {
+          sw.next = f;
+          sw.timers.push(setTimeout(f, ms));
+        },
         step = () => {
+          if (i >= list.length && !closed && longest) {
+            // the one beat to remember: the longest wait, drawn along the horizon and named in the caption
+            closed = true;
+            S.links.replaceChildren();
+            undim();
+            if (drawLong()) {
+              setCaption(longText(), hasScene(longest.ev) ? longest.ev.scene_3d : null);
+              capEl?.classList.add('live');
+              return after(HOLD, step);
+            }
+          }
           if (i >= list.length) {
-            [S.links, S.ring, S.bar].forEach((n) => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 480, easing: EASE, fill: 'forwards' }));
+            // the caption fades out first, then the picture's key returns (see .hero-cap in hero.css); the links fade with it
             capEl?.classList.remove('live');
-            return after(520, sweepEnd);
+            [S.links, S.ring, S.bar].forEach((n) => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 480, easing: EASE, fill: 'forwards' }));
+            return after(560, sweepEnd);
           }
           const h = list[i++];
           mark(h);
-          if (live) live.textContent = pairText(h) + '.';
+          setCaption(pairText(h) + '.', hasScene(h.e) ? h.e.scene_3d : null);
           capEl?.classList.add('live');
           const ln = S.links.querySelector('.ht-lk-line');
           if (ln) {
@@ -923,11 +1023,11 @@ function mountHits(stage, S, actions) {
                   e = 1 - (1 - k) ** 3;
                 ln.setAttribute('x2', x1 + (x2 - x1) * e);
                 ln.setAttribute('y2', y1 + (y2 - y1) * e);
-                if (k < 1) rid = requestAnimationFrame(tick);
+                if (k < 1) sw.rid = requestAnimationFrame(tick);
               };
             ln.setAttribute('x2', x1);
             ln.setAttribute('y2', y1);
-            rid = requestAnimationFrame(tick);
+            sw.rid = requestAnimationFrame(tick);
           }
           S.links.querySelectorAll('.ht-lk-pill,.ht-lk-tag,.ht-law-hi').forEach((n) => n.animate([{ opacity: 0 }, { opacity: +n.getAttribute('opacity') || 1 }], { duration: 280, delay: 520, easing: EASE, fill: 'backwards' }));
           after(STEP, step);
