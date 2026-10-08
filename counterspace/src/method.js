@@ -96,20 +96,17 @@ export function drawMethod() {
     );
   })();
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
-  document.getElementById('methodBody').innerHTML = `<div class="msec">
+  document.getElementById('methodBody').innerHTML = `<details class="table src-fold" id="srcDetails"><summary>Read the sources and method<span class="cnt">${cites.length} sources</span></summary>
+<p class="src-check">To check a fact, open the data table behind its chart, note the source and page reference for the entry, then find that source in the list of all cited sources.</p>
+<div class="msec">
   <h3 id="srcCite">How to cite this page</h3>
   <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
   <div class="panel-card cite-card">
     <p class="cite-text" id="citeText">Aaron Brynildson, “Counterspace Timeline, 1957–2026,” companion to <i>Space Security Law: Governance Beyond the Atmosphere</i>
       (data from the Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed., April 2026; last updated ${DATA_DATE}).</p>
-    <div class="cite-actions">
-      <button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button>
-      <span class="cite-status" id="citeStatus" role="status" aria-live="polite"></span>
-    </div>
   </div>
   <p>To cite an individual fact, cite the SWF edition and the source it rests on. The details shown for each point on a chart, and the data tables, give the page reference.</p>
 </div>
-<details class="table src-fold" id="srcDetails"><summary>Read the sources and method<span class="cnt">${cites.length} sources</span></summary>
 <div class="mcols">
 <div class="mcol">
 <div class="msec">
@@ -208,6 +205,8 @@ export function drawMethod() {
   const syncFold = () => section.classList.toggle('folded', !fold.open);
   fold.addEventListener('toggle', syncFold);
   syncFold();
+  const more = document.getElementById('srcMore'); // the main-source note belongs with the rest of the reading material
+  if (more) fold.querySelector('.src-check').after(more);
 
   // Copy the citation: the clipboard when the browser allows it; otherwise the text is selected so a reader can copy it by hand.
   const text = document.getElementById('citeText'),

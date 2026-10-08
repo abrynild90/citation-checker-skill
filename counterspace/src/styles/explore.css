@@ -56,3 +56,21 @@ section.chart.xpanel{border-top:0;padding:var(--s-5) 0 var(--s-4);outline:none}
   section.chart.xpanel{border-top:1px solid var(--line)}
   .pat-go{display:none}
 }
+
+/* the four entry cards above the tabs */
+.xcards{list-style:none;margin:0 0 var(--s-4);padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
+@media (min-width:900px){.xcards{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-4)}}
+.xcard{appearance:none;display:grid;gap:6px;width:100%;height:100%;padding:var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-3,14px);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;transition:border-color 120ms var(--ease),background 120ms var(--ease),transform 120ms var(--ease)}
+.xcard:hover{border-color:var(--accent);background:var(--surface-2)}
+.xcard:active{transform:translateY(1px)}
+.xcard:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.xcard[aria-pressed="true"]{border-color:var(--accent);background:var(--surface-2);box-shadow:inset 0 -3px 0 var(--accent)}
+.xc-pic{display:block;aspect-ratio:160/64;border-radius:8px;background:var(--bg-2);overflow:hidden}
+.xc-pic svg{display:block;width:100%;height:100%}
+.xc-a{fill:var(--accent)}
+.xc-b{fill:var(--faint);opacity:.55}
+.xc-axis{stroke:var(--line-strong);stroke-width:1;fill:none}
+.xc-t{font:600 15px/1.3 var(--sans)}
+.xc-l{font:400 13.5px/1.4 var(--sans);color:var(--muted)}
+@media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:14px}.xc-l{font-size:13px}}
+@media print{.xcards{display:none}}

@@ -243,3 +243,15 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .words-line abbr{text-decoration:none}
 .chapter-head>.takeaway,.chapter-head>.words-line{grid-column:1 / -1}
 .chapter-head>.takeaway{margin-top:var(--s-3);margin-bottom:0}
+
+/* Where every fact comes from: a short head, then one row with the disclosure and the copy button; everything else opens from the disclosure */
+.src-head{margin-bottom:var(--s-4)}
+.sources-layout{position:relative}
+.src-copy{position:absolute;right:0;top:0;display:flex;align-items:center;min-height:var(--h,44px)}
+#methodBody>details>summary{padding-right:176px;min-height:var(--h,44px)}
+.sources .src-check{margin:var(--s-4) 0 var(--s-5);max-width:var(--measure);color:var(--muted)}
+.sources .hero-more{margin:0 0 var(--s-5)}
+@media (max-width:639px){.src-copy{position:static;margin-top:var(--s-2)}#methodBody>details>summary{padding-right:0}}
+#methodBody>details.src-fold{margin-top:0}
+#methodBody>details.src-fold>summary{display:flex;margin-left:0;width:100%;box-sizing:border-box;padding-right:176px}
+@media (max-width:639px){#methodBody>details.src-fold>summary{padding-right:var(--s-4)}}
