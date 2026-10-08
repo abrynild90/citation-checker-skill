@@ -48,6 +48,44 @@ const statusOf = (cat, dec, state, v) => (v === 'D' ? 'D' : isNoData(cat, dec, s
 // The data names Russia "Russia" under direct ascent and "USSR/Russia" elsewhere; a group counts it once.
 const sameState = (k) => (k === 'Russia' ? 'USSR/Russia' : k);
 
+// What the whole chart adds up to in one decade, in the two groupings, whatever kinds are switched on: the states, the total the bar shows, and how many of
+// that total are tested or used (the low end of the range bar). A state with two capabilities counts twice in the total; "states" counts it once.
+export function totalsB(dec, group = 'cat') {
+  const units = group === 'cat' ? CATS.map((c) => [c.key]) : KIN.map((u) => u.cats),
+    all = new Set();
+  let tot = 0,
+    dem = 0;
+  const per = units.map((cats) => {
+    const st = {};
+    cats.forEach((c) =>
+      Object.entries(CAPS.coding[c][dec] || {}).forEach(([k, v]) => {
+        const n = sameState(k);
+        st[n] = st[n] === 'D' || v === 'D' ? 'D' : 'P';
+        all.add(n);
+      }),
+    );
+    tot += Object.keys(st).length;
+    dem += Object.values(st).filter((q) => q === 'D').length;
+    return Object.keys(st).length;
+  });
+  return { states: all.size, tot, dem, per };
+}
+const NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'];
+const numWord = (n) => NUM[n] ?? String(n);
+// The sentence above the chart: it uses the same numbers as the bars (the 2020s bar says 48 and "range 16 to 48"; 13 is how many states stand behind them).
+export function capSentence(group = 'cat') {
+  const first = CAPS.decades[0],
+    last = CAPS.decades.at(-1),
+    a = totalsB(first, group),
+    b = totalsB(last, group),
+    start = `In the ${first}, ${numWord(a.states)} state${a.states === 1 ? ' had' : 's had'} ${a.tot === 1 ? 'a single capability' : `${numWord(a.tot)} between them`}. `,
+    end = ` Only the ${last} figures are the Secure World Foundation’s own assessment.`;
+  if (group === 'cat')
+    return `${start}By the ${last}, ${numWord(b.states)} states have ${b.tot} capabilities between them, ${b.dem} of them tested or used and the rest still in development.${end}`;
+  const both = b.per[0] + b.per[1] - b.states;
+  return `${start}By the ${last}, ${numWord(b.per[0])} states have a kinetic capability and ${numWord(b.per[1])} a non-kinetic one, and ${numWord(both)} have both.${end}`;
+}
+
 function countsB() {
   const decs = CAPS.decades,
     RANK = { D: 3, P: 2, N: 1 };
@@ -183,7 +221,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('class', 'axis-title')
     .attr('x', phone ? 0 : 12)
     .attr('y', 14)
-    .text(kin ? 'States in each group' : 'Capabilities held, counted by state');
+    .text(kin ? 'States in each group' : 'Capabilities, counted once for each state that has one');
   // decade boundaries share the other charts' year ticks
   const gx = svg.append('g').attr('class', 'gridline');
   bandsX.slice(1).forEach(([xa]) =>
@@ -203,7 +241,7 @@ export function drawB(el = document.getElementById('svgB')) {
       title: d === '1950s' ? '1950s (1957 to 1959)' : d === '2020s' ? '2020s (to 2026)' : d,
       note:
         d === '2020s'
-          ? `Assessed by SWF (13 states).${ours ? ` Of the developing pairs, ${ours} are our reading where SWF’s table has no data.` : ''}`
+          ? `Assessed by SWF (${totalsB('2020s', 'cat').states} states).${ours ? ` Of the developing pairs, ${ours} are our reading where SWF’s table has no data.` : ''}`
           : 'Reconstructed from SWF’s test tables and country chapters; not assessed by SWF.',
       lines: units.map((u) => {
         const n = (s) => series.find((q) => q.unit === u && q.status === s)?.vals[i] || 0,
@@ -338,7 +376,7 @@ export function drawB(el = document.getElementById('svgB')) {
         .attr('y', top - 24)
         .attr('text-anchor', phone ? 'end' : 'middle');
     a.append('tspan').attr('x', cxR).text('SWF-assessed');
-    a.append('tspan').attr('class', 'panel-sub').attr('x', cxR).attr('dy', 17).text('13 states');
+    a.append('tspan').attr('class', 'panel-sub').attr('x', cxR).attr('dy', 17).text(`${totalsB(decs.at(-1), 'cat').states} states`);
   }
   const ax = svg.append('g').attr('class', 'axis xaxis').attr('transform', `translate(0,${base})`);
   ax.append('line').attr('class', 'domain').attr('x1', M.l).attr('x2', R);
@@ -374,6 +412,7 @@ export function drawB(el = document.getElementById('svgB')) {
   document.getElementById('calloutB').textContent =
     `Jamming and spoofing is the most widespread capability: ${ew20} states in the 2020s. Missiles that can destroy a satellite have stayed with ` +
     `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
+  document.getElementById('tkB').textContent = capSentence(stateB.group);
   document.getElementById('noteB').textContent = kin ? 'A state with both kinds appears in both groups.' : 'A state with two capabilities is counted twice.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
