@@ -148,12 +148,13 @@ then why it matters. Never explain the software.
 
 | Name | Title of the section |
 |---|---|
-| Law and policy | Law and policy on one timeline |
-| Anti-satellite tests | How high anti-satellite tests have reached, and the debris they left |
-| Jamming, lasers and cyber | Attacks that leave satellites in orbit |
-| Close approaches | Satellites that fly close to other satellites |
-| Who can do what | Which states hold which counterspace capabilities, by decade |
-| How long the law took | How long the law took to follow |
+| Law and weapons timeline | Law and weapons on one timeline (the law strip, then: How high anti-satellite tests have reached, and the debris they left) |
+| What the pattern shows | What the pattern shows (four findings, each linking to its chart) |
+| Explore the data | Explore the data (tabs, one chart at a time) |
+| Jamming, lasers and cyber (tab) | Attacks that leave satellites in orbit |
+| Close approaches (tab) | Satellites that fly close to other satellites |
+| Who can do what (tab) | Which states hold which counterspace capabilities, by decade |
+| How long the law took (tab) | How long the law took to follow |
 | Sources and method | Where every fact comes from |
 
 Spell out acronyms on first use in each section (anti-satellite, ASAT; low Earth orbit, LEO). SWF means the Secure World Foundation: say so the
@@ -174,13 +175,20 @@ no wording errors.
    orbit shells and their labels). One primary action ("Take the 3D tour") and one secondary ("Jump to the charts"). No big-number strip. Under the lede, a contents list of seven
    plain rows (not cards): the chapter name as a link and one factual sentence that carries the relevant count. Before any interaction no 3D library is loaded: the first picture
    is drawn from the embedded Earth image. The hero is the page's one authored motion moment (a short entrance, then the live globe).
-2. **Chapter navigation.** The contents list in the hero, plus on screens at least 1360 px wide a slim rail on the right edge with seven dots (the name shows on hover and focus). It does
-   not compete with the sticky law timeline and shows no numbers.
-3. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, a one-line key, an optional callout, and a "Show the data" disclosure. No label above
-   the title, no number.
-4. **Law and policy timeline** (the first chapter) stays in view as the reader scrolls, so every chart can be read against it.
-5. **Sources and method.** Readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
-6. **Footer.** Three short columns: about this page, data and licence, type and images.
+2. **Chapter navigation.** The contents list in the hero (six plain links), plus on screens at least 1360 px wide a slim rail on the right edge with six dots (the name shows on hover and
+   focus). It does not compete with the sticky law timeline and shows no numbers.
+3. **Two layers.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, the quiz, one timeline chapter (the law strip and the
+   anti-satellite test chart on the same years) and "What the pattern shows" (four findings computed from the data, each linking to its chart). Layer two is "Explore the data": one panel with
+   a tab for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, key,
+   data table and download, and a way on to the next chart at its foot. Nothing is removed: every chart, table and download stays, and print shows every tab. Tabs follow the ARIA tabs pattern
+   (arrow keys, Home, End, one tab stop), and an address that names a chart or something inside one (`#chartC`, `#lag`, `#tableC`) opens its tab first. Panels not chosen stay laid out at full width,
+   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open.
+4. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, a one-line key, an optional callout, and a "Show the data" disclosure. No label above
+   the title, no number. A chart inside a chapter or a tab takes an h3 and a quieter lede.
+5. **Law strip.** Stays in view as the reader scrolls the test chart and the two tabs that share its years (jamming; close approaches), with the years it shows following the chart under it. It steps
+   aside over the findings and over the two tabs with their own scales (decades; years to law).
+6. **Sources and method.** Readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
+7. **Footer.** Three short columns: about this page, data and licence, type and images.
 
 ## 5. Charts
 
