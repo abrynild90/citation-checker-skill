@@ -1,7 +1,8 @@
 /* Scene gallery, "Surprise me" and reveal. A poster per 3D scene; on hover or focus the picture eases in and a "Did you know" line rises over it. */
 .scenes{border-top:1px solid var(--line);scroll-margin-top:16px}
 /* a strip of cards that scrolls sideways: the next card always peeks in, so it is plain there is more */
-.scenes{padding:var(--s-7) 0 var(--s-6)}
+.scenes{padding:var(--s-8) 0 var(--s-6);border-top:0;background:linear-gradient(180deg,var(--hero-bg) 0,var(--bg) 104px) no-repeat;background-size:100% 104px}
+/* the dark hero ends in a soft fade into the page, never a hard edge (it matters most in the light theme) */
 .scenes-head{margin-bottom:var(--s-5)}
 .scenes-tools{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4)}
 .scenes-acts{display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center}

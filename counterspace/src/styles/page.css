@@ -93,11 +93,11 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 /* ---- hero: the picture, its words and the buttons live in hero.css; the chapter list below belongs to this file ---- */
 /* "What is on this page": one visible row of the chapters, each a link with its count under it. It sits inside the hero, so it is dark in both themes. */
 .hero-contents{grid-area:list;padding:var(--s-4) var(--gutter) 0;max-width:none}
-.pagenav{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s-2) var(--s-4)}
+.pagenav{display:grid;gap:var(--s-1)}
 .pn-h{margin:0;font:600 14px/1.3 var(--sans);letter-spacing:.02em;color:var(--hero-accent-2)}
-.toc{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:2px var(--s-4);flex:1 1 0;min-width:0}
+.toc{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0 14px;min-width:0}
 .toc li{position:relative;display:flex}
-.toc .t-name{display:inline-flex;align-items:center;min-height:32px;font:500 14.5px/1.3 var(--sans);color:var(--muted);text-decoration:none;transition:color var(--dur-1) var(--ease)}
+.toc .t-name{display:inline-flex;align-items:center;min-height:32px;font:500 14px/1.3 var(--sans);color:var(--muted);text-decoration:none;transition:color var(--dur-1) var(--ease)}
 .toc .t-name:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:var(--r-1)}
 .toc .t-name:hover{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em}
 .hero-source{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 14px/1.55 var(--sans);color:var(--muted)}
