@@ -227,10 +227,23 @@ function build(stage) {
       : [],
     wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
     glance = document.getElementById('heroGlance'),
-    gr = wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null,
+    gl0 = (glance?.classList.remove('gl-off'), wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null),
     pxDec = wide ? Math.min(118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
-    steps = d3.range(0, W + 1, 24).concat(W);
+    steps = d3.range(0, W + 1, 24).concat(W),
+    // The facts stand in the sky only where no dot, ring or star of the picture would land on them (the box measured against where every mark will sit); if one
+    // would, they are left out of this drawing, so a mark never lies across words.
+    gr =
+      gl0 &&
+      KIN.some((e) => {
+        if (e.altitude_km == null) return false;
+        const px = x(parse(e.date)),
+          py = yAlt(e.altitude_km, px),
+          r = (e.type === 'nuclear' ? 11 : e.type === 'destructive' ? 7.5 : 5.5) + 8;
+        return px + r > gl0.left - rect.left - 6 && px - r < gl0.right - rect.left + 6 && py + r > gl0.top - rect.top - 6 && py - r < gl0.bottom - rect.top + 6;
+      })
+        ? (glance.classList.add('gl-off'), null)
+        : gl0;
 
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true', focusable: 'false', style: `--htk:${K}` }),
     defs = el('defs', {}, svg),

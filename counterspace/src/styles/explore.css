@@ -101,7 +101,7 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 /* A wide window (1560 px and more): the panel is two columns. The large line and the longest wait stay at the left; the right carries every pair, oldest first, each as a
    dashed line from the weapon to the law (the drawing the hero uses), so the empty right of the panel says something. */
 .pb-pairs{display:none}
-@media (min-width:1560px){
+@media (min-width:1280px){
   .pat-big{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);column-gap:var(--s-7);align-items:center}
   .pat-big .pb-num{font-size:clamp(40px,4.3vw,84px)}
   .pb-pairs{display:block;padding-left:var(--s-6);border-left:1px solid var(--line-strong)}
@@ -121,4 +121,15 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
   .pat-big[data-armed] .rc-pill{transition:opacity 400ms var(--ease) calc(700ms + var(--i,0) * 150ms)}
   .pat-big.in .rc-link{animation:rc-draw 700ms var(--ease) both;animation-delay:calc(500ms + var(--i,0) * 150ms)}
 }
-@media (min-width:1560px) and (prefers-reduced-motion:reduce){.pat-big.in .rc-link{animation:none}}
+@media (min-width:1280px) and (prefers-reduced-motion:reduce){.pat-big.in .rc-link{animation:none}}
+/* a laptop window (1280 to 1559 px): the two columns share the panel more evenly, and the list sets its names a little narrower so every pair stays on short lines */
+@media (min-width:1280px) and (max-width:1559px){
+  .pat-big{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);column-gap:var(--s-6);padding-inline:var(--s-5)}
+  .pb-pairs{padding-left:var(--s-4)}
+  .pb-pairs .rc-links{gap:10px}
+  .pb-pairs .rc-links li{grid-template-columns:minmax(0,.78fr) minmax(0,1.8fr);gap:var(--s-2);font-size:13px}
+  .pb-pairs .rc-b{flex-basis:152px;max-width:152px;padding-left:8px}
+  .pb-pairs .rc-link{flex-basis:calc((100% - 152px) * var(--k,1))}
+  .pb-pairs .rc-pill{padding:1px 8px;font-size:11.5px}
+}
+}

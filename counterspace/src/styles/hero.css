@@ -292,3 +292,18 @@
 
 /* While the 13 of 13 card is up the picture is shorter, and the facts row (which stands over the sky) steps aside so no dot or ring ever lands on its words. */
 .hero.has-done .hero-glance{display:none}
+
+/* A drawing where a mark would land on the facts leaves them out (hero-timeline.js): they keep their place, so nothing moves, and are simply not shown. */
+.hero-glance.gl-off{visibility:hidden}
+
+/* A laptop window (1280 to 1599 px): the sky at the top right holds one fact, the longest wait, in place of the three that a wider window has room for. */
+@media (min-width:1280px) and (max-width:1599px){
+  .hero-glance{display:block;position:absolute;z-index:2;top:var(--s-5);right:var(--edge);width:min(340px,25vw);padding:0;color:var(--muted);pointer-events:none;animation:rise var(--dur-hero) var(--ease) 260ms both}
+  .hero-glance[hidden]{display:none}
+  .hg-t{margin:0 0 var(--s-2);font:600 14px/1.3 var(--sans);color:var(--text)}
+  .hero-glance ul{margin:0;padding:0;list-style:none}
+  .hero-glance li{font:400 15px/1.5 var(--sans);padding-left:var(--s-4);position:relative}
+  .hero-glance li:not(:last-child){display:none}
+  .hero-glance li::before{content:"";position:absolute;left:0;top:.72em;width:8px;border-top:2px solid var(--hero-accent-2)}
+  .hero-glance b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+}
