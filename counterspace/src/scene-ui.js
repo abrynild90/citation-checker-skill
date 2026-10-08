@@ -501,6 +501,7 @@ function togglePair(which) {
   Object.keys(pairBtns).forEach((k) => {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
+  asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
     pairBodies[k].hidden = !on;
     if (on) pairBodies[k].scrollIntoView({ block: 'nearest', behavior: 'auto' });
   });
@@ -707,6 +708,19 @@ function fitSteps() {
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.paddingBottom = '';
   asideBody.classList.remove('pin'); // measured with the foot in its natural place; pinned to the bottom at the end
+  const noted = asideBody.classList.contains('has-note'),
+    at = asideBody.scrollTop;
+  if (noted) asideBody.classList.remove('has-note');
+  try {
+    fitStepsClosed();
+  } finally {
+    if (noted) {
+      asideBody.classList.add('has-note');
+      asideBody.scrollTop = at;
+    }
+  }
+}
+function fitStepsClosed() {
   // a phone with more than four steps, or a short phone screen: the list shows the playing step only and the picture keeps the height
   // The steps are read-only here: every row is drawn whole, at its natural height, and the story column scrolls if it must (no fixed-height window).
   const one = false;

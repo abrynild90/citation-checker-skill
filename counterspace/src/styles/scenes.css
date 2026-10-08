@@ -2295,3 +2295,9 @@
 .overlay .sv-lawcard .lc-when { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .overlay .sv-lawcard .lc-when .gap-pill { margin: 0; }
 .overlay .sv-recap-links2 { width: 100%; }
+
+/* A note open under "About this picture" or "Where to go next" is part of the column: the list of steps keeps the height it was fitted to (it would otherwise
+   shrink to its section's minimum and its last rows would be drawn over the row of buttons), and the column scrolls to the note. */
+@media (min-width: 901px) {
+  .overlay .story-scroll.has-note:not(.expanded) > .sv-steps { flex: none; min-height: 0; }
+}
