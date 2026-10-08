@@ -3,7 +3,7 @@
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { D, DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
 import { activate, addGuide, bindMark, legalCard, legalKindOf, legalKindWords, legend, rove, setGuide, table } from '../ui.js';
 import { hooks } from '../shared.js';
 
@@ -127,6 +127,12 @@ export function legalGlyph(sel, l) {
 }
 
 // ---------------------------------------------------------------- the band
+function lightLinked(lawId) {
+  document.querySelectorAll('.mark.linked').forEach((n) => n.classList.remove('hl', 'linked'));
+  if (!lawId) return;
+  for (const p of D.lag_pairs.pairs)
+    if (p.law === lawId) document.querySelectorAll(`#svgA [data-id="${p.event}"], #svgC [data-id="${p.event}"], #svgR [data-id="${p.event}"]`).forEach((n) => n.classList.add('hl', 'linked'));
+}
 const ZOOM = [parse('2021-06-01'), parse('2026-07-01')];
 // On a wide screen the zoom's time axis starts and ends at the same page positions as the main chart's, so the panel's own padding is taken off its gutters.
 function zoomGutters(el, M) {
@@ -589,8 +595,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     if (hasScene(d)) badge(d3.select(this), 12, -16);
   });
   bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
-  pg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
-  sg.on('mouseenter.guide focus.guide', (ev, d) => setGuide(parse(d.start))).on('mouseleave.guide blur.guide', () => setGuide(null));
+  // Pointing at a law also lights the weapon points our records link to it, on the charts below (the shared years line them up with the law)
+  pg.on('mouseenter.guide focus.guide', (ev, d) => (setGuide(parse(d.start)), lightLinked(d.id))).on('mouseleave.guide blur.guide', () => (setGuide(null), lightLinked(null)));
+  sg.on('mouseenter.guide focus.guide', (ev, d) => (setGuide(parse(d.start)), lightLinked(d.id))).on('mouseleave.guide blur.guide', () => (setGuide(null), lightLinked(null)));
   rove(svg.selectAll('.mark'));
   svg
     .append('g')
