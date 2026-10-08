@@ -98,17 +98,27 @@ nameThemeButton();
 }
 
 // A link to something inside a closed disclosure opens it first (a chart's "How we classified these" points into the sources section, for one).
+// The sources section keeps its long reading in one disclosure that starts closed: an address or a link that names the section (the footer's "Sources", the
+// chapter rail) or one of its parts opens it, so the reader lands on the material and not on a closed bar.
 {
+  const SRC = new Set(['sources', 'srcEditions', 'codingRules', 'srcCite', 'srcLicence', 'srcList']);
+  const openSources = () => {
+    hooks.drawRest?.();
+    const f = document.getElementById('srcDetails');
+    if (!f || f.open) return false;
+    f.open = true;
+    return true;
+  };
   const reveal = () => {
     const id = decodeURIComponent(location.hash.slice(1));
     if (!id) return;
+    let opened = SRC.has(id) && openSources();
     let t = document.getElementById(id);
     if (!t) {
       hooks.drawRest?.();
       t = document.getElementById(id);
     }
-    let d = t?.closest('details'),
-      opened = false;
+    let d = t?.closest('details');
     while (d) {
       if (!d.open) ((d.open = true), (opened = true));
       d = d.parentElement?.closest('details');
@@ -117,6 +127,12 @@ nameThemeButton();
   };
   addEventListener('hashchange', reveal);
   addEventListener('load', reveal);
+  // a link to the address already in the bar fires no hashchange, so the click itself opens the section
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest?.('a[href^="#"]');
+    const id = a && decodeURIComponent(a.getAttribute('href').slice(1));
+    if (id && SRC.has(id) && openSources()) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
+  });
 }
 
 // An address that names the timeline strip (#legalBand) cannot be scrolled to natively: the strip is sticky, and the charts below it are drawn after the first
