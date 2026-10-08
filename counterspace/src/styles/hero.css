@@ -261,3 +261,11 @@
   .hero.has-done :is(.hero-cap,.hero-actions){display:none}
   .hero.has-done .stage{--stage-h:496px}
 }
+
+/* On a tall 1920 window the three facts leave the top right and stand under the lede as one row, so the quiet band between the words and the first orbit is
+   part of the page's reading order and the top right is clear sky. */
+@media (min-width:1800px) and (min-height:1040px){
+  .hero-glance{top:292px;right:auto;left:var(--edge);width:min(1180px,64vw)}
+  .hero-glance ul{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-5)}
+  .hero-glance li{padding-left:var(--s-4)}
+}

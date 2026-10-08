@@ -93,6 +93,11 @@
 :root[data-theme="light"] header.top { border-radius: 0 0 var(--r-3, 28px) var(--r-3, 28px); }
 :root[data-theme="light"] .scenes { padding-top: 72px; }
 :root[data-theme="light"] .scenes::before { display: none; }
+/* a short, soft shade just under the night window's rounded edge, so the step from the dark hero to the paper page is not a hard line */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .scenes::before { display: block; height: 72px; background: linear-gradient(180deg, rgba(5,8,19,.2) 0, rgba(5,8,19,.09) 38%, rgba(5,8,19,.025) 72%, rgba(5,8,19,0) 100%); }
+}
+:root[data-theme="light"] .scenes::before { display: block; height: 72px; background: linear-gradient(180deg, rgba(5,8,19,.2) 0, rgba(5,8,19,.09) 38%, rgba(5,8,19,.025) 72%, rgba(5,8,19,0) 100%); }
 @media (min-width:1600px){ .scenes, :root:not([data-theme="dark"]) .scenes, :root[data-theme="light"] .scenes { padding-top: 64px; } }
 
 /* the half-way reward note beside the "seen" count */
