@@ -763,14 +763,17 @@ export function drawLawMini() {
   inner.appendChild(g.node());
   miniShow();
 }
-// Shown from the top of the first of the three charts until the chart of who holds which capability starts.
+// Shown from the top of the test chart to its end, and again over the jamming and close-approach tabs of "Explore the data" (the two tabs on the shared years).
 function miniShow() {
   const host = document.getElementById('lawMini');
   if (!host || !isPhoneNow()) return;
   const a = document.getElementById('chartA').getBoundingClientRect(),
-    b = document.getElementById('chartB').getBoundingClientRect();
-  host.classList.toggle('on', a.top <= 2 && b.top > 60);
-  const now = document.getElementById('chartC').getBoundingClientRect().top > 2 ? 'chartA' : 'chartC';
+    ex = document.getElementById('explore'),
+    e = ex.getBoundingClientRect(),
+    inA = a.top <= 2 && a.bottom > 60,
+    inX = ex.dataset.years === '1' && e.top <= 2 && e.bottom > 60;
+  host.classList.toggle('on', inA || inX);
+  const now = inX ? 'chartC' : 'chartA';
   if (now !== miniFor) {
     miniFor = now;
     drawLawMini();
@@ -798,10 +801,13 @@ function legalScrollMain() {
   miniShow();
   const band = document.getElementById('legalBand'),
     tr = document.getElementById('timeline').getBoundingClientRect();
-  // The years-to-law chart has its own 0 to 16 year scale, so the strip (which implies a shared calendar axis) steps aside while that chart is at the top.
-  // The decade chart before it and the sources after it do not use the shared years either, so the strip steps aside from the decade chart to the end.
-  const lagEl = document.getElementById('chartB') || document.getElementById('lag');
-  band.classList.toggle('off', !isPhoneNow() && ((!!lagEl && lagEl.getBoundingClientRect().top < band.offsetHeight + 24) || (tr.bottom < band.offsetHeight + 120 && tr.top < 0)));
+  // The strip implies a shared calendar axis, so it stays only over charts that use it: the test chart and, in "Explore the data", the jamming and close-approach
+  // tabs. It steps aside over "What the pattern shows", over the two tabs with their own scales (decades; years to law) and at the end of the timeline.
+  const pat = document.getElementById('pattern'),
+    ex = document.getElementById('explore'),
+    bh = band.offsetHeight + 24,
+    exAligned = !!ex && ex.dataset.years === '1' && ex.getBoundingClientRect().top < bh;
+  band.classList.toggle('off', !isPhoneNow() && ((!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (tr.bottom < band.offsetHeight + 120 && tr.top < 0)));
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).
   const topY = document.getElementById('bandTop').getBoundingClientRect().top,
@@ -809,7 +815,11 @@ function legalScrollMain() {
     shrink = bandH ? Math.max(0, (legalCompact ? bandFullH : band.offsetHeight) - bandH) : 0;
   const stuck = !isPhoneNow() && topY <= -shrink - 0.5 && tr.top < -1 && tr.bottom > 200;
   // which chart is under the strip decides the years it shows (a zoomed chart: its own window)
-  const under = ['chartR', 'chartC'].find((id) => document.getElementById(id).getBoundingClientRect().top < band.offsetHeight + 40 && document.getElementById(id).getBoundingClientRect().bottom > band.offsetHeight);
+  const under = ['chartR', 'chartC'].find((id) => {
+    const e = document.getElementById(id),
+      r = e.getBoundingClientRect();
+    return !e.hasAttribute('data-off') && r.top < band.offsetHeight + 40 && r.bottom > band.offsetHeight;
+  });
   const want = stuck && under ? chartWindow[under] : null;
   const changed = stuck && want !== stripDom;
   // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it.

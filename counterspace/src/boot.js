@@ -21,6 +21,7 @@ import { audit } from './audit.js';
 import { mountDiscover } from './discover.js';
 import { mountQuiz } from './quiz.js';
 import { fillTakeaways } from './takeaways.js';
+import { mountExplore } from './explore.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
@@ -64,7 +65,7 @@ nameThemeButton();
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
-    starts = ['scenes', 'quizBand', 'timeline', 'chartA', 'chartC', 'chartR', 'chartB', 'lag', 'sources'].map((id) => document.getElementById(id)),
+    starts = ['scenes', 'quizBand', 'timeline', 'pattern', 'explore', 'sources'].map((id) => document.getElementById(id)),
     passed = new Map();
   const mark = () => {
     const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
@@ -154,6 +155,8 @@ function drawRest() {
   legalScroll();
 }
 hooks.drawRest = drawRest;
+hooks.drawLazy = drawLazy;
+hooks.legalScroll = legalScroll;
 function drawAll(lazy = false) {
   guides.length = 0;
   drawnLazy.delete('svgC');
@@ -194,6 +197,7 @@ mountHero(fontsReady, { openScene });
 mountDiscover();
 mountQuiz();
 fillTakeaways();
+mountExplore();
 let rz = 0,
   lastW = innerWidth;
 addEventListener('resize', () => {

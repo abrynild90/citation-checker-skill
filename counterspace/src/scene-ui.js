@@ -13,6 +13,7 @@ import { hideCard, legalKindWords, setGuide } from './ui.js';
 import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
+import { revealIn } from './explore.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
 import { FACTS, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 export let THREE = null,
@@ -453,6 +454,7 @@ function fillNext(cfg) {
       const m = markOf(cfg.event);
       closeScene();
       if (!m) return;
+      revealIn(m); // a mark in "Explore the data" sits in a tab: open that tab first
       m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
       m.classList.add('hl', 'flash-hl');
       m.focus({ preventScroll: true });

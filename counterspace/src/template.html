@@ -95,12 +95,9 @@
           <ul class="toc" id="glance">
             <li data-ch="scenes"><a class="t-name" href="#scenes">3D scenes</a></li>
             <li data-ch="quiz"><a class="t-name" href="#quizBand">Test yourself</a></li>
-            <li data-ch="law"><a class="t-name" href="#legalBand">Law and policy</a></li>
-            <li data-ch="tests"><a class="t-name" href="#chartA">Anti-satellite tests</a></li>
-            <li data-ch="jam"><a class="t-name" href="#chartC">Jamming, lasers and cyber</a></li>
-            <li data-ch="close"><a class="t-name" href="#chartR">Close approaches</a></li>
-            <li data-ch="who"><a class="t-name" href="#chartB">Who can do what</a></li>
-            <li data-ch="lag"><a class="t-name" href="#lag">How long the law took</a></li>
+            <li data-ch="timeline"><a class="t-name" href="#timeline">Law and weapons timeline</a></li>
+            <li data-ch="pattern"><a class="t-name" href="#pattern">What the pattern shows</a></li>
+            <li data-ch="explore"><a class="t-name" href="#explore">Explore the data</a></li>
             <li data-ch="src"><a class="t-name" href="#sources">Sources and method</a></li>
           </ul>
         </nav>
@@ -145,9 +142,9 @@
 <div id="timeline" tabindex="-1">
   <div class="wrap law-intro" id="law">
     <header class="chapter-head" id="lawHead">
-      <h2 data-avoid id="hLaw">Law and policy on one timeline</h2>
-      <p data-avoid class="lede">Each symbol is a treaty, resolution, pledge or expert manual about weapons in space, placed on the year it was made. The timeline
-        stays in view as you scroll, so every chart below can be read against it.</p>
+      <h2 data-avoid id="hLaw">Law and weapons on one timeline</h2>
+      <p data-avoid class="lede">Each symbol in the strip is a treaty, resolution, pledge or expert manual about weapons in space, placed on the year it was made.
+        Below it, every anti-satellite test sits on the same years. The strip stays in view as you scroll.</p>
 
       <p data-avoid class="takeaway" id="tkLaw"></p>
     </header>
@@ -182,9 +179,9 @@
 
   <div class="wrap">
     <div class="law-mini" id="lawMini" aria-hidden="true"><div class="law-mini-in"></div></div>
-    <section class="chart" id="chartA" aria-labelledby="hA">
-      <header class="chapter-head">
-        <h2 data-avoid id="hA">How high anti-satellite tests have reached, and the debris they left</h2>
+    <section class="chart chart-first" id="chartA" aria-labelledby="hA">
+      <header class="chapter-head sub">
+        <h3 data-avoid id="hA">How high anti-satellite tests have reached, and the debris they left</h3>
         <p data-avoid class="lede">Each point is a test of a weapon that can reach satellites, placed by year and by how high it went. The large bubbles show how
           much debris the destructive tests created.</p>
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
@@ -194,101 +191,132 @@
       <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendA"></ul></details>
       <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableA"></div></details><div class="dl-row"><button class="btn small" data-export="A" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
     </section>
-
-    <section class="chart" id="chartC" aria-labelledby="hC">
-      <header class="chapter-head">
-        <h2 data-avoid id="hC">Attacks that leave satellites in orbit</h2>
-        <p data-avoid class="lede">Each bar is a campaign of jamming, lasers or hacking that leaves the satellites it targets in orbit. Each dot is a single event, and an
-          arrow means the campaign is still going.</p>
-        <div class="tools">
-          <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart">
-            <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
-            <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
-          </span>
-          <p data-avoid class="note block" id="noteC"></p>
-          <p class="ckey" id="ckeyC" role="group" aria-label="Colour of each country"></p>
-        </div>
-      </header>
-      <p data-avoid class="takeaway" id="tkC"></p>
-      <div class="callout-row">
-      <p data-avoid class="callout quote" id="quoteC"></p>
-      <p data-avoid class="callout">The rules that govern these operations are soft law (expert manuals that are not binding) or carry military exemptions, such as
-        Article 48 of the Constitution of the International Telecommunication Union (ITU), the United Nations agency for radio and telecommunications.</p>
-      </div>
-      <div class="svgbox" id="svgC"></div>
-      <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendC" aria-label="Key to the jamming, laser and cyber chart"></ul></details>
-      <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableC"></div></details><div class="dl-row"><button class="btn small" data-export="C" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
-    </section>
-
-    <section class="chart" id="chartR" aria-labelledby="hR">
-      <header class="chapter-head">
-        <h2 data-avoid id="hR">Satellites that fly close to other satellites</h2>
-        <p data-avoid class="lede">Each shape is one close approach (also called a rendezvous or proximity operation, RPO) between a satellite and another object in orbit, placed at its
-          start date. Arrows show those still going.</p>
-        <div class="tools">
-          <span class="seg" role="group" aria-label="Years shown in the close-approach chart">
-            <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
-            <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
-          </span>
-          <button class="btn small" id="rAll" type="button" aria-expanded="false" aria-controls="svgR">Show all 68</button>
-          <p data-avoid class="note block" id="noteR"></p>
-          <p data-avoid class="note block" id="noteR2" aria-live="polite"></p>
-        </div>
-      </header>
-      <p data-avoid class="takeaway" id="tkR"></p>
-      <div class="note-line" id="noteR0"><p data-avoid><b>A close approach is not an attack.</b> Most are inspections, servicing missions or technology tests.</p>
-      </div>
-      <div class="svgbox" id="svgR"></div>
-      <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendR" aria-label="Key to the close-approach chart"></ul>
-        <p>A close approach, or proximity operation, is two objects in orbit coming near each other. The Secure World Foundation (SWF) records that an operation took place, not why. SWF itself is cautious about intent, using words such as “possibly” and “appeared to”; an outlined shape shows those entries.</p></details>
-      <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableR"></div></details><div class="dl-row"><button class="btn small" data-export="R" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
-    </section>
-
-    <section class="chart" id="chartB" aria-labelledby="hB">
-      <header class="chapter-head">
-        <h2 data-avoid id="hB">Which states hold which counterspace capabilities, by decade</h2>
-        <p data-avoid class="lede">Each bar counts how many states have a way to attack or interfere with satellites in one decade. Only the 2020s bar rests on the Secure World
-          Foundation’s (SWF) own assessment; earlier decades are reconstructed.</p>
-        <div class="tools">
-          <span class="seg" role="group" aria-label="How the capabilities are grouped">
-            <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
-            <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic and non-kinetic</button>
-          </span>
-        </div>
-      </header>
-      <p data-avoid class="takeaway" id="tkB"></p>
-      <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
-      <div class="svgbox" id="svgB"></div>
-      <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
-      <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendB" aria-label="Key to the capability chart"></ul>
-        <p data-avoid class="b-read"><b>Reading the 2020s bar:</b> the low number counts capabilities that have been tested or used, and the high number adds those still in development. This chart does not use the shared years.</p>
-        <p>For the 2020s, the states and capabilities come from SWF’s 2026 assessment of 13 countries. Whether a capability counts as demonstrated
-          (tested or used) or as still developing is our reading of SWF’s text, so the range bar is the uncertain part: its low end counts demonstrated
-          capabilities only, and its high end adds those still developing. Dotted segments are capabilities we class as developing where SWF’s country
-          table has no data. Decades before 2020 are reconstructed from SWF’s test tables and country chapters; SWF did not assess them.</p>
-        <p>Direct-ascent anti-satellite weapons are missiles launched from Earth to hit a satellite. Co-orbital means a satellite that maneuvers close to
-          another. Electronic warfare means jamming and spoofing. Directed energy means lasers and similar beams. Cyber means attacks through computers
-          and networks. The full rules are in <a href="#codingRules">Sources and method</a>.</p></details>
-      <div class="callout-row">
-        <p data-avoid class="callout" id="calloutB"></p>
-      </div>
-      <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableB"></div></details><div class="dl-row"><button class="btn small" data-export="B" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
-    </section>
-
-    <section class="chart" id="lag" aria-labelledby="hL">
-      <header class="chapter-head">
-        <h2 data-avoid id="hL">How long the law took to follow</h2>
-        <p data-avoid class="lede">Each pair links a space weapon or attack to the first later legal step our records connect with it. The large number is the time
-          between them. It shows the order of events and says nothing about cause.</p>
-
-      </header>
-      <p data-avoid class="takeaway" id="tkL"></p>
-      <p data-avoid class="note block">Unlike the other charts, this one does not use the shared years. Every bar starts at zero on the same scale, so a longer bar is a longer wait.</p>
-      <div class="svgbox" id="svgL"></div>
-      <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendL"></ul></details>
-      <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableL"></div></details><div class="dl-row"><button class="btn small" data-export="L" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
-    </section>
   </div>
+
+  <section class="pattern" id="pattern" aria-labelledby="hPattern">
+    <div class="wrap">
+      <header class="chapter-head">
+        <h2 data-avoid id="hPattern">What the pattern shows</h2>
+        <p data-avoid class="lede">Four things stand out in our records. Each one opens the chart behind it.</p>
+      </header>
+      <ol class="pat-list" id="patList">
+        <li><p data-avoid class="pat-t" id="pt1"></p><a class="pat-go" href="#lag">See how long the law took<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></li>
+        <li><p data-avoid class="pat-t" id="pt2"></p><a class="pat-go" href="#chartC">See jamming, lasers and cyber<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></li>
+        <li><p data-avoid class="pat-t" id="pt3"></p><a class="pat-go" href="#chartR">See close approaches<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></li>
+        <li><p data-avoid class="pat-t" id="pt4"></p><a class="pat-go" href="#chartB">See who can do what<svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="explore" id="explore" aria-labelledby="hExplore">
+    <div class="wrap">
+      <header class="chapter-head explore-head">
+        <h2 data-avoid id="hExplore">Explore the data</h2>
+        <p data-avoid class="lede">Four more charts, one at a time: jamming, lasers and cyber operations, close approaches in orbit, who can do what, and how long the law took. Each has its own key, data table and download.</p>
+      </header>
+      <div class="xtabs seg" id="exploreTabs" role="tablist" aria-label="Charts to explore" hidden>
+        <button class="btn small" id="tab-chartC" role="tab" aria-controls="chartC" aria-selected="true" tabindex="0" type="button">Jamming, lasers and cyber</button>
+        <button class="btn small" id="tab-chartR" role="tab" aria-controls="chartR" aria-selected="false" tabindex="-1" type="button">Close approaches</button>
+        <button class="btn small" id="tab-chartB" role="tab" aria-controls="chartB" aria-selected="false" tabindex="-1" type="button">Who can do what</button>
+        <button class="btn small" id="tab-lag" role="tab" aria-controls="lag" aria-selected="false" tabindex="-1" type="button">How long the law took</button>
+      </div>
+      <div class="xpanels" id="xpanels">
+        <section class="chart xpanel" id="chartC" role="tabpanel" aria-labelledby="tab-chartC" tabindex="-1">
+          <header class="chapter-head sub">
+            <h3 data-avoid id="hC">Attacks that leave satellites in orbit</h3>
+            <p data-avoid class="lede">Each bar is a campaign of jamming, lasers or hacking that leaves the satellites it targets in orbit. Each dot is a single event, and an
+              arrow means the campaign is still going.</p>
+            <div class="tools">
+              <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart">
+                <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+                <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
+              </span>
+              <p data-avoid class="note block" id="noteC"></p>
+              <p class="ckey" id="ckeyC" role="group" aria-label="Colour of each country"></p>
+            </div>
+          </header>
+          <p data-avoid class="takeaway" id="tkC"></p>
+          <div class="callout-row">
+          <p data-avoid class="callout quote" id="quoteC"></p>
+          <p data-avoid class="callout">The rules that govern these operations are soft law (expert manuals that are not binding) or carry military exemptions, such as
+            Article 48 of the Constitution of the International Telecommunication Union (ITU), the United Nations agency for radio and telecommunications.</p>
+          </div>
+          <div class="svgbox" id="svgC"></div>
+          <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendC" aria-label="Key to the jamming, laser and cyber chart"></ul></details>
+          <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableC"></div></details><div class="dl-row"><button class="btn small" data-export="C" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
+        </section>
+
+        <section class="chart xpanel" id="chartR" role="tabpanel" aria-labelledby="tab-chartR" tabindex="-1">
+          <header class="chapter-head sub">
+            <h3 data-avoid id="hR">Satellites that fly close to other satellites</h3>
+            <p data-avoid class="lede">Each shape is one close approach (also called a rendezvous or proximity operation, RPO) between a satellite and another object in orbit, placed at its
+              start date. Arrows show those still going.</p>
+            <div class="tools">
+              <span class="seg" role="group" aria-label="Years shown in the close-approach chart">
+                <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+                <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
+              </span>
+              <button class="btn small" id="rAll" type="button" aria-expanded="false" aria-controls="svgR">Show all 68</button>
+              <p data-avoid class="note block" id="noteR"></p>
+              <p data-avoid class="note block" id="noteR2" aria-live="polite"></p>
+            </div>
+          </header>
+          <p data-avoid class="takeaway" id="tkR"></p>
+          <div class="note-line" id="noteR0"><p data-avoid><b>A close approach is not an attack.</b> Most are inspections, servicing missions or technology tests.</p>
+          </div>
+          <div class="svgbox" id="svgR"></div>
+          <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendR" aria-label="Key to the close-approach chart"></ul>
+            <p>A close approach, or proximity operation, is two objects in orbit coming near each other. The Secure World Foundation (SWF) records that an operation took place, not why. SWF itself is cautious about intent, using words such as “possibly” and “appeared to”; an outlined shape shows those entries.</p></details>
+          <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableR"></div></details><div class="dl-row"><button class="btn small" data-export="R" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
+        </section>
+
+        <section class="chart xpanel" id="chartB" role="tabpanel" aria-labelledby="tab-chartB" tabindex="-1">
+          <header class="chapter-head sub">
+            <h3 data-avoid id="hB">Which states hold which counterspace capabilities, by decade</h3>
+            <p data-avoid class="lede">Each bar counts how many states have a way to attack or interfere with satellites in one decade. Only the 2020s bar rests on the Secure World
+              Foundation’s (SWF) own assessment; earlier decades are reconstructed.</p>
+            <div class="tools">
+              <span class="seg" role="group" aria-label="How the capabilities are grouped">
+                <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
+                <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic and non-kinetic</button>
+              </span>
+            </div>
+          </header>
+          <p data-avoid class="takeaway" id="tkB"></p>
+          <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
+          <div class="svgbox" id="svgB"></div>
+          <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
+          <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendB" aria-label="Key to the capability chart"></ul>
+            <p data-avoid class="b-read"><b>Reading the 2020s bar:</b> the low number counts capabilities that have been tested or used, and the high number adds those still in development. This chart does not use the shared years.</p>
+            <p>For the 2020s, the states and capabilities come from SWF’s 2026 assessment of 13 countries. Whether a capability counts as demonstrated
+              (tested or used) or as still developing is our reading of SWF’s text, so the range bar is the uncertain part: its low end counts demonstrated
+              capabilities only, and its high end adds those still developing. Dotted segments are capabilities we class as developing where SWF’s country
+              table has no data. Decades before 2020 are reconstructed from SWF’s test tables and country chapters; SWF did not assess them.</p>
+            <p>Direct-ascent anti-satellite weapons are missiles launched from Earth to hit a satellite. Co-orbital means a satellite that maneuvers close to
+              another. Electronic warfare means jamming and spoofing. Directed energy means lasers and similar beams. Cyber means attacks through computers
+              and networks. The full rules are in <a href="#codingRules">Sources and method</a>.</p></details>
+          <div class="callout-row">
+            <p data-avoid class="callout" id="calloutB"></p>
+          </div>
+          <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableB"></div></details><div class="dl-row"><button class="btn small" data-export="B" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
+        </section>
+
+        <section class="chart xpanel" id="lag" role="tabpanel" aria-labelledby="tab-lag" tabindex="-1">
+          <header class="chapter-head sub">
+            <h3 data-avoid id="hL">How long the law took to follow</h3>
+            <p data-avoid class="lede">Each pair links a space weapon or attack to the first later legal step our records connect with it. The large number is the time
+              between them. It shows the order of events and says nothing about cause.</p>
+
+          </header>
+          <p data-avoid class="takeaway" id="tkL"></p>
+          <p data-avoid class="note block">Unlike the other charts, this one does not use the shared years. Every bar starts at zero on the same scale, so a longer bar is a longer wait.</p>
+          <div class="svgbox" id="svgL"></div>
+          <details class="about keybox chart-key"><summary>How to read this chart</summary><ul data-avoid class="legend" id="legendL"></ul></details>
+          <div class="dl-group"><details class="table"><summary>Show the data behind this chart</summary><div class="tscroll" id="tableL"></div></details><div class="dl-row"><button class="btn small" data-export="L" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
+        </section>
+      </div>
+    </div>
+  </section>
 </div>
 
 <section class="sources folded" id="sources" aria-labelledby="hS">
@@ -318,12 +346,9 @@
   <ul>
     <li><a href="#scenes" title="3D scenes" aria-label="3D scenes"><span class="r-lab">3D scenes</span></a></li>
     <li><a href="#quizBand" title="Test yourself" aria-label="Test yourself"><span class="r-lab">Test yourself</span></a></li>
-    <li><a href="#legalBand" title="Law and policy" aria-label="Law and policy"><span class="r-lab">Law and policy</span></a></li>
-    <li><a href="#chartA" title="Anti-satellite tests" aria-label="Anti-satellite tests"><span class="r-lab">Anti-satellite tests</span></a></li>
-    <li><a href="#chartC" title="Jamming, lasers and cyber" aria-label="Jamming, lasers and cyber"><span class="r-lab">Jamming, lasers and cyber</span></a></li>
-    <li><a href="#chartR" title="Close approaches" aria-label="Close approaches"><span class="r-lab">Close approaches</span></a></li>
-    <li><a href="#chartB" title="Who can do what" aria-label="Who can do what"><span class="r-lab">Who can do what</span></a></li>
-    <li><a href="#lag" title="How long the law took" aria-label="How long the law took"><span class="r-lab">How long the law took</span></a></li>
+    <li><a href="#timeline" title="Law and weapons timeline" aria-label="Law and weapons timeline"><span class="r-lab">Law and weapons timeline</span></a></li>
+    <li><a href="#pattern" title="What the pattern shows" aria-label="What the pattern shows"><span class="r-lab">What the pattern shows</span></a></li>
+    <li><a href="#explore" title="Explore the data" aria-label="Explore the data"><span class="r-lab">Explore the data</span></a></li>
     <li><a href="#sources" title="Sources and method" aria-label="Sources and method"><span class="r-lab">Sources and method</span></a></li>
   </ul>
 </nav>

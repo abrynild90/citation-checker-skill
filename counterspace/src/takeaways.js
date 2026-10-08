@@ -1,6 +1,6 @@
 // ============================================================================
-// takeaways.js: one plain sentence above each chart that says what to notice, before the reader meets the marks. Every number is counted from the data.
-// Provides: fillTakeaways(). Needs: app.js (the data).
+// takeaways.js: one plain sentence above each chart that says what to notice, before the reader meets the marks, and the four that head "What the pattern
+// shows". Every number is counted from the data. Provides: fillTakeaways(). Needs: app.js (the data).
 // ============================================================================
 import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, fmtMonthYear, parse } from './app.js';
 import { gap, yearsBetween } from './charts/lag.js';
@@ -41,4 +41,13 @@ export function fillTakeaways() {
       return `${x.num} ${x.unit}`;
     };
   set('tkL', `The wait for a legal step ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}, and in ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
+  // What the pattern shows: the four findings that open the charts of "Explore the data", in the order of the story (law late, tests stopped, close approaches, states).
+  const finding = (id, lead, rest) => {
+    const n = document.getElementById(id);
+    if (n) n.innerHTML = `<b>${lead}</b> ${rest}`;
+  };
+  finding('pt1', 'The law came later.', `The wait for a legal step ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}; in ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
+  finding('pt2', 'Some attacks stopped. Others did not.', `Tests that destroy a satellite have paused since ${fmtMonthYear(parse(LAST_DA))}, yet ${word(going)} of ${word(NK.length)} jamming, laser and cyber operations are still going.`);
+  finding('pt3', recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.', `${cap(word(recent))} of the ${CO.length} in our records began in 2020 or later.`);
+  finding('pt4', 'More states can do more.', `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}; only the ${last} figure is the Secure World Foundation’s own assessment.`);
 }
