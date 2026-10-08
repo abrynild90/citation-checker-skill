@@ -65,9 +65,8 @@ export function toHero(done) {
     };
   requestAnimationFrame(tick);
 }
-// Bring the hero into view and pulse the link once.
+// Bring the hero into view and pulse the link once. (The counter keeps saying which link it was until the next scene is opened.)
 export function showInHero(key = fresh.at(-1)?.key) {
-  fresh = fresh.filter((f) => f.key !== key);
   toHero(() => {
     pulseReveal(key);
     document.dispatchEvent(new CustomEvent('cs:reward', { detail: null }));
