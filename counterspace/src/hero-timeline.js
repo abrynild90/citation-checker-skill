@@ -244,7 +244,7 @@ function build(stage) {
     wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
     glance = document.getElementById('heroGlance'),
     gl0 = (glance?.classList.remove('gl-off'), wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null),
-    pxDec = wide ? Math.min(118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
+    pxDec = wide ? Math.min(W >= 1800 ? 146 : 118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
     steps = d3.range(0, W + 1, 24).concat(W),
     // The facts stand in the sky only where no dot, ring or star of the picture would land on them (the box measured against where every mark will sit); if one

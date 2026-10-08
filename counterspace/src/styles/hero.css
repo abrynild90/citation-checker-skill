@@ -266,12 +266,13 @@
   .hero-done .rc-links{gap:6px}
 }
 
-/* On a tall 1920 window the three facts leave the top right and stand under the lede as one row, so the quiet band between the words and the first orbit is
-   part of the page's reading order and the top right is clear sky. */
-@media (min-width:1800px) and (min-height:1040px){
-  .hero-glance{top:292px;right:auto;left:var(--edge);width:min(1180px,64vw)}
+/* From 1800 px the three facts stand wider at the top right, so the sky between the headline and the right edge is part of the page and not an empty band; the picture
+   below takes the room the facts no longer use (hero-timeline.js). */
+@media (min-width:1800px){
+  .hero-glance{top:calc(var(--s-6) + 10px);width:min(820px,44vw)}
   .hero-glance ul{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-5)}
-  .hero-glance li{padding-left:var(--s-4)}
+  .hg-t{font-size:16px}
+  .hero-glance li{font-size:16.5px;line-height:1.45}
 }
 
 /* The first-visit cue: once the opening sweep is over, one quiet line directly under the key (same weight and colour) says the picture answers to a pointer. It fades after the first
