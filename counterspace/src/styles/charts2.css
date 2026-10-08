@@ -166,3 +166,14 @@
   .callout-row>.callout{max-width:none;margin-top:var(--s-5)}
   .callout-row>.b-read{margin-top:var(--s-5);align-self:center}
 }
+
+/* The jamming chapter's two notes stand above the chart as one slim row, so the caution is read before the bars and the page below the chart is shorter */
+#chartC .callout-row{margin:var(--s-3) 0 var(--s-2);gap:var(--s-3) var(--s-4)}
+#chartC .callout-row>.callout{margin:0;padding:var(--s-3) var(--s-4);font-size:15.5px;line-height:1.45}
+#chartC .callout-row>.callout::before{display:none}
+/* the notes folded into "How to read this chart" are plain paragraphs under the key */
+details.about>.words-line,details.about>.b-read,details.about>p{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 14px/1.55 var(--sans);color:var(--muted)}
+details.about>.b-read b,details.about>.words-line b{color:var(--text)}
+#quoteC .q{display:block;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:15.5px;line-height:1.45}
+#quoteC .by{margin-top:2px}
+@media (min-width:1100px){#chartC .callout-row{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:stretch}}

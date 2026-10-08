@@ -370,14 +370,11 @@ export function drawB(el = document.getElementById('svgB')) {
       .filter(([, v]) => v === 'D')
       .map(([k]) => k),
     WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  // One plain line each; what the words mean is in the folded "How to read this chart".
   document.getElementById('calloutB').textContent =
-    `Electronic warfare (jamming and spoofing) is held by the most states: ${ew20} in the 2020s. Demonstrated destructive direct-ascent anti-satellite ` +
-    `(DA-ASAT) capability, meaning a missile launched from Earth that can hit a satellite, has stayed at ${WORD[da20.length] ?? da20.length} states: ` +
-    `${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
-  document.getElementById('noteB').textContent = kin
-    ? 'A state that holds both kinds appears in both groups. Kinetic means missiles and satellites that maneuver close to another; non-kinetic means ' +
-      'jamming, lasers and cyber attacks.'
-    : 'A state that holds two capabilities is counted twice. What each kind means is explained under “How we classified these”.';
+    `Jamming and spoofing is the most widespread capability: ${ew20} states in the 2020s. Missiles that can destroy a satellite have stayed with ` +
+    `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
+  document.getElementById('noteB').textContent = kin ? 'A state with both kinds appears in both groups.' : 'A state with two capabilities is counted twice.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   setKey(
