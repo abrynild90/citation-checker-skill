@@ -222,4 +222,4 @@
 }
 @media (min-width:1700px){:root{--container:min(1440px,calc(100vw - 480px))}}
 /* Wide screens (1800 px and up): a wider page, a longer line for the ledes, and body text one step larger */
-@media (min-width:1800px){:root{--container:min(1680px,calc(100vw - 300px));--measure:64ch;--fs-lede:23px;--fs-body:19px}body{font-size:17px}}
+@media (min-width:1800px){:root{--container:min(1680px,calc(100vw - 300px));--measure:64ch;--fs-body:19px}body{font-size:17px}}
