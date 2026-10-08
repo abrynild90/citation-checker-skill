@@ -14,14 +14,14 @@
 .yr-play:hover{box-shadow:0 0 0 4px var(--accent-soft)}
 .yr-play:active{transform:scale(.94)}
 .yr-play:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.yr-play .ico{width:16px;height:16px;fill:currentColor}
+.yr-play .ico{width:18px;height:18px}
 .yr-line{grid-column:2 / 4;grid-row:1;display:flex;align-items:baseline;gap:var(--s-4);min-width:0;min-height:16px;padding-right:calc(68px * var(--cs))}
 .yr-bar.is-finale .yr-line{padding-right:0}
 .yr-title,.yr-cap{margin:0;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 13px/16px var(--sans);color:var(--text)}
 .yr-cap[hidden],.yr-title[hidden]{display:none}
 .yr-cap b{font-weight:600}
-.yr-cap .yr-year{color:var(--accent-2);margin-right:.35em;font-variant-numeric:tabular-nums}
-.yr-cap a{margin-left:.7em;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+.yr-cap .yr-year{color:var(--accent-2);font-variant-numeric:tabular-nums}
+.yr-cap a{margin-left:.3em;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
 .yr-cap a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:2px}
 .yr-bar.is-finale .yr-title{display:none}
 .yr-tally{margin:0 0 0 auto;flex:0 1 auto;min-width:0;text-align:right;font:500 13px/16px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}

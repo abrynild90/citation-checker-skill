@@ -111,7 +111,7 @@ function captionLine(e) {
     km = e.altitude_km != null ? `${e.altitude_km.toLocaleString('en-US')} km` : '';
   if (e.type === 'nuclear' && km) return `${name}: a nuclear explosion in space, at ${km}`;
   if (e.type === 'destructive' && km) return `${name}: a test that destroyed a satellite, at ${km}`;
-  if (e.type === 'apogee_only' && km) return `${name}: a rocket that rose to about ${km}, with no target`;
+  if (e.type === 'apogee_only' && km) return `${name}: rose to about ${km}, with no target`;
   return name;
 }
 const CAP_HOLD = 3200; // how long a caption stays while the slider keeps moving
@@ -121,7 +121,7 @@ let capTimer = 0,
 function showCap(n, ms) {
   if (capId === n.id) return;
   capId = n.id;
-  capEl.innerHTML = `<span class="yr-year">${n.year}</span>${esc(n.line)}<a href="#scenes" data-scene="${esc(n.id)}">Watch in 3D</a>`;
+  capEl.innerHTML = `<span class="yr-year">${n.year}</span> ${esc(n.line)} <a href="#scenes" data-scene="${esc(n.id)}">Watch in 3D</a>`;
   capEl.hidden = false;
   titleEl.hidden = true;
   clearTimeout(capTimer);
