@@ -11,6 +11,7 @@ export const RPO = {
   title: 'Close approaches: China, the US and Russia (2019–2026)',
   shells: [],
   duration: 32,
+  lede: 'These are three separate close approaches, also called rendezvous and proximity operations, taken from the Secure World Foundation’s tables. A close approach is not an attack.',
   caption:
     'Three separate close approaches (also called rendezvous and proximity operations), from the Secure World Foundation’s (SWF) tables. ' +
     '(1) In 2025, in geostationary orbit (GEO), about 36,000 km up, China’s SJ-21 and SJ-25 approached, appeared to dock (join together) and later separated, while two US GSSAP satellites (Geosynchronous Space Situational Awareness Program) were positioned “flanking” them. ' +

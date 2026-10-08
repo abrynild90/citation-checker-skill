@@ -8,6 +8,7 @@ export const BURNT_FROST = {
   title: 'Burnt Frost: the US destroys a failing satellite (2008)',
   shells: ['LEO'],
   duration: 12,
+  lede: 'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile at USA-193, a failing US satellite, and destroyed it about 220 km above the Earth. The SM-3 is a missile-defense interceptor, so its use against a satellite shows the overlap between missile defense and anti-satellite capability.',
   caption:
     'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile at USA-193, a failing US satellite, and destroyed it about 220 km above the Earth. ' +
     'The SM-3 is a missile-defense interceptor, built to shoot down other missiles, so its use against a satellite shows the overlap between missile defense and anti-satellite capability. ' +

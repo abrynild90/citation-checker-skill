@@ -12,6 +12,7 @@ export const SJ21_TUG = {
   title: 'China’s SJ-21 tows a dead satellite into a higher orbit (2022)',
   shells: [],
   duration: 24,
+  lede: 'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit, about 36,000 km up. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the belt where working satellites sit, then came back down close to it.',
   caption:
     'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
     'The Secure World Foundation (SWF), a space-security nonprofit, reports that SJ-21 “docked to it at some point”. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the GEO belt, the band of orbits where working satellites sit, then came back down close to GEO. ' +

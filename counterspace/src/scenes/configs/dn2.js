@@ -8,6 +8,7 @@ export const DN2 = {
   title: 'DN-2: China’s “high-altitude science” rocket launch (2013)',
   shells: ['LEO', 'MEO', 'GEO'],
   duration: 14,
+  lede: 'On 13 May 2013 China launched a DN-2 rocket from Xichang on a path that reaches space and falls back without completing an orbit. It climbed toward geostationary orbit, the ring about 36,000 km above the equator, and it had no target.',
   caption:
     'On 13 May 2013 China launched a DN-2 rocket from Xichang on a suborbital path, a flight that reaches space and falls back without completing an orbit. ' +
     'It climbed toward geostationary orbit (GEO), the ring about 36,000 km above the equator where a satellite stays above the same point on the Earth. ' +

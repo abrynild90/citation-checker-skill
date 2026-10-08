@@ -13,6 +13,7 @@ export const COSMOS1408 = {
   title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',
   shells: ['LEO'],
   duration: 16,
+  lede: 'On 15 November 2021 Russia fired a Nudol missile from Plesetsk and destroyed Cosmos 1408, a defunct Russian satellite, about 470 km above the Earth. The debris cloud spread across heights that include the orbit of the International Space Station, and its crew sheltered in their docked spacecraft.',
   caption:
     'On 15 November 2021 Russia fired a Nudol missile from Plesetsk and destroyed ' +
     'Cosmos 1408, a defunct Russian satellite, about 470 km above the Earth. ' +

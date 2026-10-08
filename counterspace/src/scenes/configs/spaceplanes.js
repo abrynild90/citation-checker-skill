@@ -13,6 +13,7 @@ export const SPACEPLANES = {
   title: 'Reusable craft that return from orbit: the US X-37B and China’s (2010–2026)',
   shells: [],
   duration: 32,
+  lede: 'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions, and six of them lasted 224 to 908 days. China’s reusable experimental spacecraft has flown three missions, and a fourth launched in February 2026.',
   caption:
     'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions (OTV-1 to OTV-8, for Orbital Test Vehicle). ' +
     'Six lasted 224 to 908 days. OTV-7 flew in an orbit reaching 38,838 km, and OTV-8 launched in August 2025. ' +

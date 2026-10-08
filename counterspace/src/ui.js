@@ -324,7 +324,7 @@ export const legalKindOf = (l) => (l.soft_law ? 'soft' : l.kind === 'negotiation
 export const legalKindWords = (l) => (l.soft_law ? 'Soft law (expert manual, not binding)' : LEGAL_KIND[legalKindOf(l)] || l.kind);
 // A web address in a citation becomes a link named for the publisher (a raw address is long and says nothing).
 const PUBLISHERS = { 'history.state.gov': 'Office of the Historian', 'treaties.unoda.org': 'UN Office for Disarmament Affairs', 'www.itu.int': 'ITU', 'www.icao.int': 'ICAO', 'press.un.org': 'UN Meetings Coverage' };
-const citeHtml = (text) =>
+export const citeHtml = (text) =>
   esc(text).replace(/https?:\/\/[^\s<]+/g, (m) => {
     const trail = (m.match(/[.,;)]+$/) || [''])[0],
       url = m.slice(0, m.length - trail.length);

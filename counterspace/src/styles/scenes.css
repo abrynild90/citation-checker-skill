@@ -2241,3 +2241,34 @@
 @media (pointer: coarse) { .overlay .sv-pbtn { min-height: 44px; } }
 
 .overlay .story { padding-bottom: var(--menu-reserve, 0px); }
+
+/* ---------- Notes that open over the story column ("About this picture", "Where to go next", the related-law card). They float above the end of the column, so
+   opening one never changes the room the steps have while the scene plays. Escape, a press outside, or the button again closes it. */
+.overlay .story-wrap > .sv-pbody {
+  position: absolute;
+  left: var(--s-4);
+  right: var(--s-4);
+  bottom: var(--s-3);
+  z-index: 6;
+  margin: 0;
+  max-height: calc(100% - var(--s-5));
+  overflow: auto;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-2);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-2);
+  animation: sv-pop var(--dur-3) var(--ease) both;
+}
+.overlay .story-wrap > .sv-pbody[hidden] { display: none; }
+@keyframes sv-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .overlay .story-wrap > .sv-pbody { animation: none; } }
+.overlay .sv-lawcard p { margin: 0; max-width: 40em; }
+.overlay .sv-lawcard .lc-title { font: 500 18px/1.3 var(--serif); color: var(--text); }
+.overlay .sv-lawcard .lc-when { margin-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--accent-2); }
+.overlay .sv-lawcard .lc-note { margin-top: var(--s-2); font: 400 14px/1.5 var(--sans); color: var(--muted); }
+.overlay .sv-lawcard .lc-bind { margin-top: var(--s-2); font: 600 14px/1.45 var(--sans); color: var(--text); }
+.overlay .sv-lawcard .lc-src { margin-top: var(--s-2); font: 400 13px/1.5 var(--sans); color: var(--muted); }
+.overlay .sv-lawcard .lc-src a { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; color: var(--accent); }
+.overlay .sv-lawcard .lc-src a .ico { width: 14px; height: 14px; }
+.overlay .sv-lawcard .lc-acts { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }

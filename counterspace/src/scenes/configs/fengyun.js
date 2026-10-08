@@ -9,6 +9,7 @@ export const FENGYUN = {
   title: 'Fengyun-1C: China destroys a weather satellite (2007)',
   shells: ['LEO'],
   duration: 16,
+  lede: 'On 11 January 2007 China fired a ground-launched anti-satellite missile and destroyed Fengyun-1C, a Chinese weather satellite, about 880 km above the Earth. At that height, fragments stay in orbit for decades and spread into a ring around the planet.',
   caption:
     'On 11 January 2007 China fired an SC-19 (a ground-launched anti-satellite missile) from Xichang and ' +
     'destroyed Fengyun-1C, a Chinese weather satellite, about 880 km above the Earth. ' +

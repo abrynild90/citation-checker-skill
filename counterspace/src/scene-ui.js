@@ -3,13 +3,13 @@
 // Provides: openScene(), closeScene(), exportStill(), startHero(); owns the single WebGL host.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { REDUCED, byId, ensureLand, esc, parse } from './app.js';
+import { REDUCED, byId, ensureLand, esc, fmtD, parse } from './app.js';
 import { GLHost } from './scenes/gl-host.js';
 import { loadEarth } from './scenes/earth.js';
 import { HERO, SCENES } from './scenes/config.js';
 import { buildSim } from './scenes/sim.js';
 import { renderSVG } from './scenes/svg-fallback.js';
-import { setGuide } from './ui.js';
+import { hideCard, legalKindWords, setGuide } from './ui.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
@@ -72,6 +72,9 @@ function prefetchEarth() {
       });
   });
 }
+// Where a scene opens (a fraction of its length) when the first frame is a plain stretch of ocean or a dark limb: the telling moment the poster shows. The scene
+// plays on from there and wraps to the start, so nothing is skipped. A tour always starts at the beginning. Chosen by viewing the frames at 0 to 0.6.
+const OPEN_AT = { starfish: 0.16, laser: 0.2, spaceplanes: 0.3 };
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 
 const $ = (id) => document.getElementById(id);
@@ -275,6 +278,7 @@ export async function openScene(id, originEl, viaTour) {
     unloadHero();
     h.mount(view);
     h.load(sim);
+    if (!viaTour && OPEN_AT[cfg.id]) h.update(OPEN_AT[cfg.id]);
     h.playing = true;
     setPlayBtn(true);
     buildViews(cfg, sim);
@@ -324,9 +328,10 @@ function splitSentences(text) {
 function setLede(level, count) {
   const full = cur?.caption || '';
   // The first sentence always shows, at every width: it says what the scene is before the steps say what happens. (The lede gives way from two sentences to one.)
-  const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? (COMPACT.matches ? 1 : 2) : 1));
+  // The intro is two sentences at every width (one when the room is tight); the full account is behind "Read the full account".
+  const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? 2 : 1));
   let shown = expanded ? full : sentences.slice(0, max).join(' ');
-  if (!expanded && max === 2 && shown.length > 360) shown = sentences[0];
+  if (!expanded && max === 2 && shown.length > 340) shown = sentences[0];
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
   moreBtn.hidden = shown === full;
@@ -345,13 +350,15 @@ function setMore(open) {
 moreBtn.onclick = () => setMore(!expanded);
 
 // Text of the open scene: title, count, story, source, related law, picture note and the steps.
+// "SWF" appears in the steps; the source line is where the reader learns what it stands for.
+const citeText = (c) => c.replace(/^Secure World Foundation,/, 'Secure World Foundation (SWF),');
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
   // Names such as X-37B or SJ-21 stay on one line instead of breaking at their hyphen.
   titleEl.innerHTML = esc(cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
-  sentences = splitSentences(cfg.caption);
+  sentences = splitSentences(cfg.lede || cfg.caption);
   expanded = false;
   asideBody.classList.remove('expanded');
   moreBtn.setAttribute('aria-expanded', 'false');
@@ -360,7 +367,7 @@ function fillStory(cfg) {
   setLede(0);
   const ev = byId[cfg.event];
   srcEl.innerHTML =
-    `<span class="sv-cite">Source: ${esc(cfg.cite)}</span>` +
+    `<span class="sv-cite">Source: ${esc(citeText(cfg.cite))}</span>` +
     (ev
       ? `<a href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false">` +
         `<use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
@@ -381,11 +388,12 @@ function fillStory(cfg) {
   ]
     .filter(Boolean)
     .join(' ');
-  slPop.innerHTML = `<p><strong>Source.</strong> ${esc(cfg.cite)}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
+  slPop.innerHTML = `<p><strong>Source.</strong> ${esc(citeText(cfg.cite))}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
   fillNext(cfg);
   lawBtn.disabled = !cfg.related;
   lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
   lawTxt.textContent = cfg.related ? `Related law: ${byId[cfg.related]?.label}` : 'Related law';
+  fillLawCard(cfg);
   renderSteps(cfg);
 }
 
@@ -436,6 +444,7 @@ slBtn.onclick = () => toggleSrc(slPop.hidden);
 const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
   pairBodies = { about: $('svAboutBody'), next: $('sceneNext') };
 function togglePair(which) {
+  if (which) (toggleSrc(false), toggleLawCard(false)); // one note at a time over the story column
   Object.keys(pairBtns).forEach((k) => {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
@@ -445,6 +454,11 @@ function togglePair(which) {
 Object.keys(pairBtns).forEach((k) => (pairBtns[k].onclick = () => togglePair(pairBodies[k].hidden ? k : null)));
 document.addEventListener('pointerdown', (e) => {
   if (!slPop.hidden && !srcRow.contains(e.target)) toggleSrc(false);
+  // a note open over the story column closes on a press anywhere outside it and its button
+  if (!e.target.closest?.('.sv-pbody, .sv-pbtn, #scRelated, .sl-law')) {
+    if (!pairBodies.about.hidden || !pairBodies.next.hidden) togglePair(null);
+    if (!lawCard.hidden) toggleLawCard(false);
+  }
 });
 
 // While the dialog is open the page behind it is inert (no focus, not read out).
@@ -607,7 +621,7 @@ const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && get
 // The list shows whole steps at rest. The story column is a flex column whose list takes what the lede and the foot leave; this measures how many whole
 // rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
 // (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
-const MAX_ROWS = Infinity; // the room decides how many whole rows show, not a count
+const MAX_ROWS = 5; // at most five whole steps show at once on a desktop window; "n more steps" and the scene's own progress carry the rest
 function rowsFit() {
   // the cue under the list takes its room before the rows are counted (updateCue hides it again if every row fits)
   if (!STACKED.matches && !expanded) {
@@ -656,19 +670,6 @@ function fitSteps() {
     r = rowsFit();
     if (asideBody.scrollHeight <= asideBody.clientHeight + 1) break; // every row fits whole, with nothing to scroll
     if (lvl === 1) break;
-  }
-  if (!r.h && !COMPACT.matches && r.n >= steps.length) {
-    // every row fits and there is room to spare: show more of the account, a sentence at a time, while everything still fits
-    const shownNow = sentences.filter((_, i) => captionEl.textContent.includes(sentences[i])).length;
-    for (let k = shownNow + 1; k <= sentences.length; k++) {
-      setLede(0, k);
-      const ok = asideBody.scrollHeight <= asideBody.clientHeight + 1 && rowsFit().n >= steps.length;
-      if (!ok) {
-        setLede(0, k - 1);
-        break;
-      }
-    }
-    r = rowsFit();
   }
   if (STACKED.matches) r.h = 0; // phone and tablet: every row at its natural height, the column scrolls; desktop: a window of whole rows
   if (r.h && !STACKED.matches) {
@@ -1012,8 +1013,8 @@ function phoneLabel(label) {
 const MAX_PILLS = 2;
 let moreBtn2 = null,
   moreMenu = null;
-// The menu opens upward over the end of the story column, so the column gives up that much height while it is open: no step or line of source is covered.
-const reserveMenu = (on) => panel.style.setProperty('--menu-reserve', on && moreMenu ? `${moreMenu.offsetHeight + 12}px` : '0px');
+// The menu opens upward over the end of the story column and does not move anything.
+const reserveMenu = () => {}; // the menu floats over the end of the column; the column keeps its size, so the steps never jump while the scene plays
 function closeMore(focus) {
   if (!moreMenu || moreMenu.hidden) return;
   moreMenu.hidden = true;
@@ -1134,20 +1135,53 @@ const go = (d) => {
 };
 $('scPrev').onclick = () => go(-1);
 $('scNext').onclick = () => go(1);
+// The related law opens as a card in the scene: its date, whether it binds, its source, and a quiet way to see it on the timeline. Nothing scrolls away.
+const lawCard = $('lawCard');
+const BINDS = { treaty: 'A treaty: it binds the states that joined it.', resolution: 'Not binding: a call or a finding, not a rule that carries enforcement.', unilateral: 'A pledge by one country, not a treaty.' };
+function fillLawCard(cfg) {
+  const l = byId[cfg.related];
+  toggleLawCard(false);
+  if (!l) return void (lawCard.innerHTML = '');
+  const when = l.end ? `${fmtD({ date: l.start })} to ${fmtD({ date: l.end })}` : fmtD({ date: l.start });
+  const binds = l.soft_law ? 'Soft law: an expert manual, not binding.' : BINDS[l.kind] || legalKindWords(l) + '.';
+  lawCard.innerHTML =
+    `<p class="lc-title">${esc(l.title || l.label)}</p><p class="lc-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
+    `<p class="lc-bind">${esc(binds)}</p>` +
+    `<p class="lc-src"><b>Source:</b> <span class="lc-cite">${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span>` +
+    (l.source_url ? ` <a href="${esc(l.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>` : '') +
+    `</p>` +
+    `<div class="lc-acts"><button type="button" class="btn small" id="lcTimeline"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>See it on the timeline</button>` +
+    `<button type="button" class="btn small quiet" id="lcClose">Close</button></div>`;
+  lawCard.querySelector('#lcClose').onclick = () => (toggleLawCard(false), lawBtn.focus());
+  lawCard.querySelector('#lcTimeline').onclick = (e) => seeLawOnTimeline(e.detail === 0);
+}
+function toggleLawCard(open) {
+  lawCard.hidden = !open;
+  lawBtn.setAttribute('aria-expanded', String(!!open));
+  if (open) (togglePair(null), toggleSrc(false));
+}
 lawBtn.onclick = () => {
+  if (!cur?.related) return;
+  toggleLawCard(lawCard.hidden);
+  if (!lawCard.hidden) lawCard.querySelector('#lcTimeline')?.focus({ preventScroll: true });
+};
+// Only when asked: close the window and bring the law to the reader on the sticky timeline. The page scrolls so the strip and the chapter heading are both in
+// view, and the law's own card (which opens by keyboard focus) appears only for a keyboard user, so it never covers the strip for someone with a mouse.
+function seeLawOnTimeline(byKeyboard) {
   const id = cur?.related;
   if (!id) return;
   closeScene();
   const m = document.querySelector(`#legalSvg [data-id="${id}"]`);
   if (!m) return;
-  $('legalBand').scrollIntoView({ block: 'nearest' });
+  $('lawHead')?.scrollIntoView({ block: 'start', behavior: 'auto' });
   m.classList.add('hl', 'flash-hl');
-  m.focus();
+  m.focus({ preventScroll: true });
+  if (!byKeyboard) hideCard();
   setGuide(parse(byId[id].start));
   setTimeout(() => {
     m.classList.remove('hl', 'flash-hl');
   }, 3500);
-};
+}
 
 // ---------------------------------------------------------------- story edges: a soft fade at the top and bottom says there is more to scroll
 function updateFades() {
@@ -1165,7 +1199,7 @@ if ('ResizeObserver' in window) {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => fitSteps());
   });
-  [asideBody, captionEl, stepsNote, moreBtn, footEl, $('svPair'), $('svAboutBody'), $('sceneNext')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
+  [asideBody, captionEl, stepsNote, moreBtn, footEl, $('svPair')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
 }
 
 // ---------------------------------------------------------------- keyboard hint, shown once per visit; it sits in the control bar zone, never over the picture
@@ -1235,6 +1269,13 @@ document.addEventListener('keydown', (e) => {
     if (!slPop.hidden) {
       toggleSrc(false);
       slBtn.focus();
+      return;
+    }
+    if (!lawCard.hidden) return (toggleLawCard(false), lawBtn.focus());
+    if (!pairBodies.about.hidden || !pairBodies.next.hidden) {
+      const was = pairBodies.about.hidden ? pairBtns.next : pairBtns.about;
+      togglePair(null);
+      was.focus();
       return;
     }
     closeScene();

@@ -10,6 +10,7 @@ export const VIASAT = {
   staticMarkerCap: { 'KA-SAT (GEO, unaffected)': 48 }, // KA-SAT is the satellite the story is about (48 px at the 22 px reference stage)
   shells: ['GEO'],
   duration: 14,
+  lede: 'On 24 February 2022, within hours of Russia’s invasion of Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems across Europe. The satellite itself kept working, because the attack hit the network on the ground.',
   caption:
     'On 24 February 2022, within hours of Russia’s invasion of Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems across Europe. ' +
     'Their “AcidRain” malware, software that erases a device’s data, reached the modems through the ground management network of KA-SAT, a communications satellite in geostationary orbit (GEO) about 36,000 km up. ' +

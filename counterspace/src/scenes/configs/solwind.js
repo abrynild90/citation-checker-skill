@@ -9,6 +9,7 @@ export const SOLWIND = {
   title: 'Solwind: a US missile destroys a satellite (1985)',
   shells: ['LEO'],
   duration: 12,
+  lede: 'On 13 September 1985 a US F-15 fighter fired an anti-satellite missile that destroyed the Solwind P78-1 satellite, about 530 km above the Earth. The missile’s homing vehicle steered itself and destroyed the satellite by collision.',
   caption:
     'On 13 September 1985 a US F-15 fighter fired an ASM-135 anti-satellite missile that destroyed the Solwind P78-1 satellite, about 530 km above the Earth. ' +
     'The F-15 climbed steeply at supersonic speed (a “zoom climb”) before it released the missile. The missile’s miniature homing vehicle, which steers itself, then rose and destroyed the satellite by collision. ' +

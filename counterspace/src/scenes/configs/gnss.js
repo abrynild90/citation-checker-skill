@@ -15,6 +15,7 @@ export const GNSS = {
   staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
   staticTextPhone: [[' · GPS signal ', ' · ']], // 375 static: "Airliner 1 · lost"
   duration: 16,
+  lede: 'Since late 2023, ground jamming has repeatedly cut satellite navigation signals, such as GPS, for aircraft and ships around the Baltic Sea. A jammer drowns out the weak signals only inside its local zone, and it does not attack any satellite.',
   caption:
     'Since late 2023, ground jamming has repeatedly cut satellite navigation signals (GNSS), such as GPS, for aircraft and ships around the Baltic Sea. ' +
     'Jamming means drowning out a signal with radio noise. In April 2024 Finnair paused its flights to Tartu. ' +

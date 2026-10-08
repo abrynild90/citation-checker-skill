@@ -10,6 +10,7 @@ export const STARFISH = {
   title: 'Starfish Prime: a nuclear explosion in space (1962)',
   shells: ['LEO'],
   duration: 14,
+  lede: 'On 9 July 1962 the United States detonated a nuclear warhead about 400 km above Johnston Island in the Pacific Ocean. Electrons from the blast were trapped by Earth’s magnetic field and formed an artificial radiation belt around the planet.',
   caption:
     'On 9 July 1962 the United States detonated a 1.4-megaton nuclear warhead (equal to ' +
     '1.4 million tonnes of TNT) about 400 km above Johnston Island in the Pacific Ocean. ' +

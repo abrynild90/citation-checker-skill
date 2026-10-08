@@ -8,6 +8,7 @@ export const SHAKTI = {
   title: 'Mission Shakti: India destroys a satellite (2019)',
   shells: ['LEO'],
   duration: 12,
+  lede: 'On 27 March 2019 India fired an interceptor missile from Abdul Kalam Island and destroyed the Microsat-R satellite about 300 km above the Earth. Indian officials said the debris would fall back into the atmosphere within 45 days.',
   caption:
     'On 27 March 2019 India fired a PDV Mk-II interceptor, a missile built to hit a target, from ' +
     'Abdul Kalam Island and destroyed the Microsat-R satellite about 300 km above the Earth. ' +

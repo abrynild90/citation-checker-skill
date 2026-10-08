@@ -8,6 +8,7 @@ export const LASER = {
   title: 'MIRACL: a US laser fired at a satellite (1997)',
   shells: ['LEO'],
   duration: 12,
+  lede: 'In October 1997 the United States fired the MIRACL chemical laser at MSTI-3, a retired Air Force experimental satellite with infrared sensors. Detailed results of the test are not public.',
   caption:
     'In October 1997 the United States fired the MIRACL chemical laser at ' +
     'MSTI-3, a retired Air Force experimental satellite with infrared sensors. ' +
