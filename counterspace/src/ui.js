@@ -5,6 +5,7 @@
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { EXPORTING, LAST_DA, PHONE_MAX, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
 import { hooks } from './shared.js';
+import { hideLinks, linkedRects, showLinks } from './links.js';
 const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
   const byKey = !!el?.matches?.(':focus-visible') && !matchMedia('(hover: none)').matches;
@@ -111,6 +112,9 @@ function showCard(html, evt, el, full = false) {
     avoidCost = (q) => avoid.reduce((a, o) => a + (hit(q, o, 0) ? (onBand ? 120 : 300) * o.w : 0), 0);
   const ax = root?.querySelector('.xaxis, g.axis')?.getBoundingClientRect();
   const hit = (a, b, pad = 3) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
+  // the marks at the other end of this mark's links (a weapon's law, a law's weapons) are ringed: a card never covers them
+  const lk = el ? linkedRects(el) : [],
+    covers = (q) => lk.some((o) => hit(q, o, 6));
   const mid = (r.top + r.bottom) / 2,
     cx = (r.left + r.right) / 2;
   const H = 3 * G,
@@ -154,7 +158,7 @@ function showCard(html, evt, el, full = false) {
         (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
         (hit(q, r, 6) ? 120 : 0) +
         (el && hit(q, r0, 3) ? 1e6 : 0) + // a card never covers the mark it describes
-        
+        (covers(q) ? 1e5 : 0) +
         (rowsChart && hit(q, r0, 2) ? 150 : 0) +
         (near ? 0 : gapTo(q) / (onBand ? 2 : 4) + Math.max(0, gapTo(q) - 120) / 2) +
         Math.abs(L - l) / 40 +
@@ -175,6 +179,7 @@ function showCard(html, evt, el, full = false) {
           (ax && hit(q, ax, 2) ? (near ? 60 : onBand ? 45 : 18) : 0) +
           (hit(q, r, 12) ? 120 : 0) +
           (el && hit(q, r0, 3) ? 1e6 : 0) +
+          (covers(q) ? 1e5 : 0) +
           (rowsChart && hit(q, r0, 2) ? 150 : 0) +
           (near ? Math.hypot(L + cw / 2 - cx, T + ch / 2 - mid) / 15 : gapTo(q) / 2.2) +
           0.5;
@@ -219,7 +224,19 @@ function showCard(html, evt, el, full = false) {
   // Pinned law strip: the card hangs just under the strip, centred on its symbol and clamped to the strip's width, never at the page edge.
   if (el && onBand && bandR && bandR.top <= 1 && bandR.bottom > 0 && root) {
     const rb = root.getBoundingClientRect();
-    best = { L: Math.min(Math.max(rb.left, cx - cw / 2), Math.max(rb.left, rb.right - cw)), T: Math.min(bandR.bottom + 8, VH - ch - 8), score: 0 };
+    const T0 = Math.min(bandR.bottom + 8, VH - ch - 8),
+      L0 = Math.min(Math.max(rb.left, cx - cw / 2), Math.max(rb.left, rb.right - cw));
+    best = { L: L0, T: T0, score: 0 };
+    // keep clear of the weapons this law is linked to: slide along the strip, then step down
+    search: for (const dy of [0, 70, 150, 240])
+      for (const dx of [0, 1, -1, 2, -2, 3, -3, 4, -4].map((k) => k * 60)) {
+        const L = Math.min(Math.max(rb.left, L0 + dx), Math.max(rb.left, rb.right - cw)),
+          T = Math.min(T0 + dy, VH - ch - 8);
+        if (!covers({ left: L, right: L + cw, top: T, bottom: T + ch })) {
+          best = { L, T, score: 0 };
+          break search;
+        }
+      }
   }
   card.style.left = best.L + 'px';
   card.style.top = best.T + 'px';
@@ -387,26 +404,31 @@ export function bindMark(sel, cardFn, onActivate) {
       if (kbd) return;
       cardEl = this;
       showCard(cardFn(d), ev, this);
+      showLinks(this);
     })
     .on('mouseleave', function (ev, d) {
+      hideLinks();
       if (touchMode) return;
       const f = focusedMark();
       if (f && f !== this && f.__card) {
         cardEl = f;
         showCard(f.__card(), null, f);
+        showLinks(f);
       } else if (cardEl === this) hideCard();
     })
     .on('focus', function (ev, d) {
       this.__card = () => cardFn(d);
       cardEl = this;
       showCard(cardFn(d), ev, this);
+      showLinks(this);
       // The browser scrolls a focused mark into view after this handler runs: place the card again once it has, so it sits by the mark and not where the mark used to be.
       const me = this;
       requestAnimationFrame(() => {
-        if (cardEl === me && document.activeElement === me) showCard(cardFn(d), null, me);
+        if (cardEl === me && document.activeElement === me) (showCard(cardFn(d), null, me), showLinks(me));
       });
     })
     .on('blur', function () {
+      hideLinks();
       if (!touchMode && cardEl === this) hideCard();
     });
 }

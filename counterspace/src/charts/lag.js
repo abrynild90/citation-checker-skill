@@ -8,6 +8,7 @@ import { D, EXPORTING, byId, esc, fmt, fmtMY, hasScene, isPhoneNow, parse, tw } 
 import { glyphMarkup, legalGlyph } from './legal.js';
 import { bindMark, hideCard, hint3d, legalKindWords, legend, openCard, rove, table } from '../ui.js';
 import { hooks } from '../shared.js';
+import { gap, yearsBetween } from '../links.js';
 const LAG = [...D.lag_pairs.pairs.map((p) => ({ cap: p.event, law: p.law })), ...D.lag_pairs.open.map((p) => ({ cap: p.event, law: null }))];
 // The two ends of each pair in a few plain words, and what the reader should know about the pair beyond the dates.
 export const WORDS = {
@@ -50,15 +51,7 @@ const hexMarkup = (c) => `<path d="${HEX}" transform="scale(1.2)" style="fill:${
 const ringMarkup = () =>
   `<circle r="7" style="fill:${GROUND};stroke:${GROUND};stroke-width:5.6"/><circle r="7" style="fill:${GROUND};stroke:var(--accent);stroke-width:2.4"/>`;
 const catColor = (c) => (c.domain === 'kinetic' ? 'var(--cat-da)' : 'var(--cat-ew)');
-// The elapsed time as a number and a unit: months under a year, years with one decimal after that.
-export function gap(years) {
-  if (years < 1) {
-    const n = Math.round(years * 12);
-    return { num: String(n), unit: n === 1 ? 'month' : 'months' };
-  }
-  return { num: years.toFixed(1), unit: 'years' };
-}
-export const yearsBetween = (a, b) => (b - a) / (365.25 * 864e5);
+export { gap, yearsBetween } from '../links.js';
 // Title line as runs of text (names in the strong weight, dates and the arrow quiet), wrapped to a width.
 function wrapRuns(runs, maxW, size) {
   const lines = [[]];
