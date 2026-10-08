@@ -667,19 +667,25 @@ function popHTML(h) {
     const e = h.e,
       alt = e.altitude_km == null ? '' : ` At ${num(e.altitude_km)} km.`,
       scene = hasScene(e),
-      title = scene ? sceneName(e.scene_3d) || e.system : e.system;
+      title = scene ? sceneName(e.scene_3d) || e.system : e.system,
+      pr = pairsAt(e.id).find((q) => q.kind === 'weapon'), // the dashed line's other end, named, so the line explains itself
+      pair = pr ? `<p class="hp-pair">${esc((scene && SHORT[e.scene_3d]) || title)}: ${esc(linkText(pr.g))}, the ${esc(LAW_WORDS[pr.law] ?? byId[pr.law].title)}</p>` : '';
     return (
       `<div class="hp-head">${thumb(scene ? e.scene_3d : '')}<div class="hp-ht"><p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p></div></div>` +
       `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
+      pair +
       (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${noLaterText(e)}</p>`) +
       (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
     );
   }
   const l = h.l,
     when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmtD({ date: l.start }),
-    scene = hasScene(l);
+    scene = hasScene(l),
+    // the scene it opens belongs to a weapon our records pair with this very law, or it is only related
+    paired = scene && D.lag_pairs.pairs.some((p) => p.law === l.id && byId[p.event]?.scene_3d === l.scene_3d);
   return (
     `<div class="hp-head">${thumb(scene ? l.scene_3d : '')}<div class="hp-ht"><p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p></div></div>` +
+    (scene && !paired ? `<p class="hp-pair">Related, not a paired follow-up.</p>` : '') +
     `<div class="hp-acts">${scene ? watch(l.scene_3d, `Watch ${SHORT[l.scene_3d] || 'the event'} in 3D`) : ''}` +
     `<a class="btn small" href="#legalBand">See it on the timeline</a></div>`
   );

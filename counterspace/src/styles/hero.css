@@ -112,6 +112,7 @@
 .ht-lk-pill.rest{stroke:rgba(150,175,230,.3)}
 .ht-lk-tag.rest{fill:var(--muted)}
 .ht-lk-dot{fill:var(--hero-accent);stroke:var(--hero-bg);stroke-width:2;paint-order:stroke;pointer-events:none}
+.hp-pair{margin-top:var(--s-2)!important;font:500 14px/1.45 var(--sans);color:var(--muted)}
 .hp-none{margin-top:var(--s-2)!important;font:500 13px/1.4 var(--sans);color:var(--faint)}
 
 /* A wide window (1600 px and more): the hero's words grow by about a tenth (the picture's own labels follow through --htk) and the empty space under the
@@ -125,7 +126,7 @@
   .ht-pop{width:300px}
   .hp-title{font-size:18.5px}
   .hp-when{font-size:14px}
-  .hp-line,.hp-none{font-size:15px}
+  .hp-line,.hp-none,.hp-pair{font-size:15px}
   .hero-grid{padding-bottom:var(--s-3)}
   .stage{--stage-h:clamp(540px,calc(92vh - 160px),770px)}
 }
@@ -146,12 +147,12 @@
 @media (min-width:900px){
   .ht-pop{width:480px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s-3);align-items:center;padding:10px var(--s-4) 11px}
   .ht-pop>p,.ht-pop>.hp-head{grid-column:1/-1}
-  .ht-pop .hp-when,.ht-pop .hp-line{grid-column:1}
+  .ht-pop .hp-when,.ht-pop .hp-line,.ht-pop .hp-pair{grid-column:1}
   .ht-pop .hp-acts{grid-column:2;grid-row:2/4;margin:0;flex-wrap:nowrap}
   .ht-pop .hp-acts:has(a){grid-column:1/-1;grid-row:auto;margin-top:8px}
   .ht-pop .hp-acts .btn{white-space:nowrap}
   .ht-pop .hp-line{margin-top:6px!important}
-  .ht-pop .hp-none{margin-top:3px!important}
+  .ht-pop .hp-none,.ht-pop .hp-pair{margin-top:3px!important}
   .ht-pop:not(:has(.hp-acts)) .hp-line{grid-column:1/-1}
 }
 @media (min-width:900px) and (max-width:1279px){.ht-pop{width:350px}.ht-pop .hp-acts .btn{padding-inline:14px}}
