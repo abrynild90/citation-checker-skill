@@ -9,8 +9,8 @@
 section.chart.chart-first{border-top:0;padding-top:var(--s-6)}
 
 /* ---- what the pattern shows */
-.pattern{padding:var(--s-7) 0 var(--s-6);border-top:1px solid var(--line)}
-.pattern .chapter-head{margin-bottom:var(--s-5)}
+.pattern{padding:var(--s-6) 0 var(--s-6);border-top:1px solid var(--line)}
+.pattern .chapter-head{margin-bottom:var(--s-4)}
 .pat-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-5) var(--s-6)}
 @media (min-width:700px){.pat-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.pat-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -32,7 +32,10 @@ section.chart.chart-first{border-top:0;padding-top:var(--s-6)}
 .xpanels{position:relative}
 section.chart.xpanel[data-off]{position:absolute;top:0;left:0;right:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;padding:0;border:0}
 section.chart.xpanel{border-top:0;padding:var(--s-5) 0 var(--s-4);outline:none}
-@media (min-width:761px){section.chart.xpanel{scroll-margin-top:calc(var(--band-h,0px) + var(--xt-h) + var(--s-3))}}
+@media (min-width:761px){
+  section.chart.xpanel{scroll-margin-top:calc(var(--band-h,0px) + var(--xt-h) + var(--s-3))}
+  .explore[data-years="0"] section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3))} /* the pinned strip steps aside over these two */
+}
 @media (max-width:760px){
   .xtabs.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;border-radius:var(--r-2)}
   .xtabs.seg::before{display:none}

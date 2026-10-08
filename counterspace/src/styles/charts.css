@@ -11,7 +11,7 @@
 
 /* ------------------------------------------------------------------ chapter 01: the law timeline */
 #timeline{position:relative}
-.law-intro{padding-top:var(--s-8)}
+.law-intro{padding-top:var(--s-7)}
 @media (max-width:760px){.law-intro{padding-top:var(--s-7)}}
 .law-intro .chapter-head{margin-bottom:var(--s-4)}
 .law-intro .legend{margin:0 0 var(--s-4)}

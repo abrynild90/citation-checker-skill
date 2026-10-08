@@ -93,7 +93,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 /* ---- hero: the picture, its words and the buttons live in hero.css; the chapter list below belongs to this file ---- */
 /* "What is on this page": one visible row of the chapters, each a link with its count under it. It sits inside the hero, so it is dark in both themes. */
 .hero-contents{grid-area:list;padding:var(--s-4) var(--gutter) 0;max-width:none}
-.pagenav{display:grid;gap:var(--s-1)}
+.pagenav{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--s-5)}
 .pn-h{margin:0;font:600 14px/1.3 var(--sans);letter-spacing:.02em;color:var(--hero-accent-2)}
 .toc{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0 14px;min-width:0}
 .toc li{position:relative;display:flex}
