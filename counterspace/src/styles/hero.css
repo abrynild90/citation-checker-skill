@@ -50,23 +50,23 @@
 .ht-band-leo{fill:rgba(150,175,230,.07)}
 .ht-band-line{fill:none;stroke:rgba(150,175,230,.30);stroke-width:1;stroke-dasharray:2 5}
 .ht-year{stroke:rgba(150,175,230,.10);stroke-width:1}
-.ht-year-t{fill:var(--muted);font:600 13px var(--sans);paint-order:stroke;stroke:rgba(5,9,20,.7);stroke-width:3px;stroke-linejoin:round;font-variant-numeric:tabular-nums;text-anchor:middle}
-.ht-zone{fill:var(--muted);font:500 13px var(--sans)}
+.ht-year-t{fill:var(--muted);font:600 calc(13px * var(--htk,1)) var(--sans);paint-order:stroke;stroke:rgba(5,9,20,.7);stroke-width:3px;stroke-linejoin:round;font-variant-numeric:tabular-nums;text-anchor:middle}
+.ht-zone{fill:var(--muted);font:500 calc(13px * var(--htk,1)) var(--sans)}
 .ht-ev{fill:var(--hero-accent);stroke:var(--hero-bg);stroke-width:3;paint-order:stroke;stroke-linejoin:round}
 .ht-ev.ring{fill:var(--hero-bg);stroke:var(--hero-accent);stroke-width:2;paint-order:normal}
 .ht-ev-under{fill:var(--hero-bg);stroke:var(--hero-bg);stroke-width:5}
 .ht-law{stroke:var(--hero-accent-2);stroke-width:2;fill:none}
 .ht-law.soft{stroke-dasharray:3 3}
-.ht-law-t{fill:var(--hero-accent-2);font:600 13px var(--sans);paint-order:stroke;stroke:var(--hero-bg);stroke-width:5px;stroke-linejoin:round}
-.ht-law-h{fill:var(--muted);font:600 13px var(--sans);paint-order:stroke;stroke:var(--hero-bg);stroke-width:5px;stroke-linejoin:round}
-.ht-note{fill:var(--text);font:400 14px var(--sans);paint-order:stroke;stroke:var(--hero-bg);stroke-width:4px;stroke-linejoin:round}
+.ht-law-t{fill:var(--hero-accent-2);font:600 calc(13px * var(--htk,1)) var(--sans);paint-order:stroke;stroke:var(--hero-bg);stroke-width:5px;stroke-linejoin:round}
+.ht-law-h{fill:var(--muted);font:600 calc(13px * var(--htk,1)) var(--sans);paint-order:stroke;stroke:var(--hero-bg);stroke-width:5px;stroke-linejoin:round}
+.ht-note{fill:var(--text);font:400 calc(14px * var(--htk,1)) var(--sans);paint-order:stroke;stroke:var(--hero-bg);stroke-width:4px;stroke-linejoin:round}
 .ht-note b{font-weight:600}
 .ht-lead{stroke:rgba(238,242,251,.55);stroke-width:1;fill:none}
 .ht-lead-dot{fill:var(--text);stroke:var(--hero-bg);stroke-width:1.5;paint-order:stroke}
 .ht-limb{fill:none;stroke:rgba(140,200,255,.85);stroke-width:1.5}
 .ht-limb2{fill:none;stroke:rgba(140,200,255,.30);stroke-width:4}
 .ht-marker{stroke:var(--text);stroke-width:1;opacity:.7}
-.ht-marker-t{fill:var(--text);font:600 13px var(--sans);font-variant-numeric:tabular-nums}
+.ht-marker-t{fill:var(--text);font:600 calc(13px * var(--htk,1)) var(--sans);font-variant-numeric:tabular-nums}
 .ht-pt,.ht-tick,.ht-fade{transform-box:fill-box}
 
 @media (min-width:900px){
@@ -100,7 +100,24 @@
 .ht-scene{fill:none;stroke:var(--hero-accent);stroke-width:1.2;opacity:.6;pointer-events:none}
 .ht-lk-line{stroke:var(--text);stroke-width:1.5;stroke-dasharray:5 4;stroke-linecap:round;opacity:.85;pointer-events:none}
 .ht-lk-pill{fill:var(--hero-bg);stroke:rgba(150,175,230,.45);stroke-width:1;pointer-events:none}
-.ht-lk-tag{fill:var(--text);font:600 12.5px var(--sans);font-variant-numeric:tabular-nums;pointer-events:none}
+.ht-lk-tag{fill:var(--text);font:600 calc(12.5px * var(--htk,1)) var(--sans);font-variant-numeric:tabular-nums;pointer-events:none}
 /* a word the time tag could not avoid is quietened while the link shows */
 .ht-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
 .hp-none{margin-top:var(--s-2)!important;font:500 13px/1.4 var(--sans);color:var(--faint)}
+
+/* A wide window (1600 px and more): the hero's words grow by about a tenth (the picture's own labels follow through --htk) and the empty space under the
+   actions is taken in. */
+@media (min-width:1600px){
+  .hero-title{font-size:55px}
+  .h1-sub{font-size:26px}
+  .hero-title,.hero-text{max-width:700px}
+  .hero-text .lede{font-size:25px}
+  .hero-cap p{font-size:15.5px}
+  .ht-pop{width:300px}
+  .hp-title{font-size:18.5px}
+  .hp-when{font-size:14px}
+  .hp-line,.hp-none{font-size:15px}
+  .hero-grid{padding-bottom:var(--s-3)}
+  .stage{height:clamp(540px,calc(92vh - 160px),770px)}
+}
+@supports (height:100svh){@media (min-width:1600px){.stage{height:clamp(540px,calc(92svh - 160px),770px)}}}

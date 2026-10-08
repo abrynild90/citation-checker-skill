@@ -81,3 +81,4 @@
 :root[data-theme="light"] header.top { border-radius: 0 0 var(--r-3, 28px) var(--r-3, 28px); }
 :root[data-theme="light"] .scenes { padding-top: 72px; }
 :root[data-theme="light"] .scenes::before { display: none; }
+@media (min-width:1600px){ .scenes, :root:not([data-theme="dark"]) .scenes, :root[data-theme="light"] .scenes { padding-top: 64px; } }

@@ -3,7 +3,7 @@
 // Earth's limb (height on a log scale), and the laws and policies as ticks on the ground. It plays once (a time marker sweeps left to right and each event
 // rises at its year) and then stays as the final picture. Provides: mountHero(). Needs the data and text measurement from app.js.
 // ============================================================================
-import { DOMAIN, KIN, LAST_DA, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
+import { DOMAIN, KIN, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
 import { NO_LATER, hasLaterLaw, linkText, pairsAt, tagSpot } from './links.js';
 import { SCENES } from './scenes/config.js';
@@ -19,7 +19,7 @@ const NS = 'http://www.w3.org/2000/svg',
   LEO = [160, 2000],
   MEO = 20200,
   GEO = 35786,
-  LINE = 19; // px between rows of ground labels
+  LINE0 = 19; // px between rows of ground labels (scaled by K where it is used)
 // Ground labels for the laws that get a name on the picture (every law gets a tick). The phone wording is shorter; null leaves it out there.
 const LAW_NAMES = {
   'ltbt-1963': {
@@ -48,6 +48,7 @@ const text = (parent, attrs, str) => {
 const hits = (a, b, pad = 0) => a.x0 < b.x1 + pad && a.x1 > b.x0 - pad && a.y0 < b.y1 + pad && a.y1 > b.y0 - pad;
 const STILL = REDUCED || /[?&]still\b/.test(location.search);
 
+let K = 1; // type and tag scale: 1, rising to 1.1 on a window of 1600 px and more, so the words keep their size next to the larger screen
 let drawn = null, // the current drawing, kept for the replay and for the Earth photograph that arrives later
   anims = [];
 
@@ -117,9 +118,10 @@ function build(stage) {
     H = Math.round(stage.clientHeight),
     phone = W < 640,
     wide = W >= 900,
+    _k = (K = phone ? 1 : chartScale()),
     gutter = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 24,
     edge = wide ? Math.max(gutter, (W - (document.querySelector('.topbar-in')?.getBoundingClientRect().width || Math.min(1240, W))) / 2 + gutter) : gutter,
-    groundH = phone ? 150 : wide ? 165 : 190,
+    groundH = Math.round((phone ? 150 : wide ? 165 : 190) * K),
     sag = phone ? 8 : Math.round(Math.min(30, W * 0.02)),
     yL = H - groundH, // the limb at the middle of the picture
     bandTop = yL + sag + (phone ? 8 : 14),
@@ -147,7 +149,7 @@ function build(stage) {
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
     steps = d3.range(0, W + 1, 24).concat(W);
 
-  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true', focusable: 'false' }),
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true', focusable: 'false', style: `--htk:${K}` }),
     defs = el('defs', {}, svg),
     limbPath =
       'M' +
@@ -195,7 +197,7 @@ function build(stage) {
   decades.forEach((d) => {
     const cx = x(d),
       yl = String(d.getUTCFullYear()),
-      half = tw(yl, 13, 500) / 2 + 3,
+      half = tw(yl, 13 * K, 500) / 2 + 3,
       cross = named.find((px) => Math.abs(px - cx) < half + 2);
     text(svg, cross === undefined ? { x: cx, y: bandTop + 19, class: 'ht-year-t' } : { x: cross - 6, y: bandTop + 19, class: 'ht-year-t', style: 'text-anchor:end' }, yl);
   });
@@ -228,8 +230,8 @@ function build(stage) {
   });
 
   // ---- annotations (plain sentences, a leader and a dot on the mark) and one small tag for the nuclear test
-  const noteSize = phone ? 13 : 14,
-    noteW = phone ? Math.min(190, W - 2 * gutter - 8) : W < 900 ? Math.round(Math.max(236, W * 0.3)) : W < 1100 ? Math.round(Math.max(200, W * 0.25)) : Math.round(Math.min(250, Math.max(190, W * 0.2))),
+  const noteSize = (phone ? 13 : 14) * K,
+    noteW = K * (phone ? Math.min(190, W - 2 * gutter - 8) : W < 900 ? Math.round(Math.max(236, W * 0.3)) : W < 1100 ? Math.round(Math.max(200, W * 0.25)) : Math.round(Math.min(250, Math.max(190, W * 0.2)))),
     placed = [],
     // what a candidate spot costs: overlapping the words is worst, then another note, then a mark; zero means free
     clash = (box, lead) =>
@@ -300,7 +302,7 @@ function build(stage) {
   const placeZones = () =>
     zones.forEach((z) => {
       for (const t of phone ? [...z.ts].reverse() : z.ts) {
-        const w = tw(t, 13, 500);
+        const w = tw(t, 13 * K, 500);
         for (let shift = 0; shift < W; shift += 12)
           for (const where of z.order) {
             const px = phone ? edge + shift : W - edge - shift,
@@ -333,7 +335,7 @@ function build(stage) {
     }
     for (const sp of spots) {
       const n = sp.lines.length,
-        w = Math.max(...sp.lines.map((l) => tw(l, 13, 500))),
+        w = Math.max(...sp.lines.map((l) => tw(l, 13 * K, 500))),
         base0 = nuke.py + (sp.line ?? 4) - (sp.line == null ? (n - 1) * 8 : 0),
         box = { x0: sp.al === 'start' ? sp.x : sp.x - w, x1: sp.al === 'start' ? sp.x + w : sp.x, y0: base0 - 13, y1: base0 + (n - 1) * 16 + 3 },
         down = sp.line > 0,
@@ -411,6 +413,7 @@ function build(stage) {
   if (!phone) placeZones();
 
   // ---- the law: a tick for every item on the ground, a name and a leader for a few
+  const LINE = LINE0 * K;
   let lastRow = 0;
   const rowsAvail = Math.floor((H - bandTop - (phone ? 40 : 44) - 8 - (phone || !wide ? 24 : 10)) / LINE),
     rowTop = (r) => bandTop + (phone ? 40 : 44) + r * LINE,
@@ -425,7 +428,7 @@ function build(stage) {
     let drop = len;
     if (label) {
       const lines = [label, ...(!phone && name.more ? [name.more] : [])],
-        w = Math.max(tw(label, 13, 600), name.more && !phone ? tw(name.more, 13) : 0),
+        w = Math.max(tw(label, 13 * K, 600), name.more && !phone ? tw(name.more, 13 * K) : 0),
         endAnchor = name.end || px + 8 + w > W - gutter;
       for (let r = (phone ? name.prow : name.row) || 0; r + lines.length <= rowsAvail; r++) {
         const box = endAnchor
@@ -583,7 +586,7 @@ function mountHits(stage, S, actions) {
       return [
         box(ev.px, ev.py, 14, 14),
         box(law.px, (law.py + law.y1) / 2, 4, (law.y1 - law.py) / 2),
-        box(sp.x, sp.y, w / 2 + 2, 13),
+        box(sp.x, sp.y, w / 2 + 2, 11 * K + 2),
         ...Array.from({ length: n + 1 }, (_, i) => box(ev.px + ((law.px - ev.px) * i) / n, ev.py + ((law.py - ev.py) * i) / n, 3, 3)),
       ];
     });
@@ -626,8 +629,8 @@ function mountHits(stage, S, actions) {
       }),
     ];
     return linksOf(h).map(({ p, ev, law }) => {
-      const w = tw(linkText(p.g), 12.5, 600) + 16,
-        sp = tagSpot({ x: ev.px, y: ev.py }, { x: law.px, y: law.py }, w, 22, words, { x0: 0, x1: S.W, y0: 4, y1: S.H - 4 });
+      const w = tw(linkText(p.g), 12.5 * K, 600) + 16 * K,
+        sp = tagSpot({ x: ev.px, y: ev.py }, { x: law.px, y: law.py }, w, 22 * K, words, { x0: 0, x1: S.W, y0: 4, y1: S.H - 4 });
       return { p, ev, law, w, sp };
     });
   };
@@ -648,7 +651,7 @@ function mountHits(stage, S, actions) {
       if (ev !== h) el('circle', { cx: ev.px, cy: ev.py, r: RING(ev), class: 'ht-ring' }, S.links);
       if (law !== h) el('line', { x1: law.px, x2: law.px, y1: law.py, y2: law.y1, class: 'ht-law-hi' }, S.links).setAttribute('opacity', 0.45);
       const t = text(S.links, { x: sp.x, y: sp.y, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g));
-      S.links.insertBefore(el('rect', { x: sp.x - w / 2, y: sp.y - 11, width: w, height: 22, rx: 11, class: 'ht-lk-pill' }), t);
+      S.links.insertBefore(el('rect', { x: sp.x - w / 2, y: sp.y - 11 * K, width: w, height: 22 * K, rx: 11 * K, class: 'ht-lk-pill' }), t);
       sp.hit.forEach((o) => o.node && (o.node.classList.add('ht-dim'), dimmed.push(o.node)));
     });
   };

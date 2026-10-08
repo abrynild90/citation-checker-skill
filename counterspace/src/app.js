@@ -184,8 +184,11 @@ export function setExporting(exporting, forceDesktop) {
 export const chartWindow = { chartC: null, chartR: null };
 export const PHONE_MAX = 640; // px: below this width the page uses its phone layouts
 export const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < PHONE_MAX;
+// On a wide window (1600 px and more) every chart is drawn on a canvas up to 10% narrower than its box and shown scaled up, so words, marks and lines all grow
+// together and the layout still fits its own words.
+export const chartScale = () => (EXPORTING || FORCE_DESKTOP || typeof innerWidth === 'undefined' ? 1 : Math.min(1.1, Math.max(1, 1 + (innerWidth - 1600) / 3200)));
 export function layout(el, domain = DOMAIN, minW = 300) {
-  const W = Math.max(minW, el.clientWidth),
+  const W = Math.max(minW, el.clientWidth / chartScale()),
     ph = isPhoneNow();
   const M = { l: ph ? 40 : 64, r: ph ? 12 : 68 };
   const x = d3

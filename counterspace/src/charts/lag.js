@@ -4,7 +4,7 @@
 // ============================================================================
 // Pairs come from data/lag_pairs.json (embedded as D.lag_pairs): pairs first, then open rings. Dropped pairs are never drawn.
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { D, EXPORTING, byId, esc, fmt, fmtMY, hasScene, isPhoneNow, parse, tw } from '../app.js';
+import { D, EXPORTING, byId, chartScale, esc, fmt, fmtMY, hasScene, isPhoneNow, parse, tw } from '../app.js';
 import { glyphMarkup, legalGlyph } from './legal.js';
 import { bindMark, hideCard, hint3d, legalKindWords, legend, openCard, rove, table } from '../ui.js';
 import { hooks } from '../shared.js';
@@ -99,7 +99,7 @@ const MAX_YEARS = 16;
 export function drawL(el = document.getElementById('svgL')) {
   el.innerHTML = '';
   const phone = isPhoneNow(),
-    W = Math.max(300, el.clientWidth),
+    W = Math.max(300, el.clientWidth / chartScale()),
     PAD = phone ? 8 : 12,
     ROOM = 12, // right of the 16 year mark; a number that does not fit beyond its bar is set on the bar instead
     x = d3

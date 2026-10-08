@@ -25,7 +25,7 @@
 @media (min-width:761px){.legal-band{position:sticky;top:0}}
 .legal-band.compact{padding:0;border-top-color:transparent;border-bottom-color:var(--line-strong)}
 .legal-band.reading #legalSvg{max-height:var(--row-h,60px);overflow:hidden}
-.legal-band svg{display:block;width:100%}
+.legal-band svg{display:block;width:100%;height:auto}
 #legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
 #legalSvg[role="region"] svg{width:auto;max-width:none}
 /* the shaded window on the band, and the soft beam that joins it to the zoom panel */
@@ -72,7 +72,7 @@
 
 /* ------------------------------------------------------------------ parts every chart shares */
 .svgbox{position:relative;margin-top:var(--s-4)}
-.svgbox svg{display:block;width:100%;overflow:visible}
+.svgbox svg{display:block;width:100%;height:auto;overflow:visible}
 .xbox{color:var(--text);background:var(--bg)}
 .xbox svg{display:block;width:100%}
 .axis text{fill:var(--muted);font:400 13px var(--sans)}
