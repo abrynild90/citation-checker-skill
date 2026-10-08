@@ -90,8 +90,8 @@ export function mountDiscover() {
   if (b) b.onclick = go;
 }
 
-// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13". At 13 of 13, when the last scene is closed, the page returns to the top and
-// a card above the buttons shows the real pairs as links, the plain line and where to go next (unless the tour's own closing slide just showed them).
+// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13". At 13 of 13, when the last scene is closed, a card docked under the buttons
+// (never over the picture) shows the real pairs as links, the plain line and where to go next (unless the tour's own closing slide just showed them).
 // Everything is counted from the scenes opened in this visit and from the linked pairs in the data; nothing is stored.
 let pending = false,
   shown = false;
@@ -119,12 +119,11 @@ function showDone() {
   document.getElementById('hdLinks').innerHTML = recapLinks();
   document.getElementById('hdLine').textContent = recapLine();
   card.hidden = false;
-  if (innerWidth >= 640)
-    card.style.bottom = Math.round(card.parentElement.getBoundingClientRect().bottom - document.getElementById('start').getBoundingClientRect().top) + 'px';
   card.classList.remove('in');
   void card.offsetWidth;
   card.classList.add('in');
-  scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+  // the card sits under the buttons: bring it into view (on a phone it is a sheet over the page and needs no scroll)
+  if (innerWidth >= 640) card.scrollIntoView({ block: 'nearest', behavior: REDUCED ? 'auto' : 'smooth' });
   document.getElementById('hdH').focus({ preventScroll: true });
 }
 function hideDone() {
