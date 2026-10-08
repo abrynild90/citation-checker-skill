@@ -71,9 +71,13 @@ function patBig(waits, longP, g) {
     `<span class="pb-end a"><b>${esc(fmtMY(from))}</b><span>${esc(PAIR_WORDS[ev.id]?.name ?? ev.system)} begins</span></span>` +
     `<span class="pb-rail"><i class="pb-dot"></i><i class="pb-draw"></i><b class="pb-pill">${esc(g(Math.max(...waits)))} later</b><i class="pb-tick"></i></span>` +
     `<span class="pb-end b"><b>${esc(fmtMY(parse(law.start)))}</b><span>${esc(LAW_WORDS[law.id] ?? law.title)}</span></span>`;
-  document.getElementById('pbNote').textContent = `${cap(word(waits.length))} pairs from our records. The line shows the longest wait. This is order in time, not cause.`;
+  // narrow: the one line drawn here shows the longest wait. Wide (the list of every pair stands beside it): the line would repeat the list, so it is left out and the list marks the longest.
+  document.getElementById('pbNote').innerHTML =
+    `<span class="pb-n1">${cap(word(waits.length))} pairs from our records. The line shows the longest wait. This is order in time, not cause.</span>` +
+    `<span class="pb-n2">${cap(word(waits.length))} pairs from our records, listed beside it. The longest wait is marked. This is order in time, not cause.</span>`;
   // on a wide window the right of the panel carries all the pairs, one dashed line each (the same drawing as the hero's links)
   document.getElementById('pbPairs').innerHTML = `<p class="pb-ph">Every pair, oldest first</p>${recapLinks()}`;
+  document.querySelector(`#pbPairs li[data-ev="${longP.event}"]`)?.classList.add('is-long');
   box.hidden = false;
   if (!REDUCED && 'IntersectionObserver' in window) {
     box.dataset.armed = '';

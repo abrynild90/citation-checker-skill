@@ -101,10 +101,15 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 /* A wide window (1560 px and more): the panel is two columns. The large line and the longest wait stay at the left; the right carries every pair, oldest first, each as a
    dashed line from the weapon to the law (the drawing the hero uses), so the empty right of the panel says something. */
 .pb-pairs{display:none}
+.pb-n2{display:none}
 @media (min-width:1280px){
   .pat-big{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);column-gap:var(--s-7);align-items:center}
   .pat-big .pb-num{font-size:clamp(40px,4.3vw,84px)}
   .pb-pairs{display:block;padding-left:var(--s-6);border-left:1px solid var(--line-strong)}
+  .pb-track{display:none}
+  .pb-n1{display:none}
+  .pb-n2{display:inline}
+  .pb-pairs li.is-long .rc-pill{border-color:var(--accent);font-weight:700}
   .pb-ph{margin:0 0 var(--s-3);font:600 14px/1.3 var(--sans);color:var(--muted)}
   .pb-pairs .rc-links{gap:12px}
   .pb-pairs .rc-links li{grid-template-columns:minmax(0,.85fr) minmax(0,2fr);font-size:14px;line-height:1.3}
