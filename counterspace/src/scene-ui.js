@@ -13,6 +13,7 @@ import { setGuide } from './ui.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
+import { SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 export let THREE = null,
   host = null,
   glOK = null;
@@ -376,10 +377,48 @@ function fillStory(cfg) {
     .filter(Boolean)
     .join(' ');
   slPop.innerHTML = `<p><strong>Source.</strong> ${esc(cfg.cite)}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
+  fillNext(cfg);
   lawBtn.disabled = !cfg.related;
   lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
   lawTxt.textContent = cfg.related ? `Related law: ${byId[cfg.related]?.label}` : 'Related law';
   renderSteps(cfg);
+}
+
+// "Where to go next": up to three other scenes (the next of the same kind, then the nearest by date of a different kind) and, when the scene's event is
+// drawn on a chart, a button that closes the window and shows it there.
+const markOf = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #svgC [data-id="${id}"], #svgR [data-id="${id}"]`);
+function fillNext(cfg) {
+  const box = $('nextLinks');
+  box.textContent = '';
+  nextScenes(cfg, ORDER).forEach(({ id, tag }) => {
+    const s = SCENES.find((c) => c.id === id);
+    if (!s) return;
+    const b = document.createElement('button'),
+      name = `${SHORT_NAME[id] || s.title}, ${s.date.slice(0, 4)}`;
+    b.type = 'button';
+    b.className = 'sv-next-btn';
+    b.textContent = name;
+    b.title = tag;
+    b.setAttribute('aria-label', `${name}: ${tag.charAt(0).toLowerCase()}${tag.slice(1)}`);
+    b.onclick = () => openScene(id);
+    box.appendChild(b);
+  });
+  if (markOf(cfg.event)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sv-next-btn chart';
+    b.innerHTML = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>Find it on the chart';
+    b.onclick = () => {
+      const m = markOf(cfg.event);
+      closeScene();
+      if (!m) return;
+      m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+      m.classList.add('hl', 'flash-hl');
+      m.focus({ preventScroll: true });
+      setTimeout(() => m.classList.remove('hl', 'flash-hl'), 3500);
+    };
+    box.appendChild(b);
+  }
 }
 
 function toggleSrc(open) {
@@ -949,9 +988,9 @@ function phoneLabel(label) {
   }
   return s.replace(/^./, (m) => m.toUpperCase());
 }
-// Desktop shows at most four view pills (the scene's own first view comes first); any others sit in a "More views" menu button (ARIA menu button pattern:
+// Desktop shows at most two view pills (the scene's own first view comes first); any others sit in a "More views" menu button (ARIA menu button pattern:
 // Enter, Space or the arrow keys open it, the arrows, Home and End move, Enter chooses, Escape and Tab close it). The keys 1 to 5 still reach every view.
-const MAX_PILLS = 4;
+const MAX_PILLS = 2;
 let moreBtn2 = null,
   moreMenu = null;
 function closeMore(focus) {
@@ -1102,7 +1141,7 @@ if ('ResizeObserver' in window) {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => fitSteps());
   });
-  [asideBody, captionEl, stepsNote, moreBtn, footEl, scaleEl.closest('details')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
+  [asideBody, captionEl, stepsNote, moreBtn, footEl, scaleEl.closest('details'), $('sceneNext')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
 }
 
 // ---------------------------------------------------------------- keyboard hint, shown once per visit; it sits in the control bar zone, never over the picture

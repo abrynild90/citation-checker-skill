@@ -106,6 +106,7 @@ document.getElementById('asof').innerHTML =
       `most of them inspection, servicing or technology demonstrations.`,
     who: `Which countries can do what: ${nStates} countries and ${word(caps.length)} kinds of capability, counted decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
     lag: `How long the law took to follow a new capability: ${pairs} milestones with a later legal step, and ${open} with none in our records.`,
+    scenes: `${SCENES.length} short scenes, one for each key event on the charts, each with its story and its source.`,
     src: `Where every fact comes from: ${nSources} cited sources, how current the data is, and the rules used to classify each entry.`,
   };
   document.querySelectorAll('#glance [data-ch]').forEach((li) => {

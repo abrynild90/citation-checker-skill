@@ -18,6 +18,7 @@ import { mountHero } from './hero-timeline.js';
 import { EARTH_URL, earthReady } from './scenes/earth.js';
 import { exportSVG } from './export.js';
 import { audit } from './audit.js';
+import { mountDiscover } from './discover.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
@@ -61,7 +62,7 @@ nameThemeButton();
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
-    starts = ['timeline', 'chartA', 'chartC', 'chartR', 'chartB', 'lag', 'sources'].map((id) => document.getElementById(id)),
+    starts = ['timeline', 'chartA', 'chartC', 'chartR', 'chartB', 'lag', 'scenes', 'sources'].map((id) => document.getElementById(id)),
     passed = new Map();
   const mark = () => {
     const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
@@ -166,6 +167,7 @@ fontsReady.then(() => {
 });
 // The hero picture is drawn from the page's own data and the embedded Earth image; no 3D library is involved.
 mountHero(fontsReady);
+mountDiscover();
 let rz = 0,
   lastW = innerWidth;
 addEventListener('resize', () => {
