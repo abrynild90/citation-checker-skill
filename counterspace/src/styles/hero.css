@@ -34,6 +34,9 @@
 .ht-pop.on{opacity:1;transform:none;pointer-events:auto;transition-duration:110ms,110ms}
 .ht-pop[hidden]{display:none}
 .ht-pop p{margin:0}
+.hp-pic{flex:none;display:block;width:72px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--line);background:var(--hero-bg)}
+.hp-head{display:flex;align-items:flex-start;gap:var(--s-3)}
+.hp-ht{min-width:0;flex:1 1 auto}
 .hp-title{font:500 17px/1.3 var(--serif)}
 .hp-when{margin-top:3px!important;font:500 13px/1.4 var(--sans);color:var(--muted)}
 .hp-line{margin-top:var(--s-2)!important;font:400 14px/1.5 var(--sans);color:var(--text)}
@@ -131,17 +134,17 @@
    one line of detail underneath. */
 @media (min-width:900px){
   .ht-pop{width:480px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s-3);align-items:center;padding:10px var(--s-4) 11px}
-  .ht-pop>p{grid-column:1/-1}
+  .ht-pop>p,.ht-pop>.hp-head{grid-column:1/-1}
   .ht-pop .hp-when,.ht-pop .hp-line{grid-column:1}
   .ht-pop .hp-acts{grid-column:2;grid-row:2/4;margin:0;flex-wrap:nowrap}
   .ht-pop .hp-acts:has(a){grid-column:1/-1;grid-row:auto;margin-top:8px}
   .ht-pop .hp-acts .btn{white-space:nowrap}
   .ht-pop .hp-line{margin-top:6px!important}
   .ht-pop .hp-none{margin-top:3px!important}
-  .ht-pop:not(:has(.hp-acts)) .hp-line,.ht-pop:not(:has(.hp-acts)) .hp-when{grid-column:1/-1}
+  .ht-pop:not(:has(.hp-acts)) .hp-line{grid-column:1/-1}
 }
 @media (min-width:900px) and (max-width:1279px){.ht-pop{width:350px}.ht-pop .hp-acts .btn{padding-inline:14px}}
-@media (min-width:1600px){.ht-pop{width:520px}}
+@media (min-width:1600px){.ht-pop{width:520px}.hp-pic{width:84px;height:47px}}
 
 /* The key under the picture says what the marks are, always; while the first sweep draws the links it gives way to the sentence of the pair being drawn. */
 .hero-cap-main{position:relative;flex:1 1 auto;min-width:0}
@@ -214,3 +217,6 @@
   .stage{height:clamp(560px,calc(100svh - 268px),900px)}
 }
 @media (prefers-reduced-motion:reduce){.hero-glance{animation:none}}
+@media (min-width:1280px){.ht-pop.has-pic{width:530px}}
+@media (min-width:1600px){.ht-pop.has-pic{width:570px}}
+@media (max-width:899px){.hp-pic{width:60px;height:34px}.ht-pop.has-pic{width:min(340px,calc(100% - 16px))}}

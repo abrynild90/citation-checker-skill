@@ -1152,9 +1152,20 @@ addEventListener('resize', camFade);
 
 // ---------------------------------------------------------------- previous, next, close, related law
 $('scClose').onclick = closeScene;
+// The previous and next arrows (and the arrow keys) move one scene along. During the tour they move the tour: it carries on from the new scene, with its
+// chip and its own advance, and only "Stop the tour" or choosing a scene from the dots ends it. Past the last scene the tour finishes with its closing slide.
 const go = (d) => {
   const i = ORDER.indexOf(cur);
-  if (i >= 0) openScene(ORDER[(i + d + ORDER.length) % ORDER.length].id);
+  if (i < 0) return;
+  if (tour) {
+    clearTimeout(tour.timer);
+    tour.timer = 0;
+    showNextUp(false);
+    if (i + d >= ORDER.length) return tourNext();
+    tour.i = (i + d + ORDER.length) % ORDER.length;
+    return openScene(ORDER[tour.i].id, null, true);
+  }
+  openScene(ORDER[(i + d + ORDER.length) % ORDER.length].id);
 };
 $('scPrev').onclick = () => go(-1);
 $('scNext').onclick = () => go(1);

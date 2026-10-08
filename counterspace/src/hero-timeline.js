@@ -8,6 +8,7 @@ import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
 import { NO_LATER, gap, hasLaterLaw, linkText, pairsAt, tagSpot, yearsBetween } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
+import { posterURL } from './scenes/posters.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
 
 const NS = 'http://www.w3.org/2000/svg',
@@ -557,6 +558,11 @@ const sceneOf = (id) => SCENES.find((s) => s.id === id);
 const sceneName = (id) => (sceneOf(id)?.title || '').replace(/\s*\((\d{4}[^)]*)\)\s*$/, '');
 const watch = (id, text) =>
   `<button type="button" class="btn small primary hp-3d" data-scene="${esc(id)}"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>${esc(text)}</button>`;
+// A dot or tick that has a 3D scene shows that scene's picture as a small thumbnail beside the words (the pictures are embedded in the page).
+const thumb = (id) => {
+  const src = posterURL(id);
+  return src ? `<img class="hp-pic" src="${src}" alt="" width="72" height="40" decoding="async">` : '';
+};
 function popHTML(h) {
   if (h.k === 'ev') {
     const e = h.e,
@@ -564,7 +570,7 @@ function popHTML(h) {
       scene = hasScene(e),
       title = scene ? sceneName(e.scene_3d) || e.system : e.system;
     return (
-      `<p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p>` +
+      `<div class="hp-head">${thumb(scene ? e.scene_3d : '')}<div class="hp-ht"><p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p></div></div>` +
       `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
       (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${NO_LATER}</p>`) +
       (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
@@ -574,7 +580,7 @@ function popHTML(h) {
     when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmtD({ date: l.start }),
     scene = hasScene(l);
   return (
-    `<p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
+    `<div class="hp-head">${thumb(scene ? l.scene_3d : '')}<div class="hp-ht"><p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p></div></div>` +
     `<div class="hp-acts">${scene ? watch(l.scene_3d, `Watch ${SHORT[l.scene_3d] || 'the event'} in 3D`) : ''}` +
     `<a class="btn small" href="#legalBand">See it on the timeline</a></div>`
   );
@@ -594,12 +600,14 @@ function mountHits(stage, S, actions) {
   pop.className = 'ht-pop';
   pop.setAttribute('role', 'region');
   pop.hidden = true;
-  const GRACE = 260; // the card stays this long after the pointer leaves, so the way to its button is never cut short
+  const GRACE = 260, // the card stays this long after the pointer leaves, so the way to its button is never cut short
+    TUBE_GRACE = 700; // and this long while the pointer is still inside the corridor between the point and the card
   const stopHide = () => (clearTimeout(hideT), (hideT = 0));
   let active = null,
     hideT = 0,
     switchT = 0,
     switchFor = null,
+    quiet = false, // true while the page itself moves the focus (it must not open a card)
     pinned = false;
   const btns = hits.map((h, i) => {
     const b = document.createElement('button');
@@ -777,6 +785,7 @@ function mountHits(stage, S, actions) {
       active = h;
       pop.dataset.hit = h.k + ':' + h.id;
       pop.innerHTML = popHTML(h);
+      pop.classList.toggle('has-pic', !!pop.querySelector('.hp-pic'));
       pop.hidden = false;
       place(h);
       if (fresh) {
@@ -801,20 +810,31 @@ function mountHits(stage, S, actions) {
     if (now) go();
     else hideT = setTimeout(go, grace);
   };
-  // The path from the point to its card: every pointer position inside this shape belongs to the journey, so crossing a neighbouring dot on the way
-  // neither swaps the card nor starts it fading. (The convex hull of the point and the card, a little padded.)
+  // The corridor from the point to its card: every pointer position inside this shape belongs to the journey, so crossing a neighbouring dot on the way
+  // neither swaps the card nor starts it fading. It is the convex hull of the point and the card (a funnel, narrow at the dot), widened so the narrow end is
+  // never thinner than a tube about 44 px across, and padded all round.
   const onWay = (x, y) => {
     if (!active || pop.hidden) return false;
     const h = active,
       ax = h.px,
       ay = h.k === 'ev' ? h.py : (h.py + h.y1) / 2,
-      L = pop.offsetLeft - 6,
-      T = pop.offsetTop - 6,
-      R = pop.offsetLeft + pop.offsetWidth + 6,
-      B = pop.offsetTop + pop.offsetHeight + 6;
+      L = pop.offsetLeft - 8,
+      T = pop.offsetTop - 8,
+      R = pop.offsetLeft + pop.offsetWidth + 8,
+      B = pop.offsetTop + pop.offsetHeight + 8;
     if (x >= L && x <= R && y >= T && y <= B) return true;
+    // the tube: the segment from the point to the nearest spot of the card, 22 px each side (a distance test, so it needs no hull at its narrow end)
+    const cx = Math.min(Math.max(ax, L), R),
+      cy = Math.min(Math.max(ay, T), B),
+      vx = cx - ax,
+      vy = cy - ay,
+      len2 = vx * vx + vy * vy;
+    if (len2 > 0) {
+      const t = Math.min(1, Math.max(0, ((x - ax) * vx + (y - ay) * vy) / len2));
+      if (Math.hypot(x - (ax + vx * t), y - (ay + vy * t)) <= 22) return true;
+    }
     const pts = [[ax, ay], [L, T], [R, T], [R, B], [L, B]];
-    // convex hull (monotone chain), then a point-in-polygon test with a 10 px margin
+    // convex hull (monotone chain), then a point-in-polygon test with a 12 px margin
     pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
     const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]),
       lo = [],
@@ -832,7 +852,7 @@ function mountHits(stage, S, actions) {
       const a = hull[i],
         b = hull[(i + 1) % hull.length],
         len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-      if (cr(a, b, [x, y]) / len < -10) return false;
+      if (cr(a, b, [x, y]) / len < -12) return false;
     }
     return true;
   };
@@ -962,12 +982,15 @@ function mountHits(stage, S, actions) {
     } else {
       clearTimeout(switchT);
       switchT = 0;
-      if (toward) hide(false, 700);
-      else if (way) hide(false, 380);
+      if (way) hide(false, TUBE_GRACE); // inside the corridor: the card waits, however slowly the pointer travels
       else if (!hideT) hide();
     }
   });
-  layer.addEventListener('pointerleave', (ev) => !pop.contains(ev.relatedTarget) && hide());
+  layer.addEventListener('pointerleave', (ev) => {
+    if (pop.contains(ev.relatedTarget)) return;
+    const r = layer.getBoundingClientRect();
+    hide(false, onWay(ev.clientX - r.left, ev.clientY - r.top) ? TUBE_GRACE : GRACE);
+  });
   pop.addEventListener('pointerenter', () => (stopHide(), clearTimeout(switchT)));
   pop.addEventListener('pointerleave', () => !pinned && hide());
   layer.addEventListener('click', (ev) => {
@@ -1008,7 +1031,7 @@ function mountHits(stage, S, actions) {
   });
   group.addEventListener('focusin', (ev) => {
     const i = btns.indexOf(ev.target);
-    if (i < 0) return;
+    if (i < 0 || quiet) return;
     sweepEnd();
     btns.forEach((b, k) => (b.tabIndex = k === i ? 0 : -1));
     pinned = false;
@@ -1016,11 +1039,7 @@ function mountHits(stage, S, actions) {
   });
   group.addEventListener('keydown', (ev) => {
     const i = btns.indexOf(document.activeElement);
-    if (ev.key === 'Escape') {
-      pinned = false;
-      hide(true);
-      return;
-    }
+    if (ev.key === 'Escape') return; // the page-wide Escape handler closes the card
     if (ev.key === 'Enter' || ev.key === ' ') {
       ev.preventDefault();
       pinned = true;
@@ -1033,14 +1052,23 @@ function mountHits(stage, S, actions) {
     ev.preventDefault();
     btns[Math.min(btns.length - 1, Math.max(0, to))].focus();
   });
-  pop.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') {
-      pinned = false;
-      const b = active?.btn;
-      hide(true);
-      b?.focus();
-    }
+  // Escape closes the card wherever the focus is, so a card pinned by a mouse click (focus still elsewhere) goes away too. When the focus was on the card, it
+  // goes back to the dot or tick the card belongs to (without opening the card again).
+  const dismiss = () => {
+    const back = pop.contains(document.activeElement) ? active?.btn : null;
+    pinned = false;
+    quiet = true;
+    if (back) back.focus({ preventScroll: true });
+    else if (pop.contains(document.activeElement)) document.activeElement.blur();
+    quiet = false;
+    hide(true);
+  };
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape' || !layer.isConnected || pop.hidden || !(active || pinned)) return;
+    if (document.querySelector('.overlay.open')) return; // a scene is open: Escape belongs to it
+    dismiss();
   });
+  pop.addEventListener('keydown', (ev) => ev.key === 'Escape' && (ev.stopPropagation(), dismiss()));
   group.addEventListener('focusout', (ev) => {
     if (!layer.contains(ev.relatedTarget)) hide();
   });
