@@ -35,6 +35,7 @@ export function showTab(id, { focus = false } = {}) {
     panel.toggleAttribute('data-off', !on);
   });
   explore.dataset.years = tab.years ? '1' : '0';
+  if (changed && !tab.years) hooks.legalOff?.(); // before the chart is drawn: the strip must not hang over a chart with its own scale
   explore.dataset.tab = id;
   hooks.drawLazy?.(tab.svg); // drawn already unless the idle pass has not come yet
   if (focus) $('tab-' + id).focus();

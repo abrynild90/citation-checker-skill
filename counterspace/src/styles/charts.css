@@ -315,7 +315,7 @@ details.table>summary{scroll-margin-top:110px}
 
 @media (min-width:1001px){.tscroll th:nth-child(2){min-width:96px}.tscroll th[data-sure]{white-space:nowrap}}
 
-.legal-band.reading.compact,.legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
+.legal-band.reading.compact,.legal-band.off.compact{opacity:0;visibility:hidden;pointer-events:none;transition:opacity 80ms var(--ease),visibility 0s 80ms}
 
 /* Wide tables fit their box: no pinned Source column, narrower cells, short labels where a long one wraps */
 .tl{white-space:normal}
@@ -454,7 +454,9 @@ details.table>summary{scroll-margin-top:110px}
 /* The zoom panel passing under the pinned strip fades out along the strip's bottom edge; the strip itself steps aside at the end of the chapter (see legal.js) */
 @media (min-width:761px){
   #legalZoomBox.under-strip{-webkit-mask-image:linear-gradient(to bottom,transparent var(--under,0px),#000 calc(var(--under,0px) + 36px));mask-image:linear-gradient(to bottom,transparent var(--under,0px),#000 calc(var(--under,0px) + 36px))}
-  .legal-band.off{opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--dur-2) var(--ease),visibility 0s var(--dur-2)}
+  .legal-band.off{opacity:0;visibility:hidden;pointer-events:none;transition:opacity 80ms var(--ease),visibility 0s 80ms}
+  /* page text scrolling under the pinned strip fades out along its edge instead of meeting the year labels */
+  .legal-band.compact:not(.off)::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;margin-top:1px;background:linear-gradient(to bottom,var(--bg),transparent);pointer-events:none}
 }
 
 /* the link between a weapon and the first later law: both ends ringed, a dashed line and the time between them (drawn by links.js, over the page) */

@@ -480,7 +480,11 @@ document.addEventListener(
   'click',
   (e) => {
     const a = e.target.closest?.('a[href^="#"]');
-    if (a && a.getAttribute('href').length > 1 && a.getAttribute('href') !== '#legalBand') hooks.drawRest?.();
+    if (a && a.getAttribute('href').length > 1 && a.getAttribute('href') !== '#legalBand') {
+      // a link to a chart that has its own scale (or to the sources): the pinned strip goes before the page jumps, not after the charts are drawn
+      if (document.getElementById(a.getAttribute('href').slice(1))?.closest('#pattern, #sources, #chartB, #lag')) hooks.legalOff?.();
+      hooks.drawRest?.();
+    }
   },
   true,
 );

@@ -390,7 +390,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   const laneP = tight ? 5 : compact ? 8 : 26,
     lane0 = yMark + (tight ? 10 : compact ? 20 : Math.max(32, dnSpace + 26));
   const yAx = lane0 + (compact ? (Math.max(lanes.length, 2) - 1) * laneP + (tight ? 6 : 8) : lanes.length ? (lanes.length - 1) * laneP + 14 : 8),
-    H = yAx + (tight ? 18 : compact ? 23 : 38);
+    H = yAx + (tight ? 27 : compact ? 31 : 38); // the pinned strip keeps its year labels a clear 8 px above its bottom edge
   const svg = d3
     .select(el)
     .append('svg')
@@ -793,6 +793,13 @@ function fadeZoom() {
   zb.classList.toggle('under-strip', overlap > 1 && zr.bottom > bb.bottom && getComputedStyle(band).visibility !== 'hidden');
   zb.style.setProperty('--under', Math.max(0, Math.round(overlap)) + 'px');
 }
+// Hides the pinned strip at once (a link or a tab is about to take the reader to a chart that does not use the shared years; legalScroll puts it back if not)
+let offUntil = 0; // until then the strip stays away whatever the scroll position says (the page is about to jump)
+export function legalOff() {
+  if (isPhoneNow()) return;
+  offUntil = performance.now() + 700;
+  document.getElementById('legalBand')?.classList.add('off');
+}
 export function legalScroll() {
   legalScrollMain();
   fadeZoom();
@@ -807,7 +814,7 @@ function legalScrollMain() {
     ex = document.getElementById('explore'),
     bh = band.offsetHeight + 24,
     exAligned = !!ex && ex.dataset.years === '1' && ex.getBoundingClientRect().top < bh;
-  band.classList.toggle('off', !isPhoneNow() && ((!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (tr.bottom < band.offsetHeight + 120 && tr.top < 0)));
+  band.classList.toggle('off', !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (tr.bottom < band.offsetHeight + 120 && tr.top < 0)));
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).
   const topY = document.getElementById('bandTop').getBoundingClientRect().top,

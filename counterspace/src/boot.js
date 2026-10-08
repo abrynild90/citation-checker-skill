@@ -9,7 +9,7 @@ import { chipsB, drawB } from './charts/b.js';
 import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
 import { timed } from './app.js';
-import { drawLegal, drawLegalKey, legalScroll } from './charts/legal.js';
+import { drawLegal, drawLegalKey, legalOff, legalScroll } from './charts/legal.js';
 import { hooks } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
@@ -157,6 +157,7 @@ function drawRest() {
 hooks.drawRest = drawRest;
 hooks.drawLazy = drawLazy;
 hooks.legalScroll = legalScroll;
+hooks.legalOff = legalOff;
 function drawAll(lazy = false) {
   guides.length = 0;
   drawnLazy.delete('svgC');
