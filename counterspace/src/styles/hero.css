@@ -141,7 +141,7 @@
   .ht-pop .hp-none{margin-top:3px!important}
   .ht-pop:not(:has(.hp-acts)) .hp-line,.ht-pop:not(:has(.hp-acts)) .hp-when{grid-column:1/-1}
 }
-@media (min-width:900px) and (max-width:1279px){.ht-pop{width:420px}}
+@media (min-width:900px) and (max-width:1279px){.ht-pop{width:350px}.ht-pop .hp-acts .btn{padding-inline:14px}}
 @media (min-width:1600px){.ht-pop{width:520px}}
 
 /* The key under the picture says what the marks are, always; while the first sweep draws the links it gives way to the sentence of the pair being drawn. */
