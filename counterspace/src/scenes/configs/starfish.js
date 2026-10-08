@@ -53,7 +53,7 @@ export const STARFISH = {
       head: true,
       thick: 0.0035,
       ghostOpacity: 0.45,
-      rocket: { minPx: 54, maxPx: 70, glowMin: 24, glowMax: 40 },
+      rocket: { minPx: IS_PHONE ? 54 : 100, maxPx: IS_PHONE ? 70 : 140, glowMin: 24, glowMax: 40 },
       opt: true,
       dx: -96,
       dy: 4,
@@ -68,9 +68,9 @@ export const STARFISH = {
       t1: 0.9,
       count: 1700,
       arcOpacity: IS_PHONE ? 0.2 : 0.11, // desktop: the arches thinned so the Earth does not read as a mesh
-      alpha: IS_PHONE ? 0.6 : 0.38, // desktop: thinner, so the Earth stays readable under the belt
+      alpha: IS_PHONE ? 0.6 : 0.2, // desktop: thinner, so the Earth stays readable under the belt
       color: C.belt,
-      size: 0.026,
+      size: IS_PHONE ? 0.026 : 0.017,
       nLon: 12,
       label: 'Artificial radiation belt',
       short: 'Radiation belt',
@@ -101,7 +101,7 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-190, -66], Johnston: [-150, 30], Thor: [-120, -78], Artificial: [-60, -21], 'Satellite damaged': [165, -50] },
+  liveOff: { Detonation: [-190, -66], Johnston: [-150, 30], Thor: [125, -30], Artificial: [-60, -21], 'Satellite damaged': [165, -50] },
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
@@ -115,8 +115,8 @@ export const STARFISH = {
     {
       name: 'Whole scene',
       glide: [
-        [0, [9, -170.5, 1.45], [16.6, -169.3, 1.05]],
-        [0.12, [9, -170.5, 1.5], [16.6, -169.3, 1.05]],
+        [0, [10, -170.3, IS_PHONE ? 1.45 : 1.3], [IS_PHONE ? 16.6 : 18.3, -169.3, 1.05]],
+        [0.12, [10, -170.3, IS_PHONE ? 1.5 : 1.34], [IS_PHONE ? 16.6 : 18.3, -169.3, 1.05]],
         [0.22, [12, -172, 1.9], [16.6, -169.3, 1.04]],
         [0.3, [18, -175, 2.35], [16.6, -169.4, 1]],
         [0.36, [18.8, -179, 2.7], [12, -174, 0.75]],
@@ -136,8 +136,8 @@ export const STARFISH = {
   staticDrop: ['Thor launch'], // static: the launch ends at the burst, whose label already says it; its leader only cut across the Earth
   still: 0.7,
   camDist: 3.5,
-  seaK: 1.5,
-  dayK: 1.2,
+  seaK: IS_PHONE ? 1.5 : 1.0, // desktop: a lower sea lift and day gain so the close-up globe keeps its ocean and land contrast (it read as a pale haze)
+  dayK: IS_PHONE ? 1.2 : 1.05,
   nightK: 2.4, // the Pacific night side is lifted so the ocean, the island glints and the rocket separate from the dark at t=0
   phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
   staticZoom: 1.7,
@@ -145,11 +145,12 @@ export const STARFISH = {
   staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
   staticCraftMax: 54, // static: the satellite icon stays small (it must not cover the Earth's centre)
   stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
+  captionShort: true, // the picture's caption is the short text: the step list beside it carries the full sentence
   status: [
-    [0, 'Thor rocket climbs toward about 400 km'],
+    [0, 'Thor rocket climbs toward about 400 km', 'Thor climbs to ~400 km'],
     [0.16, 'Detonation: electrons caught in Earth’s magnetic field', 'Detonation: electrons trapped'],
     [0.3, 'Trapped electrons spread north, south, east and west along field lines', 'Electrons spread along field lines'],
     [0.75, 'The belt has drifted around Earth', 'Belt drifts around Earth'],
-    [0.82, 'SWF: tests like this damaged or destroyed satellites then in orbit', 'SWF: such tests damaged or destroyed satellites'],
+    [0.82, 'SWF: tests like this damaged or destroyed satellites then in orbit', 'SWF: such tests damaged satellites'],
   ],
 };

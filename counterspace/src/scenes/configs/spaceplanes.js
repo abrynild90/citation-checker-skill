@@ -155,8 +155,8 @@ export const SPACEPLANES = {
       type: 'craft',
       id: 'csshq',
       variant: 'winged', // a generic winged vehicle: the sources show no more, so it is not drawn as an X-37B
-      minPx: IS_PHONE ? 38 : 80,
-      maxPx: IS_PHONE ? 52 : 114,
+      minPx: IS_PHONE ? 38 : 120,
+      maxPx: IS_PHONE ? 52 : 170,
       anchor: 'cn',
       acts: [2],
       model: 'plane',
@@ -234,8 +234,9 @@ export const SPACEPLANES = {
     { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 }, // the wake ends soon after Object J does
     { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 },
   ],
-  camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [88, -8] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
+  camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
 
+  liveOff: { 'CSSHQ orbit': [-24, 66] }, // the big CSSHQ model needs the orbit name well clear of it (below-left, on the dark sky beside the limb)
   leaderK: 0.3, // an orbit name that sits just off its line still gets a leader
   liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee
   fillK: 0.5,
@@ -291,7 +292,7 @@ export const SPACEPLANES = {
       name: 'China: CSSHQ and released objects',
       chip: 'China CSSHQ',
       act: 2,
-      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: 0.93, aspFloor: 1.33, dMin: 0.1, t: 0.75, include: IS_PHONE ? undefined : [[0, -1.45, 0]] },
+      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: IS_PHONE ? 0.93 : 0.98, aspFloor: 1.33, dMin: 0.1, t: 0.75, include: IS_PHONE ? undefined : [[0, -2.45, 0]] },
     },
     // unlocked from the tour
     { name: 'Whole scene: Earth and every orbit', at: [32, -25, 5.8], phone: { at: [32, -25, 8] }, ref: false, hide: ['OTV-7 orbit'] },

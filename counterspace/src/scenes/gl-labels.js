@@ -210,6 +210,12 @@ const methods = {
     }
     const objs = this._sceneObjects(w, h);
     objs.scale = u;
+    // desktop live view: a 24 px gutter at the left and right edges for the pills, and leaders of about 120 px at most
+    const EDGE = !noBanner && w >= 700 ? 24 : 12;
+    if (!noBanner && w >= 700) {
+      objs.edgeX = 24;
+      objs.leaderCap = 120;
+    }
     this._lastObjs = objs;
     this._lastObst = obst;
     const chip = (!noBanner && this.chipEl && this.chipEl.style.opacity !== '0' ? [rel(this.chipEl)] : [])
@@ -240,7 +246,7 @@ const methods = {
           // a pill that would come within 8 px of the viewer edge flips to the other side of its anchor when that side fits
           fx = (() => {
             const a = r.px + d[0] * offK,
-              m = r.w / 2 + 12;
+              m = r.w / 2 + EDGE;
             // (only when the clamped pill would sit on the anchor itself: a pill that stays clear above or below it just slides in)
             const cl = Math.max(m, Math.min(w - m, a)),
               covers = Math.abs(cl - r.px) < r.w / 2 + 6 && Math.abs(d[1] * offK) < r.h / 2 + 8;
@@ -250,7 +256,7 @@ const methods = {
             }
             return a;
           })(),
-          x = Math.max(r.w / 2 + 12, Math.min(w - r.w / 2 - 12, fx)),
+          x = Math.max(r.w / 2 + EDGE, Math.min(w - r.w / 2 - EDGE, fx)),
           y = Math.max(r.h / 2 + 9, Math.min(h - r.h / 2 - 9, r.py + d[1] * offK)),
           qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
           qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
@@ -283,7 +289,7 @@ const methods = {
           for (let s = 0; s < 9; s++) {
             const sg = s % 2 ? -1 : 1,
               an = ang + sg * Math.ceil(s / 2) * 0.7,
-              x = Math.max(rj.w / 2 + 12, Math.min(w - rj.w / 2 - 12, mx + Math.cos(an) * d)),
+              x = Math.max(rj.w / 2 + EDGE, Math.min(w - rj.w / 2 - EDGE, mx + Math.cos(an) * d)),
               y = Math.max(rj.h / 2 + 9, Math.min(h - rj.h / 2 - 9, my + Math.sin(an) * d)),
               c = { x, y, w: rj.w, h: rj.h };
             if (live.some((o) => o !== j && hit(c, { ...pl[o], w: raw[o].w, h: raw[o].h }))) continue;

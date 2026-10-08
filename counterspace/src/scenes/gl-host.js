@@ -703,7 +703,8 @@ export class GLHost {
       f.mesh.visible = k < 1;
     }
     // Orbit lines that fade out around their craft (it.gapIds): the line never runs through a model.
-    for (const { mat, ids } of this.gapRings || []) {
+    for (const { mat, ids, near } of this.gapRings || []) {
+      if (near) mat.uniforms.uNear.value.set(...near.pos, (!near.cams || near.cams.includes(this.camIdx)) && !this._modelBoost ? near.r : 0);
       ids.slice(0, 2).forEach((id, k) => {
         const e = this.dyn.find((d) => d.it.craftId === id),
           g = mat.uniforms['uGap' + k].value;

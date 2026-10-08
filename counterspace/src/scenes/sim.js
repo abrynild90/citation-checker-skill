@@ -306,6 +306,7 @@ export function buildSim(cfg) {
         thick: a.thick,
         push: a.push,
         gapIds: a.gapCrafts,
+        arcNear: a.arcNear && { pos: anchors[a.arcNear.anchor].pos(0), r: a.arcNear.r, cams: a.arcNear.cams }, // opt-in: only the arc within r of the anchor is drawn (on these cameras)
         fadeDisc: a.fadeDisc, // opt-in: the line fades where it crosses the Earth's disc
         fadeT: a.fadeT, // opt-in [t0, t1] (+ fadeCams: camera indices): the 3D line fades out over that time span (the inset keeps it)
         fadeCams: a.fadeCams,

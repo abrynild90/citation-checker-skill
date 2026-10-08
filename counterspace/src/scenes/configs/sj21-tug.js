@@ -40,6 +40,7 @@ export const SJ21_TUG = {
       push: 0.04,
       fadeDisc: true,
       gapCrafts: ['sj21', 'cg2'],
+      arcNear: { anchor: 'g', r: 1.1, cams: [0, 2, 3, 4] },
       label: 'GEO belt (35,786 km)',
     },
     {
@@ -106,7 +107,9 @@ export const SJ21_TUG = {
     { type: 'trail', craft: 'sj21', t0: 0.47, t1: 0.97, color: C.cn, byIndex: true },
     { type: 'trail', craft: 'cg2', t0: 0.5, t1: 0.8, color: C.dead, byIndex: true },
     // Follow views show almost no Earth: mark the belt itself, the height above it (SWF: 290 to 3,100 km by 27 Jan.) and what each trail is.
-    { type: 'tag', anchor: 'g', off: [0.2, 0, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.45, 1], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: 120, dy: 30 },
+    // the marker sits on the drawn belt arc (the ring is gapped around the pair, so it moves along the arc once the pair has risen)
+    { type: 'tag', anchor: 'g', off: [0.2, -0.008, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.45, 0.66], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: 100, dy: -40 },
+    { type: 'tag', anchor: 'g', off: [0.37, -0.029, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.66, 1], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: 100, dy: -40 },
     { type: 'path', anchor: 'g', offs: [[0.2, 0, 0], [0.2, 0.22, 0], [0.2, 0.44, 0]], noInset: true, staticHide: true, stillHide: true, staticKeep: false, vis: [0.72, 0.97], color: '#ffe6a8', opacity: 0.85, thick: 0.0018, dash: 16 },
     { type: 'tag', anchor: 'g', off: [0.2, 0.22, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.72, 0.97], color: '#ffe6a8', label: '290 to 3,100 km above GEO (SWF)', short: '290–3,100 km above GEO', dx: -128, dy: -26 },
   ],
@@ -127,7 +130,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.86, 0.45], fill: 1.0, fillRamp: [[0.14, 0.68], [0.32, 1.0]], lookCraft: true, include: [[0.14, -0.04, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.86, 0.45], fill: 1.0, fillRamp: [[0.14, 0.68], [0.32, 1.0]], lookCraft: true, shiftR: 0.1, include: [[0.14, -0.04, 0], [0.05, -0.3, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', narrowK: 1, at: [36, 104, 4.9], look: [-2, 106, 2.4], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',
