@@ -134,6 +134,18 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   background:var(--surface);box-shadow:var(--card-shadow);color:var(--text);font:600 14px/1.3 var(--sans);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--dur-1) var(--ease)}
 .rail a:hover .r-lab,.rail a:focus-visible .r-lab{opacity:1}
 
+/* 1500 px and up there is room in the margin: every dot carries its chapter name beside it (two short lines at most), the current one in full strength. */
+@media (min-width:1500px){
+  .rail{right:10px}
+  .rail ul{gap:12px}
+  .rail a{width:auto;min-height:32px;justify-content:flex-end;gap:8px}
+  .rail a::before{order:2}
+  .rail .r-lab{position:static;order:1;transform:none;width:108px;padding:0;border:0;background:none;box-shadow:none;opacity:1;color:var(--muted);font:500 13px/1.25 var(--sans);text-align:right;white-space:normal;transition:color var(--dur-1) var(--ease)}
+  .rail a:hover .r-lab,.rail a:focus-visible .r-lab,.rail a[aria-current] .r-lab{color:var(--text)}
+  .rail a[aria-current] .r-lab{font-weight:600}
+  .rail a:focus-visible{outline-offset:2px;border-radius:var(--r-1)}
+}
+
 /* ---- sources and method ---- */
 .sources{padding:var(--s-8) 0 var(--s-5);border-top:1px solid var(--line);scroll-margin-top:16px}
 .sources-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-6) var(--s-8)}

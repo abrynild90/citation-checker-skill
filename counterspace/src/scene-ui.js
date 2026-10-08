@@ -395,7 +395,7 @@ const markOf = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #s
 function fillNext(cfg) {
   const box = $('nextLinks');
   box.textContent = '';
-  $('sceneNext').open = false; // each scene starts with the row closed, so the story keeps its room
+  togglePair(null); // each scene starts with both notes closed, so the story keeps its room
   nextScenes(cfg, ORDER).forEach(({ id, tag }) => {
     const s = SCENES.find((c) => c.id === id);
     if (!s) return;
@@ -432,10 +432,17 @@ function toggleSrc(open) {
   slBtn.setAttribute('aria-expanded', String(open));
 }
 slBtn.onclick = () => toggleSrc(slPop.hidden);
-document.addEventListener('pointerdown', (e) => {
-  const n = $('sceneNext');
-  if (n.open && !n.contains(e.target)) n.open = false; // the floating row closes when the reader clicks elsewhere
-});
+// "About this picture" and "Where to go next" share one row; the one opened shows its text in the story column under the row (never over the steps or the source).
+const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
+  pairBodies = { about: $('svAboutBody'), next: $('sceneNext') };
+function togglePair(which) {
+  Object.keys(pairBtns).forEach((k) => {
+    const on = k === which;
+    pairBtns[k].setAttribute('aria-expanded', String(on));
+    pairBodies[k].hidden = !on;
+  });
+}
+Object.keys(pairBtns).forEach((k) => (pairBtns[k].onclick = () => togglePair(pairBodies[k].hidden ? k : null)));
 document.addEventListener('pointerdown', (e) => {
   if (!slPop.hidden && !srcRow.contains(e.target)) toggleSrc(false);
 });
@@ -1005,14 +1012,18 @@ function phoneLabel(label) {
 const MAX_PILLS = 2;
 let moreBtn2 = null,
   moreMenu = null;
+// The menu opens upward over the end of the story column, so the column gives up that much height while it is open: no step or line of source is covered.
+const reserveMenu = (on) => panel.style.setProperty('--menu-reserve', on && moreMenu ? `${moreMenu.offsetHeight + 12}px` : '0px');
 function closeMore(focus) {
   if (!moreMenu || moreMenu.hidden) return;
   moreMenu.hidden = true;
+  reserveMenu(false);
   moreBtn2.setAttribute('aria-expanded', 'false');
   if (focus) moreBtn2.focus();
 }
 function openMore(first) {
   moreMenu.hidden = false;
+  reserveMenu(true);
   moreBtn2.setAttribute('aria-expanded', 'true');
   moreMenu.style.left = Math.max(0, moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left) + 'px';
   const items = [...moreMenu.children];
@@ -1021,6 +1032,7 @@ function openMore(first) {
 function buildViews(cfg, sim) {
   camsEl.textContent = '';
   moreMenu?.remove();
+  panel.style.setProperty('--menu-reserve', '0px');
   moreBtn2 = moreMenu = null;
   camOn = -2;
   const pills = phoneViews.matches ? sim.cams.length : Math.min(sim.cams.length, MAX_PILLS);
@@ -1153,7 +1165,7 @@ if ('ResizeObserver' in window) {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => fitSteps());
   });
-  [asideBody, captionEl, stepsNote, moreBtn, footEl, scaleEl.closest('details'), $('sceneNext')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
+  [asideBody, captionEl, stepsNote, moreBtn, footEl, $('svPair'), $('svAboutBody'), $('sceneNext')].forEach((n) => n && liRO.observe(n)); // anything that changes the room the list has
 }
 
 // ---------------------------------------------------------------- keyboard hint, shown once per visit; it sits in the control bar zone, never over the picture
