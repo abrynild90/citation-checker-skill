@@ -172,10 +172,15 @@ no wording errors.
 ## 4. Page anatomy
 
 1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede at the upper left of the picture, which is the page's thesis: every test with a reported
-   altitude as a dot rising from the Earth's limb, every law as a tick on the ground, on the shared years. Under it one caption line (what the dots and ticks are, and that a thin ring
-   means a 3D scene) and one row of actions: "See the timeline" (primary), "Take the 3D tour", "Surprise me", "Test yourself". Nothing else: no start-here strip, no contents row, no
-   source note (the main source and the orbit words live in "Sources and method"). Pointing at a dot or tick opens a small card and, where our records link a weapon to the first later law,
-   rings both ends and draws a dashed line with the time between them. Before any interaction no 3D library is loaded.
+   altitude as a dot rising from the Earth's limb, every law as a tick on the ground, on the shared years. Under it one key line with a small drawn sign for each mark (dot: a test in
+   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of actions: "See the timeline" (primary), "Take the 3D tour",
+   "Surprise me", "Test yourself". On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right. Once, after the first paint and only at the top of
+   the page, a sweep of about four seconds draws each linked pair (dashed line growing from the weapon to the law, then "N years later") one after another, with that pair's sentence from
+   the data replacing the key line; the Replay button becomes "Skip" while it runs, and Replay runs the history and then the sweep again. It is off under reduced motion and ends at the first
+   pointer on a dot or tick. Pointing at a dot or tick opens a short, wide card on the clearest spot of the sky (never over a dot, tick, note, zone name, year, law name or the headline words),
+   rings both ends of a link, draws the dashed line with the time between, and quietens any caption the line or its tag would cross. A new card replaces the open one at once; the old one is
+   kept only while the pointer is plainly heading for its buttons. When all 13 scenes have been seen, closing the last one returns to the top and opens a card above the buttons with the real pairs
+   drawn as links, one plain line and "Where to next" (the quiz, or the full timeline); the tour's closing slide carries the same recap. Before any interaction no 3D library is loaded.
 2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list.
 3. **Two layers.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, the quiz, one timeline chapter (the law strip and the
    anti-satellite test chart on the same years) and "What the pattern shows" (four findings computed from the data, each linking to its chart). Layer two is "Explore the data": one panel with
@@ -187,7 +192,7 @@ no wording errors.
    the title, no number. A chart inside a chapter or a tab takes an h3 and a quieter lede.
 5. **Law strip.** Stays in view as the reader scrolls the test chart and the two tabs that share its years (jamming; close approaches), with the years it shows following the chart under it. It steps
    aside over the findings and over the two tabs with their own scales (decades; years to law).
-6. **Sources and method.** Readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
+6. **Sources and method.** A short head, then one row: the closed "Read the sources and method" disclosure with the copy-citation button at its end. Inside, readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
 7. **Footer.** Three short columns: about this page, data and licence, type and images.
 
 ## 5. Charts
