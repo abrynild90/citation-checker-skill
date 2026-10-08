@@ -855,10 +855,13 @@ export function probeBand() {
   band.classList.remove('compact');
   drawLegal();
 }
-let scrollTick = false; // at most one legalScroll per frame
+let scrollTick = false, // at most one legalScroll per frame
+  settleT = 0;
 addEventListener(
   'scroll',
   () => {
+    clearTimeout(settleT);
+    settleT = setTimeout(legalScroll, 200); // and once more when the scroll has stopped: a jump to a chapter that was not drawn yet still ends with the right strip
     if (scrollTick) return;
     scrollTick = true;
     requestAnimationFrame(() => {
