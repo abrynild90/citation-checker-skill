@@ -2,7 +2,7 @@
    carries .scope-dark, so the top bar and the hero are dark in both themes. Small screens first, wider layouts below. */
 
 /* ---- header, top bar ---- */
-header.top{position:relative;isolation:isolate;background-color:var(--hero-bg);color:var(--text);border-bottom:1px solid var(--hero-line)}
+header.top{position:relative;isolation:isolate;background-color:var(--hero-bg);color:var(--text)}
 /* fine stars behind the words: one gradient per star, kept to the upper part of the header (no mask: a masked layer this tall painted a second copy of the page in some renderers) */
 header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%,920px);z-index:-1;pointer-events:none;
   background-size:100% 72%;background-repeat:no-repeat;
