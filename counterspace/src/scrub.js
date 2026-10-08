@@ -124,6 +124,7 @@ function setYear(y, announce = true) {
   gapEl.hidden = true;
   year = Math.max(Y0, Math.min(Y1, Math.round(y)));
   cut = year >= Y1 ? null : yearEnd(year);
+  setPlayLabel();
   render(announce);
 }
 function setFrac(f) {

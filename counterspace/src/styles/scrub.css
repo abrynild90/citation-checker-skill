@@ -2,7 +2,7 @@
    axes do (--cs is the chart scale on wide windows), so the thumb sits straight above the edge of the fog it draws on the strip and on the chart. */
 .law-row{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-4)}
 .law-row>.keybox{flex:1 1 auto;min-width:0}
-.sc-intro{flex:none}
+.sc-intro{flex:none;margin-top:calc(var(--s-4) + 3px)}
 @media (max-width:760px){.sc-intro,.scrub{display:none}}
 
 .scrub{--cs:1;position:sticky;top:var(--band-h,64px);z-index:19;margin:var(--s-2) 0 var(--s-2);padding:var(--s-2) 0 var(--s-1);background:var(--bg);border-bottom:1px solid var(--line)}
@@ -13,7 +13,7 @@
 .scrub.is-on .sc-tally,.scrub.is-finale .sc-tally{color:var(--text)}
 .scrub.is-finale .sc-tally{color:var(--accent-2);font-weight:600}
 
-.sc-rail{margin:0 calc(68px * var(--cs)) 0 calc(64px * var(--cs));padding:0}
+.sc-rail{margin:var(--s-1) calc(68px * var(--cs)) 0 calc(64px * var(--cs));padding:0}
 .sc-track{position:relative;height:30px;border-radius:var(--r-1);cursor:ew-resize;touch-action:none;outline:none}
 .sc-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:var(--line-strong)}
 .sc-fill{position:absolute;left:0;top:50%;height:2px;margin-top:-1px;width:100%;border-radius:2px;background:var(--accent);pointer-events:none}

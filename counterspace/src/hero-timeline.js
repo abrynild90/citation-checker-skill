@@ -273,7 +273,7 @@ function build(stage) {
                 .filter((m) => m.px > left && m.py < wordsBottom + 60)
                 .map((m) => m.px - 34 * K),
               w = Math.min(470 * K, Math.min(W - edge, ...ahead) - left);
-            if (w >= 330) {
+            if (W >= 1500 && w >= 330) {
               glance.classList.add('gl-mid');
               glance.style.left = `${Math.round(left)}px`;
               glance.style.width = `${Math.round(w)}px`;
