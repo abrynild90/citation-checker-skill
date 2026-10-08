@@ -6,6 +6,8 @@
 .chapter-head.sub{margin-bottom:var(--s-4)}
 .chapter-head.sub>h3{grid-column:1;margin:0;max-width:24em;font:500 clamp(24px,2.5vw,32px)/1.2 var(--serif);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
 @media (min-width:1200px){.chapter-head.sub>h3{grid-row:1;max-width:none}}
+/* a chart's own lede is one step quieter than a chapter's, whatever the screen width */
+.chapter-head.sub>.lede{font:400 clamp(16px,1.25vw,19px)/1.55 var(--serif)}
 section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5);padding-top:var(--s-6)}
 
 /* ---- what the pattern shows */
@@ -48,7 +50,8 @@ section.chart.xpanel{border-top:0;padding:var(--s-5) 0 var(--s-4);outline:none}
 /* the way on to the next chart, at the foot of each tab */
 .xnext{display:flex;justify-content:flex-end;margin:var(--s-4) 0 0;padding-top:var(--s-4);border-top:1px solid var(--line)}
 @media print{
-  .xtabs,.xnext{display:none}
+  .xtabs.seg,.xnext{display:none}
+  .legal-band{position:static!important}
   section.chart.xpanel[data-off]{position:static;height:auto;overflow:visible;visibility:visible;pointer-events:auto}
   section.chart.xpanel{border-top:1px solid var(--line)}
   .pat-go{display:none}
