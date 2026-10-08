@@ -99,7 +99,7 @@ export function drawMethod() {
   document.getElementById('methodBody').innerHTML = `<details class="table src-fold" id="srcDetails"><summary>Read the sources and method<span class="cnt">${cites.length} sources</span></summary>
 <p class="src-check">To check a fact, open the data table behind its chart, note the source and page reference for the entry, then find that source in the list of all cited sources.</p>
 <div class="msec">
-  <h3 id="srcCite">How to cite this page</h3>
+  <h4 id="srcCite">How to cite this page</h4>
   <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
   <div class="panel-card cite-card">
     <p class="cite-text" id="citeText">Aaron Brynildson, “Counterspace Timeline, 1957–2026,” companion to <i>Space Security Law: Governance Beyond the Atmosphere</i>
@@ -110,9 +110,9 @@ export function drawMethod() {
 <div class="mcols">
 <div class="mcol">
 <div class="msec">
-  <h3 id="srcEditions">Editions and dates</h3>
+  <h4 id="srcEditions">Editions and dates</h4>
   <p class="src-intro">Which editions the data rests on, and how current it is.</p>
-  <h4 class="sub-h">What the data rests on</h4>
+  <h5 class="sub-h">What the data rests on</h5>
   <ul>
     <li><b>Main source:</b> Secure World Foundation (SWF), <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen
       Brett, eds., 9th ed., April 2026). It covers 13 countries and five categories of capability. The count of 13 countries is a 2026 figure, not a fixed
@@ -121,7 +121,7 @@ export function drawMethod() {
       2025</i> was used only to cross-check. No entry, page reference or citation depends on it. The 2026 edition was not yet published on ${DATA_DATE}.</li>
     <li><b>Data last updated:</b> ${DATA_DATE}.</li>
   </ul>
-  <h4 class="sub-h">Checks we ran</h4>
+  <h5 class="sub-h">Checks we ran</h5>
   <ul>
     <li><b>Where the opening claim comes from:</b> The statement at the top of the page that only non-destructive capabilities are in active use is SWF’s
       finding, quoted from SWF 2026, Executive Summary, p.&nbsp;xxiii (PDF p.&nbsp;21): “only non-destructive capabilities are actively being used against satellites
@@ -133,7 +133,7 @@ export function drawMethod() {
 </div>
 <div class="mcol">
 <div class="msec">
-  <h3 id="codingRules" tabindex="-1">How we classified the data</h3>
+  <h4 id="codingRules" tabindex="-1">How we classified the data</h4>
   <p class="src-intro">The rules each chart follows when it counts and places an entry. Open one to read its rules.</p>
   ${rule('What counts as an anti-satellite test', scopeRule, true)}
   ${rule(
@@ -179,7 +179,7 @@ export function drawMethod() {
   )}
 </div>
 <div class="msec">
-  <h3 id="srcLicence">Licences and credits</h3>
+  <h4 id="srcLicence">Licences and credits</h4>
   <p class="src-intro">What may be reused, and where the pictures come from.</p>
   ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
       are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
@@ -192,7 +192,7 @@ export function drawMethod() {
 </div>
 </div>
 <div class="msec">
-  <h3 id="srcList">All cited sources (${cites.length})</h3>
+  <h4 id="srcList">All cited sources (${cites.length})</h4>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
   <ol class="cites">${cites.join('')}</ol>
   <p class="only-phone"><a class="to-top" href="#top">Back to the top</a></p>

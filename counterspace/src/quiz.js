@@ -86,11 +86,11 @@ function build(q) {
     const verdict = (ok) =>
       evFirst
         ? ok
-          ? 'Right: the weapon came first.'
-          : 'Easy to guess the other way: the weapon came first and the law followed.'
+          ? 'Right. The weapon came first.'
+          : 'A fair guess, but no. The weapon came first and the law followed.'
         : ok
-          ? 'Right: this time the rules came first.'
-          : 'Easy to guess the other way: the rules came first.';
+          ? 'Right. This time the rules came first.'
+          : 'A fair guess, but no. This time the rules came first.';
     return { opts, truth, line, verdict, scene: e.scene_3d };
   }
   const [ea, la] = q.a,
@@ -108,7 +108,7 @@ function build(q) {
   const top = Math.max(ya, yb),
     one = (e, l, y) => ({ cap: evName(e), left: 'dot', right: 'tick', yl: when(byId[e]).getUTCFullYear(), yr: when(byId[l]).getUTCFullYear(), text: linkText(gap(y)), k: Math.max(0.74, y / top) }),
     line = [one(ea, la, ya), one(eb, lb, yb)];
-  const verdict = (ok) => (ok ? 'Right: that one waited the longest.' : 'Easy to guess the other way: the other one waited the longest.');
+  const verdict = (ok) => (ok ? 'Right. That one waited longest.' : 'A fair guess, but no. The other one waited longest.');
   return { opts, truth, line, verdict, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
 }
 // After a wrong answer: the scene that shows the event, and whether it has been watched yet (in memory only).
@@ -133,7 +133,7 @@ export function mountQuiz() {
   }).join('');
   host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
   <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
-  <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Pick an answer in each question. Your guesses are not stored.</p>
+  <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Four questions, no pressure. Your guesses are not stored.</p>
     <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>See it in the hero</button>
@@ -150,7 +150,7 @@ export function mountQuiz() {
   const sync = () => {
     const done = state.filter((s) => s !== null).length,
       right = state.filter(Boolean).length;
-    if (!done) tally.textContent = 'Pick an answer in each question. Your guesses are not stored.';
+    if (!done) tally.textContent = 'Four questions, no pressure. Your guesses are not stored.';
     else tally.textContent = done < N ? `You called ${right} of ${done} so far.` : `You called ${right} of ${N}.`;
     tally.classList.toggle('done', done === N);
     // all answered: the score is joined by what the four pairs have in common, and the way to the chart that shows every pair becomes the main step

@@ -152,8 +152,8 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .mcol>.msec:has(#codingRules){order:2}.mcol>.msec:has(#srcCite){order:3}.mcol>.msec:has(#srcLicence){order:4}
 @media (min-width:1200px){.mcol{display:block}}
 #methodBody{font:400 16px/1.65 var(--sans);color:var(--muted);min-width:0}
-#methodBody h3{margin:var(--s-8) 0 var(--s-2);color:var(--text);font-size:22px;line-height:1.25;scroll-margin-top:16px}
-#methodBody h3:first-child{margin-top:0}
+#methodBody h4{margin:var(--s-8) 0 var(--s-2);color:var(--text);font-size:22px;line-height:1.25;scroll-margin-top:16px}
+#methodBody h4:first-child{margin-top:0}
 #methodBody>.msec{margin-bottom:var(--s-8)}
 #methodBody p{margin:0 0 var(--s-3);max-width:var(--measure)}
 #methodBody .src-intro{max-width:var(--measure);margin:0 0 var(--s-4);color:var(--text);font-size:17px;line-height:1.55}

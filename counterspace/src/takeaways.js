@@ -19,17 +19,17 @@ export function fillTakeaways() {
   // Law: how many items are binding treaties.
   const treaties = LEGAL.filter((l) => l.kind === 'treaty').length,
     soft = LEGAL.filter((l) => l.soft_law).length;
-  set('tkLaw', `${cap(word(treaties))} of the ${LEGAL.length} items are treaties, and ${word(soft)} are expert manuals that bind no one.`);
+  set('tkLaw', `Only ${word(treaties)} of the ${LEGAL.length} items are treaties. ${cap(word(soft))} are expert manuals, which bind no one.`);
   // Tests: how many destroyed a satellite, where, and when the last was.
   const destroyed = KIN.filter((e) => e.type === 'destructive'),
     leo = destroyed.every((e) => e.altitude_km != null && e.altitude_km <= 2000);
-  set('tkA', `${cap(word(destroyed.length))} tests have destroyed a satellite${leo ? ', all in low Earth orbit' : ''}, and the last was in ${fmtMonthYear(parse(LAST_DA))}.`);
+  set('tkA', `${cap(word(destroyed.length))} tests have destroyed a satellite${leo ? ', every one in low Earth orbit' : ''}. The last was in ${fmtMonthYear(parse(LAST_DA))}.`);
   // Jamming, lasers and cyber: how many are still going.
   const going = NK.filter((e) => !e.end).length;
-  set('tkC', `${cap(word(going))} of these ${NK.length} operations are still going, while destructive tests have stopped since ${fmtMonthYear(parse(LAST_DA))}.`);
+  set('tkC', `${cap(word(going))} of these ${NK.length} operations are still going. Destructive tests have stopped since ${fmtMonthYear(parse(LAST_DA))}.`);
   // Close approaches: how many began in the 2020s.
   const recent = CO.filter((e) => e.start >= '2020').length;
-  set('tkR', `In our records, ${recent} of the ${CO.length} close approaches began in 2020 or later.`);
+  set('tkR', `In our records, ${recent} of the ${CO.length} close approaches began in 2020 or later${recent * 2 > CO.length ? ', which is more than half' : ''}.`);
   // Capabilities: how many states hold at least one, by decade.
   const states = (dec) => new Set(Object.values(CAPS.coding).flatMap((c) => Object.keys(c[dec] || {}).map((s) => s.replace('USSR/Russia', 'Russia')))).size,
     first = CAPS.decades[0],
@@ -42,7 +42,7 @@ export function fillTakeaways() {
       const x = gap(y);
       return `${x.num} ${x.unit}`;
     };
-  set('tkL', `The wait for a legal step ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}, and in ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
+  set('tkL', `The wait ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}. In ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
   // What the pattern shows: the four findings that open the charts of "Explore the data", in the order of the story (law late, tests stopped, close approaches, states).
   const finding = (id, lead, rest) => {
     const n = document.getElementById(id);

@@ -41,7 +41,7 @@ const EXPORT_SPEC = {
     id: 'svgA',
     draw: () => drawA,
     file: 'anti-satellite-tests',
-    title: 'How high anti-satellite tests have reached, and the debris they left',
+    title: 'How high the tests went, and the debris they left',
     sub: 'Every test in our records, by year and altitude, with the debris from the destructive ones.',
     legend: () => ({
       items: [
@@ -65,7 +65,7 @@ const EXPORT_SPEC = {
     id: 'svgB',
     draw: () => drawB,
     file: 'who-can-do-what',
-    title: 'Which states hold which counterspace capabilities, by decade',
+    title: 'Which states can do what, decade by decade',
     sub: 'Number of states holding each capability in each decade.',
     legend: () => ({
       items: [

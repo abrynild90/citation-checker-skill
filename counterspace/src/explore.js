@@ -176,7 +176,11 @@ export function mountExplore() {
       showTab(next.id);
       $(next.id).scrollIntoView({ block: 'start', behavior: 'auto' });
     });
-    $(t.id).append(row);
+    const fold = $(t.id).querySelector(':scope > .refold'),
+      foot = document.createElement('div');
+    foot.className = 'ref-foot';
+    fold.replaceWith(foot);
+    foot.append(fold, row);
   });
   showTab(active);
   // A click on a link to a chart opens its tab before the browser scrolls, so the jump lands on a chart that is in place.

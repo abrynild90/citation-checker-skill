@@ -82,7 +82,7 @@ export function capSentence(group = 'cat') {
     start = `In the ${first}, ${numWord(a.states)} state${a.states === 1 ? ' had' : 's had'} ${a.tot === 1 ? 'a single capability' : `${numWord(a.tot)} between them`}. `,
     end = ` Only the ${last} figures are the Secure World Foundation’s own assessment.`;
   if (group === 'cat')
-    return `${start}By the ${last}, ${numWord(b.states)} states have ${b.tot} capabilities between them, ${b.dem} of them tested or used and the rest still in development.${end}`;
+    return `${start}By the ${last}, ${numWord(b.states)} states hold ${b.tot} between them: ${b.dem} tested or used, the rest still in development.${end}`;
   const both = b.per[0] + b.per[1] - b.states;
   return `${start}By the ${last}, ${numWord(b.per[0])} states have a kinetic capability and ${numWord(b.per[1])} a non-kinetic one, and ${numWord(both)} have both.${end}`;
 }
