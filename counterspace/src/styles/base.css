@@ -118,6 +118,13 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 .chapter-head>h2{grid-column:1;max-width:22em}
 .chapter-head>.lede{grid-column:1;margin-top:var(--s-1);max-width:var(--measure);font-size:clamp(17px,1.5vw,20px)}
 .chapter-head>.tools{grid-column:1;margin-top:var(--s-3);gap:var(--s-3)}
+/* Wide screens: the title takes the left half and its one-sentence lede the right, so a chapter opening has no empty half. */
+@media (min-width:1200px){
+  .chapter-head{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--s-8)}
+  .chapter-head>h2{grid-row:1;max-width:none}
+  .chapter-head>.lede{grid-column:2;grid-row:1;margin:0 0 var(--s-1);max-width:none}
+  .chapter-head>.tools{grid-column:1 / -1;grid-row:2}
+}
 
 .only-phone{display:none}
 .phone-only-btn{display:none}

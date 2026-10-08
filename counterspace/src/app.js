@@ -95,22 +95,32 @@ document.getElementById('asof').innerHTML =
     open = D.lag_pairs.open.length,
     nSources = new Set(EVENTS.concat(LEGAL).map((r) => r.source_url)).size;
   const nuclearText = nuclear ? (nuclear === 1 ? ', one of them a high-altitude nuclear test' : `, ${word(nuclear)} of them nuclear`) : '';
+  // One short count under each name; the full sentence is the link's description.
   const text = {
-    law: `The legal and policy record, from treaties to expert manuals: ${LEGAL.length} items from ${first(LEGAL, 'start')} to ${last(LEGAL, 'start')}, drawn on the same years as every chart below.`,
+    law: `${LEGAL.length} items`,
+    tests: `${KIN.length} tests`,
+    jam: `${NK.length} operations`,
+    close: `${CO.length} close approaches`,
+    who: `${nStates} countries`,
+    lag: `${pairs} pairs`,
+    scenes: `${SCENES.length} scenes`,
+    src: `${nSources} sources`,
+  };
+  const long = {
+    law: `The legal and policy record, from treaties to expert manuals: ${LEGAL.length} items from ${first(LEGAL, 'start')} to ${last(LEGAL, 'start')}.`,
     tests:
       `Tests of weapons meant to destroy satellites: ${KIN.length} between ${first(KIN, 'date')} and ${last(KIN, 'date')}${nuclearText}; ` +
       `${destroyed.length} destroyed a satellite${allLEO ? ', all in low Earth orbit' : ''}, the last in ${fmtMonthYear(parse(LAST_DA))}.`,
     jam: `Interfering with satellites or the signals they carry, by jamming, laser or cyber attack: ${NK.length} operations since ${first(NK, 'start')}.`,
-    close:
-      `Satellites flying close to other satellites: ${CO.length} close approaches, dockings, releases and spaceplane missions since ${first(CO, 'start')}, ` +
-      `most of them inspection, servicing or technology demonstrations.`,
-    who: `Which countries can do what: ${nStates} countries and ${word(caps.length)} kinds of capability, counted decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
+    close: `Satellites flying close to other satellites: ${CO.length} close approaches, dockings, releases and spaceplane missions since ${first(CO, 'start')}.`,
+    who: `Which countries can do what: ${nStates} countries and ${word(caps.length)} kinds of capability, decade by decade from the ${CAPS.decades[0]} to the ${CAPS.decades.at(-1)}.`,
     lag: `How long the law took to follow a new capability: ${pairs} milestones with a later legal step, and ${open} with none in our records.`,
     scenes: `${SCENES.length} short scenes, one for each key event on the charts, each with its story and its source.`,
     src: `Where every fact comes from: ${nSources} cited sources, how current the data is, and the rules used to classify each entry.`,
   };
   document.querySelectorAll('#glance [data-ch]').forEach((li) => {
     li.querySelector('.t-text').textContent = text[li.dataset.ch] || '';
+    li.querySelector('a').title = long[li.dataset.ch] || '';
   });
 }
 // The phone list's heading keeps its own wording; only a count in it follows the data.
