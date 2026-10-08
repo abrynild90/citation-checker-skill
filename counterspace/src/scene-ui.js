@@ -335,15 +335,26 @@ function setLede(level, count) {
   if (!expanded && max === 2 && shown.length > 340) shown = sentences[0];
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
-  moreBtn.hidden = shown === full;
   moreBtn.classList.toggle('lone', !shown); // nothing above it: the button stands alone
+  syncMore();
+}
+// One fold for the whole story: the full account and every step open together. The button shows only while something is folded (a longer account than
+// the intro, or steps beyond the window), and says which; once open it stays, as "Show less".
+let hasMore = false;
+function syncMore() {
+  const full = (cur?.caption || '').trim(),
+    capFolded = !!cur?.lede && cur.lede.trim() !== full,
+    stepsHidden = !expanded && !STACKED.matches && !!stepsEl.style.height && listScrolls();
+  if (!expanded) hasMore = capFolded || stepsHidden;
+  moreBtn.hidden = !hasMore;
+  moreBtn.querySelector('span').textContent = expanded ? 'Show less' : capFolded ? (steps.length > 4 ? 'Read the full account and every step' : 'Read the full account') : 'Show every step';
 }
 function setMore(open) {
   expanded = open;
   asideBody.classList.toggle('expanded', open);
   moreBtn.setAttribute('aria-expanded', String(open));
-  moreBtn.querySelector('span').textContent = open ? 'Show less' : 'Read the full account';
   moreBtn.classList.toggle('open', open);
+  setLede(0); // the full account replaces the intro (fitSteps stops short when open, so the text is set here)
   if (!open) asideBody.scrollTop = 0;
   fitSteps();
   updateFades();
@@ -363,8 +374,8 @@ function fillStory(cfg) {
   expanded = false;
   asideBody.classList.remove('expanded');
   moreBtn.setAttribute('aria-expanded', 'false');
-  moreBtn.querySelector('span').textContent = 'Read the full account';
   moreBtn.classList.remove('open');
+  hasMore = false;
   setLede(0);
   const ev = byId[cfg.event];
   srcEl.innerHTML =
@@ -622,13 +633,8 @@ const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && get
 // The list shows whole steps at rest. The story column is a flex column whose list takes what the lede and the foot leave; this measures how many whole
 // rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
 // (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
-const MAX_ROWS = 5; // at most five whole steps show at once on a desktop window; "n more steps" and the scene's own progress carry the rest
+const MAX_ROWS = 5; // at most five whole steps show at once on a desktop window; the "Read the full account" fold and the scene's own progress carry the rest
 function rowsFit() {
-  // the cue under the list takes its room before the rows are counted (updateCue hides it again if every row fits)
-  if (!STACKED.matches && !expanded) {
-    stepsCue.hidden = false;
-    stepsCue.querySelector('span').textContent ||= '0 more steps';
-  }
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.height = '';
   stepsEl.style.flex = '';
@@ -780,37 +786,9 @@ function trimSteps() {
   const gap = Math.max(0, H - end);
   stepsEl.style.clipPath = gap > 1 && end > 0 ? `inset(0 0 ${gap}px 0)` : '';
 }
-// "n more steps" under the list while rows are hidden: it says how many lie beyond the window and moves the list by one window when pressed.
-const stepsCue = document.createElement('button');
-stepsCue.type = 'button';
-stepsCue.className = 'steps-cue';
-stepsCue.hidden = true;
-stepsCue.innerHTML = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-down"/></svg><span></span>';
-stepsEl.after(stepsCue);
-stepsCue.onclick = () => {
-  const H = stepsEl.clientHeight,
-    y = stepsEl.scrollTop,
-    down = !stepsCue.classList.contains('up'),
-    kids = [...stepsEl.children];
-  let to = down ? y : 0;
-  if (down) for (const li of kids) if (li.offsetTop + li.offsetHeight - y <= H + 1) to = Math.max(to, li.offsetTop + li.offsetHeight);
-  lastUserScroll = performance.now();
-  stepsEl.scrollTo({ top: down ? Math.min(to, stepsEl.scrollHeight - H) : 0, behavior: REDUCED ? 'auto' : 'smooth' });
-};
-function updateCue() {
-  const sc = !STACKED.matches && !expanded && !!stepsEl.style.height && listScrolls();
-  if (!sc) return void (stepsCue.hidden = true);
-  const H = stepsEl.clientHeight,
-    y = stepsEl.scrollTop,
-    below = [...stepsEl.children].filter((li) => li.offsetTop + li.offsetHeight - y > H + 1).length;
-  stepsCue.hidden = false;
-  stepsCue.classList.toggle('up', !below);
-  stepsCue.querySelector('span').textContent = below ? `${below} more ${below === 1 ? 'step' : 'steps'}` : 'Back to the first step';
-  stepsCue.setAttribute('aria-label', below ? `Show ${below} more ${below === 1 ? 'step' : 'steps'}` : 'Back to the first step');
-}
 let trimTimer = 0;
 function fadeSteps() {
-  updateCue();
+  syncMore();
   clearTimeout(trimTimer);
   trimTimer = setTimeout(trimSteps, 90);
   const sc = listScrolls() && stepsEl.clientHeight > 120; // a window of a single row is not faded away
