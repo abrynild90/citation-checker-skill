@@ -7,7 +7,28 @@ import { LAW_WORDS, WORDS as PAIR_WORDS, gap, yearsBetween } from './charts/lag.
 import { capSentence } from './charts/b.js';
 import { recapLinks } from './recap.js';
 
-const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'],
+const WORDS = [
+    'no',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+    'eleven',
+    'twelve',
+    'thirteen',
+    'fourteen',
+    'fifteen',
+    'sixteen',
+    'seventeen',
+    'eighteen',
+    'nineteen',
+  ],
   word = (n) => WORDS[n] ?? String(n),
   cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -23,26 +44,40 @@ export function fillTakeaways() {
   // Tests: how many destroyed a satellite, where, and when the last was.
   const destroyed = KIN.filter((e) => e.type === 'destructive'),
     leo = destroyed.every((e) => e.altitude_km != null && e.altitude_km <= 2000);
-  set('tkA', `${cap(word(destroyed.length))} tests have destroyed a satellite${leo ? ', every one in low Earth orbit' : ''}. The last was in ${fmtMonthYear(parse(LAST_DA))}.`);
+  set(
+    'tkA',
+    `${cap(word(destroyed.length))} tests have destroyed a satellite${leo ? ', every one in low Earth orbit' : ''}. The last was in ${fmtMonthYear(parse(LAST_DA))}.`,
+  );
   // Jamming, lasers and cyber: how many are still going.
   const going = NK.filter((e) => !e.end).length;
   set('tkC', `${cap(word(going))} of these ${NK.length} operations are still going. Destructive tests have stopped since ${fmtMonthYear(parse(LAST_DA))}.`);
   // Close approaches: how many began in the 2020s.
   const recent = CO.filter((e) => e.start >= '2020').length;
-  set('tkR', `In our records, ${recent} of the ${CO.length} close approaches began in 2020 or later${recent * 2 > CO.length ? ', which is more than half' : ''}.`);
+  set(
+    'tkR',
+    `In our records, ${recent} of the ${CO.length} close approaches began in 2020 or later${recent * 2 > CO.length ? ', which is more than half' : ''}.`,
+  );
   // Capabilities: how many states hold at least one, by decade.
   const states = (dec) => new Set(Object.values(CAPS.coding).flatMap((c) => Object.keys(c[dec] || {}).map((s) => s.replace('USSR/Russia', 'Russia')))).size,
     first = CAPS.decades[0],
     last = CAPS.decades.at(-1);
   set('tkB', capSentence('cat'));
   // The wait for the law: the range, and how often it was short.
-  const waits = D.lag_pairs.pairs.map((p) => yearsBetween(parse((D.events.find((e) => e.id === p.event) || {}).date || (D.events.find((e) => e.id === p.event) || {}).start), parse(D.legal.find((l) => l.id === p.law).start))),
+  const waits = D.lag_pairs.pairs.map((p) =>
+      yearsBetween(
+        parse((D.events.find((e) => e.id === p.event) || {}).date || (D.events.find((e) => e.id === p.event) || {}).start),
+        parse(D.legal.find((l) => l.id === p.law).start),
+      ),
+    ),
     short = waits.filter((y) => y < 2).length,
     g = (y) => {
       const x = gap(y);
       return `${x.num} ${x.unit}`;
     };
-  set('tkL', `The wait ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}. In ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
+  set(
+    'tkL',
+    `The wait ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}. In ${word(short)} of the ${word(waits.length)} pairs it was under two years.`,
+  );
   // What the pattern shows: the four findings that open the charts of "Explore the data", in the order of the story (law late, tests stopped, close approaches, states).
   const finding = (id, lead, rest) => {
     const n = document.getElementById(id);
@@ -51,11 +86,27 @@ export function fillTakeaways() {
   const pairs = D.lag_pairs.pairs,
     longI = waits.indexOf(Math.max(...waits)),
     longP = pairs[longI];
-  finding('pt1', `${cap(word(short))} of the ${word(waits.length)} waits were under two years.`, `The longest, from ${PAIR_WORDS[longP.event]?.name ?? byId[longP.event].system} to the ${LAW_WORDS[longP.law] ?? byId[longP.law].title}, took ${g(waits[longI])}.`);
+  finding(
+    'pt1',
+    `${cap(word(short))} of the ${word(waits.length)} waits were under two years.`,
+    `The longest, from ${PAIR_WORDS[longP.event]?.name ?? byId[longP.event].system} to the ${LAW_WORDS[longP.law] ?? byId[longP.law].title}, took ${g(waits[longI])}.`,
+  );
   patBig(waits, longP, g);
-  finding('pt2', 'Some attacks stopped. Others did not.', `Tests that destroy a satellite have paused since ${fmtMonthYear(parse(LAST_DA))}, yet ${word(going)} of ${word(NK.length)} jamming, laser and cyber operations are still going.`);
-  finding('pt3', recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.', `${cap(word(recent))} of the ${CO.length} in our records began in 2020 or later.`);
-  finding('pt4', 'More states can do more.', `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}; only the ${last} figure is the Secure World Foundation’s own assessment.`);
+  finding(
+    'pt2',
+    'Some attacks stopped. Others did not.',
+    `Tests that destroy a satellite have paused since ${fmtMonthYear(parse(LAST_DA))}, yet ${word(going)} of ${word(NK.length)} jamming, laser and cyber operations are still going.`,
+  );
+  finding(
+    'pt3',
+    recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.',
+    `${cap(word(recent))} of the ${CO.length} in our records began in 2020 or later.`,
+  );
+  finding(
+    'pt4',
+    'More states can do more.',
+    `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}; only the ${last} figure is the Secure World Foundation’s own assessment.`,
+  );
 }
 
 // The opening statement of "What the pattern shows": the range of the waits in one large line, and under it the longest pair drawn as a thin line between its two

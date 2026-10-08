@@ -21,6 +21,7 @@ import { audit } from './audit.js';
 import { mountDiscover } from './discover.js';
 import { mountQuiz } from './quiz.js';
 import { fillTakeaways } from './takeaways.js';
+import { mountScrub } from './scrub.js';
 import { mountExplore, showTab } from './explore.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
@@ -238,6 +239,7 @@ mountHero(fontsReady, { openScene, showLaw: (id, kb) => hooks.showLaw?.(id, kb) 
 mountDiscover();
 mountQuiz();
 fillTakeaways();
+mountScrub();
 mountExplore();
 let rz = 0,
   lastW = innerWidth;

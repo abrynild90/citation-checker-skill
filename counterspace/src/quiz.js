@@ -59,7 +59,8 @@ const lineHTML = (rows) =>
     )
     .join('') +
   '</div>';
-const mark = '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
+const mark =
+  '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
 
 // What each question shows: the two options (in display order, flagged right or not) and the sentence that explains the truth.
 function build(q) {
@@ -82,7 +83,9 @@ function build(q) {
       (!evFirst ? ' The manual is soft law, so it does not bind anyone.' : '') +
       ` This is order in time, not cause.${note && evFirst ? ' ' + esc(note) : ''}`;
     // the pair drawn the way the hero draws it: a dot for the weapon, a tick for the law, the first one on the left
-    const line = [{ left: evFirst ? 'dot' : 'tick', right: evFirst ? 'tick' : 'dot', yl: a[1].getUTCFullYear(), yr: a[3].getUTCFullYear(), text: linkText(g), k: 1 }];
+    const line = [
+      { left: evFirst ? 'dot' : 'tick', right: evFirst ? 'tick' : 'dot', yl: a[1].getUTCFullYear(), yr: a[3].getUTCFullYear(), text: linkText(g), k: 1 },
+    ];
     const verdict = (ok) =>
       evFirst
         ? ok
@@ -101,12 +104,29 @@ function build(q) {
       { key: 'a', text: `${evName(ea)} (${when(byId[ea]).getUTCFullYear()})`, right: ya >= yb },
       { key: 'b', text: `${evName(eb)} (${when(byId[eb]).getUTCFullYear()})`, right: yb > ya },
     ];
-  const [longP, shortP] = ya >= yb ? [[ea, la, ya], [eb, lb, yb]] : [[eb, lb, yb], [ea, la, ya]];
+  const [longP, shortP] =
+    ya >= yb
+      ? [
+          [ea, la, ya],
+          [eb, lb, yb],
+        ]
+      : [
+          [eb, lb, yb],
+          [ea, la, ya],
+        ];
   const truth =
     `<b>${esc(evName(longP[0]))}</b> waited for ${esc(lawName(longP[1]))} (${esc(fmtMY(when(byId[longP[1]])))}). ` +
     `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])} for ${esc(lawName(shortP[1]))}. This is order in time, not cause.`;
   const top = Math.max(ya, yb),
-    one = (e, l, y) => ({ cap: evName(e), left: 'dot', right: 'tick', yl: when(byId[e]).getUTCFullYear(), yr: when(byId[l]).getUTCFullYear(), text: linkText(gap(y)), k: Math.max(0.74, y / top) }),
+    one = (e, l, y) => ({
+      cap: evName(e),
+      left: 'dot',
+      right: 'tick',
+      yl: when(byId[e]).getUTCFullYear(),
+      yr: when(byId[l]).getUTCFullYear(),
+      text: linkText(gap(y)),
+      k: Math.max(0.74, y / top),
+    }),
     line = [one(ea, la, ya), one(eb, lb, yb)];
   const verdict = (ok) => (ok ? 'Right. That one waited longest.' : 'A fair guess, but no. The other one waited longest.');
   return { opts, truth, line, verdict, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
@@ -222,7 +242,9 @@ export function mountQuiz() {
     const w = ev.target.closest('.q-go');
     if (w) openScene(w.dataset.scene, w);
   });
-  document.addEventListener('cs:seen', () => host.querySelectorAll('.q-watch').forEach((n) => (n.querySelector('.q-seen').textContent = `(${watchNote(n.querySelector('.q-go').dataset.scene)})`)));
+  document.addEventListener('cs:seen', () =>
+    host.querySelectorAll('.q-watch').forEach((n) => (n.querySelector('.q-seen').textContent = `(${watchNote(n.querySelector('.q-go').dataset.scene)})`)),
+  );
   again.addEventListener('click', () => {
     state.fill(null);
     host.querySelectorAll('.q').forEach((li) => {

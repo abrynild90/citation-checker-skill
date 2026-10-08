@@ -24,6 +24,7 @@ import {
   xAxis,
 } from '../app.js';
 import { KIND_PLAIN, quiet, activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
+import { hooks } from '../shared.js';
 const stateA = { zoom: false }, // phones open on the full span so the early treaties and tests show; the toggle zooms to 2004-2026; other widths ignore it
   ZOOM_A0 = '2004-01-01';
 const ALT_AT = { intercept: 'Intercept', apogee: 'Highest point', detonation: 'Detonation' };
@@ -455,6 +456,7 @@ export function drawA(el = document.getElementById('svgA')) {
     svg.append('text').attr('class', 'band-label').attr('x', best.bx).attr('y', best.ly).text(best.label);
   });
   addGuide(svg, x, top, sy + stripH, 'A');
+  if (!EXPORTING) hooks.scrubVeil?.(svg, x, top, sy + stripH); // "Scrub through time" fogs the years the slider has not reached
   if (zoomed)
     svg
       .append('text')

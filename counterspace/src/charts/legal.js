@@ -613,6 +613,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     );
   addGuide(svg, x, 0, yAx, zoom ? 'legalzoom' : 'legal');
   lg.raise(); // labels (with a background outline, see CSS) sit above the guide line so it never strikes through them
+  if (!EXPORTING && !strip) hooks.scrubVeil?.(svg, x, 0, yAx); // "Scrub through time" fogs the years the slider has not reached, labels included
   if (strip) {
     // Start at 1957, so the first treaties are in the first view; the line under the strip says how much is in view and which way to scroll for later years.
     el.scrollLeft = 0;

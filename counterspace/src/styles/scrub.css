@@ -1,0 +1,46 @@
+/* "Scrub through time": a thin year slider that stays under the pinned law strip while the test chart is read. Its line starts and ends where the charts' year
+   axes do (--cs is the chart scale on wide windows), so the thumb sits straight above the edge of the fog it draws on the strip and on the chart. */
+.law-row{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-4)}
+.law-row>.keybox{flex:1 1 auto;min-width:0}
+.sc-intro{flex:none}
+@media (max-width:760px){.sc-intro,.scrub{display:none}}
+
+.scrub{--cs:1;position:sticky;top:var(--band-h,64px);z-index:19;margin:var(--s-2) 0 var(--s-2);padding:var(--s-2) 0 var(--s-1);background:var(--bg);border-bottom:1px solid var(--line)}
+.sc-top{display:flex;align-items:center;gap:var(--s-3);min-height:34px}
+.sc-play{flex:none;min-width:126px;justify-content:center}
+.sc-title{margin:0;flex:none;font:600 14px/1.3 var(--sans);color:var(--text)}
+.sc-tally{margin:0 0 0 auto;min-width:0;text-align:right;font:500 15px/1.35 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;text-wrap:balance}
+.scrub.is-on .sc-tally,.scrub.is-finale .sc-tally{color:var(--text)}
+.scrub.is-finale .sc-tally{color:var(--accent-2);font-weight:600}
+
+.sc-rail{margin:0 calc(68px * var(--cs)) 0 calc(64px * var(--cs));padding:0}
+.sc-track{position:relative;height:30px;border-radius:var(--r-1);cursor:ew-resize;touch-action:none;outline:none}
+.sc-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:var(--line-strong)}
+.sc-fill{position:absolute;left:0;top:50%;height:2px;margin-top:-1px;width:100%;border-radius:2px;background:var(--accent);pointer-events:none}
+.sc-ticks{position:absolute;inset:0;pointer-events:none}
+.sc-t{position:absolute;width:2px;margin-left:-1px;border-radius:1px;opacity:.38}
+.sc-t.kin{top:3px;height:9px;background:var(--accent)}
+.sc-t.law{bottom:3px;height:9px;background:var(--accent-2)}
+.sc-t.past{opacity:1}
+.scrub.is-finale .sc-t{opacity:.3}
+.sc-thumb{position:absolute;top:50%;left:100%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--accent);pointer-events:none}
+.sc-track:hover .sc-thumb{box-shadow:0 0 0 1px var(--accent),0 0 0 5px var(--accent-soft)}
+.sc-track:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.sc-track:focus-visible .sc-thumb{box-shadow:0 0 0 1px var(--accent),0 0 0 5px var(--accent-soft)}
+.scrub.is-finale .sc-thumb{opacity:0}
+/* the longest wait, drawn along the line the way the hero draws a link: a dot for the weapon, a dashed line as long as the wait with its time on it, a tick for the law */
+.sc-gap{position:absolute;top:50%;height:0;pointer-events:none}
+.sc-gap::before{content:"";position:absolute;left:0;right:0;top:-1px;border-top:2px dashed var(--accent-2)}
+.sc-gd{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg)}
+.sc-gt{position:absolute;right:-1px;top:-11px;width:3px;height:22px;border-radius:2px;background:var(--accent-2);box-shadow:0 0 0 2px var(--bg)}
+.sc-gp{position:absolute;left:50%;top:-12px;transform:translateX(-50%);padding:1px 11px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 13px/22px var(--sans);white-space:nowrap}
+@media (prefers-reduced-motion:no-preference){.scrub.is-finale .sc-gap::before{animation:sc-draw 900ms var(--ease) both}.scrub.is-finale .sc-gp{animation:sc-pill 400ms var(--ease) 700ms both}}
+@keyframes sc-draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+@keyframes sc-pill{from{opacity:0}to{opacity:1}}
+
+/* the fog drawn on the strip and the chart: everything after the slider is a faint ghost, and a thin line marks the slider's year */
+.scrub-veil{pointer-events:none}
+.sv-fog{fill:var(--ground);fill-opacity:.95;pointer-events:none}
+.sv-edge{stroke:var(--accent-2);stroke-width:1.5;pointer-events:none}
+.mark.scrub-future{pointer-events:none}
+@media print{.scrub,.sc-intro{display:none}.scrub-veil{display:none}}

@@ -6,10 +6,13 @@ export const FACTS = {
   starfish: 'The blast left a belt of its own: electrons trapped by Earth’s magnetic field formed an artificial radiation belt around the planet.',
   solwind: 'The launch pad was a fighter jet. It fired the missile from a steep supersonic climb, and the homing vehicle destroyed the satellite by collision.',
   fengyun: 'No other test on the Secure World Foundation’s list left as many tracked fragments: 3,532 cataloged, and 2,351 still in orbit as of February 2026.',
-  'burnt-frost': 'The weapon was a missile-defense interceptor, built to shoot down other missiles. The 175 trackable pieces took about 20 months to fall out of orbit.',
+  'burnt-frost':
+    'The weapon was a missile-defense interceptor, built to shoot down other missiles. The 175 trackable pieces took about 20 months to fall out of orbit.',
   dn2: 'China said the rocket reached 10,000 km. An analysis cited by the Secure World Foundation puts its highest point at 30,000 km or more.',
-  shakti: 'Indian officials said the debris would fall back within 45 days. The Secure World Foundation counts 130 tracked fragments, and none is still in orbit.',
-  cosmos1408: 'The debris cloud spread across heights that include the orbit of the International Space Station. The crew sheltered in their docked spacecraft.',
+  shakti:
+    'Indian officials said the debris would fall back within 45 days. The Secure World Foundation counts 130 tracked fragments, and none is still in orbit.',
+  cosmos1408:
+    'The debris cloud spread across heights that include the orbit of the International Space Station. The crew sheltered in their docked spacecraft.',
   gnss: 'No satellite is touched. The jammers swamp the weak signals at the receiver, so aircraft that cross the zone lose their position fix.',
   viasat: 'It came within hours of Russia’s invasion of Ukraine. The satellite kept working. The damage was to modems, reached through the ground network.',
   laser: 'The target, MSTI-3, was a retired Air Force experimental satellite. Detailed results of the test are not public.',
