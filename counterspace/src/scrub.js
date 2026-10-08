@@ -1,9 +1,10 @@
 // ============================================================================
-// scrub.js: "Scrub through time", a thin year slider above the test chart. As it moves, the years after it are fogged out on the pinned law strip, the zoom panel and
+// scrub.js: "Scrub through time", a thin year slider above the test chart (one sticky row: a round Play button in the left margin of the axis, a line of words, the line itself). As it moves, the years after it are fogged out on the pinned law strip, the zoom panel and
 // the test chart together, so the tests and the laws appear year by year, and a running tally says how many of each there have been ("1968: 25 tests, 2 laws").
+// While it passes a named event (one the page has a 3D scene for) a caption takes the title's place, with "Watch in 3D"; notes on the charts fade whole, never mid-word.
 // Play runs 1957 to 2026 in about twelve seconds (Skip jumps to the end) and ends on the longest wait in the pair data, drawn along the slider's own line.
-// Everything is counted from the same entries the charts draw; nothing is typed in. With reduced motion there is no Play: the slider is moved by hand.
-// Provides: mountScrub(). Registers hooks.scrubVeil, which the chart modules call after a draw so the fog survives every redraw. Needs: app.js, charts/lag.js, links.js.
+// Everything is counted from the same entries the charts draw; nothing is typed in. With reduced motion there is no Play: the slider is moved by hand, and a caption stays while it rests on that year.
+// All ids and classes here start with yr (the 3D scene controls own sc*, scrub and scrubWrap). Provides: mountScrub(). Registers hooks.scrubVeil, which the chart modules call after a draw so the fog survives every redraw. Needs: app.js, charts/lag.js, links.js.
 // ============================================================================
 import { DOMAIN, EVENTS, KIN, LEGAL, REDUCED, byId, chartScale, D, esc, fmtY, parse } from './app.js';
 import { SHORT } from './discover-data.js';
