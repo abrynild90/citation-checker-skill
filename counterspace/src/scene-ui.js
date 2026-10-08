@@ -428,6 +428,10 @@ function toggleSrc(open) {
 }
 slBtn.onclick = () => toggleSrc(slPop.hidden);
 document.addEventListener('pointerdown', (e) => {
+  const n = $('sceneNext');
+  if (n.open && !n.contains(e.target)) n.open = false; // the floating row closes when the reader clicks elsewhere
+});
+document.addEventListener('pointerdown', (e) => {
   if (!slPop.hidden && !srcRow.contains(e.target)) toggleSrc(false);
 });
 

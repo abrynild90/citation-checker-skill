@@ -2193,3 +2193,19 @@
   .overlay .sv-next { margin-top: 0; }
   .overlay .story-scroll > .story-foot { margin-top: var(--s-2); padding-top: var(--s-2); }
 }
+@media (min-width: 901px) {
+  /* Opened, the row floats over the step list instead of pushing it away, so the story keeps its room */
+  .overlay .sv-next { position: relative; }
+  .overlay .sv-next[open] .sv-next-links {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 2px);
+    z-index: 5;
+    padding: var(--s-3);
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-2);
+    box-shadow: var(--shadow-2);
+  }
+}
