@@ -246,8 +246,9 @@
             <p data-avoid class="lede">Each bar counts the capabilities that states had to attack or interfere with satellites in one decade.
               Only the 2020s bar rests on the Secure World Foundation’s (SWF) own assessment; earlier decades are reconstructed.</p>
             <div class="tools">
-              <span class="seg" role="group" aria-label="How the capabilities are grouped">
-                <button class="btn small" id="grpCat" aria-pressed="true" type="button">Five categories</button>
+              <button class="btn small" id="grpMore" aria-expanded="false" aria-controls="grpSeg" type="button"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg><span>More detail</span></button>
+              <span class="seg" id="grpSeg" role="group" aria-label="How the capabilities are grouped" hidden>
+                <button class="btn small" id="grpCat" aria-pressed="false" type="button">Five categories</button>
                 <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic and non-kinetic</button>
               </span>
             </div>

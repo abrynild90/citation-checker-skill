@@ -32,7 +32,8 @@ const KIN = [
     gloss: 'Electronic warfare, directed energy and cyber',
   },
 ];
-export const stateB = { group: 'cat', on: new Set(CATS.map((c) => c.key)), onKin: new Set(KIN.map((u) => u.key)) };
+// Opens plain: two groups in solid colour. "More detail" brings back the five kinds with stripes and dots (detail: true, group: 'cat').
+export const stateB = { group: 'kin', detail: false, on: new Set(CATS.map((c) => c.key)), onKin: new Set(KIN.map((u) => u.key)) };
 const stateSet = () => (stateB.group === 'cat' ? stateB.on : stateB.onKin);
 
 // 2020s "developing" (P) entries for which SWF's country matrix (Executive Summary, PDF pp. 22-32) shows "no data": our reading of the country chapters,
@@ -125,7 +126,8 @@ export function drawB(el = document.getElementById('svgB')) {
     phone = isPhoneNow(),
     R = W - M.r,
     decs = CAPS.decades,
-    kin = stateB.group === 'kin';
+    kin = stateB.group === 'kin',
+    plain = !stateB.detail;
   const starts = decs.map((d) => +d.slice(0, 4)),
     xs = starts.map((s) => parse(`${Math.max(1957, s)}-01-01`)).concat([DOMAIN[1]]),
     bandsX = decs.map((d, i) => [x(xs[i]), x(xs[i + 1])]),
@@ -178,7 +180,7 @@ export function drawB(el = document.getElementById('svgB')) {
   // stripes for developing, dots for developing by our reading (SWF's table has no data)
   const defs = svg.append('defs');
   series
-    .filter((s) => s.dev)
+    .filter((s) => s.dev && !plain)
     .forEach((s) => {
       const p = defs
         .append('pattern')
@@ -306,8 +308,8 @@ export function drawB(el = document.getElementById('svgB')) {
           .attr('width', bw + 2)
           .attr('y', yt)
           .attr('height', y(y0) - yt)
-          .style('fill', sr.dev ? `url(#hatch-${sr.key.replace(':', '-')})` : `var(${sr.v})`)
-          .style('fill-opacity', sr.dev ? 1 : 0.9)
+          .style('fill', sr.dev && !plain ? `url(#hatch-${sr.key.replace(':', '-')})` : `var(${sr.v})`)
+          .style('fill-opacity', sr.dev ? (plain ? 0.38 : 1) : 0.9)
           .style('stroke', 'var(--bg)')
           .style('stroke-width', 1.2);
       });
@@ -317,13 +319,13 @@ export function drawB(el = document.getElementById('svgB')) {
           .attr('class', 'bar-edge')
           .attr('d', roundRectPath(bx, hiY, bw, base - hiY, Math.min(7, bw / 2)));
       // the range bar: from the demonstrated-only count up to demonstrated plus developing
-      if (dem[i] < tot[i] && bw > 24) {
+      if (!plain && dem[i] < tot[i] && bw > 24) {
         const wd = `M${cx - 4.5},${y(dem[i])}h9M${cx},${y(dem[i])}V${y(tot[i])}M${cx - 4.5},${y(tot[i])}h9`;
         s.append('path').attr('class', 'whisker-halo').attr('d', wd).attr('stroke-linecap', 'round');
         s.append('path').attr('class', 'whisker').attr('d', wd).attr('stroke-linecap', 'round');
       }
       // the figure above the bar, and the range as a quiet second line
-      let range = dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : 'no range';
+      let range = plain ? '' : dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : 'no range';
       if (range && range !== 'no range' && !phone && xb - xa >= 100) range = `range ${range}`;
       if (range && tw(range, 13, 400) > xb - xa + (range === 'no range' ? -6 : 14)) range = ''; // a note that would touch the axis is left to the card
       s.append('text')
@@ -413,12 +415,25 @@ export function drawB(el = document.getElementById('svgB')) {
     `Jamming and spoofing is the most widespread capability: ${ew20} states in the 2020s. Missiles that can destroy a satellite have stayed with ` +
     `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('tkB').textContent = capSentence(stateB.group);
-  document.getElementById('noteB').textContent = kin ? 'A state with both kinds appears in both groups.' : 'A state with two capabilities is counted twice.';
+  document.getElementById('noteB').textContent = plain
+    ? 'Darker parts are tested or used; lighter parts are still in development. A state with both kinds is counted in both groups.'
+    : kin
+      ? 'A state with both kinds appears in both groups.'
+      : 'A state with two capabilities is counted twice.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   setKey(
     'legendB',
-    keyMarkup([
+    keyMarkup(plain ? [
+      {
+        head: 'Fill',
+        items: [
+          [sw(`style="fill:${ink};fill-opacity:.9"`), 'Darker: tested or used', 28],
+          [sw(`style="fill:${ink};fill-opacity:.38"`), 'Lighter: still in development', 28],
+          [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+        ],
+      },
+    ] : [
       {
         head: 'Fill',
         items: [
@@ -511,3 +526,20 @@ const pick = (group) => () => {
 };
 document.getElementById('grpCat').onclick = pick('cat');
 document.getElementById('grpKin').onclick = pick('kin');
+
+// "More detail": the five kinds, each with stripes for what is still in development; back again with "Less detail".
+const more = document.getElementById('grpMore'),
+  seg = document.getElementById('grpSeg');
+if (more)
+  more.onclick = () => {
+    stateB.detail = !stateB.detail;
+    stateB.group = stateB.detail ? 'cat' : 'kin';
+    more.setAttribute('aria-expanded', String(stateB.detail));
+    more.querySelector('span').textContent = stateB.detail ? 'Less detail' : 'More detail';
+    more.querySelector('use').setAttribute('href', stateB.detail ? '#i-minus' : '#i-plus');
+    seg.hidden = !stateB.detail;
+    document.getElementById('grpCat').setAttribute('aria-pressed', stateB.detail);
+    document.getElementById('grpKin').setAttribute('aria-pressed', false);
+    chipsB();
+    drawB();
+  };
