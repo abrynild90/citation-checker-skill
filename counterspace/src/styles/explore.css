@@ -31,8 +31,9 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 section.chart.xpanel[data-off]{position:absolute;top:0;left:0;right:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;padding:0;border:0}
 section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 @media (min-width:761px){
-  section.chart.xpanel{scroll-margin-top:calc(var(--band-h,0px) + var(--xt-h) + var(--s-3))}
-  .explore[data-years="0"] section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3))} /* the pinned strip steps aside over these two */
+  /* the page already keeps --band-h clear at the top (scroll-padding), so a panel only asks for the card row above it */
+  section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3))}
+  .explore[data-years="0"] section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3) - var(--band-h,0px))} /* the pinned strip steps aside over these two */
 }
 @media (max-width:760px){
   section.chart.xpanel{scroll-margin-top:calc(52px + var(--s-3))}
@@ -66,6 +67,7 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 .xc-t{font:600 15px/1.3 var(--sans)}
 .xc-l{font:400 13.5px/1.4 var(--sans);color:var(--muted)}
 @media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:14px}.xc-l{font-size:13px}}
-#exploreTabs{scroll-margin-top:calc(var(--band-h,0px) + var(--s-3))}
+#exploreTabs{scroll-margin-top:var(--s-3)}
+.explore[data-years="0"] #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
 @media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}
 @media print{.xcards{display:none}}

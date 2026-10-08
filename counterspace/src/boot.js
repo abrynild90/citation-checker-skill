@@ -139,6 +139,30 @@ nameThemeButton();
   });
 }
 
+// Any other address that names a part of the page (#pattern, #chartA, #srcCite ...): the charts below it are drawn after the browser's first jump, and they change
+// the page's height, so the browser lands short. Once everything is drawn, and again after the fonts and images settle, the page scrolls to the named part,
+// unless the reader has already scrolled by hand.
+{
+  let moved = false;
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
+  const settle = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id || id === 'legalBand' || moved) return;
+    hooks.drawRest?.();
+    const t = document.getElementById(id);
+    if (!t || t.closest('[data-off]')) return;
+    const r = t.getBoundingClientRect();
+    if (r.width || r.height) t.scrollIntoView({ block: 'start', behavior: 'auto' });
+    hooks.legalScroll?.();
+  };
+  addEventListener('load', () => {
+    settle();
+    document.fonts?.ready.then(settle);
+    setTimeout(settle, 700);
+    setTimeout(settle, 2000);
+  });
+}
+
 // Segmented controls: the raised thumb slides to the chosen button. Without script the chosen button carries the raised look itself.
 function placeThumb(seg) {
   const on = seg.querySelector('[aria-pressed="true"],[aria-selected="true"]');
