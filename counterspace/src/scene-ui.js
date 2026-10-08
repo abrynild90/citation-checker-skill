@@ -468,16 +468,22 @@ function fillNext(cfg) {
   }
 }
 
-// A note that opens over the story column rests just above the "About this picture / Where to go next" row, so it never covers that row, nor the button
-// that opened it (the related-law button sits below the row). Where the row is out of view, the note keeps its place at the foot.
+// A note that opens over the story column docks below the "About this picture / Where to go next" row, over the source line and the related-law button (the
+// related-law card also takes the row's place), so it can never cover the list of steps. Where there is too little room below the row, the note keeps its
+// place at the foot.
 function anchorNote(note) {
+  note.style.top = '';
   note.style.bottom = '';
   note.style.maxHeight = '';
   const wr = $('asideWrap').getBoundingClientRect(),
     pr = $('svPair').getBoundingClientRect();
   if (!pr.height || pr.top < wr.top + 140 || pr.top > wr.bottom) return;
-  note.style.bottom = Math.round(wr.bottom - pr.top + 8) + 'px';
-  note.style.maxHeight = Math.round(pr.top - wr.top - 16) + 'px';
+  const edge = note === lawCard ? pr.top : pr.bottom + 4,
+    room = wr.bottom - edge - 8;
+  if (room < 90) return;
+  note.style.top = Math.round(edge - wr.top) + 'px';
+  note.style.bottom = 'auto';
+  note.style.maxHeight = Math.round(room) + 'px';
 }
 function toggleSrc(open) {
   slPop.hidden = !open;
@@ -1159,16 +1165,17 @@ function fillLawCard(cfg) {
   if (!l) return void (lawCard.innerHTML = '');
   const when = l.end ? `${fmtD({ date: l.start })} to ${fmtD({ date: l.end })}` : fmtD({ date: l.start });
   const binds = l.soft_law ? 'Soft law: an expert manual, not binding.' : BINDS[l.kind] || legalKindWords(l) + '.';
-  const link = cfg.event && pairsAt(cfg.event).find((p) => p.law === l.id);
+  const link = cfg.event && pairsAt(cfg.event).find((p) => p.law === l.id),
+    src = l.source_url
+      ? `<a class="btn small quiet" href="${esc(l.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
+      : '';
   lawCard.innerHTML =
-    `<p class="lc-title">${esc(l.title || l.label)}</p><p class="lc-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
-    (link ? `<p class="lc-gap"><span class="gap-pill">${esc(linkText(link.g))}</span>The first law our records link to this event.</p>` : '') +
-    `<p class="lc-bind">${esc(binds)}</p>` +
-    `<p class="lc-src"><b>Source:</b> <span class="lc-cite">${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span>` +
-    (l.source_url ? ` <a href="${esc(l.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>` : '') +
-    `</p>` +
+    `<p class="lc-title">${esc(l.title || l.label)}</p>` +
+    `<p class="lc-when">${esc(legalKindWords(l))} · ${esc(when)}${link ? `<span class="gap-pill" title="The first law our records link to this event">${esc(linkText(link.g))}</span>` : ''}</p>` +
+    (l.soft_law ? '' : `<p class="lc-bind">${esc(binds)}</p>`) +
+    `<p class="lc-src"><span class="lc-cite"><b>Source:</b> ${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span></p>` +
     `<div class="lc-acts"><button type="button" class="btn small" id="lcTimeline"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>See it on the timeline</button>` +
-    `<button type="button" class="btn small quiet" id="lcClose">Close</button></div>`;
+    `${src}<button type="button" class="btn small quiet" id="lcClose">Close</button></div>`;
   lawCard.querySelector('#lcClose').onclick = () => (toggleLawCard(false), lawBtn.focus());
   lawCard.querySelector('#lcTimeline').onclick = (e) => seeLawOnTimeline(e.detail === 0);
 }

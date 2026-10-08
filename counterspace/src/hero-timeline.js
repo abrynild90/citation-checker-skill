@@ -505,7 +505,7 @@ function popHTML(h) {
     return (
       `<p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p>` +
       `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
-      (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${NO_LATER}</p>`) +
+      (hasLaterLaw(e.id) ? '<p class="hp-none">The dashed line shows the wait for the first later law in our records.</p>' : `<p class="hp-none">${NO_LATER}</p>`) +
       (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
     );
   }
@@ -514,6 +514,7 @@ function popHTML(h) {
     scene = hasScene(l);
   return (
     `<p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
+    (pairsAt(l.id).length ? '<p class="hp-none">The dashed line leads back to the weapon our records link to this law.</p>' : '') +
     `<div class="hp-acts">${scene ? watch(l.scene_3d, `Watch ${SHORT[l.scene_3d] || 'the event'} in 3D`) : ''}` +
     `<a class="btn small" href="#legalBand">See it on the timeline</a></div>`
   );
