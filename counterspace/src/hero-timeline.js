@@ -136,6 +136,8 @@ export function mountHero(fontsReady, actions = {}) {
 export const revealPair = (watched = []) => drawn?.reveal?.next(watched) || null;
 export const replayReveal = (key) => drawn?.reveal?.replay(key);
 // The link just earned, drawn again and pulsed once (a ring leaves the dot; when the line arrives, the tick answers).
+// How many real pairs are drawn as links on the resting picture so far this visit.
+export const revealedCount = () => revealedKeys.length;
 export const pulseReveal = (key) => drawn?.reveal?.pulse(key);
 
 // ---------------------------------------------------------------- words for screen readers

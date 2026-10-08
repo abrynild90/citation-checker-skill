@@ -12,6 +12,8 @@ import { renderSVG } from './scenes/svg-fallback.js';
 import { hideCard, legalKindWords, setGuide } from './ui.js';
 import { linkText, pairsAt } from './links.js';
 import { recapLine, recapLinks } from './recap.js';
+import { revealedCount } from './hero-timeline.js';
+import { showInHero } from './rewards.js';
 import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
 import { hooks, seenScenes } from './shared.js';
@@ -1535,17 +1537,33 @@ export function showRecap() {
   $('svRecapPairs').innerHTML = recapLinks();
   $('svRecapLine').textContent = recapLine();
   $('svRecapList').innerHTML = ORDER.map((s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`).join('');
+  // the hand-off back to the picture: how many pairs are drawn on it now
+  const linked = revealedCount();
+  $('svRecapHero').hidden = !linked;
+  $('svRecapHeroTxt').textContent = `Back to the picture: ${NUM[linked] || linked} ${linked === 1 ? 'pair' : 'pairs'} now linked`;
   recapEl.hidden = false;
+  recapMore();
   document.dispatchEvent(new CustomEvent('cs:recap'));
   setStatus('The tour is over. Here is what you saw.');
   $('svRecapH').focus();
 }
+// a soft fade at the foot of the slide's body while more of it lies below (the "Revisit" list opened on a short window)
+const recapBody = recapEl.querySelector('.sv-recap-body'),
+  recapMore = () => recapBody.classList.toggle('more', recapBody.scrollTop + recapBody.clientHeight < recapBody.scrollHeight - 6);
+recapBody.addEventListener('scroll', recapMore, { passive: true });
+recapEl.querySelector('.sv-recap-more').addEventListener('toggle', () => requestAnimationFrame(recapMore));
+addEventListener('resize', recapMore);
 recapEl.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-id]');
   if (b) return openScene(b.dataset.id);
   if (e.target.closest('#svRecapAgain')) return startTour();
   if (e.target.closest('#svRecapClose')) return closeScene();
   if (e.target.closest('#svRecapQuiz')) return closeScene(); // the link then scrolls to the quiz
+  if (e.target.closest('#svRecapTop')) {
+    e.preventDefault();
+    closeScene();
+    return showInHero(); // up to the picture, and its newest link pulses once
+  }
   if (e.target.closest('a[href^="#"]')) closeScene(); // the link then scrolls to the chart
 });
 
