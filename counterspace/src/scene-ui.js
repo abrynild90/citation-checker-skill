@@ -14,7 +14,7 @@ import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
 import { hooks } from './shared.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
-import { KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
+import { FACTS, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 export let THREE = null,
   host = null,
   glOK = null;
@@ -86,6 +86,7 @@ const overlay = $('overlay'),
   countEl = $('sceneDate'),
   dotsEl = $('sceneDots'),
   captionEl = $('sceneCaption'),
+  dykEl = $('sceneDyk'),
   srcEl = $('sceneSrc'),
   scaleEl = $('sceneScale'),
   stepsSection = $('sceneStepsSection'),
@@ -313,6 +314,7 @@ export async function openScene(id, originEl, viaTour) {
 
 // The account shows its first sentences, whole (never cut mid-sentence); the button opens the rest. How many sentences show depends on the room:
 // fitSteps() tries two sentences, then one, then none, so the step list always keeps at least three or four whole rows.
+const WIDE = matchMedia('(min-width: 1500px)');
 const moreBtn = $('sceneMore');
 let expanded = false,
   sentences = [];
@@ -331,8 +333,19 @@ function setLede(level, count) {
   // The first sentence always shows, at every width: it says what the scene is before the steps say what happens. (The lede gives way from two sentences to one.)
   // The intro is two sentences at every width (one when the room is tight); the full account is behind "Read the full account".
   const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? 2 : 1));
-  let shown = expanded ? full : sentences.slice(0, max).join(' ');
-  if (!expanded && max === 2 && shown.length > 340) shown = sentences[0];
+  // On a wide window the story opens with a "Did you know" line; an intro sentence that says the same thing is left out of the intro (the full account keeps it)
+  const dyk = WIDE.matches && !!FACTS[cur?.id],
+    words = (t) => new Set(t.toLowerCase().match(/[a-z0-9]{4,}/g) || []),
+    same = (a, b) => {
+      const A = words(a),
+        B = words(b);
+      let n = 0;
+      A.forEach((w) => B.has(w) && n++);
+      return n / Math.max(1, Math.min(A.size, B.size)) > 0.6;
+    },
+    pool = dyk ? sentences.filter((t, i) => !i || !same(t, FACTS[cur.id])) : sentences;
+  let shown = expanded ? full : pool.slice(0, max).join(' ');
+  if (!expanded && max === 2 && shown.length > 340) shown = pool[0];
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
   moreBtn.classList.toggle('lone', !shown); // nothing above it: the button stands alone
@@ -371,6 +384,8 @@ function fillStory(cfg) {
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   sentences = splitSentences(cfg.lede || cfg.caption);
+  dykEl.innerHTML = FACTS[cfg.id] ? `<b>Did you know</b> ${esc(FACTS[cfg.id])}` : '';
+  dykEl.hidden = !FACTS[cfg.id];
   expanded = false;
   asideBody.classList.remove('expanded');
   moreBtn.setAttribute('aria-expanded', 'false');
@@ -663,6 +678,7 @@ function fitSteps() {
   stepsEl.style.flex = '';
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.paddingBottom = '';
+  asideBody.classList.remove('pin'); // measured with the foot in its natural place; pinned to the bottom at the end
   // a phone with more than four steps, or a short phone screen: the list shows the playing step only and the picture keeps the height
   // The steps are read-only here: every row is drawn whole, at its natural height, and the story column scrolls if it must (no fixed-height window).
   const one = false;
@@ -722,7 +738,7 @@ function fitSteps() {
     const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
       ab = asideBody.getBoundingClientRect(),
       slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0;
-    r.sp = slack > 16 ? Math.min(10, (slack * 0.7) / (2 * steps.length)) : 0;
+    r.sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * steps.length)) : 0;
   }
   if (r.sp > 0.5) {
     stepsEl.style.setProperty('--sp', r.sp.toFixed(2) + 'px');
@@ -748,6 +764,7 @@ function fitSteps() {
       stepsEl.style.height = kids[k - 2].offsetTop + kids[k - 2].offsetHeight + 'px';
     }
   }
+  asideBody.classList.toggle('pin', WIDE.matches && !STACKED.matches && !expanded); // the source and the related law rest at the foot of the column
   const li = stepsEl.children[Math.max(0, stepIdx)];
   if (li && stepIdx >= 0) followStep(li, true);
   snapList(li);
@@ -817,6 +834,7 @@ stepsEl.addEventListener(
   { passive: true },
 );
 addEventListener('resize', fitSteps);
+WIDE.addEventListener('change', () => (setLede(0), fitSteps()));
 document.fonts?.ready.then(() => fitSteps());
 ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) =>
   asideBody.addEventListener(
