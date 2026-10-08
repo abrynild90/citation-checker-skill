@@ -115,8 +115,6 @@ document.getElementById('asof').innerHTML =
 // The phone list's heading keeps its own wording; only a count in it follows the data.
 const legalSum = document.querySelector('#legalPhone summary');
 if (legalSum) legalSum.textContent = legalSum.textContent.replace(/\d+/, LEGAL.length);
-document.querySelector('.cta-note').innerHTML =
-  `${SCENES.length} short 3D explainers. On a chart, select a <svg class="ico" aria-hidden="true"><use href="#i-cube"/></svg> cube icon to open one.`;
 // ---------------------------------------------------------------- palette & helpers
 const STATE_VAR = {
   'United States': '--c-us',
