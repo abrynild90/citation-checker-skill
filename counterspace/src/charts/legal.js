@@ -822,11 +822,17 @@ function legalScrollMain() {
     shrink = bandH ? Math.max(0, (legalCompact ? bandFullH : band.offsetHeight) - bandH) : 0;
   const stuck = !isPhoneNow() && topY <= -shrink - 0.5 && tr.top < -1 && tr.bottom > 200;
   // which chart is under the strip decides the years it shows (a zoomed chart: its own window)
-  const under = ['chartR', 'chartC'].find((id) => {
-    const e = document.getElementById(id),
-      r = e.getBoundingClientRect();
-    return !e.hasAttribute('data-off') && r.top < band.offsetHeight + 40 && r.bottom > band.offsetHeight;
-  });
+  // (the chart that fills most of the view below the strip: a link can leave a zoomed chart a little under the strip's edge, not behind it)
+  const bandH2 = band.offsetHeight,
+    under = ['chartR', 'chartC']
+      .map((id) => {
+        const e = document.getElementById(id);
+        if (!e || e.hasAttribute('data-off')) return null;
+        const r = e.getBoundingClientRect();
+        return { id, seen: Math.min(r.bottom, innerHeight) - Math.max(r.top, bandH2) };
+      })
+      .filter((c) => c && c.seen > 120)
+      .sort((p, q) => q.seen - p.seen)[0]?.id;
   const want = stuck && under ? chartWindow[under] : null;
   const changed = stuck && want !== stripDom;
   // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it.
@@ -888,6 +894,9 @@ addEventListener(
   },
   { passive: true },
 );
+// A jump that ends without a wheel (a link, an address, a tab) is checked again when it lands.
+for (const ev of ['scrollend', 'hashchange', 'popstate']) addEventListener(ev, () => (clearTimeout(settleT), (settleT = setTimeout(legalScroll, ev === 'scrollend' ? 30 : 120))));
+addEventListener('load', () => setTimeout(legalScroll, 400));
 
 // ---------------------------------------------------------------- key, list, glossary and table
 const dateWords = (l) => (l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start)));
