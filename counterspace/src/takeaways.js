@@ -4,7 +4,7 @@
 // ============================================================================
 import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, fmtMonthYear, parse } from './app.js';
 import { gap, yearsBetween } from './charts/lag.js';
-import { capSentence, totalsB } from './charts/b.js';
+import { capSentence } from './charts/b.js';
 
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'],
   word = (n) => WORDS[n] ?? String(n),
@@ -50,5 +50,5 @@ export function fillTakeaways() {
   finding('pt1', 'The law came later.', `The wait for a legal step ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}; in ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
   finding('pt2', 'Some attacks stopped. Others did not.', `Tests that destroy a satellite have paused since ${fmtMonthYear(parse(LAST_DA))}, yet ${word(going)} of ${word(NK.length)} jamming, laser and cyber operations are still going.`);
   finding('pt3', recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.', `${cap(word(recent))} of the ${CO.length} in our records began in 2020 or later.`);
-  finding('pt4', 'More states can do more.', `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}, and by then they have ${totalsB(last).tot} capabilities between them. Only the ${last} figures are the Secure World Foundation’s own assessment.`);
+  finding('pt4', 'More states can do more.', `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}; only the ${last} figure is the Secure World Foundation’s own assessment.`);
 }
