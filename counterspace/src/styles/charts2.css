@@ -214,3 +214,22 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 @keyframes ql-fade{from{opacity:0}}
 @keyframes ql-rise{from{transform:scaleY(0)}}
 @media (prefers-reduced-motion:reduce){.q.done :is(.ql-dot,.ql-pill,.ql-tick,.ql-years),.q.done .ql-gap::before{animation:none}}
+
+/* The flourish at three or four right: one dot under each card (filled when called, a dashed ring when missed) joined by a dashed line that draws across, ending
+   in a tick, the same drawing as a link in the hero. */
+.q-trail{position:relative;height:44px;margin-top:var(--s-4)}
+.q-trail[hidden]{display:none}
+.qt-line{position:absolute;left:calc(12.5% - 6px);right:0;top:50%;border-top:1.6px dashed var(--muted);animation:qt-draw 1300ms var(--ease) 100ms both}
+.qt-dot{position:absolute;left:var(--p);top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--accent-soft);animation:qt-pop 420ms var(--ease) calc(120ms + var(--i) * 300ms) both}
+.qt-dot.miss{background:var(--bg);border:2px dashed var(--accent-2);box-shadow:0 0 0 3px var(--bg)}
+.qt-tick{position:absolute;right:0;top:4px;bottom:4px;width:4px;margin-right:1px;border-radius:2px;background:var(--accent-2);transform-origin:50% 100%;animation:qt-rise 460ms var(--ease) 1350ms both}
+.q-trail.perfect .qt-tick::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid var(--accent-2);border-radius:50%;opacity:0;animation:qt-ring 900ms var(--ease) 1800ms both}
+@keyframes qt-draw{from{clip-path:inset(-6px 100% -6px 0)}to{clip-path:inset(-6px 0 -6px 0)}}
+@keyframes qt-pop{from{transform:scale(0)}}
+@keyframes qt-rise{from{transform:scaleY(0)}}
+@keyframes qt-ring{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.6)}}
+@media (prefers-reduced-motion:reduce){.qt-line,.qt-dot,.qt-tick,.q-trail.perfect .qt-tick::after{animation:none}}
+.q-reward{margin:var(--s-2) 0 0;font:500 15px/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) 1500ms both}
+.q-reward[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.q-reward{animation:none}}
+.q-foot .btn .ico.up{margin:0 6px 0 0}

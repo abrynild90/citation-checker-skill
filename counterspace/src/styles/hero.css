@@ -244,3 +244,6 @@
   .hero-figure>.stage{flex:1 1 auto;height:auto;min-height:var(--stage-h)}
   .no-cdn .hero-figure>.stage{min-height:0;height:350px}
 }
+
+/* the ring that leaves a link's ends when it is shown again after a reward */
+.ht-pulse{fill:none;stroke:var(--hero-accent);stroke-width:2;pointer-events:none}

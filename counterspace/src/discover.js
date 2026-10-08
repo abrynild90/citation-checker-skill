@@ -8,7 +8,7 @@ import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
 import { seenScenes } from './shared.js';
-import { replayReveal, revealPair } from './hero-timeline.js';
+import { earn, freshReward, showInHero } from './rewards.js';
 
 const yearOf = (s) => s.date.slice(0, 4);
 // Titles end with the year in brackets; the card shows the year on its own line.
@@ -56,7 +56,7 @@ function drawGallery() {
     milestone();
     if (count) {
       count.textContent = `${seenScenes.size} of ${STRIP.length} scenes seen`;
-      if (news) {
+      if (freshReward()) {
         const go = document.createElement('button');
         go.type = 'button';
         go.className = 'ss-go';
@@ -67,29 +67,34 @@ function drawGallery() {
     heroSeen();
   };
   document.addEventListener('cs:seen', sync);
+  document.addEventListener('cs:reward', sync);
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.ss-go')) return;
-    news = null;
-    scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
-    setTimeout(replayReveal, REDUCED ? 0 : 600);
+    showInHero();
     sync();
   });
   sync();
 }
 
-// Half-way rewards, in memory only: the third and the seventh scene seen each draw one more real pair on the hero's resting picture, so the 13 of 13 card is
-// not the only payoff. `news` holds the plain words for the latest one until the next scene is opened.
+// Half-way rewards, in memory only: the third and the seventh scene seen each draw one more real pair on the hero's resting picture (see rewards.js), so the
+// 13 of 13 card is not the only payoff. When the scene that earned one is closed, the page brings the hero into view and pulses the new link once.
 const MILES = [3, 7];
 let given = 0,
-  news = null; // { at, text } for the latest reward, until another scene is opened
+  toShow = null; // the reward to show when the scene on screen is closed
 function milestone() {
   const n = seenScenes.size;
   if (given < MILES.length && n >= MILES[given]) {
-    const r = revealPair([...seenScenes]);
-    given++;
-    news = r && { at: n, text: `a dashed link from ${r.event} to ${r.law}` };
-  } else if (news && n > news.at) news = null;
+    const key = 'seen' + MILES[given++],
+      r = earn(key);
+    if (r) toShow = r.key;
+  }
 }
+document.addEventListener('cs:closed', () => {
+  if (!toShow) return;
+  const k = toShow;
+  toShow = null;
+  setTimeout(() => showInHero(k), 250);
+});
 
 // The arrows move the strip by about one screenful of cards and switch off at either end; the cards themselves stay the way in for keyboards.
 function stripControls(grid) {
@@ -137,7 +142,14 @@ function heroSeen() {
   el.classList.toggle('done', all);
   if (go) go.textContent = all ? 'See the whole timeline' : 'See the timeline';
   if (!all) {
-    el.textContent = `Seen ${n} of ${STRIP.length} scenes` + (news ? `. New on the picture above: ${news.text}.` : '');
+    el.textContent = `Seen ${n} of ${STRIP.length} scenes`;
+    if (freshReward()) {
+      const go = document.createElement('button');
+      go.type = 'button';
+      go.className = 'ss-go hs-go';
+      go.textContent = 'See the new link';
+      el.append(' · A new link is on the picture. ', go);
+    }
     return;
   }
   el.innerHTML = `You have seen all ${STRIP.length} scenes. <button type="button" class="hs-again">Show what you found</button>`;
@@ -163,6 +175,7 @@ function hideDone() {
   if (card) card.hidden = true;
 }
 document.addEventListener('cs:closed', () => pending && showDone());
+document.addEventListener('cs:reward', () => heroSeen());
 document.addEventListener('cs:recap', () => ((shown = true), (pending = false)));
 document.addEventListener('click', (e) => {
   if (e.target.closest('#hdClose')) {

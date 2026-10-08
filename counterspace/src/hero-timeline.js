@@ -129,7 +129,9 @@ export function mountHero(fontsReady, actions = {}) {
 // The mid-way reward (called from discover.js): one more real pair is drawn on the resting picture. It prefers a pair whose weapon the reader has just watched in
 // 3D, and never one whose dashed line would run through words. Returns the plain words for it, or null when there is nothing left to show.
 export const revealPair = (watched = []) => drawn?.reveal?.next(watched) || null;
-export const replayReveal = () => drawn?.reveal?.replay();
+export const replayReveal = (key) => drawn?.reveal?.replay(key);
+// The link just earned, drawn again and pulsed once (a ring leaves the dot; when the line arrives, the tick answers).
+export const pulseReveal = (key) => drawn?.reveal?.pulse(key);
 
 // ---------------------------------------------------------------- words for screen readers
 function writeText(stage) {
@@ -831,14 +833,28 @@ function mountHits(stage, S, actions) {
       if (!pick) return null;
       revealedKeys.push(key(pick));
       paintRest(pick, true);
-      return { event: WORDS[pick.p.event]?.name ?? byId[pick.p.event].system, law: LAW_WORDS[pick.p.law] ?? byId[pick.p.law].title };
+      return { key: key(pick), event: WORDS[pick.p.event]?.name ?? byId[pick.p.event].system, law: LAW_WORDS[pick.p.law] ?? byId[pick.p.law].title };
     },
-    replay() {
-      const k = revealedKeys.at(-1),
-        q = k && allPairs().find((x) => key(x) === k);
+    replay(k = revealedKeys.at(-1)) {
+      const q = k && allPairs().find((x) => key(x) === k);
       if (!q) return;
       S.rest.querySelector(`[data-k="${k}"]`)?.remove();
       paintRest(q, true);
+    },
+    pulse(k = revealedKeys.at(-1)) {
+      const q = k && allPairs().find((x) => key(x) === k);
+      if (!q) return;
+      this.replay(k);
+      if (STILL) return;
+      const { ev, law } = q,
+        ring = (cx, cy, r, delay) => {
+          const c = el('circle', { cx, cy, r, class: 'ht-pulse' }, S.rest);
+          c.style.transformBox = 'fill-box';
+          c.style.transformOrigin = 'center';
+          c.animate([{ opacity: 0.9, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(2.6)' }], { duration: 1000, delay, easing: EASE, fill: 'both' }).finished.then(() => c.remove());
+        };
+      ring(ev.px, ev.py, RING(ev), 0);
+      ring(law.px, (law.py + law.y1) / 2, 9, 950);
     },
   };
   revealedKeys.forEach((k) => {

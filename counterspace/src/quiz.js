@@ -11,6 +11,7 @@ import { linkText } from './links.js';
 import { SHORT } from './discover-data.js';
 import { openScene } from './scene-ui.js';
 import { seenScenes } from './shared.js';
+import { earn, showInHero } from './rewards.js';
 
 const LAW_PLAIN = {
   ...LAW_WORDS,
@@ -131,14 +132,20 @@ export function mountQuiz() {
 </li>`;
   }).join('');
   host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
+  <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
   <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Pick an answer in each question. Your guesses are not stored.</p>
-    <p class="q-pattern" id="qPattern" hidden></p></div>
+    <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
+    <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>See it in the hero</button>
     <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
   const tally = host.querySelector('#qTally'),
     again = host.querySelector('#qAgain'),
     pat = host.querySelector('#qPattern'),
     gaps = host.querySelector('#qGaps'),
+    trail = host.querySelector('#qTrail'),
+    rew = host.querySelector('#qReward'),
+    toHero = host.querySelector('#qHero'),
+    got = new Map(), // the reward earned at each score ('quiz3', 'quiz4'): each is given once per visit
     state = new Array(N).fill(null); // null (open), true (called it) or false
   const sync = () => {
     const done = state.filter((s) => s !== null).length,
@@ -152,6 +159,25 @@ export function mountQuiz() {
     gaps.classList.toggle('primary', done === N);
     gaps.querySelector('span').textContent = done === N ? 'See every gap' : 'See all the gaps';
     again.hidden = !done;
+    // three or four right: a short drawn flourish (one dot per question joined by a dashed line, ending in a tick) and a new link on the hero's picture
+    const win = done === N && right >= 3;
+    trail.hidden = !win;
+    trail.replaceChildren();
+    rew.hidden = toHero.hidden = true;
+    if (!win) return;
+    const key = 'quiz' + right;
+    if (!got.has(key)) got.set(key, earn(key));
+    const r = got.get(key);
+    trail.className = 'q-trail' + (right === N ? ' perfect' : '');
+    trail.innerHTML =
+      '<span class="qt-line"></span>' +
+      state.map((s, i) => `<i class="qt-dot ${s ? 'ok' : 'miss'}" style="--p:${((i + 0.5) / N) * 100}%;--i:${i}"></i>`).join('') +
+      '<i class="qt-tick"></i>';
+    if (r) {
+      rew.textContent = `${right === N ? 'All four right.' : 'Three right.'} That earns a new link on the picture at the top of the page: ${r.event} and ${r.law}.`;
+      rew.hidden = toHero.hidden = false;
+      toHero.dataset.key = r.key;
+    }
   };
   host.addEventListener('click', (ev) => {
     const btn = ev.target.closest('.q-opt');
@@ -180,6 +206,7 @@ export function mountQuiz() {
         : '');
     sync();
   });
+  toHero.addEventListener('click', () => showInHero(toHero.dataset.key));
   host.addEventListener('click', (ev) => {
     const w = ev.target.closest('.q-go');
     if (w) openScene(w.dataset.scene, w);
