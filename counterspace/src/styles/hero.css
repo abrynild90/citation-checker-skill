@@ -95,3 +95,9 @@
 .no-cdn .hero-cap{display:none}
 @media (min-width:900px){.no-cdn .stage{height:350px}}
 .no-cdn :is(#tourBtn,#tourBtn2,#surpriseBtn,#surpriseBtn2,#heroReplay,.scenes-tools,.posters,.rail){display:none!important}
+
+/* a thin outer ring says "this one has a 3D scene"; the link line and its tag show which law followed a weapon */
+.ht-scene{fill:none;stroke:var(--hero-accent);stroke-width:1.2;opacity:.6;pointer-events:none}
+.ht-lk-line{stroke:var(--text);stroke-width:1.5;stroke-dasharray:5 4;stroke-linecap:round;opacity:.85;pointer-events:none}
+.ht-lk-pill{fill:var(--hero-bg);stroke:rgba(150,175,230,.45);stroke-width:1;pointer-events:none}
+.ht-lk-tag{fill:var(--text);font:600 12.5px var(--sans);font-variant-numeric:tabular-nums;pointer-events:none}

@@ -5,6 +5,7 @@
 // ============================================================================
 import { DOMAIN, KIN, LAST_DA, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
+import { linkText, pairsAt } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
@@ -210,6 +211,7 @@ function build(stage) {
       r = e.type === 'nuclear' ? 11 : e.type === 'destructive' ? 7.5 : 5.5;
     if (e.type === 'nuclear') el('path', { d: star(11), class: 'ht-ev' }, inner);
     else el('circle', { r, class: e.type === 'destructive' ? 'ht-ev' : 'ht-ev ring' }, inner);
+    if (hasScene(e)) el('circle', { r: r + 4.5, class: 'ht-scene' }, inner); // a thin outer ring: this one has a 3D scene
     marks.push({ e, px, py, r });
     S.hits.push({ k: 'ev', id: e.id, date: e.date, e, px, py, r });
     obstacles.push({ x0: px - r - 3, x1: px + r + 3, y0: py - r - 3, y1: py + r + 3 });
@@ -448,6 +450,10 @@ function build(stage) {
     }
     const tick = el('line', { x1: px, x2: px, y1: limbY(px), y2: limbY(px) + (label ? drop : tickLen), class: l.soft_law ? 'ht-law soft' : 'ht-law' }, laws);
     S.hits.push({ k: 'law', id: l.id, date: l.start, l, px, py: limbY(px), y1: limbY(px) + (label ? drop : tickLen) });
+    if (hasScene(l)) {
+      const ring = el('circle', { cx: px, cy: limbY(px), r: 6, class: 'ht-scene' }, laws);
+      S.tracks.push({ node: ring, at: l.start, delay: 100 + li * 28, dur: 500, keys: [{ opacity: 0 }, { opacity: 1 }] });
+    }
     tick.style.transformOrigin = '50% 0';
     tick.style.transformBox = 'fill-box';
     S.tracks.push({
@@ -462,7 +468,7 @@ function build(stage) {
     });
   });
 
-  S.avoid = placed.map((p) => p.box).concat(words); // the notes, zone names and title words: a card never stands on them
+  S.avoid = placed.map((p) => p.box).concat(words, rowBoxes); // the notes, zone names, title words and law names: a card never stands on them
   // ---- the time marker: a thin line that moves along the years; it never crosses the words
   const clip = el('clipPath', { id: 'htMarkClip' }, defs),
     hole = words.map((b) => `M${b.x0},${b.y0}H${b.x1}V${b.y1}H${b.x0}Z`).join('');
@@ -476,6 +482,7 @@ function build(stage) {
   // the ring and the bar that mark the point or law being looked at (moved by mountHits)
   S.ring = el('circle', { r: 13, class: 'ht-ring', opacity: 0 }, svg);
   S.bar = el('line', { class: 'ht-law-hi', opacity: 0 }, svg);
+  S.links = el('g', { 'aria-hidden': 'true' }, svg); // the dashed line from a weapon to the first later law, with the time between (moved by mountHits)
   stage.appendChild(svg);
   return S;
 }
@@ -568,6 +575,16 @@ function mountHits(stage, S, actions) {
     } else {
       for (const up of [0, 24, 48, 90]) for (let dx = -320; dx <= 320; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
     }
+    const lk = linksOf(h).flatMap(({ ev, law }) => {
+      const n = Math.max(1, Math.round(Math.hypot(law.px - ev.px, law.py - ev.py) / 16)),
+        box = (x, y, hw, hh) => ({ x0: x - hw, x1: x + hw, y0: y - hh, y1: y + hh });
+      return [
+        box(ev.px, ev.py, 14, 14),
+        box(law.px, (law.py + law.y1) / 2, 4, (law.y1 - law.py) / 2),
+        box((ev.px + law.px) / 2, (ev.py + law.py) / 2, 46, 12),
+        ...Array.from({ length: n + 1 }, (_, i) => box(ev.px + ((law.px - ev.px) * i) / n, ev.py + ((law.py - ev.py) * i) / n, 3, 3)),
+      ];
+    });
     let best = null;
     for (const [rx, ry] of cands) {
       const x = Math.min(Math.max(8, rx), S.W - pw - 8),
@@ -576,6 +593,7 @@ function mountHits(stage, S, actions) {
       let cost = Math.abs(x - rx) * 2 + Math.abs(y - ry) * 2; // pushed off its first choice by the picture's edge
       if (overlap(R, { x0: cx - 5, x1: cx + 5, y0: h.py - 5, y1: h.k === 'ev' ? h.py + 5 : h.y1 }, 0)) cost += 400; // never over its own point
       for (const o of S.avoid || []) if (overlap(R, o, 8)) cost += 300;
+      for (const o of lk) if (overlap(R, o, 2)) cost += 500; // never over the linked tick or dot, the dashed line or its tag
       for (const o of S.hits) if (o !== h && o.k === 'ev' && overlap(R, { x0: o.px - 7, x1: o.px + 7, y0: o.py - 7, y1: o.py + 7 }, 2)) cost += o.e.type === 'nuclear' ? 200 : 45;
       for (const o of S.hits) if (o !== h && o.k === 'law' && overlap(R, { x0: o.px - 2, x1: o.px + 2, y0: o.py, y1: o.y1 }, 2)) cost += 30;
       const dx = Math.max(R.x0 - cx, 0, cx - R.x1),
@@ -586,7 +604,34 @@ function mountHits(stage, S, actions) {
     pop.style.left = best.x + 'px';
     pop.style.top = best.y + 'px';
   };
+  // The real links (data/lag_pairs.json) of the point or tick being looked at: a dashed line from each weapon dot to its first later law, the time between
+  // them on a small tag, and a ring on the dot or a bar on the tick at the other end.
+  const linksOf = (h) =>
+    h
+      ? pairsAt(h.k === 'ev' ? h.e.id : h.l.id)
+          .map((p) => ({ p, ev: S.hits.find((k) => k.k === 'ev' && k.id === p.event), law: S.hits.find((k) => k.k === 'law' && k.id === p.law) }))
+          .filter((q) => q.ev && q.law)
+      : [];
+  const RING = (h) => (h.e.type === 'nuclear' ? 17 : h.e.type === 'destructive' ? 13 : 11);
+  const drawLinks = (h) => {
+    S.links.replaceChildren();
+    linksOf(h).forEach(({ p, ev, law }) => {
+      const dx = law.px - ev.px,
+        dy = law.py - ev.py,
+        d = Math.hypot(dx, dy),
+        r0 = RING(ev) + 1;
+      if (d > r0 + 4) el('line', { x1: ev.px + (dx / d) * r0, y1: ev.py + (dy / d) * r0, x2: law.px, y2: law.py, class: 'ht-lk-line' }, S.links);
+      if (ev !== h) el('circle', { cx: ev.px, cy: ev.py, r: RING(ev), class: 'ht-ring' }, S.links);
+      if (law !== h) el('line', { x1: law.px, x2: law.px, y1: law.py, y2: law.y1, class: 'ht-law-hi' }, S.links).setAttribute('opacity', 0.45);
+      const mx = (ev.px + law.px) / 2,
+        my = (ev.py + law.py) / 2,
+        t = text(S.links, { x: mx, y: my, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g)),
+        w = tw(linkText(p.g), 12.5, 600) + 16;
+      S.links.insertBefore(el('rect', { x: mx - w / 2, y: my - 11, width: w, height: 22, rx: 11, class: 'ht-lk-pill' }), t);
+    });
+  };
   const mark = (h) => {
+    drawLinks(h);
     if (h?.k === 'ev') {
       S.ring.setAttribute('transform', `translate(${h.px},${h.py})`);
       S.ring.setAttribute('r', h.e.type === 'nuclear' ? 17 : h.e.type === 'destructive' ? 13 : 11);
