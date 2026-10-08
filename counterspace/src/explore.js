@@ -39,7 +39,6 @@ export function showTab(id, { focus = false } = {}) {
   explore.dataset.years = tab.years ? '1' : '0';
   if (changed && !tab.years) hooks.legalOff?.(); // before the chart is drawn: the strip must not hang over a chart with its own scale
   explore.dataset.tab = id;
-  syncCards();
   hooks.drawLazy?.(tab.svg); // drawn already unless the idle pass has not come yet
   if (focus) $('tab-' + id).focus();
   if (changed) hooks.legalScroll?.(); // the pinned law strip steps aside for a chart that does not use the years
@@ -129,30 +128,43 @@ const LINES = {
     return `${ws.length} pairs, ${gap(Math.min(...ws)).num} ${gap(Math.min(...ws)).unit} to ${gap(Math.max(...ws)).num} years`;
   },
 };
+// The cards are the tablist: one control per chart, a picture and a line each. Arrow keys move and open together, Home and End jump.
 function mountCards() {
-  const wrap = document.createElement('ul');
-  wrap.className = 'xcards';
-  wrap.setAttribute('aria-label', 'Choose a chart');
-  wrap.innerHTML = TABS.map(
-    (t) =>
-      `<li><button type="button" class="xcard" data-tab="${t.id}" aria-pressed="false"><span class="xc-pic">${THUMBS[t.id]()}</span><span class="xc-t">${t.name}</span><span class="xc-l">${LINES[t.id]()}</span></button></li>`,
+  bar = document.createElement('div');
+  bar.className = 'xcards';
+  bar.id = 'exploreTabs';
+  bar.setAttribute('role', 'tablist');
+  bar.setAttribute('aria-label', 'Charts to explore');
+  bar.innerHTML = TABS.map(
+    (t, i) =>
+      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-pic">${THUMBS[t.id]()}</span><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${LINES[t.id]()}</span></button>`,
   ).join('');
-  bar.before(wrap);
-  wrap.addEventListener('click', (e) => {
+  $('xpanels').before(bar);
+  const cards = [...bar.children];
+  bar.addEventListener('click', (e) => {
     const b = e.target.closest('.xcard');
     if (!b) return;
     showTab(b.dataset.tab);
-    $(b.dataset.tab).scrollIntoView({ block: 'start', behavior: 'auto' });
+    const top = bar.getBoundingClientRect().top; // bring the cards and the chart under them into view only if they are not already
+    if (top < 0 || top > innerHeight * 0.5) bar.scrollIntoView({ block: 'start', behavior: 'auto' });
   });
+  bar.addEventListener('keydown', (e) => {
+    const at = cards.indexOf(document.activeElement),
+      step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key],
+      to = e.key === 'Home' ? 0 : e.key === 'End' ? cards.length - 1 : step && at >= 0 ? (at + step + cards.length) % cards.length : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    showTab(cards[to].dataset.tab, { focus: true });
+  });
+  // Links to a chart land with its cards in view: the card row's height is the room the page leaves above the panel.
+  const size = () => explore.style.setProperty('--xt-h', bar.offsetHeight + 'px');
+  size();
+  if (window.ResizeObserver) new ResizeObserver(size).observe(bar);
 }
-const syncCards = () => document.querySelectorAll('.xcard').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === active)));
 
 export function mountExplore() {
-  bar = $('exploreTabs');
   explore = $('explore');
-  if (!bar || !explore) return;
-  const btns = [...bar.querySelectorAll('[role="tab"]')];
-  bar.hidden = false;
+  if (!explore || !$('xpanels')) return;
   mountCards();
   // The tabs scroll away on a tall chart, so each panel ends with the way to the next one.
   TABS.forEach((t, i) => {
@@ -167,15 +179,6 @@ export function mountExplore() {
     $(t.id).append(row);
   });
   showTab(active);
-  btns.forEach((b) => b.addEventListener('click', () => showTab(b.id.slice(4))));
-  bar.addEventListener('keydown', (e) => {
-    const at = btns.indexOf(document.activeElement),
-      step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key],
-      to = e.key === 'Home' ? 0 : e.key === 'End' ? btns.length - 1 : step && at >= 0 ? (at + step + btns.length) % btns.length : -1;
-    if (to < 0) return;
-    e.preventDefault();
-    showTab(btns[to].id.slice(4), { focus: true }); // arrows move and open together: each tab is one chart, there is nothing to wait for
-  });
   // A click on a link to a chart opens its tab before the browser scrolls, so the jump lands on a chart that is in place.
   document.addEventListener(
     'click',

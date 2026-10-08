@@ -25,46 +25,39 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 @media (pointer:coarse){.pat-go{min-height:44px}}
 
 /* ---- explore the data */
-.explore{--xt-h:64px;padding:var(--s-7) 0 var(--s-6);border-top:1px solid var(--line)}
+.explore{--xt-h:0px;padding:var(--s-7) 0 var(--s-6);border-top:1px solid var(--line)}
 .explore-head{margin-bottom:var(--s-5)}
-.xtabs[hidden]{display:none}
-.xtabs.seg{display:flex;width:max-content;max-width:100%}
-.xtabs button{--h:42px;padding:0 var(--s-5);font-size:14.5px}
-.xtabs button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .xpanels{position:relative}
 section.chart.xpanel[data-off]{position:absolute;top:0;left:0;right:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;padding:0;border:0}
-section.chart.xpanel{border-top:0;padding:var(--s-5) 0 var(--s-4);outline:none}
+section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 @media (min-width:761px){
   section.chart.xpanel{scroll-margin-top:calc(var(--band-h,0px) + var(--xt-h) + var(--s-3))}
   .explore[data-years="0"] section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3))} /* the pinned strip steps aside over these two */
 }
 @media (max-width:760px){
-  .xtabs.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;border-radius:var(--r-2)}
-  .xtabs.seg::before{display:none}
-  .xtabs button{min-height:44px;padding:var(--s-2) var(--s-3);border-radius:calc(var(--r-2) - 3px);line-height:1.25;white-space:normal;text-align:center}
-  .seg.xtabs.has-thumb button[aria-selected="true"]{background:var(--thumb);box-shadow:var(--shadow-1),0 0 0 1px var(--line-strong)}
-  section.chart.xpanel{scroll-margin-top:calc(52px + var(--xt-h))}
+  section.chart.xpanel{scroll-margin-top:calc(52px + var(--s-3))}
   .explore{padding:var(--s-6) 0 var(--s-5)}
   .pattern{padding:var(--s-6) 0 var(--s-5)}
 }
 /* the way on to the next chart, at the foot of each tab */
 .xnext{display:flex;justify-content:flex-end;margin:var(--s-4) 0 0;padding-top:var(--s-4);border-top:1px solid var(--line)}
 @media print{
-  .xtabs.seg,.xnext{display:none}
+  .xnext{display:none}
   .legal-band{position:static!important}
   section.chart.xpanel[data-off]{position:static;height:auto;overflow:visible;visibility:visible;pointer-events:auto}
   section.chart.xpanel{border-top:1px solid var(--line)}
   .pat-go{display:none}
 }
 
-/* the four entry cards above the tabs */
-.xcards{list-style:none;margin:0 0 var(--s-4);padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
+/* the four cards are the tabs */
+.xcards{margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
 @media (min-width:900px){.xcards{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-4)}}
 .xcard{appearance:none;display:grid;gap:6px;width:100%;height:100%;padding:var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-3,14px);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;transition:border-color 120ms var(--ease),background 120ms var(--ease),transform 120ms var(--ease)}
 .xcard:hover{border-color:var(--accent);background:var(--surface-2)}
 .xcard:active{transform:translateY(1px)}
 .xcard:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.xcard[aria-pressed="true"]{border-color:var(--accent);background:var(--surface-2);box-shadow:0 0 0 1px var(--accent)}
+.xcard[aria-selected="true"]{border-color:var(--accent);background:var(--surface-2);box-shadow:0 0 0 1px var(--accent)}
+.xcard[aria-selected="true"] .xc-pic{background:var(--surface-3)}
 .xc-pic{display:block;aspect-ratio:160/64;border-radius:8px;background:var(--bg-2);overflow:hidden}
 .xc-pic svg{display:block;width:100%;height:100%}
 .xc-a{fill:var(--accent)}
@@ -73,4 +66,6 @@ section.chart.xpanel{border-top:0;padding:var(--s-5) 0 var(--s-4);outline:none}
 .xc-t{font:600 15px/1.3 var(--sans)}
 .xc-l{font:400 13.5px/1.4 var(--sans);color:var(--muted)}
 @media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:14px}.xc-l{font-size:13px}}
+#exploreTabs{scroll-margin-top:calc(var(--band-h,0px) + var(--s-3))}
+@media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}
 @media print{.xcards{display:none}}
