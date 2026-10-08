@@ -19,11 +19,10 @@
 .hero-cap p{margin:0;max-width:72ch;font:400 14px/1.5 var(--sans);color:var(--muted)}
 .hero-cap .btn{flex:none}
 @media (max-width:639px){.hero-cap .btn{width:var(--h);padding:0}.hero-cap .btn span{display:none}.hero-cap{position:relative;padding-top:var(--s-3);padding-right:calc(var(--gutter) + 52px);min-height:64px}.hero-cap .btn{position:absolute;top:8px;right:var(--gutter);background:rgba(7,11,22,.72)}}
-/* One row of actions under the picture: the whole first impression is the picture and these four ways in */
+/* One row of actions under the picture: the whole first impression is the picture and these two ways in */
 .hero-actions{grid-area:acts;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-3);padding:var(--s-4) var(--gutter) 0;animation:rise var(--dur-hero) var(--ease) 420ms both}
 .hero-actions .btn.quiet{padding-inline:var(--s-3)}
-@media (max-width:639px){.hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-2)}.hero-actions .btn{min-width:0;padding-inline:10px;white-space:nowrap;font-size:15px}
-  .hero-actions .btn.primary,.hero-actions .btn.quiet{grid-column:1/-1}}
+@media (max-width:639px){.hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-2)}.hero-actions .btn{min-width:0;padding-inline:10px;white-space:nowrap;font-size:15px}}
 
 /* The picture answers to a pointer and the arrow keys: an invisible layer of buttons sits over it, and a small card names the dot or tick and offers the 3D scene. */
 .ht-layer{position:absolute;left:0;right:0;top:0;overflow:hidden}
@@ -94,7 +93,7 @@
 .no-cdn .stage{height:0}
 .no-cdn .hero-cap{display:none}
 @media (min-width:900px){.no-cdn .stage{height:350px}}
-.no-cdn :is(#tourBtn,#tourBtn2,#surpriseBtn,#surpriseBtn2,#heroReplay,.scenes-tools,.posters,.rail){display:none!important}
+.no-cdn :is(#tourBtn,#surpriseBtn2,#heroReplay,.scenes-tools,.posters,.rail){display:none!important}
 
 /* a thin outer ring says "this one has a 3D scene"; the link line and its tag show which law followed a weapon */
 .ht-scene{fill:none;stroke:var(--hero-accent);stroke-width:1.2;opacity:.6;pointer-events:none}

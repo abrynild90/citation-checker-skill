@@ -4,7 +4,7 @@
 // ============================================================================
 import { REDUCED, esc } from './app.js';
 import { recapLine, recapLinks } from './recap.js';
-import { ORDER, openScene, startTour } from './scene-ui.js';
+import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
 import { seenScenes } from './shared.js';
@@ -20,7 +20,14 @@ const STRIP = [...ORDER].sort((a, b) => STRIKING.indexOf(a.id) - STRIKING.indexO
 function drawGallery() {
   const grid = document.getElementById('posterGrid');
   if (!grid) return;
-  grid.innerHTML = STRIP.map((s, i) => {
+  const surprise = `<li class="pcard pc-surprise">
+  <button type="button" class="ps-btn" id="surpriseBtn2" >
+    <span class="ps-pic" aria-hidden="true"><svg viewBox="0 0 160 90" focusable="false"><path class="ps-orbit" d="M14 70C44 18 112 8 148 30"/><circle class="ps-dot" cx="148" cy="30" r="4"/><circle class="ps-dot" cx="14" cy="70" r="3"/><circle class="ps-dot" cx="80" cy="25" r="2.4"/></svg><span class="ps-ico"><svg class="ico"><use href="#i-shuffle"/></svg></span></span>
+    <span class="pc-year">One at random</span>
+    <span class="pc-name">Surprise me</span>
+  </button>
+</li>`;
+  grid.innerHTML = surprise + STRIP.map((s, i) => {
     const img = posterURL(s.id);
     const fact = esc(FACTS[s.id] || '');
     return `<li class="pcard" style="--i:${i}">
@@ -79,12 +86,8 @@ export function mountDiscover() {
     const s = pickSurprise(ORDER);
     openScene(s.id, e.currentTarget);
   };
-  const tour = (e) => startTour(e.currentTarget);
-  document.getElementById('tourBtn2')?.addEventListener('click', tour);
-  ['surpriseBtn', 'surpriseBtn2'].forEach((id) => {
-    const b = document.getElementById(id);
-    if (b) b.onclick = go;
-  });
+  const b = document.getElementById('surpriseBtn2');
+  if (b) b.onclick = go;
 }
 
 // Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13". At 13 of 13, when the last scene is closed, the page returns to the top and
