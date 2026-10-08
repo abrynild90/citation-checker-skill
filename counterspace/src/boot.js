@@ -19,6 +19,7 @@ import { EARTH_URL, earthReady } from './scenes/earth.js';
 import { exportSVG } from './export.js';
 import { audit } from './audit.js';
 import { mountDiscover } from './discover.js';
+import { mountQuiz } from './quiz.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
@@ -190,6 +191,7 @@ fontsReady.then(() => {
 // The hero picture is drawn from the page's own data and the embedded Earth image; no 3D library is involved.
 mountHero(fontsReady);
 mountDiscover();
+mountQuiz();
 let rz = 0,
   lastW = innerWidth;
 addEventListener('resize', () => {

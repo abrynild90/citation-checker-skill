@@ -10,7 +10,7 @@ import { bindMark, hideCard, hint3d, legalKindWords, legend, openCard, rove, tab
 import { hooks } from '../shared.js';
 const LAG = [...D.lag_pairs.pairs.map((p) => ({ cap: p.event, law: p.law })), ...D.lag_pairs.open.map((p) => ({ cap: p.event, law: null }))];
 // The two ends of each pair in a few plain words, and what the reader should know about the pair beyond the dates.
-const WORDS = {
+export const WORDS = {
   'us-1962-starfish-prime': {
     name: 'Starfish Prime nuclear test',
     note: 'The treaty followed the test. It is not presented as a direct response.',
@@ -35,7 +35,7 @@ const WORDS = {
     note: 'The only related legal item, the Tallinn Manual 2.0 (2017), is soft law and came before the attack.',
   },
 };
-const LAW_WORDS = {
+export const LAW_WORDS = {
   'ltbt-1963': 'Limited Test Ban Treaty',
   'icao-2025': 'ICAO Assembly finding',
   'unga-77-41': 'UN General Assembly resolution 77/41',
@@ -51,14 +51,14 @@ const ringMarkup = () =>
   `<circle r="7" style="fill:${GROUND};stroke:${GROUND};stroke-width:5.6"/><circle r="7" style="fill:${GROUND};stroke:var(--accent);stroke-width:2.4"/>`;
 const catColor = (c) => (c.domain === 'kinetic' ? 'var(--cat-da)' : 'var(--cat-ew)');
 // The elapsed time as a number and a unit: months under a year, years with one decimal after that.
-function gap(years) {
+export function gap(years) {
   if (years < 1) {
     const n = Math.round(years * 12);
     return { num: String(n), unit: n === 1 ? 'month' : 'months' };
   }
   return { num: years.toFixed(1), unit: 'years' };
 }
-const yearsBetween = (a, b) => (b - a) / (365.25 * 864e5);
+export const yearsBetween = (a, b) => (b - a) / (365.25 * 864e5);
 // Title line as runs of text (names in the strong weight, dates and the arrow quiet), wrapped to a width.
 function wrapRuns(runs, maxW, size) {
   const lines = [[]];
