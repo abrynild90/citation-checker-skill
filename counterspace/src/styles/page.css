@@ -128,10 +128,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   background:var(--surface);box-shadow:var(--card-shadow);color:var(--text);font:600 14px/1.3 var(--sans);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--dur-1) var(--ease)}
 .rail a:hover .r-lab,.rail a:focus-visible .r-lab{opacity:1}
 
-/* 1360 to 1499 px: the margin is narrow, so only the chapter being read shows its name, in a small label beside its dot */
-@media (min-width:1360px) and (max-width:1499px){
-  .rail a[aria-current] .r-lab{opacity:1;width:92px;padding:5px 8px;white-space:normal;text-align:right;font:600 12.5px/1.25 var(--sans)}
-}
+/* 1360 to 1499 px: the margin is too narrow for names, so the rail is dots only; a name shows on hover and focus */
 /* 1500 px and up there is room in the margin: every dot carries its chapter name beside it (two short lines at most), the current one in full strength. */
 @media (min-width:1500px){
   .rail{right:10px}
