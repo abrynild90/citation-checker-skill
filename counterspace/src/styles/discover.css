@@ -71,3 +71,13 @@
 .pc-seen[hidden]{display:none}
 .pc-seen .ico{width:14px;height:14px;color:var(--hero-accent)}
 @media (max-width:639px){.scenes-tools .scenes-seen{display:none}}
+
+/* In the light theme the dark hero ends on one clean, rounded edge instead of a grey fade: the picture is a night window set into the paper page. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) header.top { border-radius: 0 0 var(--r-3, 28px) var(--r-3, 28px); }
+  :root:not([data-theme="dark"]) .scenes { padding-top: 72px; }
+  :root:not([data-theme="dark"]) .scenes::before { display: none; }
+}
+:root[data-theme="light"] header.top { border-radius: 0 0 var(--r-3, 28px) var(--r-3, 28px); }
+:root[data-theme="light"] .scenes { padding-top: 72px; }
+:root[data-theme="light"] .scenes::before { display: none; }
