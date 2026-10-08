@@ -2,7 +2,8 @@
 // discover.js: the scene gallery and "Surprise me". Pictures load at once (they are embedded in the page), so the strip is never blank.
 // Needs: scene-ui.js (openScene, ORDER), posters.js, discover-data.js. Provides: mountDiscover().
 // ============================================================================
-import { REDUCED, esc } from './app.js';
+import { D, REDUCED, byId, esc, parse } from './app.js';
+import { gap, yearsBetween } from './links.js';
 import { ORDER, openScene, startTour } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
@@ -45,6 +46,7 @@ function drawGallery() {
       b.classList.toggle('seen', on);
     });
     if (count) count.textContent = `${seenScenes.size} of ${STRIP.length} scenes seen`;
+    heroSeen();
   };
   document.addEventListener('cs:seen', sync);
   sync();
@@ -83,4 +85,24 @@ export function mountDiscover() {
     const b = document.getElementById(id);
     if (b) b.onclick = go;
   });
+}
+
+// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13"; at 13 of 13 it becomes a one-line payoff and the main button says where to go.
+// Everything is counted from the scenes opened in this visit and from the linked pairs in the data; nothing is stored.
+function heroSeen() {
+  const el = document.getElementById('heroSeen'),
+    go = document.getElementById('heroGo'),
+    n = seenScenes.size;
+  if (!el) return;
+  el.hidden = n === 0;
+  const all = n >= STRIP.length;
+  el.classList.toggle('done', all);
+  if (go) go.textContent = all ? 'See the whole timeline' : 'See the timeline';
+  if (!all) {
+    el.textContent = `Seen ${n} of ${STRIP.length} scenes`;
+    return;
+  }
+  const waits = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start))),
+    say = (y) => `${gap(y).num} ${gap(y).unit}`;
+  el.textContent = `You have seen all ${STRIP.length}. In every pair our records link, the law came later: after ${say(Math.min(...waits))} to ${say(Math.max(...waits))}.`;
 }

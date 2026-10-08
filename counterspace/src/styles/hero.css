@@ -121,3 +121,9 @@
   .stage{height:clamp(540px,calc(92vh - 160px),770px)}
 }
 @supports (height:100svh){@media (min-width:1600px){.stage{height:clamp(540px,calc(92svh - 160px),770px)}}}
+
+/* "Seen N of 13": quiet in the actions row; at 13 of 13 it becomes the one-line payoff on its own row */
+.hero-seen{margin:0 0 0 var(--s-2);font:500 14px/1.45 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
+.hero-seen[hidden]{display:none}
+.hero-seen.done{flex:1 0 100%;margin:var(--s-2) 0 0;max-width:70ch;color:var(--text);font-size:15px}
+@media (max-width:639px){.hero-seen{grid-column:1/-1;margin:var(--s-1) 0 0;text-align:center}.hero-seen.done{text-align:left}}
