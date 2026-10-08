@@ -328,6 +328,15 @@ function splitSentences(text) {
   }
   return out;
 }
+// Two sentences say the same thing when most of their longer words are shared.
+const words = (t) => new Set(t.toLowerCase().match(/[a-z0-9]{4,}/g) || []),
+  same = (a, b) => {
+    const A = words(a),
+      B = words(b);
+    let n = 0;
+    A.forEach((w) => B.has(w) && n++);
+    return n / Math.max(1, Math.min(A.size, B.size)) >= 0.5;
+  };
 // level 0: two sentences (one on a phone), 1: one sentence, 2: none; a number above that (from fitSteps, when there is room to spare) adds sentences
 function setLede(level, count) {
   const full = cur?.caption || '';
@@ -335,17 +344,10 @@ function setLede(level, count) {
   // The intro is two sentences at every width (one when the room is tight); the full account is behind "Read the full account".
   const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? 2 : 1));
   // On a wide window the story opens with a "Did you know" line; an intro sentence that says the same thing is left out of the intro (the full account keeps it)
-  const dyk = WIDE.matches && !!FACTS[cur?.id],
-    words = (t) => new Set(t.toLowerCase().match(/[a-z0-9]{4,}/g) || []),
-    same = (a, b) => {
-      const A = words(a),
-        B = words(b);
-      let n = 0;
-      A.forEach((w) => B.has(w) && n++);
-      return n / Math.max(1, Math.min(A.size, B.size)) > 0.6;
-    },
-    pool = dyk ? sentences.filter((t, i) => !i || !same(t, FACTS[cur.id])) : sentences;
-  let shown = expanded ? full : pool.slice(0, max).join(' ');
+  const dyk = WIDE.matches && !dykEl.hidden,
+    pool = dyk ? (expanded ? splitSentences(full) : sentences).filter((t, i) => !i || !same(t, FACTS[cur.id])) : sentences;
+  // The full account leaves out the sentence the "Did you know" line above it already says, so no sentence shows twice
+  let shown = expanded ? (dyk ? pool.join(' ') : full) : pool.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 340) shown = pool[0];
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
@@ -386,7 +388,8 @@ function fillStory(cfg) {
   countEl.textContent = `${n} / ${ORDER.length}`;
   sentences = splitSentences(cfg.lede || cfg.caption);
   dykEl.innerHTML = FACTS[cfg.id] ? `<b>Did you know</b> ${esc(FACTS[cfg.id])}` : '';
-  dykEl.hidden = !FACTS[cfg.id];
+  // the "Did you know" line is left out when the account's own first sentence already says it
+  dykEl.hidden = !FACTS[cfg.id] || same(splitSentences(cfg.caption || cfg.lede || '')[0] || '', FACTS[cfg.id]);
   expanded = false;
   asideBody.classList.remove('expanded');
   moreBtn.setAttribute('aria-expanded', 'false');
@@ -464,6 +467,17 @@ function fillNext(cfg) {
   }
 }
 
+// A note that opens over the story column rests just above the "About this picture / Where to go next" row, so it never covers that row, nor the button
+// that opened it (the related-law button sits below the row). Where the row is out of view, the note keeps its place at the foot.
+function anchorNote(note) {
+  note.style.bottom = '';
+  note.style.maxHeight = '';
+  const wr = $('asideWrap').getBoundingClientRect(),
+    pr = $('svPair').getBoundingClientRect();
+  if (!pr.height || pr.top < wr.top + 140 || pr.top > wr.bottom) return;
+  note.style.bottom = Math.round(wr.bottom - pr.top + 8) + 'px';
+  note.style.maxHeight = Math.round(pr.top - wr.top - 16) + 'px';
+}
 function toggleSrc(open) {
   slPop.hidden = !open;
   slBtn.setAttribute('aria-expanded', String(open));
@@ -478,6 +492,7 @@ function togglePair(which) {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
     pairBodies[k].hidden = !on;
+    if (on) anchorNote(pairBodies[k]);
   });
 }
 Object.keys(pairBtns).forEach((k) => (pairBtns[k].onclick = () => togglePair(pairBodies[k].hidden ? k : null)));
@@ -1157,7 +1172,7 @@ function fillLawCard(cfg) {
 function toggleLawCard(open) {
   lawCard.hidden = !open;
   lawBtn.setAttribute('aria-expanded', String(!!open));
-  if (open) (togglePair(null), toggleSrc(false));
+  if (open) (togglePair(null), toggleSrc(false), anchorNote(lawCard));
 }
 lawBtn.onclick = () => {
   if (!cur?.related) return;
