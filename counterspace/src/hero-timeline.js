@@ -3,8 +3,10 @@
 // Earth's limb (height on a log scale), and the laws and policies as ticks on the ground. It plays once (a time marker sweeps left to right and each event
 // rises at its year) and then stays as the final picture. Provides: mountHero(). Needs the data and text measurement from app.js.
 // ============================================================================
-import { DOMAIN, KIN, LAST_DA, LEGAL, REDUCED, fmtMonthYear, fmtY, parse, star, tw, wrap } from './app.js';
-import { KIND_PLAIN } from './ui.js';
+import { DOMAIN, KIN, LAST_DA, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
+import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
+import { SCENES } from './scenes/config.js';
+import { SHORT } from './discover-data.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
 
 const NS = 'http://www.w3.org/2000/svg',
@@ -48,7 +50,7 @@ const STILL = REDUCED || /[?&]still\b/.test(location.search);
 let drawn = null, // the current drawing, kept for the replay and for the Earth photograph that arrives later
   anims = [];
 
-export function mountHero(fontsReady) {
+export function mountHero(fontsReady, actions = {}) {
   const stage = document.getElementById('heroPic'),
     replay = document.getElementById('heroReplay');
   if (!stage) return;
@@ -62,6 +64,7 @@ export function mountHero(fontsReady) {
     lastW = stage.clientWidth;
     stopAnims();
     drawn = build(stage);
+    mountHits(stage, drawn, actions);
     loadEmbeddedEarth().then((ok) => ok && drawn && paintEarth(drawn));
     if (animate && !STILL) play();
   };
@@ -152,7 +155,7 @@ function build(stage) {
         .concat(W)
         .map((px) => `${px},${limbY(px).toFixed(1)}`)
         .join('L'),
-    S = { svg, W, H, yL, groundH, sag, limbY, tracks: [], earthImg: null };
+    S = { svg, W, H, yL, groundH, sag, limbY, tracks: [], earthImg: null, hits: [], phone };
   el('clipPath', { id: 'htEarthClip' }, defs).appendChild(el('path', { d: `${limbPath}L${W},${H}L0,${H}Z` }));
 
   // ---- the Earth: a flat dark ground until the photograph is drawn, and its thin atmosphere line
@@ -208,6 +211,7 @@ function build(stage) {
     if (e.type === 'nuclear') el('path', { d: star(11), class: 'ht-ev' }, inner);
     else el('circle', { r, class: e.type === 'destructive' ? 'ht-ev' : 'ht-ev ring' }, inner);
     marks.push({ e, px, py, r });
+    S.hits.push({ k: 'ev', id: e.id, date: e.date, e, px, py, r });
     obstacles.push({ x0: px - r - 3, x1: px + r + 3, y0: py - r - 3, y1: py + r + 3 });
     S.tracks.push({
       node: inner,
@@ -443,6 +447,7 @@ function build(stage) {
       }
     }
     const tick = el('line', { x1: px, x2: px, y1: limbY(px), y2: limbY(px) + (label ? drop : tickLen), class: l.soft_law ? 'ht-law soft' : 'ht-law' }, laws);
+    S.hits.push({ k: 'law', id: l.id, date: l.start, l, px, py: limbY(px), y1: limbY(px) + (label ? drop : tickLen) });
     tick.style.transformOrigin = '50% 0';
     tick.style.transformBox = 'fill-box';
     S.tracks.push({
@@ -467,8 +472,228 @@ function build(stage) {
   el('line', { x1: x(DOMAIN[0]), x2: x(DOMAIN[0]), y1: 14, y2: bandTop, class: 'ht-marker' }, mkIn);
   S.marker = { out: mkOut, inn: mkIn, dx: x(DOMAIN[1]) - x(DOMAIN[0]) };
 
+  // the ring and the bar that mark the point or law being looked at (moved by mountHits)
+  S.ring = el('circle', { r: 13, class: 'ht-ring', opacity: 0 }, svg);
+  S.bar = el('line', { class: 'ht-law-hi', opacity: 0 }, svg);
   stage.appendChild(svg);
   return S;
+}
+
+
+// ---------------------------------------------------------------- the picture answers to a pointer or a keyboard
+// Every dot and every tick on the ground can be pointed at, tapped or reached with the arrow keys; a small card says what it is and, where a 3D scene
+// exists, offers "Watch in 3D". The picture itself stays a still image for screen readers (its description lists everything): this layer sits beside
+// it, so the buttons are not inside the picture's image role. The layer has one tab stop; the arrow keys step through the history in date order.
+const sceneOf = (id) => SCENES.find((s) => s.id === id);
+const sceneName = (id) => (sceneOf(id)?.title || '').replace(/\s*\((\d{4}[^)]*)\)\s*$/, '');
+const watch = (id, text) =>
+  `<button type="button" class="btn small primary hp-3d" data-scene="${esc(id)}"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>${esc(text)}</button>`;
+function popHTML(h) {
+  if (h.k === 'ev') {
+    const e = h.e,
+      alt = e.altitude_km == null ? '' : ` At ${num(e.altitude_km)} km.`,
+      scene = hasScene(e),
+      title = scene ? sceneName(e.scene_3d) || e.system : e.system;
+    return (
+      `<p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p>` +
+      `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
+      (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
+    );
+  }
+  const l = h.l,
+    when = l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmtD({ date: l.start }),
+    scene = hasScene(l);
+  return (
+    `<p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
+    `<div class="hp-acts">${scene ? watch(l.scene_3d, `Watch ${SHORT[l.scene_3d] || 'the event'} in 3D`) : ''}` +
+    `<a class="btn small" href="#legalBand">See it on the timeline</a></div>`
+  );
+}
+function mountHits(stage, S, actions) {
+  const fig = stage.parentElement;
+  fig.querySelector('.ht-layer')?.remove();
+  const layer = document.createElement('div');
+  layer.className = 'ht-layer';
+  layer.style.height = S.H + 'px';
+  const group = document.createElement('div');
+  group.className = 'ht-group';
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', 'Events and laws in the picture. Use the arrow keys to step through them in date order; Enter shows the card.');
+  const hits = [...S.hits].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.k === 'ev' ? -1 : 1));
+  const pop = document.createElement('div');
+  pop.className = 'ht-pop';
+  pop.setAttribute('role', 'region');
+  pop.hidden = true;
+  let active = null,
+    hideT = 0,
+    pinned = false;
+  const btns = hits.map((h, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ht-hit ' + (h.k === 'ev' ? 'ev' : 'law');
+    b.tabIndex = i === 0 ? 0 : -1;
+    b.setAttribute('aria-label', h.k === 'ev' ? `${h.e.system}, ${fmtD(h.e)}` : `${h.l.title || h.l.label}, ${fmtD({ date: h.l.start })}`);
+    const w = h.k === 'ev' ? 28 : 18,
+      top = h.k === 'ev' ? h.py - 14 : h.py,
+      ht = h.k === 'ev' ? 28 : Math.max(24, h.y1 - h.py);
+    Object.assign(b.style, { left: h.px - w / 2 + 'px', top: top + 'px', width: w + 'px', height: ht + 'px' });
+    h.btn = b;
+    group.appendChild(b);
+    return b;
+  });
+  layer.append(group, pop);
+  fig.insertBefore(layer, stage.nextSibling);
+
+  const place = (h) => {
+    const pw = pop.offsetWidth,
+      ph = pop.offsetHeight,
+      cx = h.px,
+      cy = h.k === 'ev' ? h.py : (h.py + h.y1) / 2;
+    // beside the point (right if there is room, else left), level with it, kept inside the picture and off the phone's edge
+    let x = cx + 22 + pw <= S.W - 8 ? cx + 22 : cx - 22 - pw;
+    let y = cy - ph / 2;
+    if (h.k === 'law') (x = cx - pw / 2), (y = h.py - ph - 16); // a law's card stands in the sky above its tick, clear of the ground labels
+    if (S.phone) {
+      x = Math.min(Math.max(8, cx - pw / 2), S.W - pw - 8);
+      y = h.k === 'ev' ? (cy + 18 + ph <= S.H - 8 ? cy + 18 : cy - 18 - ph) : S.yL - ph - 6;
+    }
+    pop.style.left = Math.min(Math.max(8, x), S.W - pw - 8) + 'px';
+    pop.style.top = Math.min(Math.max(8, y), S.H - ph - 8) + 'px';
+  };
+  const mark = (h) => {
+    if (h?.k === 'ev') {
+      S.ring.setAttribute('transform', `translate(${h.px},${h.py})`);
+      S.ring.setAttribute('r', h.e.type === 'nuclear' ? 17 : h.e.type === 'destructive' ? 13 : 11);
+      S.ring.setAttribute('opacity', 1);
+      S.bar.setAttribute('opacity', 0);
+    } else if (h) {
+      S.bar.setAttribute('x1', h.px);
+      S.bar.setAttribute('x2', h.px);
+      S.bar.setAttribute('y1', h.py);
+      S.bar.setAttribute('y2', h.y1);
+      S.bar.setAttribute('opacity', 1);
+      S.ring.setAttribute('opacity', 0);
+    } else {
+      S.ring.setAttribute('opacity', 0);
+      S.bar.setAttribute('opacity', 0);
+    }
+  };
+  const show = (h) => {
+    clearTimeout(hideT);
+    if (active !== h) {
+      active = h;
+      pop.innerHTML = popHTML(h);
+      pop.hidden = false;
+      pop.classList.remove('on');
+      place(h);
+      requestAnimationFrame(() => pop.classList.add('on'));
+      mark(h);
+    }
+  };
+  const hide = (now) => {
+    clearTimeout(hideT);
+    const go = () => {
+      if (pinned || pop.contains(document.activeElement)) return;
+      active = null;
+      pop.hidden = true;
+      pop.classList.remove('on');
+      mark(null);
+    };
+    if (now) go();
+    else hideT = setTimeout(go, 280);
+  };
+  // the nearest dot or tick to the pointer, within a small reach (dots are close together in the 1960s)
+  const nearest = (ev) => {
+    const r = layer.getBoundingClientRect(),
+      x = ev.clientX - r.left,
+      y = ev.clientY - r.top;
+    let best = null,
+      bd = Infinity;
+    for (const h of hits) {
+      const d =
+        h.k === 'ev'
+          ? Math.hypot(x - h.px, y - h.py) - 2
+          : Math.abs(x - h.px) * 1.6 + Math.max(0, h.py - y, y - h.y1) * 1.2 + 2;
+      if (d < bd) (bd = d), (best = h);
+    }
+    return bd <= (ev.pointerType === 'touch' ? 24 : 15) ? best : null;
+  };
+  layer.addEventListener('pointermove', (ev) => {
+    if (ev.pointerType === 'touch' || pinned) return;
+    const h = nearest(ev);
+    layer.style.cursor = h ? 'pointer' : '';
+    if (h) show(h);
+    else if (!pop.matches(':hover')) hide();
+  });
+  layer.addEventListener('pointerleave', (ev) => !pop.contains(ev.relatedTarget) && hide());
+  pop.addEventListener('pointerenter', () => clearTimeout(hideT));
+  pop.addEventListener('pointerleave', () => !pinned && hide());
+  layer.addEventListener('click', (ev) => {
+    if (ev.target.closest('.ht-pop')) return;
+    const h = ev.target.closest('.ht-hit') && ev.detail === 0 ? hits[btns.indexOf(ev.target.closest('.ht-hit'))] : nearest(ev);
+    if (h) {
+      pinned = true;
+      show(h);
+    } else {
+      pinned = false;
+      hide(true);
+    }
+  });
+  // tap anywhere else, or press Escape: the card goes away
+  document.addEventListener(
+    'pointerdown',
+    (ev) => {
+      if (!layer.isConnected || layer.contains(ev.target)) return;
+      pinned = false;
+      hide(true);
+    },
+    { passive: true },
+  );
+  pop.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.hp-3d');
+    if (b) {
+      pinned = false;
+      actions.openScene?.(b.dataset.scene, b);
+    }
+    if (ev.target.closest('a')) hide(true);
+  });
+  group.addEventListener('focusin', (ev) => {
+    const i = btns.indexOf(ev.target);
+    if (i < 0) return;
+    btns.forEach((b, k) => (b.tabIndex = k === i ? 0 : -1));
+    pinned = false;
+    show(hits[i]);
+  });
+  group.addEventListener('keydown', (ev) => {
+    const i = btns.indexOf(document.activeElement);
+    if (ev.key === 'Escape') {
+      pinned = false;
+      hide(true);
+      return;
+    }
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      pinned = true;
+      show(hits[i]);
+      pop.querySelector('.hp-3d, a')?.focus();
+      return;
+    }
+    const to = ev.key === 'Home' ? 0 : ev.key === 'End' ? btns.length - 1 : { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1 }[ev.key];
+    if (to == null || i < 0) return;
+    ev.preventDefault();
+    btns[Math.min(btns.length - 1, Math.max(0, to))].focus();
+  });
+  pop.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') {
+      pinned = false;
+      const b = active?.btn;
+      hide(true);
+      b?.focus();
+    }
+  });
+  group.addEventListener('focusout', (ev) => {
+    if (!layer.contains(ev.relatedTarget)) hide();
+  });
 }
 
 // ---------------------------------------------------------------- the one authored moment

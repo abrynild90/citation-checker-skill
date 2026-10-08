@@ -189,7 +189,7 @@ fontsReady.then(() => {
   watchSegs(); // the chart controls exist now and their words have their final font
 });
 // The hero picture is drawn from the page's own data and the embedded Earth image; no 3D library is involved.
-mountHero(fontsReady);
+mountHero(fontsReady, { openScene });
 mountDiscover();
 mountQuiz();
 let rz = 0,

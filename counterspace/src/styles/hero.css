@@ -47,6 +47,26 @@ a.sp-go>.ico:last-child{transition:transform var(--dur-2) var(--ease)}
 @media (prefers-reduced-motion:reduce){.sp-link:hover .ico,a.sp-go:hover>.ico:last-child{transform:none}}
 .hero-contents{grid-area:list}
 
+/* The picture answers to a pointer and the arrow keys: an invisible layer of buttons sits over it, and a small card names the dot or tick and offers the 3D scene. */
+.ht-layer{position:absolute;left:0;right:0;top:0;z-index:1;overflow:hidden}
+.ht-group{position:absolute;inset:0}
+.ht-hit{all:unset;position:absolute;box-sizing:border-box;pointer-events:none;border-radius:50%}
+.ht-hit.law{border-radius:6px}
+.ht-hit:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.ht-pop{position:absolute;z-index:3;width:min(272px,calc(100% - 16px));padding:var(--s-3) var(--s-4) var(--s-3);background:var(--surface);color:var(--text);border:1px solid var(--line-strong);border-radius:var(--r-2);box-shadow:var(--shadow-2);opacity:0;transform:translateY(4px);transition:opacity var(--dur-2) var(--ease),transform var(--dur-2) var(--ease)}
+.ht-pop.on{opacity:1;transform:none}
+.ht-pop[hidden]{display:none}
+.ht-pop p{margin:0}
+.hp-title{font:500 17px/1.3 var(--serif)}
+.hp-when{margin-top:3px!important;font:500 13px/1.4 var(--sans);color:var(--muted)}
+.hp-line{margin-top:var(--s-2)!important;font:400 14px/1.5 var(--sans);color:var(--text)}
+.hp-acts{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-top:var(--s-3)}
+.hp-acts .btn .ico{margin-right:6px}
+.ht-ring{fill:none;stroke:var(--text);stroke-width:1.6;pointer-events:none}
+.ht-law-hi{stroke:var(--text);stroke-width:4;opacity:.45;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.ht-pop{transition:none;transform:none}}
+@media print{.ht-layer{display:none}}
+
 /* picture parts (class names are used by hero-timeline.js) */
 .ht-ground{fill:var(--hero-bg)}
 .ht-band-leo{fill:rgba(150,175,230,.07)}
