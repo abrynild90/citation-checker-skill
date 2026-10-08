@@ -307,3 +307,9 @@
   .hero-glance li::before{content:"";position:absolute;left:0;top:.72em;width:8px;border-top:2px solid var(--hero-accent-2)}
   .hero-glance b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
 }
+
+/* When a mark stands where the facts normally go (top right), they stand in the sky between the headline's words and that mark instead, as one column (hero-timeline.js sets left and width). */
+@media (min-width:1500px){
+  .hero-glance.gl-mid{right:auto;top:calc(var(--s-6) + 14px)}
+  .hero-glance.gl-mid ul{grid-template-columns:minmax(0,1fr);gap:var(--s-3)}
+}

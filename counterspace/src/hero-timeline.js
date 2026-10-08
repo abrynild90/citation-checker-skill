@@ -243,23 +243,48 @@ function build(stage) {
       : [],
     wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
     glance = document.getElementById('heroGlance'),
-    gl0 = (glance?.classList.remove('gl-off'), wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null),
+    gl0 = (
+      glance?.classList.remove('gl-off', 'gl-mid'),
+      glance && (glance.style.left = glance.style.width = ''),
+      wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null
+    ),
     pxDec = wide ? Math.min(W >= 1800 ? 176 : 118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
     steps = d3.range(0, W + 1, 24).concat(W),
-    // The facts stand in the sky only where no dot, ring or star of the picture would land on them (the box measured against where every mark will sit); if one
-    // would, they are left out of this drawing, so a mark never lies across words.
-    gr =
-      gl0 &&
+    // The facts stand in the sky only where no dot, ring or star of the picture would land on them (the box measured against where every mark will sit).
+    hitsMark = (g) =>
       KIN.some((e) => {
         if (e.altitude_km == null) return false;
         const px = x(parse(e.date)),
           py = yAlt(e.altitude_km, px),
           r = (e.type === 'nuclear' ? 11 : e.type === 'destructive' ? 7.5 : 5.5) + 8;
-        return px + r > gl0.left - rect.left - 6 && px - r < gl0.right - rect.left + 6 && py + r > gl0.top - rect.top - 6 && py - r < gl0.bottom - rect.top + 6;
-      })
-        ? (glance.classList.add('gl-off'), null)
-        : gl0;
+        return px + r > g.left - rect.left - 6 && px - r < g.right - rect.left + 6 && py + r > g.top - rect.top - 6 && py - r < g.bottom - rect.top + 6;
+      }),
+    gr = !gl0
+      ? null
+      : !hitsMark(gl0)
+        ? gl0
+        : (() => {
+            // A mark stands where the stylesheet puts the facts (the 2013 rocket does, on a wide window). They move left, into the sky between the words and the
+            // first mark up there, as one column; if that does not fit either, they are left out of this drawing, so a mark never lies across words.
+            const left = Math.max(...words.map((b) => b.x1)) + 56 * K,
+              ahead = KIN.filter((e) => e.altitude_km != null)
+                .map((e) => ({ px: x(parse(e.date)), py: yAlt(e.altitude_km, x(parse(e.date))) }))
+                .filter((m) => m.px > left && m.py < wordsBottom + 60)
+                .map((m) => m.px - 34 * K),
+              w = Math.min(470 * K, Math.min(W - edge, ...ahead) - left);
+            if (w >= 330) {
+              glance.classList.add('gl-mid');
+              glance.style.left = `${Math.round(left)}px`;
+              glance.style.width = `${Math.round(w)}px`;
+              const g2 = glance.getBoundingClientRect();
+              if (!hitsMark(g2)) return g2;
+              glance.classList.remove('gl-mid');
+              glance.style.left = glance.style.width = '';
+            }
+            glance.classList.add('gl-off');
+            return null;
+          })();
 
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true', focusable: 'false', style: `--htk:${K}` }),
     defs = el('defs', {}, svg),

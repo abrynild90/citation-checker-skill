@@ -2325,3 +2325,28 @@
   .overlay .sv-recap-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
   .overlay .sv-recap-links2 .rc-links li { grid-template-columns: minmax(0, 0.6fr) minmax(0, 2fr); }
 }
+
+/* The tour's closing slide on a very wide window: the words and the pairs are set a size up and the buttons rest on the foot of the panel, with the story centred in the
+   room above them, so the panel has no empty band above and below a small block of text */
+@media (min-width: 1500px) {
+  .overlay .sv-recap { justify-content: flex-start; }
+  .overlay .sv-recap-in { height: 100%; padding-top: var(--s-6); }
+  .overlay .sv-recap-scroll { flex: 1 1 auto; justify-content: center; }
+  .overlay .sv-recap-acts { padding: var(--s-4) 0 var(--s-5); }
+}
+@media (min-width: 1800px) {
+  .overlay .sv-recap-in { width: min(1560px, 100%); padding-top: var(--s-5); }
+  .overlay .sv-recap h2 { font-size: 64px; }
+  .overlay .sv-recap-body { gap: var(--s-5) 72px; }
+  .overlay .sv-recap-sum { font-size: 28px; max-width: 30em; }
+  .overlay .sv-recap-line { font-size: 21px; max-width: 34em; }
+  .overlay .sv-recap-hero a { font-size: 19px; }
+  .overlay .sv-recap-more > summary { font-size: 18px; }
+  .overlay .sv-recap-links2 .rc-links { gap: 34px; }
+  .overlay .sv-recap-links2 .rc-links li { font-size: 18px; line-height: 1.35; }
+  .overlay .sv-recap-links2 .rc-pill { font-size: 15px; }
+  .overlay .sv-recap-links2 .rc-b { flex-basis: 230px; max-width: 230px; }
+  .overlay .sv-recap-links2 .rc-link { flex-basis: max(calc((100% - 230px) * var(--k, 1)), calc(var(--hw, 64px) * 2 + 40px)); }
+  .overlay .sv-recap-links2 .rc-drawn { font-size: 16px; }
+  .overlay .sv-recap-acts .btn { font-size: 16px; }
+}

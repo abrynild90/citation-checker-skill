@@ -96,6 +96,7 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 | Small | Plex Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
 | Short label (key group names, table headers) | Plex Sans 600, 12.5 px, uppercase only when 1 to 3 words, tracking 0.08em |
 | Numerals | Plex Sans with tabular figures |
+| Reference band (after the quiz) | one step down: band h2 Newsreader 500 `clamp(24px, 2.3vw, 30px)`, sans h3 600 17 px, chart title (h4) Newsreader 500 `clamp(21px, 1.9vw, 25px)`, ledes Newsreader 15 to 17 px, takeaway Newsreader 500 17 to 19.5 px, callouts 14.5 to 15.5 px |
 
 ### 2.3 Space, shape, depth, motion
 
@@ -148,17 +149,34 @@ then why it matters. Never explain the software.
 
 | Name | Title of the section |
 |---|---|
-| Law and weapons timeline | Law and weapons on one timeline (the law strip, then: How high anti-satellite tests have reached, and the debris they left) |
+| Law and weapons timeline | Law and weapons on one timeline (the law strip, "Scrub through time", then: How high the tests went, and the debris they left) |
 | What the pattern shows | What the pattern shows (four findings, each linking to its chart) |
-| Explore the data | Explore the data (tabs, one chart at a time) |
+| The evidence, when you want it | The reference band after the quiz, in two parts: Explore the data (cards, one chart at a time) and Where every fact comes from |
+| Explore the data | Explore the data (cards that are also the tabs, one chart at a time) |
 | Jamming, lasers and cyber (tab) | Attacks that leave satellites in orbit |
 | Close approaches (tab) | Satellites that fly close to other satellites |
-| Who can do what (tab) | Which states hold which counterspace capabilities, by decade |
+| Who can do what (tab) | Which states can do what, decade by decade |
 | How long the law took (tab) | How long the law took to follow |
-| Sources and method | Where every fact comes from |
+| Sources and method | Where every fact comes from (one disclosure, "Read the sources and method") |
 
 Spell out acronyms on first use in each section (anti-satellite, ASAT; low Earth orbit, LEO). SWF means the Secure World Foundation: say so the
 first time it appears on the page. Domain terms the book itself uses (GEO, GNSS, co-orbital) stay, with a short gloss on first use.
+
+### 3.2b Voice
+
+Warm, sharp and plainly spoken. The subject is weapons and law, so the warmth comes from clarity and from the reader being treated as someone who can take a straight
+fact, never from jokes about harm. Rules of thumb, in order of importance:
+
+1. **Accuracy first.** A line is only as lively as the claim allows. If wit would stretch a fact or the legal cautions (order in time, not cause; soft law binds no one; the
+   2024 veto was about nuclear weapons in orbit), the plain sentence wins.
+2. **Short sentences, concrete numbers.** "Only four of the 19 items are treaties. Three are expert manuals, which bind no one." beats a long sentence with "and".
+3. **One surprising fact a section, said once.** The scenes (a fighter jet as the launch pad), the timeline (four treaties of 19), the pattern (4 months to 15.1 years), the quiz
+   (two answers catch people out) and the reference band (nothing there is required reading) each get one. Do not stack several.
+4. **Dry, not clever.** A little understatement is welcome: "Nothing here is required reading." "Four questions, no pressure." "The strip follows you down." No puns, no
+   exclamation marks, no addressing the reader as "folks", no jokes at the expense of the events or the people in them.
+5. **Say what the reader will see, then let them look.** Section ledes name what is on the screen and what to do with it, in one or two sentences, and stop.
+6. **Wrong answers are fair guesses.** The quiz says "A fair guess, but no." and then gives the true order; it never scolds.
+7. **Same claim, new words.** Rewriting for voice never changes a number, a date, a name, a hedge or a source. When in doubt, keep the old wording and add nothing.
 
 ### 3.3 Never
 
@@ -173,7 +191,8 @@ no wording errors.
 
 1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede at the upper left of the picture, which is the page's thesis: every test with a reported
    altitude as a dot rising from the Earth's limb, every law as a tick on the ground, on the shared years. Under it one key line with a small drawn sign for each mark (dot: a test in
-   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of two actions: "See the timeline" (primary) and "Take the 3D tour". ("Surprise me" is the first tile of the 3D strip, and the quiz is a chapter, not a hero button.) On a window of 900 px or more the hero fills the first screen exactly and the picture takes the spare height. On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right. Once, after the first paint and only at the top of
+   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of two actions: "See the timeline" (primary) and "Take the 3D tour". ("Surprise me" is the first tile of the 3D strip, and the quiz is a chapter, not a hero button.) On a window of 900 px or more the hero fills the first screen exactly and the picture takes the spare height. On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right; where a dot stands in that corner (the 2013 rocket does at 1800 px and more), they stand
+   in one column in the sky between the headline's words and that dot instead. Once, after the first paint and only at the top of
    the page, a sweep draws each linked pair (dashed line growing from the weapon to the law, then "N years later") one after another, with that pair's sentence from
    the data replacing the key line and ending in "Watch ... in 3D" where the pair has a scene (the key leaves before the sentence arrives and the other way round, so the two never overlap).
    It ends on one beat: the longest wait in the pair data (15.1 years), drawn along the horizon between its two dates and named in the caption; the Replay button becomes "Skip" while it runs, and Replay runs the history and then the sweep again. It is off under reduced motion and ends at the first
@@ -182,17 +201,26 @@ no wording errors.
    kept for 700 ms while the pointer stays in the corridor between the dot and the card, and Escape closes a card pinned by a click. After 3 and after 7 scenes seen, one more real pair is drawn
    on the resting picture as a thin dashed link (memory only), with a note beside the "seen" count. When all 13 scenes have been seen, closing the last one opens a card docked under the buttons
    (never over the picture) with the real pairs drawn as links, one plain line and "Where to next" (the quiz, or the full timeline); the tour's closing slide carries the same recap. Before any interaction no 3D library is loaded.
-2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list.
-3. **Two layers.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, one timeline chapter (the law strip and the
-   anti-satellite test chart on the same years), "What the pattern shows" (it opens on one large line, the range of the waits, with the longest pair drawn between its dates, then four findings computed from the data, each linking to its chart) and the quiz, which sits just after the pattern it echoes. Layer two is "Explore the data": four cards that are also the tabs, one for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, key,
-   data table and download, and a way on to the next chart at its foot. Nothing is removed: every chart, table and download stays, and print shows every tab. The cards follow the ARIA tabs pattern
+2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list: 3D scenes,
+   the timeline, the pattern, the quiz, "Explore the data" and "Sources and method" (the last two are the two halves of the reference band, see item 3).
+3. **Two layers, the second one quiet.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, one timeline chapter (the law strip and the
+   anti-satellite test chart on the same years), "What the pattern shows" (it opens on one large line, the range of the waits, with the longest pair drawn between its dates, then four findings computed from the data, each linking to its chart) and the quiz, which sits just after the pattern it echoes. Layer two is the **reference band**, headed "The evidence, when you want it": a hairline, an h2 of 24 to 32 px and one line, then two parts set a size down
+   (sans h3 of 17 px, ledes of 15 to 17 px, chart titles of 21 to 25 px, tighter spacing, no background change so every chart keeps the page as its ground). The first part is "Explore the data":
+   four compact cards (a small picture, a name and one line each, about 80 px high) that are also the tabs, one for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, any notes, and then one disclosure,
+   "Key, data table and download" (the key, the table and the download button together, with the entry count on it), sharing a row with the way on to the next chart. The second part is "Where every fact
+   comes from": one line and one disclosure, "Read the sources and method", with the copy-citation button at its end. The whole page is about 6,800 px tall at 1440 x 900 with the first chart open. Nothing is removed: every chart, table and download stays, and print shows every tab. The cards follow the ARIA tabs pattern
    (arrow keys, Home, End, one tab stop), and an address that names a chart or something inside one (`#chartC`, `#lag`, `#tableC`) opens its tab first. Panels not chosen stay laid out at full width,
-   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline, pattern, quiz, explore, sources.
+   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline (with "Scrub through time"), pattern, quiz, the reference band (explore, then sources).
 4. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, a one-line key, an optional callout, and a "Show the data" disclosure. No label above
    the title, no number. A chart inside a chapter or a tab takes an h3 and a quieter lede.
-5. **Law strip.** Stays in view as the reader scrolls the test chart and the two tabs that share its years (jamming; close approaches), with the years it shows following the chart under it. It steps
+5. **Law strip and "Scrub through time".** Beside "How to read this chart" the chapter head offers "Scrub through time"; the control itself is a thin row above the test chart that stays under the pinned strip while the chart is read
+   (hidden on a phone). Its line starts and ends where the charts' year axes do. Dragging it, the arrow keys (one year; Page Up and Page Down ten; Home and End the ends) or Play (1957 to 2026 in about twelve
+   seconds; the button becomes "Skip") fog the years it has not reached on the strip, the zoom panel and the test chart together, with a running tally ("1968: 25 tests, 2 laws") counted from the same entries;
+   the thumb sitting at the end means no fog. Play ends on the longest wait in the pair data, drawn along the slider's own line the way the hero draws a link, and named in a sentence. Reduced motion has no
+   Play: the slider is moved by hand. It adds no data of its own.
+   The strip stays in view as the reader scrolls the test chart and the two tabs that share its years (jamming; close approaches), with the years it shows following the chart under it. It steps
    aside over the findings and the quiz, over the two tabs with their own scales (decades; years to law), and once "Explore the data" has been read to its end (by that section's own bounds, at any window height).
-6. **Sources and method.** A short head, then one row: the closed "Read the sources and method" disclosure with the copy-citation button at its end. Inside, readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
+6. **Sources and method.** The second part of the reference band: a one-line head, then one row: the closed "Read the sources and method" disclosure with the copy-citation button at its end. Inside, readable at 66ch: what the data is, what is counted, what is not, how to cite, licences and credits.
 7. **Footer.** Three short columns: about this page, data and licence, type and images.
 
 ## 5. Charts
@@ -212,7 +240,7 @@ no wording errors.
   selecting a step jumps to it.
 - Control bar: play or pause (icon), a scrubber with a tick for each step, the time, a segmented control for views, and "Save image".
 - Keyboard: Space plays or pauses, Left and Right change scene, Esc closes, 1 to 5 choose a view. A small hint is shown once.
-- The tour: Previous and Next (and the arrow keys) move the tour along and it keeps running; only "Stop the tour" or choosing a scene from the dots ends it. Its closing slide is one column: the six pairs, one plain line, a "Revisit a scene or a chart" disclosure (the 13 scenes and the 4 chart links), and the actions pinned at the foot so they are never clipped.
+- The tour: Previous and Next (and the arrow keys) move the tour along and it keeps running; only "Stop the tour" or choosing a scene from the dots ends it. Its closing slide is one column (two from 1500 px: the words at the left, the six pairs at the right; from 1800 px a size up, with the story centred in the room above the buttons and the buttons resting on the foot of the panel, so there is no empty band above and below): the six pairs, one plain line, a "Revisit a scene or a chart" disclosure (the 13 scenes and the 4 chart links), and the actions pinned at the foot so they are never clipped.
 - Open and close with a short fade and scale. Phones: picture on top, story below, controls pinned at the bottom with 44 px targets.
 
 ## 7. 3D picture quality
