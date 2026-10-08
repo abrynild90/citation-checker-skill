@@ -2185,7 +2185,7 @@
 .overlay .sv-recap-list button { appearance: none; min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: transparent; color: var(--text); font: 500 13.5px/1.3 var(--sans); cursor: pointer; }
 .overlay .sv-recap-list button:hover { background: var(--surface-3); border-color: var(--accent); }
 .overlay .sv-recap-list button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.overlay .sv-recap-h { margin: var(--s-3) 0 calc(var(--s-1, 4px) * -1); font: 600 15px/1.3 var(--sans); color: var(--muted); }
+.overlay .sv-recap-h { margin: var(--s-5) 0 0; font: 600 15px/1.3 var(--sans); color: var(--muted); }
 .overlay .sv-recap-links, .overlay .sv-recap-acts { margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-3); }
 .overlay .sv-recap-links .btn { color: var(--accent); }
 .overlay .sv-recap-acts { flex: none; width: 100%; margin: 0; padding: var(--s-4) 0 var(--s-5); border-top: 1px solid var(--line); }
@@ -2198,8 +2198,9 @@
 .overlay .sv-recap-more { width: 100%; }
 .overlay .sv-recap-more > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font: 600 15px/1.3 var(--sans); color: var(--accent); }
 .overlay .sv-recap-more > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: var(--r-1); }
-.overlay .sv-recap-more[open] { display: grid; gap: var(--s-4); justify-items: start; }
-.overlay .sv-recap-more[open] > summary { margin-bottom: calc(var(--s-2) * -1); }
+/* the opened block spaces its parts with margins (a browser wraps them in one box, where a grid gap would not reach them) */
+.overlay .sv-recap-more[open] > summary { margin-bottom: var(--s-1); }
+.overlay .sv-recap-more .sv-recap-links { margin: var(--s-2) 0 0; }
 @media (max-width: 760px) { .overlay .sv-seen::before { display: none; } .overlay .sv-recap-in { padding: var(--s-4) var(--s-4) 0; } .overlay .sv-recap-acts { padding-bottom: var(--s-4); } }
 
 /* 1800 px and up: a wider viewer and a roomier story column */
