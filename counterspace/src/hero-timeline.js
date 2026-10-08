@@ -743,8 +743,7 @@ function mountHits(stage, S, actions) {
           .filter((g) => g.dataset.k !== p.event + '|' + p.law)
           .flatMap((g) => {
             const r = g.querySelector('.ht-lk-pill')?.getBBox(),
-              l = g.querySelector('.ht-lk-line'),
-              [x1, y1, x2, y2] = ['x1', 'y1', 'x2', 'y2'].map((k) => +l.getAttribute(k)),
+              [x1, y1, x2, y2] = g.dataset.ln.split(',').map(Number), // where the line ends up (its drawn end is still growing for a moment after it is added)
               n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / 10));
             return [
               r && { x0: r.x, x1: r.x + r.width, y0: r.y, y1: r.y + r.height },
@@ -823,6 +822,7 @@ function mountHits(stage, S, actions) {
         y1 = ev.py + (dy / d) * r0;
       el('circle', { cx: ev.px, cy: ev.py, r: RING(ev), class: 'ht-ring rest' }, g);
       el('line', { x1: law.px, x2: law.px, y1: law.py, y2: law.y1, class: 'ht-law-hi rest' }, g);
+      g.dataset.ln = [x1, y1, law.px, law.py].map((v) => +v.toFixed(1)).join(',');
       const ln = el('line', { x1, y1, x2: law.px, y2: law.py, class: 'ht-lk-line rest' }, g),
         tg = tagOf(ev, true).find((t) => t.law === law),
         w = tg.w,
@@ -844,6 +844,20 @@ function mountHits(stage, S, actions) {
       g.querySelectorAll('.ht-lk-pill,.ht-lk-tag,.ht-ring,.ht-law-hi').forEach((n) => n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 700, easing: EASE, fill: 'backwards' }));
       return g;
     };
+  // A link added later can run through the tag of one drawn earlier: every kept tag is placed again, now that all the kept lines are on the picture, and
+  // slides to a spot no kept line or tag touches (a tag draws above no line, so none is ever struck through).
+  const settleTags = () =>
+    S.rest.querySelectorAll('.rest-link').forEach((g) => {
+      const q = allPairs().find((x) => key(x) === g.dataset.k),
+        tg = q && tagOf(q.ev, true).find((t) => t.law === q.law),
+        rect = g.querySelector('.ht-lk-pill'),
+        tag = g.querySelector('.ht-lk-tag');
+      if (!tg || !rect || !tag) return;
+      rect.setAttribute('x', tg.sp.x - tg.w / 2);
+      rect.setAttribute('y', tg.sp.y - 11 * K);
+      tag.setAttribute('x', tg.sp.x);
+      tag.setAttribute('y', tg.sp.y);
+    });
   S.reveal = {
     next(watched) {
       const free = allPairs().filter((q) => !revealedKeys.includes(key(q)) && !crossesWords(q.ev, q.law)),
@@ -851,6 +865,7 @@ function mountHits(stage, S, actions) {
       if (!pick) return null;
       revealedKeys.push(key(pick));
       paintRest(pick, true);
+      settleTags();
       return { key: key(pick), event: WORDS[pick.p.event]?.name ?? byId[pick.p.event].system, law: LAW_WORDS[pick.p.law] ?? byId[pick.p.law].title };
     },
     replay(k = revealedKeys.at(-1)) {
@@ -858,6 +873,7 @@ function mountHits(stage, S, actions) {
       if (!q) return;
       S.rest.querySelector(`[data-k="${k}"]`)?.remove();
       paintRest(q, true);
+      settleTags();
     },
     pulse(k = revealedKeys.at(-1)) {
       const q = k && allPairs().find((x) => key(x) === k);
@@ -879,6 +895,7 @@ function mountHits(stage, S, actions) {
     const q = allPairs().find((x) => key(x) === k);
     if (q) paintRest(q, false);
   });
+  settleTags();
   const mark = (h) => {
     drawLinks(h);
     if (h?.k === 'ev') {
