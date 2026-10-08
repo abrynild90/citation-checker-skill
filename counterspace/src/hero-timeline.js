@@ -5,7 +5,7 @@
 // ============================================================================
 import { DOMAIN, KIN, LAST_DA, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
 import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
-import { linkText, pairsAt, tagSpot } from './links.js';
+import { NO_LATER, hasLaterLaw, linkText, pairsAt, tagSpot } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
@@ -505,6 +505,7 @@ function popHTML(h) {
     return (
       `<p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p>` +
       `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
+      (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${NO_LATER}</p>`) +
       (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
     );
   }

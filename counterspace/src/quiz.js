@@ -59,7 +59,7 @@ function build(q) {
     const a = evFirst ? [evName(q.ev), when(e), lawName(q.law), when(l)] : [lawName(q.law), when(l), evName(q.ev), when(e)],
       note = WORDS[e.id]?.note;
     const truth =
-      `<b>${esc(a[0])}</b> came first (${esc(fmtMY(a[1]))}). <b>${esc(a[2])}</b> followed <span class="q-gap">${gapText(Math.abs(yearsBetween(a[1], a[3])))}</span> later (${esc(fmtMY(a[3]))}).` +
+      `<b>${esc(a[0])}</b> came first (${esc(fmtMY(a[1]))}). <b>${esc(a[2])}</b> followed <span class="q-gap">${gapText(Math.abs(yearsBetween(a[1], a[3])))} later</span> (${esc(fmtMY(a[3]))}).` +
       (!evFirst ? ' The manual is soft law, so it does not bind anyone.' : '') +
       ` This is order in time, not cause.${note && evFirst ? ' ' + esc(note) : ''}`;
     return { opts, truth, scene: e.scene_3d };

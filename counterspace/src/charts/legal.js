@@ -265,10 +265,10 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     // longer one cannot be placed without covering something. A label keeps to its preferred side at every row before it tries another side, so an early
     // label never takes a spot that would block the leader of a later neighbour.
     const place = (d, prim, tiers) => {
-      for (const tier of tiers) {
+      for (const tier of tiers || []) {
         const t = text(d, tier),
           kmax = tier === 3 ? 11 : zoom ? 4 : 2;
-        for (const [anchor, dx] of anchorsOf[prim])
+        for (const [anchor, dx] of anchorsOf[prim] || [])
           for (let k = 0; k <= kmax; k++)
             // Phone strip: a raised symbol hangs its label ABOVE first (within two rows), so its leader does not run down through the symbol line.
             for (const dir of strip && d._t && k < 2 ? ['up', 'dn'] : ['dn', 'up']) {
@@ -337,6 +337,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         return;
       }
       const r = run(best.c.order, best.c.prim, true, use);
+      if (!r) return;
       labels.push(...r.out);
       maxUp = Math.max(maxUp, r.mu);
       maxDn = Math.max(maxDn, r.md);

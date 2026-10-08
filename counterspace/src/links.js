@@ -26,6 +26,10 @@ export function pairsAt(id) {
     });
 }
 export const linkText = (g) => `${g.num} ${g.unit} later`;
+// A weapon with no later law linked to it in data/lag_pairs.json says so, calmly, in its card only (no line is drawn). Returns the sentence, or '' when a law is linked.
+export const NO_LATER = 'No later law linked to it in our records.';
+export const hasLaterLaw = (id) => D.lag_pairs.pairs.some((p) => p.event === id);
+export const noLater = (e) => (hasLaterLaw(e.id) ? '' : `<p class="nolaw">${NO_LATER}</p>`);
 
 // Where a time tag sits so it never lies on words: slides along the dashed line (then a little to either side of it) to the first spot clear of every box in
 // `boxes` ({x0,x1,y0,y1}, same coordinates as the points). Falls back to the least-bad spot; `hit` lists the boxes it still touches so the caller can quiet them.

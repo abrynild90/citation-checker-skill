@@ -10,6 +10,7 @@ import { HERO, SCENES } from './scenes/config.js';
 import { buildSim } from './scenes/sim.js';
 import { renderSVG } from './scenes/svg-fallback.js';
 import { hideCard, legalKindWords, setGuide } from './ui.js';
+import { linkText, pairsAt } from './links.js';
 import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
 import { hooks, seenScenes } from './shared.js';
@@ -552,7 +553,7 @@ export function closeScene() {
 // ---------------------------------------------------------------- steps: what happens, as a timeline that follows the animation
 function renderSteps(cfg) {
   const dur = cfg.duration || 0;
-  steps = (cfg.status || cfg.steps || []).map(([t, text]) => ({ t, text }));
+  steps = (cfg.status || cfg.steps || []).filter(Array.isArray).map(([t, text]) => ({ t, text }));
   const fine = steps.some((s, i) => i && Math.round(s.t * dur) === Math.round(steps[i - 1].t * dur)); // two steps would read the same: show tenths
   stepIdx = -1;
   stepsSection.hidden = !steps.length;
@@ -1158,8 +1159,10 @@ function fillLawCard(cfg) {
   if (!l) return void (lawCard.innerHTML = '');
   const when = l.end ? `${fmtD({ date: l.start })} to ${fmtD({ date: l.end })}` : fmtD({ date: l.start });
   const binds = l.soft_law ? 'Soft law: an expert manual, not binding.' : BINDS[l.kind] || legalKindWords(l) + '.';
+  const link = cfg.event && pairsAt(cfg.event).find((p) => p.law === l.id);
   lawCard.innerHTML =
     `<p class="lc-title">${esc(l.title || l.label)}</p><p class="lc-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
+    (link ? `<p class="lc-gap"><span class="gap-pill">${esc(linkText(link.g))}</span>The first law our records link to this event.</p>` : '') +
     `<p class="lc-bind">${esc(binds)}</p>` +
     `<p class="lc-src"><b>Source:</b> <span class="lc-cite">${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span>` +
     (l.source_url ? ` <a href="${esc(l.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>` : '') +

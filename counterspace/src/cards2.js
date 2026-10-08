@@ -4,6 +4,7 @@
 // ui.js re-exports nkCard, coCard and coWhen, so other modules keep importing them from './ui.js'.
 // ============================================================================
 import { esc, fmt, fmtMY, fmtY, hasScene, parse } from './app.js';
+import { noLater } from './links.js';
 
 // ---------------------------------------------------------------- words a reader understands (never the stored codes)
 export const CATEGORY_LABEL = {
@@ -133,6 +134,7 @@ export function nkCard(e, compact = false) {
         ['How sure we are', SURE_WORD[e.confidence]],
       ]) +
       `<div class="clip3">${esc(sentencesUpTo(plain(e.effect)))}</div>` +
+      noLater(e) +
       (hasScene(e) ? sceneHint : '<div class="hint plain">Select the bar, or press Enter, for the full entry.</div>')
     );
   return (
@@ -146,7 +148,7 @@ export function nkCard(e, compact = false) {
       ['Setting', e.operational_use ? 'In a conflict' : 'A test, a demonstration or peacetime'],
       ['How sure we are', SURE_LABEL[e.confidence]],
     ]) +
-    `<div>${esc(plain(e.effect))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${srcLine(e)}${hasScene(e) ? sceneHint : ''}`
+    `<div>${esc(plain(e.effect))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${noLater(e)}${srcLine(e)}${hasScene(e) ? sceneHint : ''}`
   );
 }
 // A date as the source gives it: the day only where the source gives a day, otherwise the month or the year.
@@ -169,10 +171,10 @@ export function coCard(e, compact = false) {
     ['How sure we are', compact ? SURE_WORD[e.confidence] : SURE_LABEL[e.confidence]],
   ].filter(Boolean);
   const head = `<p class="card-title">${esc(plain(e.system))}</p>${dl(rows)}`;
-  if (compact) return head + hint;
+  if (compact) return head + noLater(e) + hint;
   const note = noteOf(e);
   return (
-    `${head}<div>${esc(plain(e.description))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${srcLine(e)}` +
+    `${head}<div>${esc(plain(e.description))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${noLater(e)}${srcLine(e)}` +
     `<div class="hint plain">A proximity operation is not an attack, and SWF is cautious in how it describes intent.</div>${hasScene(e) ? sceneHint : ''}`
   );
 }

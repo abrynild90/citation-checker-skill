@@ -5,7 +5,7 @@
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { EXPORTING, LAST_DA, PHONE_MAX, esc, fmt, fmtD, fmtMY, fmtY, hasScene, num, parse } from './app.js';
 import { hooks } from './shared.js';
-import { hideLinks, linkedRects, showLinks } from './links.js';
+import { hideLinks, linkedRects, noLater, showLinks } from './links.js';
 const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
   const byKey = !!el?.matches?.(':focus-visible') && !matchMedia('(hover: none)').matches;
@@ -323,7 +323,7 @@ export function kinCard(e) {
   return (
     `<p class="card-title">${esc(e.system)}</p><p class="when">${esc(e.state)} · ${fmtD(e)}</p><dl><dt>Target</dt><dd>${esc(targetWords(e.target))}</dd>` +
     `<dt>What happened</dt><dd>${KIND_PLAIN[e.type]}</dd><dt>Altitude</dt><dd>${alt}</dd>${debris}<dt>How sure we are</dt>` +
-    `<dd>${CONFIDENCE[e.confidence] || e.confidence}</dd></dl>${mdo}${srcLine(e)}${hasScene(e) ? hint3d() : ''}`
+    `<dd>${CONFIDENCE[e.confidence] || e.confidence}</dd></dl>${mdo}${noLater(e)}${srcLine(e)}${hasScene(e) ? hint3d() : ''}`
   );
 }
 import { nkCard, coWhen, coCard } from './cards2.js';

@@ -103,3 +103,4 @@
 .ht-lk-tag{fill:var(--text);font:600 12.5px var(--sans);font-variant-numeric:tabular-nums;pointer-events:none}
 /* a word the time tag could not avoid is quietened while the link shows */
 .ht-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
+.hp-none{margin-top:var(--s-2)!important;font:500 13px/1.4 var(--sans);color:var(--faint)}
