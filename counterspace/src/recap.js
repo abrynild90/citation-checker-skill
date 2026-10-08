@@ -15,7 +15,13 @@ const rows = () =>
         law = byId[p.law],
         a = parse(ev.date || ev.start),
         years = yearsBetween(a, parse(law.start));
-      return { a, years, g: gap(years), weapon: `${WORDS[p.event]?.name ?? ev.system}, ${fmtY(a)}`, law: `${LAW_WORDS[p.law] ?? law.title}, ${fmtY(parse(law.start))}` };
+      return {
+        a,
+        years,
+        g: gap(years),
+        weapon: `${WORDS[p.event]?.name ?? ev.system}, ${fmtY(a)}`,
+        law: `${LAW_WORDS[p.law] ?? law.title}, ${fmtY(parse(law.start))}`,
+      };
     })
     .sort((p, q) => p.a - q.a);
 

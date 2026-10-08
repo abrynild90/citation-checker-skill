@@ -128,9 +128,10 @@ nameThemeButton();
     if (location.hash !== '#legalBand' || (again === true && moved)) return;
     hooks.drawRest?.();
     const head = document.getElementById('lawHead');
-    if (head && (again !== true || Math.abs(head.getBoundingClientRect().top) > 3)) (head.scrollIntoView({ block: 'start', behavior: 'auto' }), hooks.legalScroll?.());
+    if (head && (again !== true || Math.abs(head.getBoundingClientRect().top) > 3))
+      (head.scrollIntoView({ block: 'start', behavior: 'auto' }), hooks.legalScroll?.());
   };
-  addEventListener('hashchange', () => (moved = false, toBand()));
+  addEventListener('hashchange', () => ((moved = false), toBand()));
   addEventListener('load', () => {
     toBand();
     document.fonts?.ready.then(() => toBand(true));

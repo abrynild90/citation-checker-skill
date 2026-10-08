@@ -66,7 +66,6 @@ function fromHash() {
   requestAnimationFrame(() => t.scrollIntoView({ block: 'start', behavior: 'auto' }));
 }
 
-
 // ---------------------------------------------------------------- the four entry cards above the tabs
 // Each card is a small picture of its chart, drawn from the same data, and one line saying what is in it. A card opens its tab, like the tab does.
 const yr = (e) => +String(e.date || e.start).slice(0, 4),
@@ -116,7 +115,9 @@ const THUMBS = {
   lag: () => {
     const ws = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start))),
       top = Math.max(...ws);
-    return svg(ws.map((w, i) => `<rect x="6" y="${(7 + i * 8.2).toFixed(1)}" width="${((w / top) * 140 + 4).toFixed(1)}" height="5" rx="2.5" class="xc-a"/>`).join(''));
+    return svg(
+      ws.map((w, i) => `<rect x="6" y="${(7 + i * 8.2).toFixed(1)}" width="${((w / top) * 140 + 4).toFixed(1)}" height="5" rx="2.5" class="xc-a"/>`).join(''),
+    );
   },
 };
 const LINES = {

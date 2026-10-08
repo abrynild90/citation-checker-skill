@@ -116,7 +116,8 @@ function showDone() {
   document.getElementById('hdLinks').innerHTML = recapLinks();
   document.getElementById('hdLine').textContent = recapLine();
   card.hidden = false;
-  if (innerWidth >= 640) card.style.bottom = Math.round(card.parentElement.getBoundingClientRect().bottom - document.getElementById('start').getBoundingClientRect().top) + 'px';
+  if (innerWidth >= 640)
+    card.style.bottom = Math.round(card.parentElement.getBoundingClientRect().bottom - document.getElementById('start').getBoundingClientRect().top) + 'px';
   card.classList.remove('in');
   void card.offsetWidth;
   card.classList.add('in');
