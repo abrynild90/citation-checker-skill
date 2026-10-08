@@ -5,7 +5,7 @@
 export const FACTS = {
   starfish: 'The blast left a belt of its own: electrons trapped by Earth’s magnetic field formed an artificial radiation belt around the planet.',
   solwind: 'The launch pad was a fighter jet. It fired the missile from a steep supersonic climb, and the homing vehicle destroyed the satellite by collision.',
-  fengyun: 'No other test on the Secure World Foundation’s list left as many tracked fragments: 3,532 cataloged, and 2,351 still in orbit as of February 2026.',
+  fengyun: 'The Secure World Foundation lists no other test that produced as many tracked fragments: 3,532 cataloged, and 2,351 still in orbit as of February 2026.',
   'burnt-frost':
     'The weapon was a missile-defense interceptor, built to shoot down other missiles. The 175 trackable pieces took about 20 months to fall out of orbit.',
   dn2: 'China said the rocket reached 10,000 km. An analysis cited by the Secure World Foundation puts its highest point at 30,000 km or more.',

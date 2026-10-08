@@ -1,6 +1,6 @@
 // ============================================================================
 // scrub.js: "Scrub through time", a thin year slider above the test chart. As it moves, the years after it are fogged out on the pinned law strip, the zoom panel and
-// the test chart together, so the tests and the laws appear year by year, and a running tally says how many of each there have been ("1962: 1 test, 0 laws").
+// the test chart together, so the tests and the laws appear year by year, and a running tally says how many of each there have been ("1968: 25 tests, 2 laws").
 // Play runs 1957 to 2026 in about twelve seconds (Skip jumps to the end) and ends on the longest wait in the pair data, drawn along the slider's own line.
 // Everything is counted from the same entries the charts draw; nothing is typed in. With reduced motion there is no Play: the slider is moved by hand.
 // Provides: mountScrub(). Registers hooks.scrubVeil, which the chart modules call after a draw so the fog survives every redraw. Needs: app.js, charts/lag.js, links.js.
@@ -31,6 +31,7 @@ let cut = null,
   touched = false, // the slider has been used (until then the line says what the whole chart holds)
   raf = 0;
 const veils = new Set();
+let futureSig = '';
 
 // ---------------------------------------------------------------- the fog on the charts
 hooks.scrubVeil = (svg, x, y0, y1) => {
@@ -43,6 +44,8 @@ hooks.scrubVeil = (svg, x, y0, y1) => {
   const v = { g, x, svg: svg.node(), W: +svg.attr('width') || 0 };
   veils.add(v);
   paint(v);
+  futureSig = ''; // a redrawn chart has new marks: they are dimmed again
+  dimMarks();
 };
 function paint(v) {
   if (!v.svg.isConnected) return veils.delete(v);
@@ -57,7 +60,6 @@ function paint(v) {
   v.g.select('.sv-edge').attr('x1', px).attr('x2', px);
 }
 // Marks that are still in the fog cannot be pointed at: no card opens for something the slider has not reached.
-let futureSig = '';
 function dimMarks() {
   const sig = cut == null ? '' : String(Math.floor(cut / 864e5));
   if (sig === futureSig) return;

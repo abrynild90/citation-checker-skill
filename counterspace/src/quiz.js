@@ -156,7 +156,7 @@ export function mountQuiz() {
   <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Four questions, no pressure. Your guesses are not stored.</p>
     <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
-    <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>See it in the hero</button>
+    <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
     <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
   const tally = host.querySelector('#qTally'),
     again = host.querySelector('#qAgain'),
