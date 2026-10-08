@@ -13,7 +13,7 @@
 
 /* the picture: a full-bleed drawing; the caption row sits under it */
 .hero-figure{grid-area:pic;position:relative;margin:var(--s-4) 0 0}
-.stage{position:relative;height:400px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent)}
+.stage{position:relative;--stage-h:400px;height:var(--stage-h);overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent)}
 .hero .stage svg{display:block;width:100%;height:100%}
 .hero-cap{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-3) var(--gutter) 0}
 .hero-cap p{margin:0;max-width:72ch;font:400 14px/1.5 var(--sans);color:var(--muted)}
@@ -79,12 +79,12 @@
   .h1-main{white-space:nowrap}
   .h1-sub{font-size:clamp(22px,1.95vw,24px)}
   .hero-figure{margin:0}
-  .stage{height:clamp(496px,calc(92vh - 72px - 64px - 24px),716px)}
+  .stage{--stage-h:clamp(496px,calc(92vh - 72px - 64px - 24px),716px)}
   .hero-cap{padding:var(--s-3) var(--edge) 0;justify-content:flex-start;align-items:flex-start;gap:var(--s-3)}
   .hero-actions{padding:var(--s-3) var(--edge) 0}
 }
 @supports (height:100svh){
-  @media (min-width:900px){.stage{height:clamp(496px,calc(92svh - 72px - 64px - 24px),716px)}}
+  @media (min-width:900px){.stage{--stage-h:clamp(496px,calc(92svh - 72px - 64px - 24px),716px)}}
 }
 @media print{.hero-cap .btn{display:none}}
 
@@ -127,9 +127,9 @@
   .hp-when{font-size:14px}
   .hp-line,.hp-none{font-size:15px}
   .hero-grid{padding-bottom:var(--s-3)}
-  .stage{height:clamp(540px,calc(92vh - 160px),770px)}
+  .stage{--stage-h:clamp(540px,calc(92vh - 160px),770px)}
 }
-@supports (height:100svh){@media (min-width:1600px){.stage{height:clamp(540px,calc(92svh - 160px),770px)}}}
+@supports (height:100svh){@media (min-width:1600px){.stage{--stage-h:clamp(540px,calc(92svh - 160px),770px)}}}
 
 /* "Seen N of 13": quiet in the actions row; at 13 of 13 it becomes the one-line payoff on its own row */
 .hero-seen{margin:0 0 0 var(--s-2);font:500 14px/1.45 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
@@ -227,9 +227,20 @@
   .hero-glance b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
 }
 @media (min-width:1800px){
-  .stage{height:clamp(560px,calc(100svh - 268px),900px)}
+  .stage{--stage-h:clamp(560px,calc(100svh - 268px),900px)}
 }
 @media (prefers-reduced-motion:reduce){.hero-glance{animation:none}}
 @media (min-width:1280px){.ht-pop.has-pic{width:530px}}
 @media (min-width:1600px){.ht-pop.has-pic{width:570px}}
 @media (max-width:899px){.hp-pic{width:60px;height:34px}.ht-pop.has-pic{width:min(340px,calc(100% - 16px))}}
+
+/* On a wide window the dark hero fills the first screen exactly: the picture takes whatever height the words and buttons leave, and never less than its
+   own height. (No sliver of page colour under the hero, in either theme.) */
+@media (min-width:900px){
+  header.top{display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
+  header.top>.hero{flex:1 1 auto;display:flex;flex-direction:column}
+  .hero-grid{flex:1 1 auto;grid-template-rows:minmax(0,1fr) auto auto}
+  .hero-figure{display:flex;flex-direction:column;min-height:0}
+  .hero-figure>.stage{flex:1 1 auto;height:auto;min-height:var(--stage-h)}
+  .no-cdn .hero-figure>.stage{min-height:0;height:350px}
+}

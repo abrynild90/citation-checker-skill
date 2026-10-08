@@ -2,8 +2,8 @@
 // takeaways.js: one plain sentence above each chart that says what to notice, before the reader meets the marks, and the four that head "What the pattern
 // shows". Every number is counted from the data. Provides: fillTakeaways(). Needs: app.js (the data).
 // ============================================================================
-import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, fmtMonthYear, parse } from './app.js';
-import { gap, yearsBetween } from './charts/lag.js';
+import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, REDUCED, byId, esc, fmtMY, fmtMonthYear, parse } from './app.js';
+import { LAW_WORDS, WORDS as PAIR_WORDS, gap, yearsBetween } from './charts/lag.js';
 import { capSentence } from './charts/b.js';
 
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'],
@@ -47,8 +47,41 @@ export function fillTakeaways() {
     const n = document.getElementById(id);
     if (n) n.innerHTML = `<b>${lead}</b> ${rest}`;
   };
-  finding('pt1', 'The law came later.', `The wait for a legal step ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}; in ${word(short)} of the ${word(waits.length)} pairs it was under two years.`);
+  const pairs = D.lag_pairs.pairs,
+    longI = waits.indexOf(Math.max(...waits)),
+    longP = pairs[longI];
+  finding('pt1', `${cap(word(short))} of the ${word(waits.length)} waits were under two years.`, `The longest, from ${PAIR_WORDS[longP.event]?.name ?? byId[longP.event].system} to the ${LAW_WORDS[longP.law] ?? byId[longP.law].title}, took ${g(waits[longI])}.`);
+  patBig(waits, longP, g);
   finding('pt2', 'Some attacks stopped. Others did not.', `Tests that destroy a satellite have paused since ${fmtMonthYear(parse(LAST_DA))}, yet ${word(going)} of ${word(NK.length)} jamming, laser and cyber operations are still going.`);
   finding('pt3', recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.', `${cap(word(recent))} of the ${CO.length} in our records began in 2020 or later.`);
   finding('pt4', 'More states can do more.', `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}; only the ${last} figure is the Secure World Foundation’s own assessment.`);
+}
+
+// The opening statement of "What the pattern shows": the range of the waits in one large line, and under it the longest pair drawn as a thin line between its two
+// dates. The line draws itself once, when the panel scrolls into view (with reduced motion it is simply there). Every figure is counted from the pairs.
+function patBig(waits, longP, g) {
+  const box = document.getElementById('patBig');
+  if (!box) return;
+  document.getElementById('pbNum').innerHTML = `<span>${esc(g(Math.min(...waits)))}</span> to <span>${esc(g(Math.max(...waits)))}</span>`;
+  const ev = byId[longP.event],
+    law = byId[longP.law],
+    from = parse(ev.date || ev.start);
+  document.getElementById('pbTrack').innerHTML =
+    `<span class="pb-end a"><b>${esc(fmtMY(from))}</b><span>${esc(PAIR_WORDS[ev.id]?.name ?? ev.system)} begins</span></span>` +
+    `<span class="pb-rail"><i class="pb-dot"></i><i class="pb-draw"></i><b class="pb-pill">${esc(g(Math.max(...waits)))} later</b><i class="pb-tick"></i></span>` +
+    `<span class="pb-end b"><b>${esc(fmtMY(parse(law.start)))}</b><span>${esc(LAW_WORDS[law.id] ?? law.title)}</span></span>`;
+  document.getElementById('pbNote').textContent = `${cap(word(waits.length))} pairs from our records, each a weapon and the first legal step that came after it. The line shows the longest wait. This is order in time, not cause.`;
+  box.hidden = false;
+  if (!REDUCED && 'IntersectionObserver' in window) {
+    box.dataset.armed = '';
+    const io = new IntersectionObserver(
+      (es) => {
+        if (!es.some((e) => e.isIntersecting)) return;
+        box.classList.add('in');
+        io.disconnect();
+      },
+      { threshold: 0.55 },
+    );
+    io.observe(box);
+  }
 }
