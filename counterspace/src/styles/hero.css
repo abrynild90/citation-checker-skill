@@ -226,6 +226,7 @@
 
 /* Wide windows: three sentences from the data fill the empty sky at the top right, and the picture is taller. */
 .hero-glance{display:none}
+.hero-glance li.hg-pull{display:none}
 @media (min-width:1600px){
   .hero-glance{display:block;position:absolute;z-index:2;top:var(--s-6);right:var(--edge);width:min(460px,28vw);padding:0;color:var(--muted);pointer-events:none;animation:rise var(--dur-hero) var(--ease) 260ms both}
   .hero-glance[hidden]{display:none}
@@ -275,6 +276,9 @@
   .hero-glance ul{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-5)}
   .hg-t{font-size:16px}
   .hero-glance li{font-size:16.5px;line-height:1.45}
+  .hero-glance li.hg-pull{display:block;grid-column:1 / -1;order:5;margin-top:var(--s-1);padding-left:var(--s-4);font:400 21px/1.35 var(--serif);color:var(--text)}
+  .hero-glance li.hg-pull::before{top:.8em;width:10px}
+  .hero-glance li.hg-pull b{font-weight:600}
 }
 
 /* The first-visit cue: once the opening sweep is over, one quiet line directly under the key (same weight and colour) says the picture answers to a pointer. It fades after the first

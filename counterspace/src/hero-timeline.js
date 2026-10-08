@@ -192,6 +192,14 @@ function writeText(stage) {
     `<p>Laws and policies, in date order.</p><ul>${laws}</ul>`;
 }
 
+// From 1800 px, one more line under the facts, set larger: how many of the linked pairs had the weapon first (counted from the pairs, in words).
+const NUMWORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+function pullQuote(waits) {
+  const n = waits.length,
+    first = waits.filter((w) => w > 0).length,
+    w = (k) => NUMWORDS[k] ?? String(k);
+  return first === n ? `In all <b>${w(n)}</b> pairs our records link, the weapon came first and the law followed.` : `In <b>${w(first)}</b> of the <b>${w(n)}</b> pairs our records link, the weapon came first.`;
+}
 // A wide window has empty sky at the top right: three plain sentences there, each counted from the data.
 function writeGlance() {
   const box = document.getElementById('heroGlance');
@@ -204,6 +212,7 @@ function writeGlance() {
     `<p class="hg-t">In our records</p><ul>` +
     `<li>The first test was in <b>${fmtY(parse(first.date))}</b>. The last one that destroyed a satellite was in <b>${fmtMonthYear(parse(LAST_DA))}</b>.</li>` +
     `<li><b>${laws.length}</b> laws and policies, from <b>${fmtY(parse(laws[0].start))}</b> to <b>${fmtY(parse(laws.at(-1).start))}</b>.</li>` +
+    `<li class="hg-pull">${pullQuote(waits)}</li>` + // wide windows only (hero.css); the longest wait stays the last item, the one a laptop window keeps
     `<li>The longest wait from a weapon to the first later law: <b>${long.num}&nbsp;${long.unit}</b>.</li></ul>`;
   box.hidden = false;
 }
