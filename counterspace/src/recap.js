@@ -45,6 +45,9 @@ export function drawnNote(drawn) {
   return `${cap(word(drawn))} of the ${pairWord()} ${drawn === 1 ? 'is' : 'are'} drawn on the picture; the other ${word(rest)} ${one ? 'is' : 'are'} ${what}, which ${one ? 'has' : 'have'} no point in the sky.`;
 }
 
+// The same sentence as a small paragraph that stands under the list of pairs.
+export const drawnPara = (drawn) => (drawnNote(drawn) ? `<p class="rc-drawn">${esc(drawnNote(drawn))}</p>` : '');
+
 // One row per pair: the weapon on the left, the law on the right, and between them a dashed link whose length follows the wait.
 export function recapLinks() {
   return (

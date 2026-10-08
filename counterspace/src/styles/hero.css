@@ -192,6 +192,7 @@
 .hero-done h2{margin:0 0 var(--s-3);font:500 clamp(24px,2.4vw,30px)/1.15 var(--serif);padding-right:56px}
 .hero-done h2:focus{outline:none}
 .hd-x{position:absolute;top:var(--s-3);right:var(--s-3)}
+.rc-drawn{margin:var(--s-3) 0 0;max-width:62ch;font:400 14.5px/1.45 var(--sans);color:var(--muted)}
 .hd-line{margin:var(--s-3) 0 0;max-width:62ch;font:400 15px/1.5 var(--sans);color:var(--muted)}
 .hd-next{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-3);margin:var(--s-4) 0 0}
 .hd-next-h{font:600 14px/1.3 var(--sans);color:var(--muted)}

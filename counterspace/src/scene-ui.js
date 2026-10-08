@@ -11,7 +11,7 @@ import { buildSim } from './scenes/sim.js';
 import { renderSVG } from './scenes/svg-fallback.js';
 import { hideCard, legalKindWords, setGuide } from './ui.js';
 import { linkText, pairsAt } from './links.js';
-import { drawnNote, pairWord, recapLine, recapLinks } from './recap.js';
+import { drawnPara, pairWord, recapLine, recapLinks } from './recap.js';
 import { revealCapacity, revealedCount } from './hero-timeline.js';
 import { showInHero } from './rewards.js';
 import { posterURL } from './scenes/posters.js';
@@ -1558,8 +1558,8 @@ export function showRecap() {
   $('svRecapSum').textContent =
     `You watched all ${ORDER.length} events, oldest first: ${w('test')} tests that destroyed a satellite, ${w('high')} high-altitude events (a nuclear explosion and a rocket launch), ` +
     `${w('attack')} attacks that leave satellites in orbit and ${w('near')} cases of satellites flying close to others.`;
-  $('svRecapPairs').innerHTML = recapLinks();
-  $('svRecapLine').textContent = `${recapLine()} ${drawnNote(revealCapacity())}`.trim();
+  $('svRecapPairs').innerHTML = recapLinks() + drawnPara(revealCapacity());
+  $('svRecapLine').textContent = recapLine();
   $('svRecapList').innerHTML = ORDER.map((s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`).join('');
   // the hand-off back to the picture: how many pairs are drawn on it now
   const linked = revealedCount();
