@@ -52,6 +52,9 @@ const STILL = REDUCED || /[?&]still\b/.test(location.search);
 
 let K = 1; // type and tag scale: 1, rising to 1.1 on a window of 1600 px and more, so the words keep their size next to the larger screen
 let revealedKeys = []; // 'event|law' of the links the reader has earned so far this visit (never stored)
+let pairsFn = null, // runs the 13 of 13 draw-in (set by mountHero)
+  relayout = null, // draws the picture again (set by mountHero)
+  pendingKey = null; // the link to draw in as the picture comes back
 let drawn = null, // the current drawing, kept for the replay and for the Earth photograph that arrives later
   anims = [];
 
@@ -94,6 +97,15 @@ export function mountHero(fontsReady, actions = {}) {
     cap.classList.remove('live');
     skipMode(false);
   };
+  // The 13 of 13 draw-in of all the pairs: the button becomes "Skip" while it runs. Returns false (and calls nothing) when it cannot run.
+  pairsFn = (done) => {
+    clearTimeout(sweepT);
+    if (STILL || !drawn?.sweep?.runPairs) return (done?.(), false);
+    skipMode(true);
+    const ok = drawn.sweep.runPairs(() => (cap.classList.remove('live'), skipMode(false), cueOn(), done?.()));
+    if (!ok) (skipMode(false), done?.());
+    return ok;
+  };
   const runSweep = (after) => {
     clearTimeout(sweepT);
     skipMode(true);
@@ -119,6 +131,7 @@ export function mountHero(fontsReady, actions = {}) {
   };
   // The picture appears finished (every dot and tick at once); the replay button runs the history as an animation, then the links.
   fontsReady.then(() => draw(false));
+  relayout = () => draw(false);
   replay.addEventListener('click', () => {
     if (replay.dataset.skip) {
       stopAnims();
@@ -143,7 +156,10 @@ export function mountHero(fontsReady, actions = {}) {
 
 // The mid-way reward (called from discover.js): one more real pair is drawn on the resting picture. It prefers a pair whose weapon the reader has just watched in
 // 3D, and never one whose dashed line would run through words. Returns the plain words for it, or null when there is nothing left to show.
-export const revealPair = (watched = []) => drawn?.reveal?.next(watched) || null;
+export const revealPair = (watched = [], only = false) => drawn?.reveal?.next(watched, only) || null;
+export const playPairs = (done) => (pairsFn ? pairsFn(done) : (done?.(), false));
+export const stopPairs = () => drawn?.sweep?.stop();
+export const revealCapacity = () => drawn?.reveal?.capacity() ?? 0;
 export const replayReveal = (key) => drawn?.reveal?.replay(key);
 // The link just earned, drawn again and pulsed once (a ring leaves the dot; when the line arrives, the tick answers).
 // How many real pairs are drawn as links on the resting picture so far this visit.
@@ -332,9 +348,15 @@ function build(stage) {
     placed = [],
     GAP = Math.round(9 * K), // the least air between two captions (zone names and notes stack no closer than this)
     // what a candidate spot costs: overlapping the words is worst, then another note, then a mark; zero means free
+    // a leader is one box, or a list of boxes when it bends
+    arr = (v) => (Array.isArray(v) ? v : v ? [v] : []),
     clash = (box, lead) =>
-      obstacles.reduce((n, o, i) => n + (hits(box, o, 4) || (lead && hits(lead, o, 1)) ? (i < words.length ? 80 : 14) : 0), 0) +
-      placed.reduce((n, p) => n + (hits(box, p.box, GAP) || hits(box, p.lead, 4) || (lead && (hits(lead, p.box, 1) || hits(lead, p.lead, 1))) ? 8 : 0), 0),
+      // a bent leader may pass under an earned link's line on its way to a note that stands beside it (o.link)
+      obstacles.reduce((n, o, i) => n + (hits(box, o, 4) || arr(lead).some((l) => !(o.link && Array.isArray(lead)) && hits(l, o, 1)) ? (i < words.length ? 80 : 14) : 0), 0) +
+      placed.reduce(
+        (n, p) => n + (hits(box, p.box, GAP) || arr(p.lead).some((pl) => hits(box, pl, 4) || arr(lead).some((l) => hits(l, pl, 1))) || arr(lead).some((l) => hits(l, p.box, 1)) ? 8 : 0),
+        0,
+      ),
     markOf = (id) => marks.find((m) => m.e.id === id),
     sorted = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1)),
     topD = KIN.filter((e) => e.type === 'destructive').sort((a, b) => b.altitude_km - a.altitude_km)[0],
@@ -346,6 +368,7 @@ function build(stage) {
         m: firstM,
         t: `${fmtY(parse(sorted[0].date))}: the first tests in our records, by the United States.`,
         order: ['down-start', 'up-start', 'right'],
+        shift: [60, 84, 110, 150, 200],
         phone: false,
       },
       {
@@ -367,8 +390,32 @@ function build(stage) {
     ]
       .filter((s) => !phone || s.phone)
       .filter((s) => W >= 1100 || phone || s.m !== markOf(topD.id)); // tablet widths: two crowded notes (2007 and 2021) collide, the chapter below carries the 2007 note
-  const boxFor = (dir, al, m, L, w, h) => {
+  // The links the reader has earned stand on the picture for good: the dashed line from each dot to its law's tick is a place no note, zone name or tag may
+  // stand on (a note that cannot find clear room beside it slides along to the right of the line, see the `shift` of its spec).
+  revealedKeys.forEach((k) => {
+    const [eid, lid] = k.split('|'),
+      m = markOf(eid),
+      l = LEGAL.find((q) => q.id === lid);
+    if (!m || !l) return;
+    const lx = x(parse(l.start)),
+      ly = limbY(lx),
+      n = Math.max(1, Math.ceil(Math.hypot(lx - m.px, ly - m.py) / 8));
+    for (let i = 0; i <= n; i++) {
+      const cx = m.px + ((lx - m.px) * i) / n,
+        cy = m.py + ((ly - m.py) * i) / n;
+      obstacles.push({ x0: cx - 5, x1: cx + 5, y0: cy - 5, y1: cy + 5, link: true });
+    }
+  });
+  const boxFor = (dir, al, m, L, w, h, ox = 0) => {
     const { px, py } = m;
+    if (dir === 'down' && ox)
+      return [
+        { x0: px - 6 + ox, x1: px - 6 + ox + w, y0: py + L, y1: py + L + h + 2 },
+        [
+          { x0: px - 1, x1: px + 1, y0: py + 12, y1: py + L + 10 },
+          { x0: px, x1: px - 6 + ox - 2, y0: py + L + 9, y1: py + L + 11 },
+        ],
+      ];
     if (dir === 'up')
       return [
         { x0: al === 'end' ? px + 6 - w : px - 6, x1: al === 'end' ? px + 6 : px - 6 + w, y0: py - L - h - 2, y1: py - L },
@@ -474,6 +521,16 @@ function build(stage) {
           }
           if (ok && (!best || n < best.n)) best = { dir, al, box, lead, n };
         }
+      // beside a link the reader has earned: the note starts to the right of the line, its leader bending to reach it
+      if (s.shift && (!best || best.n > 0))
+        shifted: for (const ox of s.shift)
+          for (const L of [24, 38, 56, 80]) {
+            const [box, lead] = boxFor('down', 'start', s.m, L, w, h, ox);
+            if (inside(box) && clash(box, lead) === 0) {
+              best = { dir: 'down', al: 'start', ox, box, lead, n: 0 };
+              break shifted;
+            }
+          }
       if (best && best.n <= tol) break;
     }
     if (!best || best.n > tol) return false; // no clean room: leave the note out rather than write over the buttons or the dots
@@ -498,7 +555,8 @@ function build(stage) {
               : p.dir === 'left'
                 ? [px - 8, py, p.box.x1 + 4, py]
                 : [px + 8, py, p.box.x0 - 4, py];
-      el('line', { x1: lead[0], y1: lead[1], x2: lead[2], y2: lead[3], class: 'ht-lead' }, g);
+      if (p.ox) el('path', { d: `M${px},${py + 8}V${p.box.y0 + 9}H${p.box.x0 - 4}`, class: 'ht-lead', fill: 'none' }, g);
+      else el('line', { x1: lead[0], y1: lead[1], x2: lead[2], y2: lead[3], class: 'ht-lead' }, g);
       el('circle', { cx: px, cy: py, r: 2.5, class: 'ht-lead-dot' }, g);
       const t = el('text', { class: 'ht-note', 'font-size': noteSize, 'text-anchor': anchor }, g);
       const y0 = p.dir === 'up' || p.dir === 'down' ? (p.dir === 'up' ? p.box.y0 : p.box.y0 + 2) : p.box.y0;
@@ -872,14 +930,28 @@ function mountHits(stage, S, actions) {
       tag.setAttribute('y', tg.sp.y);
     });
   S.reveal = {
-    next(watched) {
-      const free = allPairs().filter((q) => !revealedKeys.includes(key(q)) && !crossesWords(q.ev, q.law)),
-        pick = watched.map((id) => free.find((q) => q.ev.e.scene_3d === id)).find(Boolean) || free.sort((a, b) => (a.ev.date < b.ev.date ? -1 : 1))[0];
+    // How many real pairs the resting picture can show (a pair needs a dot, and not every weapon has one).
+    capacity: () => allPairs().length,
+    // The next link to draw. `watched` lists the scenes the reader has opened, oldest first: a pair whose weapon is one of those comes first. `only` stops there
+    // (the link a scene earns on its own); otherwise, with none to prefer, the oldest pair not yet drawn follows, one that crosses no words first.
+    next(watched, only = false) {
+      const left = allPairs().filter((q) => !revealedKeys.includes(key(q))),
+        mine = watched.map((id) => left.find((q) => q.ev.e.scene_3d === id)).find(Boolean),
+        byDate = [...left].sort((a, b) => (a.ev.date < b.ev.date ? -1 : 1)),
+        pick = mine || (only ? null : byDate.find((q) => !crossesWords(q.ev, q.law)) || byDate[0]);
       if (!pick) return null;
+      const out = { key: key(pick), scene: pick.ev.e.scene_3d, event: WORDS[pick.p.event]?.name ?? byId[pick.p.event].system, law: LAW_WORDS[pick.p.law] ?? byId[pick.p.law].title };
       revealedKeys.push(key(pick));
+      // A line that would run through a note, a zone name or a year: the picture is drawn again with the line known (notes keep clear of it), and the link is
+      // drawn in as it comes back.
+      if (crossesWords(pick.ev, pick.law) && relayout) {
+        pendingKey = key(pick);
+        relayout();
+        return out;
+      }
       paintRest(pick, true);
       settleTags();
-      return { key: key(pick), event: WORDS[pick.p.event]?.name ?? byId[pick.p.event].system, law: LAW_WORDS[pick.p.law] ?? byId[pick.p.law].title };
+      return out;
     },
     replay(k = revealedKeys.at(-1)) {
       const q = k && allPairs().find((x) => key(x) === k);
@@ -906,8 +978,9 @@ function mountHits(stage, S, actions) {
   };
   revealedKeys.forEach((k) => {
     const q = allPairs().find((x) => key(x) === k);
-    if (q) paintRest(q, false);
+    if (q) paintRest(q, k === pendingKey);
   });
+  pendingKey = null;
   settleTags();
   const mark = (h) => {
     drawLinks(h);
@@ -1053,27 +1126,28 @@ function mountHits(stage, S, actions) {
     capEl = live?.closest('.hero-cap');
   // The longest wait in data/lag_pairs.json. Its weapon is a jamming campaign with no height, so it has no dot in this picture: the closing beat draws it along
   // the horizon, from the year it began to the law's tick, with the same dashed line the other pairs use.
-  const longest = D.lag_pairs.pairs
-    .map((p) => {
+  const rows = D.lag_pairs.pairs.map((p) => {
       const ev = byId[p.event],
         law = byId[p.law];
       return { p, ev, law, years: yearsBetween(parse(ev.date || ev.start), parse(law.start)) };
-    })
-    .sort((a, b) => b.years - a.years)[0];
+    }),
+    longest = [...rows].sort((a, b) => b.years - a.years)[0];
   const longText = () => {
     const yr = (r) => fmtY(parse(r.date || r.start)),
       g = gap(longest.years);
     return `The longest wait: ${WORDS[longest.ev.id]?.name ?? longest.ev.system} (${longest.ev.date ? '' : 'from '}${yr(longest.ev)}) and the ${LAW_WORDS[longest.law.id] ?? longest.law.title} (${yr(longest.law)}), ${g.num} ${g.unit} apart.`;
   };
-  const drawLong = () => {
-    const lawHit = S.hits.find((k) => k.k === 'law' && k.id === longest.law.id);
+  // A pair whose weapon has no dot (a jamming campaign): drawn along the horizon, from the year it began to the law's tick, with the same dashed line.
+  // `r` is one of the rows above.
+  const drawLong = (r = longest, ms = 1400) => {
+    const lawHit = S.hits.find((k) => k.k === 'law' && k.id === r.law.id);
     if (!lawHit) return false;
     mark(lawHit); // rings the law's tick; clears the links group, which is then drawn here
-    const ax = S.x(parse(longest.ev.date || longest.ev.start)),
+    const ax = S.x(parse(r.ev.date || r.ev.start)),
       ay = S.limbY(ax) - 14,
       bx = lawHit.px,
       by = S.limbY(bx) - 14,
-      g = linkText(gap(longest.years)),
+      g = linkText(gap(r.years)),
       w = tw(g, 12.5 * K, 600) + 16 * K,
       mx = (ax + bx) / 2,
       my = (ay + by) / 2 - 20 * K;
@@ -1083,14 +1157,14 @@ function mountHits(stage, S, actions) {
     S.links.insertBefore(el('rect', { x: mx - w / 2, y: my - 11 * K, width: w, height: 22 * K, rx: 11 * K, class: 'ht-lk-pill' }), t);
     const t0 = performance.now(),
       tick = (now) => {
-        const k = Math.min(1, (now - t0) / 1400),
+        const k = Math.min(1, (now - t0) / ms),
           e = 1 - (1 - k) ** 3;
         ln.setAttribute('x2', ax + (bx - ax) * e);
         ln.setAttribute('y2', ay + (by - ay) * e);
         if (k < 1 && sw) sw.rid = requestAnimationFrame(tick);
       };
     sw.rid = requestAnimationFrame(tick);
-    S.links.querySelectorAll('.ht-lk-pill,.ht-lk-tag').forEach((n) => n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: 1100, easing: EASE, fill: 'backwards' }));
+    S.links.querySelectorAll('.ht-lk-pill,.ht-lk-tag').forEach((n) => n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: ms * 0.78, easing: EASE, fill: 'backwards' }));
     return true;
   };
   // The caption is the sentence on screen; when its weapon has a 3D scene it ends in a link that opens it.
@@ -1119,6 +1193,7 @@ function mountHits(stage, S, actions) {
     cancelAnimationFrame(sw.rid);
     sw = null;
     S.links.getAnimations?.({ subtree: true }).forEach((a) => a.cancel());
+    S.rest.style.opacity = '';
     [S.ring, S.bar].forEach((n) => n.getAnimations?.().forEach((a) => a.cancel()));
     mark(null);
     capEl?.classList.remove('live');
@@ -1204,6 +1279,63 @@ function mountHits(stage, S, actions) {
       return true;
     },
   };
+
+  // The draw-in at 13 of 13: every pair our records link, the weapon's dashed line growing to the law's tick and the wait appearing on it, one pair after another
+  // (oldest weapon first), about five seconds in all. The links kept on the resting picture step aside while it runs and come back after. Skip, Escape, or any
+  // pointer on a dot or tick ends it.
+  const PAIR_MS = 820;
+  S.sweep.runPairs = (done) => {
+    sweepEnd();
+    if (active || pinned || !rows.length) return false;
+    const list = [...rows].sort((a, b) => ((a.ev.date || a.ev.start) < (b.ev.date || b.ev.start) ? -1 : 1)),
+      yr = (r) => fmtY(parse(r.date || r.start));
+    let i = 0;
+    sw = { timers: [], rid: 0, done, held: false, next: null, pairs: true };
+    S.rest.style.transition = 'opacity 260ms ease';
+    S.rest.style.opacity = 0;
+    const after = (ms, f) => {
+        sw.next = f;
+        sw.timers.push(setTimeout(f, ms));
+      },
+      step = () => {
+        if (i >= list.length) {
+          capEl?.classList.remove('live');
+          [S.links, S.ring, S.bar].forEach((n) => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 420, easing: EASE, fill: 'forwards' }));
+          return after(480, sweepEnd);
+        }
+        const r = list[i],
+          h = S.hits.find((k) => k.k === 'ev' && k.id === r.ev.id);
+        if (h) {
+          mark(h);
+          const ln = S.links.querySelector('.ht-lk-line');
+          if (ln) {
+            const [x1, y1, x2, y2] = ['x1', 'y1', 'x2', 'y2'].map((k) => +ln.getAttribute(k)),
+              t0 = performance.now(),
+              tick = (t) => {
+                const k = Math.min(1, (t - t0) / (PAIR_MS * 0.62)),
+                  e = 1 - (1 - k) ** 3;
+                ln.setAttribute('x2', x1 + (x2 - x1) * e);
+                ln.setAttribute('y2', y1 + (y2 - y1) * e);
+                if (k < 1) sw.rid = requestAnimationFrame(tick);
+              };
+            ln.setAttribute('x2', x1);
+            ln.setAttribute('y2', y1);
+            sw.rid = requestAnimationFrame(tick);
+          }
+          S.links.querySelectorAll('.ht-lk-pill,.ht-lk-tag,.ht-law-hi').forEach((n) => n.animate([{ opacity: 0 }, { opacity: +n.getAttribute('opacity') || 1 }], { duration: 240, delay: PAIR_MS * 0.5, easing: EASE, fill: 'backwards' }));
+        } else if (!drawLong(r, PAIR_MS * 0.62)) {
+          i++;
+          return step();
+        }
+        setCaption(`Pair ${i + 1} of ${list.length}: ${WORDS[r.ev.id]?.name ?? r.ev.system} (${r.ev.date ? '' : 'from '}${yr(r.ev)}), then the ${LAW_WORDS[r.law.id] ?? r.law.title} (${yr(r.law)}).`, null);
+        capEl?.classList.add('live');
+        i++;
+        after(PAIR_MS, step);
+      };
+    step();
+    return true;
+  };
+  document.addEventListener('keydown', (ev) => ev.key === 'Escape' && sw?.pairs && sweepEnd());
 
   // The pointer's last few positions: is it heading for the card (its buttons), or merely passing over the picture?
   const trail = [];

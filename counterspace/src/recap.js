@@ -25,6 +25,10 @@ const rows = () =>
     })
     .sort((p, q) => p.a - q.a);
 
+const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+// How many pairs the records link, in a word ("six").
+export const pairWord = () => WORD[D.lag_pairs.pairs.length] || String(D.lag_pairs.pairs.length);
+
 // One row per pair: the weapon on the left, the law on the right, and between them a dashed link whose length follows the wait.
 export function recapLinks() {
   return (
@@ -47,5 +51,5 @@ export function recapLine() {
     say = (g) => `${g.num} ${g.unit}`,
     lo = r.reduce((m, x) => (x.years < m.years ? x : m)),
     hi = r.reduce((m, x) => (x.years > m.years ? x : m));
-  return `In all ${['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][r.length] || r.length} pairs our records link, the law came later: after ${say(lo.g)} at the quickest and ${say(hi.g)} at the slowest. That is the order of events, not a claim about cause.`;
+  return `In all ${pairWord()} pairs our records link, the law came later: after ${say(lo.g)} at the quickest and ${say(hi.g)} at the slowest. That is the order of events, not a claim about cause.`;
 }

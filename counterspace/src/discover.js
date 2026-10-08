@@ -3,12 +3,13 @@
 // Needs: scene-ui.js (openScene, ORDER), posters.js, discover-data.js. Provides: mountDiscover().
 // ============================================================================
 import { REDUCED, esc } from './app.js';
-import { recapLine, recapLinks } from './recap.js';
+import { pairWord, recapLine, recapLinks } from './recap.js';
 import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
 import { seenScenes } from './shared.js';
-import { earn, freshReward, showInHero } from './rewards.js';
+import { earn, freshLine, showInHero, toHero } from './rewards.js';
+import { playPairs, revealCapacity, revealedCount } from './hero-timeline.js';
 
 const yearOf = (s) => s.date.slice(0, 4);
 // Titles end with the year in brackets; the card shows the year on its own line.
@@ -55,13 +56,20 @@ function drawGallery() {
     });
     milestone();
     if (count) {
-      count.textContent = `${seenScenes.size} of ${STRIP.length} scenes seen`;
-      if (freshReward()) {
+      const line = freshLine('on the top picture');
+      count.textContent = `${seenScenes.size} of ${STRIP.length} scenes seen${line ? '. ' + line : ''}`;
+      if (line) {
         const go = document.createElement('button');
         go.type = 'button';
         go.className = 'ss-go';
-        go.textContent = 'A new link is on the top picture. Show me';
+        go.textContent = 'Show me';
         count.append('. ', go);
+      }
+      if (seenScenes.size) {
+        const rule = document.createElement('span');
+        rule.className = 'ss-rule';
+        rule.textContent = RULE();
+        count.append(rule);
       }
     }
     heroSeen();
@@ -76,24 +84,26 @@ function drawGallery() {
   sync();
 }
 
-// Half-way rewards, in memory only: the third and the seventh scene seen each draw one more real pair on the hero's resting picture (see rewards.js), so the
-// 13 of 13 card is not the only payoff. When the scene that earned one is closed, the page brings the hero into view and pulses the new link once.
+// Rewards, in memory only (see rewards.js): a scene watched whose weapon has a pair draws that pair on the hero's resting picture; the third and the seventh scene seen
+// each draw one more. When the scene that earned a link is closed, the page brings the hero into view and pulses the new link once.
 const MILES = [3, 7];
 let given = 0,
-  toShow = null; // the reward to show when the scene on screen is closed
+  toShow = null, // the reward to show when the scene on screen is closed
+  inScene = false;
 function milestone() {
   const n = seenScenes.size;
-  if (given < MILES.length && n >= MILES[given]) {
-    const key = 'seen' + MILES[given++],
-      r = earn(key);
-    if (r) toShow = r.key;
-  }
+  if (given < MILES.length && n >= MILES[given]) earn('seen' + MILES[given++]);
 }
+// The one-line rule near each counter: how more links get drawn, or that the picture has shown every link it can.
+const RULE = () => (revealedCount() >= revealCapacity() && revealCapacity() ? 'Every link this picture can draw is on it.' : 'Watch scenes or answer the quiz to draw more links.');
+document.addEventListener('cs:opening', () => (inScene = true));
+document.addEventListener('cs:reward', (e) => inScene && e.detail && (toShow = e.detail.key));
 document.addEventListener('cs:closed', () => {
-  if (!toShow) return;
+  inScene = false;
   const k = toShow;
   toShow = null;
-  setTimeout(() => showInHero(k), 250);
+  if (pending) return drawIn(); // the draw-in of every pair covers a link just earned
+  if (k) setTimeout(() => showInHero(k), 250);
 });
 
 // The arrows move the strip by about one screenful of cards and switch off at either end; the cards themselves stay the way in for keyboards.
@@ -127,9 +137,10 @@ export function mountDiscover() {
   if (b) b.onclick = go;
 }
 
-// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13". At 13 of 13, when the last scene is closed, a card docked under the buttons
-// (never over the picture) shows the real pairs as links, the plain line and where to go next (unless the tour's own closing slide just showed them).
-// Everything is counted from the scenes opened in this visit and from the linked pairs in the data; nothing is stored.
+// Under the hero's actions: once a scene has been watched, a quiet "Seen N of 13" with the links it earned and the one-line rule. At 13 of 13, when the last scene is
+// closed, the six pairs draw themselves in one at a time on the picture (skippable), then settle to one row: "See the six pairs" opens them as a card over the lower
+// picture, never pushing it (unless the tour's own closing slide just showed them). Everything is counted from the scenes opened in this visit and from the linked
+// pairs in the data; nothing is stored.
 let pending = false,
   shown = false;
 function heroSeen() {
@@ -141,49 +152,91 @@ function heroSeen() {
   const all = n >= STRIP.length;
   el.classList.toggle('done', all);
   if (go) go.textContent = all ? 'See the whole timeline' : 'See the timeline';
+  const main = document.createElement('span');
+  main.className = 'hs-main';
   if (!all) {
-    el.textContent = `Seen ${n} of ${STRIP.length} scenes`;
-    if (freshReward()) {
-      const go = document.createElement('button');
-      go.type = 'button';
-      go.className = 'ss-go hs-go';
-      go.textContent = 'See the new link';
-      el.append(' · A new link is on the picture. ', go);
+    const line = freshLine();
+    main.append(`Seen ${n} of ${STRIP.length} scenes.${line ? ' ' + line + '. ' : ''}`);
+    if (line) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ss-go hs-go';
+      b.textContent = 'Show me';
+      main.append(b);
     }
+    const rule = document.createElement('span');
+    rule.className = 'hs-rule';
+    rule.textContent = RULE();
+    el.replaceChildren(main, rule);
     return;
   }
-  el.innerHTML = `You have seen all ${STRIP.length} scenes. <button type="button" class="hs-again">Show what you found</button>`;
+  main.append(`You have seen all ${STRIP.length} scenes. In every pair our records link, the law came later. `);
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'hs-again';
+  b.setAttribute('aria-expanded', String(!card()?.hidden));
+  b.setAttribute('aria-controls', 'heroDone');
+  b.textContent = `See the ${pairWord()} pairs`;
+  main.append(b);
+  el.replaceChildren(main);
   if (!shown) pending = true;
 }
-function showDone() {
-  const card = document.getElementById('heroDone');
-  if (!card) return;
-  shown = true;
-  pending = false;
+const card = () => document.getElementById('heroDone');
+// The pairs, as a card standing over the lower part of the picture, just above the buttons. It is out of the page's flow, so the picture keeps its height.
+function openPairs(focus = true) {
+  const c = card();
+  if (!c) return;
+  document.getElementById('hdH').textContent = `The ${pairWord()} pairs our records link`;
   document.getElementById('hdLinks').innerHTML = recapLinks();
   document.getElementById('hdLine').textContent = recapLine();
-  card.hidden = false;
-  card.closest('.hero')?.classList.add('has-done');
-  card.classList.remove('in');
-  void card.offsetWidth;
-  card.classList.add('in');
-  // the card sits under the buttons: bring it into view (on a phone it is a sheet over the page and needs no scroll)
-  if (innerWidth >= 640) card.scrollIntoView({ block: 'nearest', behavior: REDUCED ? 'auto' : 'smooth' });
-  document.getElementById('hdH').focus({ preventScroll: true });
+  c.hidden = false;
+  placePairs();
+  c.classList.remove('in');
+  void c.offsetWidth;
+  c.classList.add('in');
+  document.querySelector('.hs-again')?.setAttribute('aria-expanded', 'true');
+  if (focus) document.getElementById('hdH').focus({ preventScroll: true });
 }
-function hideDone() {
-  const card = document.getElementById('heroDone');
-  if (card) card.hidden = true;
-  card?.closest('.hero')?.classList.remove('has-done');
+function closePairs(back = false) {
+  const c = card();
+  if (!c || c.hidden) return;
+  c.hidden = true;
+  const b = document.querySelector('.hs-again');
+  b?.setAttribute('aria-expanded', 'false');
+  if (back) b?.focus({ preventScroll: true });
 }
-document.addEventListener('cs:closed', () => pending && showDone());
-document.addEventListener('cs:reward', () => heroSeen());
+// stands just above the row of buttons, whatever height that row has
+function placePairs() {
+  const c = card(),
+    grid = c?.closest('.hero-grid'),
+    acts = document.getElementById('start');
+  if (!c || c.hidden || !grid || !acts || innerWidth < 640) return c && (c.style.bottom = '');
+  c.style.bottom = Math.round(grid.getBoundingClientRect().bottom - acts.getBoundingClientRect().top + 8) + 'px';
+}
+addEventListener('resize', placePairs);
+// At 13 of 13 (when the scene that made it 13 is closed): the pairs draw themselves in, then the row says where they are.
+function drawIn() {
+  shown = true;
+  pending = false;
+  toHero(() => playPairs());
+}
 document.addEventListener('cs:recap', () => ((shown = true), (pending = false)));
+document.addEventListener('cs:reward', () => heroSeen());
 document.addEventListener('click', (e) => {
-  if (e.target.closest('#hdClose')) {
-    hideDone();
-    document.getElementById('heroGo')?.closest('a')?.focus({ preventScroll: true });
-  } else if (e.target.closest('.hs-again')) showDone();
-  else if (e.target.closest('#heroDone a')) hideDone();
+  const again = e.target.closest('.hs-again');
+  if (again) return card()?.hidden ? openPairs() : closePairs(true);
+  if (e.target.closest('#hdClose')) return closePairs(true);
+  if (e.target.closest('#hdAgain')) {
+    closePairs();
+    return playPairs();
+  }
+  if (e.target.closest('#heroDone a')) return closePairs();
+  // a click anywhere else on the page puts the card away
+  if (!card()?.hidden && !e.target.closest('#heroDone')) closePairs();
 });
-document.addEventListener('keydown', (e) => e.key === 'Escape' && !document.getElementById('heroDone')?.hidden && hideDone());
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || card()?.hidden) return;
+  if (document.querySelector('.overlay.open')) return;
+  e.stopPropagation();
+  closePairs(true);
+});
