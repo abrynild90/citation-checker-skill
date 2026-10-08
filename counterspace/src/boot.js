@@ -183,7 +183,7 @@ function watchSegs() {
 
 // ---------------------------------------------------------------- boot
 // Above-the-fold pieces draw first; the rest is drawn on the next task (or on demand by audit/export).
-// Charts below the fold (C, R, B, lag) and the sources section are drawn when they come within 700 px of the viewport, or on demand by audit/export.
+// Charts below the fold (C, R, B, lag) and the sources section are drawn when they come within 700 px of the viewport, when the browser is idle, or on demand by audit/export.
 const idle = (f, timeout) => (window.requestIdleCallback || ((g) => setTimeout(g, 200)))(f, { timeout });
 // The charts and the sources section are below the fold: drawn lazily.
 const LAZY = { svgC: () => drawC(), svgR: () => drawR(), svgB: () => drawB(), svgL: () => drawL(), methodBody: drawMethod };
@@ -219,13 +219,8 @@ function drawAll(lazy = false) {
   lazyIO = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && drawLazy(e.target.id)), { rootMargin: '700px 0px' });
   Object.keys(LAZY).forEach((id) => lazyIO.observe(document.getElementById(id)));
   // Anything still undrawn is filled in when the browser is idle, so deep links, find-in-page and tests never meet an empty chart.
-  idle(
-    () =>
-      Object.keys(LAZY)
-        .filter((id) => id !== 'methodBody')
-        .forEach(drawLazy),
-    1500,
-  ); // the sources section waits for the viewport (or audit/export)
+  // The sources section is built here too, so the page's height is final within the first second and never changes under a reader who is scrolling.
+  idle(() => Object.keys(LAZY).forEach(drawLazy), 1500);
 }
 // Charts and labels are laid out by measuring text, so the first draw waits for the embedded faces (data: URIs, a local decode: a few ms).
 fontsReady.then(() => {
