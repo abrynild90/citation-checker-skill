@@ -471,6 +471,7 @@ function build(stage) {
     });
   });
 
+  S.words = words;
   S.avoid = placed.map((p) => p.box).concat(words, rowBoxes); // the notes, zone names, title words and law names: a card never stands on them
   // ---- the time marker: a thin line that moves along the years; it never crosses the words
   const clip = el('clipPath', { id: 'htMarkClip' }, defs),
@@ -508,7 +509,7 @@ function popHTML(h) {
     return (
       `<p class="hp-title">${esc(title)}</p><p class="hp-when">${esc(e.state)} · ${esc(fmtD(e))}</p>` +
       `<p class="hp-line">${esc(KIND_PLAIN[e.type] || '')}.${esc(alt)}${scene ? ' Weapon: ' + esc(e.system) + '.' : ''}</p>` +
-      (hasLaterLaw(e.id) ? '<p class="hp-none">The dashed line shows the wait for the first later law in our records.</p>' : `<p class="hp-none">${NO_LATER}</p>`) +
+      (hasLaterLaw(e.id) ? '' : `<p class="hp-none">${NO_LATER}</p>`) +
       (scene ? `<div class="hp-acts">${watch(e.scene_3d, 'Watch in 3D')}</div>` : '')
     );
   }
@@ -517,7 +518,6 @@ function popHTML(h) {
     scene = hasScene(l);
   return (
     `<p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p>` +
-    (pairsAt(l.id).length ? '<p class="hp-none">The dashed line leads back to the weapon our records link to this law.</p>' : '') +
     `<div class="hp-acts">${scene ? watch(l.scene_3d, `Watch ${SHORT[l.scene_3d] || 'the event'} in 3D`) : ''}` +
     `<a class="btn small" href="#legalBand">See it on the timeline</a></div>`
   );
@@ -561,53 +561,66 @@ function mountHits(stage, S, actions) {
   layer.append(group, pop);
   fig.insertBefore(layer, stage.nextSibling);
 
-  // Where the card stands. Candidates around the point or tick are scored: standing on a note or a zone name costs most, covering a neighbouring dot costs
-  // some, and distance from the point costs a little, so the card sits close (the pointer has a short way to it) yet clear of the words and the crowd.
+  // Where the card stands: on the clearest spot of the sky nearest the point or tick. Every position on a coarse grid is scored; a card never stands on a
+  // dot, a tick, a note, a zone name, a year, a law name, the headline words, the dashed line or its time tag (each costs a lot), and distance from the
+  // point costs a little, so it sits as close as the clear room allows. Only when no clear room exists does the least-bad spot win.
   const overlap = (a, b, pad = 0) => a.x0 < b.x1 + pad && a.x1 > b.x0 - pad && a.y0 < b.y1 + pad && a.y1 > b.y0 - pad;
+  let fixed = null;
+  const fixedBoxes = () =>
+    (fixed ||= [
+      ...(S.avoid || []).map((o) => (S.words.includes(o) ? { ...o, soft: 1 } : o)),
+      ...[...S.svg.querySelectorAll('text')].map((n) => {
+        const r = n.getBBox();
+        return { x0: r.x, x1: r.x + r.width, y0: r.y, y1: r.y + r.height };
+      }),
+      ...S.hits.map((o) =>
+        o.k === 'ev'
+          ? { x0: o.px - o.r - 5, x1: o.px + o.r + 5, y0: o.py - o.r - 5, y1: o.py + o.r + 5, o }
+          : { x0: o.px - 3, x1: o.px + 3, y0: o.py, y1: o.y1, o },
+      ),
+    ]);
   const place = (h) => {
     const pw = pop.offsetWidth,
       ph = pop.offsetHeight,
       cx = h.px,
-      cy = h.k === 'ev' ? h.py : (h.py + h.y1) / 2,
-      G = 14; // the gap between the point and the card: small, so the pointer crosses it quickly
-    let cands = [];
+      cy = h.k === 'ev' ? h.py : (h.py + h.y1) / 2;
     if (S.phone) {
-      const x = cx - pw / 2;
-      cands = h.k === 'ev' ? [[x, cy + 18], [x, cy - 18 - ph]] : [[x, S.yL - ph - 6]];
-    } else if (h.k === 'ev') {
-      for (const dx of [G + 6, 80, 140, 200, 260, 330, 400, 480]) for (const sh of [0, -50, 50, -100, 100, -150, 150]) cands.push([cx + dx, cy - ph / 2 + sh], [cx - dx - pw, cy - ph / 2 + sh]);
-      for (const dx of [0, -70, 70, -140, 140]) cands.push([cx - pw / 2 + dx, cy - ph - G - 4], [cx - pw / 2 + dx, cy + G + 4]);
-    } else {
-      for (const up of [0, 24, 48, 90, 140]) for (let dx = -560; dx <= 560; dx += 40) cands.push([cx - pw / 2 + dx, h.py - ph - 6 - up]);
+      const x = Math.min(Math.max(8, cx - pw / 2), S.W - pw - 8),
+        ys = h.k === 'ev' ? [cy + 18, cy - 18 - ph] : [S.yL - ph - 6],
+        y = ys.find((v) => v >= 8 && v + ph <= S.H - 8) ?? ys[0];
+      pop.style.left = x + 'px';
+      pop.style.top = Math.max(8, y) + 'px';
+      return;
     }
     const lk = tagOf(h).flatMap(({ ev, law, w, sp }) => {
-      const n = Math.max(1, Math.round(Math.hypot(law.px - ev.px, law.py - ev.py) / 16)),
-        box = (x, y, hw, hh) => ({ x0: x - hw, x1: x + hw, y0: y - hh, y1: y + hh });
-      return [
-        box(ev.px, ev.py, 14, 14),
-        box(law.px, (law.py + law.y1) / 2, 4, (law.y1 - law.py) / 2),
-        box(sp.x, sp.y, w / 2 + 2, 11 * K + 2),
-        ...Array.from({ length: n + 1 }, (_, i) => box(ev.px + ((law.px - ev.px) * i) / n, ev.py + ((law.py - ev.py) * i) / n, 3, 3)),
-      ];
-    });
+        const n = Math.max(1, Math.round(Math.hypot(law.px - ev.px, law.py - ev.py) / 12)),
+          box = (x, y, hw, hh) => ({ x0: x - hw, x1: x + hw, y0: y - hh, y1: y + hh });
+        return [
+          box(ev.px, ev.py, 16, 16),
+          box(law.px, (law.py + law.y1) / 2, 5, (law.y1 - law.py) / 2),
+          box(sp.x, sp.y, w / 2 + 3, 11 * K + 3),
+          ...Array.from({ length: n + 1 }, (_, i) => box(ev.px + ((law.px - ev.px) * i) / n, ev.py + ((law.py - ev.py) * i) / n, 4, 4)),
+        ];
+      }),
+      obs = fixedBoxes().filter((o) => o.o !== h),
+      self = { x0: cx - 9, x1: cx + 9, y0: h.py - 9, y1: h.k === 'ev' ? h.py + 9 : h.y1 },
+      maxY = S.yL - 14 - ph;
     let best = null;
-    for (const [rx, ry] of cands) {
-      const x = Math.min(Math.max(8, rx), S.W - pw - 8),
-        y = Math.min(Math.max(8, ry), S.H - ph - 8),
-        R = { x0: x, x1: x + pw, y0: y, y1: y + ph };
-      let cost = Math.abs(x - rx) * 2 + Math.abs(y - ry) * 2; // pushed off its first choice by the picture's edge
-      if (overlap(R, { x0: cx - 5, x1: cx + 5, y0: h.py - 5, y1: h.k === 'ev' ? h.py + 5 : h.y1 }, 0)) cost += 400; // never over its own point
-      for (const o of S.avoid || []) if (overlap(R, o, 8)) cost += 300;
-      for (const o of lk) if (overlap(R, o, 2)) cost += 500; // never over the linked tick or dot, the dashed line or its tag
-      for (const o of S.hits) if (o !== h && o.k === 'ev' && overlap(R, { x0: o.px - 7, x1: o.px + 7, y0: o.py - 7, y1: o.py + 7 }, 2)) cost += o.e.type === 'nuclear' ? 200 : 45;
-      for (const o of S.hits) if (o !== h && o.k === 'law' && overlap(R, { x0: o.px - 2, x1: o.px + 2, y0: o.py, y1: o.y1 }, 2)) cost += 30;
-      const dx = Math.max(R.x0 - cx, 0, cx - R.x1),
-        dy = Math.max(R.y0 - cy, 0, cy - R.y1);
-      cost += Math.hypot(dx, dy) * 0.6;
-      if (!best || cost < best.cost) best = { cost, x, y };
-    }
+    for (let y = 8; y <= Math.max(8, maxY); y += 10)
+      for (let x = 8; x <= S.W - pw - 8; x += 12) {
+        const R = { x0: x, x1: x + pw, y0: y, y1: y + ph },
+          dx = Math.max(R.x0 - cx, 0, cx - R.x1),
+          dy = Math.max(R.y0 - cy, 0, cy - R.y1);
+        let cost = Math.hypot(dx, dy) * 0.6;
+        if (best && cost >= best.cost) continue;
+        if (overlap(R, self, 4)) cost += 1000;
+        for (const o of obs) if (overlap(R, o, 5)) cost += o.soft ? 300 : 1000;
+        for (const o of lk) if (overlap(R, o, 2)) cost += 1000;
+        if (!best || cost < best.cost) best = { cost, x, y };
+      }
     pop.style.left = best.x + 'px';
     pop.style.top = best.y + 'px';
+    pop.dataset.clear = best.cost < 300 ? '1' : best.cost < 1000 ? 'w' : '0'; // 1: clear, w: over the headline words only
   };
   // The real links (data/lag_pairs.json) of the point or tick being looked at: a dashed line from each weapon dot to its first later law, the time between
   // them on a small tag, and a ring on the dot or a bar on the tick at the other end.
@@ -634,6 +647,12 @@ function mountHits(stage, S, actions) {
       return { p, ev, law, w, sp };
     });
   };
+  let textsCache = null;
+  const textBoxes = () =>
+    (textsCache ||= [...S.svg.querySelectorAll('text:not(.ht-lk-tag)')].map((node) => {
+      const r = node.getBBox();
+      return { node, x0: r.x, x1: r.x + r.width, y0: r.y, y1: r.y + r.height };
+    }));
   let dimmed = [];
   const undim = () => {
     dimmed.forEach((n) => n.classList.remove('ht-dim'));
@@ -653,6 +672,20 @@ function mountHits(stage, S, actions) {
       const t = text(S.links, { x: sp.x, y: sp.y, class: 'ht-lk-tag', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, linkText(p.g));
       S.links.insertBefore(el('rect', { x: sp.x - w / 2, y: sp.y - 11 * K, width: w, height: 22 * K, rx: 11 * K, class: 'ht-lk-pill' }), t);
       sp.hit.forEach((o) => o.node && (o.node.classList.add('ht-dim'), dimmed.push(o.node)));
+      // a caption the dashed line itself crosses is quietened too, so the line never runs through words
+      const n = Math.ceil(d / 5);
+      for (const o of textBoxes()) {
+        if (dimmed.includes(o.node)) continue;
+        for (let i = 0; i <= n; i++) {
+          const x = ev.px + (dx * i) / n,
+            y = ev.py + (dy * i) / n;
+          if (x > o.x0 - 3 && x < o.x1 + 3 && y > o.y0 - 2 && y < o.y1 + 2) {
+            o.node.classList.add('ht-dim');
+            dimmed.push(o.node);
+            break;
+          }
+        }
+      }
     });
   };
   const mark = (h) => {
@@ -681,9 +714,11 @@ function mountHits(stage, S, actions) {
     stopHide();
     clearTimeout(fadeT);
     clearTimeout(switchT);
+    switchT = 0;
     if (active !== h) {
       const fresh = pop.hidden || !pop.classList.contains('on');
       active = h;
+      pop.dataset.hit = h.k + ':' + h.id;
       pop.innerHTML = popHTML(h);
       pop.hidden = false;
       place(h);
@@ -695,7 +730,7 @@ function mountHits(stage, S, actions) {
       mark(h);
     }
   };
-  const hide = (now) => {
+  const hide = (now, grace = GRACE) => {
     stopHide();
     const go = () => {
       hideT = 0;
@@ -707,7 +742,7 @@ function mountHits(stage, S, actions) {
       fadeT = setTimeout(() => !active && (pop.hidden = true), 100);
     };
     if (now) go();
-    else hideT = setTimeout(go, GRACE);
+    else hideT = setTimeout(go, grace);
   };
   // The path from the point to its card: every pointer position inside this shape belongs to the journey, so crossing a neighbouring dot on the way
   // neither swaps the card nor starts it fading. (The convex hull of the point and the card, a little padded.)
@@ -760,27 +795,53 @@ function mountHits(stage, S, actions) {
     }
     return bd <= (ev.pointerType === 'touch' ? 24 : 15) ? best : null;
   };
+  // The pointer's last few positions: is it heading for the card (its buttons), or merely passing over the picture?
+  const trail = [];
+  let nearH = null;
+  const headingForCard = (x, y) => {
+    const a = trail[0],
+      b = trail.at(-1),
+      dt = b[0] - a[0];
+    if (trail.length < 2 || dt < 16) return false;
+    const vx = (b[1] - a[1]) / dt,
+      vy = (b[2] - a[2]) / dt,
+      sp = Math.hypot(vx, vy),
+      cx = pop.offsetLeft + pop.offsetWidth / 2 - x,
+      cy = pop.offsetTop + pop.offsetHeight - 24 - y, // the card's buttons are at its foot
+      d = Math.hypot(cx, cy) || 1;
+    return sp > 0.12 && (vx * cx + vy * cy) / (sp * d) > 0.8;
+  };
   layer.addEventListener('pointermove', (ev) => {
     if (ev.pointerType === 'touch' || pinned) return;
+    const now = performance.now();
+    trail.push([now, ev.clientX, ev.clientY]);
+    while (trail.length > 1 && now - trail[0][0] > 110) trail.shift();
     if (pop.contains(ev.target)) return void (stopHide(), clearTimeout(switchT)); // on the card: it stays, whatever lies beneath it
     const r = layer.getBoundingClientRect(),
-      h = nearest(ev),
-      way = onWay(ev.clientX - r.left, ev.clientY - r.top);
+      x = ev.clientX - r.left,
+      y = ev.clientY - r.top,
+      h = nearest(ev);
+    nearH = h;
     layer.style.cursor = h ? 'pointer' : '';
     if (h === active) return void (stopHide(), clearTimeout(switchT));
     if (!active || pop.hidden || !pop.classList.contains('on')) return void (h ? show(h) : active && !hideT && hide());
-    // a card is open and the pointer is over something else (or nothing)
-    if (way) return void stopHide(); // on its way to the card: hold everything
+    // A card is open and the pointer is over something else (or nothing). Another dot or tick replaces the card at once, unless the pointer is plainly on
+    // its way to the card's buttons across that dot: then it must stay over the new one for a moment before the card changes.
+    const way = onWay(x, y),
+      toward = way && headingForCard(x, y);
     if (h) {
+      if (!toward) return void show(h);
       stopHide();
-      if (switchT && switchFor === h) return; // already waiting to switch to this one
+      if (switchT && switchFor === h) return;
       clearTimeout(switchT);
       switchFor = h;
-      switchT = setTimeout(() => ((switchT = 0), show(h)), 90); // a short settle, so a glance across a crowded stretch does not flicker the card
+      switchT = setTimeout(() => ((switchT = 0), nearH === h && show(h)), 150);
     } else {
       clearTimeout(switchT);
       switchT = 0;
-      if (!hideT) hide();
+      if (toward) hide(false, 700);
+      else if (way) hide(false, 380);
+      else if (!hideT) hide();
     }
   });
   layer.addEventListener('pointerleave', (ev) => !pop.contains(ev.relatedTarget) && hide());

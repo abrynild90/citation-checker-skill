@@ -26,7 +26,7 @@
   .hero-actions .btn.primary,.hero-actions .btn.quiet{grid-column:1/-1}}
 
 /* The picture answers to a pointer and the arrow keys: an invisible layer of buttons sits over it, and a small card names the dot or tick and offers the 3D scene. */
-.ht-layer{position:absolute;left:0;right:0;top:0;z-index:1;overflow:hidden}
+.ht-layer{position:absolute;left:0;right:0;top:0;overflow:hidden}
 .ht-group{position:absolute;inset:0}
 .ht-hit{all:unset;position:absolute;box-sizing:border-box;pointer-events:none;border-radius:50%}
 .ht-hit.law{border-radius:6px}
@@ -127,3 +127,19 @@
 .hero-seen[hidden]{display:none}
 .hero-seen.done{flex:1 0 100%;margin:var(--s-2) 0 0;max-width:70ch;color:var(--text);font-size:15px}
 @media (max-width:639px){.hero-seen{grid-column:1/-1;margin:var(--s-1) 0 0;text-align:center}.hero-seen.done{text-align:left}}
+
+/* On a wide picture the card is short and wide, so there is room for it between the dots: the title and date on the left, the 3D button on the right,
+   one line of detail underneath. */
+@media (min-width:900px){
+  .ht-pop{width:480px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s-3);align-items:center;padding:10px var(--s-4) 11px}
+  .ht-pop>p{grid-column:1/-1}
+  .ht-pop .hp-when,.ht-pop .hp-line{grid-column:1}
+  .ht-pop .hp-acts{grid-column:2;grid-row:2/4;margin:0;flex-wrap:nowrap}
+  .ht-pop .hp-acts:has(a){grid-column:1/-1;grid-row:auto;margin-top:8px}
+  .ht-pop .hp-acts .btn{white-space:nowrap}
+  .ht-pop .hp-line{margin-top:6px!important}
+  .ht-pop .hp-none{margin-top:3px!important}
+  .ht-pop:not(:has(.hp-acts)) .hp-line,.ht-pop:not(:has(.hp-acts)) .hp-when{grid-column:1/-1}
+}
+@media (min-width:900px) and (max-width:1279px){.ht-pop{width:420px}}
+@media (min-width:1600px){.ht-pop{width:520px}}
