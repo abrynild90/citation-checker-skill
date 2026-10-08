@@ -291,6 +291,7 @@ export function hideCard() {
   card.classList.remove('on');
   card.setAttribute('aria-hidden', 'true');
 }
+document.addEventListener('cs:opening', () => (hideCard(), hideLinks())); // a 3D scene is opening over the page
 // ---------------------------------------------------------------- card content
 // The line that offers the 3D explainer, with the cube icon from the page's icon set. Every card builder uses it.
 export const hint3d = (what = 'the 3D explainer') =>

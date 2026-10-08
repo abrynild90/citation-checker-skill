@@ -253,7 +253,10 @@ export async function openScene(id, originEl, viaTour) {
   const wasOpen = overlay.classList.contains('open'),
     onDot = wasOpen && dotsEl.contains(document.activeElement),
     token = ++openToken;
-  if (!wasOpen) returnFocus = originEl || document.activeElement;
+  if (!wasOpen) {
+    returnFocus = originEl || document.activeElement;
+    document.dispatchEvent(new CustomEvent('cs:opening')); // a chart card or the hero's card left open behind the window goes away now
+  }
   cur = cfg;
   epi = null;
   wideSel = -1;
@@ -498,10 +501,10 @@ const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
   pairBodies = { about: $('svAboutBody'), next: $('sceneNext') };
 function togglePair(which) {
   if (which) (toggleSrc(false), toggleLawCard(false)); // one note at a time over the story column
+  asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
   Object.keys(pairBtns).forEach((k) => {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
-  asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
     pairBodies[k].hidden = !on;
     if (on) pairBodies[k].scrollIntoView({ block: 'nearest', behavior: 'auto' });
   });
@@ -551,13 +554,15 @@ export function closeScene() {
   };
   if (REDUCED) finish();
   else closeTimer = setTimeout(finish, CLOSE_MS);
-  // Focus goes back to whatever opened the scene. If nothing did (opened from code, so focus was on <body>), fall back to the scene's own timeline
-  // mark (by data-id), then to the tour button, so keyboard users never lose their place.
-  const live = (n) => n && n !== document.body && document.contains(n) && !n.inert;
-  const byMark = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #svgC [data-id="${id}"], #svgR [data-id="${id}"]`);
-  const target = [returnFocus, byMark(returnFocus?.dataset?.id), byMark(closing.event), $('tourBtn')].find(live);
+  // Focus goes back to whatever opened the scene, if it is still on the page and showing. If nothing did (opened from code, so focus was on <body>, or the
+  // opener has gone, like the hero's card), it goes to the scene's own card in the strip of scenes, then to the tour button. Never to a mark on a chart: a
+  // focused mark opens its card, which would be left open over the page.
+  const live = (n) => n && n !== document.body && document.contains(n) && !n.inert && n.getClientRects().length > 0;
+  const inStrip = (id) => id && document.querySelector(`#scenes .pc-btn[data-id="${id}"]`);
+  const target = [returnFocus, inStrip(closing.id), $('tourBtn')].find(live);
   returnFocus = null;
   target?.focus();
+  if (target?.matches?.('.mark, [data-id]:not(.pc-btn)')) hideCard(); // a chart mark that opened the scene takes focus back without showing its card again
   document.dispatchEvent(new CustomEvent('cs:closed'));
 }
 
@@ -701,13 +706,8 @@ function rowsFit() {
   }
   return { n, h, avail };
 }
+// A note opened under "About this picture" or "Where to go next" sits in the column, so the column scrolls; it is measured as if the note were closed.
 function fitSteps() {
-  if (!cur) return;
-  stepsEl.style.height = '';
-  stepsEl.style.flex = '';
-  stepsEl.style.removeProperty('--sp');
-  stepsEl.style.paddingBottom = '';
-  asideBody.classList.remove('pin'); // measured with the foot in its natural place; pinned to the bottom at the end
   const noted = asideBody.classList.contains('has-note'),
     at = asideBody.scrollTop;
   if (noted) asideBody.classList.remove('has-note');
@@ -721,6 +721,12 @@ function fitSteps() {
   }
 }
 function fitStepsClosed() {
+  if (!cur) return;
+  stepsEl.style.height = '';
+  stepsEl.style.flex = '';
+  stepsEl.style.removeProperty('--sp');
+  stepsEl.style.paddingBottom = '';
+  asideBody.classList.remove('pin'); // measured with the foot in its natural place; pinned to the bottom at the end
   // a phone with more than four steps, or a short phone screen: the list shows the playing step only and the picture keeps the height
   // The steps are read-only here: every row is drawn whole, at its natural height, and the story column scrolls if it must (no fixed-height window).
   const one = false;

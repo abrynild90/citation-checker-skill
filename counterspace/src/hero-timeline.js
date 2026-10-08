@@ -101,6 +101,7 @@ export function mountHero(fontsReady, actions = {}) {
       if (!drawn?.sweep || !drawn.sweep.run(() => (cap.classList.remove('live'), skipMode(false), cueOn()))) (skipMode(false), cueOn());
     }, after);
   };
+  document.addEventListener('cs:opening', () => drawn?.closePop?.());
   let first = true;
   const draw = (animate) => {
     lastW = stage.clientWidth;
@@ -920,6 +921,18 @@ function mountHits(stage, S, actions) {
       pop.classList.add('on');
       mark(h);
     }
+  };
+  // a 3D scene opens over the page (from anywhere, also from code): the card goes at once, whether or not the pointer or focus is on it
+  S.closePop = () => {
+    stopHide();
+    clearTimeout(fadeT);
+    clearTimeout(switchT);
+    switchT = 0;
+    pinned = false;
+    active = null;
+    pop.classList.remove('on');
+    pop.hidden = true;
+    mark(null);
   };
   const hide = (now, grace = GRACE) => {
     stopHide();
