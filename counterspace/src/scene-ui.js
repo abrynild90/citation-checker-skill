@@ -390,6 +390,7 @@ const markOf = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #s
 function fillNext(cfg) {
   const box = $('nextLinks');
   box.textContent = '';
+  $('sceneNext').open = false; // each scene starts with the row closed, so the story keeps its room
   nextScenes(cfg, ORDER).forEach(({ id, tag }) => {
     const s = SCENES.find((c) => c.id === id);
     if (!s) return;
