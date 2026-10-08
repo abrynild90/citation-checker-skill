@@ -36,7 +36,7 @@ export function recapLinks() {
     rows()
       .map(
         (r, i) =>
-          `<li style="--i:${i}"><span class="rc-a">${esc(r.weapon)}</span>` +
+          `<li style="--i:${i};--hw:${Math.round((linkText(r.g).length * 6.9 + 22) / 2 + 3)}px"><span class="rc-a">${esc(r.weapon)}</span>` +
           `<span class="rc-track"><span class="rc-link" style="--k:${(0.42 + 0.58 * Math.min(1, r.years / MAX)).toFixed(3)}"><i class="rc-dot"></i><b class="rc-pill">${esc(linkText(r.g))}</b><i class="rc-tick"></i></span>` +
           `<span class="rc-b">${esc(r.law)}</span></span></li>`,
       )

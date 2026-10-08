@@ -45,7 +45,8 @@ function showCard(html, evt, el, full = false) {
   // mark or two only when no empty spot is near (cheap, not free) and keeps off the row titles; elsewhere covering a mark costs far more than distance.
   const near = !!el?.closest?.('#svgR'),
     WM = near || el?.closest?.('#svgL') ? 1.5 : 60; // the years-to-law rows are full-width strips: covering a bar or two beats covering a heading
-  card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : '';
+  // A law's card on the strip is wider (so shorter): the strip is dense with names, and a card of normal height cannot always find a spot clear of them in a short window
+  card.style.maxWidth = near ? (card.classList.contains('full') ? '380px' : '320px') : !full && innerWidth >= 1100 && el?.closest?.('#legalSvg') ? 'min(560px,calc(100vw - 16px))' : '';
   card.classList.toggle('cc', near && !full); // compact hover card on the dense strip: heading clamped to two lines
   // A long bar (a campaign, a negotiation period) is a poor anchor: a hover card sits by the pointer, not by the bar's far end.
   let r = el ? el.getBoundingClientRect() : { left: evt.clientX, right: evt.clientX, top: evt.clientY, bottom: evt.clientY };
@@ -92,7 +93,9 @@ function showCard(html, evt, el, full = false) {
     .concat(el && !el.closest('#legalZoomBox') && el.closest('#legalBand') ? [document.getElementById('legalZoomBox')] : [])
     .forEach((n) => {
       const b = n?.getBoundingClientRect();
-      if (b && b.width > 2 && b.bottom > 0 && b.top < VH) noText.push(b);
+      // The zoom strip is the magnified copy of the strip above it, so a hover card may stand over part of it, which costs far less than standing over a law's name or the
+      // years in the strip itself (the Limited Test Ban Treaty's card used to cover "Outer Space Treaty, 1967").
+      if (b && b.width > 2 && b.bottom > 0 && b.top < VH) noText.push(n?.id === 'legalZoomBox' ? Object.assign(b.toJSON(), { cheap: true }) : b);
     });
   // Page wording around the chart (headings, ledes, callouts, keys: marked data-avoid) is avoided too, unless it is the mark's own region.
   // Each line of such text is its own obstacle (a card may cover the empty end of a line, not the words), so a heading costs per line it covers.
