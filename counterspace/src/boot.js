@@ -63,7 +63,7 @@ nameThemeButton();
 
 // Chapter rail (wide screens): the last chapter whose start has passed the reading line, 40% down the window, is the current one. It is worked out from where each
 // chapter's start is on every scroll (a jump over whole chapters, such as Tab wrapping from the footer to the skip link, must reset it too, and an observer only
-// reports an edge that is crossed). The rail stays out of sight while the opening picture is on screen.
+// reports an edge that is crossed). The rail stays out of sight while the opening picture is on screen, until the first chapter has passed the reading line; the last chapter, sources and method, is current once its band is on screen or the page is at its end.
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
@@ -71,10 +71,14 @@ nameThemeButton();
     hero = document.getElementById('top');
   const mark = () => {
     const line = innerHeight * 0.4,
-      heroGone = !hero || hero.getBoundingClientRect().bottom <= 24,
-      now = heroGone ? starts.reduce((n, el, i) => (el && el.getBoundingClientRect().top <= line ? i : n), -1) : -1;
+      heroGone = !hero || hero.getBoundingClientRect().bottom <= line, // a jump to the first chapter leaves the picture's lower edge in view, and the rail comes with the chapter
+      last = starts.length - 1,
+      src = starts[last],
+      // the folded sources band is short: it is the current chapter as soon as most of it is on screen, and at the very end of the page whatever else is showing
+      atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 8 || (!!src && src.getBoundingClientRect().top <= innerHeight * 0.8),
+      now = heroGone ? (atEnd ? last : starts.reduce((n, el, i) => (el && el.getBoundingClientRect().top <= line ? i : n), -1)) : -1;
     links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
-    rail.classList.toggle('on', now >= 0 && now < links.length - 1); // hidden over the opening picture, the sources section and the footer
+    rail.classList.toggle('on', now >= 0); // hidden only over the opening picture
     // One tab stop for the whole rail: the current chapter's dot (the first, until the reader has reached the timeline). Up and down arrows move along it.
     links.forEach((a, i) => a.setAttribute('tabindex', i === Math.max(now, 0) ? '0' : '-1'));
   };
