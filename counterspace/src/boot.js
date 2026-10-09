@@ -162,7 +162,14 @@ function jumpToHash(again) {
   if (t.closest('[data-off]')) return;
   const r = t.getBoundingClientRect();
   if (!r.width && !r.height) return;
-  if (again && !(landed && landed.id === id && Math.abs(r.top - landed.top) > 2)) return;
+  if (again) {
+    // A look after the landing corrects a landing that something moved (the place has moved on the page) and one that the room kept above it has since changed (a card row
+    // or the pinned strip measured a little late): the target should stand exactly where a jump to it puts it now. A place the page is too short to reach stays.
+    const css = getComputedStyle(t),
+      want = (parseFloat(css.scrollMarginTop) || 0) + (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0),
+      to = Math.min(Math.max(0, scrollY + r.top - want), document.documentElement.scrollHeight - innerHeight);
+    if (!(landed && landed.id === id && Math.abs(r.top - landed.top) > 2) && Math.abs(to - scrollY) <= 2) return;
+  }
   t.scrollIntoView({ block: 'start', behavior: 'auto' });
   hooks.legalScroll?.();
   landed = { id, top: t.getBoundingClientRect().top };
@@ -176,7 +183,7 @@ if (location.hash)
     jumpToHash();
     // once more after two frames and again after the page has been idle for a moment: normally nothing has moved, and nothing happens
     requestAnimationFrame(() => requestAnimationFrame(() => jumpToHash(true)));
-    setTimeout(() => jumpToHash(true), 1200);
+    [500, 1200, 2600, 4500].forEach((ms) => setTimeout(() => jumpToHash(true), ms)); // each look does nothing when the target already stands where a jump puts it
   });
 // a link to the address already in the bar fires no hashchange, so the click itself opens the section
 document.addEventListener('click', (e) => {
