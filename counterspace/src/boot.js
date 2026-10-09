@@ -178,8 +178,13 @@ addEventListener('hashchange', () => {
   const id = hashId();
   if (id === 'legalBand' || openAround(id)) requestAnimationFrame(() => jumpToHash());
 });
+let jumpedAt = 0;
+// The row of cards above "Explore the data" can still settle for a moment after the jump (its height is the room kept above the panel): within the few seconds after
+// the landing, and while the reader has not touched the page, the address lands again where it belongs.
+document.addEventListener('cs:cardsized', () => location.hash && jumpedAt && performance.now() - jumpedAt < 8000 && requestAnimationFrame(() => jumpToHash(true)));
 if (location.hash)
   settled().then(() => {
+    jumpedAt = performance.now();
     jumpToHash();
     // once more after two frames and again after the page has been idle for a moment: normally nothing has moved, and nothing happens
     requestAnimationFrame(() => requestAnimationFrame(() => jumpToHash(true)));

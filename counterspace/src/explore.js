@@ -157,9 +157,13 @@ function mountCards() {
     showTab(cards[to].dataset.tab, { focus: true });
   });
   // Links to a chart land with its cards in view: the card row's height is the room the page leaves above the panel.
-  const size = () => explore.style.setProperty('--xt-h', bar.offsetHeight + 'px');
+  const size = () => {
+    const was = explore.style.getPropertyValue('--xt-h');
+    explore.style.setProperty('--xt-h', bar.offsetHeight + 'px');
+    if (was && was !== bar.offsetHeight + 'px') document.dispatchEvent(new Event('cs:cardsized')); // the room kept above the panels changed (boot.js lands an address again)
+  };
   size();
-  if (window.ResizeObserver) new ResizeObserver(size).observe(bar);
+  if (window.ResizeObserver) new ResizeObserver(size).observe(bar, { box: 'border-box' }); // the row's whole height, not only its content: a padding or border that settles late counts too
 }
 
 export function mountExplore() {
