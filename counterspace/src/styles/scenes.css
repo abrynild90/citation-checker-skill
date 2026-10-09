@@ -1570,6 +1570,10 @@
 .overlay .sv-srcrow {
   display: none;
 }
+/* The two ways on that the short desktop window keeps in its source row ("Where to go next", "Find it on the chart"); nowhere else shows them */
+.overlay .sv-srcrow .pill.sl-x {
+  display: none;
+}
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1), (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) {
   .overlay .story-scroll > .story-foot,
   .overlay .story-scroll > .sv-about {
@@ -1832,6 +1836,40 @@
   .overlay .sv-srcrow { flex-wrap: wrap; padding-block: 4px; }
   .overlay .sl-links { flex-wrap: wrap; flex: 1 1 auto; }
 }
+/* Short desktop window (1366x768, 1280x720, 1280x800, 1440x800): the "About this picture / Where to go next" row is not in the story column, so its two ways on sit in the
+   source row as pills of the same kind. The pills share the row and wrap onto a second line when the column is narrow; "Where to go next" opens the scenes in a note over the
+   end of the column (the same place and look as the source note), and the pills are a little lower (36 px, 44 px for a finger) so the second line costs the steps little. */
+@media (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) {
+  .overlay .sl-links {
+    display: contents;
+  }
+  .overlay .sv-srcrow {
+    gap: 6px;
+    row-gap: 2px;
+    padding-block: 3px;
+  }
+  .overlay .sl-btn,
+  .overlay .sv-srcrow .pill {
+    min-height: 36px;
+  }
+  .overlay .sv-srcrow .pill.sl-x {
+    display: inline-flex;
+  }
+  .overlay .sv-srcrow .pill[aria-expanded="true"] {
+    color: var(--text);
+    background: var(--surface-3);
+  }
+  .overlay #slNextPop .sv-next-links {
+    padding: 0;
+  }
+}
+@media (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) and (pointer: coarse) {
+  .overlay .sl-btn,
+  .overlay .sv-srcrow .pill {
+    min-height: 44px;
+  }
+}
+
 /* Still diagram on a tablet or a small laptop: the sentence has its own row; the buttons share the next one */
 @media (min-width: 761px) and (max-width: 900px) {
   .overlay.is-static .ctrl { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: none !important; row-gap: 8px; }

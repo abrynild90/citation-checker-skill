@@ -121,7 +121,8 @@ const overlay = $('overlay'),
   srcRow = $('sceneSrcLine'),
   slBtn = $('slSource'),
   slLinks = $('slLinks'),
-  slPop = $('slPop');
+  slPop = $('slPop'),
+  slNextPop = $('slNextPop');
 // The same queries as scenes.css: the phone layout, the layout with the picture above the story, and the short and wide layout (a phone on its side).
 const PHONE = '(max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px)',
   COMPACT = matchMedia(PHONE),
@@ -440,40 +441,73 @@ function fillStory(cfg) {
 // "Where to go next": up to three other scenes (the next of the same kind, then the nearest by date of a different kind) and, when the scene's event is
 // drawn on a chart, a button that closes the window and shows it there.
 const markOf = (id) => id && document.querySelector(`#svgA [data-id="${id}"], #svgC [data-id="${id}"], #svgR [data-id="${id}"]`);
+function nextSceneBtn(id, tag) {
+  const s = SCENES.find((c) => c.id === id);
+  if (!s) return null;
+  const b = document.createElement('button'),
+    name = `${SHORT_NAME[id] || s.title}, ${s.date.slice(0, 4)}`;
+  b.type = 'button';
+  b.className = 'sv-next-btn';
+  b.textContent = name;
+  b.title = tag;
+  b.setAttribute('aria-label', `${name}: ${tag.charAt(0).toLowerCase()}${tag.slice(1)}`);
+  b.onclick = () => openScene(id);
+  return b;
+}
+function findOnChart(cfg) {
+  const m = markOf(cfg.event);
+  closeScene(true);
+  if (!m) return;
+  revealIn(m); // a mark in "Explore the data" sits in a tab: open that tab first
+  if (hooks.landOnMark) hooks.landOnMark(m, !REDUCED);
+  else m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+  m.classList.add('hl', 'flash-hl');
+  m.focus({ preventScroll: true });
+  setTimeout(() => m.classList.remove('hl', 'flash-hl'), 3500);
+}
+const CHART_ICON = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>';
 function fillNext(cfg) {
-  const box = $('nextLinks');
+  const box = $('nextLinks'),
+    popBox = $('slNextLinks');
   box.textContent = '';
+  popBox.textContent = '';
   togglePair(null); // each scene starts with both notes closed, so the story keeps its room
-  nextScenes(cfg, ORDER).forEach(({ id, tag }) => {
-    const s = SCENES.find((c) => c.id === id);
-    if (!s) return;
-    const b = document.createElement('button'),
-      name = `${SHORT_NAME[id] || s.title}, ${s.date.slice(0, 4)}`;
-    b.type = 'button';
-    b.className = 'sv-next-btn';
-    b.textContent = name;
-    b.title = tag;
-    b.setAttribute('aria-label', `${name}: ${tag.charAt(0).toLowerCase()}${tag.slice(1)}`);
-    b.onclick = () => openScene(id);
-    box.appendChild(b);
+  toggleNextPop(false);
+  const next = nextScenes(cfg, ORDER);
+  next.forEach(({ id, tag }) => {
+    const b = nextSceneBtn(id, tag),
+      c = nextSceneBtn(id, tag);
+    if (b) (box.appendChild(b), popBox.appendChild(c));
   });
-  if (markOf(cfg.event)) {
+  const onChart = !!markOf(cfg.event);
+  if (onChart) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'sv-next-btn chart';
-    b.innerHTML = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>Find it on the chart';
-    b.onclick = () => {
-      const m = markOf(cfg.event);
-      closeScene(true);
-      if (!m) return;
-      revealIn(m); // a mark in "Explore the data" sits in a tab: open that tab first
-      if (hooks.landOnMark) hooks.landOnMark(m, !REDUCED);
-      else m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
-      m.classList.add('hl', 'flash-hl');
-      m.focus({ preventScroll: true });
-      setTimeout(() => m.classList.remove('hl', 'flash-hl'), 3500);
-    };
+    b.innerHTML = CHART_ICON + 'Find it on the chart';
+    b.onclick = () => findOnChart(cfg);
     box.appendChild(b);
+  }
+  // A short desktop window has no "About this picture / Where to go next" row (the story column keeps its room for the steps): the same two ways on are two
+  // pills in the source row ("Where to go next" opens the scenes; "Find it on the chart" closes the window and shows the event there). They are shown by scenes.css only there.
+  if (next.length) {
+    const n = document.createElement('button');
+    n.type = 'button';
+    n.className = 'pill sl-x sl-next';
+    n.id = 'slNext';
+    n.setAttribute('aria-expanded', 'false');
+    n.setAttribute('aria-controls', 'slNextPop');
+    n.innerHTML = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg>Where to go next';
+    n.onclick = () => toggleNextPop(slNextPop.hidden);
+    slLinks.appendChild(n);
+  }
+  if (onChart) {
+    const c = document.createElement('button');
+    c.type = 'button';
+    c.className = 'pill sl-x sl-chart';
+    c.innerHTML = CHART_ICON + 'Find it on the chart';
+    c.onclick = () => findOnChart(cfg);
+    slLinks.appendChild(c);
   }
 }
 
@@ -510,15 +544,22 @@ function anchorNote(note) {
   }
 }
 function toggleSrc(open) {
+  if (open) toggleNextPop(false); // one note at a time over the story column
   slPop.hidden = !open;
   slBtn.setAttribute('aria-expanded', String(open));
 }
 slBtn.onclick = () => toggleSrc(slPop.hidden);
+// Short desktop window: the scenes to go to next open from a pill in the source row, over the end of the story column like the source note
+function toggleNextPop(open) {
+  if (open) toggleSrc(false);
+  slNextPop.hidden = !open;
+  $('slNext')?.setAttribute('aria-expanded', String(!!open));
+}
 // "About this picture" and "Where to go next" share one row; the one opened shows its text in the story column under the row (never over the steps or the source).
 const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
   pairBodies = { about: $('svAboutBody'), next: $('sceneNext') };
 function togglePair(which) {
-  if (which) (toggleSrc(false), toggleLawCard(false)); // one note at a time over the story column
+  if (which) (toggleSrc(false), toggleNextPop(false), toggleLawCard(false)); // one note at a time over the story column
   asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
   Object.keys(pairBtns).forEach((k) => {
     const on = k === which;
@@ -529,7 +570,7 @@ function togglePair(which) {
 }
 Object.keys(pairBtns).forEach((k) => (pairBtns[k].onclick = () => togglePair(pairBodies[k].hidden ? k : null)));
 document.addEventListener('pointerdown', (e) => {
-  if (!slPop.hidden && !srcRow.contains(e.target)) toggleSrc(false);
+  if (!srcRow.contains(e.target)) (toggleSrc(false), toggleNextPop(false));
   // a note open over the story column closes on a press anywhere outside it and its button
   if (!e.target.closest?.('.sv-pbody, .sv-pbtn, #scRelated, .sl-law')) {
     if (!pairBodies.about.hidden || !pairBodies.next.hidden) togglePair(null);
@@ -1239,7 +1280,7 @@ function fillLawCard(cfg) {
 function toggleLawCard(open) {
   lawCard.hidden = !open;
   lawBtn.setAttribute('aria-expanded', String(!!open));
-  if (open) (togglePair(null), toggleSrc(false), anchorNote(lawCard));
+  if (open) (togglePair(null), toggleSrc(false), toggleNextPop(false), anchorNote(lawCard));
 }
 lawBtn.onclick = () => {
   if (!cur?.related) return;
@@ -1356,6 +1397,11 @@ document.addEventListener('keydown', (e) => {
     if (!slPop.hidden) {
       toggleSrc(false);
       slBtn.focus();
+      return;
+    }
+    if (!slNextPop.hidden) {
+      toggleNextPop(false);
+      $('slNext')?.focus();
       return;
     }
     if (!lawCard.hidden) return (toggleLawCard(false), lawBtn.focus());
