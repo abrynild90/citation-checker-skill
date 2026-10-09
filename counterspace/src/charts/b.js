@@ -84,7 +84,7 @@ export function capSentence(group = 'cat') {
   if (group === 'cat')
     return `${start}By the ${last}, ${numWord(b.states)} states hold ${b.tot} between them: ${b.dem} tested or used, the rest still in development.${end}`;
   const both = b.per[0] + b.per[1] - b.states;
-  return `${start}By the ${last}, ${numWord(b.per[0])} states have a kinetic capability and ${numWord(b.per[1])} a non-kinetic one, and ${numWord(both)} have both.${end}`;
+  return `${start}By the ${last}, ${numWord(b.per[0])} states have a kinetic capability (a physical attack, such as a missile) and ${numWord(b.per[1])} a non-kinetic one (jamming, lasers or cyber), and ${numWord(both)} have both.${end}`;
 }
 
 function countsB() {
