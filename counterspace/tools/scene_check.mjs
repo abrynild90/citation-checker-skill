@@ -1,6 +1,7 @@
 // Scene collision / framing checker for the 13 WebGL scenes, their static SVG diagrams and their PNG stills.
 //   NODE_PATH=tools/node_modules OUT=<dir> PORT=9122 node tools/scene_check.mjs
 // Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.08,0.2,0.3,...  MODES=live,static,still,hero,stillapi
+//      VH=<px> (window height for every VPS width, default 800 up to 900 wide and 900 above: VPS=1280 VH=800 is 1280x800)
 //      SHOT=1 (save a PNG per state)  QUIET=1  ROOT=<dir holding the index.html to test, default .>  OUT=<dir>  PORT=<port>
 // (stillapi: every still, live and static, must be exactly 3000x1875.)
 // Every state is (scene x camera preset x t x viewport) for live scenes; static SVG at each viewport; live and static stills at 1440.
@@ -99,7 +100,7 @@ const record = (tag, F, extra = {}) => {
     );
 };
 const ctxOpts = (w, extra = {}) => ({
-  viewport: { width: w, height: w <= 400 ? 800 : w <= 900 ? 800 : 900 },
+  viewport: { width: w, height: +process.env.VH || (w <= 400 ? 800 : w <= 900 ? 800 : 900) },
   colorScheme: 'dark',
   ignoreHTTPSErrors: true,
   isMobile: w < 640,
