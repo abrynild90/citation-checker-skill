@@ -380,8 +380,11 @@ document.addEventListener(
 let lastXY = null, // where the pointer last was
   held = null, // where it was when the page jumped under it
   userAt = 0;
+// A press on a link or a button (or Enter or Space on one) is not a move of the page: it starts a jump of our own (a tour step, "See it on the timeline"), so
+// it does not count as the reader's scrolling. The wheel, a drag, and the keys that scroll still do.
+const startsJump = (e) => !!e.target?.closest?.('a[href],button,[role="button"]') && (e.type !== 'keydown' || e.key === 'Enter' || e.key === ' ');
 for (const t of ['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown'])
-  addEventListener(t, () => (userAt = performance.now()), { capture: true, passive: true });
+  addEventListener(t, (e) => void (startsJump(e) || (userAt = performance.now())), { capture: true, passive: true });
 addEventListener(
   'scroll',
   () => {

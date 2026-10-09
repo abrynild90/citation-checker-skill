@@ -155,13 +155,17 @@ export function mountQuiz() {
     return `<li class="q" data-i="${i}">
   <p class="q-ask" id="q${i}">${esc(q.ask)}</p>
   <p class="q-hint">${q.kind === 'order' ? 'Which came first?' : 'Pick one.'}</p>
-  <div class="q-opts" role="group" aria-labelledby="q${i}">
-    ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
+  <div class="q-body">
+    <div class="q-opts" role="group" aria-labelledby="q${i}">
+      ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
+    </div>
+    <div class="q-out" aria-live="polite"></div>
   </div>
-  <div class="q-out" aria-live="polite"></div>
 </li>`;
   }).join('');
-  host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
+  // the card that draws two pairs (and has the longest explanation) is given a little more width, so the four cards need about the same height side by side
+  const cols = QUESTIONS.map((q) => `minmax(0,${q.kind === 'wait' ? 1.4 : 1}fr)`).join(' ');
+  host.innerHTML = `<div class="quiz"><ol class="q-list" style="--cols:${cols}">${cards}</ol>
   <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
   <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Four questions, no pressure. Your guesses are not stored.</p>
     <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
