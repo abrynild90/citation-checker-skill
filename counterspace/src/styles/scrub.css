@@ -28,6 +28,7 @@
 .yr-bar.is-on .yr-tally,.yr-bar.is-finale .yr-tally{color:var(--text)}
 .yr-bar.is-finale .yr-tally{flex:1 1 auto;margin:0;text-align:left;white-space:normal;color:var(--accent-2);font-weight:600;text-wrap:balance}
 @media (prefers-reduced-motion:no-preference){.yr-cap:not([hidden]){animation:yr-cap 260ms var(--ease) both}}
+@media (min-width:1800px){.yr-line{min-height:19px}.yr-title,.yr-cap,.yr-tally{font-size:15px;line-height:19px}}
 @keyframes yr-cap{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 .yr-rail{grid-column:2;grid-row:2;margin:0;padding:0}
