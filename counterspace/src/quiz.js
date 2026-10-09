@@ -172,6 +172,27 @@ export function mountQuiz() {
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
     <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
+  // Cards side by side start their options level: every title takes the height of the tallest title in its row, measured from the real text (so it follows the width and
+  // the font, and is measured again when either changes).
+  const fit = () => {
+    const lis = [...host.querySelectorAll('.q')],
+      rows = new Map();
+    lis.forEach((li) => li.style.removeProperty('--ask-h'));
+    lis.forEach((li) => rows.set(li.offsetTop, [...(rows.get(li.offsetTop) || []), li]));
+    rows.forEach((g) => {
+      if (g.length < 2) return;
+      const h = Math.max(...g.map((li) => li.querySelector('.q-ask').offsetHeight));
+      g.forEach((li) => li.style.setProperty('--ask-h', h + 'px'));
+    });
+  };
+  let fitW = 0;
+  addEventListener('resize', () => {
+    if (host.clientWidth !== fitW) fit();
+    fitW = host.clientWidth;
+  });
+  fit();
+  fitW = host.clientWidth;
+  document.fonts?.ready.then(fit);
   const tally = host.querySelector('#qTally'),
     again = host.querySelector('#qAgain'),
     pat = host.querySelector('#qPattern'),
