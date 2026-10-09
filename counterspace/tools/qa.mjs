@@ -207,13 +207,16 @@ await run('data-checks', { viewport: { width: 1440, height: 900 }, colorScheme: 
     await p.evaluate((id) => document.getElementById(id).scrollIntoView(), id);
     await p.waitForTimeout(500);
   }
+  // The close-approach chart opens on its highlighted operations; "Show all" brings in the rest, so every ledger row has a mark to count.
+  await p.evaluate(() => document.getElementById('rAll')?.click());
+  await p.waitForTimeout(500);
   const page = await p.evaluate(() => {
     const ids = (sel) => [...document.querySelectorAll(sel)].map((n) => n.dataset.id);
     const rows = (id) => [...document.querySelectorAll(`#${id} tbody tr`)].map((tr) => [...tr.cells].map((c) => c.textContent.trim()));
     return {
       A: ids('#svgA [data-id]'),
       C: ids('#svgC [data-id]'),
-      R: ids('#svgR [data-id]'),
+      R: ids('#svgR g.mark[data-id]'), // marks only: each mark's printed name carries the same id
       legal: ids('#legalSvg [data-id]'),
       tableL: rows('tableL'),
       tableB: rows('tableB'),
