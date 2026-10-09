@@ -10,7 +10,7 @@ const MX = IS_PHONE ? 86 : 200; // spaceplane model size cap (px): smaller on a 
 export const SPACEPLANES = {
   id: 'spaceplanes',
   date: '2023-12-28',
-  title: 'Reusable craft that return from orbit: the US X-37B and China’s (2010–2026)',
+  title: 'Reusable craft that return from orbit: the US X-37B and China’s experimental spacecraft (2010–2026)',
   shells: [],
   duration: 32,
   lede: 'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions, and six of them lasted 224 to 908 days. China’s reusable experimental spacecraft has flown three missions, and a fourth launched in February 2026.',
