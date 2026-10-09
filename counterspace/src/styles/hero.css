@@ -253,7 +253,7 @@
 @media (min-width:900px){
   header.top{display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
   header.top>.hero{flex:1 1 auto;display:flex;flex-direction:column}
-  .hero-grid{flex:1 1 auto;grid-template-rows:minmax(0,1fr) auto auto}
+  .hero-grid{flex:1 1 auto;grid-template-rows:minmax(0,1fr) auto auto;padding-bottom:var(--s-6)} /* the buttons and the note beside them keep a clear strip above the window's edge (a reader who comes back to the top after a scene sees the note whole, not against the edge) */
   .hero-figure{display:flex;flex-direction:column;min-height:0}
   .hero-figure>.stage{flex:1 1 auto;height:auto;min-height:var(--stage-h)}
   .no-cdn .hero-figure>.stage{min-height:0;height:350px}
