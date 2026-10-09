@@ -132,6 +132,7 @@ export function drawA(el = document.getElementById('svgA')) {
       .attr('width', W - M.l - M.r)
       .attr('y', y(b))
       .attr('height', y(a) - y(b))
+      .attr('data-zone', a)
       .style('fill', fill);
     zoneJobs.push({ a, labels, ly0, depth });
   };

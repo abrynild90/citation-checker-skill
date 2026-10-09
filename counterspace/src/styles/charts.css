@@ -12,7 +12,7 @@
 /* ------------------------------------------------------------------ chapter 01: the law timeline */
 #timeline{position:relative}
 /* "See the timeline" lands with the chapter heading at the top of the window (the page-wide scroll-padding for the pinned strip would leave a strip of the scenes above it) */
-@media (min-width:761px){#timeline{scroll-margin-top:calc(-1 * var(--band-h,64px) - 12px)}}
+@media (min-width:761px){#timeline{scroll-margin-top:calc(-1 * var(--band-h,64px) - 12px - var(--land-extra,0px))}}
 .law-intro{padding-top:var(--s-7)}
 @media (max-width:760px){.law-intro{padding-top:var(--s-7)}}
 .law-intro .chapter-head{margin-bottom:var(--s-4)}

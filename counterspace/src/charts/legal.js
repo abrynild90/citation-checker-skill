@@ -897,6 +897,16 @@ export function probeBand() {
     document.documentElement.style.setProperty('--law-head-h', Math.round(law.offsetHeight - pad + 16) + 'px');
   }
   if (isPhoneNow()) return;
+  // "See the timeline" lands with the chapter heading at the top, which in a short window leaves the cluster of tests in low Earth orbit below the fold. The landing
+  // moves down by the height of the heading, so the pinned strip, the test chart's heading and slider and the low-orbit tests arrive together.
+  const tl = document.getElementById('timeline'),
+    leo = document.querySelector('#svgA [data-zone="100"]');
+  if (tl && leo) {
+    const top = tl.getBoundingClientRect().top + scrollY,
+      low = leo.getBoundingClientRect().bottom + scrollY - (top + 12), // where the bottom of the low-orbit zone sits on arrival (the timeline lands 12 px above the window)
+      cap = (document.getElementById('lawHead')?.offsetHeight || 0) + 24;
+    document.documentElement.style.setProperty('--land-extra', (low - innerHeight + 24 > 100 ? cap : 0) + 'px'); // all or nothing: a heading cut across its middle looks worse than either
+  }
   const band = document.getElementById('legalBand'),
     was = legalCompact;
   if (was) return; // already stuck: legalScroll keeps --band-h current
