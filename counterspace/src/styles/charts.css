@@ -448,7 +448,7 @@ details.table>summary{scroll-margin-top:110px}
 @media (min-width:761px){section.chart{scroll-margin-top:calc(var(--band-h,96px) + 8px)}}
 /* the test chart sits right under the strip's full form (the strip only shrinks once it has scrolled up by the difference), so its heading lands just below the strip as the timeline's does:
    the page-wide scroll-padding already keeps --band-h, so only the rest of the strip is added here */
-@media (min-width:761px){#chartA{scroll-margin-top:calc(var(--band-full-h,var(--band-h,96px)) + 8px - var(--band-h,96px))}}
+@media (min-width:761px){#chartA{scroll-margin-top:calc(var(--band-full-h,var(--band-h,96px)) + 3px - var(--band-h,96px))}} /* 3 px, not 8: the "Show the data behind this chart" pill of the chapter above ends a few px under the strip's edge at 8 */
 
 /* Close approaches and jamming tables, wide: When is one column; the description gets room; the object cell stacks the spacecraft over the other object */
 @media (min-width:1001px){
