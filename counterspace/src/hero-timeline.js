@@ -4,7 +4,7 @@
 // rises at its year) and then stays as the final picture. Provides: mountHero(). Needs the data and text measurement from app.js.
 // ============================================================================
 import { D, DOMAIN, KIN, byId, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
-import { KIND_PLAIN, legalKindWords, targetWords } from './ui.js';
+import { KIND_PLAIN, legalKindOf, legalKindWords, targetWords } from './ui.js';
 import { gap, hasLaterLaw, noLaterText, linkText, pairsAt, tagSpot, yearsBetween } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
@@ -698,6 +698,24 @@ const thumb = (id) => {
   const src = posterURL(id);
   return src ? `<img class="hp-pic" src="${src}" alt="" width="72" height="40" decoding="async">` : '';
 };
+// A law with no 3D scene would otherwise show only its name, its date and one button: this adds one plain line on what kind of thing it is and whether our
+// records pair it with a weapon (kind and pairs only; nothing is typed in per law).
+const LAW_ABOUT = {
+  treaty: 'A treaty: it binds the states that joined it.',
+  resolution: 'Not binding: a call or a finding, not a rule with enforcement.',
+  unilateral: 'A pledge by one country, not a treaty.',
+  soft: 'An expert manual: soft law, so it binds no one.',
+  veto: 'A veto in the Security Council: the draft did not pass.',
+  draft: 'A draft treaty put forward in talks.',
+  span: 'A period of talks, not a single act.',
+};
+function lawLine(l) {
+  const about = LAW_ABOUT[legalKindOf(l)] || '',
+    first = pairsAt(l.id).find((q) => q.kind === 'law'),
+    ev = first && byId[first.event];
+  const link = ev ? `The first law after ${(hasScene(ev) && SHORT[ev.scene_3d]) || WORDS[ev.id]?.name || ev.system} in our records, ${linkText(first.g)}.` : 'No test in our records is paired with it.';
+  return `<p class="hp-line">${esc(`${about} ${link}`.trim())}</p>`;
+}
 function popHTML(h) {
   if (h.k === 'ev') {
     const e = h.e,
@@ -722,6 +740,7 @@ function popHTML(h) {
   return (
     `<div class="hp-head">${thumb(scene ? l.scene_3d : '')}<div class="hp-ht"><p class="hp-title">${esc(l.title || l.label)}</p><p class="hp-when">${esc(legalKindWords(l))} · ${esc(when)}</p></div></div>` +
     (scene && !paired ? `<p class="hp-pair">Related, not a paired follow-up.</p>` : '') +
+    (scene ? '' : lawLine(l)) +
     `<div class="hp-acts">${scene ? watch(l.scene_3d, `Watch ${SHORT[l.scene_3d] || 'the event'} in 3D`) : ''}` +
     `<a class="btn small" href="#legalBand">See it on the timeline</a></div>`
   );
