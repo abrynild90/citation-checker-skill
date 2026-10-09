@@ -248,6 +248,21 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 @media (min-width:1100px){.q-ask{min-height:calc(1.3em * 3)}}
 @media (min-width:1300px){.q-ask{min-height:calc(1.3em * 2)}}
 .q.done .q-watch{margin-top:var(--s-3)}
+/* Once all four are answered (wide window: four across) the cards end on one line, and their parts keep their rows: title, options, verdict, the drawn gap, the
+   explanation and the offer to watch the scene each start at the same height in every card, so what differs from card to card is a short pause inside a row and
+   not a hollow foot to the card. Before that an answered card is only as tall as what it says, so a card still waiting for its answer never stands in empty space. */
+@media (min-width:1100px){
+  .q-list.all-done{align-items:stretch;row-gap:0;grid-template-rows:repeat(7,auto)}
+  .q-list.all-done .q{display:grid;grid-row:span 7;grid-template-rows:subgrid;row-gap:var(--s-2)}
+  .q-list.all-done .q>.q-out{grid-row:4 / span 4;display:grid;grid-template-rows:subgrid;row-gap:0;margin-top:0}
+  .q-list.all-done .q-out>.q-verdict{grid-row:1}
+  .q-list.all-done .q-opts{align-self:start}
+  .q-list.all-done .q-out>.q-verdict{align-self:start}
+  .q-list.all-done .q-out>.q-line{grid-row:2;align-self:center} /* one drawn gap beside a card with two: it sits in the middle of its row, so the room is shared above and below */
+  .q-list.all-done .q-out>.q-truth{align-self:start}
+  .q-list.all-done .q-out>.q-truth{grid-row:3}
+  .q-list.all-done .q-out>.q-watch{grid-row:4;align-self:end}
+}
 .q.done .q-hint{display:none}
 .q.done .q-opt{min-height:46px}
 .q.done .q-out{margin-top:var(--s-1)}

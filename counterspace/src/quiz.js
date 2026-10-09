@@ -183,6 +183,7 @@ export function mountQuiz() {
     if (!done) tally.textContent = 'Four questions, no pressure. Your guesses are not stored.';
     else tally.textContent = done < N ? `You called ${right} of ${done} so far.` : `You called ${right} of ${N}.`;
     tally.classList.toggle('done', done === N);
+    host.querySelector('.q-list').classList.toggle('all-done', done === N); // the four answered cards then share one height (charts2.css)
     // all answered: the score is joined by what the four pairs have in common, and the way to the chart that shows every pair becomes the main step
     pat.textContent = done === N ? pattern() : '';
     pat.hidden = done !== N || !pat.textContent;
