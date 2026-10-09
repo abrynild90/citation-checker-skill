@@ -36,7 +36,7 @@
 @keyframes yr-cap{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 .yr-rail{grid-column:2;grid-row:2;margin:0;padding:0}
-.yr-track{position:relative;height:16px;border-radius:var(--r-1);cursor:ew-resize;touch-action:none;outline:none}
+.yr-track{scroll-margin-bottom:160px;position:relative;height:16px;border-radius:var(--r-1);cursor:ew-resize;touch-action:none;outline:none}
 .yr-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:var(--line-strong)}
 .yr-fill{position:absolute;left:0;top:50%;height:2px;margin-top:-1px;width:100%;border-radius:2px;background:var(--accent);pointer-events:none}
 .yr-ticks{position:absolute;inset:0;pointer-events:none}
