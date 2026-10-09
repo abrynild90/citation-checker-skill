@@ -2326,12 +2326,10 @@
   .overlay .sv-recap-links2 .rc-links li { grid-template-columns: minmax(0, 0.6fr) minmax(0, 2fr); }
 }
 
-/* The tour's closing slide on a very wide window: the words and the pairs are set a size up and the buttons rest on the foot of the panel, with the story centred in the
-   room above them, so the panel has no empty band above and below a small block of text */
+/* The tour's closing slide on a very wide window: the words and the pairs are set a size up, and the buttons follow the last line of the story with the same room as
+   on a narrower window (the whole block stands in the middle of the panel), so there is no empty band between "Revisit a scene or a chart" and the buttons */
 @media (min-width: 1500px) {
-  .overlay .sv-recap { justify-content: flex-start; }
-  .overlay .sv-recap-in { height: 100%; padding-top: var(--s-6); }
-  .overlay .sv-recap-scroll { flex: 1 1 auto; justify-content: center; }
+  .overlay .sv-recap-in { padding-top: var(--s-6); }
   .overlay .sv-recap-acts { padding: var(--s-4) 0 var(--s-5); }
 }
 @media (min-width: 1800px) {

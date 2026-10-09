@@ -256,7 +256,12 @@ export function mountQuiz() {
           over = foot.getBoundingClientRect().bottom - (innerHeight - 24),
           room = btn.getBoundingClientRect().top - 72; // the answer just given stays on screen
         if (Math.abs(scrollY - y0) > 4 || over <= 0 || room <= 0) return;
-        scrollBy({ top: Math.min(over, room), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        let by = Math.min(over, room);
+        // The chapter's heading never ends half cut off at the top: when the move would leave only part of it in view, it goes the whole way out (if the answer just
+        // given stays on screen), and otherwise stops short of it.
+        const head = document.querySelector('.quiz-head')?.getBoundingClientRect();
+        if (head && head.top - by < 0 && head.bottom - by > 0) by = head.bottom + 4 <= room ? head.bottom + 4 : Math.max(0, head.top);
+        if (by > 0) scrollBy({ top: by, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       }, 360);
     }
   });

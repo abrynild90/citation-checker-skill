@@ -868,19 +868,25 @@ function legalScrollMain() {
       .sort((p, q) => q.seen - p.seen)[0]?.id;
   const want = stuck && under ? chartWindow[under] : null;
   const changed = stuck && want !== stripDom;
-  // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it.
-  const reading =
-    stuck &&
-    [...document.querySelectorAll('details.table[open] .tscroll, details.about[open]')].some((t) => {
-      const r = t.getBoundingClientRect();
-      return r.top < innerHeight - 80 && r.bottom > 140;
-    });
-  if (reading !== band.classList.contains('reading')) {
-    band.classList.toggle('reading', reading);
-    if (stuck) band.style.marginBottom = Math.max(0, bandFullH - band.offsetHeight) + 'px';
-  }
-  if (stuck === legalCompact && !changed) return;
-  if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused symbol
+  // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it. This happens only
+  // once the strip is in its short form: its full height is measured (bandFullH, --band-full-h) with the strip whole, never while it is cut to its one row, so
+  // the room kept for it below, and everything under that, is the same however the page was reached.
+  const applyReading = () => {
+    const reading =
+      stuck &&
+      legalCompact &&
+      [...document.querySelectorAll('details.table[open] .tscroll, details.about[open]')].some((t) => {
+        const r = t.getBoundingClientRect();
+        return r.top < innerHeight - 80 && r.bottom > 140;
+      });
+    if (reading !== band.classList.contains('reading')) {
+      band.classList.toggle('reading', reading);
+      if (stuck) band.style.marginBottom = Math.max(0, bandFullH - band.offsetHeight) + 'px';
+    }
+  };
+  if (stuck === legalCompact && !changed) return applyReading();
+  if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return applyReading(); // never rebuild under a focused symbol
+  band.classList.remove('reading'); // the strip is measured whole; applyReading puts the one-row form back below
   const h0 = band.offsetHeight;
   if (!legalCompact) (bandFullH = h0), document.documentElement.style.setProperty('--band-full-h', h0 + 'px');
   legalCompact = stuck;
@@ -890,6 +896,7 @@ function legalScrollMain() {
   if (!stuck) band.classList.remove('reading');
   if (stuck) document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
   band.style.marginBottom = stuck ? Math.max(0, (bandFullH || h0) - band.offsetHeight) + 'px' : '0px';
+  applyReading();
 }
 // Measures the sticky (compact) band's height once per layout so section anchors clear it exactly (--band-h drives scroll-margin-top), and how far the
 // band sits below the top of its chapter heading so a link to the band keeps that heading in view (--law-head-h).
@@ -911,13 +918,23 @@ export function probeBand() {
     document.documentElement.style.setProperty('--land-extra', (low - innerHeight + 24 > 100 ? cap : 0) + 'px'); // all or nothing: a heading cut across its middle looks worse than either
   }
   const band = document.getElementById('legalBand'),
-    was = legalCompact;
-  if (was) return; // already stuck: legalScroll keeps --band-h current
-  document.documentElement.style.setProperty('--band-full-h', band.offsetHeight + 'px'); // the strip as it stands over the test chart's heading (see #chartA in charts.css)
+    was = legalCompact,
+    root = document.documentElement.style;
+  // The strip's two heights are measured here, once it is drawn, whatever state a scroll found it in: a jump made while the page was still loading (an address
+  // with a #hash) can reach legalScroll before the strip has any content, and the full height it noted then (a few pixels) would leave no room kept under the
+  // short form, so the sections below would sit higher than they do on any other visit.
+  if (was) {
+    legalCompact = false;
+    band.classList.remove('compact', 'reading');
+    drawLegal();
+  }
+  bandFullH = band.offsetHeight;
+  root.setProperty('--band-full-h', bandFullH + 'px'); // the strip as it stands over the test chart's heading (see #chartA in charts.css)
   legalCompact = true;
   band.classList.add('compact');
   drawLegal();
-  document.documentElement.style.setProperty('--band-h', band.offsetHeight + 'px');
+  root.setProperty('--band-h', band.offsetHeight + 'px');
+  if (was) return void (band.style.marginBottom = Math.max(0, bandFullH - band.offsetHeight) + 'px'); // back as it was: the short form, with its room kept
   legalCompact = false;
   band.classList.remove('compact');
   drawLegal();

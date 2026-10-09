@@ -375,10 +375,36 @@ document.addEventListener(
   },
   true,
 );
+// A scroll the reader did not make (a link, a button, a jump to a chapter) moves the page under a pointer that has not moved: the browser then reports the pointer
+// as entering whatever is now beneath it. Such a hover is not the reader's, so the cards close when the jump starts and stay shut until the pointer really moves.
+let lastXY = null, // where the pointer last was
+  held = null, // where it was when the page jumped under it
+  userAt = 0;
+for (const t of ['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown'])
+  addEventListener(t, () => (userAt = performance.now()), { capture: true, passive: true });
+addEventListener(
+  'scroll',
+  () => {
+    if (held || !lastXY || performance.now() - userAt < 700) return;
+    held = lastXY;
+    hideCard();
+    hideLinks();
+    document.dispatchEvent(new CustomEvent('cs:pagejump'));
+  },
+  { passive: true },
+);
+// True while the pointer is where the page jumped under it; the first real movement ends it.
+export function hoverHeld(ev) {
+  if (!held) return false;
+  if (ev.clientX !== held[0] || ev.clientY !== held[1]) return (held = null), false;
+  return true;
+}
 document.addEventListener(
   'pointermove',
-  () => {
+  (e) => {
     kbd = false;
+    if (held && hoverHeld(e)) return;
+    lastXY = [e.clientX, e.clientY];
   },
   true,
 );
@@ -405,7 +431,7 @@ export function bindMark(sel, cardFn, onActivate) {
   if (!cardFn) return; // cardless marks (phone strip) label themselves inline instead
   sel
     .on('mouseenter', function (ev, d) {
-      if (kbd) return;
+      if (kbd || hoverHeld(ev)) return;
       cardEl = this;
       showCard(cardFn(d), ev, this);
       showLinks(this);

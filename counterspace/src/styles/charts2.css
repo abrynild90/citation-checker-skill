@@ -255,13 +255,19 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
   .q-list.all-done{align-items:stretch;row-gap:0;grid-template-rows:repeat(7,auto)}
   .q-list.all-done .q{display:grid;grid-row:span 7;grid-template-rows:subgrid;row-gap:var(--s-2)}
   .q-list.all-done .q>.q-out{grid-row:4 / span 4;display:grid;grid-template-rows:subgrid;row-gap:0;margin-top:0}
-  .q-list.all-done .q-out>.q-verdict{grid-row:1}
+  .q-list.all-done .q-out>.q-verdict{grid-row:1;align-self:end} /* the verdict stands on the drawn gap it announces; the room a shorter card has is shared out below it */
   .q-list.all-done .q-opts{align-self:start}
-  .q-list.all-done .q-out>.q-verdict{align-self:start}
   .q-list.all-done .q-out>.q-line{grid-row:2;align-self:center} /* one drawn gap beside a card with two: it sits in the middle of its row, so the room is shared above and below */
-  .q-list.all-done .q-out>.q-truth{align-self:start}
-  .q-list.all-done .q-out>.q-truth{grid-row:3}
-  .q-list.all-done .q-out>.q-watch{grid-row:4;align-self:end}
+  .q-list.all-done .q-out>.q-truth{grid-row:3;align-self:center} /* the explanation likewise; with no offer to watch under it, it takes that row as well, so no card ends in an empty strip */
+  .q-list.all-done .q-out>.q-truth:last-child{grid-row:3 / span 2;translate:0 -20px}
+  .q-list.all-done .q-out>.q-line:not(.two){translate:0 12px} /* a little below the middle of its row, so the room round it is about the same above and below */
+  .q-list.all-done .q-out>.q-watch{grid-row:4;align-self:end;margin-top:0;display:flex;flex-wrap:wrap;column-gap:.4em}
+  .q-list.all-done .q-watch .q-go{order:2;flex:0 0 100%}
+  /* the card with two drawn gaps is the tallest in its row: they sit closer together, so the room the other cards leave round their one gap stays small */
+  .q-list.all-done .q-line.two{gap:var(--s-2);margin:0 0 var(--s-1)}
+  .q-list.all-done .q-line.two .ql{gap:2px}
+  .q-list.all-done .q-line.two .ql-track{height:22px}
+  .q-list.all-done .q-line.two .ql-years{line-height:1.1}
 }
 .q.done .q-hint{display:none}
 .q.done .q-opt{min-height:46px}

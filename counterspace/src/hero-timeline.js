@@ -4,7 +4,7 @@
 // rises at its year) and then stays as the final picture. Provides: mountHero(). Needs the data and text measurement from app.js.
 // ============================================================================
 import { D, DOMAIN, KIN, byId, LAST_DA, chartScale, LEGAL, REDUCED, esc, fmtD, fmtMonthYear, fmtY, hasScene, num, parse, star, tw, wrap } from './app.js';
-import { KIND_PLAIN, legalKindOf, legalKindWords, targetWords } from './ui.js';
+import { KIND_PLAIN, hoverHeld, legalKindOf, legalKindWords, targetWords } from './ui.js';
 import { gap, hasLaterLaw, noLaterText, linkText, pairsAt, tagSpot, yearsBetween } from './links.js';
 import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
@@ -1414,8 +1414,9 @@ function mountHits(stage, S, actions) {
       d = Math.hypot(cx, cy) || 1;
     return sp > 0.12 && (vx * cx + vy * cy) / (sp * d) > 0.8;
   };
+  document.addEventListener('cs:pagejump', () => !pinned && hide(true)); // the page jumped away: a card of the picture does not follow
   layer.addEventListener('pointermove', (ev) => {
-    if (ev.pointerType === 'touch' || pinned) return;
+    if (ev.pointerType === 'touch' || pinned || hoverHeld(ev)) return;
     const now = performance.now();
     trail.push([now, ev.clientX, ev.clientY]);
     while (trail.length > 1 && now - trail[0][0] > 110) trail.shift();
