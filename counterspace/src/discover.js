@@ -46,8 +46,8 @@ function drawGallery() {
     if (b) openScene(b.dataset.id, b);
   });
   stripControls(grid);
-  // Scenes already watched wear a small "Seen" tag, and one line says how many (in memory only)
-  const count = document.getElementById('scenesSeen');
+  rovingTiles(grid);
+  // Scenes already watched wear a small "Seen" tag (in memory only); the count and the new links are told once, under the hero's actions (heroSeen)
   const sync = () => {
     grid.querySelectorAll('.pc-btn').forEach((b) => {
       const on = seenScenes.has(b.dataset.id);
@@ -55,23 +55,6 @@ function drawGallery() {
       b.classList.toggle('seen', on);
     });
     milestone();
-    if (count) {
-      const line = freshLine('on the top picture');
-      count.textContent = `${seenScenes.size} of ${STRIP.length} scenes seen${line ? '. ' + line : ''}`;
-      if (line) {
-        const go = document.createElement('button');
-        go.type = 'button';
-        go.className = 'ss-go';
-        go.textContent = 'Show me';
-        count.append('. ', go);
-      }
-      if (seenScenes.size) {
-        const rule = document.createElement('span');
-        rule.className = 'ss-rule';
-        rule.textContent = RULE();
-        count.append(rule);
-      }
-    }
     heroSeen();
   };
   document.addEventListener('cs:seen', sync);
@@ -107,6 +90,23 @@ document.addEventListener('cs:closed', () => {
 });
 
 // The arrows move the strip by about one screenful of cards and switch off at either end; the cards themselves stay the way in for keyboards.
+// The strip is one tab stop: Tab lands on the tile last used (the first, at the start), the arrow keys move along the tiles and Enter opens one.
+function rovingTiles(grid) {
+  const tiles = [...grid.querySelectorAll('button.ps-btn, button.pc-btn')];
+  if (!tiles.length) return;
+  grid.setAttribute('aria-label', `${STRIP.length} scenes. Tab once to enter; the arrow keys move between them and Enter opens one.`);
+  const set = (t) => tiles.forEach((b) => b.setAttribute('tabindex', b === t ? '0' : '-1'));
+  set(tiles[0]);
+  grid.addEventListener('focusin', (e) => tiles.includes(e.target) && set(e.target));
+  grid.addEventListener('keydown', (e) => {
+    const i = tiles.indexOf(e.target);
+    if (i < 0 || e.altKey || e.ctrlKey || e.metaKey) return;
+    const to = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: tiles.length - 1 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    tiles[Math.min(tiles.length - 1, Math.max(0, to))].focus();
+  });
+}
 function stripControls(grid) {
   const prev = document.getElementById('stripPrev'),
     next = document.getElementById('stripNext');
