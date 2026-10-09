@@ -105,7 +105,9 @@
 .ht-lk-tag{fill:var(--text);font:600 calc(12.5px * var(--htk,1)) var(--sans);font-variant-numeric:tabular-nums;pointer-events:none}
 /* a word the time tag could not avoid is quietened while the link shows */
 .ht-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
-.ht-gone{opacity:0!important;transition:opacity 120ms var(--ease)}
+/* a caption the dashed line will run through is gone at once (no frame of it under the growing line); it fades back when the link lets go */
+.ht-gone{opacity:0!important;transition:none!important}
+#heroStage svg text{transition:opacity 160ms var(--ease)}
 .ht-lk-line.rest{stroke-width:1.2;opacity:.55}
 /* the six-pairs card lists every wait itself, so the picture's own time pills step aside while it is open (one reaching past the card's edge looked like a stray label) */
 .ht-lk-pill,.ht-lk-tag{transition:opacity 160ms var(--ease)}
