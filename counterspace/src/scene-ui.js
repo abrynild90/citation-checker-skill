@@ -483,6 +483,7 @@ function anchorNote(note) {
   note.style.top = '';
   note.style.bottom = '';
   note.style.maxHeight = '';
+  note.style.minHeight = '';
   const wr = $('asideWrap').getBoundingClientRect(),
     pr = $('svPair').getBoundingClientRect();
   if (!pr.height || pr.top < wr.top + 140 || pr.top > wr.bottom) return;
@@ -492,6 +493,20 @@ function anchorNote(note) {
   note.style.top = Math.round(edge - wr.top) + 'px';
   note.style.bottom = 'auto';
   note.style.maxHeight = Math.round(room) + 'px';
+  // The related-law card ends where its text ends. When that is on or inside its own button's box (the button rests at the foot of the column in a tall window and its
+  // label can take two lines), a strip of the button would show under the card: the card reaches down over the whole button, or stays clear of it.
+  if (note === lawCard) {
+    // a card whose text does not fit the room (a long citation in a short window) takes a little more: down to the foot's edge, and up into the gap above the row
+    const over = note.scrollHeight - note.clientHeight;
+    if (over > 1) {
+      const up = Math.min(Math.max(0, over - 6), 12);
+      note.style.top = Math.round(edge - wr.top - up) + 'px';
+      note.style.maxHeight = Math.round(room + 6 + up) + 'px';
+    }
+    const nr = note.getBoundingClientRect(),
+      br = lawBtn.getBoundingClientRect();
+    if (br.height && nr.bottom > br.top - 4 && nr.bottom < br.bottom + 8) note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
+  }
 }
 function toggleSrc(open) {
   slPop.hidden = !open;
