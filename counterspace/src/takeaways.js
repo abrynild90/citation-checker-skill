@@ -130,16 +130,30 @@ function patBig(waits, longP, g) {
   document.getElementById('pbPairs').innerHTML = `<p class="pb-ph">Every pair, oldest first</p>${recapLinks()}`;
   document.querySelector(`#pbPairs li[data-ev="${longP.event}"]`)?.classList.add('is-long');
   box.hidden = false;
-  if (!REDUCED && 'IntersectionObserver' in window) {
+  // The pairs are always there as words; only the dashed lines and the time pills draw in, in under a second. The drawing starts while the panel is still a screen
+  // below the window, so it is under way or done when the panel arrives. An address (#pattern), a link or a jump that lands on the panel before that shows it
+  // complete at once, and so does a panel that is already in reach when the page loads.
+  const near = () => {
+    const r = box.getBoundingClientRect();
+    return r.top < innerHeight * 1.4 && r.bottom > -innerHeight * 0.5;
+  };
+  if (!REDUCED && 'IntersectionObserver' in window && !location.hash && !near()) {
     box.dataset.armed = '';
-    const io = new IntersectionObserver(
+    let io;
+    const stop = () => (io?.disconnect(), removeEventListener('scroll', jump));
+    const jump = () => {
+      if (box.classList.contains('in')) return stop();
+      if (box.getBoundingClientRect().top < innerHeight * 0.95) (box.classList.add('in', 'snap'), stop());
+    };
+    io = new IntersectionObserver(
       (es) => {
         if (!es.some((e) => e.isIntersecting)) return;
         box.classList.add('in');
-        io.disconnect();
+        stop();
       },
-      { threshold: 0.55 },
+      { rootMargin: '0px 0px 40% 0px', threshold: 0 },
     );
     io.observe(box);
+    addEventListener('scroll', jump, { passive: true });
   }
 }
