@@ -898,6 +898,104 @@ function legalScrollMain() {
   band.style.marginBottom = stuck ? Math.max(0, (bandFullH || h0) - band.offsetHeight) + 'px' : '0px';
   applyReading();
 }
+// "Find it on the chart": brings a mark into view under the pinned strip without ever leaving the chart's heading half under it. Where the chart's own landing (the one an
+// address like #chartA gives: the heading just below the strip) shows the mark, the page lands there. Otherwise the mark is centred in the room under the strip and the
+// heading is either whole below the strip or wholly behind it, never cut across by its edge. The strip's height at a candidate position is worked out from where the
+// strip's own place in the page sits (the strip is whole until that place has scrolled up by the difference between its two heights), then the landing is checked once more
+// when the scroll has ended, with the strip as it really is.
+export function landOnMark(m, smooth) {
+  const sec = m.closest('section.chart'),
+    head = sec?.querySelector('h2, h3, h4'),
+    band = document.getElementById('legalBand'),
+    root = document.documentElement,
+    num = (v) => parseFloat(v) || 0;
+  if (isPhoneNow() || !sec || !head || !band) return void m.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
+  const doc = (el) => {
+      const r = el.getBoundingClientRect();
+      return { t: r.top + scrollY, b: r.bottom + scrollY };
+    },
+    bandH = num(root.style.getPropertyValue('--band-h')) || band.offsetHeight,
+    full = num(root.style.getPropertyValue('--band-full-h')) || bandH,
+    shrink = Math.max(0, full - bandH),
+    topDoc = doc(document.getElementById('bandTop')).t,
+    years = sec.id === 'chartA' || sec.closest('#explore')?.dataset.years === '1',
+    box = sec.id === 'chartA' ? null : sec.querySelector('.svgbox'),
+    yr = sec.id === 'chartA' ? document.getElementById('yrBar') : null,
+    mk = doc(m),
+    hd = doc(head),
+    cap = doc(sec.querySelector('.chapter-head') || head).b,
+    vh = innerHeight,
+    maxY = Math.max(0, document.documentElement.scrollHeight - vh),
+    // the strip's lower edge with the page at y (0 where the strip is not shown over this chart)
+    stripAt = (y) => {
+      if (!years) return 0;
+      const t = topDoc - y;
+      if (box && doc(box).t - y >= bandH + 24 && t > -shrink) return 0;
+      return t <= -shrink ? bandH : Math.max(0, t) + full;
+    },
+    // the first row of the chart that is clear: under the strip and, on the test chart, under the year slider that is pinned beneath it
+    topAt = (y) => stripAt(y) + (yr && y + stripAt(y) > cap ? yr.offsetHeight + 10 : 8),
+    fits = (y) => mk.t - y >= topAt(y) && mk.b - y <= vh - 12,
+    clear = (y) => {
+      const s = stripAt(y);
+      return hd.t - y >= s + 2 ? 1 : hd.b - y <= s - 2 || hd.b - y <= 0 ? 2 : 0; // 1: the heading is whole below the strip, 2: wholly behind it, 0: cut by its edge
+    },
+    own = Math.min(maxY, Math.max(0, Math.round(sec.getBoundingClientRect().top + scrollY - num(getComputedStyle(sec).scrollMarginTop) - num(getComputedStyle(root).scrollPaddingTop)))),
+    mid = (y) => Math.abs((mk.t + mk.b) / 2 - y - (topAt(y) + (vh - topAt(y)) / 2));
+  let y = own;
+  if (!(fits(own) && clear(own) === 1)) {
+    let best = null;
+    for (let c = 0; c <= maxY; c += 4) {
+      const k = clear(c);
+      if (!k || !fits(c)) continue;
+      const score = (k === 1 ? 0 : 1e5) + mid(c);
+      if (!best || score < best.score) best = { c, score };
+    }
+    // no position shows the mark and keeps the heading whole: the mark is centred and the heading's edge is moved clear of the strip
+    if (!best) {
+      let c = Math.round(mk.t + (mk.b - mk.t) / 2 - (topAt(own) + (vh - topAt(own)) / 2));
+      c = Math.min(maxY, Math.max(0, c));
+      best = { c };
+    }
+    y = best.c;
+  }
+  scrollTo({ top: y, behavior: smooth ? 'smooth' : 'auto' });
+  // the check once the scroll has ended: the heading cut by the strip's real edge moves out from under it (the mark stays in view when it can)
+  let done = false;
+  const stop = () => ((done = true), cleanup());
+  const touch = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+  const cleanup = () => touch.forEach((t) => removeEventListener(t, stop));
+  touch.forEach((t) => addEventListener(t, stop, { passive: true, once: true }));
+  const verify = () => {
+    cleanup();
+    if (done) return;
+    done = true;
+    legalScrollMain();
+    const vis = getComputedStyle(band).visibility !== 'hidden' && !band.classList.contains('off'),
+      s = vis ? band.getBoundingClientRect().bottom : 0,
+      h = head.getBoundingClientRect(),
+      r = m.getBoundingClientRect();
+    if (!(h.top < s + 2 && h.bottom > s - 2)) return;
+    const down = h.bottom - s + 4, // the heading goes wholly behind the strip
+      up = h.top - s - 8; // or comes whole below it
+    const okAfter = (d) => r.top - d >= s + 8 && r.bottom - d <= vh - 12;
+    if (okAfter(down)) scrollBy({ top: down, behavior: 'instant' });
+    else if (okAfter(up)) scrollBy({ top: up, behavior: 'instant' });
+  };
+  // it waits for the page to come to rest at the place chosen (the scroll is smooth), and gives up on its own after a few seconds
+  let last = -1,
+    still = 0,
+    frames = 0;
+  const wait = () => {
+    if (done) return;
+    still = scrollY === last ? still + 1 : 0;
+    last = scrollY;
+    if ((Math.abs(scrollY - y) <= 2 && still >= 3) || still >= 24 || ++frames > 240) return verify();
+    requestAnimationFrame(wait);
+  };
+  requestAnimationFrame(wait);
+}
+
 // Measures the sticky (compact) band's height once per layout so section anchors clear it exactly (--band-h drives scroll-margin-top), and how far the
 // band sits below the top of its chapter heading so a link to the band keeps that heading in view (--law-head-h).
 export function probeBand() {

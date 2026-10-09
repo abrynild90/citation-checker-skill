@@ -467,7 +467,8 @@ function fillNext(cfg) {
       closeScene(true);
       if (!m) return;
       revealIn(m); // a mark in "Explore the data" sits in a tab: open that tab first
-      m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+      if (hooks.landOnMark) hooks.landOnMark(m, !REDUCED);
+      else m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
       m.classList.add('hl', 'flash-hl');
       m.focus({ preventScroll: true });
       setTimeout(() => m.classList.remove('hl', 'flash-hl'), 3500);
