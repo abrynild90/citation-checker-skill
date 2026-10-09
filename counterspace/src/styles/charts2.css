@@ -178,6 +178,7 @@ details.about>.words-line,details.about>.b-read,details.about>p{margin:var(--s-3
 details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 #quoteC .q{display:block;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:15.5px;line-height:1.45}
 #quoteC .by{margin-top:2px}
+#chartC .callout-row>#quoteC{margin:0} /* the two notes share one top edge */
 @media (min-width:1100px){#chartC .callout-row{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:stretch}}
 
 /* after a wrong answer: the scene that shows the event, as a link inside the sentence */
