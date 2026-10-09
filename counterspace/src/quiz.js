@@ -15,7 +15,7 @@ import { earn, showInHero } from './rewards.js';
 
 const LAW_PLAIN = {
   ...LAW_WORDS,
-  'tallinn-2017': 'Tallinn Manual 2.0, expert rules on cyber operations (soft law)',
+  'tallinn-2017': 'Tallinn Manual 2.0, expert cyber rules (soft law)',
   'icao-2025': 'Finding by the Assembly of the International Civil Aviation Organization (ICAO)',
 };
 // kind 'order': two things, which came first. [event id, law id, prompt, which side shows first: 'ev' or 'law']
@@ -246,6 +246,18 @@ export function mountQuiz() {
           `${esc(watchLabel(b.scene))}</button> <span class="q-seen">(${watchNote(b.scene)})</span></span>`
         : '');
     sync();
+    // The last answer opens the score, the pattern and the new link under the cards, which can land past the bottom of a short window. Unless the reader has
+    // scrolled in the meantime, the page moves by just enough (smoothly, or at once for reduced motion) to bring the whole summary into view.
+    if (state.every((s) => s !== null)) {
+      const y0 = scrollY;
+      setTimeout(() => {
+        const foot = host.querySelector('.q-foot'),
+          over = foot.getBoundingClientRect().bottom - (innerHeight - 24),
+          room = btn.getBoundingClientRect().top - 72; // the answer just given stays on screen
+        if (Math.abs(scrollY - y0) > 4 || over <= 0 || room <= 0) return;
+        scrollBy({ top: Math.min(over, room), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      }, 360);
+    }
   });
   toHero.addEventListener('click', () => showInHero(toHero.dataset.key));
   host.addEventListener('click', (ev) => {
