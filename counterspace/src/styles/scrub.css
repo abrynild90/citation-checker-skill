@@ -8,7 +8,7 @@
 /* One thin sticky row under the pinned law strip: the round Play button sits in the left margin of the axis, a line of words (the title, or a caption when the slider
    passes a named event, and the running tally) over the line itself. Pinned, it is about 36 px tall, so the strip and the row take about 112 px of a 900 px window.
    It lets go of the top once the "Key, data table and download" fold below the chart is open (the table is read at its own place), and it ends with its chart. */
-.yr-bar{--cs:1;position:sticky;top:var(--yr-top,var(--band-h,64px));z-index:19;display:grid;grid-template-columns:calc(64px * var(--cs)) minmax(0,1fr) calc(68px * var(--cs));grid-template-rows:auto auto;margin:var(--s-2) 0 var(--s-2);padding:0 0 4px;background:var(--bg);border-bottom:1px solid var(--line)}
+.yr-bar{--cs:1;position:sticky;top:var(--yr-top,var(--band-h,64px));z-index:19;display:grid;grid-template-columns:calc(64px * var(--cs)) minmax(0,1fr) calc(68px * var(--cs));grid-template-rows:auto auto;row-gap:3px;margin:var(--s-2) 0 var(--s-2);padding:6px 0 3px;background:var(--bg);border-bottom:1px solid var(--line)}
 #chartA:has(#foldA[open]) .yr-bar{position:static}
 .yr-play{grid-column:1;grid-row:1 / span 2;place-self:center;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:var(--accent);color:var(--on-accent,#fff);cursor:pointer;transition:transform var(--dur-1,120ms) var(--ease),box-shadow var(--dur-1,120ms) var(--ease)}
 .yr-play:hover{box-shadow:0 0 0 4px var(--accent-soft)}
@@ -20,6 +20,8 @@
 .yr-title,.yr-cap{margin:0;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 13px/16px var(--sans);color:var(--text)}
 .yr-cap[hidden],.yr-title[hidden]{display:none}
 .yr-cap b{font-weight:600}
+.yr-cap.fade{opacity:0;transition:opacity 320ms var(--ease)}
+@media (prefers-reduced-motion:reduce){.yr-cap.fade{transition:none}}
 .yr-cap .yr-year{color:var(--accent-2);font-variant-numeric:tabular-nums}
 .yr-cap a{margin-left:.3em;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
 .yr-cap a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:2px}
@@ -41,7 +43,7 @@
 .yr-t.law{bottom:1px;height:5px;background:var(--accent-2)}
 .yr-t.past{opacity:1}
 .yr-bar.is-finale .yr-t{opacity:.3}
-.yr-thumb{position:absolute;top:50%;left:100%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--accent);pointer-events:none}
+.yr-thumb{position:absolute;top:50%;left:100%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--accent);pointer-events:none}
 .yr-track:hover .yr-thumb{box-shadow:0 0 0 1px var(--accent),0 0 0 5px var(--accent-soft)}
 .yr-track:focus-visible{outline:none}
 .yr-track:focus-visible .yr-thumb{box-shadow:0 0 0 2px var(--bg),0 0 0 5px var(--focus)}

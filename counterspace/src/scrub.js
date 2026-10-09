@@ -115,34 +115,50 @@ function captionLine(e) {
   if (e.type === 'apogee_only' && km) return `${name}: rose to about ${km}, with no target`;
   return name;
 }
-const CAP_HOLD = 3200; // how long a caption stays while the slider keeps moving
+const YEAR_MS = 365.25 * 864e5,
+  CAP_HOLD = 3200; // how long a caption stays while the slider keeps moving
 let capTimer = 0,
+  fadeTimer = 0,
   capId = null,
   lastCut = T0;
 function showCap(n, ms) {
   if (capId === n.id) return;
   capId = n.id;
+  clearTimeout(fadeTimer);
+  capEl.classList.remove('fade');
   capEl.innerHTML = `<span class="yr-year">${n.year}</span> ${esc(n.line)} <a href="#scenes" data-scene="${esc(n.id)}">Watch in 3D</a>`;
   capEl.hidden = false;
   titleEl.hidden = true;
   clearTimeout(capTimer);
   if (ms) capTimer = setTimeout(function tick() {
     if (capEl.matches(':hover, :focus-within')) return void (capTimer = setTimeout(tick, 1200)); // being read or about to be pressed: it stays
-    hideCap();
+    hideCap(true);
   }, ms);
 }
-function hideCap() {
+function hideCap(soft) {
   clearTimeout(capTimer);
+  clearTimeout(fadeTimer);
   capId = null;
-  capEl.hidden = true;
-  titleEl.hidden = false;
+  const done = () => {
+    capEl.hidden = true;
+    capEl.classList.remove('fade');
+    titleEl.hidden = false;
+  };
+  // a caption the slider has moved on from fades out instead of vanishing
+  if (soft && !REDUCED && !capEl.hidden) {
+    capEl.classList.add('fade');
+    fadeTimer = setTimeout(done, 340);
+  } else done();
 }
 // playing: a caption pops as the slider crosses the event; by hand: the caption belongs to the year the slider rests on
 function captionFor(prev, now) {
   if (finale) return hideCap();
   if (playing) {
-    const hit = NAMED.filter((n) => n.t > prev && n.t <= now).at(-1);
-    if (hit) showCap(hit, CAP_HOLD);
+    const hit = NAMED.filter((n) => n.t > prev && n.t <= now && now - n.t <= YEAR_MS).at(-1); // (not one the playhead jumped far past in a stalled frame)
+    if (hit) return showCap(hit, CAP_HOLD);
+    // the caption names an event: once the playhead is more than a year past it, the caption goes (it must not describe a year the slider has left)
+    const shown = capId && NAMED.find((n) => n.id === capId);
+    if (shown && now - shown.t > YEAR_MS) hideCap(true);
     return;
   }
   const rest = NAMED.find((n) => n.year === year);
@@ -260,8 +276,9 @@ function bring(done) {
     row = el.getBoundingClientRect();
   if (!box) return done();
   const band = parseFloat(document.documentElement.style.getPropertyValue('--band-h')) || 0,
-    want = box.getBoundingClientRect().top + scrollY - (band + el.offsetHeight + 12),
-    ok = Math.abs(scrollY - want) < 80 && row.top >= 0;
+    // the chart sits just under the slider's row, which is pinned at the strip's bottom edge: the row is already where it will stay, so Play shifts nothing
+    want = box.getBoundingClientRect().top + scrollY - (band + el.offsetHeight + 8),
+    ok = Math.abs(scrollY - want) < 10 && row.top >= 0;
   if (ok) return done();
   scrollTo({ top: want, behavior: REDUCED ? 'auto' : 'smooth' });
   if (REDUCED) return done();
