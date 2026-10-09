@@ -835,6 +835,9 @@ function legalScrollMain() {
   miniShow();
   const band = document.getElementById('legalBand'),
     tr = document.getElementById('timeline').getBoundingClientRect();
+  // The chapter's heading names the strip; once it has scrolled off (a link lands past it in a short window) the strip carries the name itself, in its corner.
+  const lh = document.getElementById('lawHead');
+  band.classList.toggle('head-gone', !isPhoneNow() && !!lh && lh.getBoundingClientRect().bottom < 8);
   // The strip implies a shared calendar axis, so it stays only over charts that use it: the test chart and, in "Explore the data", the jamming and close-approach
   // tabs, from the top of the drawing. It steps aside over "What the pattern shows", over the two tabs with their own scales (decades; years to law) and at the end of the timeline.
   const pat = document.getElementById('pattern'),
@@ -903,7 +906,7 @@ export function probeBand() {
     leo = document.querySelector('#svgA [data-zone="100"]');
   if (tl && leo) {
     const top = tl.getBoundingClientRect().top + scrollY,
-      low = leo.getBoundingClientRect().bottom + scrollY - (top + 12), // where the bottom of the low-orbit zone sits on arrival (the timeline lands 12 px above the window)
+      low = leo.getBoundingClientRect().bottom + scrollY - (top + 23), // where the bottom of the low-orbit zone sits on arrival (the timeline lands 23 px above the window)
       cap = (document.getElementById('lawHead')?.offsetHeight || 0) + 24;
     document.documentElement.style.setProperty('--land-extra', (low - innerHeight + 24 > 100 ? cap : 0) + 'px'); // all or nothing: a heading cut across its middle looks worse than either
   }

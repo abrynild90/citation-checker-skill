@@ -158,7 +158,7 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
   #chartA .chapter-head.sub>h3{grid-column:1 / -1;grid-row:1;max-width:none}
   #chartA .chapter-head.sub>.takeaway{grid-column:1;grid-row:2;margin:0;max-width:none}
   #chartA .chapter-head.sub>.lede{grid-column:2;grid-row:2;margin:var(--s-3) 0 0}
-  #chartA .chapter-head.sub>.tools{grid-column:1 / -1;grid-row:3}
+  #chartA .chapter-head.sub>.tools{display:none} /* holds only the phone's zoom button: its empty row would keep 20 px between the takeaway and the slider */
   section.chart.chart-first#chartA{margin-top:0;padding-top:var(--s-4)}
   #chartA .yr-bar{margin-top:0}
 }
