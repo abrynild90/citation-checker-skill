@@ -273,20 +273,23 @@ export function mountQuiz() {
         : '');
     sync();
     // The last answer opens the score, the pattern and the new link under the cards, which can land past the bottom of a short window. Unless the reader has
-    // scrolled in the meantime, the page moves by just enough (smoothly, or at once for reduced motion) to bring the whole summary into view.
+    // scrolled in the meantime, the page moves by just enough (smoothly, or at once for reduced motion) to bring the whole summary row into view with a little
+    // room under it; a row taller than the window is brought up to 16 px under the top instead, so its first line is the one read first.
     if (state.every((s) => s !== null)) {
-      const y0 = scrollY;
+      const y0 = scrollY,
+        reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
       setTimeout(() => {
         const foot = host.querySelector('.q-foot'),
-          over = foot.getBoundingClientRect().bottom - (innerHeight - 24),
-          room = btn.getBoundingClientRect().top - 72; // the answer just given stays on screen
-        if (Math.abs(scrollY - y0) > 4 || over <= 0 || room <= 0) return;
-        let by = Math.min(over, room);
-        // The chapter's heading never ends half cut off at the top: when the move would leave only part of it in view, it goes the whole way out (if the answer just
-        // given stays on screen), and otherwise stops short of it.
+          fr = foot.getBoundingClientRect(),
+          room = fr.top - 16; // the most the page can move and still keep the row's top edge in view
+        if (Math.abs(scrollY - y0) > 4) return;
+        let by = Math.min(fr.bottom - (innerHeight - 24), room);
+        if (by <= 0) return;
+        // The chapter's heading never ends half cut off at the top: when the move would leave only part of it in view, it goes the whole way out (if the row's top
+        // stays in view), and otherwise stops short of it.
         const head = document.querySelector('.quiz-head')?.getBoundingClientRect();
         if (head && head.top - by < 0 && head.bottom - by > 0) by = head.bottom + 4 <= room ? head.bottom + 4 : Math.max(0, head.top);
-        if (by > 0) scrollBy({ top: by, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        if (by > 0) scrollBy({ top: by, behavior: reduced ? 'auto' : 'smooth' });
       }, 360);
     }
   });
