@@ -787,6 +787,27 @@ function miniShow() {
 let legalCompact = false;
 let bandFullH = 0;
 let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
+// The 2021 to 2026 zoom starts folded, so the first screen of the timeline shows laws and tests together. The button opens it; it also opens for print and for a
+// keyboard or link visit to anything inside it. Folded, it stays laid out at full width (only its height is 0), so its drawing never needs redoing.
+export function setZoomOpen(open, scrollTo) {
+  const wrap = document.getElementById('legalZoomWrap'),
+    btn = document.getElementById('zoomBtn');
+  if (!wrap || !btn) return;
+  const was = wrap.classList.contains('open');
+  wrap.classList.toggle('open', open);
+  wrap.classList.remove('settled');
+  btn.setAttribute('aria-expanded', String(open));
+  btn.querySelector('span').textContent = open ? 'Close the 2021–2026 zoom' : 'Zoom in on 2021–2026';
+  btn.querySelector('use').setAttribute('href', open ? '#i-minus' : '#i-zoom');
+  const done = () => wrap.classList.toggle('settled', wrap.classList.contains('open'));
+  clearTimeout(setZoomOpen.t);
+  setZoomOpen.t = setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 340);
+  if (open && !was && scrollTo) requestAnimationFrame(() => legalScroll());
+}
+export function initZoomControl() {
+  document.getElementById('zoomBtn')?.addEventListener('click', () => setZoomOpen(!document.getElementById('legalZoomWrap').classList.contains('open')));
+  addEventListener('beforeprint', () => setZoomOpen(true));
+}
 // The zoom panel scrolls up under the pinned strip: it fades out along the strip's bottom edge, so it is never cut off mid-line.
 function fadeZoom() {
   const band = document.getElementById('legalBand'),
@@ -794,7 +815,8 @@ function fadeZoom() {
   if (!band || !zb) return;
   const bb = band.getBoundingClientRect(),
     zr = zb.getBoundingClientRect(),
-    overlap = isPhoneNow() ? 0 : bb.bottom - zr.top;
+    open = document.getElementById('legalZoomWrap')?.classList.contains('open') !== false,
+    overlap = isPhoneNow() || !open ? 0 : bb.bottom - zr.top;
   zb.classList.toggle('under-strip', overlap > 1 && zr.bottom > bb.bottom && getComputedStyle(band).visibility !== 'hidden');
   zb.style.setProperty('--under', Math.max(0, Math.round(overlap)) + 'px');
 }

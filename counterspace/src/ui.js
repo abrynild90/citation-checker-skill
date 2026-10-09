@@ -90,7 +90,7 @@ function showCard(html, evt, el, full = false) {
   });
   // A card never covers a Download chart button, nor the zoom strip when it belongs to a mark on the law band above it.
   [...document.querySelectorAll('.dl-row .btn, .dl-wrap .btn')]
-    .concat(el && !el.closest('#legalZoomBox') && el.closest('#legalBand') ? [document.getElementById('legalZoomBox')] : [])
+    .concat(el && !el.closest('#legalZoomBox') && el.closest('#legalBand') && document.getElementById('legalZoomWrap')?.classList.contains('open') ? [document.getElementById('legalZoomBox')] : [])
     .forEach((n) => {
       const b = n?.getBoundingClientRect();
       // The zoom strip is the magnified copy of the strip above it, so a hover card may stand over part of it, which costs far less than standing over a law's name or the

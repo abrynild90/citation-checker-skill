@@ -148,3 +148,15 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
   .pb-track .pb-end.a{grid-column:1;text-align:left}
   .pb-track .pb-end.b{grid-column:2;text-align:right}
 }
+
+/* ---- the first screen of the timeline: law strip, then the test chart (wide windows). The test chart's takeaway moves up beside its lede so the slider row and the
+   first tests come into view with the strip, instead of a screen further down. */
+@media (min-width:1100px){
+  #chartA .chapter-head.sub{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);column-gap:var(--s-7);row-gap:var(--s-2);margin-bottom:var(--s-2)}
+  #chartA .chapter-head.sub>h3{grid-column:1 / -1;grid-row:1;max-width:none}
+  #chartA .chapter-head.sub>.takeaway{grid-column:1;grid-row:2;margin:0;max-width:none}
+  #chartA .chapter-head.sub>.lede{grid-column:2;grid-row:2;margin:var(--s-3) 0 0}
+  #chartA .chapter-head.sub>.tools{grid-column:1 / -1;grid-row:3}
+  section.chart.chart-first#chartA{margin-top:0;padding-top:var(--s-4)}
+  #chartA .yr-bar{margin-top:0}
+}

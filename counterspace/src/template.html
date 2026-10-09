@@ -120,13 +120,13 @@
       <p data-avoid class="lede">Each symbol is a treaty, resolution, pledge or expert manual about weapons in space, set on its year. Every anti-satellite test sits below, on the same years. The strip follows you down.</p>
 
       <p data-avoid class="takeaway" id="tkLaw"></p>
+      <div class="law-row">
+      <details class="about keybox" id="keyLegal"><summary>How to read this chart</summary>
+        <ul data-avoid class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul>
+        <p data-avoid class="words-line in-fold"><b>Words on this page:</b> <abbr title="Global navigation satellite system">GNSS</abbr> means satellite navigation such as GPS. ICAO is the International Civil Aviation Organization, the United Nations agency for flight. DA-ASAT means direct-ascent anti-satellite, a missile launched from Earth to hit a satellite. PAROS stands for the prevention of an arms race in outer space.</p></details>
+        <button class="btn small yr-intro" id="yrIntro" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Scrub through time</button>
+      </div>
     </header>
-    <div class="law-row">
-    <details class="about keybox" id="keyLegal"><summary>How to read this chart</summary>
-      <ul data-avoid class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul>
-      <p data-avoid class="words-line in-fold"><b>Words on this page:</b> <abbr title="Global navigation satellite system">GNSS</abbr> means satellite navigation such as GPS. ICAO is the International Civil Aviation Organization, the United Nations agency for flight. DA-ASAT means direct-ascent anti-satellite, a missile launched from Earth to hit a satellite. PAROS stands for the prevention of an arms race in outer space.</p></details>
-      <button class="btn small yr-intro" id="yrIntro" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Scrub through time</button>
-    </div>
   </div>
   <div id="bandTop" aria-hidden="true" style="height:0"></div>
   <div class="legal-band" id="legalBand" role="region" aria-labelledby="hLaw">
@@ -140,15 +140,19 @@
     </div>
   </div>
   <div class="wrap law-detail">
+    <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list"
+      id="legalList"></ul></details>
+      <div class="dl-group law-tools">
+    <div class="zoom-ctl"><button class="btn small" id="zoomBtn" type="button" aria-expanded="false" aria-controls="legalZoomWrap"><svg class="ico" aria-hidden="true"><use href="#i-zoom"/></svg><span>Zoom in on 2021–2026</span></button><span class="zoom-note">The shaded years are crowded. The zoom names every item in them.</span></div>
+    <div class="zoom-wrap" id="legalZoomWrap"><div class="zoom-in">
     <div class="legal-link" id="legalLink" aria-hidden="true"></div>
     <div class="legal-zoom" id="legalZoomBox">
       <div data-avoid class="zoom-head"><h3 id="zoomTitle">Zoom: 2021 to 2026</h3><p>The shaded window above, enlarged so every item can show its full name; select a symbol for its details
         and citation.</p></div>
       <div id="legalZoom"></div>
     </div>
-    <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list"
-      id="legalList"></ul></details>
-      <div class="dl-group"><details class="table" id="legalKey"><summary>Show the data behind this chart</summary>
+    </div></div>
+      <details class="table" id="legalKey"><summary>Show the data behind this chart</summary>
       <h3 data-avoid class="sub-h">Abbreviations</h3><dl class="glossary" id="glossaryLegal"></dl>
       <div class="tscroll" id="tableLegal"></div></details><div class="dl-row"><button class="btn small" data-export="legal" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div></div>
   </div>
@@ -159,9 +163,9 @@
       <header class="chapter-head sub">
         <h3 data-avoid id="hA">How high the tests went, and the debris they left</h3>
         <p data-avoid class="lede">Each point is one test of a weapon that can reach satellites, set by year and by height. Bubble size shows how much debris the destructive tests created.</p>
+        <p data-avoid class="takeaway" id="tkA"></p>
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
       </header>
-      <p data-avoid class="takeaway" id="tkA"></p>
       <div class="yr-bar" id="yrBar" role="group" aria-labelledby="yrTitle">
         <button class="yr-play" id="yrPlay" type="button" aria-label="Play from 1957" title="Play from 1957"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
         <div class="yr-line">
