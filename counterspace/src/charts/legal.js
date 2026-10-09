@@ -814,12 +814,14 @@ function legalScrollMain() {
   const band = document.getElementById('legalBand'),
     tr = document.getElementById('timeline').getBoundingClientRect();
   // The strip implies a shared calendar axis, so it stays only over charts that use it: the test chart and, in "Explore the data", the jamming and close-approach
-  // tabs. It steps aside over "What the pattern shows", over the two tabs with their own scales (decades; years to law) and at the end of the timeline.
+  // tabs, from the top of the drawing. It steps aside over "What the pattern shows", over the two tabs with their own scales (decades; years to law) and at the end of the timeline.
   const pat = document.getElementById('pattern'),
     ex = document.getElementById('explore'),
     bh = band.offsetHeight + 24,
     exOver = !!ex && ex.getBoundingClientRect().bottom < innerHeight * 0.7, // the chart section has been read to its end: the sources and the footer are what is on screen
-    exAligned = !!ex && ex.dataset.years === '1' && ex.getBoundingClientRect().top < bh;
+    // in "Explore the data" the strip comes only once the open chart's own drawing (the part that shares its years) reaches it, never over the heading, the cards or the notes
+    xBox = ex && ex.dataset.years === '1' ? document.querySelector('.xpanel:not([data-off]) .svgbox') : null,
+    exAligned = !!xBox && xBox.getBoundingClientRect().top < bh;
   band.classList.toggle('off', !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (exOver && tr.top < 0)));
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).

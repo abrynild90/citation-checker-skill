@@ -59,7 +59,7 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 @media (min-width:761px){
   /* the page already keeps --band-h clear at the top (scroll-padding), so a panel only asks for the card row above it */
   section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3))}
-  .explore[data-years="0"] section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3) - var(--band-h,0px))} /* the pinned strip steps aside over these two */
+  .explore section.chart.xpanel{scroll-margin-top:calc(var(--xt-h) + var(--s-3) - var(--band-h,0px))} /* the pinned strip steps aside over the cards and headings, and from the drawing down over the two charts on the shared years */
 }
 @media (max-width:760px){
   section.chart.xpanel{scroll-margin-top:calc(52px + var(--s-3))}
@@ -94,7 +94,7 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 .xc-l{font:400 13.5px/1.4 var(--sans);color:var(--muted)}
 @media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:14px}.xc-l{font-size:13px}}
 #exploreTabs{scroll-margin-top:var(--s-3)}
-.explore[data-years="0"] #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
+.explore #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
 @media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}
 @media print{.xcards{display:none}}
 
