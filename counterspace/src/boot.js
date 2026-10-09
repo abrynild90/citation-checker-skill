@@ -61,20 +61,29 @@ nameThemeButton();
   addEventListener('resize', spy);
 }
 
-// Chapter rail (wide screens): the last chapter whose start has passed the reading line, 40% down the window, is the current one. Each chapter's start is
-// watched with one IntersectionObserver whose box is the top 40% of the window; an entry's own top edge says which side of the line it is on.
+// Chapter rail (wide screens): the last chapter whose start has passed the reading line, 40% down the window, is the current one. It is worked out from where each
+// chapter's start is on every scroll (a jump over whole chapters, such as Tab wrapping from the footer to the skip link, must reset it too, and an observer only
+// reports an edge that is crossed). The rail stays out of sight while the opening picture is on screen.
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
     starts = ['scenes', 'timeline', 'pattern', 'quizBand', 'explore', 'sources'].map((id) => document.getElementById(id)),
-    passed = new Map();
+    hero = document.getElementById('top');
   const mark = () => {
-    const now = starts.reduce((n, el, i) => (el && passed.get(el) ? i : n), -1);
+    const line = innerHeight * 0.4,
+      heroGone = !hero || hero.getBoundingClientRect().bottom <= 24,
+      now = heroGone ? starts.reduce((n, el, i) => (el && el.getBoundingClientRect().top <= line ? i : n), -1) : -1;
     links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
-    rail.classList.toggle('on', now >= 0 && now < links.length - 1); // hidden over the sources section and footer
+    rail.classList.toggle('on', now >= 0 && now < links.length - 1); // hidden over the opening picture, the sources section and the footer
     // One tab stop for the whole rail: the current chapter's dot (the first, until the reader has reached the timeline). Up and down arrows move along it.
     links.forEach((a, i) => a.setAttribute('tabindex', i === Math.max(now, 0) ? '0' : '-1'));
   };
+  let tick = false;
+  const soon = () => !tick && ((tick = true), requestAnimationFrame(() => ((tick = false), mark())));
+  addEventListener('scroll', soon, { passive: true });
+  addEventListener('resize', soon);
+  addEventListener('scrollend', soon);
+  addEventListener('hashchange', soon);
   rail.addEventListener('keydown', (e) => {
     const at = links.indexOf(document.activeElement),
       step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key],
@@ -84,17 +93,14 @@ nameThemeButton();
     links.forEach((a, i) => a.setAttribute('tabindex', i === to ? '0' : '-1'));
     links[to].focus();
   });
+  // Focus that wraps round from the end of the page onto the skip link (it comes from outside the page, and the link is fixed, so the page would stay where it was)
+  // takes the reader back to the top, where the opening picture is and no chapter is current.
+  document.querySelector('.skip')?.addEventListener('focus', (e) => {
+    if (!e.relatedTarget && scrollY > 0) scrollTo({ top: 0, behavior: 'instant' });
+    mark();
+  });
   mark();
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => passed.set(e.target, e.boundingClientRect.top <= innerHeight * 0.4));
-        mark();
-      },
-      { rootMargin: '0px 0px -60% 0px' },
-    );
-    starts.forEach((el) => el && io.observe(el));
-  }
+  addEventListener('load', mark);
 }
 
 // A link to something inside a closed disclosure opens it first (a chart's "How we classified these" points into the sources section, for one).
