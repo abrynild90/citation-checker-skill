@@ -239,9 +239,11 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 :is(#chartR) svg.k2 .dlabel.dl-hid.dl-show{opacity:1}
 @media (prefers-reduced-motion:reduce){:is(#chartR) svg.k2 .dlabel.dl-hid{transition:none}}
 
-/* An answered card is only as tall as what it says (no empty space under it, whatever its neighbours hold), and says it a little tighter: the hint and the pale
+/* An answered card says its answer a little tighter: the hint and the pale
    option are not needed once the answer is in. */
-.q.done{align-self:start}
+/* Cards in one row stay the same height (the tallest sets it), and the offer to watch the scene sits at the foot of each card, so the row reads as one band. */
+.q.done .q-out{flex:1 1 auto;display:flex;flex-direction:column}
+.q.done .q-watch{margin-top:auto;padding-top:var(--s-3)}
 .q.done .q-hint{display:none}
 .q.done .q-opt{min-height:46px}
 .q.done .q-out{margin-top:var(--s-1)}

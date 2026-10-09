@@ -67,8 +67,12 @@ const lineHTML = (rows) =>
 const mark =
   '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
 
+// Four short ways to say a guess was wrong, so a run of misses does not repeat one phrase. Each card takes the one at its own place (the same card always says the same thing).
+const MISS = ['Not quite.', 'A fair guess, but no.', 'Many people guess the same, but no.', 'Not this time.'];
+const miss = (i) => MISS[i % MISS.length];
+
 // What each question shows: the two options (in display order, flagged right or not) and the sentence that explains the truth.
-function build(q) {
+function build(q, i) {
   if (q.kind === 'order') {
     const e = byId[q.ev],
       l = byId[q.law],
@@ -95,10 +99,10 @@ function build(q) {
       evFirst
         ? ok
           ? 'Right. The weapon came first.'
-          : 'A fair guess, but no. The weapon came first and the law followed.'
+          : `${miss(i)} The weapon came first and the law followed.`
         : ok
           ? 'Right. This time the rules came first.'
-          : 'A fair guess, but no. This time the rules came first.';
+          : `${miss(i)} This time the rules came first.`;
     return { opts, truth, line, verdict, scene: e.scene_3d };
   }
   const [ea, la] = q.a,
@@ -134,7 +138,7 @@ function build(q) {
       k: Math.max(0.74, y / top),
     }),
     line = [one(ea, la, ya), one(eb, lb, yb)];
-  const verdict = (ok) => (ok ? 'Right. That one waited longest.' : 'A fair guess, but no. The other one waited longest.');
+  const verdict = (ok) => (ok ? 'Right. That one waited longest.' : `${miss(i)} The other one waited longest.`);
   return { opts, truth, line, verdict, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
 }
 // After a wrong answer: the scene that shows the event, and whether it has been watched yet (in memory only).
@@ -145,7 +149,7 @@ export function mountQuiz() {
   const host = document.getElementById('quiz');
   if (!host) return;
   const N = QUESTIONS.length;
-  const built = QUESTIONS.map(build);
+  const built = QUESTIONS.map((q, i) => build(q, i));
   const cards = QUESTIONS.map((q, i) => {
     const b = built[i];
     return `<li class="q" data-i="${i}">
