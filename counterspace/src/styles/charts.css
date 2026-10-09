@@ -13,6 +13,14 @@
 #timeline{position:relative}
 /* "See the timeline" lands with the chapter heading at the top of the window (the page-wide scroll-padding for the pinned strip would leave a strip of the scenes above it) */
 @media (min-width:761px){#timeline{scroll-margin-top:calc(-1 * var(--band-h,64px) - 12px - var(--land-extra,0px))}}
+/* Landing places for chapters that have no pinned strip over them: the page-wide scroll-padding (--band-h, the room the pinned strip needs) would leave a bare band
+   at the top of the window and a scrap of the chapter above showing in it, so these cancel it and land with the chapter's own top near the window's top edge.
+   The law chapter's heading lands 64 px down, which keeps everything of the 3D scenes above it out of the window. */
+@media (min-width:761px){
+  #lawHead{scroll-margin-top:calc(64px - var(--band-h,64px))}
+  #scenes{scroll-margin-top:calc(-28px - var(--band-h,64px))}
+  #pattern,#quizBand,#explore,#sources{scroll-margin-top:calc(24px - var(--band-h,64px))}
+}
 .law-intro{padding-top:var(--s-7)}
 @media (max-width:760px){.law-intro{padding-top:var(--s-7)}}
 .law-intro .chapter-head{margin-bottom:var(--s-4)}

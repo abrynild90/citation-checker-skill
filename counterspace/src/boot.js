@@ -10,7 +10,7 @@ import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
 import { timed } from './app.js';
 import { drawLegal, drawLegalKey, initZoomControl, legalOff, legalScroll } from './charts/legal.js';
-import { hooks } from './shared.js';
+import { hooks, markFirstDrawn, settled } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
 import { ORDER, closeScene, exportStill, host, openScene, showRecap, startTour } from './scene-ui.js';
@@ -22,7 +22,7 @@ import { mountDiscover } from './discover.js';
 import { mountQuiz } from './quiz.js';
 import { fillTakeaways } from './takeaways.js';
 import { mountScrub } from './scrub.js';
-import { mountExplore, showTab } from './explore.js';
+import { mountExplore, revealIn, showTab } from './explore.js';
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { probeBand } from './charts/legal.js';
 import { fontsReady } from './fonts.js';
@@ -107,88 +107,83 @@ nameThemeButton();
   addEventListener('load', mark);
 }
 
+// An address that names a part of the page (#legalBand, #pattern, #chartC, #srcCite ...) is a jump made once. The browser's own jump lands before the charts are
+// drawn, the fonts are in and the pinned strip has been measured (--band-h, which sets how much room the page keeps at the top), so it lands in the wrong place and the
+// page then moves again. Instead nothing scrolls until the page has settled (shared.js settled(): load, fonts, first draw); then everything below is drawn, any closed
+// disclosure that holds the target is opened, and the page scrolls to the target in one move. A second look a moment later only corrects a landing that something
+// moved, and only while the reader has not scrolled by hand.
+const hashId = () => decodeURIComponent(location.hash.slice(1));
+let moved = false;
+['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
+addEventListener('hashchange', () => (moved = false));
+
 // A link to something inside a closed disclosure opens it first (a chart's "How we classified these" points into the sources section, for one).
 // The sources section keeps its long reading in one disclosure that starts closed: an address or a link that names the section (the footer's "Sources", the
 // chapter rail) or one of its parts opens it, so the reader lands on the material and not on a closed bar.
-{
-  const SRC = new Set(['sources', 'srcEditions', 'codingRules', 'srcCite', 'srcLicence', 'srcList']);
-  const openSources = () => {
+const SRC = new Set(['sources', 'srcEditions', 'codingRules', 'srcCite', 'srcLicence', 'srcList']);
+const openSources = () => {
+  hooks.drawRest?.();
+  const f = document.getElementById('srcDetails');
+  if (!f || f.open) return false;
+  f.open = true;
+  return true;
+};
+// Opens whatever closed disclosure holds the named part; true if one had to open.
+function openAround(id) {
+  if (!id) return false;
+  let opened = SRC.has(id) && openSources();
+  let t = document.getElementById(id);
+  if (!t) {
     hooks.drawRest?.();
-    const f = document.getElementById('srcDetails');
-    if (!f || f.open) return false;
-    f.open = true;
-    return true;
-  };
-  const reveal = () => {
-    const id = decodeURIComponent(location.hash.slice(1));
-    if (!id) return;
-    let opened = SRC.has(id) && openSources();
-    let t = document.getElementById(id);
-    if (!t) {
-      hooks.drawRest?.();
-      t = document.getElementById(id);
-    }
-    let d = t?.closest('details');
-    while (d) {
-      if (!d.open) ((d.open = true), (opened = true));
-      d = d.parentElement?.closest('details');
-    }
-    if (opened) requestAnimationFrame(() => t.scrollIntoView({ block: 'start' }));
-  };
-  addEventListener('hashchange', reveal);
-  addEventListener('load', reveal);
-  // a link to the address already in the bar fires no hashchange, so the click itself opens the section
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest?.('a[href^="#"]');
-    const id = a && decodeURIComponent(a.getAttribute('href').slice(1));
-    if (id && SRC.has(id) && openSources()) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
-  });
+    t = document.getElementById(id);
+  }
+  let d = t?.closest('details');
+  while (d) {
+    if (!d.open) ((d.open = true), (opened = true));
+    d = d.parentElement?.closest('details');
+  }
+  return opened;
 }
-
-// An address that names the timeline strip (#legalBand) cannot be scrolled to natively: the strip is sticky, and the charts below it are drawn after the first
-// jump, so the browser lands a whole chapter too far down. The charts are drawn first, then the page scrolls to the chapter heading, where the strip sits just
-// beneath it; it is repeated once the fonts and images have settled, unless the reader has already scrolled.
-{
-  let moved = false;
-  ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
-  const toBand = (again) => {
-    if (location.hash !== '#legalBand' || (again === true && moved)) return;
-    hooks.drawRest?.();
-    const head = document.getElementById('lawHead');
-    if (head && (again !== true || Math.abs(head.getBoundingClientRect().top) > 3))
-      (head.scrollIntoView({ block: 'start', behavior: 'auto' }), hooks.legalScroll?.());
-  };
-  addEventListener('hashchange', () => ((moved = false), toBand()));
-  addEventListener('load', () => {
-    toBand();
-    document.fonts?.ready.then(() => toBand(true));
-    setTimeout(() => toBand(true), 700);
-  });
+// Where the named part belongs: the strip's chapter heading for the strip itself (the strip is sticky, so it cannot be scrolled to), the part otherwise.
+const anchorOf = (id) => document.getElementById(id === 'legalBand' ? 'lawHead' : id);
+let landed = null; // where the jump put the target, for the one correction
+function jumpToHash(again) {
+  const id = hashId(),
+    t = id && anchorOf(id);
+  if (!t || moved) return;
+  if (!again) {
+    // everything below is drawn first only when the target sits at or under the charts that are drawn lazily; above them, drawing waits for the idle pass and
+    // the landing does not wait for it (the target is where it will stay: nothing drawn below it can move it)
+    const ex = document.getElementById('explore');
+    if (!ex || ex.contains(t) || ex.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING) hooks.drawRest?.();
+    openAround(id);
+    revealIn(t); // a chart in "Explore the data" sits in a tab: show the tab first
+  }
+  if (t.closest('[data-off]')) return;
+  const r = t.getBoundingClientRect();
+  if (!r.width && !r.height) return;
+  if (again && !(landed && landed.id === id && Math.abs(r.top - landed.top) > 2)) return;
+  t.scrollIntoView({ block: 'start', behavior: 'auto' });
+  hooks.legalScroll?.();
+  landed = { id, top: t.getBoundingClientRect().top };
 }
-
-// Any other address that names a part of the page (#pattern, #chartA, #srcCite ...): the charts below it are drawn after the browser's first jump, and they change
-// the page's height, so the browser lands short. Once everything is drawn, and again after the fonts and images settle, the page scrolls to the named part,
-// unless the reader has already scrolled by hand.
-{
-  let moved = false;
-  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
-  const settle = () => {
-    const id = decodeURIComponent(location.hash.slice(1));
-    if (!id || id === 'legalBand' || moved) return;
-    hooks.drawRest?.();
-    const t = document.getElementById(id);
-    if (!t || t.closest('[data-off]')) return;
-    const r = t.getBoundingClientRect();
-    if (r.width || r.height) t.scrollIntoView({ block: 'start', behavior: 'auto' });
-    hooks.legalScroll?.();
-  };
-  addEventListener('load', () => {
-    settle();
-    document.fonts?.ready.then(settle);
-    setTimeout(settle, 700);
-    setTimeout(settle, 2000);
+addEventListener('hashchange', () => {
+  const id = hashId();
+  if (id === 'legalBand' || openAround(id)) requestAnimationFrame(() => jumpToHash());
+});
+if (location.hash)
+  settled().then(() => {
+    jumpToHash();
+    // once more after two frames and again after the page has been idle for a moment: normally nothing has moved, and nothing happens
+    requestAnimationFrame(() => requestAnimationFrame(() => jumpToHash(true)));
+    setTimeout(() => jumpToHash(true), 1200);
   });
-}
+// a link to the address already in the bar fires no hashchange, so the click itself opens the section
+document.addEventListener('click', (e) => {
+  const a = e.target.closest?.('a[href^="#"]');
+  const id = a && decodeURIComponent(a.getAttribute('href').slice(1));
+  if (id && SRC.has(id) && openSources()) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
+});
 
 // Segmented controls: the raised thumb slides to the chosen button. Without script the chosen button carries the raised look itself.
 function placeThumb(seg) {
@@ -259,6 +254,7 @@ fontsReady.then(() => {
     drawAll(true);
   });
   performance.mark('cs:first-draw-done');
+  markFirstDrawn();
   watchSegs(); // the chart controls exist now and their words have their final font
 });
 // The hero picture is drawn from the page's own data and the embedded Earth image; no 3D library is involved.

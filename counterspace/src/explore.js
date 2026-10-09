@@ -194,5 +194,4 @@ export function mountExplore() {
     true,
   );
   addEventListener('hashchange', fromHash);
-  if (location.hash) addEventListener('load', () => setTimeout(fromHash, 60));
 }
