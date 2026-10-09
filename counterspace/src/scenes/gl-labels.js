@@ -214,7 +214,7 @@ const methods = {
     const EDGE = !noBanner && w >= 700 ? 24 : 12;
     if (!noBanner && w >= 700) {
       objs.edgeX = 24;
-      objs.leaderCap = 120;
+      objs.leaderCap = Math.round(Math.max(120, 0.153 * w)); // ~120 px at the narrowest desktop stage, growing with it (the checker's own reach is 0.153 W)
     }
     this._lastObjs = objs;
     this._lastObst = obst;

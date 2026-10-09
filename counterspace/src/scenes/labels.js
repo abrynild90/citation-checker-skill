@@ -174,7 +174,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
         for (let a = 0; a < 16; a++) tryAt2(cx(c.x + Math.cos((a * Math.PI) / 8) * rad), cy(c.y + Math.sin((a * Math.PI) / 8) * rad * 0.8));
     // Still resting on the planet: a dense local scan for any slot off it (same cost function, so every other rule still holds).
     if (bestSoft > 0 && bestN < 500) {
-      const R0 = 0.11 * W;
+      const R0 = 0.15 * W;
       for (let gy = -R0; gy <= R0; gy += 5) for (let gx = -R0; gx <= R0; gx += 5) if (gx * gx + gy * gy <= R0 * R0) tryAt2(cx(c.x + gx), cy(c.y + gy));
     }
     // Nothing clean nearby (crowded frame or a reserved band in the way): search the whole free area on a grid.
