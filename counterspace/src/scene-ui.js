@@ -1305,7 +1305,7 @@ overlay.addEventListener('keydown', hideHint, { passive: true });
 // ---------------------------------------------------------------- keyboard: Space plays or pauses, Left and Right change scene, 1 to 5 choose a view, Esc closes
 const TABBABLE = 'button:not([disabled]),input:not([disabled]),a[href],summary,[tabindex]';
 function trapTab(e) {
-  const list = [...panel.querySelectorAll(TABBABLE)].filter(
+  const list = [...(recapEl && !recapEl.hidden ? recapEl : panel).querySelectorAll(TABBABLE)].filter( // the closing slide covers the controls: Tab stays on the slide
     (n) => n.tabIndex >= 0 && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden' && !n.closest('[hidden],[aria-hidden="true"]'),
   );
   if (!list.length) return;
