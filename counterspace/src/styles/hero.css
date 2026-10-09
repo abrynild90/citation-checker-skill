@@ -107,6 +107,9 @@
 .ht-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
 .ht-gone{opacity:0!important;transition:opacity 120ms var(--ease)}
 .ht-lk-line.rest{stroke-width:1.2;opacity:.55}
+/* the six-pairs card lists every wait itself, so the picture's own time pills step aside while it is open (one reaching past the card's edge looked like a stray label) */
+.ht-lk-pill,.ht-lk-tag{transition:opacity 160ms var(--ease)}
+.hero:has(#heroDone:not([hidden])) :is(.ht-lk-pill,.ht-lk-tag){opacity:0}
 .ht-ring.rest{stroke:var(--hero-accent);stroke-opacity:.55;stroke-width:1.3}
 .ht-law-hi.rest{stroke:var(--hero-accent-2);stroke-width:3;opacity:.35}
 .ht-lk-pill.rest{stroke:rgba(150,175,230,.3)}
