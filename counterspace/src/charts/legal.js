@@ -1013,7 +1013,7 @@ export function probeBand() {
     const top = tl.getBoundingClientRect().top + scrollY,
       low = leo.getBoundingClientRect().bottom + scrollY - (top + 23), // where the bottom of the low-orbit zone sits on arrival (the timeline lands 23 px above the window)
       cap = (document.getElementById('lawHead')?.offsetHeight || 0) + 24;
-    document.documentElement.style.setProperty('--land-extra', (low - innerHeight + 24 > 100 ? cap : 0) + 'px'); // all or nothing: a heading cut across its middle looks worse than either
+    document.documentElement.style.setProperty('--land-extra', (low - innerHeight + 24 > 40 ? cap : 0) + 'px'); // all or nothing: a heading cut across its middle looks worse than either. 40 px: a cluster that ends under the window's lower edge (1920x1080 by 43 px) gets the same landing as 1440x900, heading above, cluster whole
   }
   const band = document.getElementById('legalBand'),
     was = legalCompact,
