@@ -464,7 +464,7 @@ function fillNext(cfg) {
     b.innerHTML = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>Find it on the chart';
     b.onclick = () => {
       const m = markOf(cfg.event);
-      closeScene();
+      closeScene(true);
       if (!m) return;
       revealIn(m); // a mark in "Explore the data" sits in a tab: open that tab first
       m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
@@ -545,7 +545,9 @@ function setInert(on) {
 }
 
 // ---------------------------------------------------------------- close
-export function closeScene() {
+// `nav` is true when the close is the first half of a jump somewhere else on the page (a chart, the timeline, the quiz, the top): the page must then stay where
+// that jump puts it, so the close does not bring the hero back into view (the new link waits there for the reader's return).
+export function closeScene(nav) {
   sheet.hidden = true;
   endTour(false);
   recapEl.hidden = true;
@@ -580,7 +582,7 @@ export function closeScene() {
   returnFocus = null;
   target?.focus();
   if (target?.matches?.('.mark, [data-id]:not(.pc-btn)')) hideCard(); // a chart mark that opened the scene takes focus back without showing its card again
-  document.dispatchEvent(new CustomEvent('cs:closed'));
+  document.dispatchEvent(new CustomEvent('cs:closed', { detail: { nav: nav === true } }));
 }
 
 // ---------------------------------------------------------------- steps: what happens, as a timeline that follows the animation
@@ -1248,7 +1250,7 @@ lawBtn.onclick = () => {
 function seeLawOnTimeline(byKeyboard) {
   const id = cur?.related;
   if (!id) return;
-  closeScene();
+  closeScene(true);
   showLawOnTimeline(id, byKeyboard);
 }
 // The same arrival for the hero's "See it on the timeline" button: the page scrolls to the chapter heading with the strip under it, the law's symbol is ringed
@@ -1615,13 +1617,13 @@ recapEl.addEventListener('click', (e) => {
   if (b) return openScene(b.dataset.id);
   if (e.target.closest('#svRecapAgain')) return startTour();
   if (e.target.closest('#svRecapClose')) return closeScene();
-  if (e.target.closest('#svRecapQuiz')) return closeScene(); // the link then scrolls to the quiz
+  if (e.target.closest('#svRecapQuiz')) return closeScene(true); // the link then scrolls to the quiz
   if (e.target.closest('#svRecapTop')) {
     e.preventDefault();
-    closeScene();
+    closeScene(true);
     return showInHero(); // up to the picture, and its newest link pulses once
   }
-  if (e.target.closest('a[href^="#"]')) closeScene(); // the link then scrolls to the chart
+  if (e.target.closest('a[href^="#"]')) closeScene(true); // the link then scrolls to the chart
 });
 
 // ---------------------------------------------------------------- hero

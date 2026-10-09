@@ -81,10 +81,13 @@ function milestone() {
 const RULE = () => (revealedCount() >= revealCapacity() && revealCapacity() ? 'Every link this picture can draw is on it.' : 'Watch scenes or answer the quiz to draw more links.');
 document.addEventListener('cs:opening', () => (inScene = true));
 document.addEventListener('cs:reward', (e) => inScene && e.detail && (toShow = e.detail.key));
-document.addEventListener('cs:closed', () => {
+document.addEventListener('cs:closed', (e) => {
   inScene = false;
   const k = toShow;
   toShow = null;
+  // A close that is the first half of a jump elsewhere (a chart, the timeline, the quiz) leaves the page where the jump puts it: the link is already drawn, and the
+  // hero's own note names it for when the reader comes back (the draw-in of all the pairs waits for the next ordinary close).
+  if (e.detail?.nav) return;
   if (pending) return drawIn(); // the draw-in of every pair covers a link just earned
   if (k) setTimeout(() => showInHero(k), 250);
 });
