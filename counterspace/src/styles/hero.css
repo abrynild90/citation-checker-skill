@@ -227,6 +227,7 @@
 /* Wide windows: three sentences from the data fill the empty sky at the top right, and the picture is taller. */
 .hero-glance{display:none}
 .hero-glance li.hg-pull{display:none}
+.hg-solo{display:none}
 @media (min-width:1600px){
   .hero-glance{display:block;position:absolute;z-index:2;top:var(--s-6);right:var(--edge);width:min(460px,28vw);padding:0;color:var(--muted);pointer-events:none;animation:rise var(--dur-hero) var(--ease) 260ms both}
   .hero-glance[hidden]{display:none}
@@ -308,7 +309,12 @@
   .hero-glance ul{margin:0;padding:0;list-style:none}
   .hero-glance li{font:400 15px/1.5 var(--sans);padding-left:var(--s-4);position:relative}
   .hero-glance li:not(:last-child){display:none}
-  .hero-glance li::before{content:"";position:absolute;left:0;top:.72em;width:8px;border-top:2px solid var(--hero-accent-2)}
+  /* one fact only: a sentence, not a list of one under a heading */
+  .hero-glance .hg-t{display:none}
+  .hero-glance li{padding-left:0}
+  .hero-glance li::before{display:none}
+  .hg-full{display:none}
+  .hg-solo{display:inline}
   .hero-glance b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
 }
 

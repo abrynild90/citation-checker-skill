@@ -213,7 +213,9 @@ function writeGlance() {
     `<li>The first test was in <b>${fmtY(parse(first.date))}</b>. The last one that destroyed a satellite was in <b>${fmtMonthYear(parse(LAST_DA))}</b>.</li>` +
     `<li><b>${laws.length}</b> laws and policies, from <b>${fmtY(parse(laws[0].start))}</b> to <b>${fmtY(parse(laws.at(-1).start))}</b>.</li>` +
     `<li class="hg-pull">${pullQuote(waits)}</li>` + // wide windows only (hero.css); the longest wait stays the last item, the one a laptop window keeps
-    `<li>The longest wait from a weapon to the first later law: <b>${long.num}&nbsp;${long.unit}</b>.</li></ul>`;
+    // On a laptop window this is the only fact shown, so it stands alone as one sentence (no header, no dash): the short wording below carries "in our records" with it.
+    `<li class="hg-long"><span class="hg-full">The longest wait from a weapon to the first later law: <b>${long.num}&nbsp;${long.unit}</b>.</span>` +
+    `<span class="hg-solo">In our records, the longest wait from a weapon to the first later law is <b>${long.num}&nbsp;${long.unit}</b>.</span></li></ul>`;
   box.hidden = false;
 }
 
