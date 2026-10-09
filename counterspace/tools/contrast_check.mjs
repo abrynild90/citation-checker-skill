@@ -2,7 +2,7 @@
 // For each such node it hides all text, scrolls the node into view, screenshots its box (the real pixels behind the glyphs) and computes the contrast
 // of the node's actual colour (fill or colour, times opacity) against those pixels. The reported figure is the 25th-percentile pixel, so a border or a
 // gridline inside the box does not fail a label that sits on a good background. Thresholds: 4.5:1, or 3:1 for large text.
-// Usage: NODE_PATH=tools/node_modules PORT=9950 node tools/contrast_check.mjs        (exit code 1 when any node is below its threshold)
+// Usage: NODE_PATH=tools/node_modules PORT=9950 [VPS=1440x900,1920x1080] [CDN_DIR=<d3.js three.js bm.jpg nt.jpg>] node tools/contrast_check.mjs        (exit code 1 when any node is below its threshold)
 // Needs: jsdelivr (axe-core, test only, never shipped) and the page folder served by this script.
 import { chromium } from 'playwright';
 import http from 'http';
@@ -12,12 +12,15 @@ import path from 'path';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..'),
   PORT = +(process.env.PORT || 9950),
   AXE = 'https://cdn.jsdelivr.net/npm/axe-core@4.10.2/axe.min.js',
-  CONFIGS = [
-    ['dark', 1440, 900],
-    ['light', 1440, 900],
-    ['dark', 375, 800],
-    ['light', 375, 800],
-  ];
+  // VPS=1440x900,1920x1080 overrides the widths (each is checked in the dark and the light scheme)
+  CONFIGS = process.env.VPS
+    ? process.env.VPS.split(',').flatMap((v) => ['dark', 'light'].map((s) => [s, ...v.split('x').map(Number)]))
+    : [
+        ['dark', 1440, 900],
+        ['light', 1440, 900],
+        ['dark', 375, 800],
+        ['light', 375, 800],
+      ];
 const server = http
   .createServer((q, r) => {
     const f = path.join(ROOT, q.url.split('?')[0] === '/' ? 'index.html' : q.url.split('?')[0]);
