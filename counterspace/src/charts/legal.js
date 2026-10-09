@@ -882,7 +882,7 @@ function legalScrollMain() {
   if (stuck === legalCompact && !changed) return;
   if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return; // never rebuild under a focused symbol
   const h0 = band.offsetHeight;
-  if (!legalCompact) bandFullH = h0;
+  if (!legalCompact) (bandFullH = h0), document.documentElement.style.setProperty('--band-full-h', h0 + 'px');
   legalCompact = stuck;
   stripDom = want;
   drawLegal();
@@ -913,6 +913,7 @@ export function probeBand() {
   const band = document.getElementById('legalBand'),
     was = legalCompact;
   if (was) return; // already stuck: legalScroll keeps --band-h current
+  document.documentElement.style.setProperty('--band-full-h', band.offsetHeight + 'px'); // the strip as it stands over the test chart's heading (see #chartA in charts.css)
   legalCompact = true;
   band.classList.add('compact');
   drawLegal();
