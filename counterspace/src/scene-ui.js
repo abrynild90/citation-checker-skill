@@ -547,6 +547,24 @@ function toggleSrc(open) {
   if (open) toggleNextPop(false); // one note at a time over the story column
   slPop.hidden = !open;
   slBtn.setAttribute('aria-expanded', String(open));
+  if (open) snapPop(slPop);
+}
+// A note that opens over the foot of the story column (short window) covers whole rows of the list of steps, never half of one: when its top edge falls inside a row,
+// the note grows upward to that row's top (its content stays centred in it).
+function snapPop(pop) {
+  pop.style.minHeight = '';
+  pop.classList.remove('snap');
+  const pr = pop.getBoundingClientRect(),
+    sr = stepsEl.getBoundingClientRect();
+  if (!pr.height || !sr.height || pr.top <= sr.top || pr.top >= sr.bottom) return;
+  for (const li of stepsEl.children) {
+    const r = li.getBoundingClientRect();
+    if (r.top < pr.top - 1 && r.bottom > pr.top + 1) {
+      pop.classList.add('snap');
+      pop.style.minHeight = Math.ceil(pr.height + (pr.top - r.top) + 2) + 'px';
+      break;
+    }
+  }
 }
 slBtn.onclick = () => toggleSrc(slPop.hidden);
 // Short desktop window: the scenes to go to next open from a pill in the source row, over the end of the story column like the source note
@@ -554,6 +572,7 @@ function toggleNextPop(open) {
   if (open) toggleSrc(false);
   slNextPop.hidden = !open;
   $('slNext')?.setAttribute('aria-expanded', String(!!open));
+  if (open) snapPop(slNextPop);
 }
 // "About this picture" and "Where to go next" share one row; the one opened shows its text in the story column under the row (never over the steps or the source).
 const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },

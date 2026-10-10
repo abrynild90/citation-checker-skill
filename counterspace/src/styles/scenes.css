@@ -1645,6 +1645,11 @@
   .overlay .sl-pop[hidden] {
     display: none;
   }
+  .overlay .sl-pop.snap:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .overlay .sl-pop p {
     margin: 0;
     overflow-wrap: anywhere;
