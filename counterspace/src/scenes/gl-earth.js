@@ -63,12 +63,13 @@ void main(){
     dt += magL * (0.50 * (vn(qd * 700.0) - 0.5) + 0.35 * (vn(qd * 1700.0 + 5.3) - 0.5) + 0.25 * (vn(qd * 4200.0 + 2.1) - 0.5));
   }
   day *= 1.0 + dt * (0.7 + 0.45 * magL) * (1.0 - 0.75 * water);
-  day = pow(day, vec3(0.93)) * vec3(1.04, 1.01, 0.98);
+  day = pow(day, vec3(0.96));
+  day = mix(day, vec3(dot(day, vec3(0.2126, 0.7152, 0.0722))), 0.10);
   float dif = max(dot(Nb, L), 0.0);
   float dayAmt = smoothstep(-0.10, 0.26, ndl);
   float tw = exp(-pow((ndl - 0.04) / 0.13, 2.0));
   vec3 sunCol = mix(vec3(1.0, 0.985, 0.95), vec3(1.0, 0.6, 0.38), clamp(tw * 0.9, 0.0, 1.0));
-  vec3 lit = day * (0.10 + 1.45 * pow(dif, 0.85)) * sunCol * uDay + vec3(0.03, 0.09, 0.20) * uSea * water * (0.15 + dif);
+  vec3 lit = day * (0.10 + 1.18 * pow(dif, 0.85)) * sunCol * uDay + vec3(0.03, 0.09, 0.20) * uSea * water * (0.15 + dif);
   float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
   vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt * (1.0 - 0.9 * water); // no warm patches on the open ocean (cloud and airglow in the night picture)
   vec3 dark = (vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100)) * uNight + lamp * 1.15 * uLights;
@@ -83,8 +84,8 @@ void main(){
   }
   cl *= uCloudAmt;
   float fr = pow(1.0 - ndv, 4.0);
-  col += (vec3(0.20, 0.36, 0.62) * fr * 0.5) * water * dayAmt * (1.0 - cl);
-  vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.30 * pow(max(ndl, 0.0), 0.8)) * sunCol;
+  col += (vec3(0.20, 0.36, 0.62) * fr * 0.30) * water * dayAmt * (1.0 - cl);
+  vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.08 * pow(max(ndl, 0.0), 0.8)) * sunCol;
   vec3 cloudCol = mix(vec3(0.030, 0.042, 0.075), cLit, dayAmt);
   // cloud albedo fades to nothing at the terminator and on the night side, and stays a soft blue-grey over dark ocean
   col = mix(col, cloudCol * vec3(0.84, 0.90, 1.0), cl * 0.5 * smoothstep(0.6, 1.0, ndl));
@@ -92,8 +93,8 @@ void main(){
   vec3 haze = mix(vec3(0.16, 0.38, 0.85), vec3(0.46, 0.73, 1.0), clamp(ndl * 1.5 + 0.3, 0.0, 1.0));
   haze = mix(haze, vec3(1.0, 0.5, 0.25), tw * 0.5);
   float sunny = 0.10 + 0.90 * dayAmt;
-  col = mix(col, col * 0.5 + haze * 0.9, pow(limb, 3.0) * 0.38 * sunny);
-  col += haze * pow(limb, 6.0) * 0.42 * sunny;
+  col = mix(col, col * 0.5 + haze * 0.9, pow(limb, 3.0) * 0.22 * sunny);
+  col += haze * pow(limb, 6.0) * 0.23 * sunny;
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
 }`;
@@ -267,7 +268,7 @@ export const earthMethods = {
     this._bindPictures(this._wantedPictures(), false);
     root.add(new T.Mesh(new T.SphereGeometry(1, IS_PHONE ? 72 : 96, IS_PHONE ? 48 : 64), mat));
     // Atmosphere glow: a shell far enough out that its edge is fully faded
-    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: (this.sim.cfg.atmoK ?? (this.sim.cfg.spin ? 1.1 : 1)) * 0.65 }, uScale: { value: 1 }, uFloor: { value: this.sim.cfg.atmoFloor ?? 0.03 } };
+    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: (this.sim.cfg.atmoK ?? (this.sim.cfg.spin ? 1.1 : 1)) * 0.45 }, uScale: { value: 1 }, uFloor: { value: this.sim.cfg.atmoFloor ?? 0.03 } };
     this._au = au;
     root.add(
       new T.Mesh(

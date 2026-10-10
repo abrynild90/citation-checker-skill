@@ -152,7 +152,8 @@
 .guide{stroke:var(--accent-2);stroke-width:1.5;stroke-dasharray:4 3;pointer-events:none}
 .handoff line{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:2 3}
 .handoff text{fill:var(--warn);font:600 13px var(--sans);paint-order:stroke;stroke:var(--ground);stroke-width:3px;stroke-linejoin:round}
-.badge3d path{fill:var(--surface-2);stroke:var(--muted);stroke-width:1.1;stroke-linejoin:round}
+.badge3d circle{fill:var(--ground);stroke:var(--muted);stroke-width:1.1}
+.badge3d path{stroke:none}
 .badge3d path.top{fill:var(--muted)}
 .mark .badge3d{filter:drop-shadow(0 0 1.5px var(--ground)) drop-shadow(0 0 1px var(--ground))}
 .note{font-size:13px;color:var(--faint)}
@@ -523,3 +524,5 @@ details.table>summary{scroll-margin-top:110px}
 /* the time between a weapon and the first later law: the same small pill everywhere (the picture, the scene's law card, the quiz answer) */
 .gap-pill,.q-gap{display:inline-block;padding:1px 10px;margin-right:6px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface-2);color:var(--text);font:600 12.5px/1.6 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
 .card .nolaw{margin:var(--s-2) 0 0;color:var(--faint);font:500 13px/1.4 var(--sans)}
+
+.legal-quick-key{margin:10px 0 12px;gap:6px 18px;font-size:12px}

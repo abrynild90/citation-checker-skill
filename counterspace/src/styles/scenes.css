@@ -2495,3 +2495,5 @@
   .overlay .large-type .sv-list-btn { font-size: 12px; padding-inline: 8px; }
   .overlay .large-type .sv-list-btn .ico { display: none; }
 }
+
+.overlay .sc-diagram{align-self:flex-start;margin:4px 0 10px}

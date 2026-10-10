@@ -351,3 +351,5 @@
 @media(max-width:639px) {
   .hero-title .h1-main { white-space: normal; overflow-wrap: anywhere; }
 }
+
+.ht-event-note{font-weight:500}

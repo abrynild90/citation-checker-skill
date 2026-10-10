@@ -117,7 +117,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
           return fitPose(
             P,
-            n,
+            cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : n,
             scl(cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97),
             {
               dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time

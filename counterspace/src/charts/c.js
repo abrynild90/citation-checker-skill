@@ -10,7 +10,7 @@ import {
   LAST_DA,
   NK,
   actorKey,
-  badge,
+  badge, SCENE_BADGE_MARKUP,
   colorOf,
   fmt,
   fmtMY,
@@ -412,7 +412,7 @@ export function drawC(el = document.getElementById('svgC')) {
   document.getElementById('cFull').setAttribute('aria-pressed', !zoom);
   const ink = (shape) => shape.replace('{p}', 'style="fill:var(--muted);stroke:var(--muted);stroke-width:1.5"'),
     cube =
-      '<g class="badge3d" transform="scale(1.15)"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>';
+      SCENE_BADGE_MARKUP;
   setKey(
     'legendC',
     keyMarkup([

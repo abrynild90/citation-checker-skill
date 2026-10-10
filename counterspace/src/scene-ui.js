@@ -9,6 +9,7 @@ import { loadEarth } from './scenes/earth.js';
 import { HERO, SCENES } from './scenes/config.js';
 import { buildSim } from './scenes/sim.js';
 import { renderSVG } from './scenes/svg-fallback.js';
+import { fitBanner } from './scenes/labels.js';
 import { hideCard, legalKindWords, setGuide } from './ui.js';
 import { linkText, pairsAt } from './links.js';
 import { drawnPara, pairWord, recapLine, recapLinks } from './recap.js';
@@ -150,6 +151,7 @@ const overlay = $('overlay'),
   viewsEl = $('scViews'),
   staticEl = $('scStatic'),
   staticTxt = $('scStaticTxt'),
+  diagramBtn = $('scDiagram'),
   exportBtn = $('scExport'),
   statusEl = $('scStatus'),
   stateEl = $('sceneState'),
@@ -160,6 +162,7 @@ const overlay = $('overlay'),
   slLinks = $('slLinks'),
   slPop = $('slPop'),
   slNextPop = $('slNextPop');
+const pictureNote = view.querySelector('.illus .full'), livePictureNote = pictureNote.textContent;
 // The same queries as scenes.css: the phone layout, the layout with the picture above the story, and the short and wide layout (a phone on its side).
 const PHONE = '(max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px)',
   COMPACT = matchMedia(PHONE),
@@ -186,6 +189,7 @@ let wideSel = -1,
   ttlTxt = '',
   lblTxt = '',
   lastUserScroll = -Infinity, // when the reader last scrolled the story themselves
+  diagramOnly = false,
   stillOnly = false; // the open scene shows a still diagram (animation off or 3D unavailable)
 export function setHeroSim(s) {
   heroSim = s;
@@ -300,6 +304,12 @@ export async function openScene(id, originEl, viaTour) {
   epi = null;
   wideSel = -1;
   stillOnly = false;
+  diagramOnly = false;
+  diagramBtn.textContent = 'Diagram';
+  diagramBtn.setAttribute('aria-label', 'Show explanatory diagram');
+  diagramBtn.hidden = true;
+  pictureNote.textContent = livePictureNote;
+  if (host) { host.canvas.hidden = false; if (host.labelLayer) host.labelLayer.hidden = false; }
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -346,6 +356,7 @@ export async function openScene(id, originEl, viaTour) {
   }
   stillOnly = !h;
   staticMode(!h);
+  diagramBtn.hidden = !h || !cfg.explanationAlt;
   if (tour && !h) tour.timer = setTimeout(tourNext, REDUCED ? 12000 : 9000); // a still diagram has no run: it stays up for a while, then the tour moves on
   syncScrub(h ? h.t : 0);
   asideBody.scrollTop = 0;
@@ -496,9 +507,13 @@ function syncSceneTitle(cfg) {
 function arrangeExport() {
   (COMPACT.matches ? slPop : $('sceneCtrl')).append(exportBtn);
   if (COMPACT.matches) {
+    diagramBtn.className = 'sl-btn';
+    $('sceneSrcLine').insertBefore(diagramBtn, slPop);
     $('sceneSrcLine').insertBefore(moreBtn, slPop);
     slPop.append(slLinks);
   } else {
+    diagramBtn.className = 'btn small sc-diagram';
+    $('sceneStepsSection').before(diagramBtn);
     $('sceneStepsSection').before(moreBtn);
     $('sceneSrcLine').insertBefore(slLinks, slPop);
   }
@@ -1286,7 +1301,9 @@ function staticMode(on) {
     setPlayBtn(false);
   } else setPlayBtn(true);
   stepsNote.textContent = on
-    ? 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
+    ? curSim?.cfg.explanationAlt
+      ? 'The diagram explains the event. The steps below give its sequence; animation is not running.'
+      : 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
     : 'Select a step to jump to it.';
   if (on && curSim) {
     stepIdx = stepAt(curSim.cfg.staticT ?? curSim.still ?? 0);
@@ -1296,6 +1313,34 @@ function staticMode(on) {
   exportBtn.querySelector('span').textContent = on ? 'Save this diagram' : 'Save image';
   stepsEl.querySelectorAll('.step').forEach((b) => (on ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));
 }
+// The diagram is a deliberate view, available even when animation works. Returning preserves the paused time.
+diagramBtn.onclick = () => {
+  if (!host || !curSim?.cfg.explanationAlt || !glOK) return;
+  endTour(false);
+  host.interrupt();
+  diagramOnly = !diagramOnly;
+  stillOnly = diagramOnly;
+  host.canvas.hidden = diagramOnly;
+  if (host.labelLayer) host.labelLayer.hidden = diagramOnly;
+  if (diagramOnly) {
+    renderSVG(curSim, view);
+    staticMode(true);
+    staticTxt.textContent = 'This diagram shows the relationship. Choose Animation to return to the paused scene.';
+    $('scRetry').hidden = true;
+    diagramBtn.textContent = 'Animation';
+    diagramBtn.setAttribute('aria-label', 'Return to paused animation');
+  } else {
+    view.querySelector(':scope > svg')?.remove();
+    pictureNote.textContent = livePictureNote;
+    fitBanner(view);
+    staticMode(false);
+    host.update(host.t);
+    syncScrub(host.t);
+    setPlayBtn(false);
+    diagramBtn.textContent = 'Diagram';
+    diagramBtn.setAttribute('aria-label', 'Show explanatory diagram');
+  }
+};
 // "Try again": forget that 3D failed and open the same scene once more.
 $('scRetry').onclick = () => {
   if (!cur) return;
@@ -1744,14 +1789,14 @@ function svgToPNG(svg, title, cite) {
       g.textBaseline = 'middle';
       g.fillStyle = '#ffc86b';
       g.font = `600 ${Math.round(14 * s)}px ${SANS}`;
-      g.fillText('Drawn for illustration. Orbit heights are squeezed to fit.', 16 * s, hb / 2);
+      g.fillText(svg.dataset.explanation ? 'Schematic diagram. Geometry is illustrative.' : 'Drawn for illustration. Orbit heights are squeezed to fit.', 16 * s, hb / 2);
       g.fillStyle = '#eef2fb';
       g.font = `600 ${Math.round(25 * s)}px ${SERIF}`;
       g.fillText(title, 16 * s, hb + H + 24 * s);
       const srcTxt = `Source: ${String(cite || '')
         .trim()
         .replace(/[.;,\s]+$/, '')}.`;
-      const credit = svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Land map: Natural Earth (public domain).';
+      const credit = svg.dataset.explanation ? 'Schematic diagram.' : svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Land map: Natural Earth (public domain).';
       // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
       let f = Math.round(15 * s);
       for (; f > 10 * s; f -= 0.5 * s) {
@@ -1771,7 +1816,7 @@ function svgToPNG(svg, title, cite) {
 export async function exportStill() {
   if (!cur) return null;
   await fontsReady; // the print layout measures and draws text on canvas
-  if (host && glOK) return host.stillPNG(cur.title, cur.cite);
+  if (host && glOK && !stillOnly) return host.stillPNG(cur.title, cur.cite);
   const svg = view.querySelector(':scope > svg');
   if (!svg) throw new Error('No diagram to save');
   // The diagram is laid out afresh in an off-screen stage 760 px wide (so the Earth fills more of the frame): its 11 px labels then

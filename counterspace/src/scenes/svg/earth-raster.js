@@ -110,7 +110,7 @@ function rasterCore(P, day, night) {
       let t = ndl / 0.34;
       t = t < 0 ? 0 : t > 1 ? 1 : t;
       const lam = ndl > 0 ? (ndl > 0.9 ? 1 : ndl / 0.9) : 0,
-        dayK = t * t * (3 - 2 * t) * (0.6 + 0.52 * lam); // soft terminator, gentle form shading
+        dayK = t * t * (3 - 2 * t) * (0.6 + 0.40 * lam); // soft terminator, gentle form shading
       // dim blue light on the dark side keeps the continents readable
       let r = tr * (dayK + 0.03),
         gr = tg * (dayK + 0.05),
@@ -174,7 +174,7 @@ function rasterCore(P, day, night) {
               c8 = c4 * c4,
               c16 = c8 * c8,
               c32 = c16 * c16,
-              sp = c32 * c32 * c32 * c8 * wat * 70; // a small soft highlight (about ch^200)
+              sp = c32 * c32 * c32 * c8 * wat * 42; // a small soft highlight (about ch^200)
             r += sp;
             gr += sp * 0.96;
             bl += sp * 0.88;
@@ -188,17 +188,18 @@ function rasterCore(P, day, night) {
         let lit = (ndl + 0.25) / 0.75;
         lit = lit < 0 ? 0 : lit > 1 ? 1 : lit;
         const rim = fr * (0.12 + 0.88 * lit * lit * (3 - 2 * lit));
-        r += rim * 70;
-        gr += rim * 140;
-        bl += rim * 235;
+        r += rim * 40;
+        gr += rim * 85;
+        bl += rim * 140;
       }
       // --- write (tiny dither against banding in the dark gradients)
       seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
       const dn = (seed >>> 24) / 255 - 0.5,
         q = (j * SW + i) * 4;
-      o[q] = r + dn;
-      o[q + 1] = gr + dn;
-      o[q + 2] = bl + dn;
+      const lum = 0.2126 * r + 0.7152 * gr + 0.0722 * bl;
+      o[q] = r * 0.9 + lum * 0.1 + dn;
+      o[q + 1] = gr * 0.9 + lum * 0.1 + dn;
+      o[q + 2] = bl * 0.9 + lum * 0.1 + dn;
       o[q + 3] = 255;
     }
   }

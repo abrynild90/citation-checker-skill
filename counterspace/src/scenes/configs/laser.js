@@ -4,6 +4,7 @@ import { C } from './shared.js';
 
 export const LASER = {
   id: 'laser',
+  explanationAlt: 'Schematic horizon view: a ground station at White Sands aims a laser toward MSTI-3 while it is above the horizon. The drawn beam and satellite shape are illustrative; detailed test results are not public.',
   date: '1997-10-17',
   title: 'MIRACL: a US laser fired at a satellite (1997)',
   shells: ['LEO'],

@@ -306,61 +306,6 @@ export const modelMethods = {
     const g = K.build();
     g.userData.body = g.userData.meshes.get(foil);
     g.userData.sat = true;
-    if (tug) {
-      // SJ-21 (tug): a second smaller dish on a short boom, and a generic grapple boom (illustrative: SWF does not describe any arm on SJ-21) that stows
-      // folded and reaches toward its docking partner.
-      const dk = this._mat(0x1c2233),
-        boom = new T.Mesh(new T.CylinderGeometry(0.0003, 0.0003, 0.007, 8), this._mat(0xaab3c2, { metalness: 0.85, roughness: 0.38 })),
-        dish2 = new T.Group();
-      boom.position.set(0.0042, -0.0066, 0.0035);
-      boom.rotation.z = -0.35;
-      g.add(boom);
-      const k2 = new Kit(T);
-      k2.group(0.0054, -0.0102, 0.0035, PI + 0.5, 0, 0, () => {
-        const pts = [];
-        for (let i = 0; i <= 8; i++) pts.push(new T.Vector2((0.0022 * i) / 8, 0.0009 * (i / 8) ** 2));
-        k2.geo(this._mat(0xeceff5, { side: T.DoubleSide, metalness: 0.3, roughness: 0.4 }), new T.LatheGeometry(pts, 20));
-      });
-      dish2.add(...k2.build().children);
-      g.add(dish2);
-      const arm = new T.Group(),
-        armM = this._mat(0xffeaa8, { emissive: 0x6b5a1e }), // a light, warm boom that stands out from the grey bus
-        seg = (x0, y0, x1, y1, r) => {
-          const L = Math.hypot(x1 - x0, y1 - y0),
-            q = new T.Mesh(new T.CylinderGeometry(r, r, L, 8), armM);
-          q.rotation.z = Math.PI / 2 + Math.atan2(y1 - y0, x1 - x0);
-          q.position.set((x0 + x1) / 2, (y0 + y1) / 2, 0);
-          arm.add(q);
-        };
-      seg(0.006, 0, 0.0135, 0.0036, 0.0011);
-      seg(0.0135, 0.0036, 0.0225, 0, 0.0008);
-      [0.006, 0.0135].forEach((x, i) => {
-        const j = new T.Mesh(new T.BoxGeometry(0.003, 0.003, 0.003), dk);
-        j.position.set(x, i ? 0.0036 : 0, 0);
-        arm.add(j);
-      });
-      [-1, 1].forEach((u) => {
-        const f = new T.Mesh(new T.BoxGeometry(0.0034, 0.0004, 0.0004), dk);
-        f.position.set(0.0243, 0, u * 0.0012);
-        arm.add(f);
-      });
-      g.add(arm);
-      // each frame the boom points at the partner (docked pair: the other model), extending as the dock window nears and folding once it ends
-      arm.updateMatrixWorld = (force) => {
-        const e = (g.userData.armE ||= this.dyn.find((d) => d.obj === g)),
-          B = e?.it.dockWith && this.dyn.find((d) => d.it.craftId === e.it.dockWith);
-        let f = 0.25;
-        if (B) {
-          const [t0, t1] = e.it.dockT,
-            t = this.t;
-          f = Math.max(0.25, Math.min(1, (t - (t0 - 0.12)) / 0.1, (t1 + 0.04 - t) / 0.04));
-          const d = g.worldToLocal(g.parent.localToWorld(B.obj.position.clone())); // the partner, in this model's own (possibly rotated) frame
-          if (d.lengthSq() > 1e-12) arm.quaternion.setFromUnitVectors(new T.Vector3(1, 0, 0), d.normalize());
-        }
-        arm.scale.set(0.5 + 0.45 * f, 2.1, 2.1);
-        T.Group.prototype.updateMatrixWorld.call(arm, force);
-      };
-    }
     if (halo) {
       // A glow behind a craft is drawn only when it carries state (a status colour, or the laser glow); otherwise the rim light does the separating.
       const h = new T.Sprite(

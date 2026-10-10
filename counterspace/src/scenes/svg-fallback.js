@@ -16,6 +16,7 @@ import { requestFullEarth, wantsFullEarth } from './svg/upgrade.js';
 import { prewarmEarth } from './svg/earth-raster.js';
 import { fontFaceCSS, rememberSim, simOf } from './svg/still-frame.js';
 import { SANS } from '../fonts.js';
+import { renderExplanation } from './svg/explanations.js';
 
 prewarmEarth(); // a worker starts decoding the embedded Earth images while the page boots, so the first picture finds it ready
 
@@ -25,6 +26,16 @@ prewarmEarth(); // a worker starts decoding the embedded Earth images while the 
 let svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
 
 export function renderSVG(sim, el, t = sim.still, opts = {}) {
+  if (!opts.panel && sim.cfg.explanationAlt) {
+    const note = el.querySelector('.illus .full');
+    if (note) note.textContent = 'Schematic diagram. Geometry is illustrative.';
+    if (!opts.print) fitBanner(el);
+    const node = renderExplanation(sim, el, opts);
+    if (node) {
+      if (!opts.print && !opts.W) watchStage(sim, el, t, el.clientWidth, el.clientHeight);
+      return node;
+    }
+  }
   if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el, renderSVG, opts);
   const t0 = performance.now(),
     hero = !!sim.cfg.spin && !opts.panel;
@@ -118,7 +129,7 @@ function watchStage(sim, el, t, W, H) {
   new ResizeObserver(() => {
     clearTimeout(st.timer);
     st.timer = setTimeout(() => {
-      if (el.querySelector(':scope > canvas') || !el.querySelector(':scope > svg')) return; // the live globe (or nothing) is on the stage
+      if (el.querySelector(':scope > canvas:not([hidden])') || !el.querySelector(':scope > svg')) return; // the live globe (or nothing) is on the stage
       if (simOf(el.querySelector(':scope > svg')) !== st.sim) return; // a different picture has taken the stage
       const nw = el.clientWidth,
         nh = el.clientHeight;

@@ -32,8 +32,6 @@ const LAW_NAMES = {
     prow: 1,
   },
   'ost-1967': { text: 'Outer Space Treaty, 1967', phone: 'Outer Space Treaty, 1967', prow: 0 },
-  'itu-1992': { text: 'ITU Constitution, Articles 45 and 48, 1992', phone: null },
-  'tallinn-2017': { text: 'Tallinn Manual 2.0 (soft law), 2017', phone: null, end: true },
   'unga-77-41': { text: 'UN General Assembly resolution 77/41, 2022', phone: 'UN resolution, 2022', row: 1, prow: 1 },
 };
 const el = (name, attrs = {}, parent) => {
@@ -67,7 +65,6 @@ export function mountHero(fontsReady, actions = {}) {
   stage.id = 'heroStage';
   replay.hidden = STILL;
   writeText(stage);
-  writeGlance();
   let lastW = 0,
     lastH = 0;
   // The first sweep draws each real link (a weapon, a dashed line, the wait, the law) one after another; the button becomes "Skip" while it runs.
@@ -192,33 +189,6 @@ function writeText(stage) {
     `<p>Laws and policies, in date order.</p><ul>${laws}</ul>`;
 }
 
-// From 1800 px, one more line under the facts, set larger: how many of the linked pairs had the weapon first (counted from the pairs, in words).
-const NUMWORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
-function pullQuote(waits) {
-  const n = waits.length,
-    first = waits.filter((w) => w > 0).length,
-    w = (k) => NUMWORDS[k] ?? String(k);
-  return first === n ? `In all <b>${w(n)}</b> pairs our records link, the weapon came first and the law followed.` : `In <b>${w(first)}</b> of the <b>${w(n)}</b> pairs our records link, the weapon came first.`;
-}
-// A wide window has empty sky at the top right: three plain sentences there, each counted from the data.
-function writeGlance() {
-  const box = document.getElementById('heroGlance');
-  if (!box) return;
-  const first = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1))[0],
-    laws = [...LEGAL].sort((a, b) => (a.start < b.start ? -1 : 1)),
-    waits = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start))),
-    long = gap(Math.max(...waits));
-  box.innerHTML =
-    `<p class="hg-t">In our records</p><ul>` +
-    `<li>The first test was in <b>${fmtY(parse(first.date))}</b>. The last one that destroyed a satellite was in <b>${fmtMonthYear(parse(LAST_DA))}</b>.</li>` +
-    `<li><b>${laws.length}</b> laws and policies, from <b>${fmtY(parse(laws[0].start))}</b> to <b>${fmtY(parse(laws.at(-1).start))}</b>.</li>` +
-    `<li class="hg-pull">${pullQuote(waits)}</li>` + // wide windows only (hero.css); the longest wait stays the last item, the one a laptop window keeps
-    // On a laptop window this is the only fact shown, so it stands alone as one sentence (no header, no dash): the short wording below carries "in our records" with it.
-    `<li class="hg-long"><span class="hg-full">The longest wait from a weapon to the first later law: <b>${long.num}&nbsp;${long.unit}</b>.</span>` +
-    `<span class="hg-solo">In our records, the longest wait from a weapon to the first later law is <b>${long.num}&nbsp;${long.unit}</b>.</span></li></ul>`;
-  box.hidden = false;
-}
-
 // ---------------------------------------------------------------- the drawing
 function build(stage) {
   stage.querySelector('svg')?.remove();
@@ -253,49 +223,9 @@ function build(stage) {
         })
       : [],
     wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
-    glance = document.getElementById('heroGlance'),
-    gl0 = (
-      glance?.classList.remove('gl-off', 'gl-mid'),
-      glance && (glance.style.left = glance.style.width = ''),
-      wide && glance && !glance.hidden && getComputedStyle(glance).display !== 'none' ? glance.getBoundingClientRect() : null
-    ),
     pxDec = wide ? Math.min(W >= 1800 ? 176 : 118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
-    steps = d3.range(0, W + 1, 24).concat(W),
-    // The facts stand in the sky only where no dot, ring or star of the picture would land on them (the box measured against where every mark will sit).
-    hitsMark = (g) =>
-      KIN.some((e) => {
-        if (e.altitude_km == null) return false;
-        const px = x(parse(e.date)),
-          py = yAlt(e.altitude_km, px),
-          r = (e.type === 'nuclear' ? 11 : e.type === 'destructive' ? 7.5 : 5.5) + 8;
-        return px + r > g.left - rect.left - 6 && px - r < g.right - rect.left + 6 && py + r > g.top - rect.top - 6 && py - r < g.bottom - rect.top + 6;
-      }),
-    gr = !gl0
-      ? null
-      : !hitsMark(gl0)
-        ? gl0
-        : (() => {
-            // A mark stands where the stylesheet puts the facts (the 2013 rocket does, on a wide window). They move left, into the sky between the words and the
-            // first mark up there, as one column; if that does not fit either, they are left out of this drawing, so a mark never lies across words.
-            const left = Math.max(...words.map((b) => b.x1)) + 56 * K,
-              ahead = KIN.filter((e) => e.altitude_km != null)
-                .map((e) => ({ px: x(parse(e.date)), py: yAlt(e.altitude_km, x(parse(e.date))) }))
-                .filter((m) => m.px > left && m.py < wordsBottom + 60)
-                .map((m) => m.px - 34 * K),
-              w = Math.min(470 * K, Math.min(W - edge, ...ahead) - left);
-            if (W >= 1500 && w >= 330) {
-              glance.classList.add('gl-mid');
-              glance.style.left = `${Math.round(left)}px`;
-              glance.style.width = `${Math.round(w)}px`;
-              const g2 = glance.getBoundingClientRect();
-              if (!hitsMark(g2)) return g2;
-              glance.classList.remove('gl-mid');
-              glance.style.left = glance.style.width = '';
-            }
-            glance.classList.add('gl-off');
-            return null;
-          })();
+    steps = d3.range(0, W + 1, 24).concat(W);
 
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true', focusable: 'false', style: `--htk:${K}` }),
     defs = el('defs', {}, svg),
@@ -351,7 +281,6 @@ function build(stage) {
   });
 
   // ---- events
-  if (gr) words.push({ x0: gr.left - rect.left - 12, y0: gr.top - rect.top - 10, x1: gr.right - rect.left + 12, y1: gr.bottom - rect.top + 12 });
   const obstacles = [...words],
     marks = [],
     pts = el('g', {}, svg);
@@ -394,19 +323,10 @@ function build(stage) {
         0,
       ),
     markOf = (id) => marks.find((m) => m.e.id === id),
-    sorted = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1)),
     topD = KIN.filter((e) => e.type === 'destructive').sort((a, b) => b.altitude_km - a.altitude_km)[0],
     lastD = KIN.find((e) => e.date === LAST_DA && e.type === 'destructive'),
-    firstM = markOf('us-1959-bold-orion') || markOf(sorted.find((e) => e.altitude_km != null).id),
     nuke = marks.find((m) => m.e.type === 'nuclear'),
     specs = [
-      {
-        m: firstM,
-        t: `${fmtY(parse(sorted[0].date))}: the first tests in our records, by the United States.`,
-        order: ['down-start', 'up-start', 'right'],
-        shift: [60, 84, 110, 150, 200],
-        phone: false,
-      },
       {
         m: markOf(topD.id),
         t: phone
@@ -594,7 +514,7 @@ function build(stage) {
       if (p.ox) el('path', { d: `M${px},${py + 8}V${p.box.y0 + 9}H${p.box.x0 - 4}`, class: 'ht-lead', fill: 'none' }, g);
       else el('line', { x1: lead[0], y1: lead[1], x2: lead[2], y2: lead[3], class: 'ht-lead' }, g);
       el('circle', { cx: px, cy: py, r: 2.5, class: 'ht-lead-dot' }, g);
-      const t = el('text', { class: 'ht-note', 'font-size': noteSize, 'text-anchor': anchor }, g);
+      const t = el('text', { class: 'ht-note ht-event-note', 'font-size': noteSize, 'text-anchor': anchor }, g);
       const y0 = p.dir === 'up' || p.dir === 'down' ? (p.dir === 'up' ? p.box.y0 : p.box.y0 + 2) : p.box.y0;
       p.lines.forEach((l, i) => {
         const ts = el('tspan', { x: anchor === 'end' ? p.box.x1 : tx, y: y0 + noteSize + i * (noteSize + 5) - 2 }, t);

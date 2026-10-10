@@ -9,7 +9,7 @@ import {
   KIN,
   LAST_DA,
   Placer,
-  badge,
+  badge, SCENE_BADGE_MARKUP,
   byId,
   colorOf,
   fmtD,
@@ -505,8 +505,8 @@ export function drawA(el = document.getElementById('svgA')) {
   );
   K.group('3D explainers');
   li(
-    '<g class="badge3d"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>',
-    'Select a cube icon to open a 3D explainer',
+    SCENE_BADGE_MARKUP,
+    'Select a play symbol to open a scene',
   );
   K.done();
   // ---- data table

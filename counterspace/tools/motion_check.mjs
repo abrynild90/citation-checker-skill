@@ -138,6 +138,21 @@ try {
           );
         }
       }
+      if (['starfish', 'laser', 'sj21-tug', 'viasat'].includes(id)) {
+        await page.evaluate(() => window.__cs.host().interrupt());
+        const diagramTime = await page.evaluate(() => window.__cs.host().t);
+        await page.locator('#scDiagram').press('Enter');
+        assert.equal(await page.locator('#sceneView > svg').getAttribute('data-explanation'), id, `${id}: diagram is accessible with keyboard`);
+        assert.equal(await page.locator('#scPlay').isVisible(), false, `${id}: diagram has no running controls`);
+        assert.equal(await page.evaluate(() => window.__cs.host().playing), false, `${id}: diagram pauses animation`);
+        assert.deepEqual(await page.evaluate(() => window.__cs.audit().filter(x => /scene/.test(x.chart || ''))), [], `${id}: diagram labels fit`);
+        const diagramViolations = await page.evaluate(async () => (await axe.run(document.getElementById('scenePanel'))).violations.map(v => v.id));
+        assert.deepEqual(diagramViolations, [], `${id}: diagram accessibility`);
+        await page.locator('#scDiagram').press('Enter');
+        assert.equal(await page.locator('#sceneView > svg').count(), 0, `${id}: animation view returns`);
+        assert.equal(await page.evaluate(() => window.__cs.host().t), diagramTime, `${id}: paused time is preserved`);
+        assert.equal(await page.locator('#scPlay').getAttribute('aria-label'), 'Play', `${id}: returning stays paused`);
+      }
       await page.locator('#scClose').click();
       console.log(width, id, 'controls, idle pause and accessibility OK');
     }
