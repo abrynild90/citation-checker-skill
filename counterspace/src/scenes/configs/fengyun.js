@@ -21,6 +21,9 @@ export const FENGYUN = {
     'anti-satellite missile tests, meaning tests launched from Earth (resolution 77/41). ' +
     'The call is not binding.',
   cite: 'Secure World Foundation, 2026, Table 5-1, p. 05-01 (3,532 cataloged; 2,351 in orbit as of Feb. 2026).',
+  modelNote:
+    'Fengyun-1C is shown with a box-shaped body and two long solar arrays. NASA describes two 1.5 × 4 m arrays. Its size, orientation and motion here are illustrative.',
+  modelSource: 'https://orbitaldebris.jsc.nasa.gov/quarterly-news/pdfs/odqnv13i3.pdf',
   related: 'unga-77-41',
   event: 'cn-2007-fy1c',
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
@@ -44,6 +47,7 @@ export const FENGYUN = {
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
     {
       type: 'target',
+      variant: 'fengyun',
       label: 'Fengyun-1C',
       color: C.tgt,
       big: true,

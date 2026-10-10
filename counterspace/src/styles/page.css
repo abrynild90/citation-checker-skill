@@ -282,3 +282,37 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .symbol-key li { display: inline-flex; align-items: center; gap: 7px; }
 .symbol-key svg { width: 16px; height: 16px; flex: none; fill: currentColor; }
 .symbol-key p { margin: 0; }
+
+/* A short introduction stays under the reader's control, with a stable text area. */
+.first-look { padding-block: 48px; scroll-margin-top: 70px; }
+.first-look h2 { max-width: 28ch; }
+.first-look-progress { display: flex; flex-wrap: wrap; gap: 8px 20px; list-style: none; padding: 0; margin: 24px 0; }
+.first-look-progress button { min-height: 44px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; cursor: pointer; padding: 8px 0; }
+.first-look-progress [aria-current] { color: var(--text); border-color: var(--accent); }
+.first-look-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 780px; border-top: 1px solid var(--line); }
+.first-look-dates p { position: relative; padding-top: 12px; }
+.first-look-dates time { display: block; color: var(--muted); font-size: 14px; }
+.first-look-dates strong { display: block; margin-top: 6px; font-weight: 500; }
+.first-look-copy { max-width: 65ch; min-height: 210px; }
+.first-look-copy h3 { margin: 22px 0 12px; }
+.first-look-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.cap-phone { display: none; }
+@media(max-width:760px) {
+  .first-look { padding-block: 28px; }
+  .first-look-copy { min-height: 340px; }
+  .first-look-progress { gap: 4px 14px; font-size: 13px; }
+  .first-look-dates { gap: 16px; }
+  .cap-phone { display: block; margin: 24px 0; }
+  .cap-phone label { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .cap-phone select { min-height: 44px; padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; font: inherit; }
+  .cap-phone-row { padding: 20px 0 12px; border-bottom: 1px solid var(--line); }
+  .cap-phone-row h5 { display: flex; justify-content: space-between; gap: 16px; margin: 0 0 12px; font-size: 15px; font-weight: 500; }
+  .cap-phone-row h5 span { white-space: nowrap; }
+  .cap-phone-bar { display: flex; height: 16px; }
+  .cap-phone-bar span { background: var(--cap-color); border: 1px solid var(--cap-color); box-sizing: border-box; }
+  .cap-phone-bar .cap-status-P { background: repeating-linear-gradient(135deg,transparent 0 3px,var(--cap-color) 3px 4px); }
+  .cap-phone-bar .cap-status-N { background: radial-gradient(var(--cap-color) 1px,transparent 1px) 0 0/5px 5px; border-style: dotted; }
+  .cap-phone-row p { font-size: 13px; line-height: 1.6; margin: 8px 0; }
+  #chartB:not(.show-cap-history) #svgB, #chartB:not(.show-cap-history) .cap-history-hint { display: none; }
+  #chartB #tkB, #chartB #noteB { display: none; }
+}

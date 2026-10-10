@@ -87,7 +87,8 @@
           <button class="btn quiet" id="hdAgain" type="button"><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Draw them on the picture again</button></p>
       </section>
       <div class="hero-actions" id="start" role="group" aria-label="Where to start">
-        <a class="btn primary" href="#timeline"><span id="heroGo">See the timeline</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
+        <button class="btn primary" id="firstLookOpen" type="button" aria-expanded="false" aria-controls="firstLook">Start with one example</button>
+        <a class="btn" href="#timeline"><span id="heroGo">See the timeline</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
         <button class="btn" id="tourBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
         <p class="hero-seen" id="heroSeen" aria-live="polite" hidden></p>
       </div>
@@ -96,6 +97,26 @@
 </header>
 
 <main>
+<section id="firstLook" class="first-look wrap" aria-labelledby="firstLookTitle" hidden>
+  <p class="eyebrow">One event, one later treaty</p>
+  <h2 id="firstLookTitle" tabindex="-1">What can a timeline tell us?</h2>
+  <ol class="first-look-progress" aria-label="Choose a part of the introduction">
+    <li><button type="button" data-look="0" aria-current="step">1. The test</button></li>
+    <li><button type="button" data-look="1">2. The treaty</button></li>
+    <li><button type="button" data-look="2">3. The qualification</button></li>
+  </ol>
+  <div class="first-look-dates" aria-label="Chronology">
+    <p><time datetime="1962-07-09">9 July 1962</time><strong>Starfish Prime</strong></p>
+    <p id="firstLookTreaty" hidden><time datetime="1963-08-05">5 August 1963</time><strong>Limited Test Ban Treaty signed</strong></p>
+  </div>
+  <div id="firstLookCopy" class="first-look-copy" aria-live="polite" aria-atomic="true"></div>
+  <div class="first-look-actions">
+    <button class="btn" id="firstLookBack" type="button">Previous</button>
+    <button class="btn primary" id="firstLookNext" type="button">Next: the treaty</button>
+    <a class="btn" id="firstLookDone" href="#timeline" hidden>Explore the timeline</a>
+    <button class="btn" id="firstLookScene" type="button">See the test in 3D</button>
+  </div>
+</section>
 
 <section class="scenes" id="scenes" aria-labelledby="hScenes">
   <div class="wrap">
@@ -314,7 +335,13 @@
           </header>
           <p data-avoid class="takeaway" id="tkB"></p>
           <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
-          <p class="phone-chart-hint">Scroll across to compare all eight decades. Select a bar for its states and sources.</p>
+          <div id="capPhone" class="cap-phone">
+            <label for="capDecade">Compare capabilities in the <select id="capDecade"></select></label>
+            <div id="capPhoneRows" aria-live="polite"></div>
+            <p id="capPhoneNote" class="note"></p>
+            <button class="btn small" id="capHistory" type="button" aria-expanded="false" aria-controls="svgB">Show all decades</button>
+          </div>
+          <p class="phone-chart-hint cap-history-hint">Scroll across to compare all eight decades. Select a bar for its states and sources.</p>
           <div class="svgbox" id="svgB" tabindex="0" role="region" aria-label="Capabilities by decade"></div>
           <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
           <div class="callout-row">

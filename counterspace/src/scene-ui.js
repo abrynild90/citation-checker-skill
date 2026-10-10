@@ -426,12 +426,16 @@ function syncMore() {
   if (!expanded) hasMore = capFolded || stepsHidden;
   moreBtn.hidden = !hasMore;
   moreBtn.querySelector('span').textContent = expanded
-    ? 'Show less'
-    : capFolded
-      ? steps.length > 4
-        ? 'Read the full account and every step'
-        : 'Read the full account'
-      : 'Show every step';
+    ? COMPACT.matches
+      ? 'Back to summary'
+      : 'Show less'
+    : COMPACT.matches
+      ? 'Full account'
+      : capFolded
+        ? steps.length > 4
+          ? 'Read the full account and every step'
+          : 'Read the full account'
+        : 'Show every step';
 }
 function setMore(open) {
   expanded = open;
@@ -491,6 +495,14 @@ function syncSceneTitle(cfg) {
 }
 function arrangeExport() {
   (COMPACT.matches ? slPop : $('sceneCtrl')).append(exportBtn);
+  if (COMPACT.matches) {
+    $('sceneSrcLine').insertBefore(moreBtn, slPop);
+    slPop.append(slLinks);
+  } else {
+    $('sceneStepsSection').before(moreBtn);
+    $('sceneSrcLine').insertBefore(slLinks, slPop);
+  }
+  syncMore();
 }
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
@@ -528,12 +540,19 @@ function fillStory(cfg) {
   scaleEl.textContent = [
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
+    cfg.modelNote,
     'Earth imagery: NASA Blue Marble and Black Marble (public domain). A simple map is drawn if the photograph cannot load.',
     REDUCED ? 'Your device is set to limit animation, so a still diagram is shown.' : '',
   ]
     .filter(Boolean)
     .join(' ');
   slPop.innerHTML = `<p><strong>Source.</strong> ${esc(citeText(cfg.cite))}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
+  if (cfg.modelSource) {
+    const link = `<p><a href="${esc(cfg.modelSource)}" target="_blank" rel="noopener">Spacecraft shape reference<span class="sr"> (opens in a new tab)</span></a></p>`;
+    slPop.insertAdjacentHTML('beforeend', link);
+    $('svAboutBody').querySelector('.model-source')?.remove();
+    $('svAboutBody').insertAdjacentHTML('beforeend', `<div class="model-source">${link}</div>`);
+  } else $('svAboutBody').querySelector('.model-source')?.remove();
   arrangeExport();
   fillNext(cfg);
   lawBtn.disabled = !cfg.related;

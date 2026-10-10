@@ -138,7 +138,46 @@ function countsB() {
   return { series, units };
 }
 
+// The phone comparison uses the same aggregation and filters as the historical chart.
+let phoneDecade = CAPS.decades.at(-1);
+const phoneSelect = document.getElementById('capDecade');
+phoneSelect.innerHTML = CAPS.decades.map((d) => `<option${d === phoneDecade ? ' selected' : ''}>${d}</option>`).join('');
+function drawPhoneB() {
+  const { series, units } = countsB(),
+    i = CAPS.decades.indexOf(phoneDecade);
+  const max = Math.max(1, ...units.map((u) => series.filter((s) => s.unit.key === u.key).reduce((n, s) => n + s.vals[i], 0)));
+  const names = { D: 'tested or used', P: 'developing', N: 'developing, our reading; SWF’s table has no data' };
+  document.getElementById('capPhoneRows').innerHTML = units
+    .map((u) => {
+      const rows = series.filter((s) => s.unit.key === u.key),
+        total = rows.reduce((n, s) => n + s.vals[i], 0);
+      return `<section class="cap-phone-row"><h5>${u.label}<span>${total} ${total === 1 ? 'state' : 'states'}</span></h5><div class="cap-phone-bar" aria-hidden="true" style="--cap-color:var(${u.v})">${rows.map((s) => `<span class="cap-status-${s.status}" style="width:${(100 * s.vals[i]) / max}%"></span>`).join('')}</div><p>${
+        rows
+          .filter((s) => s.vals[i])
+          .map((s) => `<span><b>${s.vals[i]}</b> ${names[s.status]}</span>`)
+          .join('; ') || 'No capabilities recorded'
+      }</p></section>`;
+    })
+    .join('');
+  document.getElementById('capPhoneNote').textContent =
+    (phoneDecade === '2020s'
+      ? 'Based on SWF’s 2026 assessment. The distinction between tested or used and developing is our reading of its text.'
+      : 'Reconstructed from historical records; SWF did not assess this decade.') +
+    ' Each state counts once within a group and may appear in more than one group.';
+}
+phoneSelect.onchange = () => {
+  phoneDecade = phoneSelect.value;
+  drawPhoneB();
+};
+document.getElementById('capHistory').onclick = (e) => {
+  const on = document.getElementById('chartB').classList.toggle('show-cap-history');
+  e.currentTarget.setAttribute('aria-expanded', String(on));
+  e.currentTarget.textContent = on ? 'Hide the historical chart' : 'Show all decades';
+  if (on) drawB();
+};
+
 export function drawB(el = document.getElementById('svgB')) {
+  if (!EXPORTING) drawPhoneB();
   el.innerHTML = '';
   const phone = isPhoneNow(),
     { W, M, x } = layout(el, DOMAIN, phone && !EXPORTING ? 620 : 300),

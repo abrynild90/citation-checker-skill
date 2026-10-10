@@ -17,6 +17,9 @@ export const SOLWIND = {
     'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons. ' +
     'The positions and the debris spread are drawn to show the idea. They are not calculated.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (285 tracked, 0 still in orbit); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
+  modelNote:
+    'Solwind’s broad shape follows NASA’s P78-1 photograph: a wheel-shaped body beneath an upright solar sail. Its size, orientation and motion here are illustrative.',
+  modelSource: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/p78-1.html',
   related: null,
   event: 'us-1985-solwind',
   launchPhoneK: 1.2,
@@ -65,6 +68,7 @@ export const SOLWIND = {
     },
     {
       type: 'target',
+      variant: 'solwind',
       label: 'Solwind P78-1',
       color: C.tgt,
       big: 5,

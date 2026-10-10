@@ -2459,3 +2459,9 @@
   .overlay .story-scroll:not(.expanded) > .sv-pbody,
   .overlay .story-scroll:not(.expanded) > .story-foot { order:4; }
 }
+
+@media(max-width:760px) {
+  #sceneSrcLine > #sceneMore { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 14px; min-height: 44px; border: 1px solid var(--line); border-radius: 24px; color: var(--text); font-size: 13px; }
+  #sceneSrcLine > #sceneMore[hidden] { display: none; }
+  #slPop .sl-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+}

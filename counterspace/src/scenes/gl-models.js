@@ -184,7 +184,44 @@ export const modelMethods = {
   // _fitModels() rescales the models every frame so a model is never a giant blob when the camera is close, nor a speck when it is far.
   // Small spacecraft (MSTI-3 class): a chamfered bus wrapped in crinkled foil with gold bands, radiators, a star tracker, a sensor barrel, a thruster
   // cluster, a yoke and two cell-gridded wings, and a mast with a parabolic dish and its feed. Nose along +z, wings along x, up is +y.
+  // Identifiable broad shapes only: NASA HEASARC P78-1 photograph and NASA ODQN 13(3), pp. 5–6.
+  // Dimensions, attitude and motion remain illustrative; no invented instruments or appendages.
+  _referenceSatModel(variant) {
+    const T = this.T,
+      K = new Kit(T),
+      PI = Math.PI;
+    const metal = this._mat(0xc3cbd7, { metalness: 0.65, roughness: 0.48 });
+    const foil = this._foil(0xd8b36a),
+      panel = this._panelMat();
+    const back = this._mat(0x566071, { metalness: 0.3, roughness: 0.65 });
+    const array = (w, h, x, y, z, rx = 0) => {
+      K.group(x, y, z, rx, 0, 0, () => {
+        K.box(metal, w, h, 0.0005);
+        K.plane(panel, w - 0.0004, h - 0.0004, 0, 0, 0.00027);
+        K.plane(back, w - 0.0004, h - 0.0004, 0, 0, -0.00027, 0, PI, 0);
+      });
+    };
+    if (variant === 'solwind') {
+      // The wheel beneath a single upright sail is the defining outline in the photograph.
+      K.cyl(metal, 0.017, 0.017, 0.008, 0, -0.014, 0, 0, 0, 0, 32);
+      K.cyl(foil, 0.016, 0.016, 0.0014, 0, -0.0185, 0, 0, 0, 0, 32);
+      K.ring(metal, 0.017, 0.0005, 0, -0.0097, 0, PI / 2);
+      K.box(foil, 0.008, 0.008, 0.007, 0, -0.006, 0.004);
+      array(0.03, 0.028, 0, 0.007, -0.002);
+      K.box(metal, 0.0006, 0.028, 0.0006, 0, 0.007, -0.0015);
+    } else {
+      // FY-1C: box body and two long solar arrays; detail beyond this is deliberately omitted.
+      K.geo(foil, chamferBox(T, 0.009, 0.009, 0.009, 0.0006, 0.0002));
+      K.box(metal, 0.044, 0.0006, 0.0006);
+      array(0.016, 0.006, -0.014, 0, 0, -PI / 2);
+      array(0.016, 0.006, 0.014, 0, 0, -PI / 2);
+    }
+    const g = K.build();
+    Object.assign(g.userData, { span: variant === 'solwind' ? 0.044 : 0.046, minPx: 15, maxPx: 50 });
+    return g;
+  },
   _satModel(color, halo, bright, variant) {
+    if (variant === 'solwind' || variant === 'fengyun') return this._referenceSatModel(variant);
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
@@ -427,7 +464,7 @@ export const modelMethods = {
     // Payload-bay doors: a long recessed panel on the back with a centre seam and two hinge lines
     K.geo(deck, new T.CapsuleGeometry(0.0021, 0.015, 4, 12), 0, 0.0043, -0.0034, PI / 2, 0, 0, 1, 1, 0.22);
     K.box(dark, 0.00018, 0.00022, 0.0172, 0, 0.0049, -0.0034);
-    for (const z of [-0.0098, 0.0030]) K.box(dark, 0.0042, 0.00018, 0.00018, 0, 0.0047, z);
+    for (const z of [-0.0098, 0.003]) K.box(dark, 0.0042, 0.00018, 0.00018, 0, 0.0047, z);
     // Wing: a thin rounded slab (generous bevel), dark below with a pale deck on top, set low on the rear body
     const shape = (k) => {
       const q = new T.Shape();
@@ -450,7 +487,16 @@ export const modelMethods = {
       0,
       0,
     );
-    K.geo(deck, new T.ExtrudeGeometry(shape(0.86), { depth: 0.0004, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 2, curveSegments: 6 }), 0, -0.0007, -0.0004, PI / 2, 0, 0);
+    K.geo(
+      deck,
+      new T.ExtrudeGeometry(shape(0.86), { depth: 0.0004, bevelEnabled: true, bevelThickness: 0.0003, bevelSize: 0.0004, bevelSegments: 2, curveSegments: 6 }),
+      0,
+      -0.0007,
+      -0.0004,
+      PI / 2,
+      0,
+      0,
+    );
     // Tail: two small tapered fins canted outward (the X-37B's V tail), white with a dark tip
     const fin = new T.Shape();
     fin.moveTo(0, 0);
@@ -460,16 +506,27 @@ export const modelMethods = {
     fin.closePath();
     for (const s of [-1, 1]) {
       K.group(s * 0.0034, 0.0016, -0.0245, 0, 0, -s * 0.5, () => {
-        K.geo(white, new T.ExtrudeGeometry(fin, { depth: 0.0007, bevelEnabled: true, bevelThickness: 0.0002, bevelSize: 0.0002, bevelSegments: 2 }), -0.00035, 0, 0, 0, PI / 2, 0);
+        K.geo(
+          white,
+          new T.ExtrudeGeometry(fin, { depth: 0.0007, bevelEnabled: true, bevelThickness: 0.0002, bevelSize: 0.0002, bevelSegments: 2 }),
+          -0.00035,
+          0,
+          0,
+          0,
+          PI / 2,
+          0,
+        );
         K.box(dark, 0.0009, 0.0004, 0.0044, 0, 0.0074, -0.0068);
       });
     }
-    K.cyl(dark, 0.0022, 0.0030, 0.0030, 0, 0, -0.0242, PI / 2);
+    K.cyl(dark, 0.0022, 0.003, 0.003, 0, 0, -0.0242, PI / 2);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(under);
     g.userData.sat = true;
     // Engine glow: a small additive blue-white bloom behind the engine bell
-    const eg = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0x9fc8ff, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending }));
+    const eg = new T.Sprite(
+      new T.SpriteMaterial({ map: this.spriteTex, color: 0x9fc8ff, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending }),
+    );
     eg.scale.setScalar(0.011);
     eg.position.set(0, 0, -0.0262);
     g.add(eg);
@@ -529,28 +586,57 @@ export const modelMethods = {
     const wing = (k) => {
       const q = new T.Shape();
       q.moveTo(0.0052 * k, 0.0098 * k);
-      q.lineTo(0.0125 * k, -0.0140 * k);
+      q.lineTo(0.0125 * k, -0.014 * k);
       q.lineTo(0.0125 * k, -0.0192 * k);
       q.lineTo(-0.0125 * k, -0.0192 * k);
-      q.lineTo(-0.0125 * k, -0.0140 * k);
+      q.lineTo(-0.0125 * k, -0.014 * k);
       q.lineTo(-0.0052 * k, 0.0098 * k);
       q.closePath();
       return q;
     };
-    K.geo(under, new T.ExtrudeGeometry(wing(1), { depth: 0.0016, bevelEnabled: true, bevelThickness: 0.0004, bevelSize: 0.0005, bevelSegments: 2 }), 0, -0.0017, 0, PI / 2, 0, 0);
-    K.geo(topShade, new T.ExtrudeGeometry(wing(0.93), { depth: 0.0005, bevelEnabled: true, bevelThickness: 0.0002, bevelSize: 0.0002, bevelSegments: 1 }), 0, -0.0004, -0.0004, PI / 2, 0, 0);
+    K.geo(
+      under,
+      new T.ExtrudeGeometry(wing(1), { depth: 0.0016, bevelEnabled: true, bevelThickness: 0.0004, bevelSize: 0.0005, bevelSegments: 2 }),
+      0,
+      -0.0017,
+      0,
+      PI / 2,
+      0,
+      0,
+    );
+    K.geo(
+      topShade,
+      new T.ExtrudeGeometry(wing(0.93), { depth: 0.0005, bevelEnabled: true, bevelThickness: 0.0002, bevelSize: 0.0002, bevelSegments: 1 }),
+      0,
+      -0.0004,
+      -0.0004,
+      PI / 2,
+      0,
+      0,
+    );
     K.box(dark, 0.0058, 0.0004, 0.0034, 0, 0.0021, 0.0148); // a plain dark patch at the nose end (no cockpit claim)
     for (const s of [-1, 1]) K.box(dark, 0.0072, 0.0004, 0.0022, s * 0.0078, -0.0003, -0.0172); // trailing-edge flaps
     K.cyl(dark, 0.0024, 0.003, 0.0028, 0, 0, -0.0238, PI / 2);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(under);
     g.userData.sat = true;
-    const eg = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xffc89f, transparent: true, opacity: 0.8, depthWrite: false, blending: T.AdditiveBlending }));
+    const eg = new T.Sprite(
+      new T.SpriteMaterial({ map: this.spriteTex, color: 0xffc89f, transparent: true, opacity: 0.8, depthWrite: false, blending: T.AdditiveBlending }),
+    );
     eg.scale.setScalar(0.011);
     eg.position.set(0, 0, -0.0268);
     g.add(eg);
     if (halo) {
-      const h = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: bright ? 0.5 : 0.34, depthWrite: false, blending: T.AdditiveBlending }));
+      const h = new T.Sprite(
+        new T.SpriteMaterial({
+          map: this.spriteTex,
+          color: this._c(color),
+          transparent: true,
+          opacity: bright ? 0.5 : 0.34,
+          depthWrite: false,
+          blending: T.AdditiveBlending,
+        }),
+      );
       h.scale.setScalar(0.07);
       g.add(h);
       g.userData.halo = h;
@@ -585,7 +671,9 @@ export const modelMethods = {
       return m;
     };
     g.add(plume(0.07, 0.0036, 0xff9a52, 0.26, -0.062), plume(0.04, 0.0021, 0xffe3b8, 0.5, -0.047));
-    const halo = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xffb070, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
+    const halo = new T.Sprite(
+      new T.SpriteMaterial({ map: this.spriteTex, color: 0xffb070, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }),
+    );
     halo.scale.setScalar(0.022);
     halo.position.z = -0.032;
     g.add(halo);
@@ -717,7 +805,10 @@ export const modelMethods = {
     ring.position.y = 0.0005;
     g.add(ring);
     // a translucent disc inside the ring and a bright dot at its exact centre: the marker reads as one target seen from any angle
-    const fill = new T.Mesh(new T.CircleGeometry(0.0145, 28), new T.MeshBasicMaterial({ color: this._c(color), transparent: true, opacity: 0.38, side: T.DoubleSide, depthWrite: false }));
+    const fill = new T.Mesh(
+      new T.CircleGeometry(0.0145, 28),
+      new T.MeshBasicMaterial({ color: this._c(color), transparent: true, opacity: 0.38, side: T.DoubleSide, depthWrite: false }),
+    );
     fill.rotation.x = -Math.PI / 2;
     fill.position.y = 0.0004;
     g.add(fill);
@@ -837,15 +928,43 @@ export const modelMethods = {
         wg.setAttribute('position', new T.Float32BufferAttribute(pts, 3));
         wg.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
         wg.setIndex(idx);
-        g.add(new T.Mesh(wg, new T.MeshBasicMaterial({ vertexColors: true, color: 0xdfeaff, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+        g.add(
+          new T.Mesh(
+            wg,
+            new T.MeshBasicMaterial({
+              vertexColors: true,
+              color: 0xdfeaff,
+              transparent: true,
+              opacity: op,
+              depthWrite: false,
+              blending: T.AdditiveBlending,
+              side: T.DoubleSide,
+            }),
+          ),
+        );
       };
-      fade([-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0006, 0.0006, -0.07, 0.0006, 0.0006, -0.07], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.34);
+      fade(
+        [-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0006, 0.0006, -0.07, 0.0006, 0.0006, -0.07],
+        [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 2, 1, 1, 2, 3],
+        0.34,
+      );
       // a tapered V wake: two thin arms that diverge astern and fade out
       [-1, 1].forEach((sd) =>
-        fade([sd * 0.002, 0.0006, -0.034, sd * 0.0036, 0.0006, -0.034, sd * 0.0165, 0.0006, -0.105, sd * 0.0172, 0.0006, -0.105], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.3),
+        fade(
+          [sd * 0.002, 0.0006, -0.034, sd * 0.0036, 0.0006, -0.034, sd * 0.0165, 0.0006, -0.105, sd * 0.0172, 0.0006, -0.105],
+          [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+          [0, 2, 1, 1, 2, 3],
+          0.3,
+        ),
       );
       [-1, 1].forEach((sd) =>
-        fade([sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0128, 0.0006, -0.03, sd * 0.0134, 0.0006, -0.03], [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 2, 1, 1, 2, 3], 0.22),
+        fade(
+          [sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0128, 0.0006, -0.03, sd * 0.0134, 0.0006, -0.03],
+          [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+          [0, 2, 1, 1, 2, 3],
+          0.22,
+        ),
       );
     } else {
       const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
