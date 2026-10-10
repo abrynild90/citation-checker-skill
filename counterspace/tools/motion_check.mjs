@@ -95,6 +95,31 @@ try {
           return h.t >= a.t0 && h.t < a.t1;
         }, i);
         assert.equal(episodeMatches, true, `${id}: episode time remains within its story`);
+        await page.waitForTimeout(120);
+        assert.equal(
+          await page.evaluate((i) => {
+            const h = window.__cs.host(),
+              a = h.sim.cfg.acts[i],
+              steps = h.sim.cfg.status || h.sim.cfg.steps;
+            return [...document.querySelectorAll('#sceneSteps li:not([hidden])')].every((li) => {
+              const t = steps[Number(li.dataset.i)][0];
+              return t >= a.t0 && t < a.t1;
+            });
+          }, i),
+          true,
+          `${id}: visible narrative belongs to selected episode`,
+        );
+        if (width === 1440) {
+          assert.equal(
+            await page.evaluate(() => {
+              const current = document.querySelector('#sceneSteps .now').getBoundingClientRect();
+              const list = document.getElementById('sceneSteps').getBoundingClientRect();
+              return current.height > 0 && current.top >= list.top - 1 && current.bottom <= list.bottom + 1;
+            }),
+            true,
+            `${id}: active episode step is fully visible`,
+          );
+        }
       }
       await page.locator('#scClose').click();
       console.log(width, id, 'controls, idle pause and accessibility OK');
