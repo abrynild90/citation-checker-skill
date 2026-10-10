@@ -17,7 +17,7 @@ const RULES = [
   // internal / software vocabulary a reader does not need
   ['ledger', 'error', /\bledger\b/i, 'say "records", "entries" or "the data"'],
   ['implementation-copy', 'error', /\b(scrub through time|(?:group|capability) memberships|not coded|absent code|interface revision|fetched from|built into the page)\b/i, 'describe the action or finding in plain language'],
-  ['quiz-filler', 'error', /\b(no pressure|many people guess|fair guess|tend to surprise people|nothing here is required reading)\b/i, 'give the result or instruction directly'],
+  ['stock-filler', 'error', /\b(did you know|no pressure|many people guess|fair guess|tend to surprise people|nothing here is required reading)\b/i, 'give the result or instruction directly'],
   ['file-format', 'error', /\b(SVG|PNG|CSV|JSON|HTML|API|WebGL|GPU|URL)\b/, 'name the action ("Download chart", "Save image"), not the file format'],
   ['file-name', 'error', /\b[\w-]+\.(md|json|csv|svg|png|html|mjs|js|py)\b/i, 'point to the page itself, not a file name'],
   ['schema-meta', 'error', /\b(schema|metadata|dataset version|version \d+\.\d+)\b/i, 'drop it, or say "data last updated <date>"'],
