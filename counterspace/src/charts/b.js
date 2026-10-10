@@ -145,7 +145,7 @@ phoneSelect.innerHTML = CAPS.decades.map((d) => `<option${d === phoneDecade ? ' 
 function drawPhoneB() {
   const { series, units } = countsB(),
     i = CAPS.decades.indexOf(phoneDecade);
-  const max = Math.max(1, ...units.map((u) => series.filter((s) => s.unit.key === u.key).reduce((n, s) => n + s.vals[i], 0)));
+  const max = Math.max(1, ...units.flatMap((u) => CAPS.decades.map((_, j) => series.filter((s) => s.unit.key === u.key).reduce((n, s) => n + s.vals[j], 0))));
   const names = { D: 'tested or used', P: 'developing', N: 'developing, our reading; SWF’s table has no data' };
   document.getElementById('capPhoneRows').innerHTML = units
     .map((u) => {
@@ -163,7 +163,7 @@ function drawPhoneB() {
     (phoneDecade === '2020s'
       ? 'Based on SWF’s 2026 assessment. The distinction between tested or used and developing is our reading of its text.'
       : 'Reconstructed from historical records; SWF did not assess this decade.') +
-    ' Each state counts once within a group and may appear in more than one group.';
+    ' Bars use the same scale in every decade. Each state counts once within a group and may appear in more than one group.';
 }
 phoneSelect.onchange = () => {
   phoneDecade = phoneSelect.value;

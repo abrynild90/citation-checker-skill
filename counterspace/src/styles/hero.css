@@ -342,3 +342,12 @@
   .hero-glance li{font:400 14px/1.5 var(--sans)}
   .hero-glance b{font-weight:600;color:var(--text)}
 }
+@media(max-width:639px) {
+  .hero-actions { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+  .hero-actions #firstLookOpen { grid-column: 1 / -1; }
+  .hero-actions .btn { white-space: normal; max-width: 100%; line-height: 1.3; padding-block: 8px; }
+  .hero-actions .btn span { min-width: 0; }
+}
+@media(max-width:639px) {
+  .hero-title .h1-main { white-space: normal; overflow-wrap: anywhere; }
+}

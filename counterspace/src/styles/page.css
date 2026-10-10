@@ -318,3 +318,16 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   #chartB #tkB, #chartB #noteB { display: none; }
 }
 .first-look-actions .btn { white-space: normal; max-width: 100%; min-width: 0; text-align: center; }
+
+@media(max-width:760px) {
+  #pageTitle .nb { white-space: normal; overflow-wrap: anywhere; }
+  .hero-actions .btn, .chart .tools .btn { white-space: normal; max-width: 100%; }
+  .chart .tools, .chart .tools .seg { min-width: 0; max-width: 100%; }
+  .chart .tools .seg { overflow-x: auto; }
+  .chart .refold { min-width: 0; max-width: 100%; }
+  .chart .refold > summary { white-space: normal; flex-wrap: wrap; }
+}
+@media(max-width:760px) {
+  .chart .xnext, .chart .xnext .btn { min-width: 0; max-width: 100%; }
+  .chart .xnext .btn { white-space: normal; line-height: 1.3; padding-block: 8px; }
+}

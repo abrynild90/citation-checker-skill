@@ -96,15 +96,29 @@ try {
       assert.equal(await p.locator('#sceneMore').getAttribute('aria-expanded'), 'true');
       await p.locator('#scClose').click();
       await p.waitForTimeout(400);
-      assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     }
     await p.addStyleTag({ content: 'html { -webkit-text-size-adjust: 200%; text-size-adjust: 200%; }' });
     await p.locator('#firstLookOpen').click();
-    assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     await p.locator('#firstLookBack').focus();
     await p.keyboard.press('Enter');
     assert.equal(await p.locator('[data-look="1"]').getAttribute('aria-current'), 'step');
     if (out) await p.screenshot({ path: path.join(out, `${engine}-${theme}-enlarged-text.png`) });
+    for (const height of [844, 667]) {
+      await p.setViewportSize({ width: 390, height });
+      await p.evaluate(() => window.__cs.openScene('rpo'));
+      await p.waitForTimeout(500);
+      for (const id of ['scClose', 'sceneMore', 'scPlay', 'scViews']) {
+        if (!(await p.locator(`#${id}`).isVisible())) continue;
+        const r = await p.locator(`#${id}`).boundingBox();
+        assert.ok(r.x >= 0 && r.y >= 0 && r.x + r.width <= 390 && r.y + r.height <= height, `enlarged text: ${id} outside screen`);
+      }
+      assert.ok((await p.locator('#asideBody').boundingBox()).height >= 90, 'enlarged account retains room to read and scroll');
+      if (out) await p.screenshot({ path: path.join(out, `${engine}-${theme}-enlarged-scene-${height}.png`) });
+      await p.locator('#scClose').click();
+      await p.waitForTimeout(400);
+    }
     assert.deepEqual(errors, []);
     reports.push({
       engine,
@@ -112,7 +126,7 @@ try {
       cpuThrottling: engine === 'chromium' ? '4x synthetic slowdown' : 'none',
       checks:
         'intro, decade/filter data, full history, touch full account and source, orientation, 200% CSS text-size adjustment, keyboard navigation, axe accessibility, no document overflow',
-      layoutShift: await p.evaluate(() => window.__shifts?.reduce((a, b) => a + b, 0) ?? null),
+      layoutShiftSum: await p.evaluate(() => window.__shifts?.reduce((a, b) => a + b, 0) ?? null),
       timing: await p.evaluate(() =>
         performance.getEntriesByType('navigation').map((n) => ({ domContentLoaded: n.domContentLoadedEventEnd, load: n.loadEventEnd })),
       ),
