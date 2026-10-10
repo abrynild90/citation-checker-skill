@@ -45,13 +45,19 @@ const methods = {
     }
     return null;
   },
+  // The stage height that the pixel numbers of a scene (label offsets, sprite floors, margins) are written for. A live call is at the stage's own size, so the factor is 1; a
+  // still (any other size) is laid out for the stage of a 1440 x 900 window (652 px), so a print never depends on the window it is saved from.
+  _refH(h) {
+    const ch = this.el.clientHeight || h;
+    return Math.abs(h - ch) < 1 ? ch : 652;
+  },
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
   _labelPositions(w, h, u = 1, noBanner = false, statusBox = null) {
     const cam = this.camera.position,
       T = this.T,
       raw = [],
-      k = h / (this.el.clientHeight || h);
+      k = h / this._refH(h);
     for (const L of this.labels) {
       if (L.cls === 'shell' && this.hideShell) {
         raw.push(null);
@@ -325,7 +331,7 @@ const methods = {
     const T = this.T,
       cam = this.camera,
       cp = cam.position,
-      k = h / (this.el.clientHeight || h),
+      k = h / this._refH(h),
       sc = h / (2 * Math.tan((cam.fov * DEG) / 2)),
       V = new T.Vector3(),
       M = this.root.matrixWorld;
@@ -427,7 +433,7 @@ const methods = {
       cam = this.camera,
       cp = cam.position,
       cpa = [cp.x, cp.y, cp.z],
-      k = h / (this.el.clientHeight || h),
+      k = h / this._refH(h),
       sc = h / (2 * Math.tan((cam.fov * DEG) / 2)),
       W3 = new T.Vector3(),
       items = this.sim.items;
