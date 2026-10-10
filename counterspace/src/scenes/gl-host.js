@@ -489,8 +489,8 @@ export class GLHost {
         if (it.shape === 'aircraft' && p) {
           // wings level, nose along the ground track
           const up = new T.Vector3(...norm(p)),
-            a2 = it.pos(Math.min(1, t + 0.004)),
-            a1 = it.pos(Math.max(0, t - 0.004));
+            a2 = it.pos(Math.min(1, t + 0.004)) || p,
+            a1 = it.pos(Math.max(0, t - 0.004)) || p; // at an appearance or retirement boundary, use the visible position for a one-sided heading
           const f = new T.Vector3(...a2).sub(new T.Vector3(...a1));
           f.addScaledVector(up, -f.dot(up));
           if (f.lengthSq() > 1e-12) {

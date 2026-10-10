@@ -20,6 +20,16 @@ try {
     for (const id of await page.evaluate(() => window.__cs.scenes)) {
       await page.evaluate(id => window.__cs.openScene(id), id);
       await page.waitForFunction(() => window.__cs.host()?.scene && window.__cs.earthReady());
+      // Aircraft headings sample nearby positions. A retired aircraft has no position on one side of its boundary.
+      await page.evaluate(() => {
+        const h = window.__cs.host();
+        for (const it of h.sim.items.filter(it => it.kind === 'point' && it.shape === 'aircraft')) {
+          for (let k = 0; k <= 500; k++) {
+            const t = k / 500;
+            if (it.pos(t) && (!it.pos(Math.min(1, t + .004)) || !it.pos(Math.max(0, t - .004)))) h.update(t);
+          }
+        }
+      });
       await page.locator('#sceneStepChoose').selectOption('1');
       assert.equal(await page.evaluate(() => window.__cs.host().playing), false, `${id}: step pauses`);
       assert.equal(await page.locator('#scPlay').getAttribute('aria-label'), 'Play');
@@ -34,6 +44,12 @@ try {
       await page.waitForTimeout(250);
       assert.deepEqual(await page.evaluate(() => ({t: window.__cs.host().t, raf: window.__cs.host().raf})), idle, `${id}: pause is idle`);
       await page.locator('#scPlay').click();
+      if (await page.locator('#scMoreViews').isVisible()) {
+        await page.locator('#scMoreViews').click();
+        assert.equal(await page.evaluate(() => window.__cs.host().playing), false, `${id}: camera menu pauses`);
+        await page.keyboard.press('Escape');
+        await page.locator('#scPlay').click();
+      }
       const box = await page.locator('#sceneView canvas').first().boundingBox();
       await page.mouse.move(box.x + box.width * .45, box.y + box.height * .5);
       await page.mouse.down(); await page.mouse.move(box.x + box.width * .5, box.y + box.height * .5); await page.mouse.up();

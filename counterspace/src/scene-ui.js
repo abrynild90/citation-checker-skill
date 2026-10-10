@@ -257,6 +257,7 @@ ORDER.forEach((s, i) => {
   sheetList.appendChild(li);
 });
 function toggleSheet(open) {
+  if (open && cur) host?.interrupt();
   sheet.hidden = !open;
   listBtn.setAttribute('aria-expanded', String(open));
   if (open) {
@@ -620,6 +621,7 @@ function anchorNote(note) {
   }
 }
 function toggleSrc(open) {
+  if (open && cur) host?.interrupt();
   if (open) toggleNextPop(false); // one note at a time over the story column
   slPop.hidden = !open;
   slBtn.setAttribute('aria-expanded', String(open));
@@ -627,6 +629,7 @@ function toggleSrc(open) {
 slBtn.onclick = () => toggleSrc(slPop.hidden);
 // Short desktop window: the scenes to go to next open from a pill in the source row, over the end of the story column like the source note
 function toggleNextPop(open) {
+  if (open && cur) host?.interrupt();
   if (open) toggleSrc(false);
   slNextPop.hidden = !open;
   $('slNext')?.setAttribute('aria-expanded', String(!!open));
@@ -635,6 +638,7 @@ function toggleNextPop(open) {
 const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
   pairBodies = { about: $('svAboutBody'), next: $('sceneNext') };
 function togglePair(which) {
+  if (which && cur) host?.interrupt();
   if (which) (toggleSrc(false), toggleNextPop(false), toggleLawCard(false)); // one note at a time over the story column
   asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
   Object.keys(pairBtns).forEach((k) => {
@@ -1215,6 +1219,7 @@ function closeMore(focus) {
   if (focus) moreBtn2.focus();
 }
 function openMore(first) {
+  host?.interrupt();
   moreMenu.hidden = false;
   reserveMenu(true);
   moreBtn2.setAttribute('aria-expanded', 'true');
