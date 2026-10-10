@@ -21,7 +21,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     M = (ex.edge ?? 12) * (ex.scale || 1),
     MX = (ex.edgeX ?? ex.edge ?? 12) * (ex.scale || 1); // ex.edgeX (desktop live view: 24): the pill's x stays this far from the left and right edges (the leader is not clamped)
   const out = new Array(list.length).fill(null);
-  let relocMode = false; // true while a fixed (scene-offset) slot is being checked and, if it collides, moved: only the defects the checker names count (see out.relocate)
+  let relocMode = 0; // 1 while a fixed (scene-offset) slot is being checked, 2 while slots are tried for it (then drawn paths and rings count at 30%)
   const order = list
     .map((_, i) => i)
     .filter((i) => list[i])
@@ -103,20 +103,21 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
         for (const b of boxes) if (segBox(c.px, c.py, qx, qy, b)) n += 600;
         for (const s of segs) if (segSeg([c.px, c.py, qx, qy], s)) n += 500;
       }
-      if (lead && !relocMode) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += pl.soft ? 70 : 550;
+      const ok = relocMode === 2 ? 0.3 : relocMode ? 0 : 1; // weight of the drawn paths and ring lines
+      if (lead && ok) for (const pl of obst) if (polyCross([c.px, c.py, qx, qy], pl)) n += (pl.soft ? 70 : 550) * ok;
       const me = { x, y, w: w + 6, h: h + 6 };
       for (let o = 0; o < list.length; o++) {
         const q = list[o];
         if (q && q !== c && Math.abs(q.px - x) < w / 2 + 2 && Math.abs(q.py - y) < h / 2 + 2) n += 400;
       }
-      if (!relocMode) for (const pl of obst) if (polyBox(pl, me)) n += pl.soft ? 90 : 650;
+      if (ok) for (const pl of obst) if (polyBox(pl, me)) n += (pl.soft ? 90 : 650) * ok;
       // Sprites, ring lines and dense particle clumps are things a label must not sit on (its leader may still point into them).
       for (const m of marks) {
         const ddx = Math.max(Math.abs(x - m.x) - w / 2, 0),
           ddy = Math.max(Math.abs(y - m.y) - h / 2, 0);
         if (ddx * ddx + ddy * ddy < (m.r + 3) * (m.r + 3)) n += 700;
       }
-      if (!relocMode) for (const rg of rings) if (polyBox(rg, me)) n += 140; // a thin ring line under a label is a smaller defect than a label on the planet
+      if (ok) for (const rg of rings) if (polyBox(rg, me)) n += 140 * ok; // a thin ring line under a label is a smaller defect than a label on the planet
       if (parts && !relocMode) {
         const pc = parts.count(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
         if (pc > 2) n += Math.min(900, (pc - 2) * 140);
@@ -314,7 +315,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       if (!dropped) break;
     }
   // out.relocate(i, x0, y0, others, mem): label i sits at a fixed slot (x0, y0) set by a scene offset. When that slot lands on a sprite or the planet, makes another
-  // label's box or leader cross its own, or gives it a leader longer than the cap, the nearest slot that does not (within about 0.12 W) is returned as [x, y]; null when
+  // label's box or leader cross its own, or gives it a leader longer than the cap, the nearest slot that does not (within about 0.22 W) is returned as [x, y]; null when
   // the fixed slot is already clean or nothing nearby is better. others = [{x, y, w, h, leader: [ax, ay, qx, qy] | null}] for every other placed label. mem (an object)
   // keeps the last answer per label so a pill that had to move stays put from frame to frame.
   bestRun.out.relocate = (i, x0, y0, others, mem) => {
@@ -327,13 +328,14 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       if (o.leader) sg.push(o.leader);
     }
     list[i] = { ...c0, x: x0, y: y0, pin: true };
-    relocMode = true;
+    relocMode = 1;
     try {
       const m = mk(i, bx, sg);
       if (!m) return null;
       const { cx, cy, cost } = m,
         cur = cost(x0, y0);
       if (cur < 60) return null;
+      relocMode = 2;
       let best = null,
         bestN = cur - 40; // a move must be clearly better than staying
       const tryAt = (x, y) => {
@@ -349,7 +351,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       const prev = mem && mem['r' + i];
       if (prev) tryAt(prev[0], prev[1]);
       if (!best || bestN >= 60) {
-        const R = 0.12 * W;
+        const R = 0.22 * W;
         for (let rad = 6; rad <= R && rad * 0.6 < bestN; rad += rad < 40 ? 6 : 10)
           for (let a = 0; a < 24; a++) tryAt(x0 + Math.cos((a * Math.PI) / 12) * rad, y0 + Math.sin((a * Math.PI) / 12) * rad);
       }
@@ -359,7 +361,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
       }
       return best;
     } finally {
-      relocMode = false;
+      relocMode = 0;
       list[i] = c0;
     }
   };
