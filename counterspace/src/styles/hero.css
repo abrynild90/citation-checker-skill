@@ -328,3 +328,8 @@
   .hero-glance.gl-mid{right:auto;top:calc(var(--s-6) + 14px)}
   .hero-glance.gl-mid ul{grid-template-columns:minmax(0,1fr);gap:var(--s-3)}
 }
+/* Direct entry points are visible before the opening illustration. */
+.hero-jumps{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}
+.hero-jumps a{display:inline-flex;align-items:center;min-height:44px;font:500 14px/1.4 var(--sans);color:var(--hero-accent);text-decoration:none;border-bottom:1px solid var(--hero-line)}
+.hero-jumps a:hover{border-color:var(--hero-accent)}
+@media(min-width:761px){.hero-jumps{margin-top:8px}.hero-jumps a{min-height:36px}}

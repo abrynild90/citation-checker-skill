@@ -104,3 +104,28 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .law-choice[hidden]{display:none}
 .law-choice .hint{display:none}
 @media(max-width:640px){#chartC .callout-row{margin-block:12px}#chartC .callout-row>.callout:not(.quote){font-size:14px;line-height:1.5;padding-block:12px}.xcards{gap:8px}.xcard{padding:10px}.xc-l{font-size:12px}}
+
+/* Record readers expose the same sources and uncertainty as the visual marks. */
+.record-find{margin:16px 0 20px;padding:0 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface)}
+.record-find>summary{display:list-item;cursor:pointer;min-height:48px;padding:12px 0;font:600 14px/1.5 var(--sans);color:var(--accent)}
+.record-find>summary>span{margin-left:8px;font-weight:400;color:var(--muted);white-space:nowrap}
+.record-tools{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(0,1.3fr);gap:16px}
+.record-tools label,.state-choose{display:grid;gap:6px;font:500 14px/1.5 var(--sans);color:var(--text)}
+.record-find input,.record-find select{min-width:0;width:100%;min-height:44px;font:400 16px/1.4 var(--sans);padding:10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
+.record-count{font:400 13px/1.5 var(--sans);color:var(--muted);margin:10px 0 16px}
+.record-result{border-top:1px solid var(--line);padding:16px 0;font:400 15px/1.6 var(--sans);max-width:76ch}
+.record-result h5,.record-result .card-title{font:500 23px/1.3 var(--serif);margin:0 0 8px;color:var(--text)}
+.record-result p{margin:8px 0}.record-result dl{display:grid;grid-template-columns:minmax(110px,.4fr) minmax(0,1fr);gap:8px 20px;margin:16px 0}
+.record-result dt{font-weight:600;color:var(--muted)}.record-result dd{margin:0}.record-result .btn{margin-top:12px}.state-choose{padding-bottom:16px;max-width:420px}
+@media(max-width:640px){.record-tools{grid-template-columns:1fr}.record-result dl{grid-template-columns:1fr;gap:3px}.record-result dd{margin-bottom:10px}.record-find{padding-inline:12px}.record-find>summary>span{display:block;margin-left:0}}
+.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+@media(max-width:760px){
+ .source-actions .btn{min-height:44px}
+ .ref-band .ref-sub p,.refold .rf-sec>p,.site-foot p{font-size:16px;line-height:1.6}
+ .law-choose select,.scene-choose select,.overlay .step-choose select{font-size:16px}
+ .sources .msec p,.sources .cites{font-size:16px;line-height:1.65}
+ .sources .cites>li{padding-block:16px}
+}
+.record-result>.btn{margin-right:8px}
+/* The capability chart's old reference ordering must not bury its record reader. */
+#chartB>details.record-find{order:0}

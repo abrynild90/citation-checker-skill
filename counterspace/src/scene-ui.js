@@ -324,6 +324,18 @@ export async function openScene(id, originEl, viaTour) {
 // fitSteps() tries two sentences, then one, then none, so the step list always keeps at least three or four whole rows.
 const WIDE = matchMedia('(min-width: 1500px)');
 const moreBtn = $('sceneMore');
+const stepChoose = $('sceneStepChoose');
+stepChoose.onchange = () => {
+  if (stillOnly) {
+    setMore(true);
+    const li = stepsEl.children[+stepChoose.value];
+    li?.scrollIntoView({ block: 'nearest' });
+    li?.querySelector('button')?.focus();
+  } else {
+    jumpToStep(+stepChoose.value);
+    if (host) { host.playing = false; setPlayBtn(false); }
+  }
+};
 let expanded = false,
   sentences = [];
 const ABBR = /\b(?:U\.S|U\.K|U\.N|No|Nos|St|Dr|Mr|Ms|Gen|Lt|Col|vs|approx|e\.g|i\.e|etc|Fig|ca|Jan|Feb|Aug|Sept|Oct|Nov|Dec)\.$/;
@@ -376,6 +388,8 @@ function syncMore() {
 function setMore(open) {
   expanded = open;
   asideBody.classList.toggle('expanded', open);
+  panel.classList.toggle('reading-account', open);
+  if (open && host) { host.playing = false; setPlayBtn(false); }
   moreBtn.setAttribute('aria-expanded', String(open));
   moreBtn.classList.toggle('open', open);
   setLede(0); // the full account replaces the intro (fitSteps stops short when open, so the text is set here)
@@ -427,6 +441,7 @@ function fillStory(cfg) {
   dykEl.hidden = !FACTS[cfg.id] || same(splitSentences(cfg.caption || cfg.lede || '')[0] || '', FACTS[cfg.id]);
   expanded = false;
   asideBody.classList.remove('expanded');
+  panel.classList.remove('reading-account');
   moreBtn.setAttribute('aria-expanded', 'false');
   moreBtn.classList.remove('open');
   hasMore = false;
@@ -660,6 +675,7 @@ function renderSteps(cfg) {
   steps = (cfg.status || cfg.steps || []).filter(Array.isArray).map(([t, text]) => ({ t, text }));
   const fine = steps.some((s, i) => i && Math.round(s.t * dur) === Math.round(steps[i - 1].t * dur)); // two steps would read the same: show tenths
   stepIdx = -1;
+  stepChoose.innerHTML = steps.map((s, i) => `<option value="${i}">${i + 1}. ${esc(s.text)}</option>`).join('');
   stepsSection.hidden = !steps.length;
   stepsEl.innerHTML = steps
     .map(
@@ -683,6 +699,7 @@ function stepAt(t) {
   return k;
 }
 function markStep(k) {
+  if (document.activeElement !== stepChoose) stepChoose.value = String(k);
   [...stepsEl.children].forEach((li, i) => {
     li.classList.toggle('done', i < k);
     li.classList.toggle('now', i === k);
