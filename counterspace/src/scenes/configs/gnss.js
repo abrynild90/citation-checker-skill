@@ -120,7 +120,7 @@ export const GNSS = {
       short: 'Baltic zone',
       at: [39, 11, 1.52],
       look: [51.0, 21.0, 0.98],
-      phone: { at: [40, 12, 1.4], look: [52.4, 21, 0.98] },
+      phone: { at: [40, 12, 1.68], look: [52.4, 21, 0.98] },
     },
     {
       name: 'Close up: jammer zone and Airliner 1',

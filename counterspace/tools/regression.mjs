@@ -29,8 +29,33 @@ try {
       await page.waitForFunction(id => !document.getElementById(id).hasAttribute('data-off'), id);
       assert.equal(await page.locator(`#tab-${id}`).getAttribute('aria-selected'), 'true');
     }
+    if (width <= 400) {
+      await page.evaluate(() => window.__cs.showTab('chartR'));
+      const clipped = await page.evaluate(() => {
+        const svg = document.querySelector('#svgR svg'), edge = svg.getBoundingClientRect();
+        return [...svg.querySelectorAll('.band-gloss')].filter(el => el.getBoundingClientRect().right > edge.right + 1).map(el => el.textContent);
+      });
+      assert.deepEqual(clipped, [], `${width}: close-approach headers clipped`);
+      const clippedHandoff = await page.evaluate(() => {
+        const edge = document.querySelector('#svgA svg').getBoundingClientRect();
+        return [...document.querySelectorAll('#svgA .handoff text')].filter(el => el.getBoundingClientRect().right > edge.right + 1).map(el => el.textContent);
+      });
+      assert.deepEqual(clippedHandoff, [], `${width}: destructive-test annotation clipped`);
+    }
     await page.evaluate(() => { location.hash = 'srcCite'; });
     await page.waitForFunction(() => document.getElementById('srcDetails').open);
+    await page.locator('#sourceFind').fill('NO_MATCH_SOURCE_13579');
+    assert.equal(await page.locator('#citedSources > li:visible').count(), 0);
+    assert.match(await page.locator('#sourceCount').textContent(), /try a different/);
+    await page.locator('#sourceFind').fill('');
+    assert.equal(await page.locator('#citedSources > li:visible').count(), await page.locator('#citedSources > li').count());
+    assert.equal(await page.locator('#sceneChoose option').count(), 14);
+    assert.equal(await page.locator('#legalChoose option').count(), 20);
+    await page.locator('#legalChoose').selectOption('ost-1967');
+    assert.equal(await page.locator('#legalChoice').isVisible(), true);
+    assert.match(await page.locator('#legalChoice').innerText(), /Outer Space Treaty/);
+    await page.locator('#clearLawChoice').click();
+    assert.equal(await page.locator('#legalChoice').isVisible(), false);
     for (const k of ['A', 'B', 'C', 'R', 'L', 'legal']) {
       const svg = await page.evaluate(k => window.__cs.exportSVG(k), k);
       if (process.env.EXPORTS && width === 1440) fs.writeFileSync(`exports/chart-${k}.svg`, svg);

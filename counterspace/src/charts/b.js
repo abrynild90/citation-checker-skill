@@ -84,7 +84,7 @@ export function capSentence(group = 'cat') {
   if (group === 'cat')
     return `${start}By the ${last}, ${numWord(b.states)} states hold ${b.tot} between them: ${b.dem} tested or used, the rest still in development.${end}`;
   const both = b.per[0] + b.per[1] - b.states;
-  return `${start}By the ${last}, ${numWord(b.per[0])} states have a kinetic capability (a physical attack, such as a missile) and ${numWord(b.per[1])} a non-kinetic one (jamming, lasers or cyber), and ${numWord(both)} have both.${end}`;
+  return `${numWord(b.states).replace(/^./, c => c.toUpperCase())} distinct states in the ${last}: ${b.per[0]} with kinetic capabilities, ${b.per[1]} with non-kinetic capabilities, ${both} with both.${end}`;
 }
 
 function countsB() {
@@ -223,7 +223,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('class', 'axis-title')
     .attr('x', phone ? 0 : 12)
     .attr('y', 14)
-    .text(kin ? 'States in each group' : 'Capabilities, counted by state');
+    .text(kin ? 'Group memberships' : 'Capability memberships');
   // decade boundaries share the other charts' year ticks
   const gx = svg.append('g').attr('class', 'gridline');
   bandsX.slice(1).forEach(([xa]) =>
@@ -416,10 +416,10 @@ export function drawB(el = document.getElementById('svgB')) {
     `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('tkB').textContent = capSentence(stateB.group);
   document.getElementById('noteB').textContent = plain
-    ? 'Darker parts are tested or used; lighter parts are still in development. A state with both kinds is counted in both groups.'
+    ? 'Bar heights count group memberships, not distinct states: a state with both kinds counts twice. Darker parts are tested or used; lighter parts are in development.'
     : kin
-      ? 'A state with both kinds appears in both groups.'
-      : 'A state with two capabilities is counted twice.';
+      ? 'Bar heights count group memberships. A state with both kinds counts twice.'
+      : 'Bar heights count capability memberships, not distinct states. A state can appear in several categories.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   setKey(

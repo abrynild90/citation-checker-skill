@@ -23,6 +23,7 @@ function showCard(html, evt, el, full = false) {
   // A card opened by keyboard focus is opaque at once (no half-faded card with page text showing through while it moves into place).
   card.classList.toggle('solid', !!el?.matches?.(':focus-visible'));
   card.classList.add('on');
+  card.inert = false;
   card.setAttribute('aria-hidden', 'false');
   const dock = innerWidth < PHONE_MAX;
   card.classList.toggle('dock', dock);
@@ -292,6 +293,7 @@ card.addEventListener('click', () => {
 export function hideCard() {
   cardEl = null;
   card.classList.remove('on');
+  card.inert = true;
   card.setAttribute('aria-hidden', 'true');
 }
 document.addEventListener('cs:opening', () => (hideCard(), hideLinks())); // a 3D scene is opening over the page

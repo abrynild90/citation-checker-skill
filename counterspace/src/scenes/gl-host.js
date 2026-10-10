@@ -245,11 +245,11 @@ export class GLHost {
     }
     this.setCam(i);
   }
-  // Narrow stage (phone width): the picture is only about 320 px wide, so the camera moves in by cfg.narrowK (default 0.88; a camera may override it with
+  // Narrow stage (phone width): the picture is only about 320 px wide, so the camera moves in by cfg.narrowK (default 1; a camera may override it with
   // its own `narrowK`; 1 opts out). cfg.narrowShift moves the view sideways by that fraction of the frame width (positive: the subject sits further left).
   _nar(v, c) {
     if (this.sim.cfg.spin || this.el.clientWidth >= 520 || this.camera.aspect > 2) return v;
-    const k = c?.narrowK ?? this.sim.cfg.narrowK ?? 0.88,
+    const k = c?.narrowK ?? this.sim.cfg.narrowK ?? 1,
       sh = c?.narrowShift ?? this.sim.cfg.narrowShift ?? 0,
       L = v.look,
       P = v.pos;

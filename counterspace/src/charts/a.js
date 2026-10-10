@@ -229,7 +229,7 @@ export function drawA(el = document.getElementById('svgA')) {
   handoffLines.forEach((t, i) =>
     hg
       .append('text')
-      .attr('transform', `translate(${HX + 13 + i * 16},${top + 4}) rotate(90)`)
+      .attr('transform', `translate(${phone ? HX - 12 - i * 16 : HX + 13 + i * 16},${top + 4}) rotate(90)`)
       .attr('text-anchor', 'start')
       .style('font-weight', i ? 400 : null)
       .text(t),
@@ -282,7 +282,7 @@ export function drawA(el = document.getElementById('svgA')) {
   // ---- annotations: each tries several offsets and takes the first that clears zone labels, the label of the last destructive test, all marks and earlier notes
   const pl = new Placer({ x0: 2, x1: W - 2, y0: top, y1: top + plotH });
   pl.add([0, 0, M.l + 1, top + plotH + 6]); // the altitude numbers: no note may sit on them
-  pl.add([HX + 2, top + 4, HX + 17 + (handoffLines.length - 1) * 16, top + 8 + handoffLen]);
+  pl.add([phone ? HX - 28 : HX + 2, top + 4, phone ? HX + 2 : HX + 17 + (handoffLines.length - 1) * 16, top + 8 + handoffLen]);
   KV.forEach((d) => {
     const X = x(parse(d.date)),
       Y = d.altitude_km == null ? stripY(d) : y(d.altitude_km);
