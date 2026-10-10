@@ -2405,3 +2405,25 @@
 }
 /* The phase selector replaces the clipped strip of steps in the compact phone account. */
 @media(max-width:760px){.overlay #scenePanel:not(.reading-account) #sceneStepsBox{display:none}}
+
+/* The full current step stays readable beside the phone's compact selector. */
+.overlay .current-step { display: none; }
+@media (max-width: 760px) {
+  .overlay .current-step {
+    display: block;
+    margin: 8px 0 0;
+    min-height: 3em;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    overflow-wrap: break-word;
+  }
+}
+@media (max-width: 760px) {
+  .overlay:not(.is-static) .panel:not(.reading-account) { grid-template-rows: auto minmax(0, 36%) minmax(0, 1fr) auto; }
+  .overlay:not(.is-static) .story-scroll:not(.expanded) .sv-steps h3 {
+    position: absolute; width: 1px; height: 1px; margin: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .overlay .step-choose { margin: 6px 0 4px; }
+}

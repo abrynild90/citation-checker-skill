@@ -24,7 +24,7 @@ export class GLHost {
     this.camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
     this.target = new THREE.Vector3(0, 0, 0);
     this.t = 0;
-    this.playing = true;
+    this._playing = true;
     this.raf = 0;
     this.onTick = null;
     this.lock = null;
@@ -32,6 +32,27 @@ export class GLHost {
     this._user = false; // the viewer dragged or zoomed: a following camera stays where they put it until they pick a preset
     this._bindDrag();
     this.ro = new ResizeObserver(() => this.resize());
+  }
+  get playing() { return this._playing; }
+  set playing(on) {
+    this._playing = !!on;
+    cancelAnimationFrame(this.raf);
+    this.raf = 0;
+    if (!on) {
+      cancelAnimationFrame(this._twRaf);
+      this._tw = null;
+      this._fadeEl?.getAnimations().forEach((a) => a.cancel());
+      this.labelLayer?.getAnimations().forEach((a) => a.cancel());
+    } else {
+      this._ended = false;
+      if (this._running && this.scene) this.play(this.onTick);
+    }
+    this.onPlaybackChange?.(this._playing);
+  }
+  // A reader takes control immediately; a paused tour must not advance behind them.
+  interrupt() {
+    this.playing = false;
+    this.onInteraction?.();
   }
   mount(el) {
     if (this.el) {
@@ -282,33 +303,31 @@ export class GLHost {
     this.camera.lookAt(this.target);
     this._heroFit();
     this._camSeen = true;
-    // A view switch during playback glides to the new view (exponential ease-out, 700 ms). Paused scenes, reduced motion and the hero cut instead.
-    this._tw = !instant && prev && this.playing && !REDUCED_MOTION && !this.sim.cfg.spin ? { t0: performance.now(), ...prev } : null;
-    if (this._tw) this._twLoop();
+    // A requested view glides briefly from the current pose, including while paused. Reduced motion and episode cuts remain immediate.
+    this._tw = !instant && prev && !REDUCED_MOTION && !this.sim.cfg.spin ? { t0: performance.now(), ...prev } : null;
+    if (this._tw && !this.playing) this._twLoop();
     this.render();
   }
   // Frames while a view change glides (a playing scene renders anyway; a scene being dragged or paused still needs them).
   _twLoop() {
     cancelAnimationFrame(this._twRaf);
     const step = () => {
-      if (!this._tw) return;
+      if (!this._tw || this.playing) return;
       this.render();
       this._twRaf = requestAnimationFrame(step);
     };
     this._twRaf = requestAnimationFrame(step);
   }
-  // Camera motion on top of the preset pose: the glide to a newly picked view, and a very slight drift while the scene plays.
+  // Only deliberate view changes add camera motion to the explanatory scene.
   _camMotion() {
-    const c = this.sim.cams[this.camIdx],
-      tw = this._tw,
-      drift = this.playing && !this.dragging && !REDUCED_MOTION && !this.sim.cfg.spin && !this._user && !c?.follow && !this._modelBoost;
-    if (!c || this._user || (!tw && !drift)) return;
+    const c = this.sim.cams[this.camIdx], tw = this._tw;
+    if (!c || this._user || !tw) return;
     const T = this.T,
       cam = this.camera,
       v = this._nar(c.follow ? c.follow(this.t, cam.aspect) : { pos: c.pos, look: c.look || [0, 0, 0], up: c.up }, c);
     let e = 1;
     if (tw) {
-      const f = Math.min(1, (performance.now() - tw.t0) / 700);
+      const f = Math.min(1, (performance.now() - tw.t0) / 360);
       e = f >= 1 ? 1 : (1 - Math.pow(2, -10 * f)) / (1 - Math.pow(2, -10));
       if (f >= 1) this._tw = null;
     }
@@ -320,10 +339,6 @@ export class GLHost {
       l.lerpVectors(tw.l, l, e);
       u.lerpVectors(tw.u, u, e).normalize();
     }
-    if (drift)
-      p.sub(l)
-        .applyAxisAngle(u, 0.006 * Math.sin(this.t * Math.PI * 2))
-        .add(l); // about a third of a degree each way over the scene
     cam.position.copy(p);
     this.target.copy(l);
     cam.up.copy(u);
@@ -336,13 +351,14 @@ export class GLHost {
       const ov = (this._fadeEl ||= Object.assign(document.createElement('div'), {}));
       ov.style.cssText = 'position:absolute;inset:0;background:#05080f;pointer-events:none;opacity:0';
       if (ov.parentNode !== this.el) this.el.insertBefore(ov, this.labelLayer || null);
-      ov.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 650, easing: 'ease-out' });
-      this.labelLayer?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-out' });
+      ov.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 280, easing: 'ease-out' });
+      this.labelLayer?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
     } catch (e) {}
   }
   update(t) {
     const T = this.T;
     this.t = t;
+    this._ended = false;
     const acts = this.sim.cfg.acts,
       cut = this.sim.cfg.camCut;
     // cfg.camCut { t, cam, from } (opt-in): while the viewer has not picked a view, the camera cuts to preset `cam` from time t and back to `from` (0) before it
@@ -473,8 +489,8 @@ export class GLHost {
         if (it.shape === 'aircraft' && p) {
           // wings level, nose along the ground track
           const up = new T.Vector3(...norm(p)),
-            a2 = it.pos(Math.min(1, t + 0.004)),
-            a1 = it.pos(Math.max(0, t - 0.004));
+            a2 = it.pos(Math.min(1, t + 0.004)) || p,
+            a1 = it.pos(Math.max(0, t - 0.004)) || p; // at an appearance or retirement boundary, use the visible position for a one-sided heading
           const f = new T.Vector3(...a2).sub(new T.Vector3(...a1));
           f.addScaledVector(up, -f.dot(up));
           if (f.lengthSq() > 1e-12) {
@@ -506,7 +522,7 @@ export class GLHost {
           tint.color.set(on ? '#ffffff' : it.color);
           if (ud.halo) {
             ud.halo.material.color.set(on ? '#ff8cf0' : it.color);
-            ud.halo.scale.setScalar(on ? 0.07 + 0.008 * Math.sin(performance.now() / 60) : 0.05);
+            ud.halo.scale.setScalar(on ? 0.06 : 0.05);
             ud.halo.material.opacity = on ? 0.65 : 0.3;
           }
         }
@@ -573,7 +589,7 @@ export class GLHost {
             obj.userData.ends[1].position.set(0, L / 2 - e, 0);
           }
           const core = obj.userData.core.material,
-            now = performance.now() / 1000;
+            now = t * this.sim.cfg.duration;
           if (it.opFn) {
             const o = it.opFn(t);
             core.color.set(it.colorFn ? it.colorFn(t) : it.color);
@@ -583,9 +599,9 @@ export class GLHost {
             // GNSS links: steady green outside the zone, faint flickering red inside it
             const jam = it.dashFn(t);
             core.color.set(it.colorFn(t));
-            core.opacity = jam ? 0.12 + 0.18 * Math.abs(Math.sin(now * 13 + L * 9)) : 0.55;
+            core.opacity = jam ? 0.12 + 0.18 * Math.abs(Math.sin(now * 3 + L * 9)) : 0.55;
           } else if (obj.userData.halo) {
-            const pulse = 0.8 + 0.2 * Math.sin(now * 30);
+            const pulse = 1;
             core.opacity = (it.opacity ?? 0.9) * pulse;
             obj.userData.halo.material.opacity = 0.24 * pulse;
           }
@@ -684,17 +700,16 @@ export class GLHost {
         f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       obj.scale.setScalar(u.base * f);
     }
-    // Dazzle glare on a target while a beam is on: about 120 px across on screen, pulsing.
+    // Bounded dazzle glare: the target and its leader remain readable through the beam.
     for (const { it, obj } of this.dyn) {
       if (it.kind !== 'glare') continue;
       const p = it.on(this.t) && it.pos(this.t);
       obj.visible = !!p && !occluded([cp.x, cp.y, cp.z], p);
       if (!p) continue;
       obj.position.set(...p);
-      const d = Math.max(0.15, obj.position.distanceTo(cp)),
-        pulse = 0.85 + 0.15 * Math.sin(this.t * this.sim.cfg.duration * 9);
-      obj.scale.setScalar((92 * k * d * pulse) / sc);
-      obj.material.rotation = this.t * 3;
+      const d = Math.max(0.15, obj.position.distanceTo(cp));
+      obj.scale.setScalar((56 * k * d) / sc);
+      obj.material.rotation = 0;
     }
     // Orbit lines with an opt-in fade-out over a time span (it.fadeT), on the listed cameras only when it.fadeCams is given.
     for (const f of this.fadeRings || []) {
@@ -764,26 +779,34 @@ export class GLHost {
   play(onTick) {
     cancelAnimationFrame(this.raf);
     this.onTick = onTick;
+    this._running = true;
     let last = performance.now();
     const loop = (now) => {
-      this.raf = requestAnimationFrame(loop);
+      this.raf = 0;
+      if (!this.playing || !this.scene || document.hidden) return;
       const dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); // never negative: a slow first frame (the frame's own time is older than `last`) must not rewind the scene
       last = now;
       if (this.playing && !this.dragging) {
         let t = this.t + dt / this.sim.cfg.duration;
-        if (t > 1.08) t = 0;
-        if (this.lock != null) {
-          const a = this.sim.cfg.acts[this.lock];
-          if (t >= a.t1 || t < a.t0 - 1e-6) t = a.t0;
+        const end = this.lock != null ? this.sim.cfg.acts[this.lock].t1 - 0.001 : 1;
+        const done = t >= end;
+        t = Math.min(t, end);
+        this.update(t);
+        if (done) {
+          this._ended = true;
+          this.playing = false; // hold the final diagram; only Replay begins another run
         }
-        this.update(Math.min(t, 1));
-        this.t = t;
-        this.onTick?.(Math.min(t, 1));
+        this.onTick?.(t);
       }
+      if (this.playing && this.scene) this.raf = requestAnimationFrame(loop);
     };
-    this.raf = requestAnimationFrame(loop);
+    if (this.playing) this.raf = requestAnimationFrame(loop);
   }
   unload() {
+    this._running = false;
+    this.playing = false;
+    this._fadeEl?.remove();
+    this._fadeEl = null;
     cancelAnimationFrame(this.raf);
     this.el?.querySelector(':scope > .illus .ep-merge')?.remove(); // the merged episode note (cfg.epChipMerge) leaves with the scene
     if (this.scene) {
@@ -834,6 +857,7 @@ export class GLHost {
     let sx = 0,
       sy = 0;
     cv.addEventListener('pointerdown', (e) => {
+      this.interrupt();
       this.dragging = true;
       this._user = true;
       sx = e.clientX;
@@ -868,6 +892,7 @@ export class GLHost {
       'wheel',
       (e) => {
         e.preventDefault();
+        this.interrupt();
         this._user = true;
         const p = this.camera.position,
           o = p.clone().sub(this.target);

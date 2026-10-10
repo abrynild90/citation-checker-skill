@@ -30,6 +30,38 @@ async function getHost() {
   try {
     if (!host) {
       host = new GLHost(THREE);
+      host.onPlaybackChange = (on) => {
+        if (cur && host.el === view) {
+          setPlayBtn(on);
+          if (!on && host._ended) setStatus('Finished. Replay starts this event again.');
+        }
+      };
+      host.onInteraction = () => {
+        if (!cur) return;
+        if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
+        setStatus('Paused.');
+      };
+      host.canvas.addEventListener('webglcontextlost', (e) => {
+        e.preventDefault();
+        const failed = host;
+        if (!failed) return;
+        failed.interrupt();
+        endTour(false);
+        const inScene = !!cur && failed.el === view;
+        failed.unload();
+        failed.ro.disconnect();
+        failed.canvas.remove();
+        failed.labelLayer?.remove();
+        failed.renderer.dispose();
+        host = null;
+        glOK = false;
+        if (inScene) {
+          stillOnly = true;
+          renderSVG(curSim, view);
+          staticMode(true);
+          setStatus('The animation stopped. A still diagram is shown.');
+        }
+      });
       // The scrubber mirrors scene time however it changes: playback ticks, scrubbing or programmatic host.update() calls.
       const upd = host.update.bind(host),
         pick = host.pickCam.bind(host);
@@ -41,7 +73,9 @@ async function getHost() {
             hi = epi.a1 - (epi.last ? 0 : 0.001);
           if (!(t >= epi.a0 - 1e-6 && t <= hi)) t = lo + Math.max(0, Math.min(1, t)) * (hi - lo);
         }
+        const wasEnded = host._ended;
         upd(t);
+        if (wasEnded) setPlayBtn(host.playing);
         syncScrub(host.t);
       };
       host.pickCam = (i) => {
@@ -78,7 +112,7 @@ function prefetchEarth() {
   });
 }
 // Where a scene opens (a fraction of its length) when the first frame is a plain stretch of ocean or a dark limb: the telling moment the poster shows. The scene
-// plays on from there and wraps to the start, so nothing is skipped. A tour always starts at the beginning. Chosen by viewing the frames at 0 to 0.6.
+// plays on from there and holds the last diagram. Replay and a tour start at the beginning. Chosen by viewing the frames at 0 to 0.6.
 const OPEN_AT = { starfish: 0.16, laser: 0.2, spaceplanes: 0.3 };
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 
@@ -223,6 +257,7 @@ ORDER.forEach((s, i) => {
   sheetList.appendChild(li);
 });
 function toggleSheet(open) {
+  if (open && cur) host?.interrupt();
   sheet.hidden = !open;
   listBtn.setAttribute('aria-expanded', String(open));
   if (open) {
@@ -586,6 +621,7 @@ function anchorNote(note) {
   }
 }
 function toggleSrc(open) {
+  if (open && cur) host?.interrupt();
   if (open) toggleNextPop(false); // one note at a time over the story column
   slPop.hidden = !open;
   slBtn.setAttribute('aria-expanded', String(open));
@@ -593,6 +629,7 @@ function toggleSrc(open) {
 slBtn.onclick = () => toggleSrc(slPop.hidden);
 // Short desktop window: the scenes to go to next open from a pill in the source row, over the end of the story column like the source note
 function toggleNextPop(open) {
+  if (open && cur) host?.interrupt();
   if (open) toggleSrc(false);
   slNextPop.hidden = !open;
   $('slNext')?.setAttribute('aria-expanded', String(!!open));
@@ -601,6 +638,7 @@ function toggleNextPop(open) {
 const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
   pairBodies = { about: $('svAboutBody'), next: $('sceneNext') };
 function togglePair(which) {
+  if (which && cur) host?.interrupt();
   if (which) (toggleSrc(false), toggleNextPop(false), toggleLawCard(false)); // one note at a time over the story column
   asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
   Object.keys(pairBtns).forEach((k) => {
@@ -637,6 +675,7 @@ export function closeScene(nav) {
   recapEl.hidden = true;
   if (!cur) return;
   const closing = cur;
+  if (host?.el === view) host.interrupt();
   cur = null;
   epi = null;
   openToken++;
@@ -699,6 +738,7 @@ function stepAt(t) {
   return k;
 }
 function markStep(k) {
+  $('sceneCurrentStep').textContent = steps[k]?.text || '';
   if (document.activeElement !== stepChoose) stepChoose.value = String(k);
   [...stepsEl.children].forEach((li, i) => {
     li.classList.toggle('done', i < k);
@@ -1110,24 +1150,28 @@ $('scRetry').onclick = () => {
 };
 scrub.oninput = () => {
   if (host && cur && !stillOnly) {
-    host.playing = false;
+    host.interrupt();
     setPlayBtn(false);
     host.update(epi ? epi.a0 + 0.001 + (scrub.value / 1000) * (epi.a1 - (epi.last ? 0 : 0.001) - epi.a0 - 0.001) : scrub.value / 1000);
   }
 };
 // Play/pause: an icon button whose accessible name is the action it will do.
 function setPlayBtn(on) {
+  if (!on && tour) { clearTimeout(tour.timer); tour.timer = 0; }
   playBtn.classList.toggle('playing', !!on);
-  playBtn.setAttribute('aria-label', on ? 'Pause' : 'Play');
-  playBtn.title = on ? 'Pause (Space)' : 'Play (Space)';
-  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : '#i-play');
+  const action = on ? 'Pause' : (host?._ended || host?.t >= 1) ? 'Replay' : 'Play';
+  playBtn.setAttribute('aria-label', action);
+  playBtn.title = `${action} (Space)`;
+  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : (host?._ended || host?.t >= 1) ? '#i-replay' : '#i-play');
   playBtn.disabled = false;
 }
 function togglePlay() {
   if (!host || !cur || !glOK || stillOnly) return;
-  host.playing = !host.playing;
+  if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
+  const on = !host.playing;
+  if (on && (host._ended || host.t >= 1)) host.update(epi ? epi.a0 + 0.001 : 0);
+  host.playing = on;
   hideHint();
-  if (host.playing && host.t >= 1) host.t = 0;
   setPlayBtn(host.playing);
   setStatus(host.playing ? 'Playing.' : 'Paused.');
 }
@@ -1175,6 +1219,7 @@ function closeMore(focus) {
   if (focus) moreBtn2.focus();
 }
 function openMore(first) {
+  host?.interrupt();
   moreMenu.hidden = false;
   reserveMenu(true);
   moreBtn2.setAttribute('aria-expanded', 'true');
@@ -1266,6 +1311,7 @@ document.addEventListener('pointerdown', (e) => {
 });
 function chooseView(i) {
   if (!host || !cur || !glOK || stillOnly || !host.sim.cams[i]) return;
+  host.interrupt();
   host.pickCam(i);
   syncCams();
   setStatus(`View: ${host.sim.cams[i].name}.`);
@@ -1430,7 +1476,7 @@ function seek(e) {
   e.preventDefault();
   const a0 = epi ? epi.a0 + 0.001 : 0,
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
-  host.playing = false;
+  host.interrupt();
   setPlayBtn(false);
   host.update(Math.max(a0, Math.min(a1, host.t + ((e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 5 : 1)) / dur)));
 }
@@ -1653,9 +1699,8 @@ function endTour(finished) {
 $('svTourStop').onclick = () => {
   endTour(false);
   if (host && cur && !stillOnly && glOK) {
-    host.playing = true; // the scene on screen carries on in a loop, as it does when opened by hand
-    if (host.t >= 1) host.t = 0;
-    setPlayBtn(true);
+    host.interrupt();
+    setPlayBtn(false);
   }
   playBtn.focus();
 };
@@ -1756,3 +1801,8 @@ addEventListener('resize', () => {
 hooks.openScene = openScene;
 hooks.showLaw = showLawOnTimeline;
 hooks.prefetchEarth = prefetchEarth;
+
+// Returning to a background tab never advances an event or resumes movement without consent.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) host?.interrupt();
+});

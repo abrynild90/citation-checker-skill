@@ -92,8 +92,8 @@ void main(){
   vec3 haze = mix(vec3(0.16, 0.38, 0.85), vec3(0.46, 0.73, 1.0), clamp(ndl * 1.5 + 0.3, 0.0, 1.0));
   haze = mix(haze, vec3(1.0, 0.5, 0.25), tw * 0.5);
   float sunny = 0.10 + 0.90 * dayAmt;
-  col = mix(col, col * 0.5 + haze * 0.9, pow(limb, 3.0) * 0.62 * sunny);
-  col += haze * pow(limb, 6.0) * 0.85 * sunny;
+  col = mix(col, col * 0.5 + haze * 0.9, pow(limb, 3.0) * 0.38 * sunny);
+  col += haze * pow(limb, 6.0) * 0.42 * sunny;
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
 }`;
@@ -267,7 +267,7 @@ export const earthMethods = {
     this._bindPictures(this._wantedPictures(), false);
     root.add(new T.Mesh(new T.SphereGeometry(1, IS_PHONE ? 72 : 96, IS_PHONE ? 48 : 64), mat));
     // Atmosphere glow: a shell far enough out that its edge is fully faded
-    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: this.sim.cfg.atmoK ?? (this.sim.cfg.spin ? 1.1 : 1) }, uScale: { value: 1 }, uFloor: { value: this.sim.cfg.atmoFloor ?? 0.03 } };
+    const au = { uSun: { value: new T.Vector3(...sunDir) }, uGain: { value: (this.sim.cfg.atmoK ?? (this.sim.cfg.spin ? 1.1 : 1)) * 0.65 }, uScale: { value: 1 }, uFloor: { value: this.sim.cfg.atmoFloor ?? 0.03 } };
     this._au = au;
     root.add(
       new T.Mesh(
