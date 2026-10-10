@@ -316,10 +316,10 @@ export const RPO = {
     {
       name: 'China and the US in GEO',
       act: 0,
-      fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.2, include: [[0, -1.3, 0]] },
+      fitCraft: { anchor: 'g1', ids: ['sj25', 'sj21b', 'usa270', 'usa271'], dir: [-0.3, 0.8, 0.55], fill: IS_PHONE ? 0.68 : 0.88, t: 0.2, include: [[0, -1.3, 0]] },
     },
-    { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: 0.88, t: 0.57, shiftR: 0.07 } },
-    { name: 'The US and the UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: 0.88, t: 0.85, include: [[0, -1.3, 0]] } },
+    { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: IS_PHONE ? 0.68 : 0.88, t: 0.57, shiftR: 0.07 } },
+    { name: 'The US and the UK in GEO', act: 2, fitCraft: { anchor: 'g3', ids: ['sky', 'usa271b'], dir: [-0.3, 0.8, 0.55], fill: IS_PHONE ? 0.68 : 0.88, t: 0.85, include: [[0, -1.3, 0]] } },
     { name: 'Whole scene: Earth and the GEO belt', at: [38, 100, 7.2], phone: { at: [38, 100, 10] }, ref: false, hide: IS_PHONE ? ['USA 245', 'SJ-25', 'SJ-21', 'USA 270', 'USA 271'] : ['USA 245', 'SJ-25'] }, // unlocked from the tour
   ],
 };

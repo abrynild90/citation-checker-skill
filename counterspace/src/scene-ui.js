@@ -356,7 +356,7 @@ function setLede(level, count) {
   // The full account leaves out the sentence the "Did you know" line above it already says, so no sentence shows twice
   let shown = expanded ? (dyk ? pool.join(' ') : full) : pool.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 340) shown = pool[0];
-  if (!expanded && matchMedia('(max-width: 760px)').matches) shown = PHONE_LEDES[cur.id] || shown;
+  if (!expanded) shown = SCENE_SUMMARIES[cur.id] || shown;
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
   moreBtn.classList.toggle('lone', !shown); // nothing above it: the button stands alone
@@ -388,7 +388,7 @@ moreBtn.onclick = () => setMore(!expanded);
 // Text of the open scene: title, count, story, source, related law, picture note and the steps.
 // "SWF" appears in the steps; the source line is where the reader learns what it stands for.
 const citeText = (c) => c.replace(/^Secure World Foundation,/, 'Secure World Foundation (SWF),');
-const PHONE_LEDES = {
+const SCENE_SUMMARIES = {
   starfish: 'A U.S. nuclear test about 400 km up trapped electrons in Earth’s magnetic field.',
   fengyun: 'China destroyed its Fengyun-1C weather satellite, leaving long-lived debris.',
   cosmos1408: 'Russia destroyed Cosmos 1408. Debris crossed the International Space Station’s orbit.',
@@ -396,9 +396,9 @@ const PHONE_LEDES = {
   'sj21-tug': 'China’s SJ-21 docked with defunct Compass G2 and towed it above the working GEO belt.',
   laser: 'The U.S. aimed MIRACL at MSTI-3 in 1997. Peresvet is a separate Russian case.',
   'burnt-frost': 'A U.S. ship-launched interceptor destroyed USA-193 in a low orbit; its debris decayed quickly.',
-  shakti: 'India intercepted Microsat-R at about 283 km in Mission Shakti.',
+  shakti: 'India intercepted Microsat-R at about 300 km in Mission Shakti.',
   solwind: 'A missile launched from a U.S. F-15 destroyed the Solwind satellite.',
-  dn2: 'China’s DN-2 launch had no satellite target. Estimates of its peak altitude differ.',
+  dn2: 'DN-2 had no target. China reported 10,000 km; an analysis cited by SWF estimated 30,000 km or more.',
   gnss: 'A ground jammer disrupts GPS receivers on aircraft; it does not attack the GPS satellites.',
   rpo: 'Three episodes of spacecraft coming close. A close approach does not establish hostile intent.',
   spaceplanes: 'Reusable U.S. and Chinese craft fly unusual missions; their purpose is not established here.'
