@@ -32,7 +32,7 @@ export const SHAKTI = {
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: { Impact: [-200, -50], 'Abdul Kalam': [-34, 66], PDV: [-40, -120], 'Microsat-R': [165, 6] }, // the two pills sit on opposite sides of the strike, one above and one below
   camOff: { 1: { PDV: [130, -115], 'Abdul Kalam': [-150, 40] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
-  phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
+  phoneOff: { 'Abdul Kalam': [-105, 0], Impact: [110, -60] }, // compact views keep names off the launch plume and Earth limb
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.45, wf: 0.5 },
   actors: [
     { type: 'site', at: [20.75, 87.08], label: 'Abdul Kalam Island', color: C.ground },

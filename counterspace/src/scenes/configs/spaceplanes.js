@@ -247,6 +247,7 @@ export const SPACEPLANES = {
   ],
   camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
 
+  phoneCamOff: { 2: { 'X-37B OTV-7': [-80, 65], 'OTV-7': [-80, 65] } },
   liveOff: { 'CSSHQ orbit': [-24, 66] }, // the big CSSHQ model needs the orbit name well clear of it (below-left, on the dark sky beside the limb)
   leaderK: 0.3, // an orbit name that sits just off its line still gets a leader
   liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee

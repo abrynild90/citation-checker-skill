@@ -2,6 +2,7 @@
 //   NODE_PATH=tools/node_modules OUT=<dir> PORT=9122 node tools/scene_check.mjs
 // Env: ONLY=id,id (scene filter)  CAMS=0,1 (camera-preset filter)  VPS=1440,900,375  TS=0.08,0.2,0.3,...  MODES=live,static,still,hero,stillapi
 //      VH=<px> (window height for every VPS width, default 800 up to 900 wide and 900 above: VPS=1280 VH=800 is 1280x800)
+//      PRESETS=0 skips the additional nine-time camera sweep for focused rechecks; default includes it.
 //      SHOT=1 (save a PNG per state)  QUIET=1  ROOT=<dir holding the index.html to test, default .>  OUT=<dir>  PORT=<port>
 // (stillapi: every still, live and static, must be exactly 3000x1875.)
 // Every state is (scene x camera preset x t x viewport) for live scenes; static SVG at each viewport; live and static stills at 1440.
@@ -144,13 +145,14 @@ if (MODES.includes('live'))
       for (let ci = 0; ci < cams.length; ci++) {
         // preset-empty: every preset keeps its subject framed across the whole timeline
         if ((CAMS.length && !CAMS.includes(ci)) || cams[ci].ref === false) continue; // ref:false = a map view of ground markers, no craft subject
-        for (const t of [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]) {
+        for (const t of process.env.PRESETS === '0' ? [] : [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]) {
           await page.evaluate(
             ({ ci, t }) => {
               const h = window.__cs.host();
               h.playing = false;
               h._lm = {};
               h.pickCam(ci);
+              h.interrupt(); // seeking cancels the view transition, just as the visible controls do
               h.update(t);
               h.update(t);
             },
@@ -183,6 +185,7 @@ if (MODES.includes('live'))
               h.playing = false;
               h._lm = {};
               h.pickCam(ci);
+              h.interrupt(); // seeking cancels the view transition, just as the visible controls do
               h.update(t);
               h.update(t);
             },

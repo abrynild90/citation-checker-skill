@@ -85,9 +85,10 @@ async function getHost() {
         const c = host.sim.cams[i],
           cc = host.sim.cfg.cameras?.[i],
           acts = host.sim.cfg.acts,
-          a = acts && !c.auto ? acts[c.act] : null;
+          cut = host.sim.cfg.camCut,
+          a = acts && !c.auto ? acts[c.act] : cut ? (i === cut.cam ? { t0: cut.t, t1: 1 } : { t0: 0, t1: cut.t }) : null;
         wideSel = acts && !c.auto && c.act == null ? i : -1; // an episode scene's Wide preset: its chip is the pressed one, not the Tour's
-        epi = a ? { a0: a.t0, a1: a.t1, last: a === acts.at(-1), name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
+        epi = a ? { a0: a.t0, a1: a.t1, last: acts ? a === acts.at(-1) : a.t1 === 1, name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
         pick(i);
         if (epi)
           host.update(host.t); // bring the time into the episode now (a preset pressed at another episode's time)
@@ -1166,7 +1167,14 @@ function jumpToStep(i) {
   host.interrupt();
   setPlayBtn(false);
   const tour = host.sim.cams.findIndex((c) => c.auto);
-  if (epi && (s.t < epi.a0 || s.t >= epi.a1) && tour >= 0) host.pickCam(tour);
+  if (epi && (s.t < epi.a0 || s.t >= epi.a1)) {
+    if (tour >= 0) host.pickCam(tour);
+    else if (host.sim.cfg.camCut) {
+      epi = null;
+      host._manual = false;
+      host._cutOn = null;
+    }
+  }
   host.update(Math.min(s.t, 1));
   setStatus(`Step ${i + 1} of ${steps.length}: ${s.text}`);
 }

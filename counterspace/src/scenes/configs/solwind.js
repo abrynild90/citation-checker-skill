@@ -41,7 +41,7 @@ export const SOLWIND = {
   liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [188, -98], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
-  narrowK: 0.95, // phone: a lighter tighten, the debris cloud at its widest stays inside the frame
+  narrowK: 1.08, // compact views leave a margin around the late debris cloud
   narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
   phoneOff: { 'ASM-135': [70, -84] },
   actors: [

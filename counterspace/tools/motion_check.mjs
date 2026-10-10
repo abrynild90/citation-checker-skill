@@ -83,6 +83,23 @@ try {
         assert.equal(await page.locator('#slPop #scExport').isVisible(), true, `${id}: save image remains reachable`);
         await page.locator('#slSource').click();
       }
+      if (id === 'laser') {
+        await page.evaluate(() => {
+          const h = window.__cs.host();
+          h.pickCam(3);
+          h.interrupt();
+        });
+        assert.equal(await page.evaluate(() => window.__cs.host().t >= 0.78), true, 'Russia view selects its own account');
+        await page.evaluate(() => {
+          const h = window.__cs.host();
+          h.pickCam(0);
+          h.interrupt();
+        });
+        assert.equal(await page.evaluate(() => window.__cs.host().t < 0.78), true, 'MIRACL view selects its own account');
+        if (width === 1440) await page.locator('#sceneSteps li').last().click();
+        else await page.locator('#sceneStepChoose').selectOption(String((await page.locator('#sceneStepChoose option').count()) - 1));
+        assert.equal(await page.evaluate(() => window.__cs.host().camIdx), 3, 'Peresvet step restores the Russia view');
+      }
       const episodeButtons = page.locator('#sceneEpisodes button');
       for (let i = 0; i < (await episodeButtons.count()); i++) {
         await page.locator('#scPlay').click();
@@ -145,8 +162,13 @@ try {
     await page.evaluate(() => window.__cs.startTour());
     await page.waitForFunction(() => window.__cs.host()?.scene);
     await page.evaluate(() => window.__cs.host().update(0.998));
-    await page.waitForFunction(() => window.__cs.host()._ended);
-    await page.locator('#scCams button[data-i]').nth(1).click();
+    // Act in the frame that finishes: a slow software-rendered CI click must not
+    // accidentally arrive after the legitimate 1.6-second advance deadline.
+    await page.waitForFunction(() => {
+      if (!window.__cs.host()._ended) return false;
+      document.querySelectorAll('#scCams button[data-i]')[1].click();
+      return true;
+    });
     await page.waitForTimeout(1800);
     assert.match(await page.locator('#sceneTitle').textContent(), /Starfish/);
     assert.equal(await page.evaluate(() => window.__cs.host().playing), false);

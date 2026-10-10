@@ -18,7 +18,7 @@ export const BURNT_FROST = {
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
-  phoneOff: { 'USS Lake Erie': [46, 34] }, // 375: the ship pill clears the caption pill below it
+  phoneOff: { 'USS Lake Erie': [-115, 8] }, // compact views: the name clears the ship and the caption below
   sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -95, el: 8 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,

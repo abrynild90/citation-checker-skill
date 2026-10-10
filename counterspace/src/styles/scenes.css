@@ -2447,3 +2447,14 @@
   .overlay .scene-episodes button { flex:1 1 28%; min-height:44px; padding:7px; font-size:12px; }
   .overlay #scenePanel:has(.scene-episodes:not([hidden])):not(.reading-account) { grid-template-rows:auto minmax(0,32%) minmax(0,1fr) auto; }
 }
+
+/* On phones, read the current explanation before opening the longer account. */
+@media (max-width:760px) {
+  .overlay .story-scroll:not(.expanded) > .sv-lede { order:0; }
+  .overlay .story-scroll:not(.expanded) > .scene-episodes { order:1; }
+  .overlay .story-scroll:not(.expanded) > .sv-steps { order:2; }
+  .overlay .story-scroll:not(.expanded) > .sv-more { order:3; margin-top:8px; }
+  .overlay .story-scroll:not(.expanded) > .sv-about,
+  .overlay .story-scroll:not(.expanded) > .sv-pbody,
+  .overlay .story-scroll:not(.expanded) > .story-foot { order:4; }
+}
