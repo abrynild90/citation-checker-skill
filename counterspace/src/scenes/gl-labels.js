@@ -309,7 +309,7 @@ const methods = {
       idx.sort((a, b) => (moved.has(b) ? 1 : 0) - (moved.has(a) ? 1 : 0) || a - b);
       for (const i of idx) {
         const r = raw[i],
-          others = idx.filter((j) => j !== i).map((j) => ({ x: pl[j].x, y: pl[j].y, w: raw[j].w, h: raw[j].h, leader: pl[j].leader ? [pl[j].ax, pl[j].ay, pl[j].qx, pl[j].qy] : null }));
+          others = raw.map((q, j) => (q && pl[j] && j !== i ? j : -1)).filter((j) => j >= 0).map((j) => ({ x: pl[j].x, y: pl[j].y, w: raw[j].w, h: raw[j].h, leader: pl[j].leader ? [pl[j].ax, pl[j].ay, pl[j].qx, pl[j].qy] : null }));
         const n = pl.relocate(i, pl[i].x, pl[i].y, others, this._lm);
         if (!n) continue;
         const qx = Math.max(n[0] - r.w / 2, Math.min(n[0] + r.w / 2, r.px)),
