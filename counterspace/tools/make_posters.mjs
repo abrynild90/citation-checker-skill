@@ -39,7 +39,7 @@ const POSTER_VIEW = {
   gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
   spaceplanes: { cam: 2, boost: 1.3, back: 3.4, lift: -1.6 }, // OTV-7's elongated orbit around the Earth
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
-  solwind: { cam: 0, back: 0.62, boost: 2.4 }, // close on the impact, the satellite several times larger
+  solwind: { cam: 0, back: 0.82, boost: 1.8 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.4, right: 0.12, boost: 1.7 },
   fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
   dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
@@ -82,6 +82,7 @@ try {
           h.playing = false;
           h.update(tt);
           h.pickCam(cam);
+          h.interrupt();
           h.update(tt);
           h.render();
           // the screen box of the craft on show (the picture is cropped around it)
@@ -190,6 +191,7 @@ try {
         if (view.boost) h._modelBoost = view.boost;
         if (view.cam != null) {
           h.pickCam(view.cam);
+          h.interrupt();
           h.update(t);
         }
         if (view.back) {

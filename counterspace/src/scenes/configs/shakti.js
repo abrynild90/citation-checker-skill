@@ -4,6 +4,7 @@ import { IS_PHONE } from '../core.js';
 
 export const SHAKTI = {
   id: 'shakti',
+  noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   date: '2019-03-27',
   title: 'Mission Shakti: India destroys a satellite (2019)',
   shells: ['LEO'],
@@ -79,12 +80,12 @@ export const SHAKTI = {
       palette: { hot: [1, 0.98, 0.82], mid: [1, 0.88, 0.5], cool: [1, 0.8, 0.42] }, // warm fragments with short trails; the dark halo separates them from the amber city lights
       darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
       hard: true, // crisp gold-white fragments with a bright centre: not another soft amber town light
-      size: 0.1,
-      minPx: 4,
-      maxPx: 11,
-      additive: true,
+      size: 0.065,
+      minPx: 2.5,
+      maxPx: 6,
+      additive: false,
       trail: { n: 5, dt: 0.012, k: 0.6 },
-      lateGlow: true,
+      lateGlow: false,
     },
   ],
   still: 0.43,

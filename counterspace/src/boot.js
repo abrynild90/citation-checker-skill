@@ -1,3 +1,4 @@
+import './first-look.js';
 // ============================================================================
 // boot.js: first draw, lazy drawing, resize, theme toggle and the window.__cs test hooks.
 // Needs: every other module. Runs last.

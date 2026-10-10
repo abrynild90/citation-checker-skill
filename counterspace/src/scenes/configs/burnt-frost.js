@@ -4,6 +4,7 @@ import { IS_PHONE } from '../core.js';
 
 export const BURNT_FROST = {
   id: 'burnt-frost',
+  noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   date: '2008-02-20',
   title: 'Burnt Frost: the US destroys a failing satellite (2008)',
   shells: ['LEO'],
@@ -100,9 +101,9 @@ export const BURNT_FROST = {
       color: '#ffb066',
       palette: { hot: [1, 0.86, 0.55], mid: [1, 0.6, 0.25], cool: [1, 0.5, 0.22] },
       hard: true,
-      size: 0.085,
+      size: 0.06,
       minPx: 2.5,
-      maxPx: 9,
+      maxPx: 6,
       additive: false,
       lateGlow: true,
     }, // warm orange fragments, uneven in size and spread: no lattice, separate from the blue ocean

@@ -2459,3 +2459,39 @@
   .overlay .story-scroll:not(.expanded) > .sv-pbody,
   .overlay .story-scroll:not(.expanded) > .story-foot { order:4; }
 }
+
+@media(max-width:760px) {
+  #sceneSrcLine > #sceneMore { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 14px; min-height: 44px; border: 1px solid var(--line); border-radius: 24px; color: var(--text); font-size: 13px; }
+  #sceneSrcLine > #sceneMore[hidden] { display: none; }
+  #slPop .sl-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+}
+
+@media(max-width:760px) { #sceneSrcLine > #sceneMore .ico { display: none; } }
+/* Keep enlarged phone text inside the sheet; its account remains scrollable. */
+@media(max-width:760px) {
+  .overlay .panel, .overlay .sv-head, .overlay .story, .overlay .ctrl { min-width: 0; max-width: 100%; }
+  .overlay .sv-head { grid-template-columns: 40px max-content 40px minmax(0, 1fr); }
+  .overlay h2#sceneTitle { min-width: 0; overflow-wrap: anywhere; }
+  .overlay .sv-seen { grid-column: 1 / -1; white-space: normal; }
+  .overlay .sv-list-btn { min-width: 0; white-space: normal; }
+}
+@media(max-width:760px) {
+  .overlay { width: 100vw; width: 100dvw; max-width: 100dvw; }
+}
+@media(max-width:760px) {
+  .overlay #scViews, .overlay #scCams { flex-wrap: wrap; min-width: 0; max-width: 100%; }
+  .overlay #scCams button { white-space: normal; max-width: 100%; }
+}
+/* Diagram labels use measured coordinates. Browser zoom still enlarges the whole
+   diagram; automatic text inflation belongs to the adjacent readable account. */
+.overlay #sceneView { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+@media(max-width:760px) {
+  .overlay #scenePanel.large-type { grid-template-rows: auto minmax(0,1fr) minmax(160px,1.2fr) auto !important; }
+}
+
+@media(max-width:760px) {
+  .overlay .large-type .sv-seen { display: none; }
+  .overlay .large-type .sv-list-btn { font-size: 12px; padding-inline: 8px; }
+  .overlay .large-type .sv-list-btn .ico { display: none; }
+}

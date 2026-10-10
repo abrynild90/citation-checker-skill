@@ -4,6 +4,7 @@ import { IS_PHONE } from '../core.js';
 
 export const SOLWIND = {
   id: 'solwind',
+  noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   fitPct: 0.99,
   date: '1985-09-13',
   title: 'Solwind: a US missile destroys a satellite (1985)',
@@ -17,6 +18,9 @@ export const SOLWIND = {
     'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons. ' +
     'The positions and the debris spread are drawn to show the idea. They are not calculated.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (285 tracked, 0 still in orbit); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
+  modelNote:
+    'Solwind’s broad shape follows NASA’s P78-1 photograph: a wheel-shaped body beneath an upright solar sail. Its size, orientation and motion here are illustrative.',
+  modelSource: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/p78-1.html',
   related: null,
   event: 'us-1985-solwind',
   launchPhoneK: 1.2,
@@ -31,6 +35,7 @@ export const SOLWIND = {
   latePct: 0.85,
   camGlide: true,
   burstPadFrom: 0.4,
+  fitFillKeys: IS_PHONE ? [0.68, 0.7, 0.85, 0.9, 0.9, 0.9] : undefined, // room for the wheel and sail above the caption during the climb
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
   fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
@@ -65,6 +70,7 @@ export const SOLWIND = {
     },
     {
       type: 'target',
+      variant: 'solwind',
       label: 'Solwind P78-1',
       color: C.tgt,
       big: 5,

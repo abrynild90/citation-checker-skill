@@ -378,6 +378,7 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: 'sat',
         prim: true,
+        variant: a.variant,
         color: a.color,
         label: a.label,
         short: a.short,

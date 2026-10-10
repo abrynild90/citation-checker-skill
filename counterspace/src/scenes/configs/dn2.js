@@ -72,7 +72,7 @@ export const DN2 = {
         { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46, staticAt: [0.88, 0.58], staticPin: 'hard' },
       ],
     },
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9, sats: 6 },
+    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9 },
   ],
   still: 0.62,
   stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it

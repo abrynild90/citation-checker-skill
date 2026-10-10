@@ -21,14 +21,34 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
     hair = px * Math.min(1, Math.max(0.5, s / 44)), // outline weight: 1 px, down to half a pixel on a very small glyph
     big = s >= 44; // room for cells, bolts and small parts
   const rect = (a, b, w, h, fill, r = 0) =>
-    k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('rx', r).attr('fill', fill).attr('stroke', INK).attr('stroke-width', hair);
+    k
+      .append('rect')
+      .attr('x', a)
+      .attr('y', b)
+      .attr('width', w)
+      .attr('height', h)
+      .attr('rx', r)
+      .attr('fill', fill)
+      .attr('stroke', INK)
+      .attr('stroke-width', hair);
   // a shape, or several that overlap, outlined once around their union: the outline underneath, the fill on top
   const solid = (d, fill, extra) => {
-    k.append('path').attr('d', d).attr('fill', INK).attr('stroke', INK).attr('stroke-width', 2 * hair);
-    return k.append('path').attr('d', d).attr('fill', fill).attr('stroke', 'none').call(extra || (() => {}));
+    k.append('path')
+      .attr('d', d)
+      .attr('fill', INK)
+      .attr('stroke', INK)
+      .attr('stroke-width', 2 * hair);
+    return k
+      .append('path')
+      .attr('d', d)
+      .attr('fill', fill)
+      .attr('stroke', 'none')
+      .call(extra || (() => {}));
   };
-  const stroke = (d, col, w, op = 1) => k.append('path').attr('d', d).attr('fill', 'none').attr('stroke', col).attr('stroke-width', w).attr('stroke-opacity', op);
-  const shine = (a, b, w, h, op = 0.2) => k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', '#fff').attr('fill-opacity', op);
+  const stroke = (d, col, w, op = 1) =>
+    k.append('path').attr('d', d).attr('fill', 'none').attr('stroke', col).attr('stroke-width', w).attr('stroke-opacity', op);
+  const shine = (a, b, w, h, op = 0.2) =>
+    k.append('rect').attr('x', a).attr('y', b).attr('width', w).attr('height', h).attr('fill', '#fff').attr('fill-opacity', op);
   // a solar panel: blue, a light frame, a cell line down the middle when there is room
   const panel = (a, b, w, h, cells = 1) => {
     rect(a, b, w, h, PANEL);
@@ -39,7 +59,19 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
     }
   };
   if (shape === 'sat' || shape === 'iss') {
-    if (shape === 'iss') {
+    if (o.variant === 'solwind') {
+      panel(-35, -47, 70, 62, 3);
+      rect(-9, -4, 18, 18, '#d8b36a');
+      solid('M-41,20 Q0,10 41,20 V40 Q0,52 -41,40Z', METAL);
+      stroke('M-41,20 Q0,31 41,20', WHITE, hair);
+      rect(-39, 39, 78, 6, '#d8b36a');
+    } else if (o.variant === 'fengyun') {
+      rect(-48, -1, 96, 2, METAL);
+      panel(-48, -7, 35, 14, 1);
+      panel(13, -7, 35, 14, 1);
+      rect(-10, -10, 20, 20, '#d8b36a', 1);
+      shine(-10, -10, 20, 6);
+    } else if (shape === 'iss') {
       // the truss with four pairs of solar arrays, the module cluster and a cross module
       rect(-50, -2.4, 100, 4.8, METAL);
       for (const cx of [-43, -26, 26, 43]) {
@@ -73,7 +105,14 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
       }
       // a small dish on a mast
       stroke(`M0,${-bh}V${-bh - 5}`, METAL, 2.2);
-      k.append('ellipse').attr('cx', 0).attr('cy', -bh - 7).attr('rx', 6.5).attr('ry', 3).attr('fill', WHITE).attr('stroke', INK).attr('stroke-width', hair);
+      k.append('ellipse')
+        .attr('cx', 0)
+        .attr('cy', -bh - 7)
+        .attr('rx', 6.5)
+        .attr('ry', 3)
+        .attr('fill', WHITE)
+        .attr('stroke', INK)
+        .attr('stroke-width', hair);
       if (o.variant === 'tug') {
         // SJ-21: three thruster bells aft, radiator strips on the bus sides, and a two-segment grapple boom with a small jaw (as in the live model)
         solid('M-9,19 L-6.5,29 L-11.5,29Z M9,19 L11.5,29 L6.5,29Z M-2.8,19 L-4,30 L4,30 L2.8,19Z', '#4b546d');
@@ -98,7 +137,10 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
   } else if (shape === 'plane' && o.variant === 'winged') {
     // a generic winged vehicle (CSSHQ), nose up: a slim body on a broad delta wing, no tail or surface detail
     solid('M0,-47 L6,-28 L48,34 L-48,34 L-6,-28Z', color);
-    k.append('path').attr('d', 'M0,-45 C4,-30 4.6,-10 4.6,14 L4.6,34 L-4.6,34 L-4.6,14 C-4.6,-10 -4,-30 0,-45Z').attr('fill', '#fff').attr('fill-opacity', 0.28);
+    k.append('path')
+      .attr('d', 'M0,-45 C4,-30 4.6,-10 4.6,14 L4.6,34 L-4.6,34 L-4.6,14 C-4.6,-10 -4,-30 0,-45Z')
+      .attr('fill', '#fff')
+      .attr('fill-opacity', 0.28);
   } else if (shape === 'plane') {
     // spaceplane, seen from above, nose up: a swept delta with a lighter fuselage and a dark cockpit
     solid('M0,-47 L5,-31 L9.5,-12 L45,22 L45,30 L13,25 L7,37 L0,41 L-7,37 L-13,25 L-45,30 L-45,22 L-9.5,-12 L-5,-31Z', color);
@@ -121,14 +163,23 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
     rect(-44, -5, 14, 10, '#5d6a86');
   } else if (shape === 'site') {
     // a place on the ground: a dot in a ring
-    k.append('circle').attr('r', 36).attr('fill', 'none').attr('stroke', INK).attr('stroke-width', 8 + 2 * hair);
+    k.append('circle')
+      .attr('r', 36)
+      .attr('fill', 'none')
+      .attr('stroke', INK)
+      .attr('stroke-width', 8 + 2 * hair);
     k.append('circle').attr('r', 36).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 8);
-    k.append('circle').attr('r', 15).attr('fill', color).attr('stroke', INK).attr('stroke-width', 2 * hair);
+    k.append('circle')
+      .attr('r', 15)
+      .attr('fill', color)
+      .attr('stroke', INK)
+      .attr('stroke-width', 2 * hair);
   } else if (shape === 'jammer') {
     // a truck with a mast, a crossed antenna and three emission arcs
     rect(-40, 12, 50, 20, '#3a4254', 2);
     rect(12, 16, 22, 16, WHITE, 2);
-    for (const cx of [-28, -6, 24]) k.append('circle').attr('cx', cx).attr('cy', 34).attr('r', 7).attr('fill', INK).attr('stroke', '#8e9bb4').attr('stroke-width', 2);
+    for (const cx of [-28, -6, 24])
+      k.append('circle').attr('cx', cx).attr('cy', 34).attr('r', 7).attr('fill', INK).attr('stroke', '#8e9bb4').attr('stroke-width', 2);
     stroke('M-14,12V-34', INK, 4 + 2 * hair);
     stroke('M-14,12V-34', WHITE, 4);
     stroke('M-28,-30H0M-24,-18H-4', color, 4);
