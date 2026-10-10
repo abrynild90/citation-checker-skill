@@ -52,8 +52,9 @@ export const FENGYUN = {
       dv: 0.9,
       decay: 0,
       color: C.debris,
-      minPx: IS_PHONE ? 4 : 3.5, // bigger, brighter fragments: the ring stays visible when it spreads wide and thin
-      maxPx: 9,
+      hard: true, // separate fragments, without a soft haze hiding their distribution
+      minPx: IS_PHONE ? 2.5 : 2, // individual fragments remain distinct on the smaller stage
+      maxPx: 5.5,
       size: 0.034,
       label: 'Debris ring',
       labelEdge: true, // live: the label points at a fragment on the ring's outer edge, so the leader stays short

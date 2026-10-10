@@ -276,3 +276,9 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
  .site-foot{padding-bottom:calc(96px + env(safe-area-inset-bottom))}html{scroll-padding-bottom:84px}
 }
 @media print{.reading-nav,.record-find{display:none}}
+
+/* Diagram symbols match the chart geometry; each label stays with its symbol. */
+.symbol-key ul { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 6px; padding: 0; list-style: none; }
+.symbol-key li { display: inline-flex; align-items: center; gap: 7px; }
+.symbol-key svg { width: 16px; height: 16px; flex: none; fill: currentColor; }
+.symbol-key p { margin: 0; }

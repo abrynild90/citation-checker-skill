@@ -4,7 +4,7 @@
   "description": "Build and validate the self-contained Counterspace website",
   "scripts": {
     "build": "cd .. && python3 tools/build_page.py",
-    "test": "cd .. && node tools/smoke.mjs && node tools/regression.mjs",
+    "test": "cd .. && node tools/smoke.mjs && node tools/regression.mjs && node tools/motion_check.mjs",
     "qa": "cd .. && node tools/qa.mjs",
     "test:scenes": "cd .. && node tools/scene_check.mjs"
   },
