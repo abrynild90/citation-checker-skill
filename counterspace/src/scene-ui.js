@@ -327,6 +327,7 @@ const moreBtn = $('sceneMore');
 const stepChoose = $('sceneStepChoose');
 stepChoose.onchange = () => {
   if (stillOnly) {
+    setMore(true);
     const li = stepsEl.children[+stepChoose.value];
     li?.scrollIntoView({ block: 'nearest' });
     li?.querySelector('button')?.focus();

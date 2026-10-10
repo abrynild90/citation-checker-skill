@@ -76,6 +76,12 @@ try {
     assert.match(await page.locator('#chartB .record-result').innerText(), /Direct-ascent weapons\s+Demonstrated/);
     await page.locator('#chartB .record-find > summary').click();
     if (width <= 400) {
+      await page.evaluate(() => window.__cs.openScene('starfish'));
+      await page.waitForFunction(() => document.getElementById('overlay').getAttribute('aria-hidden') === 'false');
+      assert.equal(await page.locator('#sceneStepsBox').isVisible(), false);
+      await page.locator('#sceneStepChoose').selectOption('1');
+      assert.equal(await page.locator('#sceneStepsBox').isVisible(), true);
+      await page.locator('#scClose').click();
       await page.locator('.reading-nav select').selectOption('quizBand');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'quizBand');
       assert.equal(await page.locator('.reading-nav').isVisible(), true);

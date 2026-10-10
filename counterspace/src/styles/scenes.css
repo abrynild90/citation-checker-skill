@@ -2403,3 +2403,5 @@
  .overlay .panel.reading-account{grid-template-rows:auto minmax(0,26%) minmax(0,1fr) auto}
  .overlay .reading-account .story-scroll{padding-bottom:24px}
 }
+/* The phase selector replaces the clipped strip of steps in the compact phone account. */
+@media(max-width:760px){.overlay #scenePanel:not(.reading-account) #sceneStepsBox{display:none}}

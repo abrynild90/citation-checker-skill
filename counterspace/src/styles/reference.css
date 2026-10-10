@@ -127,3 +127,5 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
  .sources .cites>li{padding-block:16px}
 }
 .record-result>.btn{margin-right:8px}
+/* The capability chart's old reference ordering must not bury its record reader. */
+#chartB>.record-find{order:0}
