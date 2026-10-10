@@ -10,7 +10,7 @@ import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
 import { timed } from './app.js';
 import { drawLegal, drawLegalKey, initZoomControl, landOnMark, legalOff, legalScroll } from './charts/legal.js';
-import { hooks, markFirstDrawn, settled } from './shared.js';
+import { fragmentId, hooks, markFirstDrawn, settled } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
 import { ORDER, closeScene, exportStill, host, openScene, showRecap, startTour } from './scene-ui.js';
@@ -112,7 +112,7 @@ nameThemeButton();
 // page then moves again. Instead nothing scrolls until the page has settled (shared.js settled(): load, fonts, first draw); then everything below is drawn, any closed
 // disclosure that holds the target is opened, and the page scrolls to the target in one move. A second look a moment later only corrects a landing that something
 // moved, and only while the reader has not scrolled by hand.
-const hashId = () => decodeURIComponent(location.hash.slice(1));
+const hashId = () => fragmentId(location.hash);
 let moved = false;
 ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
 addEventListener('hashchange', () => (moved = false));
@@ -193,7 +193,7 @@ if (location.hash)
 // a link to the address already in the bar fires no hashchange, so the click itself opens the section
 document.addEventListener('click', (e) => {
   const a = e.target.closest?.('a[href^="#"]');
-  const id = a && decodeURIComponent(a.getAttribute('href').slice(1));
+  const id = a && fragmentId(a.getAttribute('href'));
   if (id && SRC.has(id) && openSources()) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
 });
 
@@ -318,3 +318,18 @@ window.__cs = {
   scenes: ORDER.map((s) => s.id),
   host: () => host,
 };
+
+// Native Tab scrolling can leave a control under the sticky law strip. Keep focus visible.
+document.addEventListener('focusin', (e) => {
+  const target = e.target;
+  if (target.closest('#legalBand, #rail, #overlay, #card, .skip')) return;
+  requestAnimationFrame(() => {
+    if (document.activeElement !== target) return;
+    legalScroll();
+    const band = document.getElementById('legalBand'),
+      b = band.getBoundingClientRect(),
+      r = target.getBoundingClientRect();
+    if (!band.classList.contains('off') && b.top <= 1 && b.bottom > 0 && r.top >= 0 && r.top < b.bottom + 8 && r.bottom > b.top)
+      scrollBy({ top: r.top - b.bottom - 12, behavior: 'instant' });
+  });
+});

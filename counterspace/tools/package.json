@@ -1,19 +1,25 @@
 {
-  "name": "tools",
+  "name": "counterspace-tools",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Build and validate the self-contained Counterspace website",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "cd .. && python3 tools/build_page.py",
+    "test": "cd .. && node tools/smoke.mjs && node tools/regression.mjs",
+    "qa": "cd .. && node tools/qa.mjs",
+    "test:scenes": "cd .. && node tools/scene_check.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "d3": "7.9.0",
     "esbuild": "^0.28.2",
-    "playwright": "^1.56.1"
+    "playwright": "^1.56.1",
+    "three": "0.160.0"
   },
   "devDependencies": {
+    "axe-core": "4.10.3",
     "prettier": "^3.9.9"
-  }
+  },
+  "private": true
 }

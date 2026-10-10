@@ -20,12 +20,12 @@
   type="image/svg+xml"
   href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070b16'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%233a7bd5'/%3E%3Cellipse cx='16' cy='16' rx='12.5' ry='5' transform='rotate(-24 16 16)' fill='none' stroke='%23ffc86b' stroke-width='1.8'/%3E%3Ccircle cx='26.6' cy='11.4' r='2' fill='%23ffc86b'/%3E%3C/svg%3E"
 >
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style id="cs-fonts">/*__FONTS__*/</style>
 <style>/*__CSS__*/</style>
 </head>
 <body>
 <!--__ICONS__-->
+<noscript><p class="wrap">Enable JavaScript to use the interactive charts, scenes and downloads.</p></noscript>
 <a class="skip" href="#timeline">Skip to the timeline</a>
 <header class="top scope-dark" id="top">
   <div class="topbar">
@@ -71,7 +71,7 @@
             href="#i-replay"/></svg><span>Replay</span></button>
         </figcaption>
         <div class="hero-glance" id="heroGlance" hidden></div>
-        <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Check your connection and reload.<button class="btn small" type="button" onclick="location.reload()"><svg
+        <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Reload the page to try again.<button class="btn small" type="button" onclick="location.reload()"><svg
           class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Reload</button></p>
         <div class="sr" id="heroAlt"></div>
       </figure>
@@ -428,7 +428,8 @@
 <script id="cs-land" type="application/json">/*__LAND__*/</script>
 <script id="cs-earth" type="application/json">/*__EARTH__*/</script>
 <script id="cs-posters" type="application/json">/*__POSTERS__*/</script>
-<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" onerror="document.documentElement.classList.add('no-cdn')"></script>
+<script id="cs-licenses" type="application/json">/*__LICENSES__*/</script>
+<script>/*__D3__*/</script>
 <script>addEventListener('load',function(){if(typeof d3==='undefined')document.documentElement.classList.add('no-cdn')})</script>
 <script type="module">
 /*__APP__*/

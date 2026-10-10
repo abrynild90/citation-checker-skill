@@ -358,11 +358,14 @@ export function exportSVG(which) {
 }
 export function download(name, data, type) {
   const a = document.createElement('a');
-  a.href = data instanceof Blob ? URL.createObjectURL(data) : data.startsWith('data:') ? data : URL.createObjectURL(new Blob([data], { type }));
+  const objectURL = data instanceof Blob ? URL.createObjectURL(data) : data.startsWith('data:') ? null : URL.createObjectURL(new Blob([data], { type }));
+  a.href = objectURL || data;
   a.download = name;
   document.body.appendChild(a);
   a.click();
   a.remove();
+  // Keep the URL alive long enough for the browser to start the download, then release its bytes.
+  if (objectURL) setTimeout(() => URL.revokeObjectURL(objectURL), 30000);
 }
 // A SVG string drawn onto a canvas at twice its size, saved as a PNG (the fonts travel inside the file, so the picture matches the drawing).
 function svgToPng(svg) {

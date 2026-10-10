@@ -196,7 +196,7 @@ export function drawA(el = document.getElementById('svgA')) {
         .tickValues(major)
         .tickSize(0)
         .tickPadding(4)
-        .tickFormat((d) => (phone ? d3.format(',')(d) : `${d3.format(',')(d)} km`)),
+        .tickFormat(d3.format(',')),
     )
     .select('.domain')
     .remove();
@@ -205,7 +205,7 @@ export function drawA(el = document.getElementById('svgA')) {
     .attr('class', 'axis-title')
     .attr('x', 0)
     .attr('y', 14)
-    .text(phone ? 'Altitude in km, logarithmic scale' : 'Altitude above Earth, logarithmic scale');
+    .text(phone ? 'Altitude in km, logarithmic scale' : 'Altitude above Earth in km, logarithmic scale');
   // ---- strip for unreported altitudes
   const sy = top + plotH + capH,
     stripY = (e) => sy + 16 + (e._row || 0) * ROWH;
