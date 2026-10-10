@@ -203,7 +203,11 @@ export const modelMethods = {
     };
     if (variant === 'solwind') {
       // The wheel beneath a single upright sail is the defining outline in the photograph.
-      K.cyl(metal, 0.017, 0.017, 0.008, 0, -0.014, 0, 0, 0, 0, 32);
+      K.cyl(this._foil(0x9faabd), 0.017, 0.017, 0.008, 0, -0.014, 0, 0, 0, 0, 32);
+      for (let k = 0; k < 12; k++) {
+        const angle = (k * PI) / 6;
+        K.box(metal, 0.0004, 0.0075, 0.0004, Math.sin(angle) * 0.017, -0.014, Math.cos(angle) * 0.017, 0, angle, 0);
+      }
       K.cyl(foil, 0.016, 0.016, 0.0014, 0, -0.0185, 0, 0, 0, 0, 32);
       K.ring(metal, 0.017, 0.0005, 0, -0.0097, 0, PI / 2);
       K.box(foil, 0.008, 0.008, 0.007, 0, -0.006, 0.004);
@@ -217,6 +221,7 @@ export const modelMethods = {
       array(0.016, 0.006, 0.014, 0, 0, -PI / 2);
     }
     const g = K.build();
+    if (variant === 'solwind') g.rotation.y = -Math.PI * 0.45; // an illustrative three-quarter attitude keeps the sail visible
     Object.assign(g.userData, { span: variant === 'solwind' ? 0.044 : 0.046, minPx: 15, maxPx: 50 });
     return g;
   },

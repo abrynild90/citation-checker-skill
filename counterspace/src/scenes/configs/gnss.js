@@ -133,7 +133,7 @@ export const GNSS = {
     { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], phone: { at: [42, -8, 5.6] }, ref: false, hide: IS_PHONE ? ['Ground jammer', 'Jammer effect', 'Airliner 1'] : ['Ground jammer', 'Jammer effect', 'GPS signal'] },
   ],
   status: [
-    [0, 'Both airliners have GNSS (green); the jammer zone is red', 'Airliners have GNSS (green); zone is red', 'Both airliners have GNSS (green); zone is red'],
+    [0, 'Outside the red jammer zone, aircraft receive GPS signals (green)', 'Green: GPS received; red: signal lost', 'Green: GPS received; red: signal lost'],
     [0.3, 'Inside the zone GNSS is lost (red); outside it, OK (green). Satellites unaffected', 'Inside the zone GNSS is lost (red)', 'Zone: GNSS lost (red). Outside: fine. Satellites unaffected'],
   ],
 };

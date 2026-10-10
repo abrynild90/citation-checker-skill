@@ -272,7 +272,7 @@ export const SPACEPLANES = {
     [0.3, 'OTV-7 (launched 28 Dec. 2023): an elongated orbit, 323 to 38,838 km up, tilt 59.1° (Feb. 2024)', 'OTV-7: 323 to 38,838 km up, tilt 59.1°'],
     [0.38, 'SWF: may have tested a new sensor or payload; what and why are unclear', 'SWF: purpose and payload unclear'],
     [0.46, 'Oct. 2024: uses air drag to lower its orbit; landed at Vandenberg 7 Mar. 2025 (434 days)', 'Landed 7 Mar. 2025 after 434 days'],
-    [0.51, 'OTV-8 launched 21 Aug. 2025; SWF says it was still in orbit in Feb. 2026', 'OTV-8 launched 21 Aug. 2025'],
+    [0.51, 'Next flight: OTV-8 launched 21 Aug. 2025; SWF says it was still in orbit in Feb. 2026', 'Next: OTV-8 launched 21 Aug. 2025'],
     [0.54, 'China’s CSSHQ: flights of 2, 276 and 268 days; a fourth launched 6 Feb. 2026 (SWF)', 'CSSHQ: flights of 2, 276, 268 days'],
     [0.56, 'Flight 1 (launched 4 Sept. 2020) spent 2 days in orbit', 'CSSHQ flight 1: 2 days in orbit'],
     [0.575, 'Flight 2 (2022–23): orbit raised to about 597–607 km; Object J cataloged, apparently released', 'Flight 2: Object J apparently released'],

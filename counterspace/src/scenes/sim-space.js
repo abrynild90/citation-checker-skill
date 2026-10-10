@@ -383,19 +383,14 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         return n;
       },
     });
-    // The count is stated against the nominal sample (a.count) at every width: a phone draws fewer dots, but the share offline is the same number.
-    const dark = (t) => {
-      let d = 0;
-      for (const o of canon) if (t > o) d++;
-      return Math.round((d / canon.length) * a.count);
-    };
+    // Dots explain the spread of the outage; their drawn number is not an observed count.
     items.push({
       kind: 'status',
       text: (t, still, phone) => {
         if (phone) {
           if (t < a.pulse0) return 'Before the attack: modems online';
           if (t < a.t0) return 'Attackers reach the ground network';
-          return t < a.t1 ? `Malware wipes modems · ${dark(t)}/${a.count} offline` : 'Modems offline · satellite kept working';
+          return t < a.t1 ? 'Malware wipes modems; they go offline' : 'Modems offline · satellite kept working';
         }
         if (a.compactStatus) {
           // opt-in: shorter desktop status lines
@@ -407,7 +402,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
                 : t < a.t1
                   ? 'Modems wiped (SWF: ~45 min): red = offline'
                   : 'Modems offline (red) · satellite kept working';
-          return t >= a.t0 ? `${c} · ${dark(t)} of ${a.count} simulated` : c;
+          return c;
         }
         const tx =
           t < a.pulse0
@@ -417,7 +412,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
               : t < a.t1
                 ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
                 : 'Modems offline (red) · the satellite kept working';
-        return t >= a.t0 ? `${tx} · ${dark(t)} of ${a.count} simulated terminals offline` : tx;
+        return tx;
       },
     });
   }

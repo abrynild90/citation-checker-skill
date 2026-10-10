@@ -294,6 +294,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .first-look-dates time { display: block; color: var(--muted); font-size: 14px; }
 .first-look-dates strong { display: block; margin-top: 6px; font-weight: 500; }
 .first-look-copy { max-width: 65ch; min-height: 210px; }
+.first-look-copy p { font-family: var(--serif); font-size: 19px; line-height: 1.55; }
 .first-look-copy h3 { margin: 22px 0 12px; }
 .first-look-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .cap-phone { display: none; }
@@ -316,3 +317,4 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   #chartB:not(.show-cap-history) #svgB, #chartB:not(.show-cap-history) .cap-history-hint { display: none; }
   #chartB #tkB, #chartB #noteB { display: none; }
 }
+.first-look-actions .btn { white-space: normal; max-width: 100%; min-width: 0; text-align: center; }

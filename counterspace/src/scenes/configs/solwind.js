@@ -4,6 +4,7 @@ import { IS_PHONE } from '../core.js';
 
 export const SOLWIND = {
   id: 'solwind',
+  noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   fitPct: 0.99,
   date: '1985-09-13',
   title: 'Solwind: a US missile destroys a satellite (1985)',
@@ -34,6 +35,7 @@ export const SOLWIND = {
   latePct: 0.85,
   camGlide: true,
   burstPadFrom: 0.4,
+  fitFillKeys: IS_PHONE ? [0.68, 0.7, 0.85, 0.9, 0.9, 0.9] : undefined, // room for the wheel and sail above the caption during the climb
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
   fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
