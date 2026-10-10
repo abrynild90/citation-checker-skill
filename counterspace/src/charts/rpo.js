@@ -389,8 +389,8 @@ export function drawR(el = document.getElementById('svgR')) {
       if (un > 0) {
         const g = glossOf[b.li], count = SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`;
         if (phone) {
-          g.text(count).append('tspan').attr('x', INSET + 18).attr('dy', 16).text(`${un} more names: tap a mark to read`);
-        } else g.text(`${count}, ${un} unnamed here: hover or focus to read`);
+          g.text(count).append('tspan').attr('x', INSET + 18).attr('dy', 16).text(`${un} more names: tap a shape`);
+        } else g.text(`${count}; ${un} more names: select a shape`);
       }
     });
   }

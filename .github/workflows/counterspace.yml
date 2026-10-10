@@ -28,3 +28,5 @@ jobs:
         working-directory: counterspace/tools
       - run: npm test
         working-directory: counterspace/tools
+      - run: node tools/copy_lint.mjs
+        working-directory: counterspace

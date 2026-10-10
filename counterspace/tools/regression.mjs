@@ -46,7 +46,7 @@ try {
     await page.waitForFunction(() => document.getElementById('srcDetails').open);
     await page.locator('#sourceFind').fill('NO_MATCH_SOURCE_13579');
     assert.equal(await page.locator('#citedSources > li:visible').count(), 0);
-    assert.match(await page.locator('#sourceCount').textContent(), /try a different/);
+    assert.match(await page.locator('#sourceCount').textContent(), /try a different/i);
     await page.locator('#sourceFind').fill('');
     assert.equal(await page.locator('#citedSources > li:visible').count(), await page.locator('#citedSources > li').count());
     assert.equal(await page.locator('#sceneChoose option').count(), 14);

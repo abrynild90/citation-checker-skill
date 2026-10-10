@@ -16,6 +16,8 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const RULES = [
   // internal / software vocabulary a reader does not need
   ['ledger', 'error', /\bledger\b/i, 'say "records", "entries" or "the data"'],
+  ['implementation-copy', 'error', /\b(scrub through time|(?:group|capability) memberships|not coded|absent code|interface revision|fetched from|built into the page)\b/i, 'describe the action or finding in plain language'],
+  ['stock-filler', 'error', /\b(did you know|no pressure|many people guess|fair guess|tend to surprise people|nothing here is required reading)\b/i, 'give the result or instruction directly'],
   ['file-format', 'error', /\b(SVG|PNG|CSV|JSON|HTML|API|WebGL|GPU|URL)\b/, 'name the action ("Download chart", "Save image"), not the file format'],
   ['file-name', 'error', /\b[\w-]+\.(md|json|csv|svg|png|html|mjs|js|py)\b/i, 'point to the page itself, not a file name'],
   ['schema-meta', 'error', /\b(schema|metadata|dataset version|version \d+\.\d+)\b/i, 'drop it, or say "data last updated <date>"'],
@@ -147,12 +149,26 @@ async function pagePass(label, opts) {
   const t = await p.evaluate(pageText);
   add(`${label} page`, t.text);
   add(`${label} page (read aloud)`, t.attrs);
+  console.log(`${label} page checked`);
   return p;
 }
 
 // 1. Desktop page: text, hover cards of every mark, downloads, hero labels, scenes (animated).
 {
   const p = await pagePass('desktop', { viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
+  // Inline readers expose text that cannot be reached by hovering chart points.
+  const readers = await p.evaluate(() => {
+    const out = [];
+    for (const select of document.querySelectorAll('.record-find select')) {
+      for (const option of [...select.options].filter(o => o.value)) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        out.push([select.id, select.closest('.record-find').querySelector('.record-result').innerText]);
+      }
+    }
+    return out;
+  });
+  readers.forEach(([id, text]) => add(`reader ${id}`, text));
   const cards = await p.evaluate(async () => {
     const out = [];
     for (const m of document.querySelectorAll('.mark')) {
@@ -212,6 +228,7 @@ async function pagePass(label, opts) {
       await p.waitForTimeout(250);
       await grab(`view ${i + 1}`);
     }
+    console.log(`scene ${id} checked`);
     await p.evaluate(() => window.__cs.closeScene());
     await p.waitForTimeout(250);
   }
@@ -241,6 +258,7 @@ async function pagePass(label, opts) {
           .join('\n'),
       ),
     );
+    console.log(`scene ${id} checked`);
     await p.evaluate(() => window.__cs.closeScene());
     await p.waitForTimeout(200);
   }
@@ -255,6 +273,7 @@ async function pagePass(label, opts) {
     await p.evaluate((id) => window.__cs.openScene(id), id);
     await p.waitForTimeout(1500);
     add(`still diagram ${id}`, await p.evaluate(() => document.getElementById('overlay').innerText));
+    console.log(`scene ${id} checked`);
     await p.evaluate(() => window.__cs.closeScene());
     await p.waitForTimeout(150);
   }

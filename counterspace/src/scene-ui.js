@@ -436,7 +436,7 @@ function fillStory(cfg) {
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   sentences = splitSentences(cfg.lede || cfg.caption);
-  dykEl.innerHTML = FACTS[cfg.id] ? `<b>Did you know</b> ${esc(FACTS[cfg.id])}` : '';
+  dykEl.innerHTML = FACTS[cfg.id] ? `${esc(FACTS[cfg.id])}` : '';
   // the "Did you know" line is left out when the account's own first sentence already says it
   dykEl.hidden = !FACTS[cfg.id] || same(splitSentences(cfg.caption || cfg.lede || '')[0] || '', FACTS[cfg.id]);
   expanded = false;
@@ -465,7 +465,7 @@ function fillStory(cfg) {
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
     'Earth imagery: NASA Blue Marble and Black Marble (public domain). A simple map is drawn if the photograph cannot load.',
-    REDUCED ? 'Animation is switched off on this device, so a still diagram is shown.' : '',
+    REDUCED ? 'Your device is set to limit animation, so a still diagram is shown.' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -1088,8 +1088,8 @@ function staticMode(on) {
   overlay.classList.toggle('is-static', on);
   if (on) {
     staticTxt.textContent = REDUCED
-      ? 'Animation is off on this device, so this is a still diagram.'
-      : 'The 3D view could not load, so this is a still diagram. Check your connection and try again; your browser may also have 3D switched off.';
+      ? 'Your device is set to limit animation, so this is a still diagram.'
+      : 'The animation could not start, so a still diagram is shown. Try again, or read the account and steps below.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
@@ -1596,7 +1596,7 @@ let tour = null; // { i, timer } while the tour runs
 function markSeen(cfg) {
   seen.add(cfg.id);
   document.dispatchEvent(new CustomEvent('cs:seen', { detail: cfg.id }));
-  seenEl.textContent = `You’ve now seen ${seen.size} of ${ORDER.length} scenes`;
+  seenEl.textContent = `${seen.size} of ${ORDER.length} scenes viewed`;
   tourEl.hidden = !tour;
   if (tour) $('svTourTxt').textContent = `Tour: scene ${tour.i + 1} of ${ORDER.length}`;
 }
