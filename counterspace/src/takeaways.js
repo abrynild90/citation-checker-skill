@@ -2,10 +2,9 @@
 // takeaways.js: one plain sentence above each chart that says what to notice, before the reader meets the marks, and the four that head "What the pattern
 // shows". Every number is counted from the data. Provides: fillTakeaways(). Needs: app.js (the data).
 // ============================================================================
-import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, REDUCED, byId, esc, fmtMY, fmtMonthYear, parse } from './app.js';
+import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, byId, esc, fmtMY, fmtMonthYear, parse } from './app.js';
 import { LAW_WORDS, WORDS as PAIR_WORDS, gap, yearsBetween } from './charts/lag.js';
 import { capSentence } from './charts/b.js';
-import { recapLinks } from './recap.js';
 
 const WORDS = [
     'no',
@@ -91,7 +90,7 @@ export function fillTakeaways() {
     `${cap(word(short))} of the ${word(waits.length)} waits were under two years.`,
     `The longest, from ${PAIR_WORDS[longP.event]?.name ?? byId[longP.event].system} to the ${LAW_WORDS[longP.law] ?? byId[longP.law].title}, took ${g(waits[longI])}.`,
   );
-  patBig(waits, longP, g);
+  patBig(waits, g);
   finding(
     'pt2',
     'Some attacks stopped. Others did not.',
@@ -109,51 +108,28 @@ export function fillTakeaways() {
   );
 }
 
-// The opening statement of "What the pattern shows": the range of the waits in one large line, and under it the longest pair drawn as a thin line between its two
-// dates. The line draws itself once, when the panel scrolls into view (with reduced motion it is simply there). Every figure is counted from the pairs.
-function patBig(waits, longP, g) {
+// All six recorded pairs use the same duration scale; the dates and qualifications stay visible.
+function patBig(waits, g) {
   const box = document.getElementById('patBig');
   if (!box) return;
-  document.getElementById('pbNum').innerHTML = `<span>${esc(g(Math.min(...waits)))}</span> to <span>${esc(g(Math.max(...waits)))}</span>`;
-  const ev = byId[longP.event],
-    law = byId[longP.law],
-    from = parse(ev.date || ev.start);
-  document.getElementById('pbTrack').innerHTML =
-    `<span class="pb-end a"><b>${esc(fmtMY(from))}</b><span>${esc(PAIR_WORDS[ev.id]?.name ?? ev.system)} begins</span></span>` +
-    `<span class="pb-rail"><i class="pb-dot"></i><i class="pb-draw"></i><b class="pb-pill">${esc(g(Math.max(...waits)))} later</b><i class="pb-tick"></i></span>` +
-    `<span class="pb-end b"><b>${esc(fmtMY(parse(law.start)))}</b><span>${esc(LAW_WORDS[law.id] ?? law.title)}</span></span>`;
-  // narrow: the one line drawn here shows the longest wait. Wide (the list of every pair stands beside it): the line would repeat the list, so it is left out and the list marks the longest.
-  document.getElementById('pbNote').innerHTML =
-    `<span class="pb-n1">${cap(word(waits.length))} pairs from our records. The line shows the longest wait. This is order in time, not cause.</span>` +
-    `<span class="pb-n2">${cap(word(waits.length))} pairs from our records, listed beside it. The longest wait is marked. This is order in time, not cause.</span>`;
-  // on a wide window the right of the panel carries all the pairs, one dashed line each (the same drawing as the hero's links)
-  document.getElementById('pbPairs').innerHTML = `<p class="pb-ph">Every pair, oldest first</p>${recapLinks()}`;
-  document.querySelector(`#pbPairs li[data-ev="${longP.event}"]`)?.classList.add('is-long');
+  const limit = Math.ceil(Math.max(...waits));
+  document.getElementById('pbNum').textContent = `${g(Math.min(...waits))} to ${g(Math.max(...waits))}`;
+  document.getElementById('pbTrack').hidden = true;
+  document.getElementById('pbNote').textContent =
+    `Six pairs from our records. Each line uses the same scale, up to ${limit} years. This is order in time, not cause.`;
+  document.getElementById('pbPairs').innerHTML =
+    '<ol class="pair-comparison">' +
+    D.lag_pairs.pairs
+      .map((p, i) => {
+        const ev = byId[p.event],
+          law = byId[p.law];
+        return (
+          `<li><span class="pair-event"><b>${esc(PAIR_WORDS[p.event]?.name ?? ev.system)}</b><span>${esc(fmtMY(parse(ev.date || ev.start)))}</span></span>` +
+          `<span class="pair-duration"><strong>${esc(g(waits[i]))}</strong><span class="pair-track" aria-hidden="true"><i style="width:${(waits[i] / limit) * 100}%"></i></span></span>` +
+          `<span class="pair-law"><b>${esc(LAW_WORDS[p.law] ?? law.title)}</b><span>${esc(fmtMY(parse(law.start)))}</span></span></li>`
+        );
+      })
+      .join('') +
+    '</ol>';
   box.hidden = false;
-  // The pairs are always there as words; only the dashed lines and the time pills draw in, in under a second. The drawing starts while the panel is still a screen
-  // below the window, so it is under way or done when the panel arrives. An address (#pattern), a link or a jump that lands on the panel before that shows it
-  // complete at once, and so does a panel that is already in reach when the page loads.
-  const near = () => {
-    const r = box.getBoundingClientRect();
-    return r.top < innerHeight * 1.4 && r.bottom > -innerHeight * 0.5;
-  };
-  if (!REDUCED && 'IntersectionObserver' in window && !location.hash && !near()) {
-    box.dataset.armed = '';
-    let io;
-    const stop = () => (io?.disconnect(), removeEventListener('scroll', jump));
-    const jump = () => {
-      if (box.classList.contains('in')) return stop();
-      if (box.getBoundingClientRect().top < innerHeight * 0.95) (box.classList.add('in', 'snap'), stop());
-    };
-    io = new IntersectionObserver(
-      (es) => {
-        if (!es.some((e) => e.isIntersecting)) return;
-        box.classList.add('in');
-        stop();
-      },
-      { rootMargin: '0px 0px 40% 0px', threshold: 0 },
-    );
-    io.observe(box);
-    addEventListener('scroll', jump, { passive: true });
-  }
 }

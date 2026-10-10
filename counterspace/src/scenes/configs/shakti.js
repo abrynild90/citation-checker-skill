@@ -30,7 +30,7 @@ export const SHAKTI = {
   phoneHide: ['PDV'], // 375: Microsat-R and the island are enough around the strike
   fitFillKeys: IS_PHONE ? undefined : [0.95, 0.85, 0.8, 0.76, 0.68, 0.62], // desktop: the opening is tight on the pad, then eases out
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
-  liveOff: { Impact: [-200, -50], 'Abdul Kalam': [-34, 66], 'PDV': [-40, -120], 'Microsat-R': [165, 6] }, // the two pills sit on opposite sides of the strike, one above and one below
+  liveOff: { Impact: [-200, -50], 'Abdul Kalam': [-34, 66], PDV: [-40, -120], 'Microsat-R': [165, 6] }, // the two pills sit on opposite sides of the strike, one above and one below
   camOff: { 1: { PDV: [130, -115], 'Abdul Kalam': [-150, 40] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
   phoneOff: { 'Abdul Kalam': [-40, 46] }, // 375: the island label hangs clear of the trail head
   hit: { lat: 26.0, lon: 95.0, alt: 300, inc: 96.6, t: 0.38, wa: 0.45, wf: 0.5 },
@@ -50,7 +50,22 @@ export const SHAKTI = {
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
     },
-    { type: 'intercept', from: [20.75, 87.08], t0: 0.16, color: C.int, label: 'PDV Mk-II', flash: 0.5, flashCap: 0.9, strong: true, coreK: 0.5, flashSpan: 0.26, linger: 0.2, lingerK: 0.6, lingerEnd: 0.7, rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 } },
+    {
+      type: 'intercept',
+      from: [20.75, 87.08],
+      t0: 0.16,
+      color: C.int,
+      label: 'PDV Mk-II',
+      flash: 0.5,
+      flashCap: 0.62,
+      strong: true,
+      coreK: 0.35,
+      flashSpan: 0.26,
+      linger: 0.2,
+      lingerK: 0.6,
+      lingerEnd: 0.7,
+      rocket: { style: 'slim', minPx: 64, maxPx: 96, glowMin: 30, glowMax: 50 },
+    },
     {
       type: 'debris',
       count: 130,

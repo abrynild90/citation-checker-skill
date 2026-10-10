@@ -38,7 +38,10 @@ async function getHost() {
       };
       host.onInteraction = () => {
         if (!cur) return;
-        if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
+        if (tour) {
+          clearTimeout(tour.timer);
+          tour.timer = 0;
+        }
         setStatus('Paused.');
       };
       host.canvas.addEventListener('webglcontextlost', (e) => {
@@ -113,7 +116,7 @@ function prefetchEarth() {
 }
 // Where a scene opens (a fraction of its length) when the first frame is a plain stretch of ocean or a dark limb: the telling moment the poster shows. The scene
 // plays on from there and holds the last diagram. Replay and a tour start at the beginning. Chosen by viewing the frames at 0 to 0.6.
-const OPEN_AT = { starfish: 0.16, laser: 0.2, spaceplanes: 0.3 };
+const OPEN_AT = { starfish: 0.16, laser: 0.2 };
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 
 const $ = (id) => document.getElementById(id);
@@ -368,7 +371,10 @@ stepChoose.onchange = () => {
     li?.querySelector('button')?.focus();
   } else {
     jumpToStep(+stepChoose.value);
-    if (host) { host.playing = false; setPlayBtn(false); }
+    if (host) {
+      host.playing = false;
+      setPlayBtn(false);
+    }
   }
 };
 let expanded = false,
@@ -418,13 +424,22 @@ function syncMore() {
     stepsHidden = !expanded && !STACKED.matches && !!stepsEl.style.height && listScrolls();
   if (!expanded) hasMore = capFolded || stepsHidden;
   moreBtn.hidden = !hasMore;
-  moreBtn.querySelector('span').textContent = expanded ? 'Show less' : capFolded ? (steps.length > 4 ? 'Read the full account and every step' : 'Read the full account') : 'Show every step';
+  moreBtn.querySelector('span').textContent = expanded
+    ? 'Show less'
+    : capFolded
+      ? steps.length > 4
+        ? 'Read the full account and every step'
+        : 'Read the full account'
+      : 'Show every step';
 }
 function setMore(open) {
   expanded = open;
   asideBody.classList.toggle('expanded', open);
   panel.classList.toggle('reading-account', open);
-  if (open && host) { host.playing = false; setPlayBtn(false); }
+  if (open && host) {
+    host.playing = false;
+    setPlayBtn(false);
+  }
   moreBtn.setAttribute('aria-expanded', String(open));
   moreBtn.classList.toggle('open', open);
   setLede(0); // the full account replaces the intro (fitSteps stops short when open, so the text is set here)
@@ -450,19 +465,30 @@ const SCENE_SUMMARIES = {
   dn2: 'DN-2 had no target. China reported 10,000 km; an analysis cited by SWF estimated 30,000 km or more.',
   gnss: 'A ground jammer disrupts GPS receivers on aircraft; it does not attack the GPS satellites.',
   rpo: 'Three episodes of spacecraft coming close. A close approach does not establish hostile intent.',
-  spaceplanes: 'Reusable U.S. and Chinese craft fly unusual missions; their purpose is not established here.'
+  spaceplanes: 'Reusable U.S. and Chinese craft fly unusual missions; their purpose is not established here.',
 };
 const PHONE_TITLES = {
-  starfish: 'Starfish Prime (1962)', solwind: 'Solwind intercept (1985)', fengyun: 'Fengyun-1C intercept (2007)',
-  'burnt-frost': 'Operation Burnt Frost (2008)', dn2: 'DN-2 high-altitude test (2013)', shakti: 'Mission Shakti (2019)',
-  cosmos1408: 'Cosmos 1408 intercept (2021)', gnss: 'Baltic GPS jamming', viasat: 'Viasat cyberattack (2022)',
-  laser: 'MIRACL laser test (1997)', 'sj21-tug': 'SJ-21 satellite tow (2022)', rpo: 'Three close approaches',
-  spaceplanes: 'Reusable spaceplanes'
+  starfish: 'Starfish Prime (1962)',
+  solwind: 'Solwind intercept (1985)',
+  fengyun: 'Fengyun-1C intercept (2007)',
+  'burnt-frost': 'Operation Burnt Frost (2008)',
+  dn2: 'DN-2 high-altitude test (2013)',
+  shakti: 'Mission Shakti (2019)',
+  cosmos1408: 'Cosmos 1408 intercept (2021)',
+  gnss: 'Baltic GPS jamming',
+  viasat: 'Viasat cyberattack (2022)',
+  laser: 'MIRACL laser test (1997)',
+  'sj21-tug': 'SJ-21 satellite tow (2022)',
+  rpo: 'Three close approaches',
+  spaceplanes: 'Reusable spaceplanes',
 };
 function syncSceneTitle(cfg) {
   const phone = matchMedia('(max-width: 760px)').matches;
-  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, m => `<span class="nb">${m}</span>`);
+  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
   titleEl.setAttribute('aria-label', cfg.title);
+}
+function arrangeExport() {
+  (COMPACT.matches ? slPop : $('sceneCtrl')).append(exportBtn);
 }
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
@@ -491,8 +517,9 @@ function fillStory(cfg) {
     (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
   // Stacked layouts: one row of pills (Source, Open the source, Related law); the citation and the picture note open from "Source".
   slLinks.innerHTML =
-    (ev ? `<a class="pill" href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>` : '') +
-    (cfg.related ? `<button type="button" class="pill sl-law">Related law</button>` : '');
+    (ev
+      ? `<a class="pill" href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
+      : '') + (cfg.related ? `<button type="button" class="pill sl-law">Related law</button>` : '');
   const slLaw = slLinks.querySelector('.sl-law');
   if (slLaw) slLaw.onclick = () => lawBtn.click();
   toggleSrc(false);
@@ -505,6 +532,7 @@ function fillStory(cfg) {
     .filter(Boolean)
     .join(' ');
   slPop.innerHTML = `<p><strong>Source.</strong> ${esc(citeText(cfg.cite))}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
+  arrangeExport();
   fillNext(cfg);
   lawBtn.disabled = !cfg.related;
   lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
@@ -617,7 +645,8 @@ function anchorNote(note) {
     }
     const nr = note.getBoundingClientRect(),
       br = lawBtn.getBoundingClientRect();
-    if (br.height && nr.bottom > br.top - 4 && nr.bottom < br.bottom + 8) note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
+    if (br.height && nr.bottom > br.top - 4 && nr.bottom < br.bottom + 8)
+      note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
   }
 }
 function toggleSrc(open) {
@@ -709,12 +738,82 @@ export function closeScene(nav) {
 }
 
 // ---------------------------------------------------------------- steps: what happens, as a timeline that follows the animation
+function buildEpisodes(cfg) {
+  const box = $('sceneEpisodes');
+  box.hidden = !cfg.acts;
+  box.replaceChildren();
+  cfg.acts?.forEach((act, i) => {
+    const camera = cfg.cameras[act.cam],
+      button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = `${i + 1}. ${camera.episode || camera.chip || cfg.epChipShort?.[i] || camera.name}`;
+    button.setAttribute('aria-pressed', 'false');
+    button.onclick = () => {
+      if (!host || stillOnly) return;
+      chooseView(act.cam);
+      host.update(act.t0 + 0.001);
+    };
+    box.append(button);
+  });
+}
+const STEP_NAMES = {
+  starfish: ['Rocket ascent', 'Detonation', 'Trapped electrons', 'Belt around Earth', 'Satellite damage'],
+  solwind: ['F-15 climb', 'Missile release', 'Intercept', 'Debris decay'],
+  fengyun: ['Interceptor ascent', 'Collision', 'Debris ring', 'Debris remaining'],
+  'burnt-frost': ['Interceptor ascent', 'Closing distance', 'Collision', 'Debris decay'],
+  dn2: ['Rocket ascent', 'Estimated highest point', 'Reported re-entry'],
+  shakti: ['Interceptor ascent', 'Collision', 'Debris decay'],
+  cosmos1408: ['Interceptor ascent', 'Collision', 'Debris and the ISS orbit'],
+  gnss: ['Before entering the zone', 'Inside the jammer zone'],
+  viasat: ['Normal service', 'Attack begins', 'Modems disabled', 'Satellite unaffected', 'Attribution'],
+  laser: ['Satellite rises', 'MIRACL tracks the target', 'Separate case: Peresvet'],
+  'sj21-tug': ['Approach', 'Close proximity', 'Docking', 'Tow begins', 'Higher orbit', 'Separation not described', 'Return toward GEO'],
+  rpo: [
+    'SJ-21 approaches SJ-25',
+    'GSSAP positions',
+    'Possible docking',
+    'Possible docking again',
+    'Docked pair',
+    'Separation',
+    'January approaches',
+    'Cosmos 2543 released',
+    'Close to Cosmos 2542',
+    'Orbit raised',
+    'Near USA 245',
+    'Russia’s statement',
+    'USA 271 approaches',
+    'Orbit adjustment',
+    'Closest approach',
+    'End of the approach',
+  ],
+  spaceplanes: [
+    'OTV-1 to OTV-6',
+    'Low-orbit flights',
+    'Runway landings',
+    'SWF’s assessment',
+    'OTV-7’s elongated orbit',
+    'Unclear purpose',
+    'Lowering the orbit',
+    'OTV-8 launch',
+    'China’s flights',
+    'First flight',
+    'Object J appears',
+    'Approaches to Object J',
+    'Object G released',
+    'PLA’s assessment',
+    'SWF’s interpretation',
+    'Fourth flight',
+  ],
+};
 function renderSteps(cfg) {
   const dur = cfg.duration || 0;
   steps = (cfg.status || cfg.steps || []).filter(Array.isArray).map(([t, text]) => ({ t, text }));
   const fine = steps.some((s, i) => i && Math.round(s.t * dur) === Math.round(steps[i - 1].t * dur)); // two steps would read the same: show tenths
   stepIdx = -1;
-  stepChoose.innerHTML = steps.map((s, i) => `<option value="${i}">${i + 1}. ${esc(s.text)}</option>`).join('');
+  stepChoose.innerHTML = steps
+    .map((s, i) => `<option value="${i}" data-description="${esc(s.text)}">${i + 1}. ${esc(STEP_NAMES[cfg.id]?.[i] || `Step ${i + 1}`)}</option>`)
+    .join('');
+  buildEpisodes(cfg);
   stepsSection.hidden = !steps.length;
   stepsEl.innerHTML = steps
     .map(
@@ -739,6 +838,10 @@ function stepAt(t) {
 }
 function markStep(k) {
   $('sceneCurrentStep').textContent = steps[k]?.text || '';
+  const act = cur?.acts?.findIndex((a) => (steps[k]?.t ?? 0) >= a.t0 && (steps[k]?.t ?? 0) < a.t1);
+  $('sceneEpisodes')
+    .querySelectorAll('button')
+    .forEach((b, i) => b.setAttribute('aria-pressed', String(i === act)));
   if (document.activeElement !== stepChoose) stepChoose.value = String(k);
   [...stepsEl.children].forEach((li, i) => {
     li.classList.toggle('done', i < k);
@@ -756,7 +859,8 @@ function syncSteps(t) {
   stepIdx = k;
   markStep(k);
   const li = stepsEl.children[k];
-  if (first && STACKED.matches) asideBody.scrollTop = 0; // Keep the opening explanation visible; playback follows subsequent steps.
+  if (first && STACKED.matches)
+    asideBody.scrollTop = 0; // Keep the opening explanation visible; playback follows subsequent steps.
   else if (first) requestAnimationFrame(() => followStep(li, true));
   else followStep(li);
 }
@@ -779,21 +883,24 @@ function followStep(li, instant) {
     if (li.offsetTop < y - 1) to = li.offsetTop;
     else if (need > y + 1) {
       to = maxY;
-      for (const c of stepsEl.children) if (c.offsetTop >= need - 1) {
+      for (const c of stepsEl.children)
+        if (c.offsetTop >= need - 1) {
           to = Math.min(maxY, c.offsetTop);
           break;
         }
     }
     if (Math.abs(to - y) > 1) {
       // The active row is never seen half-way: a row below the window jumps in at once; the glide is only for a row already whole in view
-      const inView = li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1;
+      const inView =
+        li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1;
       const smooth = inView && !(REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5);
       stepsEl.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' });
       if (!smooth) trimSteps(); // the clip follows the jump at once, so the active row is whole on the very next frame
       // a smooth scroll that did not arrive (a busy page, a browser that skips it) is finished at once, so the list always rests on its row
       if (smooth)
         setTimeout(() => {
-          if (Math.abs(stepsEl.scrollTop - to) > 1 && performance.now() - lastUserScroll > 1500 && stepIdx === +li.dataset.i) stepsEl.scrollTo({ top: to, behavior: 'auto' });
+          if (Math.abs(stepsEl.scrollTop - to) > 1 && performance.now() - lastUserScroll > 1500 && stepIdx === +li.dataset.i)
+            stepsEl.scrollTo({ top: to, behavior: 'auto' });
         }, 700);
     }
     return;
@@ -914,7 +1021,7 @@ function fitStepsClosed() {
         const H = bot[j] - top[i];
         if (H > r.avail + 0.5 || H < r.avail * 0.7 || j - i + 1 > MAX_ROWS) continue;
         const c = blank(H);
-        if (c < bestCost - 1 || (Math.abs(c - bestCost) <= 1 && H > best)) (best = H), (bestCost = c);
+        if (c < bestCost - 1 || (Math.abs(c - bestCost) <= 1 && H > best)) ((best = H), (bestCost = c));
       }
     if (best < r.h || best > r.h) {
       r.h = best;
@@ -1040,10 +1147,12 @@ document.fonts?.ready.then(() => fitSteps());
     { passive: true },
   ),
 );
-// Selecting a step plays the scene from the start of that step (the tour camera takes over if the step lies outside a locked episode).
+// Selecting a step pauses at its beginning; an out-of-episode step restores the whole-story camera.
 function jumpToStep(i) {
   const s = steps[i];
   if (!s || !host || !glOK || stillOnly || !cur) return;
+  host.interrupt();
+  setPlayBtn(false);
   const tour = host.sim.cams.findIndex((c) => c.auto);
   if (epi && (s.t < epi.a0 || s.t >= epi.a1) && tour >= 0) host.pickCam(tour);
   host.update(Math.min(s.t, 1));
@@ -1053,7 +1162,10 @@ stepsEl.addEventListener('click', (e) => {
   const li = e.target.closest('li[data-i]');
   if (li) jumpToStep(+li.dataset.i);
 });
-COMPACT.addEventListener('change', () => fitSteps());
+COMPACT.addEventListener('change', () => {
+  arrangeExport();
+  fitSteps();
+});
 STACKED.addEventListener('change', () => fitSteps());
 addEventListener('resize', () => toggleSrc(false));
 
@@ -1121,6 +1233,7 @@ function syncScrub(t) {
 }
 // A still diagram has no timeline: Play, the scrubber and the views give way to one plain sentence; the steps stay, for reading.
 function staticMode(on) {
+  $('sceneEpisodes').hidden = on || !curSim?.cfg.acts;
   [playBtn, scrubWrap, scTime, viewsEl].forEach((n) => {
     n.hidden = on;
   });
@@ -1133,7 +1246,9 @@ function staticMode(on) {
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
-  stepsNote.textContent = on ? 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
+  stepsNote.textContent = on
+    ? 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
+    : 'Select a step to jump to it.';
   if (on && curSim) {
     stepIdx = stepAt(curSim.cfg.staticT ?? curSim.still ?? 0);
     markStep(stepIdx); // the step the still shows
@@ -1157,17 +1272,23 @@ scrub.oninput = () => {
 };
 // Play/pause: an icon button whose accessible name is the action it will do.
 function setPlayBtn(on) {
-  if (!on && tour) { clearTimeout(tour.timer); tour.timer = 0; }
+  if (!on && tour) {
+    clearTimeout(tour.timer);
+    tour.timer = 0;
+  }
   playBtn.classList.toggle('playing', !!on);
-  const action = on ? 'Pause' : (host?._ended || host?.t >= 1) ? 'Replay' : 'Play';
+  const action = on ? 'Pause' : host?._ended || host?.t >= 1 ? 'Replay' : 'Play';
   playBtn.setAttribute('aria-label', action);
   playBtn.title = `${action} (Space)`;
-  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : (host?._ended || host?.t >= 1) ? '#i-replay' : '#i-play');
+  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : host?._ended || host?.t >= 1 ? '#i-replay' : '#i-play');
   playBtn.disabled = false;
 }
 function togglePlay() {
   if (!host || !cur || !glOK || stillOnly) return;
-  if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
+  if (tour) {
+    clearTimeout(tour.timer);
+    tour.timer = 0;
+  }
   const on = !host.playing;
   if (on && (host._ended || host.t >= 1)) host.update(epi ? epi.a0 + 0.001 : 0);
   host.playing = on;
@@ -1179,7 +1300,10 @@ playBtn.onclick = togglePlay;
 const narrowViews = matchMedia('(max-width: 1180px)'),
   phoneViews = matchMedia('(max-width: 760px)');
 narrowViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
-phoneViews.addEventListener?.('change', () => { if (cur) syncSceneTitle(cur); if (host && cur) buildViews(cur, host.sim); });
+phoneViews.addEventListener?.('change', () => {
+  if (cur) syncSceneTitle(cur);
+  if (host && cur) buildViews(cur, host.sim);
+});
 // A short label for a phone button (about 12 characters at most, always whole words); the full name stays as the button's accessible name.
 const STOP = /^(the|and|in|of|a|to|at|on|for|from)$/i;
 function phoneLabel(label) {
@@ -1192,7 +1316,10 @@ function phoneLabel(label) {
     .replace(/\s+in\s+(GEO|LEO|low Earth orbit)$/i, '')
     .trim();
   if (s.length <= 12) return s.replace(/^./, (m) => m.toUpperCase());
-  s = s.replace(/^all (three|\w+) \w+$/i, 'All $1').replace(/\s+(?:and the|and)\s+/i, ', ').replace(/\s+(of|with|at|on)\s+.*$/i, '');
+  s = s
+    .replace(/^all (three|\w+) \w+$/i, 'All $1')
+    .replace(/\s+(?:and the|and)\s+/i, ', ')
+    .replace(/\s+(of|with|at|on)\s+.*$/i, '');
   if (s.length > 12) {
     const out = [];
     for (const w of s.split(/\s+/)) {
@@ -1223,7 +1350,8 @@ function openMore(first) {
   moreMenu.hidden = false;
   reserveMenu(true);
   moreBtn2.setAttribute('aria-expanded', 'true');
-  moreMenu.style.left = Math.max(0, Math.min(moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left, viewsEl.clientWidth - moreMenu.offsetWidth)) + 'px';
+  moreMenu.style.left =
+    Math.max(0, Math.min(moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left, viewsEl.clientWidth - moreMenu.offsetWidth)) + 'px';
   const items = [...moreMenu.children];
   (first === 'last' ? items.at(-1) : items.find((b) => b.getAttribute('aria-checked') === 'true' && first !== 'first') || items[0]).focus();
 }
@@ -1241,7 +1369,14 @@ function buildViews(cfg, sim) {
     const label = names[i],
       b = document.createElement('button');
     b.type = 'button';
-    const short = phoneViews.matches ? phoneLabel(label) : narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^Follow the action$/i, 'Follow').replace(/^./, (m) => m.toUpperCase()) : label;
+    const short = phoneViews.matches
+      ? phoneLabel(label)
+      : narrowViews.matches
+        ? label
+            .replace(/^From (the |a )?/i, '')
+            .replace(/^Follow the action$/i, 'Follow')
+            .replace(/^./, (m) => m.toUpperCase())
+        : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
     b.title = label;
@@ -1346,7 +1481,11 @@ $('scPrev').onclick = () => go(-1);
 $('scNext').onclick = () => go(1);
 // The related law opens as a card in the scene: its date, whether it binds, its source, and a quiet way to see it on the timeline. Nothing scrolls away.
 const lawCard = $('lawCard');
-const BINDS = { treaty: 'A treaty: it binds the states that joined it.', resolution: 'Not binding: a call or a finding, not a rule that carries enforcement.', unilateral: 'A pledge by one country, not a treaty.' };
+const BINDS = {
+  treaty: 'A treaty: it binds the states that joined it.',
+  resolution: 'Not binding: a call or a finding, not a rule that carries enforcement.',
+  unilateral: 'A pledge by one country, not a treaty.',
+};
 const pairedLaw = (cfg) => !!(cfg.event && cfg.related && pairsAt(cfg.event).some((p) => p.law === cfg.related));
 function fillLawCard(cfg) {
   const l = byId[cfg.related];
@@ -1456,7 +1595,8 @@ overlay.addEventListener('keydown', hideHint, { passive: true });
 // ---------------------------------------------------------------- keyboard: Space plays or pauses, Left and Right change scene, 1 to 5 choose a view, Esc closes
 const TABBABLE = 'button:not([disabled]),input:not([disabled]),a[href],summary,[tabindex]';
 function trapTab(e) {
-  const list = [...(recapEl && !recapEl.hidden ? recapEl : panel).querySelectorAll(TABBABLE)].filter( // the closing slide covers the controls: Tab stays on the slide
+  const list = [...(recapEl && !recapEl.hidden ? recapEl : panel).querySelectorAll(TABBABLE)].filter(
+    // the closing slide covers the controls: Tab stays on the slide
     (n) => n.tabIndex >= 0 && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden' && !n.closest('[hidden],[aria-hidden="true"]'),
   );
   if (!list.length) return;
@@ -1715,7 +1855,9 @@ export function showRecap() {
     `${w('attack')} attacks that leave satellites in orbit and ${w('near')} cases of satellites flying close to others.`;
   $('svRecapPairs').innerHTML = recapLinks() + drawnPara(revealCapacity());
   $('svRecapLine').textContent = recapLine();
-  $('svRecapList').innerHTML = ORDER.map((s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`).join('');
+  $('svRecapList').innerHTML = ORDER.map(
+    (s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`,
+  ).join('');
   // the hand-off back to the picture: how many pairs are drawn on it now
   const linked = revealedCount();
   $('svRecapHero').hidden = !linked;
@@ -1733,7 +1875,11 @@ const recapBody = recapEl.querySelector('.sv-recap-body'),
   recapMore = () => {
     const edge = recapBody.getBoundingClientRect().bottom - 2,
       below = recapBody.lastElementChild.getBoundingClientRect().bottom > edge + 2, // content of the body (not its padding) still out of sight
-      hidden = below ? [...recapBody.querySelectorAll('.sv-recap-more[open] button[data-id], .sv-recap-more[open] .sv-recap-links a')].filter((n) => n.getBoundingClientRect().bottom > edge).length : 0;
+      hidden = below
+        ? [...recapBody.querySelectorAll('.sv-recap-more[open] button[data-id], .sv-recap-more[open] .sv-recap-links a')].filter(
+            (n) => n.getBoundingClientRect().bottom > edge,
+          ).length
+        : 0;
     recapBody.classList.toggle('more', below);
     recapCue.hidden = !below;
     if (below) $('svRecapCueTxt').textContent = hidden ? `${hidden} more below` : 'More below';

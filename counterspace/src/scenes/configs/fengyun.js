@@ -42,8 +42,28 @@ export const FENGYUN = {
   stillImpact: true, // the print also labels the impact point
   actors: [
     { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
-    { type: 'target', label: 'Fengyun-1C', color: C.tgt, big: true, minPx: IS_PHONE ? 60 : 100, maxPx: IS_PHONE ? 90 : 140, impactDx: 150, impactDy: -80, impactUntil: 0.6 },
-    { type: 'intercept', from: [28.2, 102.0], t0: 0.14, color: C.int, label: 'SC-19', strong: true, coreK: 2.4, flash: 0.36, rocket: IS_PHONE ? undefined : { minPx: 54, maxPx: 70 } }, // a bright core and a second white ring: the hit reads against the debris plume
+    {
+      type: 'target',
+      label: 'Fengyun-1C',
+      color: C.tgt,
+      big: true,
+      minPx: IS_PHONE ? 60 : 100,
+      maxPx: IS_PHONE ? 90 : 140,
+      impactDx: 150,
+      impactDy: -80,
+      impactUntil: 0.6,
+    },
+    {
+      type: 'intercept',
+      from: [28.2, 102.0],
+      t0: 0.14,
+      color: C.int,
+      label: 'SC-19',
+      strong: true,
+      coreK: 0.85,
+      flash: 0.3,
+      rocket: IS_PHONE ? undefined : { minPx: 54, maxPx: 70 },
+    }, // a bright core and a second white ring: the hit reads against the debris plume
     {
       type: 'debris',
       count: 3532,

@@ -1,7 +1,7 @@
 /* Scene gallery, "Surprise me" and reveal. A poster per 3D scene; on hover or focus the picture eases in and a "Did you know" line rises over it. */
 .scenes{border-top:1px solid var(--line);scroll-margin-top:16px}
 /* a strip of cards that scrolls sideways: the next card always peeks in, so it is plain there is more */
-.scenes{--seam:176px;position:relative;padding:120px 0 var(--s-5);border-top:0}
+.scenes{--seam:120px;position:relative;padding:64px 0 var(--s-5);border-top:0}
 .scenes::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--seam);pointer-events:none;
   background:linear-gradient(180deg,#050813 0,rgba(5,8,19,.8) 22%,rgba(5,8,19,.46) 46%,rgba(5,8,19,.16) 72%,rgba(5,8,19,0) 100%)}
 .scenes>.wrap{position:relative}

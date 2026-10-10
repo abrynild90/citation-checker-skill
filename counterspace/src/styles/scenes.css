@@ -2397,7 +2397,7 @@
 }
 
 /* A reader can reach any phase without scrolling away from the scene. */
-.overlay .step-choose{display:grid;gap:5px;margin:8px 0 12px;font:500 13px/1.4 var(--sans);color:var(--muted)}
+.overlay .step-choose{display:none;gap:5px;margin:8px 0 12px;font:500 13px/1.4 var(--sans);color:var(--muted)}
 .overlay .step-choose select{width:100%;min-width:0;min-height:44px;font:400 14px/1.4 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px}
 @media(max-width:760px) and (min-height:541px){
  .overlay .panel.reading-account{grid-template-rows:auto minmax(0,26%) minmax(0,1fr) auto}
@@ -2425,5 +2425,25 @@
     position: absolute; width: 1px; height: 1px; margin: 0;
     overflow: hidden; clip-path: inset(50%); white-space: nowrap;
   }
-  .overlay .step-choose { margin: 6px 0 4px; }
+  .overlay .step-choose { display:grid; margin: 6px 0 4px; }
+}
+
+/* Episode names remain beside the narrative while the camera changes. */
+.overlay .scene-episodes { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+.overlay .scene-episodes[hidden] { display:none; }
+.overlay .scene-episodes button { font:500 13px/1.4 var(--sans); color:var(--muted); background:transparent; border:1px solid var(--line-strong); border-radius:8px; padding:8px 10px; text-align:left; cursor:pointer; }
+.overlay .scene-episodes button[aria-pressed="true"] { background:var(--accent-soft); color:var(--text); border-color:var(--accent); }
+.overlay .scene-episodes button:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+@media(max-width:760px) {
+  .overlay h2#sceneTitle { white-space:normal; overflow:visible; text-overflow:clip; max-height:none; line-height:1.2; }
+  .overlay #sceneCtrl { display:grid; grid-template-columns:44px minmax(0,1fr); grid-template-rows:56px auto; gap:4px 12px; padding:8px 16px max(8px,env(safe-area-inset-bottom)); }
+  .overlay #scPlay { grid-column:1; grid-row:1; }
+  .overlay #scrubWrap { grid-column:2 / -1; grid-row:1; width:100%; min-width:0; height:40px; align-self:end; }
+  .overlay #scTime { grid-column:2 / -1; grid-row:1; width:auto; font-size:12px; align-self:start; justify-self:end; line-height:16px; }
+  .overlay #scViews { grid-column:1 / -1; grid-row:2; width:100%; margin:0; }
+  .overlay #scStatic { grid-column:1 / -1; grid-row:1 / -1; }
+  .overlay .sl-pop #scExport { margin-top:12px; min-height:44px; }
+  .overlay .scene-episodes { gap:5px; margin:8px 0; }
+  .overlay .scene-episodes button { flex:1 1 28%; min-height:44px; padding:7px; font-size:12px; }
+  .overlay #scenePanel:has(.scene-episodes:not([hidden])):not(.reading-account) { grid-template-rows:auto minmax(0,32%) minmax(0,1fr) auto; }
 }

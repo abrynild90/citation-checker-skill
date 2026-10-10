@@ -33,7 +33,9 @@ export class GLHost {
     this._bindDrag();
     this.ro = new ResizeObserver(() => this.resize());
   }
-  get playing() { return this._playing; }
+  get playing() {
+    return this._playing;
+  }
   set playing(on) {
     this._playing = !!on;
     cancelAnimationFrame(this.raf);
@@ -320,7 +322,8 @@ export class GLHost {
   }
   // Only deliberate view changes add camera motion to the explanatory scene.
   _camMotion() {
-    const c = this.sim.cams[this.camIdx], tw = this._tw;
+    const c = this.sim.cams[this.camIdx],
+      tw = this._tw;
     if (!c || this._user || !tw) return;
     const T = this.T,
       cam = this.camera,
@@ -599,7 +602,8 @@ export class GLHost {
             // GNSS links: steady green outside the zone, faint flickering red inside it
             const jam = it.dashFn(t);
             core.color.set(it.colorFn(t));
-            core.opacity = jam ? 0.12 + 0.18 * Math.abs(Math.sin(now * 3 + L * 9)) : 0.55;
+            core.opacity = jam ? 0.1 + 0.1 * Math.abs(Math.sin(now * 3 + L * 9)) : 0.38;
+            if (obj.userData.halo) obj.userData.halo.material.opacity = 0.06;
           } else if (obj.userData.halo) {
             const pulse = 1;
             core.opacity = (it.opacity ?? 0.9) * pulse;
@@ -618,7 +622,8 @@ export class GLHost {
           core.material.opacity = 0;
           ring.scale.setScalar((it.size ? it.size * 1.7 : 0.9) * (it.lingerK ?? 1) + 0.01);
           ring.userData.s0 = ring.scale.x;
-          ring.material.opacity = it.lingerEnd != null ? it.linger * Math.max(0, 1 - (t - it.t0 - span) / Math.max(1e-6, it.lingerEnd - it.t0 - span)) : it.linger; // lingerEnd (opt-in): the faint ring fades to 0 at this t
+          ring.material.opacity =
+            it.lingerEnd != null ? it.linger * Math.max(0, 1 - (t - it.t0 - span) / Math.max(1e-6, it.lingerEnd - it.t0 - span)) : it.linger; // lingerEnd (opt-in): the faint ring fades to 0 at this t
           if (obj.userData.ring2) obj.userData.ring2.material.opacity = 0;
         } else if (on) {
           const f = dt / span,
@@ -708,7 +713,7 @@ export class GLHost {
       if (!p) continue;
       obj.position.set(...p);
       const d = Math.max(0.15, obj.position.distanceTo(cp));
-      obj.scale.setScalar((56 * k * d) / sc);
+      obj.scale.setScalar((40 * k * d) / sc);
       obj.material.rotation = 0;
     }
     // Orbit lines with an opt-in fade-out over a time span (it.fadeT), on the listed cameras only when it.fadeCams is given.
