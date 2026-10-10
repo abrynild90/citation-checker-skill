@@ -80,7 +80,10 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     // An object hidden under the banner or caption band gets no label (nothing visible to point at).
     if (reserved.some((r) => c.px > r[0] && c.px < r[0] + r[2] && c.py > r[1] && c.py < r[1] + r[3])) return null;
     const { w, h } = c;
-    const cx = (x) => Math.max(w / 2 + MX, Math.min(W - w / 2 - MX, x)),
+    // a fixed slot that has to move (relocMode) may come closer to the left and right edges than the usual gutter, down to ex.relocEdgeX: a wide pill on a small stage
+    // has no other clear slot beside the planet
+    const MXe = relocMode ? Math.min(MX, (ex.relocEdgeX ?? MX) * (ex.scale || 1)) : MX;
+    const cx = (x) => Math.max(w / 2 + MXe, Math.min(W - w / 2 - MXe, x)),
       cy = (y) => Math.max(h / 2 + M, Math.min(H - h / 2 - M, y));
     const hits = (x, y) => boxes.reduce((n, b) => n + (Math.abs(x - b.x) < (w + b.w) / 2 + (ex.gap ?? 5) && Math.abs(y - b.y) < (h + b.h) / 2 + (ex.gap ?? 5) ? 1 : 0), 0);
     // A leader longer than this (share of the canvas width) is a defect: the label belongs next to its object.
@@ -119,6 +122,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
         if (pc > 2) n += Math.min(900, (pc - 2) * 140);
       }
       for (const s of segs) if (segBox(s[0], s[1], s[2], s[3], me)) n += 600;
+      if (relocMode) n += 1.5 * (Math.max(0, MX - (x - w / 2)) + Math.max(0, MX - (W - x - w / 2))); // still prefers the usual gutter where a slot there is as good
       if (disc && Math.hypot(x - disc.cx, y - disc.cy) < disc.r + Math.hypot(w, h) * 0.55) {
         const dx0 = Math.max(Math.abs(x - disc.cx) - w / 2, 0),
           dy0 = Math.max(Math.abs(y - disc.cy) - h / 2, 0);

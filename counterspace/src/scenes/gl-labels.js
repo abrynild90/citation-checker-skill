@@ -214,6 +214,7 @@ const methods = {
     const EDGE = !noBanner && w >= 700 ? 24 : 12;
     if (!noBanner && w >= 700) {
       objs.edgeX = 24;
+      objs.relocEdgeX = 11; // the gutter a pill that has to move off a sprite or the planet may use (see placeLabels().relocate)
       objs.leaderCap = Math.round(Math.max(120, 0.153 * w)); // ~120 px at the narrowest desktop stage, growing with it (the checker's own reach is 0.153 W)
     }
     this._lastObjs = objs;
