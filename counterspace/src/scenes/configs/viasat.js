@@ -129,6 +129,6 @@ export const VIASAT = {
     },
     { name: 'Europe close up', short: 'Europe', at: [32, 14, 2.15], look: [50, 19, 1.0], insetRef: true, phone: { at: [32, 14, 2.2], look: [56, 20, 1.0] } }, // the close view of the regions (KA-SAT is out of frame here by design; the first camera keeps it in view)
     { name: 'Ground network', short: 'Network', at: [42, -2, 2.3], look: [46, 14, 1.0], ref: false },
-    { name: 'Earth and GEO', at: [30, -6, 18], phone: { at: [30, -6, 22] }, hide: ['Ground management'] }, // its label would need a leader across the whole globe
+    { name: 'Earth and GEO', at: [30, -6, 6.5], hide: ['Ground management'] }, // its label would need a leader across the whole globe
   ],
 };

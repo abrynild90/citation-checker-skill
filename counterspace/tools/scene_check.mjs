@@ -152,7 +152,8 @@ if (MODES.includes('live'))
               h.playing = false;
               h._lm = {};
               h.pickCam(ci);
-              h.interrupt(); // seeking cancels the view transition, just as the visible controls do
+              h.interrupt(); // stop automatic motion before measuring a requested preset
+              h.setCam(ci, true); // measure its final pose, rather than the cancelled transition
               h.update(t);
               h.update(t);
             },
@@ -185,7 +186,8 @@ if (MODES.includes('live'))
               h.playing = false;
               h._lm = {};
               h.pickCam(ci);
-              h.interrupt(); // seeking cancels the view transition, just as the visible controls do
+              h.interrupt(); // stop automatic motion before measuring a requested preset
+              h.setCam(ci, true); // measure its final pose, rather than the cancelled transition
               h.update(t);
               h.update(t);
             },
