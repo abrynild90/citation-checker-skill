@@ -20,15 +20,14 @@ import { hooks, seenScenes } from './shared.js';
 import { revealIn } from './explore.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
 import { FACTS, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
-export let THREE = null,
-  host = null,
+import * as THREE from 'three';
+export let host = null,
   glOK = null;
 async function getHost() {
   ensureLand();
   if (REDUCED) return null;
   if (glOK === false) return null;
   try {
-    if (!THREE) THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
     if (!host) {
       host = new GLHost(THREE);
       // The scrubber mirrors scene time however it changes: playback ticks, scrubbing or programmatic host.update() calls.

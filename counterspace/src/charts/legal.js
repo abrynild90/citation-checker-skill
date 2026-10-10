@@ -53,12 +53,12 @@ const NAMES = {
   'woomera-2024': { t: 'Woomera Manual (soft law)', m: 'Woomera Manual*', s: 'Woomera*' },
   'unsc-veto-2024': { t: 'Russian veto: nuclear weapons in orbit', m: 'Russian veto (nuclear weapons)', s: 'Russian veto' },
   'itu-rrb-2024': { t: 'ITU Radio Regulations Board: grave concern', m: 'ITU Board: grave concern', s: 'ITU Board ’24' },
-  'icao-2025': { t: 'ICAO Assembly: GNSS interference an infraction', m: 'ICAO finding on GNSS', s: 'Aviation body ’25' },
+  'icao-2025': { t: 'ICAO Assembly: GNSS interference an infraction', m: 'ICAO finding on GNSS', s: 'ICAO ’25' },
   'itu-rrb-2025': {
     t: 'ITU Radio Regulations Board urges Russia to stop interference',
     l: 'ITU Radio Regulations Board urges Russia to stop',
     m: 'ITU Board urges Russia to stop',
-    s: 'ITU Board ’25',
+    s: 'ITU ’25',
   },
 };
 // Card, table and list titles are set once, here, so ui.js and lag.js can read l.title without importing this module's tables.
@@ -76,6 +76,7 @@ const nameAt = (d, size) => {
 export const GLOSSARY = [
   ['Space Treaty', 'The Outer Space Treaty (1967).'],
   ['ABM Treaty', 'Anti-Ballistic Missile Treaty (1972). Article XII bars interference with the other side’s means of verifying the treaty.'],
+  ['ICAO', 'The International Civil Aviation Organization, the United Nations agency for civil aviation.'],
   ['Aviation body', 'The International Civil Aviation Organization (ICAO), the United Nations agency for civil aviation.'],
   ['CD', 'Conference on Disarmament.'],
   ['Cyber manual', 'Tallinn Manual 2.0: an expert manual on how international law applies to cyber operations.'],
@@ -240,7 +241,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .filter((d) => !crowd(d))
       .forEach((d) => {
         const c = clusters.at(-1);
-        if (c && d._cx - c.at(-1)._cx < 200) c.push(d);
+        if (c && (zoom || d._cx - c.at(-1)._cx < 200)) c.push(d);
         else clusters.push([d]);
       });
     // The preferred side comes first; the others are there so a label near an edge or in a tight cluster can still find room.
