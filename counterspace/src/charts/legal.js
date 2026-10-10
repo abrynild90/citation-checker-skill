@@ -1076,7 +1076,7 @@ export function drawLegalKey() {
   const choose = document.getElementById('legalChoose'), choice = document.getElementById('legalChoice');
   if (choose && !choose.dataset.set) {
     choose.dataset.set = '1';
-    choose.innerHTML += [...LEGAL].sort((a,b) => a.start.localeCompare(b.start)).map(l => `<option value="${esc(l.id)}">${fmtY(parse(l.start))} — ${esc(l.title)}</option>`).join('');
+    choose.innerHTML += [...LEGAL].sort((a,b) => a.start.localeCompare(b.start)).map(l => `<option value="${esc(l.id)}">${fmtY(parse(l.start))} · ${esc(l.title)}</option>`).join('');
     choose.addEventListener('change', () => {
       const law = LEGAL.find(l => l.id === choose.value);
       choice.hidden = !law;

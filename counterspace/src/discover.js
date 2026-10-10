@@ -42,7 +42,7 @@ function drawGallery() {
 </li>`;
   }).join('') + surprise;
   const chooser = document.getElementById('sceneChoose');
-  chooser.innerHTML += STRIP.map(s => `<option value="${esc(s.id)}">${esc(yearOf(s))} — ${esc(nameOf(s))}</option>`).join('');
+  chooser.innerHTML += STRIP.map(s => `<option value="${esc(s.id)}">${esc(yearOf(s))} · ${esc(nameOf(s))}</option>`).join('');
   chooser.addEventListener('change', () => { if (chooser.value) { openScene(chooser.value, chooser); chooser.value = ''; } });
   grid.addEventListener('click', (e) => {
     const b = e.target.closest('.pc-btn');

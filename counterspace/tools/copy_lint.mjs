@@ -149,6 +149,7 @@ async function pagePass(label, opts) {
   const t = await p.evaluate(pageText);
   add(`${label} page`, t.text);
   add(`${label} page (read aloud)`, t.attrs);
+  console.log(`${label} page checked`);
   return p;
 }
 
@@ -227,6 +228,7 @@ async function pagePass(label, opts) {
       await p.waitForTimeout(250);
       await grab(`view ${i + 1}`);
     }
+    console.log(`scene ${id} checked`);
     await p.evaluate(() => window.__cs.closeScene());
     await p.waitForTimeout(250);
   }
@@ -256,6 +258,7 @@ async function pagePass(label, opts) {
           .join('\n'),
       ),
     );
+    console.log(`scene ${id} checked`);
     await p.evaluate(() => window.__cs.closeScene());
     await p.waitForTimeout(200);
   }
@@ -270,6 +273,7 @@ async function pagePass(label, opts) {
     await p.evaluate((id) => window.__cs.openScene(id), id);
     await p.waitForTimeout(1500);
     add(`still diagram ${id}`, await p.evaluate(() => document.getElementById('overlay').innerText));
+    console.log(`scene ${id} checked`);
     await p.evaluate(() => window.__cs.closeScene());
     await p.waitForTimeout(150);
   }
