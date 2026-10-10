@@ -19,6 +19,7 @@ import { EARTH_URL, earthReady } from './scenes/earth.js';
 import { exportSVG } from './export.js';
 import { audit } from './audit.js';
 import { mountDiscover } from './discover.js';
+import { mountReading } from './reading.js';
 import { mountQuiz } from './quiz.js';
 import { fillTakeaways } from './takeaways.js';
 import { mountScrub } from './scrub.js';
@@ -277,6 +278,7 @@ mountQuiz();
 fillTakeaways();
 mountScrub();
 mountExplore();
+mountReading();
 let rz = 0,
   lastW = innerWidth;
 addEventListener('resize', () => {

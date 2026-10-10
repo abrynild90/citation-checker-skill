@@ -45,7 +45,7 @@ const NO_DATA_2020S = {
 };
 const isNoData = (cat, dec, state) => dec === '2020s' && (NO_DATA_2020S[cat] || []).includes(state);
 // Status of one state in one category and decade: 'D' (demonstrated), 'P' (developing, matrix-supported) or 'N' (developing, our reading, matrix: no data).
-const statusOf = (cat, dec, state, v) => (v === 'D' ? 'D' : isNoData(cat, dec, state) ? 'N' : 'P');
+export const statusOf = (cat, dec, state, v) => (v === 'D' ? 'D' : isNoData(cat, dec, state) ? 'N' : 'P');
 // The data names Russia "Russia" under direct ascent and "USSR/Russia" elsewhere; a group counts it once.
 const sameState = (k) => (k === 'Russia' ? 'USSR/Russia' : k);
 

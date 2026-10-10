@@ -418,7 +418,7 @@ function build(stage) {
       {
         m: markOf(lastD.id),
         t: phone
-          ? `${fmtMonthYear(parse(lastD.date))}: Russia destroyed Cosmos 1408 at ${lastD.altitude_km} km, the last such test.`
+          ? `November 2021: last destructive test (Cosmos 1408).`
           : `${fmtMonthYear(parse(lastD.date))}: Russia destroyed its Cosmos 1408 satellite at ${lastD.altitude_km} km, the last such test.`,
         order: ['up-end', 'down-end', 'left'],
         phone: true,
@@ -535,7 +535,7 @@ function build(stage) {
     }
   }
 
-  const placeNote = (s, tol = phone || W < 900 ? 14 : 13) => {
+  const placeNote = (s, tol = phone ? 0 : W < 900 ? 14 : 13) => {
     let best = null,
       lines = [],
       w = 0;
@@ -575,7 +575,7 @@ function build(stage) {
   };
   specs.forEach((s) => placeNote(s));
   // A phone shows at least one weapons note: if none found clean room, the last test's note may lie across a mark or two (never across words).
-  if (phone && !placed.some((p) => p.m)) specs.slice().reverse().some((s) => placeNote(s, 60));
+  if (phone && !placed.some((p) => p.m)) specs.slice().reverse().some((s) => placeNote(s, 0));
   placed
     .filter((p) => p.m)
     .forEach((p) => {

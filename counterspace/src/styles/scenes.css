@@ -2395,3 +2395,11 @@
  .overlay .more-menu{min-width:200px;max-width:calc(100vw - 48px)}
  .overlay .more-menu button{min-height:42px}
 }
+
+/* A reader can reach any phase without scrolling away from the scene. */
+.overlay .step-choose{display:grid;gap:5px;margin:8px 0 12px;font:500 13px/1.4 var(--sans);color:var(--muted)}
+.overlay .step-choose select{width:100%;min-width:0;min-height:44px;font:400 14px/1.4 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px}
+@media(max-width:760px) and (min-height:541px){
+ .overlay .panel.reading-account{grid-template-rows:auto minmax(0,26%) minmax(0,1fr) auto}
+ .overlay .reading-account .story-scroll{padding-bottom:24px}
+}

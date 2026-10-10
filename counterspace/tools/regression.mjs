@@ -56,6 +56,30 @@ try {
     assert.match(await page.locator('#legalChoice').innerText(), /Outer Space Treaty/);
     await page.locator('#clearLawChoice').click();
     assert.equal(await page.locator('#legalChoice').isVisible(), false);
+    // Reading a dense chart must not depend on selecting a small SVG mark.
+    const findA = page.locator('#chartA .record-find');
+    await findA.locator('summary').click();
+    await findA.locator('input').fill('fengyun 2007');
+    assert.equal(await findA.locator('select option').count(), 2);
+    await findA.locator('select').selectOption({ index: 1 });
+    assert.match(await findA.locator('.record-result').innerText(), /880 km/);
+    assert.equal(await findA.locator('.record-result a[href^="https://"]').count() > 0, true);
+    await findA.locator('input').fill('NO_MATCH_RECORD_13579');
+    assert.equal(await findA.locator('select').isDisabled(), true);
+    assert.equal(await findA.locator('.record-result').isVisible(), false);
+    await findA.locator('input').fill('');
+    await findA.locator('summary').click();
+    await page.evaluate(() => window.__cs.showTab('chartB'));
+    await page.locator('#chartB .record-find > summary').click();
+    assert.equal(await page.locator('#stateAssessment option').count(), 14);
+    await page.locator('#stateAssessment').selectOption('Russia');
+    assert.match(await page.locator('#chartB .record-result').innerText(), /Direct-ascent weapons\s+Demonstrated/);
+    await page.locator('#chartB .record-find > summary').click();
+    if (width <= 400) {
+      await page.locator('.reading-nav select').selectOption('quizBand');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'quizBand');
+      assert.equal(await page.locator('.reading-nav').isVisible(), true);
+    }
     for (const k of ['A', 'B', 'C', 'R', 'L', 'legal']) {
       const svg = await page.evaluate(k => window.__cs.exportSVG(k), k);
       if (process.env.EXPORTS && width === 1440) fs.writeFileSync(`exports/chart-${k}.svg`, svg);
@@ -96,6 +120,16 @@ try {
   await live.waitForFunction(() => window.__cs && document.querySelector('#svgA svg'));
   await live.evaluate(() => window.__cs.openScene('starfish'));
   await live.waitForFunction(() => window.__cs.host() && window.__cs.earthReady());
+  await live.locator('#sceneStepChoose').selectOption('1');
+  const selectedTime = await live.evaluate(() => window.__cs.host().t);
+  assert.equal(await live.evaluate(() => window.__cs.host().playing), false);
+  assert.equal(selectedTime > 0, true);
+  await live.setViewportSize({ width: 390, height: 844 });
+  await live.locator('#sceneMore').click();
+  assert.equal(await live.locator('#scenePanel').evaluate(el => el.classList.contains('reading-account')), true);
+  assert.equal(await live.evaluate(() => window.__cs.host().playing), false);
+  await live.locator('#sceneMore').click();
+  assert.equal(await live.locator('#scenePanel').evaluate(el => el.classList.contains('reading-account')), false);
   await live.evaluate(() => { window.__cs.host().playing = false; window.__cs.closeScene(); });
   await live.waitForFunction(() => document.getElementById('overlay').getAttribute('aria-hidden') === 'true');
   assert.deepEqual(liveErrors, []); assert.deepEqual(liveRemote, []);
