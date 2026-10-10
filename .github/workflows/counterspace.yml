@@ -30,6 +30,21 @@ jobs:
         run: git diff --exit-code -- counterspace/index.html
       - run: npm test
         working-directory: counterspace/tools
+
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: counterspace/tools/package-lock.json
+      - run: npm ci
+        working-directory: counterspace/tools
+      - run: npx playwright install --with-deps chromium
+        working-directory: counterspace/tools
       - run: node tools/copy_lint.mjs
         working-directory: counterspace
 
