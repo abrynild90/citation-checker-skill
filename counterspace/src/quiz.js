@@ -67,9 +67,8 @@ const lineHTML = (rows) =>
 const mark =
   '<span class="q-mark" aria-hidden="true"><svg class="ico q-yes"><use href="#i-check"/></svg><svg class="ico q-no"><use href="#i-close"/></svg></span>';
 
-// Four short ways to say a guess was wrong, so a run of misses does not repeat one phrase. Each card takes the one at its own place (the same card always says the same thing).
-const MISS = ['Not quite.', 'A fair guess, but no.', 'Many people guess the same, but no.', 'Not this time.'];
-const miss = (i) => MISS[i % MISS.length];
+// Give a direct result before the explanation.
+const miss = () => 'Incorrect.';
 
 // What each question shows: the two options (in display order, flagged right or not) and the sentence that explains the truth.
 function build(q, i) {
@@ -167,7 +166,7 @@ export function mountQuiz() {
   const cols = QUESTIONS.map((q) => `minmax(0,${q.kind === 'wait' ? 1.4 : 1}fr)`).join(' ');
   host.innerHTML = `<div class="quiz"><ol class="q-list" style="--cols:${cols}">${cards}</ol>
   <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
-  <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Four questions, no pressure. Your guesses are not stored.</p>
+  <div class="q-foot"><div class="q-sum"><p class="q-tally" id="qTally" aria-live="polite">Four questions. Your answers are not saved.</p>
     <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
@@ -205,8 +204,8 @@ export function mountQuiz() {
   const sync = () => {
     const done = state.filter((s) => s !== null).length,
       right = state.filter(Boolean).length;
-    if (!done) tally.textContent = 'Four questions, no pressure. Your guesses are not stored.';
-    else tally.textContent = done < N ? `You called ${right} of ${done} so far.` : `You called ${right} of ${N}.`;
+    if (!done) tally.textContent = 'Four questions. Your answers are not saved.';
+    else tally.textContent = done < N ? `${right} of ${done} answered correctly so far.` : `${right} of ${N} answered correctly.`;
     tally.classList.toggle('done', done === N);
     host.querySelector('.q-list').classList.toggle('all-done', done === N); // the four answered cards then share one height (charts2.css)
     // all answered: the score is joined by what the four pairs have in common, and the way to the chart that shows every pair becomes the main step

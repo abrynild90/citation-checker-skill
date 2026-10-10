@@ -25,7 +25,7 @@ function finder(id, entries, render = card) {
     const matches = ordered.filter(e => words.every(w => `${label(e)} ${e.target || ''} ${e.description || e.effect || ''}`.toLocaleLowerCase().includes(w)));
     select.innerHTML = `<option value="">${matches.length ? 'Choose an entry…' : 'No matching entries'}</option>` + matches.map(e => `<option value="${esc(e.id)}">${esc(label(e))}</option>`).join('');
     select.disabled = !matches.length;
-    count.textContent = `${matches.length} of ${ordered.length} records${matches.length ? '' : ' — try a different name, state or year'}`;
+    count.textContent = `${matches.length} of ${ordered.length} records${matches.length ? '' : '. Try a different name, state or year'}`;
     result.hidden = true;
     result.replaceChildren();
   }
@@ -62,7 +62,7 @@ function capabilities() {
   const result = fold.querySelector('.record-result');
   fold.querySelector('select').onchange = e => {
     const state = e.target.value; result.hidden = !state;
-    result.innerHTML = state ? `<h5>${esc(state)} · 2020s</h5><dl>${Object.entries(names).map(([k,n]) => `<dt>${n}</dt><dd>${({D:'Demonstrated: tested or used',P:'Developing',N:'Developing: our reading where SWF’s matrix has no data'})[stateCode(k,state)] || 'Not coded in this assessment'}</dd>`).join('')}</dl><p class="note">Our classification of SWF’s 2026 text. An absent code does not establish that a state lacks a capability. <a href="#codingRules">Read the classification rules</a>.</p>` : '';
+    result.innerHTML = state ? `<h5>${esc(state)} · 2020s</h5><dl>${Object.entries(names).map(([k,n]) => `<dt>${n}</dt><dd>${({D:'Demonstrated: tested or used',P:'Developing',N:'Developing: our reading of the country chapter; SWF’s summary table has no data'})[stateCode(k,state)] || 'Not classified in this assessment'}</dd>`).join('')}</dl><p class="note">Our classification of SWF’s 2026 text. An unclassified capability does not mean the state lacks it. <a href="#codingRules">Read the classification rules</a>.</p>` : '';
   };
 }
 

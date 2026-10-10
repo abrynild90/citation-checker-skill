@@ -184,10 +184,7 @@ export function drawMethod() {
   ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
       are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
       graphics are reproduced.</p>
-    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). Small versions are built
-      into the page. The full-size images are fetched from a fixed copy hosted on jsDelivr, a public file host, only when you interact with the globe at the
-      top of the page or open a 3D explainer, and never when animation is switched off on your device. Coastlines in the still diagrams come from Natural
-      Earth (public domain) through the world-atlas dataset.</p>`)}
+    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). More detailed Earth images load from jsDelivr when you interact with the globe or open a 3D explainer. They do not load when your device is set to limit animation. Coastlines come from Natural Earth (public domain).</p>`)}
 </div>
 </div>
 </div>
@@ -206,7 +203,7 @@ export function drawMethod() {
     const words = find.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
     sourceItems.forEach(li => { li.hidden = !words.every(word => li.textContent.toLocaleLowerCase().includes(word)); });
     const count = sourceItems.filter(li => !li.hidden).length;
-    document.getElementById('sourceCount').textContent = `${count} of ${sourceItems.length} sources${count ? '' : ' — try a different title, institution or year'}`;
+    document.getElementById('sourceCount').textContent = `${count} of ${sourceItems.length} sources${count ? '' : '. Try a different title, institution or year'}`;
   });
 
   // The long reference material sits in one disclosure; while it is closed the section's contents list has nothing to point at, so it steps aside.
