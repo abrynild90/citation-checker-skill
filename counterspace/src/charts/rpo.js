@@ -60,7 +60,8 @@ export function drawR(el = document.getElementById('svgR')) {
   const zoomed = zoomedR(),
     dom = zoomed ? R_FOCUS() : DOMAIN,
     { W, M, x } = layout(el, dom),
-    phone = isPhoneNow();
+    phone = isPhoneNow(),
+    head = phone ? 76 : HEAD;
   const SHOWN = stateR.all || EXPORTING ? CO : CO.filter(isHighlight),
     k = phone ? 0.95 : 1,
     R = W - M.r,
@@ -99,10 +100,10 @@ export function drawR(el = document.getElementById('svgR')) {
   const bands = R_LANES.map((l, li) => {
     const n = Math.max(1, lanes[li].length),
       b = { l, li, y0: yCur, n, count: SHOWN.filter((e) => lane(e) === li).length, all: CO.filter((e) => lane(e) === li).length };
-    b.y1 = yCur + HEAD + n * ROW + 10;
+    b.y1 = yCur + head + n * ROW + 10;
     lanes[li].forEach((row, ri) =>
       row.forEach((p) => {
-        p.y = b.y0 + HEAD + ri * ROW + ROW / 2;
+        p.y = b.y0 + head + ri * ROW + ROW / 2;
         placed.push(p);
       }),
     );
@@ -176,7 +177,7 @@ export function drawR(el = document.getElementById('svgR')) {
         gl.append('line')
           .attr('x1', tx)
           .attr('x2', tx)
-          .attr('y1', b.y0 + HEAD - 6)
+          .attr('y1', b.y0 + head - 6)
           .attr('y2', b.y1 - 8);
     });
     // header: a dot in the actor's colour, the name and how many operations
@@ -197,8 +198,8 @@ export function drawR(el = document.getElementById('svgR')) {
     glossOf[b.li] = svg
       .append('text')
       .attr('class', 'band-gloss')
-      .attr('x', INSET + 18 + tw(b.l.key, 14, 600) + 12)
-      .attr('y', hy)
+      .attr('x', phone ? INSET + 18 : INSET + 18 + tw(b.l.key, 14, 600) + 12)
+      .attr('y', phone ? hy + 20 : hy)
       .text(SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`);
   });
   xAxis(svg, x, axisY, zoomed ? (phone ? 10 : 5) : undefined);
@@ -364,7 +365,7 @@ export function drawR(el = document.getElementById('svgR')) {
       // the band headers are words too: a name that would sit against one (the first row's name under "N highlighted of M operations") is put out of sight
       heads = Object.values(glossOf).map((g) => {
         const t = g.text(); // measured with the longer wording it may be given just below
-        g.text(`${t}, 9 unnamed here: hover or focus to read`);
+        g.text(phone ? t : `${t}, 9 unnamed here: hover or focus to read`);
         const r = g.node().getBBox();
         g.text(t);
         return [r.x - 2, r.x + r.width + 2, r.y - 3, r.y + r.height + 4];
@@ -385,7 +386,12 @@ export function drawR(el = document.getElementById('svgR')) {
     // a band header says how many marks carry no name on the chart, so a reader knows to hover for the rest
     bands.forEach((b) => {
       const un = placed.filter((q) => lane(q.e) === b.li && !named.has(q)).length;
-      if (un > 0) glossOf[b.li].text(`${SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`}, ${un} unnamed here: hover or focus to read`);
+      if (un > 0) {
+        const g = glossOf[b.li], count = SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`;
+        if (phone) {
+          g.text(count).append('tspan').attr('x', INSET + 18).attr('dy', 16).text(`${un} more names: tap a mark to read`);
+        } else g.text(`${count}, ${un} unnamed here: hover or focus to read`);
+      }
     });
   }
 

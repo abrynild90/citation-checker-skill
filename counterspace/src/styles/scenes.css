@@ -2386,3 +2386,12 @@
   .overlay .sv-recap-links2 .rc-drawn { font-size: 16px; }
   .overlay .sv-recap-acts .btn { font-size: 16px; }
 }
+
+/* A compact phone title and a complete camera menu leave room for the picture. */
+@media(max-width:760px){
+ .overlay h2#sceneTitle{font-size:21px;line-height:1.15}
+ .overlay #scCams{overflow:visible;mask-image:none;-webkit-mask-image:none;flex-wrap:nowrap}
+ .overlay #scCams button{font-size:12px;padding-inline:9px;white-space:nowrap}
+ .overlay .more-menu{min-width:200px;max-width:calc(100vw - 48px)}
+ .overlay .more-menu button{min-height:42px}
+}

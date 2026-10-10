@@ -29,7 +29,7 @@ function drawGallery() {
     <span class="pc-name">Surprise me</span>
   </button>
 </li>`;
-  grid.innerHTML = surprise + STRIP.map((s, i) => {
+  grid.innerHTML = STRIP.map((s, i) => {
     const img = posterURL(s.id);
     const fact = esc(FACTS[s.id] || '');
     return `<li class="pcard" style="--i:${i}">
@@ -40,7 +40,10 @@ function drawGallery() {
     <span class="pc-fact-s" aria-hidden="true">${fact}</span>
   </button>
 </li>`;
-  }).join('');
+  }).join('') + surprise;
+  const chooser = document.getElementById('sceneChoose');
+  chooser.innerHTML += STRIP.map(s => `<option value="${esc(s.id)}">${esc(yearOf(s))} — ${esc(nameOf(s))}</option>`).join('');
+  chooser.addEventListener('change', () => { if (chooser.value) { openScene(chooser.value, chooser); chooser.value = ''; } });
   grid.addEventListener('click', (e) => {
     const b = e.target.closest('.pc-btn');
     if (b) openScene(b.dataset.id, b);

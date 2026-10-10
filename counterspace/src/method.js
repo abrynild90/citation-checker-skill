@@ -194,10 +194,20 @@ export function drawMethod() {
 <div class="msec">
   <h4 id="srcList">All cited sources (${cites.length})</h4>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
-  <ol class="cites">${cites.join('')}</ol>
+  <label class="source-find">Find a source <input id="sourceFind" type="search" placeholder="Title, institution or year" aria-controls="citedSources"></label>
+  <p class="note" id="sourceCount" role="status">${cites.length} sources</p>
+  <ol class="cites" id="citedSources">${cites.join('')}</ol>
   <p class="only-phone"><a class="to-top" href="#top">Back to the top</a></p>
   <p>The data table behind each chart lists every entry with its source and page reference.</p></div>
 </details>`;
+
+  const find = document.getElementById('sourceFind'), sourceItems = [...document.querySelectorAll('#citedSources > li')];
+  find.addEventListener('input', () => {
+    const words = find.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    sourceItems.forEach(li => { li.hidden = !words.every(word => li.textContent.toLocaleLowerCase().includes(word)); });
+    const count = sourceItems.filter(li => !li.hidden).length;
+    document.getElementById('sourceCount').textContent = `${count} of ${sourceItems.length} sources${count ? '' : ' — try a different title, institution or year'}`;
+  });
 
   // The long reference material sits in one disclosure; while it is closed the section's contents list has nothing to point at, so it steps aside.
   const fold = document.getElementById('srcDetails'),

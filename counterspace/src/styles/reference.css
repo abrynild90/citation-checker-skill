@@ -89,3 +89,18 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .ref-foot>.xnext .btn{--h:40px}
 @media (max-width:640px){.ref-foot{flex-direction:column}.ref-foot>.xnext{align-self:flex-end}}
 .law-intro{padding-top:var(--s-6)}
+
+.source-find{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font:500 14px/1.5 var(--sans);margin:16px 0 8px}
+.source-find input{font:400 16px/1.5 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;min-width:0;width:min(100%,340px)}
+.source-find input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.cites>li[hidden]{display:none}
+@media(max-width:640px){.ref-band.explore{padding-top:28px}.ref-head{margin-bottom:16px}.xnav{gap:8px}.ref-band section.chart.xpanel{padding-top:24px}}
+
+.law-choose{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font:500 14px/1.5 var(--sans);margin:16px 0}
+.law-choose select{max-width:100%;min-width:0;width:min(100%,420px);font:400 14px/1.5 var(--sans);border:1px solid var(--line-strong);border-radius:8px;padding:10px;background:var(--surface-2);color:var(--text)}
+.law-choose select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.law-choice{padding:16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface-2);font:400 14px/1.6 var(--sans);max-width:72ch}
+.law-choice .card-title{font:500 21px/1.3 var(--serif);margin-bottom:8px}
+.law-choice[hidden]{display:none}
+.law-choice .hint{display:none}
+@media(max-width:640px){#chartC .callout-row{margin-block:12px}#chartC .callout-row>.callout:not(.quote){font-size:14px;line-height:1.5;padding-block:12px}.xcards{gap:8px}.xcard{padding:10px}.xc-l{font-size:12px}}

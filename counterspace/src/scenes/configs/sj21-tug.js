@@ -51,8 +51,8 @@ export const SJ21_TUG = {
       anchor: 'g',
       color: C.dead,
       scale: 2.2 * PK,
-      minPx: IS_PHONE ? 90 : 80,
-      maxPx: IS_PHONE ? 120 : 112,
+      minPx: IS_PHONE ? 64 : 80,
+      maxPx: IS_PHONE ? 88 : 112,
       label: 'Compass G2 (defunct)',
       short: 'Compass G2',
       staticKey: [
@@ -79,8 +79,8 @@ export const SJ21_TUG = {
       color: C.cn,
       bright: true,
       scale: 2.2 * PK,
-      minPx: IS_PHONE ? 90 : 80,
-      maxPx: IS_PHONE ? 120 : 112,
+      minPx: IS_PHONE ? 64 : 80,
+      maxPx: IS_PHONE ? 88 : 112,
       label: 'SJ-21 (China)',
       short: 'SJ-21',
       staticKey: [
@@ -131,7 +131,7 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.86, 0.45], fill: 1.0, fillRamp: [[0.14, 0.68], [0.32, 1.0]], lookCraft: true, shiftR: 0.1, include: [[0.14, -0.04, 0], [0.05, -0.3, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
+    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.86, 0.45], fill: 1.0, fillRamp: [[0.14, 0.68], [0.32, 1.0]], lookCraft: true, shiftR: 0.1, include: [[0.14, -0.04, 0], [0.05, -0.3, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.65, lookCraft: true, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
     { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', narrowK: 1, at: [36, 104, 4.9], look: [-2, 106, 2.4], phone: { at: [36, 104, 4.8] } },
     {
       name: 'Approach and docking, from the side',
@@ -151,7 +151,7 @@ export const SJ21_TUG = {
       short: 'Looking down',
       ...ARM_TAG,
       fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.95, lookCraft: true, include: [[0.12, -0.04, 0], [0.04, -0.16, 0]] },
-      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } },
+      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.65, lookCraft: true, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } },
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
   ],

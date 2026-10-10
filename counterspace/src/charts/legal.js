@@ -1073,6 +1073,17 @@ function drawLegalList() {
 }
 export function drawLegalKey() {
   drawLegalList();
+  const choose = document.getElementById('legalChoose'), choice = document.getElementById('legalChoice');
+  if (choose && !choose.dataset.set) {
+    choose.dataset.set = '1';
+    choose.innerHTML += [...LEGAL].sort((a,b) => a.start.localeCompare(b.start)).map(l => `<option value="${esc(l.id)}">${fmtY(parse(l.start))} — ${esc(l.title)}</option>`).join('');
+    choose.addEventListener('change', () => {
+      const law = LEGAL.find(l => l.id === choose.value);
+      choice.hidden = !law;
+      choice.innerHTML = law ? legalCard(law) + '<button class="btn small" type="button" id="clearLawChoice">Clear selection</button>' : '';
+      choice.querySelector('button')?.addEventListener('click', () => { choice.hidden = true; choose.value = ''; choose.focus(); });
+    });
+  }
   const K = legend('legendLegal', 22, 18),
     li = K.item;
   li(glyphMarkup('treaty'), 'Treaty');

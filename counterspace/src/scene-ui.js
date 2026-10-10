@@ -356,6 +356,7 @@ function setLede(level, count) {
   // The full account leaves out the sentence the "Did you know" line above it already says, so no sentence shows twice
   let shown = expanded ? (dyk ? pool.join(' ') : full) : pool.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 340) shown = pool[0];
+  if (!expanded && matchMedia('(max-width: 760px)').matches) shown = PHONE_LEDES[cur.id] || shown;
   captionEl.textContent = shown;
   captionEl.hidden = !shown;
   moreBtn.classList.toggle('lone', !shown); // nothing above it: the button stands alone
@@ -387,10 +388,37 @@ moreBtn.onclick = () => setMore(!expanded);
 // Text of the open scene: title, count, story, source, related law, picture note and the steps.
 // "SWF" appears in the steps; the source line is where the reader learns what it stands for.
 const citeText = (c) => c.replace(/^Secure World Foundation,/, 'Secure World Foundation (SWF),');
+const PHONE_LEDES = {
+  starfish: 'A U.S. nuclear test about 400 km up trapped electrons in Earth’s magnetic field.',
+  fengyun: 'China destroyed its Fengyun-1C weather satellite, leaving long-lived debris.',
+  cosmos1408: 'Russia destroyed Cosmos 1408. Debris crossed the International Space Station’s orbit.',
+  viasat: 'A cyberattack disabled users’ ground modems; the KA-SAT satellite stayed in orbit.',
+  'sj21-tug': 'China’s SJ-21 docked with defunct Compass G2 and towed it above the working GEO belt.',
+  laser: 'The U.S. aimed MIRACL at MSTI-3 in 1997. Peresvet is a separate Russian case.',
+  'burnt-frost': 'A U.S. ship-launched interceptor destroyed USA-193 in a low orbit; its debris decayed quickly.',
+  shakti: 'India intercepted Microsat-R at about 283 km in Mission Shakti.',
+  solwind: 'A missile launched from a U.S. F-15 destroyed the Solwind satellite.',
+  dn2: 'China’s DN-2 launch had no satellite target. Estimates of its peak altitude differ.',
+  gnss: 'A ground jammer disrupts GPS receivers on aircraft; it does not attack the GPS satellites.',
+  rpo: 'Three episodes of spacecraft coming close. A close approach does not establish hostile intent.',
+  spaceplanes: 'Reusable U.S. and Chinese craft fly unusual missions; their purpose is not established here.'
+};
+const PHONE_TITLES = {
+  starfish: 'Starfish Prime (1962)', solwind: 'Solwind intercept (1985)', fengyun: 'Fengyun-1C intercept (2007)',
+  'burnt-frost': 'Operation Burnt Frost (2008)', dn2: 'DN-2 high-altitude test (2013)', shakti: 'Mission Shakti (2019)',
+  cosmos1408: 'Cosmos 1408 intercept (2021)', gnss: 'Baltic GPS jamming', viasat: 'Viasat cyberattack (2022)',
+  laser: 'MIRACL laser test (1997)', 'sj21-tug': 'SJ-21 satellite tow (2022)', rpo: 'Three close approaches',
+  spaceplanes: 'Reusable spaceplanes'
+};
+function syncSceneTitle(cfg) {
+  const phone = matchMedia('(max-width: 760px)').matches;
+  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, m => `<span class="nb">${m}</span>`);
+  titleEl.setAttribute('aria-label', cfg.title);
+}
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
   // Names such as X-37B or SJ-21 stay on one line instead of breaking at their hyphen.
-  titleEl.innerHTML = esc(cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
+  syncSceneTitle(cfg);
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   sentences = splitSentences(cfg.lede || cfg.caption);
@@ -671,7 +699,8 @@ function syncSteps(t) {
   stepIdx = k;
   markStep(k);
   const li = stepsEl.children[k];
-  if (first) requestAnimationFrame(() => followStep(li, true));
+  if (first && STACKED.matches) asideBody.scrollTop = 0; // Keep the opening explanation visible; playback follows subsequent steps.
+  else if (first) requestAnimationFrame(() => followStep(li, true));
   else followStep(li);
 }
 // Keep the current step in view as the animation moves on, moving the list as little as possible so the reader keeps their place: the step stays
@@ -682,7 +711,8 @@ function followStep(li, instant) {
   const own = listScrolls() ? stepsEl : asideBody,
     box = own.getBoundingClientRect(),
     r = li.getBoundingClientRect();
-  if (!stepsBox.open || !r.height) return; // the list is folded away (phone)
+  if (!stepsBox.open || !r.height) return;
+  if (STACKED.matches && !expanded && own === asideBody) return; // The live caption follows the action; the reader controls the account’s scroll position. // the list is folded away (phone)
   if (own === stepsEl) {
     // move to a step boundary so the list rests on whole steps: the active step lands fully in view
     const y = stepsEl.scrollTop,
@@ -1088,7 +1118,7 @@ playBtn.onclick = togglePlay;
 const narrowViews = matchMedia('(max-width: 1180px)'),
   phoneViews = matchMedia('(max-width: 760px)');
 narrowViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
-phoneViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
+phoneViews.addEventListener?.('change', () => { if (cur) syncSceneTitle(cur); if (host && cur) buildViews(cur, host.sim); });
 // A short label for a phone button (about 12 characters at most, always whole words); the full name stays as the button's accessible name.
 const STOP = /^(the|and|in|of|a|to|at|on|for|from)$/i;
 function phoneLabel(label) {
@@ -1131,7 +1161,7 @@ function openMore(first) {
   moreMenu.hidden = false;
   reserveMenu(true);
   moreBtn2.setAttribute('aria-expanded', 'true');
-  moreMenu.style.left = Math.max(0, moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left) + 'px';
+  moreMenu.style.left = Math.max(0, Math.min(moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left, viewsEl.clientWidth - moreMenu.offsetWidth)) + 'px';
   const items = [...moreMenu.children];
   (first === 'last' ? items.at(-1) : items.find((b) => b.getAttribute('aria-checked') === 'true' && first !== 'first') || items[0]).focus();
 }
@@ -1141,7 +1171,7 @@ function buildViews(cfg, sim) {
   panel.style.setProperty('--menu-reserve', '0px');
   moreBtn2 = moreMenu = null;
   camOn = -2;
-  const pills = phoneViews.matches ? sim.cams.length : Math.min(sim.cams.length, MAX_PILLS);
+  const pills = Math.min(sim.cams.length, MAX_PILLS);
   $('sceneCtrl')?.toggleAttribute('data-many-views', sim.cams.length >= 4); // four or more views: they take their own row on a wide window so the time bar keeps its length
   const names = sim.cams.map((c, i) => viewName(cfg.cameras?.[i], c.name));
   sim.cams.forEach((c, i) => {

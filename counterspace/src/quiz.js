@@ -266,7 +266,7 @@ export function mountQuiz() {
       o.querySelector('.q-t').insertAdjacentHTML('beforeend', b.opts[j].right ? '<span class="sr"> (the right answer)</span>' : '');
     });
     li.querySelector('.q-out').innerHTML =
-      `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<p class="q-truth">${b.truth}</p>` +
+      `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>` +
       (!ok && b.scene
         ? `<span class="q-watch">Want to see it? <button type="button" class="q-go" data-scene="${esc(b.scene)}"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>` +
           `${esc(watchLabel(b.scene))}</button> <span class="q-seen">(${watchNote(b.scene)})</span></span>`
