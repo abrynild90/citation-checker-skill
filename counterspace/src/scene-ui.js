@@ -1591,7 +1591,7 @@ asideBody.addEventListener('scroll', updateFades, { passive: true });
 addEventListener('resize', updateFades);
 asideBody.addEventListener('toggle', updateFades, true);
 if ('ResizeObserver' in window) {
-  new ResizeObserver(([entry]) => panel.classList.toggle('large-type', entry.contentRect.height > 140)).observe(panel.querySelector('.sv-head'));
+  new ResizeObserver(() => panel.classList.toggle('large-type', titleEl.getBoundingClientRect().height > 70)).observe(panel.querySelector('.sv-head'));
   new ResizeObserver(updateFades).observe(asideBody);
   let raf = 0;
   liRO = new ResizeObserver(() => {

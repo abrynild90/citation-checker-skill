@@ -2489,3 +2489,9 @@
 @media(max-width:760px) {
   .overlay #scenePanel.large-type { grid-template-rows: auto minmax(0,1fr) minmax(160px,1.2fr) auto !important; }
 }
+
+@media(max-width:760px) {
+  .overlay .large-type .sv-seen { display: none; }
+  .overlay .large-type .sv-list-btn { font-size: 12px; padding-inline: 8px; }
+  .overlay .large-type .sv-list-btn .ico { display: none; }
+}
