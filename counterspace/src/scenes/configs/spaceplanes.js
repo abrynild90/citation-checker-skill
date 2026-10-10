@@ -5,7 +5,7 @@ import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
 const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
-const MX = IS_PHONE ? 86 : 200; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
+const MX = IS_PHONE ? 108 : 216; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
@@ -38,7 +38,17 @@ export const SPACEPLANES = {
   ],
   actors: [
     // ---- US X-37B, OTV-1 to OTV-6: LEO flights
-    { type: 'path', fn: (u) => orbitPos(350, 38, 288, u * 2 * Math.PI), N: 120, color: '#8fd0ff', opacity: 0.6, thick: 0.002, fade: true, acts: [0], staticKeep: false },
+    {
+      type: 'path',
+      fn: (u) => orbitPos(350, 38, 288, u * 2 * Math.PI),
+      N: 120,
+      color: '#8fd0ff',
+      opacity: 0.6,
+      thick: 0.002,
+      fade: true,
+      acts: [0],
+      staticKeep: false,
+    },
     {
       type: 'path',
       fn: (u) => orbitPos(350, 54, 288, u * 2 * Math.PI),
@@ -55,7 +65,7 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37',
-      minPx: IS_PHONE ? 68 : 140,
+      minPx: IS_PHONE ? 86 : 158,
       maxPx: MX,
       anchor: 'us',
       acts: [0],
@@ -237,6 +247,7 @@ export const SPACEPLANES = {
   ],
   camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
 
+  phoneCamOff: { 2: { 'X-37B OTV-7': [-80, 65], 'OTV-7': [-80, 65] } },
   liveOff: { 'CSSHQ orbit': [-24, 66] }, // the big CSSHQ model needs the orbit name well clear of it (below-left, on the dark sky beside the limb)
   leaderK: 0.3, // an orbit name that sits just off its line still gets a leader
   liveShort: ['OTV-7 orbit'], // the orbit's long label detached from its line at the far right; the short name sits at the apogee
@@ -287,13 +298,23 @@ export const SPACEPLANES = {
       name: 'X-37B OTV-7: follows the craft',
       chip: 'X-37B OTV-7',
       act: 1,
-      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 2.3, fill: 1.1, t: 0.42, lock: true, tight: true },
+      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 1.8, fill: 1.1, t: 0.42, lock: true, tight: true },
     },
     {
       name: 'China: CSSHQ and released objects',
       chip: 'China CSSHQ',
       act: 2,
-      fitCraft: { anchor: 'cn', ids: ['csshq', 'objJ', 'objG'], dir: [-0.3, 0.6, 0.75], phoneDir: [-0.25, 1.15, 0.45], fill: IS_PHONE ? 0.93 : 0.98, aspFloor: 1.33, dMin: 0.1, t: 0.75, include: IS_PHONE ? undefined : [[0, -2.45, 0]] },
+      fitCraft: {
+        anchor: 'cn',
+        ids: ['csshq', 'objJ', 'objG'],
+        dir: [-0.3, 0.6, 0.75],
+        phoneDir: [-0.25, 1.15, 0.45],
+        fill: IS_PHONE ? 0.93 : 0.98,
+        aspFloor: 1.33,
+        dMin: 0.1,
+        t: 0.75,
+        include: IS_PHONE ? undefined : [[0, -1.6, 0]],
+      },
     },
     // unlocked from the tour
     { name: 'Whole scene: Earth and every orbit', at: [32, -25, 5.8], phone: { at: [32, -25, 8] }, ref: false, hide: ['OTV-7 orbit'] },

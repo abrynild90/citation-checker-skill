@@ -47,7 +47,17 @@ export const COSMOS1408 = {
       crossHit: 0.55,
       thick: 0.0032,
       opacity: 0.85,
-      sat: { speed: 0.16, label: 'ISS orbit (schematic)', short: 'ISS orbit', iss: true, big: IS_PHONE ? 1.35 : 2, minPx: IS_PHONE ? 54 : 64, maxPx: IS_PHONE ? 84 : 120, dx: 134, dy: 8 },
+      sat: {
+        speed: 0.16,
+        label: 'ISS orbit (schematic)',
+        short: 'ISS orbit',
+        iss: true,
+        big: IS_PHONE ? 1.35 : 2,
+        minPx: IS_PHONE ? 54 : 64,
+        maxPx: IS_PHONE ? 84 : 120,
+        dx: 134,
+        dy: 8,
+      },
     },
     { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: -84, impactDy: -46, dx: -40, dy: 62 },
     { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true, flash: 0.2, coreK: 0.4, flashSpan: 0.12 },
@@ -61,8 +71,8 @@ export const COSMOS1408 = {
       decay: 0.25,
       late: { t0: 0.34, k: 7, kr: 1.2 },
       lateBoost: 1.9, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end
-      minPx: 5,
-      maxPx: 11, // the band keeps spreading along and across the orbit instead of a smear over the pole
+      minPx: 3,
+      maxPx: 7, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
       hard: true, // crisp fragments with a bright centre: not another soft orange town light
       palette: { hot: [1, 0.98, 0.9], mid: [1, 0.9, 0.74], cool: [1, 0.8, 0.62] }, // warm white fragments: separate from the amber city lights

@@ -7,7 +7,7 @@
 import { CO, DOMAIN, esc, EXPORTING, chartWindow, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ACTIVITY_LABEL, ACTIVITY_SHORT, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
-import { arrowPath, barPath, circlePath, diamondPath, fullNote, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
+import { arrowPath, barPath, circlePath, diamondPath, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, TOP_AXIS_H, topAxis } from './kit.js';
 
 const coWhenShort = (e) => {
   const a = datePrecise(e, e.start),
@@ -59,9 +59,17 @@ export function drawR(el = document.getElementById('svgR')) {
   el.innerHTML = ''; // a re-draw replaces the chart (never stacks a second one)
   const zoomed = zoomedR(),
     dom = zoomed ? R_FOCUS() : DOMAIN,
-    { W, M, x } = layout(el, dom),
+    { W, M, x: baseX } = layout(el, dom),
     phone = isPhoneNow(),
-    head = phone ? 76 : HEAD;
+    individual = !stateR.all && !EXPORTING,
+    rowHeight = individual ? (phone ? 68 : 38) : ROW,
+    head = individual ? (phone ? 88 : 66) : phone ? 76 : HEAD,
+    x = individual
+      ? d3
+          .scaleUtc()
+          .domain(dom)
+          .range([phone ? 16 : M.l + 242, W - M.r])
+      : baseX;
   const SHOWN = stateR.all || EXPORTING ? CO : CO.filter(isHighlight),
     k = phone ? 0.95 : 1,
     R = W - M.r,
@@ -86,7 +94,7 @@ export function drawR(el = document.getElementById('svgR')) {
           tail = Math.max(X1 + (ongoing ? 9 : 0), X0 + (bar ? 12 : 0));
         // Phones: the packing extent IS the tap target (>= 24 px wide, room for the cube on either side), so no two targets in a row overlap.
         const p = { e, X0, X1, ongoing, bar, ext: phone ? [X0 - pad - (sc ? 5 : 0), tail + pad + (sc ? 5 : 0)] : [X0 - pad, tail + (sc ? 17 : 8)] };
-        let r = rows.findIndex((row) => row.every((q) => p.ext[0] > q.ext[1] || p.ext[1] < q.ext[0]));
+        let r = individual ? -1 : rows.findIndex((row) => row.every((q) => p.ext[0] > q.ext[1] || p.ext[1] < q.ext[0]));
         if (r < 0) {
           r = rows.length;
           rows.push([]);
@@ -95,15 +103,15 @@ export function drawR(el = document.getElementById('svgR')) {
       });
     return rows;
   });
-  let yCur = TOP + (zoomed && !EXPORTING && phone ? TOP_AXIS_H : 0); // desktop: the pinned law strip above already carries these years, so the chart keeps no second top axis
+  let yCur = TOP + (!individual && zoomed && !EXPORTING && phone ? TOP_AXIS_H : 0); // desktop: the pinned law strip above already carries these years, so the chart keeps no second top axis
   const placed = [];
   const bands = R_LANES.map((l, li) => {
     const n = Math.max(1, lanes[li].length),
       b = { l, li, y0: yCur, n, count: SHOWN.filter((e) => lane(e) === li).length, all: CO.filter((e) => lane(e) === li).length };
-    b.y1 = yCur + head + n * ROW + 10;
+    b.y1 = yCur + head + n * rowHeight + 10;
     lanes[li].forEach((row, ri) =>
       row.forEach((p) => {
-        p.y = b.y0 + head + ri * ROW + ROW / 2;
+        p.y = b.y0 + head + ri * rowHeight + (individual && phone ? 48 : rowHeight / 2);
         placed.push(p);
       }),
     );
@@ -203,7 +211,8 @@ export function drawR(el = document.getElementById('svgR')) {
       .text(SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`);
   });
   xAxis(svg, x, axisY, zoomed ? (phone ? 10 : 5) : undefined);
-  if (zoomed && !EXPORTING && phone) topAxis(svg, x, TOP + TOP_AXIS_H - 6, 10);
+  if (individual) bands.forEach((b) => topAxis(svg, x, b.y0 + head - 8, phone ? 10 : 5));
+  else if (zoomed && !EXPORTING && phone) topAxis(svg, x, TOP + TOP_AXIS_H - 6, 10);
   if (zoomLines.length) {
     const t = svg
       .append('text')
@@ -286,13 +295,14 @@ export function drawR(el = document.getElementById('svgR')) {
     'ru-2023-luch-olymp-2': 'Luch/Olymp-2',
     'ru-2019-cosmos2542-2543-usa245': 'Cosmos 2542',
   };
-  if (!EXPORTING) {
+  if (!EXPORTING && !individual) {
     const named = new Set(),
       lg = svg.append('g').attr('class', 'dlabels').attr('aria-hidden', 'true'),
       lbox = []; // [x0, x1, y] of every label drawn so far: labels keep 6 px apart
     // the same name twice close together (two entries of one programme) is drawn once
     const clear = (a, b, yy, t) =>
-      lbox.every((q) => Math.abs(q[2] - yy) > 13 || q[1] < a - 9 || q[0] > b + 9) && !lbox.some((q) => q[3] === t && Math.abs(q[2] - yy) < 45 && q[1] > a - 160 && q[0] < b + 160);
+      lbox.every((q) => Math.abs(q[2] - yy) > 13 || q[1] < a - 9 || q[0] > b + 9) &&
+      !lbox.some((q) => q[3] === t && Math.abs(q[2] - yy) < 45 && q[1] > a - 160 && q[0] < b + 160);
     // a label never sits on any 3D cube
     const cubeHit = (a, b, yy) => placed.some((q) => q.bx != null && q.bx + 8 > a && q.bx - 8 < b && q.by + 9 > yy - 9 && q.by - 9 < yy + 7);
     placed.forEach((p) => {
@@ -304,27 +314,56 @@ export function drawR(el = document.getElementById('svgR')) {
       const edge = p.bx != null && p.bx < p.X0 ? p.bx - 14 : p.X0 - 14, // a 3D cube left of the mark pushes the label further left
         left = [edge - w, edge],
         right = [p.X1 + (p.ongoing ? 30 : 16), p.X1 + (p.ongoing ? 30 : 16) + w];
-      const side = left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y, t) && !cubeHit(left[0], left[1], p.y) ? 'l' : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y, t) && !cubeHit(right[0], right[1], p.y) && !p.ongoing ? 'r' : null;
+      const side =
+        left[0] > INSET + 8 && free(left[0], left[1]) && clear(left[0], left[1], p.y, t) && !cubeHit(left[0], left[1], p.y)
+          ? 'l'
+          : right[1] < R - 8 && free(right[0], right[1]) && clear(right[0], right[1], p.y, t) && !cubeHit(right[0], right[1], p.y) && !p.ongoing
+            ? 'r'
+            : null;
       let dy = 0,
         ax = null;
       if (!side) {
         // no room in the row: try just above or below the mark, ending where the mark ends, when nothing is there
-        const hi0 = (p.bx != null && p.bx > p.X1 ? p.X0 - 10 : Math.max(p.X1, p.bx ?? 0) + 4); // ends before a cube on the mark's right
+        const hi0 = p.bx != null && p.bx > p.X1 ? p.X0 - 10 : Math.max(p.X1, p.bx ?? 0) + 4; // ends before a cube on the mark's right
         for (const [off, hi] of [-15, 15].flatMap((o) => [hi0, p.bx != null ? p.bx - 10 : null, p.X0 - 10].filter((v) => v != null).map((h) => [o, h]))) {
           const a = hi - w,
             yy = p.y + off;
-          if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy, t) && placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 10 || q.ext[0] > hi + 10)) {
+          if (
+            a > INSET + 8 &&
+            hi < R - 4 &&
+            !cubeHit(a, hi, yy) &&
+            clear(a, hi, yy, t) &&
+            placed.every((q) => q === p || Math.abs(q.y - yy) > 11 || q.ext[1] < a - 10 || q.ext[0] > hi + 10)
+          ) {
             dy = off;
             ax = hi;
             lbox.push([a, hi, yy, t]);
             break;
           }
         }
-        if (ax != null) return named.add(p), lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', ax).attr('y', p.y + dy + 4.4).attr('text-anchor', 'end').text(t);
+        if (ax != null)
+          return (
+            named.add(p),
+            lg
+              .append('text')
+              .attr('class', 'dlabel')
+              .attr('data-id', p.e.id)
+              .attr('x', ax)
+              .attr('y', p.y + dy + 4.4)
+              .attr('text-anchor', 'end')
+              .text(t)
+          );
       }
       if (side) named.add(p);
       if (side) lbox.push(side === 'l' ? [left[0], left[1], p.y, t] : [right[0], right[1], p.y, t]);
-      if (side) lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', side === 'l' ? left[1] : right[0]).attr('y', p.y + 4.4).attr('text-anchor', side === 'l' ? 'end' : 'start').text(t);
+      if (side)
+        lg.append('text')
+          .attr('class', 'dlabel')
+          .attr('data-id', p.e.id)
+          .attr('x', side === 'l' ? left[1] : right[0])
+          .attr('y', p.y + 4.4)
+          .attr('text-anchor', side === 'l' ? 'end' : 'start')
+          .text(t);
     });
     // Second pass, so that a wider chart never shows fewer names than a narrower one: a headline the first pass could not place gets more positions to try
     // (further above or below the row, ends anchored to either side of the mark, start-anchored after it).
@@ -342,7 +381,13 @@ export function drawR(el = document.getElementById('svgR')) {
           if (a > INSET + 8 && hi < R - 4 && !cubeHit(a, hi, yy) && clear(a, hi, yy, t) && okRow(a, hi, yy)) {
             named.add(p);
             lbox.push([a, hi, yy, t]);
-            lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', hi).attr('y', yy + 4.4).attr('text-anchor', 'end').text(t);
+            lg.append('text')
+              .attr('class', 'dlabel')
+              .attr('data-id', p.e.id)
+              .attr('x', hi)
+              .attr('y', yy + 4.4)
+              .attr('text-anchor', 'end')
+              .text(t);
             return;
           }
         }
@@ -351,7 +396,13 @@ export function drawR(el = document.getElementById('svgR')) {
           if (b < R - 8 && !cubeHit(lo, b, yy) && clear(lo, b, yy, t) && okRow(lo, b, yy)) {
             named.add(p);
             lbox.push([lo, b, yy, t]);
-            lg.append('text').attr('class', 'dlabel').attr('data-id', p.e.id).attr('x', lo).attr('y', yy + 4.4).attr('text-anchor', 'start').text(t);
+            lg.append('text')
+              .attr('class', 'dlabel')
+              .attr('data-id', p.e.id)
+              .attr('x', lo)
+              .attr('y', yy + 4.4)
+              .attr('text-anchor', 'start')
+              .text(t);
             return;
           }
         }
@@ -360,7 +411,9 @@ export function drawR(el = document.getElementById('svgR')) {
     // A name that still touches any mark, cube or another name (measured on the drawn text, not estimated) is put out of sight; it shows again while its mark
     // is pointed at or focused. Names of marks with a 3D explainer are kept first. So a crowded chart ("Show all") never shows a clipped or overlapping name.
     const lbls = lg.selectAll('.dlabel').nodes(),
-      mbox = placed.map((q) => [q.X0 - 8, Math.max(q.X1, q.X0 + (q.bar ? 12 : 0)) + (q.ongoing ? 12 : 8), q.y - 9, q.y + 9]).concat(placed.filter((q) => q.bx != null).map((q) => [q.bx - 7, q.bx + 7, q.by - 9, q.by + 9])),
+      mbox = placed
+        .map((q) => [q.X0 - 8, Math.max(q.X1, q.X0 + (q.bar ? 12 : 0)) + (q.ongoing ? 12 : 8), q.y - 9, q.y + 9])
+        .concat(placed.filter((q) => q.bx != null).map((q) => [q.bx - 7, q.bx + 7, q.by - 9, q.by + 9])),
       kept = [],
       // the band headers are words too: a name that would sit against one (the first row's name under "N highlighted of M operations") is put out of sight
       heads = Object.values(glossOf).map((g) => {
@@ -378,7 +431,12 @@ export function drawR(el = document.getElementById('svgR')) {
       })
       .sort((a, b) => a.sc - b.sc)
       .forEach((l) => {
-        if (mbox.some((m) => clash(l.box, m)) || heads.some((h) => clash(l.box, h)) || kept.some((k) => clash([l.box[0], l.box[1], l.box[2] - 5, l.box[3] + 5], k))) { // a name keeps clear of a mark by a little air, and of the name above or below it by a line of air
+        if (
+          mbox.some((m) => clash(l.box, m)) ||
+          heads.some((h) => clash(l.box, h)) ||
+          kept.some((k) => clash([l.box[0], l.box[1], l.box[2] - 5, l.box[3] + 5], k))
+        ) {
+          // a name keeps clear of a mark by a little air, and of the name above or below it by a line of air
           l.node.classList.add('dl-hid');
           named.delete(byId.get(l.node.dataset.id));
         } else kept.push(l.box);
@@ -387,14 +445,46 @@ export function drawR(el = document.getElementById('svgR')) {
     bands.forEach((b) => {
       const un = placed.filter((q) => lane(q.e) === b.li && !named.has(q)).length;
       if (un > 0) {
-        const g = glossOf[b.li], count = SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`;
+        const g = glossOf[b.li],
+          count = SHOWN.length < CO.length ? `${b.count} highlighted of ${b.all} operations` : `${b.count} operations`;
         if (phone) {
-          g.text(count).append('tspan').attr('x', INSET + 18).attr('dy', 16).text(`${un} more names: tap a shape`);
+          g.text(count)
+            .append('tspan')
+            .attr('x', INSET + 18)
+            .attr('dy', 16)
+            .text(`${un} more names: tap a shape`);
         } else g.text(`${count}; ${un} more names: select a shape`);
       }
     });
   }
 
+  if (individual) {
+    const labels = svg.append('g').attr('class', 'rpo-row-labels');
+    placed.forEach((p) => {
+      const name = HEADLINES[p.e.id] || p.e.system;
+      const lines = wrapLines(name, phone ? R - INSET - 10 : 220, (s) => tw(s, 13, 600));
+      const label = labels
+        .append('text')
+        .attr('class', 'dlabel')
+        .attr('x', INSET)
+        .attr('y', phone ? p.y - 29 : p.y + 4);
+      lines.forEach((line, i) =>
+        label
+          .append('tspan')
+          .attr('x', INSET)
+          .attr('dy', i ? 16 : 0)
+          .text(line),
+      );
+      labels
+        .append('line')
+        .attr('x1', phone ? INSET : x.range()[0])
+        .attr('x2', R - 8)
+        .attr('y1', p.y + 18)
+        .attr('y2', p.y + 18)
+        .style('stroke', 'var(--line)')
+        .style('stroke-opacity', 0.45);
+    });
+  }
   const g = svg
     .append('g')
     .selectAll('g')
@@ -459,7 +549,13 @@ export function drawR(el = document.getElementById('svgR')) {
   );
   rove(g);
   // a name put out of sight (it would have touched another mark or name) shows while its mark is pointed at or focused
-  const showName = (d, on) => svg.selectAll('.dlabel.dl-hid').filter(function () { return this.dataset.id === d.e.id; }).classed('dl-show', on);
+  const showName = (d, on) =>
+    svg
+      .selectAll('.dlabel.dl-hid')
+      .filter(function () {
+        return this.dataset.id === d.e.id;
+      })
+      .classed('dl-show', on);
   g.on('mouseenter.dl focus.dl', (ev, d) => showName(d, true)).on('mouseleave.dl blur.dl', (ev, d) => showName(d, false));
   addGuide(svg, x, TOP, axisY, 'R');
   if (EXPORTING) return;
@@ -469,14 +565,16 @@ export function drawR(el = document.getElementById('svgR')) {
     chartWindow.chartR = zoomed ? R_FOCUS() : null;
     queueMicrotask(() => dispatchEvent(new Event('scroll')));
   }
-  document.getElementById('noteR').innerHTML = zoomed ? zoomNote('2000 to 2026', stateR.focus === null, 'the first entry in our records is from 2003') : fullNote();
+  document.getElementById('noteR').textContent = zoomed
+    ? '2000–2026. The first recorded operation began in 2003.'
+    : '1957–2026, the same years as the law timeline.';
   const allBtn = document.getElementById('rAll'),
     nHi = CO.filter(isHighlight).length;
   allBtn.textContent = stateR.all ? 'Show highlights only' : `Show all ${CO.length}`;
   allBtn.setAttribute('aria-expanded', String(stateR.all));
   document.getElementById('noteR2').textContent = stateR.all
     ? `Showing all ${CO.length} entries.`
-    : `Showing the ${nHi} highlighted operations: those with a 3D explainer, and every docking, tow and spaceplane mission. The other ${CO.length - nHi} are one press away.`;
+    : `${nHi} highlighted operations: 3D explainers, docking, towing and spaceplane missions. “Show all ${CO.length}” adds the other ${CO.length - nHi}.`;
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);
   const cube =

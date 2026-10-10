@@ -129,3 +129,16 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .record-result>.btn{margin-right:8px}
 /* The capability chart's old reference ordering must not bury its record reader. */
 #chartB>details.record-find{order:0}
+
+.phone-chart-hint { display:none; }
+@media(max-width:639px) {
+ #svgB { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-color:var(--accent) var(--surface); scrollbar-width:thin; }
+ #svgB:focus-visible { outline:3px solid var(--focus); outline-offset:4px; }
+ .phone-chart-hint { display:block; font:400 14px/1.5 var(--sans); color:var(--muted); }
+}
+.sources.ref-band .sources-layout { gap:24px; }
+.sources.ref-band .cites { font-size:16px; line-height:1.6; }
+.sources.ref-band .cites .cd { font-size:15px; line-height:1.6; }
+.sources.ref-band .cites>li { padding-block:10px; border-bottom:1px solid var(--line); }
+.ref-band .record-find { background:none; border-radius:0; border:0; border-top:1px solid var(--line); margin-top:20px; }
+.pat-big { padding:0; }

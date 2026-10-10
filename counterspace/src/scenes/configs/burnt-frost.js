@@ -18,7 +18,7 @@ export const BURNT_FROST = {
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
-  phoneOff: { 'USS Lake Erie': [46, 34] }, // 375: the ship pill clears the caption pill below it
+  phoneOff: { 'USS Lake Erie': [90, -66] }, // compact views: the name clears the ship and the caption below
   sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -95, el: 8 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,
@@ -37,7 +37,18 @@ export const BURNT_FROST = {
   fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
   hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
   actors: [
-    { type: 'ship', at: [22.0, -163.0], label: 'USS Lake Erie', shade: true, labelUntil: 0.56, hideFrom: 0.58, dx: 0, dy: 44, minPx: IS_PHONE ? 72 : 100, maxPx: IS_PHONE ? 135 : 160 },
+    {
+      type: 'ship',
+      at: [22.0, -163.0],
+      label: 'USS Lake Erie',
+      shade: true,
+      labelUntil: 0.56,
+      hideFrom: 0.58,
+      dx: 0,
+      dy: 44,
+      minPx: IS_PHONE ? 72 : 100,
+      maxPx: IS_PHONE ? 135 : 160,
+    },
     {
       type: 'target',
       label: 'USA-193',
@@ -56,8 +67,45 @@ export const BURNT_FROST = {
         { k: 1.05, di: 0.4, dr: 0.02, dw: 1.15 },
       ],
     },
-    { type: 'intercept', from: [22.0, -163.0], t0: 0.2, color: '#ff8a4a', taper: 0.3, thick: 0.0055, label: 'SM-3 interceptor', short: 'SM-3', rocket: { style: 'slim', minPx: 46, maxPx: 72, glowMin: 24, glowMax: 40 }, flash: 0.4, flashCap: 1.2, coreK: 0.8, strong: true, retire: 0.14, hold: -0.14, flashSpan: 0.16, linger: 0.2, lingerK: 0.5, lingerEnd: 0.6 },
-    { type: 'debris', count: 175, spreadAlt: 110, spreadInc: 3.6, spreadRaan: 3.2, dv: 0.85, drift: 0.9, decay: 2.2, color: '#ffb066', palette: { hot: [1, 0.86, 0.55], mid: [1, 0.6, 0.25], cool: [1, 0.5, 0.22] }, hard: true, size: 0.085, minPx: 2.5, maxPx: 9, additive: false, lateGlow: true }, // warm orange fragments, uneven in size and spread: no lattice, separate from the blue ocean
+    {
+      type: 'intercept',
+      from: [22.0, -163.0],
+      t0: 0.2,
+      color: '#ff8a4a',
+      taper: 0.3,
+      thick: 0.0055,
+      label: 'SM-3 interceptor',
+      short: 'SM-3',
+      rocket: { style: 'slim', minPx: 46, maxPx: 72, glowMin: 24, glowMax: 40 },
+      flash: 0.4,
+      flashCap: 0.8,
+      coreK: 0.55,
+      strong: true,
+      retire: 0.14,
+      hold: -0.14,
+      flashSpan: 0.16,
+      linger: 0.2,
+      lingerK: 0.5,
+      lingerEnd: 0.6,
+    },
+    {
+      type: 'debris',
+      count: 175,
+      spreadAlt: 110,
+      spreadInc: 3.6,
+      spreadRaan: 3.2,
+      dv: 0.85,
+      drift: 0.9,
+      decay: 2.2,
+      color: '#ffb066',
+      palette: { hot: [1, 0.86, 0.55], mid: [1, 0.6, 0.25], cool: [1, 0.5, 0.22] },
+      hard: true,
+      size: 0.085,
+      minPx: 2.5,
+      maxPx: 9,
+      additive: false,
+      lateGlow: true,
+    }, // warm orange fragments, uneven in size and spread: no lattice, separate from the blue ocean
   ],
   still: 0.47,
   status: [

@@ -25,7 +25,7 @@ import {
 } from '../app.js';
 import { KIND_PLAIN, quiet, activate, addGuide, bindMark, handoff, kinCard, legend, rove, srcCell, table, targetWords } from '../ui.js';
 import { hooks } from '../shared.js';
-const stateA = { zoom: false }, // phones open on the full span so the early treaties and tests show; the toggle zooms to 2004-2026; other widths ignore it
+const stateA = { zoom: true }, // phones open on 2004–2026; the full chronology remains one button away; other widths ignore it
   ZOOM_A0 = '2004-01-01';
 const ALT_AT = { intercept: 'Intercept', apogee: 'Highest point', detonation: 'Detonation' };
 const CONFIDENCE = { high: 'High', medium: 'Medium', low: 'Low' };
@@ -59,13 +59,13 @@ export function drawA(el = document.getElementById('svgA')) {
           .range([M.l, W - M.r])
       : L0.x;
   // Rows above the plot: the zoom note (phones) and the axis title.
-  const top = zoomed ? 50 : 34,
+  const top = phone ? 78 : 34,
     plotH = phone ? 330 : 410;
   // Tests with no reported altitude sit in a strip below the plot at their true dates; marks that would overlap are dodged into extra rows (x never moves).
   const unk = KV.filter((e) => e.altitude_km == null).sort((a, b) => (a.date < b.date ? -1 : 1)),
     rowEnd = [],
-    STEP = 16,
-    ROWH = 17;
+    STEP = phone ? 24 : 16,
+    ROWH = phone ? 24 : 17;
   unk.forEach((e) => {
     const X = x(parse(e.date));
     let r = rowEnd.findIndex((v) => v <= X - STEP);
@@ -102,7 +102,7 @@ export function drawA(el = document.getElementById('svgA')) {
   const rD = d3
     .scaleSqrt()
     .domain([0, 3600])
-    .range([0, phone ? 22 : 30]);
+    .range([0, phone ? 18 : 30]);
   // ---- orbit zones, each named inside the zone at the left (the names are placed after the notes, so the notes keep the clearest spots)
   const HX = x(parse(LAST_DA));
   // The label for the last destructive test runs vertically just right of its dotted line (its name, then its date beside it), so it can never meet the
@@ -190,14 +190,7 @@ export function drawA(el = document.getElementById('svgA')) {
     .append('g')
     .attr('class', 'axis')
     .attr('transform', `translate(${M.l},0)`)
-    .call(
-      d3
-        .axisLeft(y)
-        .tickValues(major)
-        .tickSize(0)
-        .tickPadding(4)
-        .tickFormat(d3.format(',')),
-    )
+    .call(d3.axisLeft(y).tickValues(major).tickSize(0).tickPadding(4).tickFormat(d3.format(',')))
     .select('.domain')
     .remove();
   svg
@@ -226,14 +219,20 @@ export function drawA(el = document.getElementById('svgA')) {
   xAxis(svg, x, sy + stripH, zoomed ? 5 : undefined);
   // ---- the last destructive test
   const hg = handoff(svg, x, top, sy + stripH, null);
-  handoffLines.forEach((t, i) =>
-    hg
-      .append('text')
-      .attr('transform', `translate(${phone ? HX - 12 - i * 16 : HX + 13 + i * 16},${top + 4}) rotate(90)`)
-      .attr('text-anchor', 'start')
-      .style('font-weight', i ? 400 : null)
-      .text(t),
-  );
+  if (phone)
+    hg.append('text')
+      .attr('x', M.l)
+      .attr('y', 56)
+      .text(`Last destructive test: ${fmtMY(parse(LAST_DA))}`);
+  else
+    handoffLines.forEach((t, i) =>
+      hg
+        .append('text')
+        .attr('transform', `translate(${phone ? HX - 12 - i * 16 : HX + 13 + i * 16},${top + 4}) rotate(90)`)
+        .attr('text-anchor', 'start')
+        .style('font-weight', i ? 400 : null)
+        .text(t),
+    );
   // ---- debris bubbles first (behind the marks)
   const dest = KV.filter((e) => e.type === 'destructive');
   svg
@@ -282,7 +281,7 @@ export function drawA(el = document.getElementById('svgA')) {
   // ---- annotations: each tries several offsets and takes the first that clears zone labels, the label of the last destructive test, all marks and earlier notes
   const pl = new Placer({ x0: 2, x1: W - 2, y0: top, y1: top + plotH });
   pl.add([0, 0, M.l + 1, top + plotH + 6]); // the altitude numbers: no note may sit on them
-  pl.add([phone ? HX - 28 : HX + 2, top + 4, phone ? HX + 2 : HX + 17 + (handoffLines.length - 1) * 16, top + 8 + handoffLen]);
+  if (!phone) pl.add([phone ? HX - 28 : HX + 2, top + 4, phone ? HX + 2 : HX + 17 + (handoffLines.length - 1) * 16, top + 8 + handoffLen]);
   KV.forEach((d) => {
     const X = x(parse(d.date)),
       Y = d.altitude_km == null ? stripY(d) : y(d.altitude_km);
@@ -338,9 +337,8 @@ export function drawA(el = document.getElementById('svgA')) {
       if (t2) t.append('tspan').attr('class', 'ann-sub').attr('x', tx).attr('dy', 16).text(t2);
       return;
     }
-    // crowded view (a phone showing the full span): the note may touch a neighbour rather than be dropped
-    if (!relaxed) return ann(id, t1, t2, prefs.slice(0, 1), true);
-    console.warn('annotation unplaced', id);
+    // The source card retains every annotation when no clear label position remains.
+    return;
   };
   const sweep = () => {
     const o = [];

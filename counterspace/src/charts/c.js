@@ -3,7 +3,26 @@
 // Provides: drawC(), stateC, zoomedC().
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { DOMAIN, EXPORTING, chartWindow, LAST_DA, NK, actorKey, badge, colorOf, fmt, fmtMY, fmtY, hasScene, isPhoneNow, PHONE_MAX, layout, parse, tw, xAxis } from '../app.js';
+import {
+  DOMAIN,
+  EXPORTING,
+  chartWindow,
+  LAST_DA,
+  NK,
+  actorKey,
+  badge,
+  colorOf,
+  fmt,
+  fmtMY,
+  fmtY,
+  hasScene,
+  isPhoneNow,
+  PHONE_MAX,
+  layout,
+  parse,
+  tw,
+  xAxis,
+} from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
 import { activate, addGuide, bindMark, nkCard, quiet, rove, srcCell, table } from '../ui.js';
 import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
@@ -49,7 +68,13 @@ export function drawC(el = document.getElementById('svgC')) {
     { W, M } = lay,
     phone = isPhoneNow();
   // On a phone the zoom still starts in 1995, but the plot runs nearly edge to edge, so the recent years get the width.
-  const x = phone && zoom ? d3.scaleUtc().domain(C_FOCUS()).range([8, W - M.r]) : lay.x;
+  const x =
+    phone && zoom
+      ? d3
+          .scaleUtc()
+          .domain(C_FOCUS())
+          .range([8, W - M.r])
+      : lay.x;
   const R = W - M.r, // right end of the plot (and of every band)
     L = phone ? 0 : M.l, // left end of every band
     PADX = 14, // text inset inside a band
@@ -144,7 +169,7 @@ export function drawC(el = document.getElementById('svgC')) {
   let y = stripBottom + 14;
   bands.forEach((b) => {
     b.y0 = y;
-    let yy = y + b.head.h;
+    let yy = y + b.head.h + (phone ? 26 : 0);
     b.rows.forEach((r) => {
       r.top = yy;
       r.y = r.mode === 'above' ? yy + 12 + r.lines.length * LH + 8 + MARK_R : yy + r.h / 2;
@@ -189,7 +214,15 @@ export function drawC(el = document.getElementById('svgC')) {
 
   // the quotation, attributed
   if (EXPORTING) {
-    svg.append('rect').attr('class', 'quote-box').attr('x', boxX).attr('y', 2).attr('width', boxW).attr('height', boxH - 2).attr('rx', 8).attr('aria-hidden', 'true');
+    svg
+      .append('rect')
+      .attr('class', 'quote-box')
+      .attr('x', boxX)
+      .attr('y', 2)
+      .attr('width', boxW)
+      .attr('height', boxH - 2)
+      .attr('rx', 8)
+      .attr('aria-hidden', 'true');
     lines(svg, 'quote', INSET, qTop + qSize, qLines, qLH);
     lines(svg, 'quote-by', INSET, byY + 13, byLines, 17);
   }
@@ -246,11 +279,12 @@ export function drawC(el = document.getElementById('svgC')) {
     const h = b.head;
     lines(svg, 'band-title', INSET, b.y0 + 27, h.title, LH);
     lines(svg, 'band-gloss', INSET, b.y0 + 27 + (h.title.length - 1) * LH + 21, h.gloss, 17);
+    if (phone) topAxis(svg, x, b.y0 + h.h + 18, 10);
   });
 
   // year axis
   xAxis(svg, x, axisY, zoom ? (phone ? 10 : 5) : undefined);
-  if (zoom && !EXPORTING && phone) topAxis(svg, x, stripBottom + 14 - 6, 10);
+  // Each phone band has its own year axis.
   if (zoomLines.length) lines(svg, 'zoom-flag', PADX, axisY + 56, zoomLines, 17);
 
   // entries
@@ -369,7 +403,9 @@ export function drawC(el = document.getElementById('svgC')) {
   const ck = document.getElementById('ckeyC');
   if (ck) {
     const names = [...new Set(NK.map((e) => actorKey(e.actor) || 'Several or other'))];
-    ck.innerHTML = names.map((n) => `<span class="ck"><i style="background:${n === 'Several or other' ? 'var(--c-multi)' : colorOf(n)}"></i>${n}</span>`).join('');
+    ck.innerHTML = names
+      .map((n) => `<span class="ck"><i style="background:${n === 'Several or other' ? 'var(--c-multi)' : colorOf(n)}"></i>${n}</span>`)
+      .join('');
   }
   document.getElementById('quoteC').innerHTML = `<span class="q">${QUOTE}</span><span class="by">${QUOTE_BY}</span>`;
   document.getElementById('cFocus').setAttribute('aria-pressed', zoom);

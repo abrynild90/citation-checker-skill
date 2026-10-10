@@ -333,3 +333,12 @@
 .hero-jumps a{display:inline-flex;align-items:center;min-height:44px;font:500 14px/1.4 var(--sans);color:var(--hero-accent);text-decoration:none;border-bottom:1px solid var(--hero-line)}
 .hero-jumps a:hover{border-color:var(--hero-accent)}
 @media(min-width:761px){.hero-jumps{margin-top:8px}.hero-jumps a{min-height:36px}}
+/* Phone readers keep the key facts beneath the picture, clear of its plotted events. */
+@media(max-width:639px){
+  .hero-glance{display:block;position:static;padding:16px 0 0;color:var(--muted)}
+  .hero-glance[hidden]{display:none}
+  .hero-glance .hg-t,.hero-glance .hg-pull,.hero-glance .hg-long{display:none}
+  .hero-glance ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+  .hero-glance li{font:400 14px/1.5 var(--sans)}
+  .hero-glance b{font-weight:600;color:var(--text)}
+}

@@ -38,7 +38,10 @@ async function getHost() {
       };
       host.onInteraction = () => {
         if (!cur) return;
-        if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
+        if (tour) {
+          clearTimeout(tour.timer);
+          tour.timer = 0;
+        }
         setStatus('Paused.');
       };
       host.canvas.addEventListener('webglcontextlost', (e) => {
@@ -82,9 +85,10 @@ async function getHost() {
         const c = host.sim.cams[i],
           cc = host.sim.cfg.cameras?.[i],
           acts = host.sim.cfg.acts,
-          a = acts && !c.auto ? acts[c.act] : null;
+          cut = host.sim.cfg.camCut,
+          a = acts && !c.auto ? acts[c.act] : cut ? (i === cut.cam ? { t0: cut.t, t1: 1 } : { t0: 0, t1: cut.t }) : null;
         wideSel = acts && !c.auto && c.act == null ? i : -1; // an episode scene's Wide preset: its chip is the pressed one, not the Tour's
-        epi = a ? { a0: a.t0, a1: a.t1, last: a === acts.at(-1), name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
+        epi = a ? { a0: a.t0, a1: a.t1, last: acts ? a === acts.at(-1) : a.t1 === 1, name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
         pick(i);
         if (epi)
           host.update(host.t); // bring the time into the episode now (a preset pressed at another episode's time)
@@ -113,7 +117,7 @@ function prefetchEarth() {
 }
 // Where a scene opens (a fraction of its length) when the first frame is a plain stretch of ocean or a dark limb: the telling moment the poster shows. The scene
 // plays on from there and holds the last diagram. Replay and a tour start at the beginning. Chosen by viewing the frames at 0 to 0.6.
-const OPEN_AT = { starfish: 0.16, laser: 0.2, spaceplanes: 0.3 };
+const OPEN_AT = { starfish: 0.16, laser: 0.2 };
 export const ORDER = [...SCENES].sort((a, b) => (a.date < b.date ? -1 : 1));
 
 const $ = (id) => document.getElementById(id);
@@ -368,7 +372,10 @@ stepChoose.onchange = () => {
     li?.querySelector('button')?.focus();
   } else {
     jumpToStep(+stepChoose.value);
-    if (host) { host.playing = false; setPlayBtn(false); }
+    if (host) {
+      host.playing = false;
+      setPlayBtn(false);
+    }
   }
 };
 let expanded = false,
@@ -418,16 +425,26 @@ function syncMore() {
     stepsHidden = !expanded && !STACKED.matches && !!stepsEl.style.height && listScrolls();
   if (!expanded) hasMore = capFolded || stepsHidden;
   moreBtn.hidden = !hasMore;
-  moreBtn.querySelector('span').textContent = expanded ? 'Show less' : capFolded ? (steps.length > 4 ? 'Read the full account and every step' : 'Read the full account') : 'Show every step';
+  moreBtn.querySelector('span').textContent = expanded
+    ? 'Show less'
+    : capFolded
+      ? steps.length > 4
+        ? 'Read the full account and every step'
+        : 'Read the full account'
+      : 'Show every step';
 }
 function setMore(open) {
   expanded = open;
   asideBody.classList.toggle('expanded', open);
   panel.classList.toggle('reading-account', open);
-  if (open && host) { host.playing = false; setPlayBtn(false); }
+  if (open && host) {
+    host.playing = false;
+    setPlayBtn(false);
+  }
   moreBtn.setAttribute('aria-expanded', String(open));
   moreBtn.classList.toggle('open', open);
   setLede(0); // the full account replaces the intro (fitSteps stops short when open, so the text is set here)
+  if (steps.length) markStep(Math.max(0, stepIdx));
   if (!open) asideBody.scrollTop = 0;
   fitSteps();
   updateFades();
@@ -450,19 +467,30 @@ const SCENE_SUMMARIES = {
   dn2: 'DN-2 had no target. China reported 10,000 km; an analysis cited by SWF estimated 30,000 km or more.',
   gnss: 'A ground jammer disrupts GPS receivers on aircraft; it does not attack the GPS satellites.',
   rpo: 'Three episodes of spacecraft coming close. A close approach does not establish hostile intent.',
-  spaceplanes: 'Reusable U.S. and Chinese craft fly unusual missions; their purpose is not established here.'
+  spaceplanes: 'Reusable U.S. and Chinese craft fly unusual missions; their purpose is not established here.',
 };
 const PHONE_TITLES = {
-  starfish: 'Starfish Prime (1962)', solwind: 'Solwind intercept (1985)', fengyun: 'Fengyun-1C intercept (2007)',
-  'burnt-frost': 'Operation Burnt Frost (2008)', dn2: 'DN-2 high-altitude test (2013)', shakti: 'Mission Shakti (2019)',
-  cosmos1408: 'Cosmos 1408 intercept (2021)', gnss: 'Baltic GPS jamming', viasat: 'Viasat cyberattack (2022)',
-  laser: 'MIRACL laser test (1997)', 'sj21-tug': 'SJ-21 satellite tow (2022)', rpo: 'Three close approaches',
-  spaceplanes: 'Reusable spaceplanes'
+  starfish: 'Starfish Prime (1962)',
+  solwind: 'Solwind intercept (1985)',
+  fengyun: 'Fengyun-1C intercept (2007)',
+  'burnt-frost': 'Operation Burnt Frost (2008)',
+  dn2: 'DN-2 high-altitude test (2013)',
+  shakti: 'Mission Shakti (2019)',
+  cosmos1408: 'Cosmos 1408 intercept (2021)',
+  gnss: 'Baltic GPS jamming',
+  viasat: 'Viasat cyberattack (2022)',
+  laser: 'MIRACL laser test (1997)',
+  'sj21-tug': 'SJ-21 satellite tow (2022)',
+  rpo: 'Three close approaches',
+  spaceplanes: 'Reusable spaceplanes',
 };
 function syncSceneTitle(cfg) {
   const phone = matchMedia('(max-width: 760px)').matches;
-  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, m => `<span class="nb">${m}</span>`);
+  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
   titleEl.setAttribute('aria-label', cfg.title);
+}
+function arrangeExport() {
+  (COMPACT.matches ? slPop : $('sceneCtrl')).append(exportBtn);
 }
 function fillStory(cfg) {
   const n = ORDER.indexOf(cfg) + 1;
@@ -491,8 +519,9 @@ function fillStory(cfg) {
     (cfg.related ? '' : '<span class="sv-nolaw">No related law on the timeline.</span>');
   // Stacked layouts: one row of pills (Source, Open the source, Related law); the citation and the picture note open from "Source".
   slLinks.innerHTML =
-    (ev ? `<a class="pill" href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>` : '') +
-    (cfg.related ? `<button type="button" class="pill sl-law">Related law</button>` : '');
+    (ev
+      ? `<a class="pill" href="${esc(ev.source_url)}" target="_blank" rel="noopener">Open the source<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-external"/></svg><span class="sr"> (opens in a new tab)</span></a>`
+      : '') + (cfg.related ? `<button type="button" class="pill sl-law">Related law</button>` : '');
   const slLaw = slLinks.querySelector('.sl-law');
   if (slLaw) slLaw.onclick = () => lawBtn.click();
   toggleSrc(false);
@@ -505,6 +534,7 @@ function fillStory(cfg) {
     .filter(Boolean)
     .join(' ');
   slPop.innerHTML = `<p><strong>Source.</strong> ${esc(citeText(cfg.cite))}</p><p><strong>About this picture.</strong> ${esc(scaleEl.textContent)}</p>`;
+  arrangeExport();
   fillNext(cfg);
   lawBtn.disabled = !cfg.related;
   lawBox.classList.toggle('none', !cfg.related); // no related law: the button gives way to a plain sentence in the source
@@ -617,7 +647,8 @@ function anchorNote(note) {
     }
     const nr = note.getBoundingClientRect(),
       br = lawBtn.getBoundingClientRect();
-    if (br.height && nr.bottom > br.top - 4 && nr.bottom < br.bottom + 8) note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
+    if (br.height && nr.bottom > br.top - 4 && nr.bottom < br.bottom + 8)
+      note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
   }
 }
 function toggleSrc(open) {
@@ -709,12 +740,83 @@ export function closeScene(nav) {
 }
 
 // ---------------------------------------------------------------- steps: what happens, as a timeline that follows the animation
+function buildEpisodes(cfg) {
+  const box = $('sceneEpisodes');
+  box.hidden = !cfg.acts;
+  box.replaceChildren();
+  cfg.acts?.forEach((act, i) => {
+    const camera = cfg.cameras[act.cam],
+      button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = `${i + 1}. ${camera.episode || camera.chip || cfg.epChipShort?.[i] || camera.name}`;
+    button.setAttribute('aria-pressed', 'false');
+    button.onclick = () => {
+      if (!host || stillOnly) return;
+      chooseView(act.cam);
+      host.update(act.t0 + 0.001);
+      requestAnimationFrame(() => followStep(stepsEl.children[stepIdx], true));
+    };
+    box.append(button);
+  });
+}
+const STEP_NAMES = {
+  starfish: ['Rocket ascent', 'Detonation', 'Trapped electrons', 'Belt around Earth', 'Satellite damage'],
+  solwind: ['F-15 climb', 'Missile release', 'Intercept', 'Debris decay'],
+  fengyun: ['Interceptor ascent', 'Collision', 'Debris ring', 'Debris remaining'],
+  'burnt-frost': ['Interceptor ascent', 'Closing distance', 'Collision', 'Debris decay'],
+  dn2: ['Rocket ascent', 'Estimated highest point', 'Reported re-entry'],
+  shakti: ['Interceptor ascent', 'Collision', 'Debris decay'],
+  cosmos1408: ['Interceptor ascent', 'Collision', 'Debris and the ISS orbit'],
+  gnss: ['Before entering the zone', 'Inside the jammer zone'],
+  viasat: ['Normal service', 'Attack begins', 'Modems disabled', 'Satellite unaffected', 'Attribution'],
+  laser: ['Satellite rises', 'MIRACL tracks the target', 'Separate case: Peresvet'],
+  'sj21-tug': ['Approach', 'Close proximity', 'Docking', 'Tow begins', 'Higher orbit', 'Separation not described', 'Return toward GEO'],
+  rpo: [
+    'SJ-21 approaches SJ-25',
+    'GSSAP positions',
+    'Possible docking',
+    'Possible docking again',
+    'Docked pair',
+    'Separation',
+    'January approaches',
+    'Cosmos 2543 released',
+    'Close to Cosmos 2542',
+    'Orbit raised',
+    'Near USA 245',
+    'Russia’s statement',
+    'USA 271 approaches',
+    'Orbit adjustment',
+    'Closest approach',
+    'End of the approach',
+  ],
+  spaceplanes: [
+    'OTV-1 to OTV-6',
+    'Low-orbit flights',
+    'Runway landings',
+    'SWF’s assessment',
+    'OTV-7’s elongated orbit',
+    'Unclear purpose',
+    'Lowering the orbit',
+    'OTV-8 launch',
+    'China’s flights',
+    'First flight',
+    'Object J appears',
+    'Approaches to Object J',
+    'Object G released',
+    'PLA’s assessment',
+    'SWF’s interpretation',
+    'Fourth flight',
+  ],
+};
 function renderSteps(cfg) {
   const dur = cfg.duration || 0;
   steps = (cfg.status || cfg.steps || []).filter(Array.isArray).map(([t, text]) => ({ t, text }));
   const fine = steps.some((s, i) => i && Math.round(s.t * dur) === Math.round(steps[i - 1].t * dur)); // two steps would read the same: show tenths
   stepIdx = -1;
-  stepChoose.innerHTML = steps.map((s, i) => `<option value="${i}">${i + 1}. ${esc(s.text)}</option>`).join('');
+  stepChoose.innerHTML = steps
+    .map((s, i) => `<option value="${i}" data-description="${esc(s.text)}">${i + 1}. ${esc(STEP_NAMES[cfg.id]?.[i] || `Step ${i + 1}`)}</option>`)
+    .join('');
+  buildEpisodes(cfg);
   stepsSection.hidden = !steps.length;
   stepsEl.innerHTML = steps
     .map(
@@ -739,15 +841,29 @@ function stepAt(t) {
 }
 function markStep(k) {
   $('sceneCurrentStep').textContent = steps[k]?.text || '';
+  const act = cur?.acts?.findIndex((a) => (steps[k]?.t ?? 0) >= a.t0 && (steps[k]?.t ?? 0) < a.t1);
+  $('sceneEpisodes')
+    .querySelectorAll('button')
+    .forEach((b, i) => b.setAttribute('aria-pressed', String(i === act)));
   if (document.activeElement !== stepChoose) stepChoose.value = String(k);
+  const episode = !expanded && !stillOnly ? cur?.acts?.[act] : null;
+  let refit = false;
   [...stepsEl.children].forEach((li, i) => {
+    const hidden = !!episode && (steps[i].t < episode.t0 || steps[i].t >= episode.t1);
+    if (li.hidden !== hidden) refit = true;
+    li.hidden = hidden;
     li.classList.toggle('done', i < k);
     li.classList.toggle('now', i === k);
     const b = li.firstElementChild;
     if (i === k) b.setAttribute('aria-current', 'step');
     else b.removeAttribute('aria-current');
   });
+  if (refit) {
+    stepsEl.scrollTop = 0;
+    requestAnimationFrame(fitSteps);
+  }
 }
+const visibleStepRows = () => [...stepsEl.children].filter((li) => !li.hidden);
 function syncSteps(t) {
   if (!steps.length || stillOnly) return;
   const k = stepAt(t);
@@ -756,7 +872,8 @@ function syncSteps(t) {
   stepIdx = k;
   markStep(k);
   const li = stepsEl.children[k];
-  if (first && STACKED.matches) asideBody.scrollTop = 0; // Keep the opening explanation visible; playback follows subsequent steps.
+  if (first && STACKED.matches)
+    asideBody.scrollTop = 0; // Keep the opening explanation visible; playback follows subsequent steps.
   else if (first) requestAnimationFrame(() => followStep(li, true));
   else followStep(li);
 }
@@ -779,21 +896,24 @@ function followStep(li, instant) {
     if (li.offsetTop < y - 1) to = li.offsetTop;
     else if (need > y + 1) {
       to = maxY;
-      for (const c of stepsEl.children) if (c.offsetTop >= need - 1) {
+      for (const c of visibleStepRows())
+        if (c.offsetTop >= need - 1) {
           to = Math.min(maxY, c.offsetTop);
           break;
         }
     }
     if (Math.abs(to - y) > 1) {
       // The active row is never seen half-way: a row below the window jumps in at once; the glide is only for a row already whole in view
-      const inView = li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1;
+      const inView =
+        li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1;
       const smooth = inView && !(REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5);
       stepsEl.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' });
       if (!smooth) trimSteps(); // the clip follows the jump at once, so the active row is whole on the very next frame
       // a smooth scroll that did not arrive (a busy page, a browser that skips it) is finished at once, so the list always rests on its row
       if (smooth)
         setTimeout(() => {
-          if (Math.abs(stepsEl.scrollTop - to) > 1 && performance.now() - lastUserScroll > 1500 && stepIdx === +li.dataset.i) stepsEl.scrollTo({ top: to, behavior: 'auto' });
+          if (Math.abs(stepsEl.scrollTop - to) > 1 && performance.now() - lastUserScroll > 1500 && stepIdx === +li.dataset.i)
+            stepsEl.scrollTo({ top: to, behavior: 'auto' });
         }, 700);
     }
     return;
@@ -808,7 +928,7 @@ function followStep(li, instant) {
     const pos = (n) => n.getBoundingClientRect().top - box.top + own.scrollTop,
       cap = own.scrollHeight - own.clientHeight,
       want = Math.min(cap, own.scrollTop + dy),
-      cuts = [...own.children, ...own.querySelectorAll('.sv-steps h3'), ...stepsEl.children]
+      cuts = [...own.children, ...own.querySelectorAll('.sv-steps h3'), ...visibleStepRows()]
         .filter((n) => n.getClientRects().length)
         .flatMap((n) => {
           // a paragraph can also rest on any of its own lines
@@ -838,9 +958,9 @@ function rowsFit() {
   let n = 0,
     h = 0;
   const cap = STACKED.matches ? Infinity : MAX_ROWS; // a long list shows about six rows at a time on a desktop window, never a list taller than the picture
-  if (stepsEl.scrollHeight <= avail + 1 && steps.length <= cap) return { n: steps.length, h: 0, avail };
-  const first = stepsEl.firstElementChild;
-  for (const li of stepsEl.children) {
+  if (stepsEl.scrollHeight <= avail + 1 && visibleStepRows().length <= cap) return { n: visibleStepRows().length, h: 0, avail };
+  const first = visibleStepRows()[0];
+  for (const li of visibleStepRows()) {
     const b = li.offsetTop + li.offsetHeight;
     if (b <= avail + 1 && n < cap) {
       n++;
@@ -878,10 +998,10 @@ function fitStepsClosed() {
   // The steps are read-only here: every row is drawn whole, at its natural height, and the story column scrolls if it must (no fixed-height window).
   const one = false;
   overlay.classList.toggle('steps-one', one);
-  if (!steps.length) return;
+  if (!visibleStepRows().length) return;
   if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
   // Phone with more than four steps: the list shows the playing step only (more height for the picture); a phone with fewer shows up to three rows.
-  const want = one ? 1 : Math.min(steps.length, COMPACT.matches ? 3 : 4);
+  const want = one ? 1 : Math.min(visibleStepRows().length, COMPACT.matches ? 3 : 4);
   let r;
   for (let lvl = 0; lvl <= 1; lvl++) {
     setLede(lvl);
@@ -893,7 +1013,7 @@ function fitStepsClosed() {
   if (r.h && !STACKED.matches) {
     // The window rests on a row at every step of the story, so the rows left under the last resting place can be shorter than the window and leave a blank band
     // above the cue. Of the heights that are a whole number of consecutive rows, take the one that leaves the least blank at any resting place.
-    const kids = [...stepsEl.children],
+    const kids = visibleStepRows(),
       top = kids.map((k) => k.offsetTop),
       bot = kids.map((k) => k.offsetTop + k.offsetHeight),
       total = bot.at(-1),
@@ -914,7 +1034,7 @@ function fitStepsClosed() {
         const H = bot[j] - top[i];
         if (H > r.avail + 0.5 || H < r.avail * 0.7 || j - i + 1 > MAX_ROWS) continue;
         const c = blank(H);
-        if (c < bestCost - 1 || (Math.abs(c - bestCost) <= 1 && H > best)) (best = H), (bestCost = c);
+        if (c < bestCost - 1 || (Math.abs(c - bestCost) <= 1 && H > best)) ((best = H), (bestCost = c));
       }
     if (best < r.h || best > r.h) {
       r.h = best;
@@ -927,13 +1047,13 @@ function fitStepsClosed() {
     stepsEl.style.flex = '0 0 auto';
     stepsEl.style.height = r.h + 'px';
     r.sp = Math.min(8, Math.max(0, Math.floor(((r.avail - r.h) / (2 * r.n)) * 50) / 50 - 0.02));
-  } else if (r.n < steps.length) r.sp = 0;
+  } else if (r.n < visibleStepRows().length) r.sp = 0;
   else if (!r.h) {
     // every row fits: a share of what is left under the content goes into the rows, so the column has no gap at its foot
     const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
       ab = asideBody.getBoundingClientRect(),
       slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0;
-    r.sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * steps.length)) : 0;
+    r.sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * visibleStepRows().length)) : 0;
   }
   if (r.sp > 0.5) {
     stepsEl.style.setProperty('--sp', r.sp.toFixed(2) + 'px');
@@ -941,7 +1061,7 @@ function fitStepsClosed() {
   }
   if (r.h) {
     // so that every row can rest at the top of the list (also the last ones), the end of the list gets the room the last whole window leaves
-    const kids = [...stepsEl.children],
+    const kids = visibleStepRows(),
       H = parseFloat(stepsEl.style.height),
       total = kids.at(-1).offsetTop + kids.at(-1).offsetHeight;
     let pad = 0;
@@ -954,7 +1074,7 @@ function fitStepsClosed() {
   }
   // desktop: if the column still overflows (a rounding, a late font), take the last whole row out of the window rather than let the column scroll under the cue
   if (r.h && !STACKED.matches) {
-    const kids = [...stepsEl.children];
+    const kids = visibleStepRows();
     for (let k = r.n; k > 1 && asideBody.scrollHeight > asideBody.clientHeight + 0.5; k--) {
       stepsEl.style.height = kids[k - 2].offsetTop + kids[k - 2].offsetHeight + 'px';
     }
@@ -972,7 +1092,7 @@ function snapList(active) {
   if (!stepsEl.style.height || !listScrolls()) return;
   const H = stepsEl.clientHeight,
     y = stepsEl.scrollTop,
-    kids = [...stepsEl.children];
+    kids = visibleStepRows();
   if (kids.some((k) => Math.abs(k.offsetTop - y) < 1)) return;
   const ok = (t) => !active || stillOnly === undefined || (active.offsetTop >= t - 0.5 && active.offsetTop + active.offsetHeight <= t + H + 0.5);
   const maxY = stepsEl.scrollHeight - H;
@@ -991,7 +1111,7 @@ function trimSteps() {
   const H = stepsEl.clientHeight,
     y = stepsEl.scrollTop;
   let end = 0;
-  for (const li of stepsEl.children) {
+  for (const li of visibleStepRows()) {
     const b = li.offsetTop + li.offsetHeight - y;
     if (b <= H + 1.5) end = Math.max(end, b);
   }
@@ -1022,7 +1142,7 @@ stepsEl.addEventListener(
       if (end) return;
       const y = stepsEl.scrollTop;
       let best = 0;
-      for (const li of stepsEl.children) if (Math.abs(li.offsetTop - y) < Math.abs(best - y)) best = li.offsetTop;
+      for (const li of visibleStepRows()) if (Math.abs(li.offsetTop - y) < Math.abs(best - y)) best = li.offsetTop;
       if (Math.abs(best - y) > 1) stepsEl.scrollTo({ top: Math.max(0, best), behavior: REDUCED ? 'auto' : 'smooth' });
     }, 140);
   },
@@ -1040,12 +1160,21 @@ document.fonts?.ready.then(() => fitSteps());
     { passive: true },
   ),
 );
-// Selecting a step plays the scene from the start of that step (the tour camera takes over if the step lies outside a locked episode).
+// Selecting a step pauses at its beginning; an out-of-episode step restores the whole-story camera.
 function jumpToStep(i) {
   const s = steps[i];
   if (!s || !host || !glOK || stillOnly || !cur) return;
+  host.interrupt();
+  setPlayBtn(false);
   const tour = host.sim.cams.findIndex((c) => c.auto);
-  if (epi && (s.t < epi.a0 || s.t >= epi.a1) && tour >= 0) host.pickCam(tour);
+  if (epi && (s.t < epi.a0 || s.t >= epi.a1)) {
+    if (tour >= 0) host.pickCam(tour);
+    else if (host.sim.cfg.camCut) {
+      epi = null;
+      host._manual = false;
+      host._cutOn = null;
+    }
+  }
   host.update(Math.min(s.t, 1));
   setStatus(`Step ${i + 1} of ${steps.length}: ${s.text}`);
 }
@@ -1053,7 +1182,10 @@ stepsEl.addEventListener('click', (e) => {
   const li = e.target.closest('li[data-i]');
   if (li) jumpToStep(+li.dataset.i);
 });
-COMPACT.addEventListener('change', () => fitSteps());
+COMPACT.addEventListener('change', () => {
+  arrangeExport();
+  fitSteps();
+});
 STACKED.addEventListener('change', () => fitSteps());
 addEventListener('resize', () => toggleSrc(false));
 
@@ -1121,6 +1253,7 @@ function syncScrub(t) {
 }
 // A still diagram has no timeline: Play, the scrubber and the views give way to one plain sentence; the steps stay, for reading.
 function staticMode(on) {
+  $('sceneEpisodes').hidden = on || !curSim?.cfg.acts;
   [playBtn, scrubWrap, scTime, viewsEl].forEach((n) => {
     n.hidden = on;
   });
@@ -1133,7 +1266,9 @@ function staticMode(on) {
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
-  stepsNote.textContent = on ? 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.' : 'Select a step to jump to it.';
+  stepsNote.textContent = on
+    ? 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
+    : 'Select a step to jump to it.';
   if (on && curSim) {
     stepIdx = stepAt(curSim.cfg.staticT ?? curSim.still ?? 0);
     markStep(stepIdx); // the step the still shows
@@ -1157,17 +1292,23 @@ scrub.oninput = () => {
 };
 // Play/pause: an icon button whose accessible name is the action it will do.
 function setPlayBtn(on) {
-  if (!on && tour) { clearTimeout(tour.timer); tour.timer = 0; }
+  if (!on && tour) {
+    clearTimeout(tour.timer);
+    tour.timer = 0;
+  }
   playBtn.classList.toggle('playing', !!on);
-  const action = on ? 'Pause' : (host?._ended || host?.t >= 1) ? 'Replay' : 'Play';
+  const action = on ? 'Pause' : host?._ended || host?.t >= 1 ? 'Replay' : 'Play';
   playBtn.setAttribute('aria-label', action);
   playBtn.title = `${action} (Space)`;
-  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : (host?._ended || host?.t >= 1) ? '#i-replay' : '#i-play');
+  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : host?._ended || host?.t >= 1 ? '#i-replay' : '#i-play');
   playBtn.disabled = false;
 }
 function togglePlay() {
   if (!host || !cur || !glOK || stillOnly) return;
-  if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
+  if (tour) {
+    clearTimeout(tour.timer);
+    tour.timer = 0;
+  }
   const on = !host.playing;
   if (on && (host._ended || host.t >= 1)) host.update(epi ? epi.a0 + 0.001 : 0);
   host.playing = on;
@@ -1179,7 +1320,10 @@ playBtn.onclick = togglePlay;
 const narrowViews = matchMedia('(max-width: 1180px)'),
   phoneViews = matchMedia('(max-width: 760px)');
 narrowViews.addEventListener?.('change', () => host && cur && buildViews(cur, host.sim));
-phoneViews.addEventListener?.('change', () => { if (cur) syncSceneTitle(cur); if (host && cur) buildViews(cur, host.sim); });
+phoneViews.addEventListener?.('change', () => {
+  if (cur) syncSceneTitle(cur);
+  if (host && cur) buildViews(cur, host.sim);
+});
 // A short label for a phone button (about 12 characters at most, always whole words); the full name stays as the button's accessible name.
 const STOP = /^(the|and|in|of|a|to|at|on|for|from)$/i;
 function phoneLabel(label) {
@@ -1192,7 +1336,10 @@ function phoneLabel(label) {
     .replace(/\s+in\s+(GEO|LEO|low Earth orbit)$/i, '')
     .trim();
   if (s.length <= 12) return s.replace(/^./, (m) => m.toUpperCase());
-  s = s.replace(/^all (three|\w+) \w+$/i, 'All $1').replace(/\s+(?:and the|and)\s+/i, ', ').replace(/\s+(of|with|at|on)\s+.*$/i, '');
+  s = s
+    .replace(/^all (three|\w+) \w+$/i, 'All $1')
+    .replace(/\s+(?:and the|and)\s+/i, ', ')
+    .replace(/\s+(of|with|at|on)\s+.*$/i, '');
   if (s.length > 12) {
     const out = [];
     for (const w of s.split(/\s+/)) {
@@ -1223,7 +1370,8 @@ function openMore(first) {
   moreMenu.hidden = false;
   reserveMenu(true);
   moreBtn2.setAttribute('aria-expanded', 'true');
-  moreMenu.style.left = Math.max(0, Math.min(moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left, viewsEl.clientWidth - moreMenu.offsetWidth)) + 'px';
+  moreMenu.style.left =
+    Math.max(0, Math.min(moreBtn2.getBoundingClientRect().left - viewsEl.getBoundingClientRect().left, viewsEl.clientWidth - moreMenu.offsetWidth)) + 'px';
   const items = [...moreMenu.children];
   (first === 'last' ? items.at(-1) : items.find((b) => b.getAttribute('aria-checked') === 'true' && first !== 'first') || items[0]).focus();
 }
@@ -1241,7 +1389,14 @@ function buildViews(cfg, sim) {
     const label = names[i],
       b = document.createElement('button');
     b.type = 'button';
-    const short = phoneViews.matches ? phoneLabel(label) : narrowViews.matches ? label.replace(/^From (the |a )?/i, '').replace(/^Follow the action$/i, 'Follow').replace(/^./, (m) => m.toUpperCase()) : label;
+    const short = phoneViews.matches
+      ? phoneLabel(label)
+      : narrowViews.matches
+        ? label
+            .replace(/^From (the |a )?/i, '')
+            .replace(/^Follow the action$/i, 'Follow')
+            .replace(/^./, (m) => m.toUpperCase())
+        : label;
     b.textContent = short;
     if (short !== label) b.setAttribute('aria-label', label);
     b.title = label;
@@ -1346,7 +1501,11 @@ $('scPrev').onclick = () => go(-1);
 $('scNext').onclick = () => go(1);
 // The related law opens as a card in the scene: its date, whether it binds, its source, and a quiet way to see it on the timeline. Nothing scrolls away.
 const lawCard = $('lawCard');
-const BINDS = { treaty: 'A treaty: it binds the states that joined it.', resolution: 'Not binding: a call or a finding, not a rule that carries enforcement.', unilateral: 'A pledge by one country, not a treaty.' };
+const BINDS = {
+  treaty: 'A treaty: it binds the states that joined it.',
+  resolution: 'Not binding: a call or a finding, not a rule that carries enforcement.',
+  unilateral: 'A pledge by one country, not a treaty.',
+};
 const pairedLaw = (cfg) => !!(cfg.event && cfg.related && pairsAt(cfg.event).some((p) => p.law === cfg.related));
 function fillLawCard(cfg) {
   const l = byId[cfg.related];
@@ -1456,7 +1615,8 @@ overlay.addEventListener('keydown', hideHint, { passive: true });
 // ---------------------------------------------------------------- keyboard: Space plays or pauses, Left and Right change scene, 1 to 5 choose a view, Esc closes
 const TABBABLE = 'button:not([disabled]),input:not([disabled]),a[href],summary,[tabindex]';
 function trapTab(e) {
-  const list = [...(recapEl && !recapEl.hidden ? recapEl : panel).querySelectorAll(TABBABLE)].filter( // the closing slide covers the controls: Tab stays on the slide
+  const list = [...(recapEl && !recapEl.hidden ? recapEl : panel).querySelectorAll(TABBABLE)].filter(
+    // the closing slide covers the controls: Tab stays on the slide
     (n) => n.tabIndex >= 0 && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden' && !n.closest('[hidden],[aria-hidden="true"]'),
   );
   if (!list.length) return;
@@ -1715,7 +1875,9 @@ export function showRecap() {
     `${w('attack')} attacks that leave satellites in orbit and ${w('near')} cases of satellites flying close to others.`;
   $('svRecapPairs').innerHTML = recapLinks() + drawnPara(revealCapacity());
   $('svRecapLine').textContent = recapLine();
-  $('svRecapList').innerHTML = ORDER.map((s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`).join('');
+  $('svRecapList').innerHTML = ORDER.map(
+    (s) => `<li><button type="button" data-id="${esc(s.id)}">${esc(SHORT_NAME[s.id] || s.title)}, ${year(s)}</button></li>`,
+  ).join('');
   // the hand-off back to the picture: how many pairs are drawn on it now
   const linked = revealedCount();
   $('svRecapHero').hidden = !linked;
@@ -1733,7 +1895,11 @@ const recapBody = recapEl.querySelector('.sv-recap-body'),
   recapMore = () => {
     const edge = recapBody.getBoundingClientRect().bottom - 2,
       below = recapBody.lastElementChild.getBoundingClientRect().bottom > edge + 2, // content of the body (not its padding) still out of sight
-      hidden = below ? [...recapBody.querySelectorAll('.sv-recap-more[open] button[data-id], .sv-recap-more[open] .sv-recap-links a')].filter((n) => n.getBoundingClientRect().bottom > edge).length : 0;
+      hidden = below
+        ? [...recapBody.querySelectorAll('.sv-recap-more[open] button[data-id], .sv-recap-more[open] .sv-recap-links a')].filter(
+            (n) => n.getBoundingClientRect().bottom > edge,
+          ).length
+        : 0;
     recapBody.classList.toggle('more', below);
     recapCue.hidden = !below;
     if (below) $('svRecapCueTxt').textContent = hidden ? `${hidden} more below` : 'More below';

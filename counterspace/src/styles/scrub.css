@@ -70,3 +70,6 @@
 .ann-g.scrub-future,.lab.scrub-future,.lbls line.scrub-future{opacity:.05;pointer-events:none}
 @media (prefers-reduced-motion:no-preference){.ann-g,.lab,.lbls line{transition:opacity 240ms var(--ease)}}
 @media print{.yr-bar,.yr-intro{display:none}.scrub-veil{display:none}}
+
+/* Phone readers use the chart range button; the crowded year-play row adds no needed control. */
+@media(max-width:760px){.yr-intro,.yr-bar{display:none}}

@@ -41,9 +41,9 @@ export const SOLWIND = {
   liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [188, -98], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
-  narrowK: 0.95, // phone: a lighter tighten, the debris cloud at its widest stays inside the frame
+  narrowK: 1.08, // compact views leave a margin around the late debris cloud
   narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
-  phoneOff: { 'ASM-135': [70, -84] },
+  phoneOff: { 'ASM-135': [70, -84], 'F-15': [128, -55] },
   actors: [
     {
       type: 'aircraft',
@@ -68,8 +68,8 @@ export const SOLWIND = {
       label: 'Solwind P78-1',
       color: C.tgt,
       big: 5,
-      minPx: IS_PHONE ? 40 : 56,
-      maxPx: IS_PHONE ? 60 : 96, // the satellite reads at t=0.2, before the intercept
+      minPx: IS_PHONE ? 50 : 68,
+      maxPx: IS_PHONE ? 72 : 108, // readable before the intercept, while remaining clear of the aircraft
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
@@ -80,8 +80,44 @@ export const SOLWIND = {
       endFrom: 0.84,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
-    { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', thick: 0.0065, rocket: { minPx: 62, maxPx: 78 }, strong: true, flash: 0.4, flashSpan: 0.22, flashCap: 0.9, coreK: 0.5, linger: 0.3, lingerK: 0.5, lingerEnd: 0.93, retire: 0.06 },
-    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, hideEmpty: true, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6', palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] }, darkHalo: 0.8, size: 0.06, minPx: 4, maxPx: 10, additive: false, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
+    {
+      type: 'intercept',
+      from: 'aircraft',
+      t0: 0.24,
+      color: C.int,
+      label: 'ASM-135',
+      thick: 0.0065,
+      rocket: { minPx: 62, maxPx: 78 },
+      strong: true,
+      flash: 0.4,
+      flashSpan: 0.22,
+      flashCap: 0.9,
+      coreK: 0.5,
+      linger: 0.3,
+      lingerK: 0.5,
+      lingerEnd: 0.93,
+      retire: 0.06,
+    },
+    {
+      type: 'debris',
+      count: 285,
+      spreadAlt: 150,
+      spreadInc: 2.6,
+      spreadRaan: 1.8,
+      dv: 0.6,
+      hideEmpty: true,
+      decay: 0.9,
+      decayWin: [0.7, 0.84],
+      color: '#ffd2a6',
+      palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] },
+      darkHalo: 0.8,
+      size: 0.06,
+      minPx: 4,
+      maxPx: 10,
+      additive: false,
+      trail: { n: 5, dt: 0.012, k: 0.6 },
+      lateGlow: true,
+    },
   ],
   still: 0.45,
   status: [
