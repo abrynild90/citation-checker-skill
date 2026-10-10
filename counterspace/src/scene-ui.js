@@ -663,6 +663,10 @@ function markStep(k) {
     if (i === k) b.setAttribute('aria-current', 'step');
     else b.removeAttribute('aria-current');
   });
+  // the active row is set in a heavier weight and may wrap differently: the clip that cuts the window at its last whole row is measured again
+  // for the new active row now, after the row has taken its new height, and once the list has come to rest
+  trimSteps();
+  requestAnimationFrame(() => (trimSteps(), requestAnimationFrame(trimSteps)));
 }
 function syncSteps(t) {
   if (!steps.length || stillOnly) return;
