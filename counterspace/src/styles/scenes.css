@@ -2454,6 +2454,7 @@
   .overlay .story-scroll:not(.expanded) > .scene-episodes { order:1; }
   .overlay .story-scroll:not(.expanded) > .sv-steps { order:2; }
   .overlay .story-scroll:not(.expanded) > .sv-more { order:3; margin-top:8px; }
+  .overlay .story-scroll:not(.expanded)::after { order:5; }
   .overlay .story-scroll:not(.expanded) > .sv-about,
   .overlay .story-scroll:not(.expanded) > .sv-pbody,
   .overlay .story-scroll:not(.expanded) > .story-foot { order:4; }

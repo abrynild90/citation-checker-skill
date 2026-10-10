@@ -43,7 +43,7 @@ export const SOLWIND = {
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
   narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
-  phoneOff: { 'ASM-135': [70, -84] },
+  phoneOff: { 'ASM-135': [70, -84], 'F-15': [128, -55] },
   actors: [
     {
       type: 'aircraft',
