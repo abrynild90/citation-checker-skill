@@ -71,6 +71,7 @@ try {
     await findA.locator('summary').click();
     await page.evaluate(() => window.__cs.showTab('chartB'));
     await page.locator('#chartB .record-find > summary').click();
+    assert.equal(await page.evaluate(() => document.querySelector('#chartB .record-find').getBoundingClientRect().top < document.getElementById('svgB').getBoundingClientRect().top), true);
     assert.equal(await page.locator('#stateAssessment option').count(), 14);
     await page.locator('#stateAssessment').selectOption('Russia');
     assert.match(await page.locator('#chartB .record-result').innerText(), /Direct-ascent weapons\s+Demonstrated/);
