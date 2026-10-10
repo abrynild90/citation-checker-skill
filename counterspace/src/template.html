@@ -71,7 +71,6 @@
           <button class="btn small" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
             href="#i-replay"/></svg><span>Replay</span></button>
         </figcaption>
-        <div class="hero-glance" id="heroGlance" hidden></div>
         <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Reload the page to try again.<button class="btn small" type="button" onclick="location.reload()"><svg
           class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Reload</button></p>
         <div class="sr" id="heroAlt"></div>
@@ -144,6 +143,7 @@
       <p data-avoid class="takeaway" id="tkLaw"></p>
       <label class="law-choose">Find a law or policy <select id="legalChoose"><option value="">Choose one of the 19 items…</option></select></label>
       <div id="legalChoice" class="law-choice" hidden></div>
+      <ul class="legend legal-quick-key" id="legalQuickKey" aria-label="Main timeline symbols"></ul>
       <div class="law-row">
       <details class="about keybox" id="keyLegal"><summary>How to read this chart</summary>
         <ul data-avoid class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul>
@@ -191,7 +191,7 @@
         <p data-avoid class="takeaway" id="tkA"></p>
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
       </header>
-      <p class="chart-key-inline">Point = one test · Bubble = catalogued debris · Dashed ring = reported maximum height · Cube = 3D scene. Select a point for its source.</p>
+      <p class="chart-key-inline">Point = one test · Bubble = catalogued debris · Dashed ring = reported maximum height · Play symbol = scene. Select a point for its source.</p>
       <div class="yr-bar" id="yrBar" role="group" aria-labelledby="yrTitle">
         <button class="yr-play" id="yrPlay" type="button" aria-label="Play from 1957" title="Play from 1957"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
         <div class="yr-line">

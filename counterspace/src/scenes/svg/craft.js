@@ -114,15 +114,9 @@ export function drawCraft(g, shape, x, y, s, color, o = {}) {
         .attr('stroke', INK)
         .attr('stroke-width', hair);
       if (o.variant === 'tug') {
-        // SJ-21: three thruster bells aft, radiator strips on the bus sides, and a two-segment grapple boom with a small jaw (as in the live model)
+        // SJ-21: three thruster bells aft, radiator strips on the bus sides, with no speculative docking hardware
         solid('M-9,19 L-6.5,29 L-11.5,29Z M9,19 L11.5,29 L6.5,29Z M-2.8,19 L-4,30 L4,30 L2.8,19Z', '#4b546d');
         for (const sg of [-1, 1]) rect(sg * bw - 1.6, -bh + 4, 3.2, bh * 2 - 8, WHITE);
-        const arm = 'M-9,-19 L-20,-36 L-40,-30';
-        stroke(arm, INK, 5.4 + 2 * hair);
-        stroke(arm, METAL, 3);
-        k.append('circle').attr('cx', -20).attr('cy', -36).attr('r', 2.8).attr('fill', '#4b546d').attr('stroke', INK).attr('stroke-width', hair);
-        stroke('M-40,-30 L-46,-34 M-40,-30 L-46,-25', INK, 3.4);
-        stroke('M-40,-30 L-46,-34 M-40,-30 L-46,-25', METAL, 1.6);
       } else if (o.variant === 'navsat') {
         // Compass G2: the Earth-facing phased array on the bus, a whip antenna and the apogee-motor bell
         rect(-10, -13, 20, 17, '#27324f');

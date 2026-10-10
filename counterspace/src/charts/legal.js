@@ -3,7 +3,7 @@
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { D, DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { D, DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, SCENE_BADGE_MARKUP, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
 import { activate, addGuide, bindMark, legalCard, legalKindOf, legalKindWords, legend, rove, setGuide, table } from '../ui.js';
 import { hooks } from '../shared.js';
 
@@ -1175,6 +1175,12 @@ export function drawLegalKey() {
       });
     });
   }
+  const quick = legend('legalQuickKey', 18, 16);
+  quick.item(glyphMarkup('treaty'), 'Treaty');
+  quick.item(glyphMarkup('resolution'), 'Resolution or finding (not binding)');
+  quick.item(glyphMarkup('soft'), 'Expert manual (not binding)');
+  quick.item(SCENE_BADGE_MARKUP, 'Scene');
+  quick.done();
   const K = legend('legendLegal', 22, 18),
     li = K.item;
   li(glyphMarkup('treaty'), 'Treaty');
@@ -1185,8 +1191,8 @@ export function drawLegalKey() {
   li(glyphMarkup('veto'), 'Veto in the UN Security Council');
   li(`<rect x="-9" y="-3.5" width="18" height="7" rx="3.5" style="${BAR_STYLE}"/>`, 'Years of negotiation');
   li(
-    '<g class="badge3d"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>',
-    'Select a cube icon to open a 3D explainer',
+    SCENE_BADGE_MARKUP,
+    'Select a play symbol to open a scene',
   );
   K.done();
   // The key is folded at every width; its summary opens it.

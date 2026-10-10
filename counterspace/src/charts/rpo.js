@@ -4,7 +4,7 @@
 // Provides: drawR(), stateR, zoomedR(), R_SHAPE_KEY, R_STYLE_KEY, R_VERT_NOTE.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { CO, DOMAIN, esc, EXPORTING, chartWindow, PHONE_MAX, actorKey, badge, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
+import { CO, DOMAIN, esc, EXPORTING, chartWindow, PHONE_MAX, actorKey, badge, SCENE_BADGE_MARKUP, colorOf, hasScene, isPhoneNow, layout, parse, tw, xAxis } from '../app.js';
 import { ACTIVITY_LABEL, ACTIVITY_SHORT, ORBIT_LABEL, SURE_LABEL, SURE_WORD, datePrecise, plain } from '../cards2.js';
 import { activate, addGuide, bindMark, coCard, coWhen, rove, srcCell, table } from '../ui.js';
 import { arrowPath, barPath, circlePath, diamondPath, glyph, keyMarkup, roundRectPath, setKey, trianglePath, wrapLines, TOP_AXIS_H, topAxis } from './kit.js';
@@ -578,7 +578,7 @@ export function drawR(el = document.getElementById('svgR')) {
   document.getElementById('rFocus').setAttribute('aria-pressed', zoomed);
   document.getElementById('rFull').setAttribute('aria-pressed', !zoomed);
   const cube =
-    '<g class="badge3d" transform="scale(1.15)"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>';
+    SCENE_BADGE_MARKUP;
   const ink = (s) => s.replaceAll(INK, 'var(--muted)').replace(/;stroke:var\(--muted\);stroke-width:1\.5/, ';stroke:var(--muted);stroke-width:1.5');
   setKey(
     'legendR',

@@ -2,12 +2,9 @@
 import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C, PK } from './shared.js';
 
-// SJ-21 presets that show the pair carry this note: SWF says SJ-21 "docked" with Compass G2 but does not describe any arm or grapple, so the boom drawn
-// on the tug model is a generic, illustrative one.
-const ARM_TAG = { tag: 'Arm drawn for illustration (SWF does not describe it)', tagShort: 'Arm drawn for illustration (not in SWF)' };
-
 export const SJ21_TUG = {
   id: 'sj21-tug',
+  explanationAlt: 'Before towing, defunct Compass G2 occupied the working geostationary belt. SJ-21 docked with it by an undescribed method and towed both objects above that belt. The before-and-after diagram is schematic; no docking hardware or exact trajectory is shown.',
   date: '2022-01-21',
   title: 'China’s SJ-21 tows a dead satellite into a higher orbit (2022)',
   shells: [],
@@ -17,11 +14,10 @@ export const SJ21_TUG = {
     'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
     'The Secure World Foundation (SWF), a space-security nonprofit, reports that SJ-21 “docked to it at some point”. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the GEO belt, the band of orbits where working satellites sit, then came back down close to GEO. ' +
     'SWF’s table says SJ-21 pulled Compass G2 well past the graveyard orbit, the disposal region above GEO for retired satellites. ' +
-    'SWF does not say how SJ-21 captured or docked with it, so the grabbing arm drawn on SJ-21 is for illustration only. SWF does report robotic-arm demonstrations on other Chinese satellites: SY-7 (2013) and Aolong-1 (2016). ' +
+    'SWF does not say how SJ-21 captured or docked with it. The spacecraft shapes, spacing and motion are illustrative. ' +
     'No legal item in our records is tied to this event.',
   cite:
-    'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15; robotic arms on other satellites: SY-7, p. 03-02; ' +
-    'Aolong-1, p. 03-04; SJ-17, p. 03-08.',
+    'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15.',
   related: null,
   event: 'cn-2022-sj21-compass-g2',
   inset: 'Top view',
@@ -189,7 +185,6 @@ export const SJ21_TUG = {
   cameras: [
     {
       name: 'Follow the pair',
-      ...ARM_TAG,
       fitCraft: {
         anchor: 'g',
         ids: ['sj21', 'cg2'],
@@ -224,20 +219,17 @@ export const SJ21_TUG = {
     {
       name: 'Approach and docking, from the side',
       short: 'Approach and docking',
-      ...ARM_TAG,
       fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.95, 0.15, 0.3], fill: 0.62, dMin: 0.35, t: 0.3 },
     },
     {
       name: 'The pull: the pair rises above the belt',
       short: 'The pull',
-      ...ARM_TAG,
-      frame: { anchor: 'g', from: [0.1, 0.26, 1.05], to: [0.08, 0.26, 0], t: 0.6 },
-      phone: { frame: { anchor: 'g', from: [0.1, 0.14, 1.05], to: [0.08, 0.14, 0], t: 0.6 } },
+      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [0.1, 0.26, 1.05], fill: 0.78, lookCraft: true, include: [[0, -0.3, 0]] },
+      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [0.1, 0.26, 1.05], fill: 0.65, lookCraft: true, include: [[0, -0.14, 0]] } },
     },
     {
       name: 'Looking down at the pair, Earth below',
       short: 'Looking down',
-      ...ARM_TAG,
       fitCraft: {
         anchor: 'g',
         ids: ['sj21', 'cg2'],

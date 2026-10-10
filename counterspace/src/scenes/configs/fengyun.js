@@ -7,7 +7,7 @@ export const FENGYUN = {
   fitPct: IS_PHONE ? 0.8 : 0.94,
   date: '2007-01-11',
   title: 'Fengyun-1C: China destroys a weather satellite (2007)',
-  shells: ['LEO'],
+  shells: [], // the debris ring is the subject; a second orbit-zone ellipse obscures its shape
   duration: 16,
   lede: 'On 11 January 2007 China fired a ground-launched anti-satellite missile and destroyed Fengyun-1C, a Chinese weather satellite, about 880 km above the Earth. At that height, fragments stay in orbit for decades and spread into a ring around the planet.',
   caption:
@@ -28,7 +28,10 @@ export const FENGYUN = {
   event: 'cn-2007-fy1c',
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
   launchCam: 'second',
-  orbitAt: [26, 74, 4.6],
+  fitLateView: [24, 35], // turn smoothly toward an oblique ring view after the cloud spreads
+  fitLateViewFrom: 0.5,
+  staticCenter: [24, 35], // oblique to the near-polar orbit: a ring, rather than an edge-on plume
+  orbitAt: [24, 35, 4.6],
   fitMinKeys: IS_PHONE ? [1.9, 0] : [2.05, 2.2], // the first key frames the Xichang to satellite arc close, so the interceptor and the satellite read as craft
   lookK: IS_PHONE ? 0.8 : 0.84, // the Earth stays whole and centred in the first frames (phone: it was cropped at the left)
   latePct: IS_PHONE ? 0.8 : 0.62, // the ring steps frame the bulk of the cloud, so the Earth fills more of the frame
@@ -37,6 +40,7 @@ export const FENGYUN = {
   narrowK: 1, // phone: the fitted dolly already frames the debris; a further tighten cut it at the frame edge
   fitFill: IS_PHONE ? 0.88 : 0.78, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
   liveOff: { 'Fengyun-1C': [0, -70], Xichang: [-60, 34], 'Debris ring': [120, 18], 'SC-19': [-140, -34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
+  camOff: { 1: { 'Debris ring': [90, 0] }, 3: { 'Debris ring': [90, 0] } },
   offFrom: { 'Fengyun-1C': 0.18 }, // 375: before the launch the placer's own slot is clear; from here the pill hangs below-right of the satellite
   phoneOff: { 'Fengyun-1C': [18, 52], Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
   sunView: { az: 60, el: 14 }, // a lower, more sideways sun: a clear terminator and a shaded limb, not a flat disc
