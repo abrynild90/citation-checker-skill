@@ -57,6 +57,11 @@ try {
     assert.equal(await page.locator('#scPlay').getAttribute('aria-label'), 'Replay');
     await page.waitForTimeout(200);
     assert.equal(await page.evaluate(() => window.__cs.host().t), 1);
+    await page.locator('#scScrub').focus(); await page.keyboard.press('Home');
+    assert.equal(await page.locator('#scPlay').getAttribute('aria-label'), 'Play');
+    await page.evaluate(() => window.__cs.host().update(.998));
+    await page.locator('#scPlay').click();
+    await page.waitForFunction(() => window.__cs.host()._ended);
     await page.locator('#scPlay').click();
     assert.equal(await page.evaluate(() => window.__cs.host().playing && window.__cs.host().t < .2), true);
     await page.locator('#scClose').click();

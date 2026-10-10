@@ -30,7 +30,12 @@ async function getHost() {
   try {
     if (!host) {
       host = new GLHost(THREE);
-      host.onPlaybackChange = (on) => { if (cur && host.el === view) setPlayBtn(on); };
+      host.onPlaybackChange = (on) => {
+        if (cur && host.el === view) {
+          setPlayBtn(on);
+          if (!on && host._ended) setStatus('Finished. Replay starts this event again.');
+        }
+      };
       host.onInteraction = () => {
         if (!cur) return;
         if (tour) { clearTimeout(tour.timer); tour.timer = 0; }
@@ -68,7 +73,9 @@ async function getHost() {
             hi = epi.a1 - (epi.last ? 0 : 0.001);
           if (!(t >= epi.a0 - 1e-6 && t <= hi)) t = lo + Math.max(0, Math.min(1, t)) * (hi - lo);
         }
+        const wasEnded = host._ended;
         upd(t);
+        if (wasEnded) setPlayBtn(host.playing);
         syncScrub(host.t);
       };
       host.pickCam = (i) => {
@@ -1139,7 +1146,7 @@ $('scRetry').onclick = () => {
 };
 scrub.oninput = () => {
   if (host && cur && !stillOnly) {
-    host.playing = false;
+    host.interrupt();
     setPlayBtn(false);
     host.update(epi ? epi.a0 + 0.001 + (scrub.value / 1000) * (epi.a1 - (epi.last ? 0 : 0.001) - epi.a0 - 0.001) : scrub.value / 1000);
   }
@@ -1148,10 +1155,10 @@ scrub.oninput = () => {
 function setPlayBtn(on) {
   if (!on && tour) { clearTimeout(tour.timer); tour.timer = 0; }
   playBtn.classList.toggle('playing', !!on);
-  const action = on ? 'Pause' : host?._ended ? 'Replay' : 'Play';
+  const action = on ? 'Pause' : (host?._ended || host?.t >= 1) ? 'Replay' : 'Play';
   playBtn.setAttribute('aria-label', action);
   playBtn.title = `${action} (Space)`;
-  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : host?._ended ? '#i-replay' : '#i-play');
+  playBtn.querySelector('use').setAttribute('href', on ? '#i-pause' : (host?._ended || host?.t >= 1) ? '#i-replay' : '#i-play');
   playBtn.disabled = false;
 }
 function togglePlay() {
@@ -1464,7 +1471,7 @@ function seek(e) {
   e.preventDefault();
   const a0 = epi ? epi.a0 + 0.001 : 0,
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1;
-  host.playing = false;
+  host.interrupt();
   setPlayBtn(false);
   host.update(Math.max(a0, Math.min(a1, host.t + ((e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 5 : 1)) / dur)));
 }
