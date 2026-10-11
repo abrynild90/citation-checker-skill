@@ -4,6 +4,8 @@ import { IS_PHONE } from '../core.js';
 
 export const BURNT_FROST = {
   id: 'burnt-frost',
+  explanationAlt:
+    'Sequence of the Burnt Frost interception: collision at about 220 km, spreading fragments, and a later count of none remaining from 175 tracked fragments. They fell out of orbit in about 20 months. Symbols and timing are illustrative.',
   noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   date: '2008-02-20',
   title: 'Burnt Frost: the US destroys a failing satellite (2008)',
@@ -36,7 +38,15 @@ export const BURNT_FROST = {
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.62, 0.78], // desktop: the first two key frames sit tight on the ship and the satellite, the second tighter, so the camera is already pushing in from the first second
   burstPadFrom: IS_PHONE ? undefined : 0.3, // desktop: the early keys are fitted to the craft alone (the burst ring is not in frame yet)
   fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
-  hit: { lat: 29.0, lon: -173.0, alt: 220, inc: 58.5, t: 0.42, wa: 0.15, wf: 0.5 },
+  hit: {
+    lat: 29.0,
+    lon: -173.0,
+    alt: 220,
+    inc: 58.5,
+    t: 0.42,
+    wa: 0.15,
+    wf: 0.5,
+  },
   actors: [
     {
       type: 'ship',
@@ -62,6 +72,7 @@ export const BURNT_FROST = {
       impactDy: -30,
       tickUntil: 0.95,
       bright: true,
+      fallUntil: 0.87,
       fall: [
         { k: 1.5, di: 0.2, dr: 0.01, dw: 0.9 },
         { k: 1.25, di: -0.3, dr: -0.012, dw: 1.05 },
@@ -78,13 +89,13 @@ export const BURNT_FROST = {
       label: 'SM-3 interceptor',
       short: 'SM-3',
       rocket: { style: 'slim', minPx: 46, maxPx: 72, glowMin: 24, glowMax: 40 },
-      flash: 0.4,
+      flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,
       strong: true,
       retire: 0.14,
       hold: -0.14,
-      flashSpan: 0.16,
+      flashSpan: 0.12,
       linger: 0.2,
       lingerK: 0.5,
       lingerEnd: 0.6,
@@ -98,12 +109,18 @@ export const BURNT_FROST = {
       dv: 0.85,
       drift: 0.9,
       decay: 2.2,
+      decayWin: [0.62, 0.87],
+      hideEmpty: true,
       color: '#ffb066',
-      palette: { hot: [1, 0.86, 0.55], mid: [1, 0.6, 0.25], cool: [1, 0.5, 0.22] },
+      palette: {
+        hot: [1, 0.86, 0.55],
+        mid: [1, 0.6, 0.25],
+        cool: [1, 0.5, 0.22],
+      },
       hard: true,
-      size: 0.06,
+      size: 0.036,
       minPx: 2.5,
-      maxPx: 6,
+      maxPx: 5,
       additive: false,
       lateGlow: true,
     }, // warm orange fragments, uneven in size and spread: no lattice, separate from the blue ocean
@@ -112,7 +129,9 @@ export const BURNT_FROST = {
   status: [
     [0, 'Interceptor rises toward the satellite'],
     [0.25, 'Interceptor closes on the satellite', 'Interceptor closing in'],
-    [0.44, 'Collision at about 220 km; fragments fall back quickly', 'Collision at about 220 km'],
-    [0.6, 'Fast-forward: all out of orbit after about 20 months (SWF)', 'SWF: about 20 months to come down'],
+    [0.44, 'Collision at about 220 km', 'Collision at about 220 km'],
+    [0.54, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],
+    [0.65, 'Time passes: debris falls back into the atmosphere', 'Time passes: debris falls back'],
+    [0.9, 'SWF: 0 of 175 tracked fragments remain; all fell out of orbit in about 20 months', 'Later count: 0 of 175 remain (SWF)'],
   ],
 };

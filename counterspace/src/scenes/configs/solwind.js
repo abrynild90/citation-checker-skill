@@ -4,6 +4,8 @@ import { IS_PHONE } from '../core.js';
 
 export const SOLWIND = {
   id: 'solwind',
+  explanationAlt:
+    'Sequence of the Solwind interception: collision at about 530 km, spreading fragments, and a later Secure World Foundation count of none remaining from 285 tracked fragments. Symbols and timing are illustrative.',
   noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   fitPct: 0.99,
   date: '1985-09-13',
@@ -42,8 +44,21 @@ export const SOLWIND = {
   sunView: IS_PHONE ? undefined : { az: -45, el: 22 }, // desktop: the Pacific coast and the Earth under the pair are in daylight, not a dull night side
   lightsK: 0.5, // softer city lights: the break-up pieces and the missile stay readable over the coast
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
-  hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.45, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [188, -98], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  hit: {
+    lat: 37.5,
+    lon: -135.0,
+    alt: 530,
+    inc: 97.6,
+    t: 0.5,
+    wa: 0.45,
+    wf: 0.5,
+  },
+  liveOff: {
+    'ASM-135': [-80, -62],
+    'F-15': [150, -100],
+    Impact: [188, -98],
+    Solwind: [178, -24],
+  }, // the missile's pill sits above the F-15 with a leader down to the arc
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
@@ -80,10 +95,10 @@ export const SOLWIND = {
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
       impactDy: IS_PHONE ? -81 : undefined,
-      tickUntil: 0.84, // the tick retires with the last fragment
+      tickUntil: 0.88, // the tick retires with the last fragment
       endLabel: 'Impact point: 0 of 285 in orbit',
       endShort: '0 of 285 in orbit',
-      endFrom: 0.84,
+      endFrom: 0.88,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
     {
@@ -95,17 +110,19 @@ export const SOLWIND = {
       thick: 0.0065,
       rocket: { minPx: 62, maxPx: 78 },
       strong: true,
-      flash: 0.4,
-      flashSpan: 0.22,
+      flash: 0.24,
+      flashSpan: 0.14,
       flashCap: 0.9,
       coreK: 0.5,
       linger: 0.3,
       lingerK: 0.5,
-      lingerEnd: 0.93,
+      lingerEnd: 0.72,
       retire: 0.06,
     },
     {
       type: 'debris',
+      label: 'Fragments',
+      dx: 50, dy: -30,
       count: 285,
       spreadAlt: 150,
       spreadInc: 2.6,
@@ -113,15 +130,15 @@ export const SOLWIND = {
       dv: 0.6,
       hideEmpty: true,
       decay: 0.9,
-      decayWin: [0.7, 0.84],
+      decayWin: [0.7, 0.87],
       color: '#ffd2a6',
       palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] },
       darkHalo: 0.8,
-      size: 0.06,
-      minPx: 4,
-      maxPx: 10,
+      hard: true,
+      size: 0.036,
+      minPx: 2.5,
+      maxPx: 5,
       additive: false,
-      trail: { n: 5, dt: 0.012, k: 0.6 },
       lateGlow: true,
     },
   ],
@@ -129,7 +146,9 @@ export const SOLWIND = {
   status: [
     [0, 'F-15 in a steep, supersonic climb'],
     [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
-    [0.52, 'Collision at about 530 km; fragments spread, then fall out of orbit', 'Collision at about 530 km'],
-    [0.75, 'Fast-forward: fragments decay; SWF counts all 285 out of orbit', 'Decay: all 285 out (SWF)'],
+    [0.52, 'Collision at about 530 km', 'Collision at about 530 km'],
+    [0.62, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],
+    [0.75, 'Time passes: fragments fall out of orbit', 'Time passes: fragments fall out of orbit'],
+    [0.88, 'SWF, 2026: 0 of 285 tracked fragments remain in orbit', 'Later count: 0 of 285 remain (SWF)'],
   ],
 };

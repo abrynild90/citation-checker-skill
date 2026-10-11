@@ -153,7 +153,7 @@ if (MODES.includes('live'))
               h._lm = {};
               h.pickCam(ci);
               h.interrupt(); // stop automatic motion before measuring a requested preset
-              h.setCam(ci, true); // measure its final pose, rather than the cancelled transition
+              h.setCam(h.sim.cams[ci].auto ? h.camIdx : ci, true); // keep the episode camera chosen by an automatic view
               h.update(t);
               h.update(t);
             },
@@ -187,7 +187,7 @@ if (MODES.includes('live'))
               h._lm = {};
               h.pickCam(ci);
               h.interrupt(); // stop automatic motion before measuring a requested preset
-              h.setCam(ci, true); // measure its final pose, rather than the cancelled transition
+              h.setCam(h.sim.cams[ci].auto ? h.camIdx : ci, true); // keep the episode camera chosen by an automatic view
               h.update(t);
               h.update(t);
             },

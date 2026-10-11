@@ -4,6 +4,7 @@ import { SANS } from '../../fonts.js';
 import { drawCraft } from './craft.js';
 import { fontFaceCSS, rememberSim } from './still-frame.js';
 import { textW } from './pill.js';
+import { drawRelationship, RELATIONSHIP_IDS } from './relationships.js';
 
 const INK = '#eef2fb',
   MUTED = '#b5c1d8',
@@ -11,7 +12,7 @@ const INK = '#eef2fb',
   GOLD = '#f4cb79',
   RED = '#ff9a91',
   PURPLE = '#cfb7ff';
-const IDS = new Set(['sj21-tug', 'starfish', 'viasat', 'laser']);
+const IDS = new Set(['sj21-tug', 'starfish', 'viasat', 'laser', ...RELATIONSHIP_IDS]);
 
 export function renderExplanation(sim, el, opts = {}) {
   if (!IDS.has(sim.cfg.id) || opts.panel) return null;
@@ -24,9 +25,11 @@ export function renderExplanation(sim, el, opts = {}) {
   const top = opts.print ? 18 : Math.max(phone ? 62 : 54, (banner?.offsetHeight || 24) + 24);
   const bottom = H - 16,
     body = bottom - top - (phone ? 42 : 0);
-  const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', sim.cfg.explanationAlt).style('background', '#070b16');
+  const episode = Math.max(0, sim.cfg.acts?.findIndex((a, i) => (opts.t ?? sim.still) >= a.t0 && ((opts.t ?? sim.still) < a.t1 || i === sim.cfg.acts.length - 1)) ?? 0);
+  const alt = sim.cfg.explanationAlts?.[episode] || sim.cfg.explanationAlt;
+  const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', alt).style('background', '#070b16');
   svg.append('title').text(sim.cfg.title);
-  svg.append('desc').text(sim.cfg.explanationAlt);
+  svg.append('desc').text(alt);
   const defs = svg.append('defs');
   if (opts.print) defs.append('style').text(fontFaceCSS());
   svg.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b16');
@@ -47,6 +50,7 @@ export function renderExplanation(sim, el, opts = {}) {
       .attr('fill', color)
       .attr('font-size', size)
       .attr('font-weight', weight)
+      .style('font-family', SANS)
       .text(str);
     // Measured text boxes form the collision probe; these are diagram labels, not estimated widths.
     const w = textW(str, size, weight),
@@ -103,7 +107,28 @@ export function renderExplanation(sim, el, opts = {}) {
     return h;
   };
 
-  if (sim.cfg.id === 'sj21-tug') {
+  if (RELATIONSHIP_IDS.includes(sim.cfg.id)) {
+    drawRelationship({
+      sim,
+      t: opts.t ?? sim.still,
+      W,
+      H,
+      phone,
+      fs,
+      pad,
+      top,
+      bottom,
+      body,
+      g,
+      text,
+      wrap,
+      line,
+      path,
+      circle,
+      arrow,
+      craft,
+    });
+  } else if (sim.cfg.id === 'sj21-tug') {
     const gap = phone ? 20 : 42,
       pw = (W - 2 * pad - gap) / 2;
     const yGEO = top + body * 0.68,
@@ -226,6 +251,8 @@ export function renderExplanation(sim, el, opts = {}) {
     },
   };
   svg.node().dataset.explanation = sim.cfg.id;
+  svg.node().dataset.time = String(opts.t ?? sim.still);
+  if (sim.cfg.explanationByStep) svg.node().dataset.episode = String(episode);
   rememberSim(svg.node(), sim);
   el.querySelector(':scope > svg')?.remove();
   el.prepend(svg.node());

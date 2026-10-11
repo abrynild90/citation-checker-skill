@@ -10,7 +10,10 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
   const A = cfg.acts || null;
   const f = focus || [20, 0];
   const dist = (cfg.camDist || 4.2) * (IS_PHONE ? (cfg.phoneK ?? 1) : 1);
-  const wide = { name: 'Whole scene', pos: ll(cfg.wideLat != null && !IS_PHONE ? cfg.wideLat : f[0] * 0.6 + 10, f[1] - 25, dist) },
+  const wide = {
+      name: 'Whole scene',
+      pos: ll(cfg.wideLat != null && !IS_PHONE ? cfg.wideLat : f[0] * 0.6 + 10, f[1] - 25, dist),
+    },
     polar = { name: 'From the pole', pos: ll(80, f[1], dist * 1.05) };
   let cams;
   // Frame camera: position and target given in an anchor's local frame [along, radial, cross-track] in Earth radii. `follow: true` re-solves it at every t,
@@ -20,9 +23,17 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       p = an.pos(t),
       f = an.frame(t),
       o = (v) => add(add(add(p, scl(f.along, v[0])), scl(f.rad, v[1])), scl(f.cross, v[2]));
-    return { pos: o(fr.from), look: o(fr.to), up: fr.up === false ? null : f.rad };
+    return {
+      pos: o(fr.from),
+      look: o(fr.to),
+      up: fr.up === false ? null : f.rad,
+    };
   };
-  const frameCam = (fr) => ({ ...frameAt(fr, fr.t), hideShell: true, follow: fr.follow ? (t) => frameAt(fr, t) : null });
+  const frameCam = (fr) => ({
+    ...frameAt(fr, fr.t),
+    hideShell: true,
+    follow: fr.follow ? (t) => frameAt(fr, t) : null,
+  });
   // Dolly camera for the hit scenes: at a few key times the camera is fitted to everything that matters then (launch site, target, hit point, the
   // bulk of the debris) so the action fills the frame; between keys it glides, so it pulls back as the debris spreads.
   const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -152,7 +163,11 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       const s = smooth((t - keys[i]) / (keys[i + 1] - keys[i])),
         a = poses[i],
         b = poses[i + 1];
-      return { pos: add(scl(a.pos, 1 - s), scl(b.pos, s)), look: add(scl(a.look, 1 - s), scl(b.look, s)), up: null };
+      return {
+        pos: add(scl(a.pos, 1 - s), scl(b.pos, s)),
+        look: add(scl(a.look, 1 - s), scl(b.look, s)),
+        up: null,
+      };
     };
     return { name: 'Follow the action', follow: at, ...at(0), hideShell: true };
   };
@@ -171,11 +186,24 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               P = [site, q],
               look = scl(add(scl(site, 0.5), scl(q, 0.5)), 0.97);
             return {
-              ...fitPose(P, n, look, { dMin: 0.3, dMax: c.fit.dMax ?? 6, fillX: c.fit.fill ?? 0.86, fillY: (c.fit.fill ?? 0.86) * 0.8, asp }),
+              ...fitPose(P, n, look, {
+                dMin: 0.3,
+                dMax: c.fit.dMax ?? 6,
+                fillX: c.fit.fill ?? 0.86,
+                fillY: (c.fit.fill ?? 0.86) * 0.8,
+                asp,
+              }),
               up: null,
             };
           };
-        return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(tgt.t), hideShell: true };
+        return {
+          name: c.name,
+          auto: false,
+          ref: c.ref,
+          follow: at,
+          ...at(tgt.t),
+          hideShell: true,
+        };
       }
       if (c.fitPts) {
         // Static camera fitted once to a list of [lat, lon, r] points, seen from the direction dir = [lat, lon].
@@ -183,11 +211,25 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           n = norm(ll(c.fitPts.dir[0], c.fitPts.dir[1])),
           look = scl(centroid(P), c.fitPts.lookK ?? 1),
           at = (t, asp) => ({
-            ...fitPose(P, n, look, { dMin: 1, dMax: 12, fillX: c.fitPts.fill ?? 0.86, fillY: (c.fitPts.fillY ?? c.fitPts.fill ?? 0.86) * 0.8, asp }),
+            ...fitPose(P, n, look, {
+              dMin: 1,
+              dMax: 12,
+              fillX: c.fitPts.fill ?? 0.86,
+              fillY: (c.fitPts.fillY ?? c.fitPts.fill ?? 0.86) * 0.8,
+              asp,
+            }),
             up: null,
           }),
           v = at(0);
-        return { name: c.name, auto: false, ref: c.ref, pos: v.pos, look: v.look, follow: at, hideShell: true };
+        return {
+          name: c.name,
+          auto: false,
+          ref: c.ref,
+          pos: v.pos,
+          look: v.look,
+          follow: at,
+          hideShell: true,
+        };
       }
       if (c.trackPath) {
         // Camera that follows a suborbital path: fitted at every t to the launch site, the head of the path and (later) the GEO ring above the apogee.
@@ -213,7 +255,13 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               P.push(all[all.length >> 1]);
             }
             const look = scl(centroid(P.concat([[0, 0, 0]])), c.trackPath.lookK ?? 1); // lookK < 1 pulls the view toward the Earth's centre
-            const q = fitPose(P, n, look, { dMin: 1.2, dMax: 12, fillX: c.trackPath.fill ?? 0.8, fillY: (c.trackPath.fill ?? 0.8) * 0.8, asp });
+            const q = fitPose(P, n, look, {
+              dMin: 1.2,
+              dMax: 12,
+              fillX: c.trackPath.fill ?? 0.8,
+              fillY: (c.trackPath.fill ?? 0.8) * 0.8,
+              asp,
+            });
             // trackPath.zoom: with the ring in frame, move in by that factor: the Earth gets larger and the far side of the ring is cropped on purpose
             if (ring && c.trackPath.zoom) q.pos = add(look, scl(add(q.pos, scl(look, -1)), 1 / c.trackPath.zoom));
             return { ...q, up: null };
@@ -225,9 +273,56 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             const w = smooth((t - (g0 - 0.1)) / 0.2),
               A = pose(t, asp, false, false),
               B = pose(t, asp, true, true);
-            return { pos: add(scl(A.pos, 1 - w), scl(B.pos, w)), look: add(scl(A.look, 1 - w), scl(B.look, w)), up: null };
+            return {
+              pos: add(scl(A.pos, 1 - w), scl(B.pos, w)),
+              look: add(scl(A.look, 1 - w), scl(B.look, w)),
+              up: null,
+            };
           };
-        return { name: c.name, auto: false, ref: c.ref, follow: at, ...at(0), hideShell: true, ringFrame: !!c.trackPath.ring };
+        return {
+          name: c.name,
+          auto: false,
+          ref: c.ref,
+          follow: at,
+          ...at(0),
+          hideShell: true,
+          ringFrame: !!c.trackPath.ring,
+        };
+      }
+      if (c.fitOrbit) {
+        // A stable overview fits the complete path and Earth at the actual stage aspect.
+        const P = c.fitOrbit.points,
+          normal = norm(cross3(P[0], P[Math.floor((P.length - 1) / 4)])),
+          up = norm(cross3(P[0], normal)),
+          globe = [
+            [1, 0, 0],
+            [-1, 0, 0],
+            [0, 1, 0],
+            [0, -1, 0],
+            [0, 0, 1],
+            [0, 0, -1],
+          ],
+          pts = P.concat(globe),
+          look = centroid(pts),
+          at = (_t, asp) => ({
+            ...fitPose(pts, normal, look, {
+              asp,
+              up,
+              dMax: 24,
+              fillX: c.fitOrbit.fill ?? 0.77,
+              fillY: 0.7,
+            }),
+            up,
+          });
+        return {
+          name: c.name,
+          auto: false,
+          act: c.act,
+          ref: c.ref,
+          follow: at,
+          ...at(0),
+          hideShell: true,
+        };
       }
       if (c.fitCraft) {
         // Tight follow camera on a set of craft: the view direction is given in the anchor's local frame [along, radial, cross-track] and stays fixed;
@@ -282,7 +377,11 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
                 D = Math.hypot(...add(pose.look, scl(pose.pos, -1))),
                 [tH, tV] = tanFor(asp ?? ASPECT),
                 sh = add(scl(r, 0.14 * tH * D), scl(u, 0.12 * tV * D));
-              return { pos: add(pose.pos, sh), look: add(pose.look, sh), up: f.rad };
+              return {
+                pos: add(pose.pos, sh),
+                look: add(pose.look, sh),
+                up: f.rad,
+              };
             }
             if (c.fitCraft.shiftR) {
               // shiftR: the picture slides right by this fraction of the half-width (the camera moves left), e.g. to clear labels at the left edge
@@ -290,13 +389,32 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
                 r = norm(cross3(fw, f.rad)),
                 D = Math.hypot(...add(pose.look, scl(pose.pos, -1))),
                 sh = scl(r, -c.fitCraft.shiftR * tanFor(asp ?? ASPECT)[0] * D);
-              return { pos: add(pose.pos, sh), look: add(pose.look, sh), up: f.rad };
+              return {
+                pos: add(pose.pos, sh),
+                look: add(pose.look, sh),
+                up: f.rad,
+              };
             }
             return { ...pose, up: f.rad };
           };
-        return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, follow: at, ...at(c.fitCraft.t ?? 0.5), hideShell: true };
+        return {
+          name: c.name,
+          auto: !!c.auto,
+          act: c.act,
+          ref: c.ref,
+          follow: at,
+          ...at(c.fitCraft.t ?? 0.5),
+          hideShell: true,
+        };
       }
-      if (c.frame) return { name: c.name, auto: !!c.auto, act: c.act, ref: c.ref, ...frameCam(c.frame) };
+      if (c.frame)
+        return {
+          name: c.name,
+          auto: !!c.auto,
+          act: c.act,
+          ref: c.ref,
+          ...frameCam(c.frame),
+        };
       // c.drift = [dLon of the camera, dLon of the target] in degrees over the whole timeline: a slow pan, so the view differs at every t
       const drifted = (t) => ({
         pos: ll(c.at[0], c.at[1] + c.drift[0] * (t - 0.5), c.at[2]),
@@ -311,9 +429,22 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             let i = 0;
             while (i < G.length - 2 && t > G[i + 1][0]) i++;
             const u = smooth(Math.max(0, Math.min(1, (t - G[i][0]) / (G[i + 1][0] - G[i][0]))));
-            return { pos: ll(...lerpV(G[i][1], G[i + 1][1], u)), look: ll(...lerpV(G[i][2], G[i + 1][2], u)), up: null };
+            return {
+              pos: ll(...lerpV(G[i][1], G[i + 1][1], u)),
+              look: ll(...lerpV(G[i][2], G[i + 1][2], u)),
+              up: null,
+            };
           };
-        return { name: c.name, auto: false, ref: c.ref, hide: c.hide, insetRef: c.insetRef, hideShell: true, follow: gl, ...gl(0) };
+        return {
+          name: c.name,
+          auto: false,
+          ref: c.ref,
+          hide: c.hide,
+          insetRef: c.insetRef,
+          hideShell: true,
+          follow: gl,
+          ...gl(0),
+        };
       }
       return {
         name: c.name,
@@ -329,7 +460,15 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         ...(c.drift ? { follow: drifted, ...drifted(0.5) } : {}),
       };
     });
-  else if (H && !items._arc) cams = [{ name: 'Close up', pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)) }, wide, polar];
+  else if (H && !items._arc)
+    cams = [
+      {
+        name: 'Close up',
+        pos: ll(f[0] * 0.8 + 6, f[1] - 12, Math.max(2.5, dist * 0.72)),
+      },
+      wide,
+      polar,
+    ];
   else if (items._arc) {
     // launch site through the intercept: a side-on camera looking at the middle of the arc
     const { from, to, mid } = items._arc,
@@ -366,7 +505,11 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
   if (cfg.cameras)
     cams = cams.map((v, i) =>
       cfg.cameras[i] && (cfg.cameras[i].narrowK != null || cfg.cameras[i].narrowShift != null)
-        ? { ...v, narrowK: cfg.cameras[i].narrowK, narrowShift: cfg.cameras[i].narrowShift }
+        ? {
+            ...v,
+            narrowK: cfg.cameras[i].narrowK,
+            narrowShift: cfg.cameras[i].narrowShift,
+          }
         : v,
     );
   // Still-frame camera: for act scenes, the camera of the act that contains t; otherwise cfg.stillFrame (a frame camera) if given.

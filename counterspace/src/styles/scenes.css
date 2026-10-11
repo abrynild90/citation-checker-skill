@@ -2487,7 +2487,7 @@
 .overlay #sceneView { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 @media(max-width:760px) {
-  .overlay #scenePanel.large-type { grid-template-rows: auto minmax(0,1fr) minmax(160px,1.2fr) auto !important; }
+  .overlay #scenePanel.large-type { grid-template-rows: auto minmax(0,1fr) minmax(220px,1.2fr) auto !important; }
 }
 
 @media(max-width:760px) {
@@ -2497,3 +2497,53 @@
 }
 
 .overlay .sc-diagram{align-self:flex-start;margin:4px 0 10px}
+
+/* A dated report replaces the historical cloud; no surviving positions are invented. */
+.scene-evidence {
+  position: absolute;
+  left: 50%;
+  bottom: 54px;
+  transform: translateX(-50%);
+  width: min(320px, calc(100% - 32px));
+  padding: 16px 20px;
+  border: 1px solid #64718b;
+  border-radius: 6px;
+  background: #0f172b;
+  color: #eef2fb;
+  text-align: center;
+  font-family: var(--sans);
+  line-height: 1.4;
+}
+.scene-evidence[hidden] {
+  display: none;
+}
+.scene-evidence span {
+  display: block;
+}
+.scene-evidence-date {
+  font-size: 14px;
+  font-weight: 600;
+}
+.scene-evidence-value {
+  font-size: 36px;
+  color: #f4cb79;
+  line-height: 1.2;
+  margin: 4px 0;
+}
+.scene-evidence-detail {
+  font-size: 14px;
+}
+.scene-evidence-note {
+  font-size: 12px;
+  color: #b5c1d8;
+  margin-top: 10px;
+}
+@media (max-width: 519px) {
+  .scene-evidence {
+    bottom: 58px;
+    padding: 10px 16px;
+  }
+  .scene-evidence-value {
+    font-size: 28px;
+  }
+}

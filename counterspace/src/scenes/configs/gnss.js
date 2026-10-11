@@ -4,6 +4,8 @@ import { IS_PHONE } from '../core.js';
 
 export const GNSS = {
   id: 'gnss',
+  explanationAlt:
+    'GPS satellites keep working. Their signals reach aircraft receivers, but radio noise from a ground jammer prevents reception inside its local zone. The diagram explains receiver interference; it does not establish the jammer’s location or zone boundary.',
   date: '2023-12-01',
   title: 'Jamming satellite navigation (GNSS) over the Baltic',
   shells: ['LEO', 'MEO'],
@@ -15,6 +17,8 @@ export const GNSS = {
   staticDropPhone: ['LEO ≤2,000 km'], // 375 static: the LEO shell label would crowd the aircraft and jammer labels
   staticTextPhone: [[' · GPS signal ', ' · ']], // 375 static: "Airliner 1 · lost"
   duration: 16,
+  scaleNote:
+    'The jammer’s location, the zone boundary and the aircraft routes are illustrative. The map does not establish the measured extent of interference.',
   lede: 'Since late 2023, ground jamming has repeatedly cut satellite navigation signals, such as GPS, for aircraft and ships around the Baltic Sea. A jammer drowns out the weak signals only inside its local zone, and it does not attack any satellite.',
   caption:
     'Since late 2023, ground jamming has repeatedly cut satellite navigation signals (GNSS), such as GPS, for aircraft and ships around the Baltic Sea. ' +
@@ -48,11 +52,17 @@ export const GNSS = {
       color: C.jam,
       soft: true,
       clean: true, // a clear red tint with a visible rim
-      label: 'Jammer effect zone',
-      short: 'Jammer zone',
+      label: 'Illustrative jammer zone',
+      short: 'Illustrative zone',
       dx: 50,
       dy: 18,
-      jammer: { at: [56.5, 21.0], label: 'Ground jammer', short: 'Jammer', dx: -70, dy: 30 },
+      jammer: {
+        at: [56.5, 21.0],
+        label: 'Ground jammer',
+        short: 'Jammer',
+        dx: -70,
+        dy: 30,
+      },
     },
     { type: 'place', at: [60.4, 18.6], label: 'Baltic Sea', color: '#cfd8ea' },
     {
@@ -106,8 +116,13 @@ export const GNSS = {
   inset: 'GPS (top view)',
   insetSize: [100, 80], // 25% smaller than before
   insetRing: true, // the top view is one GPS orbit ring with a few satellites on it, not every orbit plane (those read as an atom)
-  liveOff: { 'Jammer effect zone': [62, -30], 'Airliner 1': [-34, -50] },
-  offSteps: { 'Airliner 1': [[0, -84, -46], [0.17, null]] }, // desktop: the pill sits left of the zone while the airliner is outside it, then the placer's own slot // desktop: a leader runs from the label to the zone's edge
+  liveOff: { 'Illustrative jammer zone': [62, -30], 'Airliner 1': [-34, -50] },
+  offSteps: {
+    'Airliner 1': [
+      [0, -84, -46],
+      [0.17, null],
+    ],
+  }, // desktop: the pill sits left of the zone while the airliner is outside it, then the placer's own slot // desktop: a leader runs from the label to the zone's edge
   stillHideText: ['Baltic Sea'], // the print drops the place name: it would sit on Airliner 1's leader
   noJamArrow: true, // the jammed link gets no edge arrowhead (it would read as a stray marker at the frame border)
   sunView: { az: 30, el: 32 }, // a higher, more frontal sun: the Baltic terrain is lit, not olive and murky
@@ -130,10 +145,23 @@ export const GNSS = {
       phone: { at: [51, 18.5, 1.55] },
       ref: false, // a close-up of the dome: Airliner 2 is outside this frame by design
     },
-    { name: 'Europe and GPS orbits', short: 'Europe and GPS', at: [42, -8, 5.0], look: [40, 10, 0.5], phone: { at: [42, -8, 5.6] }, ref: false, hide: IS_PHONE ? ['Ground jammer', 'Jammer effect', 'Airliner 1'] : ['Ground jammer', 'Jammer effect', 'GPS signal'] },
+    {
+      name: 'Europe and GPS orbits',
+      short: 'Europe and GPS',
+      at: [42, -8, 5.0],
+      look: [40, 10, 0.5],
+      phone: { at: [42, -8, 5.6] },
+      ref: false,
+      hide: IS_PHONE ? ['Ground jammer', 'Jammer effect', 'Airliner 1'] : ['Ground jammer', 'Jammer effect', 'GPS signal'],
+    },
   ],
   status: [
     [0, 'Outside the red jammer zone, aircraft receive GPS signals (green)', 'Green: GPS received; red: signal lost', 'Green: GPS received; red: signal lost'],
-    [0.3, 'Inside the zone GNSS is lost (red); outside it, OK (green). Satellites unaffected', 'Inside the zone GNSS is lost (red)', 'Zone: GNSS lost (red). Outside: fine. Satellites unaffected'],
+    [
+      0.3,
+      'Inside the zone GNSS is lost (red); outside it, OK (green). Satellites unaffected',
+      'Inside the zone GNSS is lost (red)',
+      'Zone: GNSS lost (red). Outside: fine. Satellites unaffected',
+    ],
   ],
 };

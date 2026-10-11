@@ -427,7 +427,7 @@ export function installGLStill(GLHost) {
     tmp.style.cssText = 'position:fixed;left:-10000px;top:0;width:760px;height:375px;overflow:hidden';
     document.body.appendChild(tmp);
     try {
-      const printed = renderSVG(sim, tmp, undefined, { print: true });
+      const printed = renderSVG(sim, tmp, Number(node.dataset.time ?? sim.still), { print: true });
       if (window.__cs) window.__cs.lastStillLay = printed?.__lay; // test hook: the print layout's probe (craft sizes, Earth disc)
       return await stillFromSVG(printed, sim.cfg.title, sim.cfg.cite);
     } finally {

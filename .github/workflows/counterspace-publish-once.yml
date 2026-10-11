@@ -1,0 +1,32 @@
+name: Publish reviewed Counterspace page
+on:
+  push:
+    branches: ['improve/counterspace-scene-clarity']
+    paths: ['.github/workflows/counterspace-publish-once.yml']
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: npm ci
+        working-directory: counterspace/tools
+      - run: npm run build
+        working-directory: counterspace/tools
+      - name: Verify reviewed page
+        run: test "$(git hash-object counterspace/index.html)" = b6f0bc8eb902ba75993a0b6b4ad1134cd5d000e3
+      - name: Commit reviewed page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add counterspace/index.html
+          git commit -m "Build verified Counterspace page"
+          git push origin HEAD:improve/counterspace-scene-clarity

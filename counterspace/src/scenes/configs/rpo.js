@@ -7,6 +7,10 @@ const MIN_PX = IS_PHONE ? 62 : 90, // craft model size range (px): larger than b
 
 export const RPO = {
   id: 'rpo',
+  explanationByStep: true,
+  explanationAlts: ['2025 in geostationary orbit: SJ-21 and SJ-25 appeared to dock while USA 271 and USA 270 flanked them. Hardware and spacing are illustrative; a close approach does not establish hostile intent.', '2019–20 in low Earth orbit: Cosmos 2542 released Cosmos 2543, which worked near USA 245. Hardware and spacing are illustrative; a close approach does not establish hostile intent.', '2025 in geostationary orbit: USA 271 and SKYNET 5A made a jointly announced close approach. Hardware and spacing are illustrative; this was not an attack.'],
+  explanationAlt:
+    'Three separate schematic relationships: China’s SJ-21 and SJ-25 appeared to dock while US satellites flanked them; Russia’s Cosmos 2542 released Cosmos 2543, which worked near USA 245; and a jointly announced US–UK approach between USA 271 and SKYNET 5A. Spacing and hardware are illustrative. A close approach does not establish hostile intent.',
   date: '2025-06-13',
   title: 'Close approaches: China, the US and Russia (2019–2026)',
   shells: [],
@@ -52,7 +56,7 @@ export const RPO = {
       status: 'USA 271 and SKYNET 5A: a jointly announced US–UK close approach',
     },
   ],
-  phoneCamOff: { 2: { 'Cosmos 2543': [-88, -62] } }, // 375: the Cosmos 2543 chip sits off the Earth's limb, above the craft
+  phoneCamOff: { 2: { 'Cosmos 2543': [-88, -62], 'USA 245': [-90, -40] } }, // 375: the Cosmos 2543 chip sits off the Earth's limb, above the craft
   liveText: { 'Within 1 km (13 June)': 'Within 1 km' }, // live desktop: the date is in the step text; the shorter chip stays off the Earth's disc
   narrowK: 1, // phone: the act cameras are fitted to the craft already; a further tighten cut USA 245 off
   leaderK: 0.3, // a place or orbit name that sits just off its line still gets a leader (the GEO belt name floated free)
@@ -72,15 +76,49 @@ export const RPO = {
   scaleNote:
     'The distances between spacecraft are exaggerated and orbital motion is slowed so that each episode can be seen. ' +
     'The three episodes happened at different times and in different places.',
-  anchors: { g1: { geo: { lon: 127 } }, l1: { orbit: { alt: 600, inc: 97.9, through: [58, 52], tThrough: 0.57, du: 0.4 } }, g3: { geo: { lon: 95.3 } } },
+  anchors: {
+    g1: { geo: { lon: 127 } },
+    l1: {
+      orbit: {
+        alt: 600,
+        inc: 97.9,
+        through: [58, 52],
+        tThrough: 0.57,
+        du: 0.4,
+      },
+    },
+    g3: { geo: { lon: 95.3 } },
+  },
   acts: [
     { t0: 0, t1: 0.42, cam: 1 },
     { t0: 0.42, t1: 0.72, cam: 2 },
     { t0: 0.72, t1: 1, cam: 3 },
   ],
   actors: [
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.004, opacity: 0.6, inset: true, push: 0.2, label: 'GEO belt' },
-    { type: 'ring', alt: 600, inc: 97.9, raan: 40, color: '#8fd0ff', thick: 0.0016, opacity: 0.1, inset: true, push: 0.08, fadeDisc: true }, // fadeDisc: no long orbit lines drawn across the Earth
+    {
+      type: 'ring',
+      alt: GEO_ALT,
+      inc: 0,
+      raan: 0,
+      color: C.geo,
+      thick: 0.004,
+      opacity: 0.6,
+      inset: true,
+      push: 0.2,
+      label: 'GEO belt',
+    },
+    {
+      type: 'ring',
+      alt: 600,
+      inc: 97.9,
+      raan: 40,
+      color: '#8fd0ff',
+      thick: 0.0016,
+      opacity: 0.1,
+      inset: true,
+      push: 0.08,
+      fadeDisc: true,
+    }, // fadeDisc: no long orbit lines drawn across the Earth
     // ---- 1 · China + US in GEO (SJ-21, SJ-25, USA 270, USA 271), June 2025 to January 2026
     {
       type: 'craft',
@@ -193,9 +231,33 @@ export const RPO = {
         [0.72, 0, 0, 0],
       ],
     },
-    { type: 'range', a: 'sj21b', b: 'sj25', t0: 0.16, t1: 0.235, label: 'Within 1 km (13 June)', short: '≤ 1 km' }, // COMSPOC: on 13 June within 1 km
-    { type: 'range', a: 'sj21b', b: 'sj25', t0: 0.385, t1: 0.415, label: 'Just under 3 km (13 Jan.)', short: '< 3 km' },
-    { type: 'burst', craft: 'c2542', t0: 0.447, color: '#ffd9c0', ringColor: C.ru, size: 0.1, span: 0.05 },
+    {
+      type: 'range',
+      a: 'sj21b',
+      b: 'sj25',
+      t0: 0.16,
+      t1: 0.235,
+      label: 'Within 1 km (13 June)',
+      short: '≤ 1 km',
+    }, // COMSPOC: on 13 June within 1 km
+    {
+      type: 'range',
+      a: 'sj21b',
+      b: 'sj25',
+      t0: 0.385,
+      t1: 0.415,
+      label: 'Just under 3 km (13 Jan.)',
+      short: '< 3 km',
+    },
+    {
+      type: 'burst',
+      craft: 'c2542',
+      t0: 0.447,
+      color: '#ffd9c0',
+      ringColor: C.ru,
+      size: 0.1,
+      span: 0.05,
+    },
     {
       type: 'craft',
       id: 'c2543',
@@ -224,9 +286,33 @@ export const RPO = {
         [0.72, 0.3, 0.1, 0.02],
       ],
     },
-    { type: 'range', a: 'c2543', b: 'c2542', t0: 0.47, t1: 0.53, label: 'Within 2 km', short: '≤ 2 km' },
-    { type: 'range', a: 'c2543', b: 'usa245', t0: 0.6, t1: 0.665, label: 'Within 20 km (Jan. 2020)', short: '≤ 20 km' },
-    { type: 'trail', craft: 'c2543', t0: 0.447, t1: 0.68, color: C.ru, acts: [1] },
+    {
+      type: 'range',
+      a: 'c2543',
+      b: 'c2542',
+      t0: 0.47,
+      t1: 0.53,
+      label: 'Within 2 km',
+      short: '≤ 2 km',
+    },
+    {
+      type: 'range',
+      a: 'c2543',
+      b: 'usa245',
+      t0: 0.6,
+      t1: 0.665,
+      label: 'Within 20 km (Jan. 2020)',
+      short: '≤ 20 km',
+    },
+    {
+      type: 'trail',
+      craft: 'c2543',
+      tail: 0.15, wakeOp: 0.35, taper: true,
+      t0: 0.447,
+      t1: 0.68,
+      color: C.ru,
+      acts: [1],
+    },
     {
       type: 'craft',
       id: 'usa245',
@@ -288,9 +374,34 @@ export const RPO = {
         [1, -0.4, 0.05, 0],
       ],
     },
-    { type: 'range', a: 'usa271b', b: 'sky', t0: 0.84, t1: 0.94, label: 'Closest about 13 km', short: '~ 13 km' },
-    { type: 'burst', craft: 'usa271b', t0: 0.82, color: '#cfe8ff', ringColor: C.us, size: 0.1, span: 0.05 },
-    { type: 'trail', craft: 'usa271b', t0: 0.72, t1: 0.83, color: C.us, acts: [2] },
+    {
+      type: 'range',
+      a: 'usa271b',
+      b: 'sky',
+      t0: 0.84,
+      t1: 0.94,
+      label: 'Closest about 13 km',
+      short: '~ 13 km',
+    },
+    {
+      type: 'burst',
+      craft: 'usa271b',
+      tail: 0.15, wakeOp: 0.35, taper: true,
+      t0: 0.82,
+      color: '#cfe8ff',
+      ringColor: C.us,
+      size: 0.1,
+      span: 0.05,
+    },
+    {
+      type: 'trail',
+      craft: 'usa271b',
+      tail: 0.15, wakeOp: 0.35, taper: true,
+      t0: 0.72,
+      t1: 0.83,
+      color: C.us,
+      acts: [2],
+    },
   ],
   still: 0.3,
   stillShort: ['USA 271', 'USA 245', 'Cosmos 2542'],
@@ -317,7 +428,13 @@ export const RPO = {
     [0.94, 'The close approach lasted roughly 5–11 Sept. (SWF)', 'Lasted roughly 5–11 Sept. (SWF)'],
   ],
   cameras: [
-    { name: 'All three episodes', auto: true, at: [30, 90, 4.9], look: [0, 121, 2.0], phone: { at: [30, 90, 6.0] } },
+    {
+      name: 'All three episodes',
+      auto: true,
+      at: [30, 90, 4.9],
+      look: [0, 121, 2.0],
+      phone: { at: [30, 90, 6.0] },
+    },
     {
       name: 'China and the US in GEO',
       act: 0,
@@ -330,7 +447,18 @@ export const RPO = {
         include: IS_PHONE ? undefined : [[0, -0.8, 0]],
       },
     },
-    { name: 'Russia in LEO', act: 1, fitCraft: { anchor: 'l1', ids: ['c2542', 'c2543', 'usa245'], dir: [-0.2, 0.75, 0.6], fill: 0.88, t: 0.57, shiftR: 0.07 } },
+    {
+      name: 'Russia in LEO',
+      act: 1,
+      fitCraft: {
+        anchor: 'l1',
+        ids: ['c2542', 'c2543', 'usa245'],
+        dir: [-0.2, 0.75, 0.6],
+        fill: 0.88,
+        t: 0.57,
+        shiftR: 0.07,
+      },
+    },
     {
       name: 'The US and the UK in GEO',
       act: 2,
