@@ -10,16 +10,22 @@ const server = http.createServer((q, r) => {
 });
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const url = `http://127.0.0.1:${server.address().port}/`;
-const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({
+  args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+});
 try {
   for (const width of [1440, 390]) {
-    const page = await browser.newPage({ viewport: { width, height: width === 390 ? 844 : 1000 } });
+    const page = await browser.newPage({
+      viewport: { width, height: width === 390 ? 844 : 1000 },
+    });
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.route('**/*', (r) => (r.request().url().startsWith(url) ? r.continue() : r.abort()));
     await page.goto(url);
     await page.waitForFunction(() => window.__cs && document.querySelector('#svgA svg'));
-    await page.addScriptTag({ path: new URL('node_modules/axe-core/axe.min.js', import.meta.url).pathname });
+    await page.addScriptTag({
+      path: new URL('node_modules/axe-core/axe.min.js', import.meta.url).pathname,
+    });
     for (const id of await page.evaluate(() => window.__cs.scenes)) {
       await page.evaluate((id) => window.__cs.openScene(id), id);
       await page.waitForFunction(() => window.__cs.host()?.scene && window.__cs.earthReady());
@@ -44,12 +50,24 @@ try {
       await page.locator('#scPlay').click();
       await page.locator('#scCams button[data-i]').nth(1).click();
       assert.equal(await page.evaluate(() => window.__cs.host().playing), false, `${id}: view pauses`);
-      await page.waitForFunction(() => !window.__cs.host()._tw, { timeout: 10000 });
+      await page.waitForFunction(() => !window.__cs.host()._tw, {
+        timeout: 10000,
+      });
       // Playback is idle after pausing; late image decoding may still request one draw.
-      const idle = await page.evaluate(() => ({ t: window.__cs.host().t, raf: window.__cs.host().raf }));
+      const idle = await page.evaluate(() => ({
+        t: window.__cs.host().t,
+        raf: window.__cs.host().raf,
+      }));
       assert.equal(idle.raf, 0);
       await page.waitForTimeout(250);
-      assert.deepEqual(await page.evaluate(() => ({ t: window.__cs.host().t, raf: window.__cs.host().raf })), idle, `${id}: pause is idle`);
+      assert.deepEqual(
+        await page.evaluate(() => ({
+          t: window.__cs.host().t,
+          raf: window.__cs.host().raf,
+        })),
+        idle,
+        `${id}: pause is idle`,
+      );
       await page.locator('#scPlay').click();
       if (await page.locator('#scMoreViews').isVisible()) {
         await page.locator('#scMoreViews').click();
@@ -138,20 +156,51 @@ try {
           );
         }
       }
-      if (['starfish', 'laser', 'sj21-tug', 'viasat'].includes(id)) {
+      if (id !== 'fengyun') {
         await page.evaluate(() => window.__cs.host().interrupt());
-        const diagramTime = await page.evaluate(() => window.__cs.host().t);
+        let diagramTime = await page.evaluate(() => window.__cs.host().t);
         await page.locator('#scDiagram').press('Enter');
         assert.equal(await page.locator('#sceneView > svg').getAttribute('data-explanation'), id, `${id}: diagram is accessible with keyboard`);
         assert.equal(await page.locator('#scPlay').isVisible(), false, `${id}: diagram has no running controls`);
         assert.equal(await page.evaluate(() => window.__cs.host().playing), false, `${id}: diagram pauses animation`);
-        assert.deepEqual(await page.evaluate(() => window.__cs.audit().filter(x => /scene/.test(x.chart || ''))), [], `${id}: diagram labels fit`);
-        const diagramViolations = await page.evaluate(async () => (await axe.run(document.getElementById('scenePanel'))).violations.map(v => v.id));
+        assert.deepEqual(await page.evaluate(() => window.__cs.audit().filter((x) => /scene/.test(x.chart || ''))), [], `${id}: diagram labels fit`);
+        const diagramViolations = await page.evaluate(async () => (await axe.run(document.getElementById('scenePanel'))).violations.map((v) => v.id));
         assert.deepEqual(diagramViolations, [], `${id}: diagram accessibility`);
+        if (['rpo', 'spaceplanes'].includes(id)) {
+          for (let i = 0; i < (await episodeButtons.count()); i++) {
+            await episodeButtons.nth(i).press('Enter');
+            assert.equal(await page.locator('#sceneView > svg').getAttribute('data-episode'), String(i), `${id}: still picture follows episode`);
+            assert.equal(await episodeButtons.nth(i).getAttribute('aria-pressed'), 'true', `${id}: still episode control follows picture`);
+            assert.equal(await page.evaluate(() => window.__cs.host().playing), false, `${id}: still selection stays paused`);
+            assert.deepEqual(await page.evaluate(() => window.__cs.audit().filter((x) => /scene/.test(x.chart || ''))), [], `${id}: episode labels fit`);
+          }
+          diagramTime = await page.evaluate(() => window.__cs.host().t);
+        }
         await page.locator('#scDiagram').press('Enter');
         assert.equal(await page.locator('#sceneView > svg').count(), 0, `${id}: animation view returns`);
         assert.equal(await page.evaluate(() => window.__cs.host().t), diagramTime, `${id}: paused time is preserved`);
         assert.equal(await page.locator('#scPlay').getAttribute('aria-label'), 'Play', `${id}: returning stays paused`);
+      }
+      if (['cosmos1408', 'solwind', 'burnt-frost', 'shakti'].includes(id)) {
+        const late = await page.evaluate(() => {
+          const h = window.__cs.host();
+          h.interrupt();
+          h.update(0.92);
+          return {
+            cloud: h.sim.items.filter((x) => x.kind === 'cloud').map((x) => x.vis),
+            card: h.factEl ? !h.factEl.hidden : null,
+          };
+        });
+        assert.equal(
+          late.cloud.every((n) => n === 0),
+          true,
+          `${id}: later count has no historical cloud`,
+        );
+        if (id === 'cosmos1408') {
+          assert.equal(late.card, true, 'Cosmos later count is a source card');
+          await page.evaluate(() => window.__cs.host().update(0.68));
+          assert.equal(await page.evaluate(() => window.__cs.host().factEl.hidden), true, 'Cosmos seek back restores historical view');
+        }
       }
       await page.locator('#scClose').click();
       console.log(width, id, 'controls, idle pause and accessibility OK');
@@ -191,14 +240,20 @@ try {
     assert.equal(await page.evaluate(() => window.__cs.host().playing), false);
     await page.locator('#scPlay').click();
     await page.evaluate(() => {
-      Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+      Object.defineProperty(document, 'hidden', {
+        configurable: true,
+        value: true,
+      });
       document.dispatchEvent(new Event('visibilitychange'));
     });
     assert.equal(await page.evaluate(() => window.__cs.host().playing), false);
     await page.locator('#scClose').click();
     // A lost graphics context replaces the failed animation with a useful source-qualified still.
     await page.evaluate(() => {
-      Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+      Object.defineProperty(document, 'hidden', {
+        configurable: true,
+        value: false,
+      });
       window.__cs.openScene('fengyun');
     });
     await page.waitForFunction(() => window.__cs.host()?.scene);

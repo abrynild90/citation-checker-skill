@@ -4,11 +4,24 @@ import { ellipsePath } from '../co-sim.js';
 import { C, PK } from './shared.js';
 
 // OTV-7's orbit as tracked by amateurs in Feb. 2024 (SWF p. 01-06): 323 x 38,838 km at 59.1 deg. Node and argument of perigee are illustrative.
-const HEO_ORBIT = { perigee: 323, apogee: 38838, inc: 59.1, raan: 110, argp: 270, m0: 3.2, revs: 3.4 };
+const HEO_ORBIT = {
+  perigee: 323,
+  apogee: 38838,
+  inc: 59.1,
+  raan: 110,
+  argp: 270,
+  m0: 3.2,
+  revs: 3.4,
+};
+const HEO_PATH = ellipsePath(HEO_ORBIT, 180);
 const MX = IS_PHONE ? 108 : 216; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
   id: 'spaceplanes',
+  explanationByStep: true,
+  explanationAlts: ['X-37B’s first six missions flew in low Earth orbit and lasted 224 to 908 days each. Orbital geometry is schematic.', 'OTV-7’s February 2024 orbit: lowest reported height 323 km, highest 38,838 km and tilt 59.1 degrees. The complete orbit is shown; shape and orientation are schematic.', 'China’s reusable experimental spacecraft repeatedly approached released objects. Hardware and spacing are illustrative; mission purpose is not established here.'],
+  explanationAlt:
+    'Schematic diagrams of three separate episodes: the first six X-37B missions in low Earth orbit, OTV-7’s elongated orbit with reported February 2024 heights of 323 and 38,838 km and tilt of 59.1 degrees, and China’s spacecraft approaching released objects. Hardware, spacing, orbit shape and orientation are illustrative. Mission purposes are not established.',
   date: '2023-12-28',
   title: 'Reusable craft that return from orbit: the US X-37B and China’s experimental spacecraft (2010–2026)',
   shells: [],
@@ -25,7 +38,8 @@ export const SPACEPLANES = {
   related: null,
   event: 'us-2023-otv7',
   noInset: true,
-  scaleNote: 'The distances to the released objects are exaggerated and orbital motion is slowed.',
+  scaleNote:
+    'The reported orbital heights and tilt are sourced. Orbit heights are squeezed to fit; orientation, spacecraft sizes, distances to released objects and motion are illustrative.',
   anchors: {
     us: { orbit: { alt: 350, inc: 45, raan: 288, u0: 0.47, du: 3.4 } },
     heo: { ellipse: HEO_ORBIT },
@@ -61,7 +75,17 @@ export const SPACEPLANES = {
       staticHide: true,
       staticKeep: false,
     },
-    { type: 'path', fn: (u) => orbitPos(350, 45, 288, u * 2 * Math.PI), N: 120, color: C.us, opacity: 0.85, thick: 0.0028, fade: true, acts: [0], push: 0.1 },
+    {
+      type: 'path',
+      fn: (u) => orbitPos(350, 45, 288, u * 2 * Math.PI),
+      N: 120,
+      color: C.us,
+      opacity: 0.85,
+      thick: 0.0028,
+      fade: true,
+      acts: [0],
+      push: 0.1,
+    },
     {
       type: 'craft',
       id: 'x37',
@@ -82,7 +106,15 @@ export const SPACEPLANES = {
         [1, 0, 0, 0],
       ],
     },
-    { type: 'trail', craft: 'x37', t0: 0.0, t1: 0.3, color: C.us, acts: [0], thick: 0.003 },
+    {
+      type: 'trail',
+      craft: 'x37',
+      t0: 0.0,
+      t1: 0.3,
+      color: C.us,
+      acts: [0],
+      thick: 0.003,
+    },
     // ---- US X-37B, OTV-7: highly elliptical orbit
     {
       type: 'path',
@@ -106,8 +138,8 @@ export const SPACEPLANES = {
       type: 'path',
       points: ellipsePath(HEO_ORBIT, 360),
       color: C.us,
-      opacity: 0.8,
-      thick: 0.0026,
+      opacity: 0.85,
+      thick: 0.005,
       fade: true,
       acts: [1],
       push: 0.15,
@@ -122,8 +154,8 @@ export const SPACEPLANES = {
     {
       type: 'craft',
       id: 'x37h',
-      minPx: IS_PHONE ? 68 : 172,
-      maxPx: MX,
+      minPx: IS_PHONE ? 42 : 64,
+      maxPx: IS_PHONE ? 64 : 100,
       anchor: 'heo',
       acts: [1],
       model: 'plane',
@@ -139,7 +171,38 @@ export const SPACEPLANES = {
         [1, 0, 0, 0],
       ],
     },
-    { type: 'trail', craft: 'x37h', t0: 0.24, t1: 0.54, N: 160, color: C.us, acts: [1], thick: 0.003 },
+    {
+      type: 'trail',
+      craft: 'x37h',
+      t0: 0.24,
+      t1: 0.54,
+      N: 160,
+      color: C.us,
+      acts: [1],
+      thick: 0.003,
+    },
+    {
+      type: 'tag',
+      world: HEO_PATH[0],
+      acts: [1],
+      leader: true,
+      label: 'Lowest: 323 km',
+      short: '323 km · lowest',
+      color: C.us,
+      dx: -42,
+      dy: 46,
+    },
+    {
+      type: 'tag',
+      world: HEO_PATH[90],
+      acts: [1],
+      leader: true,
+      label: 'Highest: 38,838 km',
+      short: '38,838 km · highest',
+      color: C.us,
+      dx: 0,
+      dy: -45,
+    },
     // ---- China, CSSHQ: flights 2 and 3 and the objects released from them
     {
       type: 'path',
@@ -214,8 +277,24 @@ export const SPACEPLANES = {
         [0.755, 0.16, 0.01, 0.03],
       ],
     },
-    { type: 'link', a: 'csshq', b: 'objJ', t0: 0.635, t1: 0.647, color: '#fff1c1', width: 0.009 },
-    { type: 'link', a: 'csshq', b: 'objJ', t0: 0.671, t1: 0.683, color: '#fff1c1', width: 0.009 },
+    {
+      type: 'link',
+      a: 'csshq',
+      b: 'objJ',
+      t0: 0.635,
+      t1: 0.647,
+      color: '#fff1c1',
+      width: 0.009,
+    },
+    {
+      type: 'link',
+      a: 'csshq',
+      b: 'objJ',
+      t0: 0.671,
+      t1: 0.683,
+      color: '#fff1c1',
+      width: 0.009,
+    },
     {
       type: 'craft',
       id: 'objG',
@@ -241,10 +320,45 @@ export const SPACEPLANES = {
         [0.96, 0.08, 0.005, 0.02],
       ],
     },
-    { type: 'trail', craft: 'csshq', t0: 0.54, t1: 1, color: C.cn, acts: [2], thick: 0.0018, tail: 0.12, wakeOp: 0.2, taper: 0.1 }, // a soft wake: thin at its tail, faint, capped in length
-    { type: 'trail', craft: 'objJ', t0: 0.585, t1: 0.755, until: 0.82, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 }, // the wake ends soon after Object J does
-    { type: 'trail', craft: 'objG', t0: 0.8, t1: 0.985, color: C.cn, acts: [2], thick: 0.0022, tail: 0.25, wakeOp: 0.7, taper: 0.35 },
+    {
+      type: 'trail',
+      craft: 'csshq',
+      t0: 0.54,
+      t1: 1,
+      color: C.cn,
+      acts: [2],
+      thick: 0.0018,
+      tail: 0.12,
+      wakeOp: 0.2,
+      taper: 0.1,
+    }, // a soft wake: thin at its tail, faint, capped in length
+    {
+      type: 'trail',
+      craft: 'objJ',
+      t0: 0.585,
+      t1: 0.755,
+      until: 0.82,
+      color: C.cn,
+      acts: [2],
+      thick: 0.0022,
+      tail: 0.25,
+      wakeOp: 0.7,
+      taper: 0.35,
+    }, // the wake ends soon after Object J does
+    {
+      type: 'trail',
+      craft: 'objG',
+      t0: 0.8,
+      t1: 0.985,
+      color: C.cn,
+      acts: [2],
+      thick: 0.0022,
+      tail: 0.25,
+      wakeOp: 0.7,
+      taper: 0.35,
+    },
   ],
+  camHide: { 2: ['GEO ring'] },
   camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
 
   phoneCamOff: { 2: { 'X-37B OTV-7': [-80, 65], 'OTV-7': [-80, 65] } },
@@ -287,22 +401,34 @@ export const SPACEPLANES = {
     [0.975, 'Flight 4 launched from Jiuquan on 6 Feb. 2026; SWF reports no landing yet', 'Flight 4 launched 6 Feb. 2026'],
   ],
   cameras: [
-    { name: 'All three parts', auto: true, at: [40, -25, 4.4], phone: { at: [40, -25, 5.2] } },
+    {
+      name: 'All three parts',
+      auto: true,
+      at: [40, -25, 4.4],
+      phone: { at: [40, -25, 5.2] },
+    },
     {
       name: 'X-37B: flights in low Earth orbit',
       chip: 'X-37B low-orbit flights',
       act: 0,
-      fitCraft: { anchor: 'us', ids: ['x37'], dir: [-0.5, 0.55, 0.7], dMin: 1.1, fill: 0.75, t: 0.15 },
+      fitCraft: {
+        anchor: 'us',
+        ids: ['x37'],
+        dir: [-0.5, 0.55, 0.7],
+        dMin: 1.1,
+        fill: 0.75,
+        t: 0.15,
+      },
     },
     {
-      name: 'X-37B OTV-7: follows the craft',
-      chip: 'X-37B OTV-7',
+      name: 'X-37B OTV-7: Earth and the whole orbit',
+      chip: 'OTV-7 whole orbit',
       act: 1,
-      fitCraft: { anchor: 'heo', ids: ['x37h'], dir: [-0.6, 0.7, 0.6], dMin: 1.8, fill: 1.1, t: 0.42, lock: true, tight: true },
+      fitOrbit: { points: HEO_PATH, fill: 0.76 },
     },
     {
-      name: 'China: CSSHQ and released objects',
-      chip: 'China CSSHQ',
+      name: 'China’s spacecraft and released objects',
+      chip: 'China’s spacecraft',
       act: 2,
       fitCraft: {
         anchor: 'cn',
@@ -317,7 +443,29 @@ export const SPACEPLANES = {
       },
     },
     // unlocked from the tour
-    { name: 'Whole scene: Earth and every orbit', at: [32, -25, 5.8], phone: { at: [32, -25, 8] }, ref: false, hide: ['OTV-7 orbit'] },
+    {
+      name: 'Whole scene: Earth and every orbit',
+      at: [32, -25, 5.8],
+      phone: { at: [32, -25, 8] },
+      ref: false,
+      hide: ['OTV-7 orbit'],
+    },
+    {
+      name: 'OTV-7: follow the spacecraft',
+      chip: 'OTV-7 follow',
+      act: 1,
+      hide: ['Lowest:', 'Highest:'],
+      fitCraft: {
+        anchor: 'heo',
+        ids: ['x37h'],
+        dir: [-0.6, 0.7, 0.6],
+        dMin: 1.8,
+        fill: 0.86,
+        t: 0.42,
+        lock: true,
+        tight: true,
+      },
+    },
   ],
   staticCenter: [40, 105],
   staticFit: 1.6,

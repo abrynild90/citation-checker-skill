@@ -23,6 +23,7 @@ import {
   orbitThrough,
   rAlt,
   scl,
+  smooth,
   toLL,
 } from './core.js';
 import { lerp3 } from './gl-items.js';
@@ -47,7 +48,11 @@ export function buildSim(cfg) {
       o = a.off || [0, 0, 0];
     return add(add(add(an.pos(t), scl(f.along, o[0])), scl(f.rad, o[1])), scl(f.cross, o[2]));
   };
-  const shellDefs = { LEO: [2000, '#78a8ff', 'LEO ≤2,000 km'], MEO: [20200, '#a88cff', 'MEO (GPS)'], GEO: [GEO_ALT, '#ffcf6e', 'GEO'] };
+  const shellDefs = {
+    LEO: [2000, '#78a8ff', 'LEO ≤2,000 km'],
+    MEO: [20200, '#a88cff', 'MEO (GPS)'],
+    GEO: [GEO_ALT, '#ffcf6e', 'GEO'],
+  };
   const sl = cfg.shellLabels || {},
     sa = cfg.shellAng || {},
     angDef = { LEO: 150, MEO: 38, GEO: 60 };
@@ -74,7 +79,13 @@ export function buildSim(cfg) {
     const o = orbitThrough(H.lat, H.lon, H.inc);
     const wBase = 2 * Math.PI * 0.9 * Math.sqrt(1 / Math.pow(rAlt(H.alt), 3));
     // Approach speed (wa) and post-impact drift (wf) are scaled so the target stays in view before the hit (illustrative).
-    tgt = { ...H, raan: o.raan, uHit: o.u, w: wBase * (H.wf ?? 1), wa: wBase * (H.wa ?? 0.4) };
+    tgt = {
+      ...H,
+      raan: o.raan,
+      uHit: o.u,
+      w: wBase * (H.wf ?? 1),
+      wa: wBase * (H.wa ?? 0.4),
+    };
     tgt.pos = (t) => orbitPos(H.alt, H.inc, tgt.raan, tgt.uHit + (t < H.t ? tgt.wa : tgt.w) * (t - H.t));
     tgt.hitPos = tgt.pos(H.t);
     focus = focus || [H.lat, H.lon];
@@ -221,7 +232,7 @@ export function buildSim(cfg) {
           actOn(t, a.acts) && (flags.all || !a.vis || (t >= a.vis[0] && t <= a.vis[1]))
             ? a.craftAt
               ? crafts[a.craftAt[0]].raw(a.craftAt[1])
-              : aPos(a, t)
+              : a.world || aPos(a, t)
             : null,
       });
     if (a.type === 'path') {
@@ -308,7 +319,12 @@ export function buildSim(cfg) {
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,
-        ...(a.labelUntil != null ? { labelFn: (t, narrow, still) => (still || t < a.labelUntil ? a.label : null), statusColor: () => '#cfd8ea' } : {}),
+        ...(a.labelUntil != null
+          ? {
+              labelFn: (t, narrow, still) => (still || t < a.labelUntil ? a.label : null),
+              statusColor: () => '#cfd8ea',
+            }
+          : {}),
       }); // labelUntil (opt-in): the ship's pill retires after the intercept
     if (a.type === 'ring') {
       let raan = a.raan,
@@ -333,7 +349,11 @@ export function buildSim(cfg) {
         thick: a.thick,
         push: a.push,
         gapIds: a.gapCrafts,
-        arcNear: a.arcNear && { pos: anchors[a.arcNear.anchor].pos(0), r: a.arcNear.r, cams: a.arcNear.cams }, // opt-in: only the arc within r of the anchor is drawn (on these cameras)
+        arcNear: a.arcNear && {
+          pos: anchors[a.arcNear.anchor].pos(0),
+          r: a.arcNear.r,
+          cams: a.arcNear.cams,
+        }, // opt-in: only the arc within r of the anchor is drawn (on these cameras)
         fadeDisc: a.fadeDisc, // opt-in: the line fades where it crosses the Earth's disc
         fadeT: a.fadeT, // opt-in [t0, t1] (+ fadeCams: camera indices): the 3D line fades out over that time span (the inset keeps it)
         fadeCams: a.fadeCams,
@@ -367,13 +387,27 @@ export function buildSim(cfg) {
       if (a.sats)
         for (let s = 0; s < a.sats; s++) {
           const ph = (s / a.sats) * 2 * Math.PI;
-          items.push({ kind: 'point', shape: 'sat', small: true, color: a.color, pos: () => orbitPos(a.alt, a.inc, a.raan, ph) });
+          items.push({
+            kind: 'point',
+            shape: 'sat',
+            small: true,
+            color: a.color,
+            pos: () => orbitPos(a.alt, a.inc, a.raan, ph),
+          });
         }
     }
     if (a.type === 'target' && tgt) {
       const pts = [];
       for (let k = 0; k <= 180; k++) pts.push(orbitPos(tgt.alt, tgt.inc, tgt.raan, (k / 180) * 2 * Math.PI));
-      items.push({ kind: 'curve', pts: () => pts, color: a.color, opacity: 0.35, role: 'orbit', fadeDisc: a.fadeDisc, thick: a.orbitThick }); // fadeDisc: opt-in, the line fades over the Earth's disc
+      items.push({
+        kind: 'curve',
+        pts: () => pts,
+        color: a.color,
+        opacity: 0.35,
+        role: 'orbit',
+        fadeDisc: a.fadeDisc,
+        thick: a.orbitThick,
+      }); // fadeDisc: opt-in, the line fades over the Earth's disc
       items.push({
         kind: 'point',
         shape: 'sat',
@@ -453,11 +487,11 @@ export function buildSim(cfg) {
       a.fall.forEach((f, i) => {
         const pos = (t) => {
           const dt = t - tgt.t;
-          if (dt < 0) return null;
+          if (dt < 0 || (a.fallUntil != null && t >= a.fallUntil)) return null;
           const alt = tgt.alt * (1 - f.k * dt) - 6 * dt;
           return alt > 70 ? orbitPos(alt, tgt.inc + f.di, tgt.raan + f.dr, tgt.uHit + tgt.w * dt * f.dw) : null;
         };
-        const tEnd = tgt.t + (1 - 75 / tgt.alt) / f.k,
+        const tEnd = Math.min(tgt.t + (1 - 75 / tgt.alt) / f.k, a.fallUntil ?? 1),
           N = 36,
           all = [];
         for (let k = 0; k <= N; k++) all.push(pos(tgt.t + ((tEnd - tgt.t) * k) / N) || pos(tgt.t + ((tEnd - tgt.t) * (k - 1)) / N));
@@ -466,10 +500,11 @@ export function buildSim(cfg) {
           dynamic: true,
           avoid: true,
           all,
-          thick: 0.0045,
+          thick: 0.0025,
           color: '#ff9a55',
           width: 2,
           pts: (t) => {
+            if (a.fallUntil != null && t >= a.fallUntil) return [];
             const s = clamp01((t - tgt.t) / (tEnd - tgt.t));
             return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
           },
@@ -486,7 +521,15 @@ export function buildSim(cfg) {
           labelDy: 16,
           pos,
         });
-        items.push({ kind: 'flash', pos: all[N], t0: Math.min(0.98, tEnd), color: '#ffd9a0', size: 0.12, span: 0.1 });
+        items.push({
+          kind: 'flash',
+          pos: all[N],
+          t0: Math.min(0.98, tEnd),
+          color: '#ffd9a0',
+          size: 0.12,
+          span: 0.1,
+          until: a.fallUntil,
+        });
       });
     }
     if (a.type === 'aircraft') {
@@ -640,7 +683,10 @@ export function buildSim(cfg) {
           pos: (t) => (t < tgt.t - 0.004 ? bez(sAt(t)) : null),
           orient: (t) => {
             const sv = sAt(t);
-            return { up: norm(bez(sv)), dir: norm(add(bez(Math.min(1, sv + 0.02)), scl(bez(sv), -1))) };
+            return {
+              up: norm(bez(sv)),
+              dir: norm(add(bez(Math.min(1, sv + 0.02)), scl(bez(sv), -1))),
+            };
           },
         });
       items.push({
@@ -734,6 +780,8 @@ export function buildSim(cfg) {
         vis: 0,
         fill(t, out, colr) {
           const dt = t - tgt.t;
+          // Retire a historical cloud before a later source count is shown; do not invent surviving positions.
+          const cloudFade = a.fadeOut ? 1 - smooth((t - a.fadeOut[0]) / (a.fadeOut[1] - a.fadeOut[0])) : 1;
           // a.ring { t1, ease }: opt-in closed ring: each fragment's along-track offset grows from 0 at the hit to its own share of the full circle at t1
           // (ordered by speed, so the ring is evenly filled), then the band keeps widening; the early cloud is a short, fat shell, not a thin wall
           const rs = a.ring ? 1 - (1 - clamp01(dt / (a.ring.t1 - tgt.t))) ** (a.ring.ease ?? 2) : 0;
@@ -744,7 +792,7 @@ export function buildSim(cfg) {
             let x = 0,
               y = 0,
               z = 0;
-            if (dt > 0) {
+            if (dt > 0 && cloudFade > 0) {
               const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
               let alt = tgt.alt + p.da * fat * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
@@ -788,6 +836,7 @@ export function buildSim(cfg) {
                 (0.7 + 0.3 * dens) *
                   0.9 *
                   fade *
+                  cloudFade *
                   (0.4 + 0.6 * core * core) *
                   (dt > 0 && dt < 0.02 ? dt / 0.02 : 1) *
                   (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1),
@@ -844,7 +893,13 @@ export function buildSim(cfg) {
           return s <= 0 ? [] : all.slice(0, Math.max(2, Math.round(s * N) + 1));
         },
       });
-      items.push({ kind: 'curve', pts: () => all, color: a.color, opacity: a.ghostOpacity ?? 0.22, role: 'action' }); // ghostOpacity (opt-in): a brighter whole path
+      items.push({
+        kind: 'curve',
+        pts: () => all,
+        color: a.color,
+        opacity: a.ghostOpacity ?? 0.22,
+        role: 'action',
+      }); // ghostOpacity (opt-in): a brighter whole path
       if (a.marks) {
         // altitude ruler along the apogee direction: ticks at stated/analysed altitudes + GEO
         const d = norm(all[N >> 1]),
@@ -888,7 +943,15 @@ export function buildSim(cfg) {
               f = s - i;
             return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
           };
-          items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.16, kvMin: a.rocket.glowMin ?? 16, kvMax: a.rocket.glowMax ?? 38, pos: headPos });
+          items.push({
+            kind: 'point',
+            shape: 'kv',
+            color: a.color,
+            kvSize: 0.16,
+            kvMin: a.rocket.glowMin ?? 16,
+            kvMax: a.rocket.glowMax ?? 38,
+            pos: headPos,
+          });
           items.push({
             kind: 'point',
             shape: 'rocket',
@@ -899,8 +962,26 @@ export function buildSim(cfg) {
             maxPx: a.rocket.maxPx ?? 54,
             pos: sm,
           });
-        } else items.push({ kind: 'point', shape: 'kv', color: a.color, kvSize: 0.3, kvMin: 28, kvMax: 64, pos: headPos });
-        if (!a.rocket) items.push({ kind: 'point', shape: 'kv', color: a.headColor ?? '#fff1e6', kvSize: 0.14, kvMin: 14, kvMax: 30, pos: headPos });
+        } else
+          items.push({
+            kind: 'point',
+            shape: 'kv',
+            color: a.color,
+            kvSize: 0.3,
+            kvMin: 28,
+            kvMax: 64,
+            pos: headPos,
+          });
+        if (!a.rocket)
+          items.push({
+            kind: 'point',
+            shape: 'kv',
+            color: a.headColor ?? '#fff1e6',
+            kvSize: 0.14,
+            kvMin: 14,
+            kvMax: 30,
+            pos: headPos,
+          });
       }
       focus = focus || a.from;
     }
@@ -921,7 +1002,13 @@ export function buildSim(cfg) {
         labelDx: a.dx,
         labelDy: a.dy,
       });
-    buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus: (f) => (focus = focus || f) });
+    buildSpaceActor(a, {
+      cfg,
+      items,
+      rnd,
+      tgt,
+      setFocus: (f) => (focus = focus || f),
+    });
   }
   // GNSS links: aircraft <-> 4 highest GPS satellites; red when inside zone.
   if (items._gps && items._zone) {
@@ -973,6 +1060,23 @@ export function buildSim(cfg) {
           });
       });
   }
-  const { cams, stillCamFor } = buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, crafts });
-  return { cfg, items, cams, flags, stillCamFor, still: cfg.still ?? 0.5, sunRef: cams[0].pos };
+  const { cams, stillCamFor } = buildCameras({
+    cfg,
+    items,
+    H,
+    tgt,
+    aircraftPos,
+    focus,
+    anchors,
+    crafts,
+  });
+  return {
+    cfg,
+    items,
+    cams,
+    flags,
+    stillCamFor,
+    still: cfg.still ?? 0.5,
+    sunRef: cams[0].pos,
+  };
 }

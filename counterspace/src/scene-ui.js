@@ -20,6 +20,7 @@ import { download } from './export.js';
 import { hooks, seenScenes } from './shared.js';
 import { revealIn } from './explore.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
+import { stillFromSVG } from './scenes/svg/still-frame.js';
 import { FACTS, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 import * as THREE from 'three';
 export let host = null,
@@ -61,7 +62,8 @@ async function getHost() {
         glOK = false;
         if (inScene) {
           stillOnly = true;
-          renderSVG(curSim, view);
+          diagramTime = failed.t;
+          renderSVG(curSim, view, diagramTime);
           staticMode(true);
           setStatus('The animation stopped. A still diagram is shown.');
         }
@@ -89,7 +91,14 @@ async function getHost() {
           cut = host.sim.cfg.camCut,
           a = acts && !c.auto ? acts[c.act] : cut ? (i === cut.cam ? { t0: cut.t, t1: 1 } : { t0: 0, t1: cut.t }) : null;
         wideSel = acts && !c.auto && c.act == null ? i : -1; // an episode scene's Wide preset: its chip is the pressed one, not the Tour's
-        epi = a ? { a0: a.t0, a1: a.t1, last: acts ? a === acts.at(-1) : a.t1 === 1, name: cc?.episode || cc?.chip || cc?.short || c.name } : null;
+        epi = a
+          ? {
+              a0: a.t0,
+              a1: a.t1,
+              last: acts ? a === acts.at(-1) : a.t1 === 1,
+              name: cc?.episode || cc?.chip || cc?.short || c.name,
+            }
+          : null;
         pick(i);
         if (epi)
           host.update(host.t); // bring the time into the episode now (a preset pressed at another episode's time)
@@ -162,7 +171,8 @@ const overlay = $('overlay'),
   slLinks = $('slLinks'),
   slPop = $('slPop'),
   slNextPop = $('slNextPop');
-const pictureNote = view.querySelector('.illus .full'), livePictureNote = pictureNote.textContent;
+const pictureNote = view.querySelector('.illus .full'),
+  livePictureNote = pictureNote.textContent;
 // The same queries as scenes.css: the phone layout, the layout with the picture above the story, and the short and wide layout (a phone on its side).
 const PHONE = '(max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px)',
   COMPACT = matchMedia(PHONE),
@@ -190,6 +200,7 @@ let wideSel = -1,
   lblTxt = '',
   lastUserScroll = -Infinity, // when the reader last scrolled the story themselves
   diagramOnly = false,
+  diagramTime = null,
   stillOnly = false; // the open scene shows a still diagram (animation off or 3D unavailable)
 export function setHeroSim(s) {
   heroSim = s;
@@ -309,7 +320,10 @@ export async function openScene(id, originEl, viaTour) {
   diagramBtn.setAttribute('aria-label', 'Show explanatory diagram');
   diagramBtn.hidden = true;
   pictureNote.textContent = livePictureNote;
-  if (host) { host.canvas.hidden = false; if (host.labelLayer) host.labelLayer.hidden = false; }
+  if (host) {
+    host.canvas.hidden = false;
+    if (host.labelLayer) host.labelLayer.hidden = false;
+  }
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -319,6 +333,7 @@ export async function openScene(id, originEl, viaTour) {
   syncDots();
   const sim = buildSim(cfg);
   curSim = sim;
+  diagramTime = sim.still;
   camsEl.textContent = '';
   view.querySelector(':scope > svg')?.remove();
   if (!host && !REDUCED && glOK !== false) setState('loading', 'Loading the 3D view. You can read the story while you wait.');
@@ -377,6 +392,7 @@ const moreBtn = $('sceneMore');
 const stepChoose = $('sceneStepChoose');
 stepChoose.onchange = () => {
   if (stillOnly) {
+    if (curSim?.cfg.explanationByStep) return jumpToStep(+stepChoose.value);
     setMore(true);
     const li = stepsEl.children[+stepChoose.value];
     li?.scrollIntoView({ block: 'nearest' });
@@ -601,7 +617,11 @@ function findOnChart(cfg) {
   if (!m) return;
   revealIn(m); // a mark in "Explore the data" sits in a tab: open that tab first
   if (hooks.landOnMark) hooks.landOnMark(m, !REDUCED);
-  else m.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+  else
+    m.scrollIntoView({
+      block: 'center',
+      behavior: REDUCED ? 'auto' : 'smooth',
+    });
   m.classList.add('hl', 'flash-hl');
   m.focus({ preventScroll: true });
   setTimeout(() => m.classList.remove('hl', 'flash-hl'), 3500);
@@ -785,6 +805,7 @@ function buildEpisodes(cfg) {
     button.textContent = `${i + 1}. ${camera.episode || camera.chip || cfg.epChipShort?.[i] || camera.name}`;
     button.setAttribute('aria-pressed', 'false');
     button.onclick = () => {
+      if (stillOnly && curSim?.cfg.explanationByStep) return setDiagramTime(act.t0 + 0.001);
       if (!host || stillOnly) return;
       chooseView(act.cam);
       host.update(act.t0 + 0.001);
@@ -795,12 +816,12 @@ function buildEpisodes(cfg) {
 }
 const STEP_NAMES = {
   starfish: ['Rocket ascent', 'Detonation', 'Trapped electrons', 'Belt around Earth', 'Satellite damage'],
-  solwind: ['F-15 climb', 'Missile release', 'Intercept', 'Debris decay'],
+  solwind: ['F-15 climb', 'Missile release', 'Collision', 'Debris spreads', 'Debris decay', 'Later count'],
   fengyun: ['Interceptor ascent', 'Collision', 'Debris ring', 'Debris remaining'],
-  'burnt-frost': ['Interceptor ascent', 'Closing distance', 'Collision', 'Debris decay'],
+  'burnt-frost': ['Interceptor ascent', 'Closing distance', 'Collision', 'Debris spreads', 'Debris decay', 'Later count'],
   dn2: ['Rocket ascent', 'Estimated highest point', 'Reported re-entry'],
-  shakti: ['Interceptor ascent', 'Collision', 'Debris decay'],
-  cosmos1408: ['Interceptor ascent', 'Collision', 'Debris and the ISS orbit'],
+  shakti: ['Interceptor ascent', 'Collision', 'Debris spreads', 'Debris decay', 'Later count'],
+  cosmos1408: ['Interceptor ascent', 'Collision', 'Debris and the ISS orbit', 'Time passes', 'February 2026 count'],
   gnss: ['Before entering the zone', 'Inside the jammer zone'],
   viasat: ['Normal service', 'Attack begins', 'Modems disabled', 'Satellite unaffected', 'Attribution'],
   laser: ['Satellite rises', 'MIRACL tracks the target', 'Separate case: Peresvet'],
@@ -880,7 +901,7 @@ function markStep(k) {
     .querySelectorAll('button')
     .forEach((b, i) => b.setAttribute('aria-pressed', String(i === act)));
   if (document.activeElement !== stepChoose) stepChoose.value = String(k);
-  const episode = !expanded && !stillOnly ? cur?.acts?.[act] : null;
+  const episode = !expanded && (!stillOnly || curSim?.cfg.explanationByStep) ? cur?.acts?.[act] : null;
   let refit = false;
   [...stepsEl.children].forEach((li, i) => {
     const hidden = !!episode && (steps[i].t < episode.t0 || steps[i].t >= episode.t1);
@@ -1177,7 +1198,11 @@ stepsEl.addEventListener(
       const y = stepsEl.scrollTop;
       let best = 0;
       for (const li of visibleStepRows()) if (Math.abs(li.offsetTop - y) < Math.abs(best - y)) best = li.offsetTop;
-      if (Math.abs(best - y) > 1) stepsEl.scrollTo({ top: Math.max(0, best), behavior: REDUCED ? 'auto' : 'smooth' });
+      if (Math.abs(best - y) > 1)
+        stepsEl.scrollTo({
+          top: Math.max(0, best),
+          behavior: REDUCED ? 'auto' : 'smooth',
+        });
     }, 140);
   },
   { passive: true },
@@ -1197,6 +1222,7 @@ document.fonts?.ready.then(() => fitSteps());
 // Selecting a step pauses at its beginning; an out-of-episode step restores the whole-story camera.
 function jumpToStep(i) {
   const s = steps[i];
+  if (s && stillOnly && curSim?.cfg.explanationByStep) return setDiagramTime(s.t);
   if (!s || !host || !glOK || stillOnly || !cur) return;
   host.interrupt();
   setPlayBtn(false);
@@ -1211,6 +1237,27 @@ function jumpToStep(i) {
   }
   host.update(Math.min(s.t, 1));
   setStatus(`Step ${i + 1} of ${steps.length}: ${s.text}`);
+}
+function setDiagramTime(t) {
+  if (!curSim?.cfg.explanationByStep) return;
+  endTour(false);
+  diagramTime = Math.max(0, Math.min(1, t));
+  // Keep the paused return time without animating a hidden camera or episode fade.
+  if (diagramOnly && host) {
+    host.interrupt();
+    epi = null;
+    wideSel = -1;
+    host.lock = null;
+    host._manual = false;
+    host._act = null;
+    host.t = diagramTime;
+    host._ended = diagramTime >= 1;
+  }
+  renderSVG(curSim, view, diagramTime);
+  stepIdx = stepAt(diagramTime);
+  markStep(stepIdx);
+  requestAnimationFrame(fitSteps);
+  setStatus(`Still diagram: ${steps[stepIdx]?.text || cur.title}`);
 }
 stepsEl.addEventListener('click', (e) => {
   const li = e.target.closest('li[data-i]');
@@ -1287,7 +1334,7 @@ function syncScrub(t) {
 }
 // A still diagram has no timeline: Play, the scrubber and the views give way to one plain sentence; the steps stay, for reading.
 function staticMode(on) {
-  $('sceneEpisodes').hidden = on || !curSim?.cfg.acts;
+  $('sceneEpisodes').hidden = !curSim?.cfg.acts || (on && !curSim?.cfg.explanationByStep);
   [playBtn, scrubWrap, scTime, viewsEl].forEach((n) => {
     n.hidden = on;
   });
@@ -1301,17 +1348,21 @@ function staticMode(on) {
     setPlayBtn(false);
   } else setPlayBtn(true);
   stepsNote.textContent = on
-    ? curSim?.cfg.explanationAlt
-      ? 'The diagram explains the event. The steps below give its sequence; animation is not running.'
-      : 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
+    ? curSim?.cfg.explanationByStep
+      ? 'Select an episode or step to change this still diagram. Animation is not running.'
+      : curSim?.cfg.explanationAlt
+        ? 'The diagram explains the event. The steps below give its sequence; animation is not running.'
+        : 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
     : 'Select a step to jump to it.';
   if (on && curSim) {
-    stepIdx = stepAt(curSim.cfg.staticT ?? curSim.still ?? 0);
+    stepIdx = stepAt(curSim.cfg.explanationByStep ? (diagramTime ?? curSim.still) : (curSim.cfg.staticT ?? curSim.still ?? 0));
     markStep(stepIdx); // the step the still shows
     requestAnimationFrame(fitSteps);
   }
   exportBtn.querySelector('span').textContent = on ? 'Save this diagram' : 'Save image';
-  stepsEl.querySelectorAll('.step').forEach((b) => (on ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));
+  stepsEl
+    .querySelectorAll('.step')
+    .forEach((b) => (on && !curSim?.cfg.explanationByStep ? b.setAttribute('aria-disabled', 'true') : b.removeAttribute('aria-disabled')));
 }
 // The diagram is a deliberate view, available even when animation works. Returning preserves the paused time.
 diagramBtn.onclick = () => {
@@ -1323,7 +1374,8 @@ diagramBtn.onclick = () => {
   host.canvas.hidden = diagramOnly;
   if (host.labelLayer) host.labelLayer.hidden = diagramOnly;
   if (diagramOnly) {
-    renderSVG(curSim, view);
+    diagramTime = host.t;
+    renderSVG(curSim, view, diagramTime);
     staticMode(true);
     staticTxt.textContent = 'This diagram shows the relationship. Choose Animation to return to the paused scene.';
     $('scRetry').hidden = true;
@@ -1758,60 +1810,7 @@ const PRINT_W = 3000;
 // Same layout as the live image (GLHost.stillPNG): a header band with the note on illustration, the diagram, then a footer band with the title,
 // the source and the imagery credit on separate lines. Sizes are in units of PRINT_W / 1000.
 function svgToPNG(svg, title, cite) {
-  return new Promise((resolve, reject) => {
-    const vb = svg.viewBox.baseVal,
-      xml = new XMLSerializer().serializeToString(svg),
-      img = new Image();
-    img.onload = () => {
-      const s = PRINT_W / 1000,
-        hb = Math.round(40 * s),
-        fb = Math.round(92 * s),
-        H = Math.round(PRINT_W * 0.625) - hb - fb; // the same 3000 x 1875 total as the live images (the diagram is laid out at this aspect)
-      const c = document.createElement('canvas'),
-        g = c.getContext('2d');
-      c.width = PRINT_W;
-      c.height = H + hb + fb;
-      g.fillStyle = '#060912';
-      g.fillRect(0, 0, c.width, c.height);
-      const fit = Math.min(PRINT_W / vb.width, H / vb.height); // contain (exact fit for the off-screen stage laid out at this aspect)
-      g.drawImage(img, (PRINT_W - vb.width * fit) / 2, hb + (H - vb.height * fit) / 2, vb.width * fit, vb.height * fit);
-      g.fillStyle = '#0b1120';
-      g.fillRect(0, 0, PRINT_W, hb);
-      g.fillRect(0, hb + H, PRINT_W, fb);
-      g.strokeStyle = 'rgba(150,175,230,0.3)';
-      g.lineWidth = Math.max(1, s);
-      g.beginPath();
-      g.moveTo(0, hb - 0.5);
-      g.lineTo(PRINT_W, hb - 0.5);
-      g.moveTo(0, hb + H + 0.5);
-      g.lineTo(PRINT_W, hb + H + 0.5);
-      g.stroke();
-      g.textBaseline = 'middle';
-      g.fillStyle = '#ffc86b';
-      g.font = `600 ${Math.round(14 * s)}px ${SANS}`;
-      g.fillText(svg.dataset.explanation ? 'Schematic diagram. Geometry is illustrative.' : 'Drawn for illustration. Orbit heights are squeezed to fit.', 16 * s, hb / 2);
-      g.fillStyle = '#eef2fb';
-      g.font = `600 ${Math.round(25 * s)}px ${SERIF}`;
-      g.fillText(title, 16 * s, hb + H + 24 * s);
-      const srcTxt = `Source: ${String(cite || '')
-        .trim()
-        .replace(/[.;,\s]+$/, '')}.`;
-      const credit = svg.dataset.explanation ? 'Schematic diagram.' : svg.dataset.earth === 'bluemarble' ? 'Earth imagery: NASA Blue Marble (public domain).' : 'Land map: Natural Earth (public domain).';
-      // Both footer lines share one font size: the largest (up to 15 px units) at which the longer line still fits.
-      let f = Math.round(15 * s);
-      for (; f > 10 * s; f -= 0.5 * s) {
-        g.font = `${f}px ${SANS}`;
-        if (Math.max(g.measureText(srcTxt).width, g.measureText(credit).width) <= PRINT_W - 32 * s) break;
-      }
-      g.font = `${f}px ${SANS}`;
-      g.fillStyle = '#c3cbe0';
-      g.fillText(srcTxt, 16 * s, hb + H + 54 * s);
-      g.fillText(credit, 16 * s, hb + H + 77 * s);
-      resolve(c.toDataURL('image/png'));
-    };
-    img.onerror = () => reject(new Error('The diagram could not be turned into an image'));
-    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
-  });
+  return stillFromSVG(svg, title, cite);
 }
 export async function exportStill() {
   if (!cur) return null;
@@ -1830,7 +1829,7 @@ export async function exportStill() {
     tmp.style.cssText = `position:fixed;left:-10000px;top:0;width:${vw}px;height:${vh}px;overflow:hidden`;
     document.body.appendChild(tmp);
     try {
-      const node = renderSVG(curSim, tmp, undefined, { print: true });
+      const node = renderSVG(curSim, tmp, diagramTime ?? curSim.still, { print: true });
       if (window.__cs) window.__cs.lastStillLay = node?.__lay; // test hook: the print layout's probe (craft sizes, Earth disc)
       if (node?.viewBox) return await svgToPNG(node, cur.title, cur.cite);
     } catch (e) {
@@ -1975,11 +1974,19 @@ const recapDetails = recapEl.querySelector('.sv-recap-more');
 recapDetails.addEventListener('toggle', () => {
   if (recapDetails.open) {
     const top = recapDetails.getBoundingClientRect().top - recapBody.getBoundingClientRect().top + recapBody.scrollTop - 8;
-    recapBody.scrollTo({ top: Math.max(0, top), behavior: REDUCED ? 'auto' : 'smooth' });
+    recapBody.scrollTo({
+      top: Math.max(0, top),
+      behavior: REDUCED ? 'auto' : 'smooth',
+    });
   }
   requestAnimationFrame(recapMore);
 });
-recapCue.addEventListener('click', () => recapBody.scrollBy({ top: Math.round(recapBody.clientHeight * 0.7), behavior: REDUCED ? 'auto' : 'smooth' }));
+recapCue.addEventListener('click', () =>
+  recapBody.scrollBy({
+    top: Math.round(recapBody.clientHeight * 0.7),
+    behavior: REDUCED ? 'auto' : 'smooth',
+  }),
+);
 addEventListener('resize', recapMore);
 recapEl.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-id]');

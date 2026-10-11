@@ -4,6 +4,8 @@ import { IS_PHONE } from '../core.js';
 
 export const COSMOS1408 = {
   id: 'cosmos1408',
+  explanationAlt:
+    'The historical debris cloud crossed the ISS’s orbital height after the 2021 collision at about 470 km. A separate February 2026 count reports five of more than 1,800 tracked fragments remaining. Cloud extent is schematic; dots are not fragment counts.',
   fitPct: 0.92,
   latePct: 0.8, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
   fitCross: true,
@@ -38,7 +40,14 @@ export const COSMOS1408 = {
   liveText: { 'ISS orbit': 'ISS orbit' }, // the shorter text keeps its leader within the limit at 900 px
   noSimCount: true,
   actors: [
-    { type: 'site', at: [62.9, 40.6], label: 'Plesetsk', color: C.ground, dx: -52, dy: 16 },
+    {
+      type: 'site',
+      at: [62.9, 40.6],
+      label: 'Plesetsk',
+      color: C.ground,
+      dx: -52,
+      dy: 16,
+    },
     {
       type: 'ring',
       alt: 420,
@@ -59,23 +68,53 @@ export const COSMOS1408 = {
         dy: 8,
       },
     },
-    { type: 'target', label: 'Cosmos 1408', color: C.tgt, big: 2.6, minPx: 42, maxPx: 90, bright: true, impactDx: -84, impactDy: -46, dx: -40, dy: 62 },
-    { type: 'intercept', from: [62.9, 40.6], t0: 0.17, color: C.int, label: 'Nudol', strong: true, flash: 0.2, coreK: 0.4, flashSpan: 0.12 },
+    {
+      type: 'target',
+      label: 'Cosmos 1408',
+      impactUntil: 0.76,
+      tickUntil: 0.84,
+      color: C.tgt,
+      big: 2.6,
+      minPx: 42,
+      maxPx: 90,
+      bright: true,
+      impactDx: -84,
+      impactDy: -46,
+      dx: -40,
+      dy: 62,
+    },
+    {
+      type: 'intercept',
+      from: [62.9, 40.6],
+      t0: 0.17,
+      color: C.int,
+      label: 'Nudol',
+      strong: true,
+      flash: 0.2,
+      coreK: 0.4,
+      flashSpan: 0.12,
+    },
     {
       type: 'debris',
       count: 1807,
+      fadeOut: [0.76, 0.84],
+      hideEmpty: true,
       spreadAlt: 150,
       spreadInc: 5,
       spreadRaan: 2.2,
       dv: 1.0,
       decay: 0.25,
       late: { t0: 0.34, k: 7, kr: 1.2 },
-      lateBoost: 1.9, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end
-      minPx: 3,
-      maxPx: 7, // the band keeps spreading along and across the orbit instead of a smear over the pole
+      lateBoost: 0.4, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end
+      minPx: 2.3,
+      maxPx: 4.5, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
       hard: true, // crisp fragments with a bright centre: not another soft orange town light
-      palette: { hot: [1, 0.98, 0.9], mid: [1, 0.9, 0.74], cool: [1, 0.8, 0.62] }, // warm white fragments: separate from the amber city lights
+      palette: {
+        hot: [1, 0.98, 0.9],
+        mid: [1, 0.9, 0.74],
+        cool: [1, 0.8, 0.62],
+      }, // warm white fragments: separate from the amber city lights
       darkHalo: 0.7,
       color: C.debris,
       label: 'Debris of Cosmos 1408',
@@ -86,13 +125,27 @@ export const COSMOS1408 = {
       labelEdge: true, // live: the label points at a fragment on the cloud's outer edge, not one deep inside it
     },
   ],
-  still: 0.8,
+  still: 0.68,
+  factCard: {
+    from: 0.84,
+    title: 'February 2026',
+    value: '5',
+    detail: 'tracked fragments remained',
+    note: 'More than 1,800 tracked initially · SWF, 2026',
+  },
   phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
-  liveOff: { 'Cosmos 1408': [-100, 14], Plesetsk: [-96, 44], 'ISS orbit': [150, 0], Impact: [26, -134] }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
+  liveOff: {
+    'Cosmos 1408': [-100, 14],
+    Plesetsk: [-96, 44],
+    'ISS orbit': [150, 0],
+    Impact: [26, -134],
+  }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [130, -37] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],
     [0.32, 'Collision at about 470 km: debris spreads and crosses the ISS orbit', 'Collision at about 470 km; debris spreads'],
-    [0.6, 'Cloud crosses the ISS orbit. SWF: 5 of more than 1,800 pieces still in orbit (Feb. 2026)', 'SWF: 5 of more than 1,800 pieces still in orbit'],
+    [0.6, '2021: debris spreads across the ISS’s orbital height; the crew sheltered', '2021: debris crosses the ISS’s orbital height'],
+    [0.76, 'Time passes. The historical cloud fades; it is not a map of surviving fragments', 'Historical cloud fades; later count follows'],
+    [0.84, 'February 2026: SWF counts 5 of more than 1,800 tracked fragments still in orbit', 'February 2026: 5 tracked fragments remain (SWF)'],
   ],
 };

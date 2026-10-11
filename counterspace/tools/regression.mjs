@@ -146,6 +146,19 @@ try {
         assert.equal(covered, false, `keyboard focus covered at stop ${n}`);
       }
     }
+    for (const id of ['rpo', 'spaceplanes']) {
+      await page.evaluate(id => window.__cs.openScene(id), id);
+      for (let i = 0; i < 3; i++) {
+        await page.locator('#sceneEpisodes button').nth(i).press('Enter');
+        assert.equal(await page.locator('#sceneView > svg').getAttribute('data-episode'), String(i), `${id}: reduced-motion episode follows keyboard selection`);
+      }
+      if (width === 375) {
+        await page.evaluate(() => window.__cs.exportStill());
+        const labels = await page.evaluate(() => window.__cs.lastStillLay.labels.map(x => x.text));
+        assert.equal(labels.includes(id === 'rpo' ? 'SKYNET 5A' : 'China’s reusable spacecraft'), true, `${id}: saved diagram preserves selected episode`);
+      }
+      await page.evaluate(() => window.__cs.closeScene());
+    }
     await page.addScriptTag({ path: new URL('node_modules/axe-core/axe.min.js', import.meta.url).pathname });
     const violations = await page.evaluate(async () => (await axe.run(document)).violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) })));
     console.log(width, JSON.stringify({ errors, remote, violations }));

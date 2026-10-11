@@ -4,10 +4,14 @@ import { C } from './shared.js';
 
 export const DN2 = {
   id: 'dn2',
+  explanationAlt:
+    'Two accounts of the rocket’s highest point: China stated 10,000 km; analysis cited by the Secure World Foundation estimated 30,000 km or more. Geostationary orbit is at 35,786 km. These are separate reported figures, not successive measurements of a known trajectory. No target was hit.',
   date: '2013-05-13',
   title: 'DN-2: China’s “high-altitude science” rocket launch (2013)',
   shells: ['LEO', 'MEO', 'GEO'],
   duration: 14,
+  scaleNote:
+    'The launch and reported heights are sourced. The flight path, rocket shape, timing and re-entry position are illustrative, not a reconstructed trajectory.',
   lede: 'On 13 May 2013 China launched a DN-2 rocket from Xichang on a path that reaches space and falls back without completing an orbit. It climbed toward geostationary orbit, the ring about 36,000 km above the equator, and it had no target.',
   caption:
     'On 13 May 2013 China launched a DN-2 rocket from Xichang on a suborbital path, a flight that reaches space and falls back without completing an orbit. ' +
@@ -20,7 +24,15 @@ export const DN2 = {
   related: null,
   event: 'cn-2013-dn2',
   actors: [
-    { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground, offGlobe: true, staticAt: [0.78, 0.47], staticPin: 'hard' },
+    {
+      type: 'site',
+      at: [28.2, 102.0],
+      label: 'Xichang',
+      color: C.ground,
+      offGlobe: true,
+      staticAt: [0.78, 0.47],
+      staticPin: 'hard',
+    },
     {
       type: 'suborbital',
       from: [28.2, 102.0],
@@ -37,8 +49,14 @@ export const DN2 = {
       dx: -40,
       dy: -50,
       head: true,
-      ghostOpacity: 0.5, // the whole planned path stays readable before the rocket flies it
-      rocket: { style: 'slim', minPx: IS_PHONE ? 68 : 100, maxPx: IS_PHONE ? 86 : 116, glowMin: IS_PHONE ? 32 : 10, glowMax: IS_PHONE ? 52 : 16 },
+      ghostOpacity: 0.25, // the whole planned path stays readable before the rocket flies it
+      rocket: {
+        style: 'slim',
+        minPx: IS_PHONE ? 46 : 66,
+        maxPx: IS_PHONE ? 64 : 82,
+        glowMin: 10,
+        glowMax: 16,
+      },
       apexT: 0.47,
       rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth
       staticAt: [0.6, 0.09],
@@ -46,7 +64,7 @@ export const DN2 = {
         {
           alt: 10000,
           label: '10,000 km · China’s stated figure',
-          short: '10,000 km',
+          short: '10,000 km (China)',
           phoneFrom: 0.3,
           opt: true,
           color: '#ffd9a0',
@@ -69,10 +87,28 @@ export const DN2 = {
           staticAt: [0.85, 0.8],
           staticPin: 'hard',
         },
-        { alt: GEO_ALT, label: 'GEO ring · 35,786 km', short: 'GEO', opt: true, color: C.geo, dx: 0, dy: 46, staticAt: [0.88, 0.58], staticPin: 'hard' },
+        {
+          alt: GEO_ALT,
+          label: 'GEO ring · 35,786 km',
+          short: 'GEO',
+          opt: true,
+          color: C.geo,
+          dx: 0,
+          dy: 46,
+          staticAt: [0.88, 0.58],
+          staticPin: 'hard',
+        },
       ],
     },
-    { type: 'ring', alt: GEO_ALT, inc: 0, raan: 0, color: C.geo, thick: 0.006, opacity: 0.9 },
+    {
+      type: 'ring',
+      alt: GEO_ALT,
+      inc: 0,
+      raan: 0,
+      color: C.geo,
+      thick: 0.006,
+      opacity: 0.9,
+    },
   ],
   still: 0.62,
   stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it
@@ -88,8 +124,14 @@ export const DN2 = {
   // each with a short
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
-  liveText: { '10,000': '10,000 km', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
-  liveOff: { 'DN-2 path': [-30, -34], Xichang: [-60, -40], '10,000': [10, 42], '≥30,000': [-10, -96], GEO: [20, 74] }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
+  liveText: { '10,000': '10,000 km (China)', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
+  liveOff: {
+    'DN-2 path': [-30, -34],
+    Xichang: [-60, -40],
+    '10,000': [10, 42],
+    '≥30,000': [-10, -96],
+    GEO: [20, 74],
+  }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
   offSteps: {
     'DN-2 path': [
       [0, -30, -34],
@@ -119,12 +161,35 @@ export const DN2 = {
     {
       name: 'Follow the rocket',
       short: 'Follow',
-      trackPath: { tilt: 45, lift: 0.55, ring: true, geoT: -0.1, ahead: 0.07, fill: IS_PHONE ? 0.86 : 0.76, zoom: IS_PHONE ? 1.3 : 1.42, lookK: 0.4 },
+      trackPath: {
+        tilt: 45,
+        lift: 0.55,
+        ring: true,
+        geoT: -0.1,
+        ahead: 0.07,
+        fill: IS_PHONE ? 0.86 : 0.76,
+        zoom: IS_PHONE ? 1.3 : 1.42,
+        lookK: 0.4,
+      },
     },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame
-    { name: 'Side view', at: [22, 8, 5.4], look: [0, 90, 0.7], phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] } },
-    { name: 'From the pole', at: [78, 80, 8.4], phone: { at: [78, 80, 7.2] }, hide: ['DN-2 path', '10,000'] },
+    {
+      name: 'Side view',
+      at: [22, 8, 5.4],
+      look: [0, 90, 0.7],
+      phone: { at: [24, 24, 6.6], look: [0, 96, 0.7] },
+    },
+    {
+      name: 'From the pole',
+      at: [78, 80, 8.4],
+      phone: { at: [78, 80, 7.2] },
+      hide: ['DN-2 path', '10,000'],
+    },
     // Whole scene: far enough back that no ring edge is cropped; 375: the path label would sit on the disc, crowding Xichang and 10,000 km
-    { name: 'Whole scene', at: [20, 45, 6.8], phone: { at: [20, 45, 8], hide: ['DN-2 path'] } },
+    {
+      name: 'Whole scene',
+      at: [20, 45, 6.8],
+      phone: { at: [20, 45, 8], hide: ['DN-2 path'] },
+    },
   ],
 };

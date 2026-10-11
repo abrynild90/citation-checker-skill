@@ -187,6 +187,25 @@ export class GLHost {
       pillCss({ warm: true, block: true }) +
       ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px)';
     this.labelLayer.appendChild(this.statusEl);
+    this.factEl = null;
+    if (sim.cfg.factCard) {
+      const c = sim.cfg.factCard;
+      this.factEl = document.createElement('div');
+      this.factEl.className = 'scene-evidence';
+      for (const [name, value] of Object.entries({
+        date: c.title,
+        value: c.value,
+        detail: c.detail,
+        note: c.note,
+      })) {
+        const span = document.createElement('span');
+        span.className = 'scene-evidence-' + name;
+        span.textContent = value;
+        this.factEl.append(span);
+      }
+      this.factEl.hidden = true;
+      this.labelLayer.appendChild(this.factEl);
+    }
     // Hero: an on-canvas hint that the stage is interactive (fades once the visitor drags it).
     this.chipEl = null;
     if (sim.cfg.spin) {
@@ -293,7 +312,13 @@ export class GLHost {
   }
   setCam(i, instant) {
     const c = this.sim.cams[i],
-      prev = this._camSeen ? { p: this.camera.position.clone(), l: this.target.clone(), u: this.camera.up.clone() } : null;
+      prev = this._camSeen
+        ? {
+            p: this.camera.position.clone(),
+            l: this.target.clone(),
+            u: this.camera.up.clone(),
+          }
+        : null;
     this.camIdx = i;
     this._user = false;
     this.hideShell = !!c.hideShell;
@@ -354,8 +379,14 @@ export class GLHost {
       const ov = (this._fadeEl ||= Object.assign(document.createElement('div'), {}));
       ov.style.cssText = 'position:absolute;inset:0;background:#05080f;pointer-events:none;opacity:0';
       if (ov.parentNode !== this.el) this.el.insertBefore(ov, this.labelLayer || null);
-      ov.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 280, easing: 'ease-out' });
-      this.labelLayer?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
+      ov.animate([{ opacity: 0.9 }, { opacity: 0 }], {
+        duration: 280,
+        easing: 'ease-out',
+      });
+      this.labelLayer?.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 280,
+        easing: 'ease-out',
+      });
     } catch (e) {}
   }
   update(t) {
@@ -614,7 +645,7 @@ export class GLHost {
         const span = it.span ?? (it.big ? 0.3 : 0.14),
           dt = t - it.t0,
           lg = it.linger != null && dt >= span, // opt-in: after the burst a faint ring stays on the impact point
-          on = dt > 0 && (dt < span || lg);
+          on = dt > 0 && (it.until == null || t < it.until) && (dt < span || (lg && (it.lingerEnd == null || t < it.lingerEnd)));
         obj.visible = on;
         obj.userData.on = on;
         if (on && lg) {
@@ -650,6 +681,7 @@ export class GLHost {
     for (const { m, u0, speed } of this.trails || []) m.uniforms.uU.value = (((u0 + t * Math.PI * 2 * speed) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     this._drawInset();
     if (this.statusEl) {
+      if (this.factEl) this.factEl.hidden = t < this.sim.cfg.factCard.from;
       // a camera may carry its own caption ([full, phone]) when the time-line text does not describe what it shows
       const cst = this.sim.cams[this.camIdx]?.status;
       this.statusEl.textContent = cst
@@ -850,12 +882,16 @@ export class GLHost {
     this.dyn = [];
     this.status = null;
     this.statusEl = null;
+    this.factEl = null;
     this.chipEl = null;
     this.insetEl = null;
     this._lastPlace = this._lastObjs = this._lastObst = null;
   }
   memory() {
-    return { ...this.renderer.info.memory, programs: this.renderer.info.programs?.length };
+    return {
+      ...this.renderer.info.memory,
+      programs: this.renderer.info.programs?.length,
+    };
   }
   _bindDrag() {
     const cv = this.canvas;
