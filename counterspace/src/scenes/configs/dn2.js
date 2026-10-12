@@ -56,6 +56,8 @@ export const DN2 = {
         maxPx: IS_PHONE ? 64 : 82,
         glowMin: 10,
         glowMax: 16,
+        burn: 0.2, // a short powered phase, then a long coast to the apogee
+        stage: { s: 0.09 }, // the reports speak of upper stages: one lower stage drops away early in the burn (the count of stages is not claimed)
       },
       apexT: 0.47,
       rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth

@@ -89,6 +89,7 @@ export const COSMOS1408 = {
       t0: 0.17,
       color: C.int,
       label: 'Nudol',
+      rocket: { style: 'slim', minPx: 44, maxPx: 60, glowMin: 14, glowMax: 26 }, // a drawn interceptor with exhaust and smoke, like the other launch scenes
       strong: true,
       flash: 0.2,
       coreK: 0.4,

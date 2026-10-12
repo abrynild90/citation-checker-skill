@@ -90,7 +90,8 @@ export function buildSim(cfg) {
     tgt.hitPos = tgt.pos(H.t);
     focus = focus || [H.lat, H.lon];
   }
-  let aircraftPos = null;
+  let aircraftPos = null,
+    aircraftItem = null;
   if (cfg.status)
     items.push({
       kind: 'status',
@@ -618,6 +619,7 @@ export function buildSim(cfg) {
         item.gnss = true;
         item.path = a.path;
       }
+      aircraftItem = item;
       items.push(item);
     }
     if (a.type === 'intercept' && tgt) {
@@ -650,6 +652,7 @@ export function buildSim(cfg) {
         all,
         thick: a.thick ?? 0.0042,
         taper: a.taper,
+        wakeOp: a.wakeOp ?? (a.rocket ? 0.3 : undefined), // a drawn rocket has its own exhaust and smoke: the path behind it is a faint guide
         color: a.color,
         width: 2,
         label: a.label,
@@ -668,6 +671,7 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: 'kv',
         color: a.color,
+        dim: a.rocket ? 0.3 : undefined, // a drawn vehicle has its own exhaust: the coloured glow is only a faint marker behind it
         pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(sAt(t)) : null),
       });
       if (a.rocket)
@@ -679,6 +683,18 @@ export function buildSim(cfg) {
           scale: 1,
           minPx: a.rocket.minPx ?? 26,
           maxPx: a.rocket.maxPx ?? 48,
+          rocketStyle: a.rocket.style,
+          // flight look (gl-rocket.js): ignition at t0, the vehicle is consumed at the hit; burn is the fraction of the flight under thrust (the rest is coast)
+          fx: {
+            t0: a.t0,
+            t1: tgt.t,
+            burn: a.rocket.burn ?? 0.55,
+            alt0: a.from === 'aircraft' ? (cfg.actors.find((x) => x.type === 'aircraft')?.alt ?? 12) : 0,
+            air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop } : null,
+            cold: a.rocket.launch === 'vls',
+            stage: a.rocket.stage,
+            seed: a.t0 * 10,
+          },
           // stands at the launch point from the start, then rides the arc
           pos: (t) => (t < tgt.t - 0.004 ? bez(sAt(t)) : null),
           orient: (t) => {
@@ -689,13 +705,14 @@ export function buildSim(cfg) {
             };
           },
         });
-      items.push({
-        kind: 'point',
-        shape: 'kv',
-        kvSize: 0.07,
-        color: '#ffd9a0',
-        pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(Math.max(0.012, sAt(t) - 0.035)) : null),
-      });
+      if (!a.rocket)
+        items.push({
+          kind: 'point',
+          shape: 'kv',
+          kvSize: 0.07,
+          color: '#ffd9a0',
+          pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(Math.max(0.012, sAt(t) - 0.035)) : null),
+        });
       items.push({
         kind: 'flash',
         pos: to,
@@ -879,6 +896,7 @@ export function buildSim(cfg) {
         short: a.short,
         all,
         thick: a.thick,
+        wakeOp: a.wakeOp ?? (a.rocket ? 0.3 : undefined),
         color: a.color,
         width: 2,
         label: a.label,
@@ -950,6 +968,7 @@ export function buildSim(cfg) {
             kvSize: 0.16,
             kvMin: a.rocket.glowMin ?? 16,
             kvMax: a.rocket.glowMax ?? 38,
+            dim: 0.3, // the drawn vehicle has its own exhaust: the coloured glow is only a faint marker behind it
             pos: headPos,
           });
           items.push({
@@ -961,6 +980,8 @@ export function buildSim(cfg) {
             minPx: a.rocket.minPx ?? 30,
             maxPx: a.rocket.maxPx ?? 54,
             pos: sm,
+            // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
+            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stage: a.rocket.stage, seed: a.t0 * 10 },
           });
         } else
           items.push({

@@ -7,7 +7,7 @@ import { foilCanvas } from './earth.js';
 
 // Part kit: a craft is built from many small boxes, cylinders and swept shapes. Each part is placed with a position and rotation (inside optional nested
 // groups), baked into its geometry, and all parts that share a material are merged into one mesh, so a whole craft costs a handful of draw calls.
-class Kit {
+export class Kit {
   constructor(T) {
     this.T = T;
     this.map = new Map();
@@ -59,7 +59,9 @@ class Kit {
         nv += ge.attributes.position.count;
         ni += ge.index ? ge.index.count : ge.attributes.position.count;
       }
-      const pos = new Float32Array(nv * 3),
+      const hasCol = list.every((ge) => ge.attributes.color),
+        colA = hasCol ? new Float32Array(nv * 3) : null,
+        pos = new Float32Array(nv * 3),
         nor = new Float32Array(nv * 3),
         uv = new Float32Array(nv * 2),
         idx = new Uint32Array(ni);
@@ -71,6 +73,7 @@ class Kit {
         pos.set(ge.attributes.position.array, vo * 3);
         nor.set(ge.attributes.normal.array, vo * 3);
         uv.set(ge.attributes.uv.array, vo * 2);
+        if (hasCol) colA.set(ge.attributes.color.array, vo * 3);
         if (ix) for (let i = 0; i < ix.length; i++) idx[io + i] = ix[i] + vo;
         else for (let i = 0; i < c; i++) idx[io + i] = vo + i;
         vo += c;
@@ -81,6 +84,7 @@ class Kit {
       bg.setAttribute('position', new T.BufferAttribute(pos, 3));
       bg.setAttribute('normal', new T.BufferAttribute(nor, 3));
       bg.setAttribute('uv', new T.BufferAttribute(uv, 2));
+      if (hasCol) bg.setAttribute('color', new T.BufferAttribute(colA, 3));
       bg.setIndex(new T.BufferAttribute(idx, 1));
       const mesh = new T.Mesh(bg, mat);
       meshes.set(mat, mesh);
@@ -592,79 +596,6 @@ export const modelMethods = {
       g.userData.halo = h;
     }
     Object.assign(g.userData, { span: 0.046, minPx: 22, maxPx: 60 });
-    return g;
-  },
-  // Sounding rocket (DN-2): white body, red nose cone, four fins, an engine bell and a glowing exhaust flame behind. Nose along +z, length about 0.06.
-  // style 'slim' (opt-in, DN-2): a slender grey-white stage, a small dark nose cone, dark fins and a soft additive plume (no yellow cone flame)
-  _rocketSlim() {
-    const T = this.T,
-      K = new Kit(T),
-      PI = Math.PI,
-      body = this._mat(0xcfd4dc, { metalness: 0.35, roughness: 0.42 }),
-      dark = this._mat(0x262b36, { metalness: 0.6, roughness: 0.45 });
-    K.cyl(body, 0.0026, 0.0026, 0.05, 0, 0, 0, PI / 2, 0, 0, 20);
-    K.cyl(dark, 0.0002, 0.0026, 0.008, 0, 0, 0.029, PI / 2, 0, 0, 20);
-    K.cyl(dark, 0.0027, 0.0027, 0.0016, 0, 0, 0.012, PI / 2, 0, 0, 20);
-    K.cyl(dark, 0.0023, 0.0017, 0.004, 0, 0, -0.027, PI / 2, 0, 0, 16);
-    for (let k = 0; k < 4; k++) {
-      const a = (k * PI) / 2;
-      K.box(dark, 0.0005, 0.005, 0.008, Math.cos(a) * 0.0038, Math.sin(a) * 0.0038, -0.021, 0, 0, a - PI / 2);
-    }
-    const g = K.build();
-    const plume = (len, r, col, op, z) => {
-      const m = new T.Mesh(
-        new T.ConeGeometry(r, len, 16, 1, true),
-        new T.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide }),
-      );
-      m.rotation.x = -PI / 2;
-      m.position.z = z;
-      return m;
-    };
-    g.add(plume(0.07, 0.0036, 0xff9a52, 0.26, -0.062), plume(0.04, 0.0021, 0xffe3b8, 0.5, -0.047));
-    const halo = new T.Sprite(
-      new T.SpriteMaterial({ map: this.spriteTex, color: 0xffb070, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }),
-    );
-    halo.scale.setScalar(0.022);
-    halo.position.z = -0.032;
-    g.add(halo);
-    g.userData.sat = true;
-    g.userData.body = g.userData.meshes.get(body);
-    Object.assign(g.userData, { span: 0.062, minPx: 30, maxPx: 52 });
-    return g;
-  },
-  _rocketModel(color, style) {
-    if (style === 'slim') return this._rocketSlim();
-    const T = this.T,
-      K = new Kit(T),
-      PI = Math.PI,
-      white = this._mat(0xf2f4f9, { metalness: 0.3, roughness: 0.36 }),
-      tip = this._mat(new T.Color(color).lerp(new T.Color(0xffffff), 0.1).getHex(), { metalness: 0.2, roughness: 0.4 }),
-      dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45 });
-    K.cyl(white, 0.0042, 0.0042, 0.036, 0, 0, 0, PI / 2, 0, 0, 20);
-    K.cyl(tip, 0.0003, 0.0042, 0.016, 0, 0, 0.026, PI / 2, 0, 0, 20);
-    K.cyl(dark, 0.0034, 0.0042, 0.003, 0, 0, -0.0195, PI / 2, 0, 0, 16);
-    K.cyl(dark, 0.003, 0.0022, 0.006, 0, 0, -0.0225, PI / 2, 0, 0, 16);
-    for (let k = 0; k < 4; k++) {
-      const a = (k * PI) / 2;
-      K.box(tip, 0.0007, 0.0085, 0.011, Math.cos(a) * 0.0068, Math.sin(a) * 0.0068, -0.0125, 0, 0, a - PI / 2);
-    }
-    K.cyl(dark, 0.0043, 0.0043, 0.0012, 0, 0, 0.0075, PI / 2, 0, 0, 20); // a dark band
-    const g = K.build();
-    const flame = new T.Mesh(
-      new T.ConeGeometry(0.0038, 0.045, 14, 1, true),
-      new T.MeshBasicMaterial({ color: 0xffa24a, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide }),
-    );
-    flame.rotation.x = -PI / 2; // apex (+y) to -z: the wide end sits at the engine
-    flame.position.z = -0.03;
-    const core = flame.clone();
-    core.material = flame.material.clone();
-    core.material.color.set(0xfff0c8);
-    core.scale.set(0.5, 0.55, 0.5);
-    core.position.z = -0.0255;
-    g.add(flame, core);
-    g.userData.sat = true;
-    g.userData.body = g.userData.meshes.get(white);
-    Object.assign(g.userData, { span: 0.062, minPx: 30, maxPx: 52 });
     return g;
   },
   // Airliner: white fuselage with a pointed nose and a tapered tail, swept wings, two engines, a tail fin and stabilisers. The airframe colour is the

@@ -7,6 +7,7 @@ import { DEG, IS_PHONE, add, ll, scl } from './core.js';
 import { modelMethods } from './gl-models.js';
 import { earthMethods } from './gl-earth.js';
 import { spaceMethods } from './gl-space.js';
+import { rocketMethods } from './gl-rocket.js';
 
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz;
@@ -311,7 +312,7 @@ const methods = {
             map: this.spriteTex,
             color: col(it.color),
             transparent: true,
-            opacity: 0.9,
+            opacity: 0.9 * (it.dim ?? 1),
             depthWrite: false,
             blending: T.AdditiveBlending,
           }),
@@ -348,6 +349,7 @@ const methods = {
       } else if (it.scale) m.scale.setScalar(it.scale);
       root.add(m);
       this.dyn.push({ it, obj: m });
+      if (it.fx && it.shape === 'rocket') this._rocketInit(it, m, root);
       if (it.trailOf) this._trail(it, root);
       if (it.label)
         this._label(
@@ -647,5 +649,5 @@ const methods = {
 
 // Adds this file's methods to GLHost.prototype. Called once from app.js, after gl-host.js is loaded and before any scene opens.
 export function installGLItems(GLHost) {
-  Object.assign(GLHost.prototype, methods, modelMethods, earthMethods, spaceMethods);
+  Object.assign(GLHost.prototype, methods, modelMethods, earthMethods, spaceMethods, rocketMethods);
 }

@@ -160,6 +160,7 @@ export class GLHost {
     this.obst = [];
     this._lm = {};
     this.ptMats = [];
+    this._rkt = [];
     this.tubeMats = [];
     this.ringPts = [];
     this.shellRings = [];
@@ -514,7 +515,9 @@ export class GLHost {
             r.scale.setScalar(0.012 + 0.11 * ph);
             r.material.opacity = 0.85 * (1 - ph) ** 1.5;
           });
-        if (it.orient && p) {
+        if (it.fx && p && this._rocketPose(it, obj, t, p)) {
+          // a rocket flies nose along its velocity (gl-rocket.js)
+        } else if (it.orient && p) {
           const o = it.orient(t);
           obj.up.set(...o.up);
           obj.lookAt(p[0] + o.dir[0], p[1] + o.dir[1], p[2] + o.dir[2]);
@@ -737,6 +740,7 @@ export class GLHost {
         f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       obj.scale.setScalar(u.base * f);
     }
+    this._rocketFrame(); // rocket exhaust, smoke and staging follow the models' drawn size
     // Bounded dazzle glare: the target and its leader remain readable through the beam.
     for (const { it, obj } of this.dyn) {
       if (it.kind !== 'glare') continue;
