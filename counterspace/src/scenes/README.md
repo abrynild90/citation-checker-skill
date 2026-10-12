@@ -37,6 +37,7 @@ Illustrative only.
 | `gl-host.js` | `GLHost` class (live render, camera, model/glow fitting) |
 | `gl-items.js` | GLHost mixin: shaders, materials and item builders (`installGLItems`) |
 | `gl-models.js` | GLHost mixin: low-poly craft and site models (satellite, ISS, spaceplane, aircraft, site, pin, jammer, ship); installed by `installGLItems` |
+| `gl-rocket.js` | GLHost mixin: rocket and interceptor models plus their flight look (layered exhaust plume, ignition flash, burnout cut-off, atmosphere-only smoke trail, velocity-aligned attitude, nose heating, stage separation, air-launch drop, vertical-launch pop); driven by an item's `fx` descriptor from `sim.js` and the optional `rocket: {burn, stage, launch}` keys of an intercept / suborbital actor; installed by `installGLItems` |
 | `gl-labels.js` | GLHost mixin: HTML labels, leaders, context inset (`installGLLabels`) |
 | `gl-still.js` | GLHost mixin: print-resolution PNG still (`installGLStill`) |
 
