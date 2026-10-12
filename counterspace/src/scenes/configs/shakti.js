@@ -118,6 +118,8 @@ export const SHAKTI = {
     },
   ],
   still: 0.43,
+  stillImpact: true, // the print also labels the impact point, to the right of the strike, so the frame is not bare on that side of the globe
+  stillOff: { Impact: [215, -75] },
   status: [
     [0, 'PDV Mk-II rises from Abdul Kalam Island'],
     [0.4, 'Collision at about 300 km', 'Collision at about 300 km'],
