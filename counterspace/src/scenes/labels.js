@@ -332,7 +332,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
     try {
       const m = mk(i, bx, sg);
       if (!m) return null;
-      const { cx, cy, cost } = m,
+      const { cx, cy, cost, w, h } = m,
         cur = cost(x0, y0);
       if (cur < 60) return null;
       relocMode = 2;
@@ -354,6 +354,17 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
         const R = 0.22 * W;
         for (let rad = 6; rad <= R && rad * 0.6 < bestN; rad += rad < 40 ? 6 : 10)
           for (let a = 0; a < 24; a++) tryAt(x0 + Math.cos((a * Math.PI) / 12) * rad, y0 + Math.sin((a * Math.PI) / 12) * rad);
+        // no clean slot on the rings (the free strip between the limb and the leader cap can be a few px wide): at every height within reach, the slot that just clears
+        // the planet on either side
+        if (disc && (!best || bestN >= 60))
+          for (let dy = -R; dy <= R; dy += 4) {
+            const Y = y0 + dy,
+              dy0 = Math.max(Math.abs(Y - disc.cy) - h / 2, 0);
+            if (dy0 >= disc.r) continue;
+            const hx = Math.sqrt(disc.r * disc.r - dy0 * dy0) + w / 2 + 1;
+            tryAt(disc.cx + hx, Y);
+            tryAt(disc.cx - hx, Y);
+          }
       }
       if (mem) {
         if (best) mem['r' + i] = best;
