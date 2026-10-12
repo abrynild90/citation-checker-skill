@@ -613,7 +613,7 @@ export class GLHost {
           if (it.maxPx) {
             const bh = this.renderer.domElement.height;
             cap =
-              (it.maxPx * (bh / (this.el?.clientHeight || bh)) * Math.max(0.1, mid.distanceTo(this.camera.position))) /
+              (it.maxPx * (bh / this._stageH(bh)) * Math.max(0.1, mid.distanceTo(this.camera.position))) /
               bh /
               Math.tan((this.camera.fov * DEG) / 2);
           }
@@ -704,10 +704,16 @@ export class GLHost {
     }
     this.render();
   }
+  // The stage height that sizes written in px at the stage (point sprites, ribbons, stars) are scaled from: the live canvas's own stage, and for a print-resolution
+  // still the stage of a 1440 x 900 window (652 px), so a print never depends on the window it is saved from.
+  _stageH(bh) {
+    const ch = this.el?.clientHeight || bh;
+    return Math.abs(bh - ch * this.renderer.getPixelRatio()) < 2 ? ch : 652;
+  }
   // Point sprite sizes follow the drawing-buffer height (live canvas or the print-resolution still).
   _ptUniforms() {
     const bh = this.renderer.domElement.height,
-      k = bh / (this.el?.clientHeight || bh),
+      k = bh / this._stageH(bh),
       sc = bh / (2 * Math.tan((this.camera.fov * DEG) / 2));
     for (const m of this.tubeMats || []) {
       m.uniforms.uScale.value = sc;
@@ -725,7 +731,7 @@ export class GLHost {
   // Models keep a sensible on-screen size: scaled down when the camera is close, up (a little) when it is far.
   _fitModels() {
     const bh = this.renderer.domElement.height,
-      k = bh / (this.el?.clientHeight || bh),
+      k = bh / this._stageH(bh),
       sc = bh / (2 * Math.tan((this.camera.fov * DEG) / 2)),
       cp = this.camera.position,
       v = (this._v3 ||= new this.T.Vector3());

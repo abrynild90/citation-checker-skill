@@ -153,7 +153,7 @@ export const spaceMethods = {
   },
   // Star size follows the drawing-buffer scale (device pixel ratio, or the print-resolution still).
   _spaceFrame() {
-    if (this._starMat) this._starMat.uniforms.uPx.value = this.renderer.domElement.height / (this.el?.clientHeight || this.renderer.domElement.height);
+    if (this._starMat) this._starMat.uniforms.uPx.value = this.renderer.domElement.height / this._stageH(this.renderer.domElement.height);
   },
   _disposeSpace() {
     this._nebTex?.dispose();

@@ -45,13 +45,19 @@ const methods = {
     }
     return null;
   },
+  // The stage height that the pixel numbers of a scene (label offsets, sprite floors, margins) are written for. A live call is at the stage's own size, so the factor is 1; a
+  // still (any other size) is laid out for the stage of a 1440 x 900 window (652 px), so a print never depends on the window it is saved from.
+  _refH(h) {
+    const ch = this.el.clientHeight || h;
+    return Math.abs(h - ch) < 1 ? ch : 652;
+  },
   // Screen positions of visible labels for a given canvas size (shared by live render and PNG export).
   // u = font scale relative to the live 11 px label. Overlaps are resolved by placeLabels().
   _labelPositions(w, h, u = 1, noBanner = false, statusBox = null) {
     const cam = this.camera.position,
       T = this.T,
       raw = [],
-      k = h / (this.el.clientHeight || h);
+      k = h / this._refH(h);
     for (const L of this.labels) {
       if (L.cls === 'shell' && this.hideShell) {
         raw.push(null);
@@ -214,6 +220,7 @@ const methods = {
     const EDGE = !noBanner && w >= 700 ? 24 : 12;
     if (!noBanner && w >= 700) {
       objs.edgeX = 24;
+      objs.relocEdgeX = 11; // the gutter a pill that has to move off a sprite or the planet may use (see placeLabels().relocate)
       objs.leaderCap = Math.round(Math.max(120, 0.153 * w)); // ~120 px at the narrowest desktop stage, growing with it (the checker's own reach is 0.153 W)
     }
     this._lastObjs = objs;
@@ -236,6 +243,7 @@ const methods = {
     // (a pill that must sit outside a zone early and inside it later); it replaces that label's liveOff entry (a step with dx null: no fixed offset, the placer's own slot).
     const stepOffs = !noBanner && this.camIdx === 0 && w >= 700 && !camOffs && this.sim.cfg.offSteps;
     const offsAll = stepOffs ? { ...Object.fromEntries(Object.entries(offs || {}).filter(([n]) => !(n in stepOffs))), ...Object.fromEntries(Object.entries(stepOffs).map(([n, st]) => { const k = st.filter((e) => e[0] <= this.t).pop() || st[0]; return [n, k[1] == null ? null : [k[1], k[2]]]; }).filter((e) => e[1])) } : offs;
+    const moved = new Set(); // labels a scene offset or the push-apart moved off the placer's own slot: checked again below
     if (offsAll)
       Object.entries(offsAll).forEach(([n, d]) => {
         if (this.sim.cfg.offFrom?.[n] > this.t) return; // cfg.offFrom { 'Label start': t } (opt-in): the fixed offset applies only from this time
@@ -263,6 +271,7 @@ const methods = {
         // the placer's own slot stays when the fixed one would land on another label (it knows nothing of this override)
         if (pl.some((q, j) => j !== i && q && raw[j] && Math.abs(q.x - x) < (raw[j].w + r.w) / 2 && Math.abs(q.y - y) < (raw[j].h + r.h) / 2)) return;
         Object.assign(pl[i], { x, y, leader: true, ax: r.px, ay: r.py, qx, qy });
+        moved.add(i);
       });
     // cfg.pushApart { near, dist, gap } (opt-in): two pills whose referents lie within `near` px (default 40) and whose boxes touch or overlap: the later one
     // is pushed radially away from the pair's midpoint (at least `dist` px, default 110), turning in 40 degree steps until it clears every other pill
@@ -294,9 +303,25 @@ const methods = {
               c = { x, y, w: rj.w, h: rj.h };
             if (live.some((o) => o !== j && hit(c, { ...pl[o], w: raw[o].w, h: raw[o].h }))) continue;
             Object.assign(pl[j], { x, y, leader: true, ax: rj.px, ay: rj.py, qx: Math.max(x - rj.w / 2, Math.min(x + rj.w / 2, rj.px)), qy: Math.max(y - rj.h / 2, Math.min(y + rj.h / 2, rj.py)) });
+            moved.add(j);
             break;
           }
         }
+    }
+    // Desktop live view: every pill is checked once more where it finally stands (after the scene offsets and the push-apart). One that sits on a sprite or the planet, whose
+    // box or leader crosses another's, or whose leader is over the cap, is moved to the nearest slot that does not (see placeLabels().relocate); nothing else changes.
+    if (!noBanner && w >= 700 && pl.relocate) {
+      const idx = raw.map((r, i) => (r && pl[i] && !r.fixed ? i : -1)).filter((i) => i >= 0);
+      idx.sort((a, b) => (moved.has(b) ? 1 : 0) - (moved.has(a) ? 1 : 0) || a - b);
+      for (const i of idx) {
+        const r = raw[i],
+          others = raw.map((q, j) => (q && pl[j] && j !== i ? j : -1)).filter((j) => j >= 0).map((j) => ({ x: pl[j].x, y: pl[j].y, w: raw[j].w, h: raw[j].h, leader: pl[j].leader ? [pl[j].ax, pl[j].ay, pl[j].qx, pl[j].qy] : null }));
+        const n = pl.relocate(i, pl[i].x, pl[i].y, others, this._lm);
+        if (!n) continue;
+        const qx = Math.max(n[0] - r.w / 2, Math.min(n[0] + r.w / 2, r.px)),
+          qy = Math.max(n[1] - r.h / 2, Math.min(n[1] + r.h / 2, r.py));
+        Object.assign(pl[i], { x: n[0], y: n[1], leader: !r.noLeader && Math.hypot(qx - r.px, qy - r.py) > r.h * (r.leaderK ?? 0.9), ax: r.px, ay: r.py, qx, qy });
+      }
     }
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
@@ -306,7 +331,7 @@ const methods = {
     const T = this.T,
       cam = this.camera,
       cp = cam.position,
-      k = h / (this.el.clientHeight || h),
+      k = h / this._refH(h),
       sc = h / (2 * Math.tan((cam.fov * DEG) / 2)),
       V = new T.Vector3(),
       M = this.root.matrixWorld;
@@ -408,7 +433,7 @@ const methods = {
       cam = this.camera,
       cp = cam.position,
       cpa = [cp.x, cp.y, cp.z],
-      k = h / (this.el.clientHeight || h),
+      k = h / this._refH(h),
       sc = h / (2 * Math.tan((cam.fov * DEG) / 2)),
       W3 = new T.Vector3(),
       items = this.sim.items;

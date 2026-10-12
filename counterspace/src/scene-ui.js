@@ -710,6 +710,24 @@ function toggleSrc(open) {
   if (open) toggleNextPop(false); // one note at a time over the story column
   slPop.hidden = !open;
   slBtn.setAttribute('aria-expanded', String(open));
+  if (open) snapPop(slPop);
+}
+// A note that opens over the foot of the story column (short window) covers whole rows of the list of steps, never half of one: when its top edge falls inside a row,
+// the note grows upward to that row's top (its content stays centred in it).
+function snapPop(pop) {
+  pop.style.minHeight = '';
+  pop.classList.remove('snap');
+  const pr = pop.getBoundingClientRect(),
+    sr = stepsEl.getBoundingClientRect();
+  if (!pr.height || !sr.height || pr.top <= sr.top || pr.top >= sr.bottom) return;
+  for (const li of stepsEl.children) {
+    const r = li.getBoundingClientRect();
+    if (r.top < pr.top - 1 && r.bottom > pr.top + 1) {
+      pop.classList.add('snap');
+      pop.style.minHeight = Math.ceil(pr.height + (pr.top - r.top) + 2) + 'px';
+      break;
+    }
+  }
 }
 slBtn.onclick = () => toggleSrc(slPop.hidden);
 // Short desktop window: the scenes to go to next open from a pill in the source row, over the end of the story column like the source note
@@ -718,6 +736,7 @@ function toggleNextPop(open) {
   if (open) toggleSrc(false);
   slNextPop.hidden = !open;
   $('slNext')?.setAttribute('aria-expanded', String(!!open));
+  if (open) snapPop(slNextPop);
 }
 // "About this picture" and "Where to go next" share one row; the one opened shows its text in the story column under the row (never over the steps or the source).
 const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
@@ -730,8 +749,36 @@ function togglePair(which) {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
     pairBodies[k].hidden = !on;
-    if (on) pairBodies[k].scrollIntoView({ block: 'nearest', behavior: 'auto' });
   });
+  if (which) revealNote(pairBodies[which]);
+}
+// Bring the opened note into the column's view, and the related-law button under it too when both fit; when they do not, the note is whole and the button is
+// one scroll away (the column's fade at its foot says so). The column never rests with a line of the source or the button cut at its foot.
+function revealNote(body) {
+  const sr = asideBody.getBoundingClientRect(),
+    nr = body.getBoundingClientRect(),
+    foot = $('sceneFoot'),
+    fr = foot.getClientRects().length ? foot.getBoundingClientRect() : nr,
+    gap = 6,
+    all = fr.bottom + gap - sr.bottom, // the foot's lower edge in view
+    keepTop = nr.top - (sr.top + gap), // but the note's top edge stays in view
+    whole = nr.bottom + gap - sr.bottom; // at the least, the note is whole
+  const need = Math.max(whole, Math.min(all, keepTop)),
+    most = Math.max(need, keepTop);
+  if (need > 1) {
+    // the column rests on a block boundary (or a line of the lede), never mid-line: the nearest one at or below what is needed, while the note's top stays in view
+    const top0 = asideBody.scrollTop - sr.top,
+      cuts = [...asideBody.children]
+        .filter((n) => n.getClientRects().length)
+        .flatMap((n) => {
+          const r = n.getBoundingClientRect(),
+            lh = parseFloat(getComputedStyle(n).lineHeight) || 0,
+            lines = lh && n.matches('p, .sv-lede') ? Math.round(r.height / lh) : 1;
+          return Array.from({ length: Math.max(1, lines) }, (_, k) => r.top + top0 + k * lh - 4);
+        })
+        .filter((v) => v - asideBody.scrollTop >= need - 0.5 && v - asideBody.scrollTop <= most + 0.5 && v <= asideBody.scrollHeight - asideBody.clientHeight + 0.5);
+    asideBody.scrollTop = cuts.length ? Math.min(...cuts) : asideBody.scrollTop + need;
+  } else if (nr.top < sr.top + 1) asideBody.scrollTop += nr.top - sr.top - gap;
 }
 Object.keys(pairBtns).forEach((k) => (pairBtns[k].onclick = () => togglePair(pairBodies[k].hidden ? k : null)));
 document.addEventListener('pointerdown', (e) => {
@@ -917,6 +964,10 @@ function markStep(k) {
     stepsEl.scrollTop = 0;
     requestAnimationFrame(fitSteps);
   }
+  // the active row is set in a heavier weight and may wrap differently: the clip that cuts the window at its last whole row is measured again
+  // for the new active row now, after the row has taken its new height, and once the list has come to rest
+  trimSteps();
+  requestAnimationFrame(() => (trimSteps(), requestAnimationFrame(trimSteps)));
 }
 const visibleStepRows = () => [...stepsEl.children].filter((li) => !li.hidden);
 function syncSteps(t) {
@@ -1031,12 +1082,17 @@ function rowsFit() {
 // A note opened under "About this picture" or "Where to go next" sits in the column, so the column scrolls; it is measured as if the note were closed.
 function fitSteps() {
   const noted = asideBody.classList.contains('has-note'),
-    at = asideBody.scrollTop;
-  if (noted) asideBody.classList.remove('has-note');
+    at = asideBody.scrollTop,
+    open = noted ? Object.values(pairBodies).filter((n) => !n.hidden) : [];
+  if (noted) {
+    asideBody.classList.remove('has-note');
+    open.forEach((n) => (n.hidden = true)); // the note itself is not part of what the list is fitted to either
+  }
   try {
     fitStepsClosed();
   } finally {
     if (noted) {
+      open.forEach((n) => (n.hidden = false));
       asideBody.classList.add('has-note');
       asideBody.scrollTop = at;
     }
