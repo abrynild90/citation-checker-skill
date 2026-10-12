@@ -359,7 +359,7 @@ export const SPACEPLANES = {
     },
   ],
   camHide: { 2: ['GEO ring'] },
-  camOff: { 2: { 'GEO ring': [-30, -64] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
+  camOff: { 2: { 'GEO ring': [-30, -64], Highest: [-96, -62] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
 
   phoneCamOff: { 2: { 'X-37B OTV-7': [-80, 65], 'OTV-7': [-80, 65] } },
   liveOff: { 'CSSHQ orbit': [-24, 66] }, // the big CSSHQ model needs the orbit name well clear of it (below-left, on the dark sky beside the limb)
