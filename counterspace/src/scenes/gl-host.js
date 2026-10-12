@@ -664,7 +664,7 @@ export class GLHost {
             { core, ring } = obj.userData;
           core.scale.setScalar((it.size ?? (it.big ? 0.55 : 0.16)) * Math.sqrt(Math.min(1, f * 3)) + 0.01);
           core.userData.s0 = core.scale.x;
-          core.material.opacity = 0.85 * Math.max(0, 1 - f * 1.6) * (it.coreK ?? 1);
+          core.material.opacity = 0.85 * Math.pow(Math.max(0, 1 - f * 1.6), 1.6) * (it.coreK ?? 1); // a short flash: it drops away quickly, the ring carries on
           ring.scale.setScalar((it.size ? it.size * 1.7 : it.big ? 0.9 : 0.3) * Math.pow(f, 0.6) + 0.01);
           ring.userData.s0 = ring.scale.x;
           ring.material.opacity = 0.9 * (1 - f);
@@ -673,7 +673,7 @@ export class GLHost {
             // strong flash: a bigger, longer-lived core and a second white ring
             core.scale.setScalar(core.scale.x * 1.45);
             core.userData.s0 = core.scale.x;
-            core.material.opacity = Math.min(1, 1.1 * Math.max(0, 1 - f * 1.05)) * (it.coreK ?? 1);
+            core.material.opacity = Math.min(1, 1.1 * Math.pow(Math.max(0, 1 - f * 1.05), 1.5)) * (it.coreK ?? 1);
             r2.scale.setScalar((it.size ?? 0.55) * 2.6 * Math.pow(f, 0.5) + 0.01);
             r2.userData.s0 = r2.scale.x;
             r2.material.opacity = 0.75 * (1 - f);

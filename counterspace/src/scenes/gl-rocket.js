@@ -400,6 +400,15 @@ export const rocketMethods = {
       pb = it.pos(t + d) || p,
       vel = rec.v1.set(pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]);
     const speed = vel.length() / (2 * d);
+    // coast: no thrust steers the vehicle, so its attitude changes slowly (it follows the flight direction at a fraction of the pace) and a pitch-over at the
+    // top of the arc is a slow roll of the nose, not a flip
+    const tb = rec.burns[rec.burns.length - 1][1];
+    if (t > tb) {
+      const te = tb + 0.3 * (t - tb),
+        qa = it.pos(te - d) || p,
+        qb = it.pos(te + d) || p;
+      vel.set(qb[0] - qa[0], qb[1] - qa[1], qb[2] - qa[2]);
+    }
     if (vel.lengthSq() > 1e-14) rec.lastDir.copy(vel).normalize();
     const dir = rec.v2.copy(rec.lastDir),
       up = rec.v3.set(p[0], p[1], p[2]).normalize();
