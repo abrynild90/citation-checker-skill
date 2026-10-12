@@ -2,12 +2,9 @@
 import { GEO_ALT, IS_PHONE } from '../core.js';
 import { C, PK } from './shared.js';
 
-// SJ-21 presets that show the pair carry this note: SWF says SJ-21 "docked" with Compass G2 but does not describe any arm or grapple, so the boom drawn
-// on the tug model is a generic, illustrative one.
-const ARM_TAG = { tag: 'Arm drawn for illustration (SWF does not describe it)', tagShort: 'Arm drawn for illustration (not in SWF)' };
-
 export const SJ21_TUG = {
   id: 'sj21-tug',
+  explanationAlt: 'Before towing, defunct Compass G2 occupied the working geostationary belt. SJ-21 docked with it by an undescribed method and towed both objects above that belt. The before-and-after diagram is schematic; no docking hardware or exact trajectory is shown.',
   date: '2022-01-21',
   title: 'China’s SJ-21 tows a dead satellite into a higher orbit (2022)',
   shells: [],
@@ -17,11 +14,10 @@ export const SJ21_TUG = {
     'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
     'The Secure World Foundation (SWF), a space-security nonprofit, reports that SJ-21 “docked to it at some point”. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the GEO belt, the band of orbits where working satellites sit, then came back down close to GEO. ' +
     'SWF’s table says SJ-21 pulled Compass G2 well past the graveyard orbit, the disposal region above GEO for retired satellites. ' +
-    'SWF does not say how SJ-21 captured or docked with it, so the grabbing arm drawn on SJ-21 is for illustration only. SWF does report robotic-arm demonstrations on other Chinese satellites: SY-7 (2013) and Aolong-1 (2016). ' +
+    'SWF does not say how SJ-21 captured or docked with it. The spacecraft shapes, spacing and motion are illustrative. ' +
     'No legal item in our records is tied to this event.',
   cite:
-    'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15; robotic arms on other satellites: SY-7, p. 03-02; ' +
-    'Aolong-1, p. 03-04; SJ-17, p. 03-08.',
+    'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15.',
   related: null,
   event: 'cn-2022-sj21-compass-g2',
   inset: 'Top view',
@@ -51,8 +47,8 @@ export const SJ21_TUG = {
       anchor: 'g',
       color: C.dead,
       scale: 2.2 * PK,
-      minPx: IS_PHONE ? 90 : 80,
-      maxPx: IS_PHONE ? 120 : 112,
+      minPx: IS_PHONE ? 64 : 80,
+      maxPx: IS_PHONE ? 88 : 112,
       label: 'Compass G2 (defunct)',
       short: 'Compass G2',
       staticKey: [
@@ -79,8 +75,8 @@ export const SJ21_TUG = {
       color: C.cn,
       bright: true,
       scale: 2.2 * PK,
-      minPx: IS_PHONE ? 90 : 80,
-      maxPx: IS_PHONE ? 120 : 112,
+      minPx: IS_PHONE ? 64 : 80,
+      maxPx: IS_PHONE ? 88 : 112,
       label: 'SJ-21 (China)',
       short: 'SJ-21',
       staticKey: [
@@ -109,10 +105,66 @@ export const SJ21_TUG = {
     { type: 'trail', craft: 'cg2', t0: 0.5, t1: 0.8, color: C.dead, byIndex: true },
     // Follow views show almost no Earth: mark the belt itself, the height above it (SWF: 290 to 3,100 km by 27 Jan.) and what each trail is.
     // the marker sits on the drawn belt arc (the ring is gapped around the pair, so it moves along the arc once the pair has risen)
-    { type: 'tag', anchor: 'g', off: [0.2, -0.008, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.45, 0.66], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: 100, dy: -40 },
-    { type: 'tag', anchor: 'g', off: [0.37, -0.029, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.66, 1], color: C.geo, label: 'GEO belt line', short: 'GEO belt line', dx: 100, dy: -40 },
-    { type: 'path', anchor: 'g', offs: [[0.2, 0, 0], [0.2, 0.22, 0], [0.2, 0.44, 0]], noInset: true, staticHide: true, stillHide: true, staticKeep: false, vis: [0.72, 0.97], color: '#ffe6a8', opacity: 0.85, thick: 0.0018, dash: 16 },
-    { type: 'tag', anchor: 'g', off: [0.2, 0.22, 0], leader: true, liveOnly: true, stillHide: true, vis: [0.72, 0.97], color: '#ffe6a8', label: '290 to 3,100 km above GEO (SWF)', short: '290–3,100 km above GEO', dx: -128, dy: -26 },
+    {
+      type: 'tag',
+      anchor: 'g',
+      off: [0.2, -0.008, 0],
+      leader: true,
+      liveOnly: true,
+      stillHide: true,
+      vis: [0.45, 0.66],
+      color: C.geo,
+      label: 'GEO belt line',
+      short: 'GEO belt line',
+      dx: 100,
+      dy: -40,
+    },
+    {
+      type: 'tag',
+      anchor: 'g',
+      off: [0.37, -0.029, 0],
+      leader: true,
+      liveOnly: true,
+      stillHide: true,
+      vis: [0.66, 1],
+      color: C.geo,
+      label: 'GEO belt line',
+      short: 'GEO belt line',
+      dx: 100,
+      dy: -40,
+    },
+    {
+      type: 'path',
+      anchor: 'g',
+      offs: [
+        [0.2, 0, 0],
+        [0.2, 0.22, 0],
+        [0.2, 0.44, 0],
+      ],
+      noInset: true,
+      staticHide: true,
+      stillHide: true,
+      staticKeep: false,
+      vis: [0.72, 0.97],
+      color: '#ffe6a8',
+      opacity: 0.85,
+      thick: 0.0018,
+      dash: 16,
+    },
+    {
+      type: 'tag',
+      anchor: 'g',
+      off: [0.2, 0.22, 0],
+      leader: true,
+      liveOnly: true,
+      stillHide: true,
+      vis: [0.72, 0.97],
+      color: '#ffe6a8',
+      label: '290 to 3,100 km above GEO (SWF)',
+      short: '290–3,100 km above GEO',
+      dx: -128,
+      dy: -26,
+    },
   ],
   atmoK: 1.5, // the Earth is only a sliver in the follow views: a faint blue limb glow, lit or not, shows where it is
   atmoFloor: 0.4,
@@ -131,27 +183,77 @@ export const SJ21_TUG = {
     [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
-    { name: 'Follow the pair', ...ARM_TAG, fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.86, 0.45], fill: 1.0, fillRamp: [[0.14, 0.68], [0.32, 1.0]], lookCraft: true, shiftR: 0.1, include: [[0.14, -0.04, 0], [0.05, -0.3, 0]] }, phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.32, 0.64, 0.7], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } } },
-    { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', narrowK: 1, at: [36, 104, 4.9], look: [-2, 106, 2.4], phone: { at: [36, 104, 4.8] } },
+    {
+      name: 'Follow the pair',
+      fitCraft: {
+        anchor: 'g',
+        ids: ['sj21', 'cg2'],
+        dir: [-0.3, 0.86, 0.45],
+        fill: 1.0,
+        fillRamp: [
+          [0.14, 0.68],
+          [0.32, 1.0],
+        ],
+        lookCraft: true,
+        shiftR: 0.1,
+        include: [
+          [0.14, -0.04, 0],
+          [0.05, -0.3, 0],
+        ],
+      },
+      phone: {
+        fitCraft: {
+          anchor: 'g',
+          ids: ['sj21', 'cg2'],
+          dir: [-0.32, 0.64, 0.7],
+          fill: 0.65,
+          lookCraft: true,
+          include: [
+            [0.12, -0.02, 0],
+            [0.04, -0.14, 0],
+          ],
+        },
+      },
+    },
+    { name: 'Whole event: Earth and the GEO belt', short: 'Whole event', narrowK: 1, at: [36, 104, 4.3], look: [-2, 106, 2.4], phone: { at: [36, 104, 4.35] } },
     {
       name: 'Approach and docking, from the side',
       short: 'Approach and docking',
-      ...ARM_TAG,
       fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.95, 0.15, 0.3], fill: 0.62, dMin: 0.35, t: 0.3 },
     },
     {
       name: 'The pull: the pair rises above the belt',
       short: 'The pull',
-      ...ARM_TAG,
-      frame: { anchor: 'g', from: [0.1, 0.26, 1.05], to: [0.08, 0.26, 0], t: 0.6 },
-      phone: { frame: { anchor: 'g', from: [0.1, 0.14, 1.05], to: [0.08, 0.14, 0], t: 0.6 } },
+      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [0.1, 0.26, 1.05], fill: 0.78, lookCraft: true, include: [[0, -0.3, 0]] },
+      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [0.1, 0.26, 1.05], fill: 0.65, lookCraft: true, include: [[0, -0.14, 0]] } },
     },
     {
       name: 'Looking down at the pair, Earth below',
       short: 'Looking down',
-      ...ARM_TAG,
-      fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.95, lookCraft: true, include: [[0.12, -0.04, 0], [0.04, -0.16, 0]] },
-      phone: { fitCraft: { anchor: 'g', ids: ['sj21', 'cg2'], dir: [-0.3, 0.8, 0.55], fill: 0.93, include: [[0.12, -0.02, 0], [0.04, -0.14, 0]] } },
+      fitCraft: {
+        anchor: 'g',
+        ids: ['sj21', 'cg2'],
+        dir: [-0.3, 0.8, 0.55],
+        fill: 0.95,
+        lookCraft: true,
+        include: [
+          [0.12, -0.04, 0],
+          [0.04, -0.16, 0],
+        ],
+      },
+      phone: {
+        fitCraft: {
+          anchor: 'g',
+          ids: ['sj21', 'cg2'],
+          dir: [-0.3, 0.8, 0.55],
+          fill: 0.65,
+          lookCraft: true,
+          include: [
+            [0.12, -0.02, 0],
+            [0.04, -0.14, 0],
+          ],
+        },
+      },
     },
     { name: 'Whole GEO belt', at: [26, 70, 7.4], phone: { at: [26, 70, 9], hide: ['GEO belt ('] } }, // 375: the ring is its own label here; its pill needed a long leader
   ],

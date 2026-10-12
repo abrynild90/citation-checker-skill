@@ -144,7 +144,18 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
     items._gps = sats;
   }
   if (a.type === 'zone') {
-    items.push({ kind: 'dome', at: a.at, radius: a.radius, color: a.color, label: a.label, short: a.short, labelDx: a.dx, labelDy: a.dy, soft: a.soft, clean: a.clean });
+    items.push({
+      kind: 'dome',
+      at: a.at,
+      radius: a.radius,
+      color: a.color,
+      label: a.label,
+      short: a.short,
+      labelDx: a.dx,
+      labelDy: a.dy,
+      soft: a.soft,
+      clean: a.clean,
+    });
     items._zone = a;
     if (a.jammer)
       items.push({
@@ -197,9 +208,19 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       // space side stays bright; only the ground-side segment dims once the ground network is hit
       const e = ll(b[0], b[1], 1.003),
         m = add(scl(g, 0.4), scl(e, 0.6));
-      items.push({ kind: 'beam', a: () => g, b: () => m, on: () => true, color: a.color, opacity: 0.4, width: 0.0038, edgeFade: true });
+      items.push({
+        kind: 'beam',
+        a: () => g,
+        b: () => m,
+        on: () => true,
+        color: a.color,
+        opacity: IS_PHONE ? 0.24 : 0.35,
+        width: 0.0038,
+        maxPx: IS_PHONE ? 1.2 : 2,
+        edgeFade: true,
+      });
       // Service traffic: small packets ride the downlink from the satellite to the ground; they stop once the ground side goes dark (illustrative).
-      for (let k = 0; k < 3; k++)
+      for (let k = 0; k < (IS_PHONE ? 1 : 3); k++)
         items.push({
           kind: 'point',
           shape: 'kv',
@@ -219,9 +240,10 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         color: a.color,
         opacity: 0.4,
         width: 0.0038,
+        maxPx: IS_PHONE ? 1.2 : 2,
         edgeFade: true,
         colorFn: (t) => (t > a.dimT0 + bi * 0.03 ? '#d98a7a' : a.color),
-        opFn: (t) => 0.4 - 0.34 * smooth((t - a.dimT0 - bi * 0.03) / (a.dimT1 - a.dimT0)),
+        opFn: (t) => (IS_PHONE ? 0.7 : 1) * (0.4 - 0.34 * smooth((t - a.dimT0 - bi * 0.03) / (a.dimT1 - a.dimT0))),
       });
     });
     if (a.hub) {
@@ -361,19 +383,14 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
         return n;
       },
     });
-    // The count is stated against the nominal sample (a.count) at every width: a phone draws fewer dots, but the share offline is the same number.
-    const dark = (t) => {
-      let d = 0;
-      for (const o of canon) if (t > o) d++;
-      return Math.round((d / canon.length) * a.count);
-    };
+    // Dots explain the spread of the outage; their drawn number is not an observed count.
     items.push({
       kind: 'status',
       text: (t, still, phone) => {
         if (phone) {
           if (t < a.pulse0) return 'Before the attack: modems online';
           if (t < a.t0) return 'Attackers reach the ground network';
-          return t < a.t1 ? `Malware wipes modems · ${dark(t)}/${a.count} offline` : 'Modems offline · satellite kept working';
+          return t < a.t1 ? 'Malware wipes modems; they go offline' : 'Modems offline · satellite kept working';
         }
         if (a.compactStatus) {
           // opt-in: shorter desktop status lines
@@ -385,7 +402,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
                 : t < a.t1
                   ? 'Modems wiped (SWF: ~45 min): red = offline'
                   : 'Modems offline (red) · satellite kept working';
-          return t >= a.t0 ? `${c} · ${dark(t)} of ${a.count} simulated` : c;
+          return c;
         }
         const tx =
           t < a.pulse0
@@ -395,7 +412,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
               : t < a.t1
                 ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
                 : 'Modems offline (red) · the satellite kept working';
-        return t >= a.t0 ? `${tx} · ${dark(t)} of ${a.count} simulated terminals offline` : tx;
+        return tx;
       },
     });
   }
@@ -410,9 +427,9 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       bStatic: (a.staticK ?? cfg.staticK) ? (t) => scl(tgt.pos(t), a.staticK ?? cfg.staticK) : null,
       on: (t) => t >= (a.tOn ?? 0) && Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02, // a.tOn (opt-in): the beam waits for its story step
       color: a.color,
-      opacity: 0.95,
-      width: 0.022,
-      maxPx: 15,
+      opacity: 0.7,
+      width: 0.016,
+      maxPx: 8,
       coreColor: '#ffe3f9',
       ends: a.ends ?? 0.05, // a.ends (opt-in): the glow size at the beam ends
       labelOffDisc: a.labelOffDisc,
@@ -430,8 +447,8 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       shape: 'kv',
       color: a.color,
       kvSize: 0.16,
-      kvMin: 26,
-      kvMax: 58,
+      kvMin: 18,
+      kvMax: 36,
       noStatic: true,
       pos: (t) => (t >= (a.tOn ?? 0) && Math.abs(t - tgt.t) < a.window && dot(tgt.pos(t), su) > 1.02 ? from : null),
     });

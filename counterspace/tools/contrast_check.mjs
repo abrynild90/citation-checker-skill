@@ -11,7 +11,7 @@ import path from 'path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..'),
   PORT = +(process.env.PORT || 9950),
-  AXE = 'https://cdn.jsdelivr.net/npm/axe-core@4.10.2/axe.min.js',
+  AXE = path.join(ROOT, 'tools/node_modules/axe-core/axe.min.js'),
   // VPS=1440x900,1920x1080 overrides the widths (each is checked in the dark and the light scheme)
   CONFIGS = process.env.VPS
     ? process.env.VPS.split(',').flatMap((v) => ['dark', 'light'].map((s) => [s, ...v.split('x').map(Number)]))
@@ -72,7 +72,7 @@ for (const [scheme, w, h] of CONFIGS) {
   await p.waitForTimeout(2500);
   await p.evaluate((s) => (document.documentElement.dataset.theme = s), scheme);
   await p.waitForTimeout(800);
-  await (process.env.AXE_FILE ? p.addScriptTag({ path: process.env.AXE_FILE }) : p.addScriptTag({ url: AXE }));
+  await (process.env.AXE_FILE ? p.addScriptTag({ path: process.env.AXE_FILE }) : p.addScriptTag({ path: AXE }));
   const meta = await p.evaluate(async () => {
     const r = await window.axe.run(document, { runOnly: ['color-contrast'], resultTypes: ['incomplete', 'violations'] });
     window.__els = (r.incomplete[0]?.nodes || []).map((n) => document.querySelector(n.target[n.target.length - 1])).filter(Boolean);

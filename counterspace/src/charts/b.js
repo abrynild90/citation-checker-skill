@@ -45,7 +45,7 @@ const NO_DATA_2020S = {
 };
 const isNoData = (cat, dec, state) => dec === '2020s' && (NO_DATA_2020S[cat] || []).includes(state);
 // Status of one state in one category and decade: 'D' (demonstrated), 'P' (developing, matrix-supported) or 'N' (developing, our reading, matrix: no data).
-const statusOf = (cat, dec, state, v) => (v === 'D' ? 'D' : isNoData(cat, dec, state) ? 'N' : 'P');
+export const statusOf = (cat, dec, state, v) => (v === 'D' ? 'D' : isNoData(cat, dec, state) ? 'N' : 'P');
 // The data names Russia "Russia" under direct ascent and "USSR/Russia" elsewhere; a group counts it once.
 const sameState = (k) => (k === 'Russia' ? 'USSR/Russia' : k);
 
@@ -71,7 +71,25 @@ export function totalsB(dec, group = 'cat') {
   });
   return { states: all.size, tot, dem, per };
 }
-const NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'];
+const NUM = [
+  'no',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+  'thirteen',
+  'fourteen',
+  'fifteen',
+  'sixteen',
+];
 const numWord = (n) => NUM[n] ?? String(n);
 // The sentence above the chart: it uses the same numbers as the bars (the 2020s bar says 48 and "range 16 to 48"; 13 is how many states stand behind them).
 export function capSentence(group = 'cat') {
@@ -84,7 +102,7 @@ export function capSentence(group = 'cat') {
   if (group === 'cat')
     return `${start}By the ${last}, ${numWord(b.states)} states hold ${b.tot} between them: ${b.dem} tested or used, the rest still in development.${end}`;
   const both = b.per[0] + b.per[1] - b.states;
-  return `${start}By the ${last}, ${numWord(b.per[0])} states have a kinetic capability (a physical attack, such as a missile) and ${numWord(b.per[1])} a non-kinetic one (jamming, lasers or cyber), and ${numWord(both)} have both.${end}`;
+  return `${numWord(b.states).replace(/^./, (c) => c.toUpperCase())} distinct states in the ${last}: ${b.per[0]} with kinetic capabilities, ${b.per[1]} with non-kinetic capabilities, ${both} with both.${end}`;
 }
 
 function countsB() {
@@ -120,10 +138,49 @@ function countsB() {
   return { series, units };
 }
 
+// The phone comparison uses the same aggregation and filters as the historical chart.
+let phoneDecade = CAPS.decades.at(-1);
+const phoneSelect = document.getElementById('capDecade');
+phoneSelect.innerHTML = CAPS.decades.map((d) => `<option${d === phoneDecade ? ' selected' : ''}>${d}</option>`).join('');
+function drawPhoneB() {
+  const { series, units } = countsB(),
+    i = CAPS.decades.indexOf(phoneDecade);
+  const max = Math.max(1, ...units.flatMap((u) => CAPS.decades.map((_, j) => series.filter((s) => s.unit.key === u.key).reduce((n, s) => n + s.vals[j], 0))));
+  const names = { D: 'tested or used', P: 'developing', N: 'developing, our reading; SWF’s table has no data' };
+  document.getElementById('capPhoneRows').innerHTML = units
+    .map((u) => {
+      const rows = series.filter((s) => s.unit.key === u.key),
+        total = rows.reduce((n, s) => n + s.vals[i], 0);
+      return `<section class="cap-phone-row"><h5>${u.label}<span>${total} ${total === 1 ? 'state' : 'states'}</span></h5><div class="cap-phone-bar" aria-hidden="true" style="--cap-color:var(${u.v})">${rows.map((s) => `<span class="cap-status-${s.status}" style="width:${(100 * s.vals[i]) / max}%"></span>`).join('')}</div><p>${
+        rows
+          .filter((s) => s.vals[i])
+          .map((s) => `<span><b>${s.vals[i]}</b> ${names[s.status]}</span>`)
+          .join('; ') || 'No capabilities recorded'
+      }</p></section>`;
+    })
+    .join('');
+  document.getElementById('capPhoneNote').textContent =
+    (phoneDecade === '2020s'
+      ? 'Based on SWF’s 2026 assessment. The distinction between tested or used and developing is our reading of its text.'
+      : 'Reconstructed from historical records; SWF did not assess this decade.') +
+    ' Bars use the same scale in every decade. Each state counts once within a group and may appear in more than one group.';
+}
+phoneSelect.onchange = () => {
+  phoneDecade = phoneSelect.value;
+  drawPhoneB();
+};
+document.getElementById('capHistory').onclick = (e) => {
+  const on = document.getElementById('chartB').classList.toggle('show-cap-history');
+  e.currentTarget.setAttribute('aria-expanded', String(on));
+  e.currentTarget.textContent = on ? 'Hide the historical chart' : 'Show all decades';
+  if (on) drawB();
+};
+
 export function drawB(el = document.getElementById('svgB')) {
+  if (!EXPORTING) drawPhoneB();
   el.innerHTML = '';
-  const { W, M, x } = layout(el),
-    phone = isPhoneNow(),
+  const phone = isPhoneNow(),
+    { W, M, x } = layout(el, DOMAIN, phone && !EXPORTING ? 620 : 300),
     R = W - M.r,
     decs = CAPS.decades,
     kin = stateB.group === 'kin',
@@ -169,6 +226,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('role', 'group')
     .attr('aria-labelledby', 'hB')
     .attr('id', 'svgB-root');
+  if (phone && !EXPORTING) svg.style('width', `${W}px`).style('max-width', 'none');
   svg
     .append('desc')
     .text(
@@ -223,7 +281,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('class', 'axis-title')
     .attr('x', phone ? 0 : 12)
     .attr('y', 14)
-    .text(kin ? 'States in each group' : 'Capabilities, counted by state');
+    .text('Capabilities counted');
   // decade boundaries share the other charts' year ticks
   const gx = svg.append('g').attr('class', 'gridline');
   bandsX.slice(1).forEach(([xa]) =>
@@ -378,7 +436,11 @@ export function drawB(el = document.getElementById('svgB')) {
         .attr('y', top - 24)
         .attr('text-anchor', phone ? 'end' : 'middle');
     a.append('tspan').attr('x', cxR).text('SWF-assessed');
-    a.append('tspan').attr('class', 'panel-sub').attr('x', cxR).attr('dy', 17).text(`${totalsB(decs.at(-1), 'cat').states} states`);
+    a.append('tspan')
+      .attr('class', 'panel-sub')
+      .attr('x', cxR)
+      .attr('dy', 17)
+      .text(`${totalsB(decs.at(-1), 'cat').states} states`);
   }
   const ax = svg.append('g').attr('class', 'axis xaxis').attr('transform', `translate(0,${base})`);
   ax.append('line').attr('class', 'domain').attr('x1', M.l).attr('x2', R);
@@ -387,7 +449,11 @@ export function drawB(el = document.getElementById('svgB')) {
     if (i) ax.append('line').attr('class', 'tick').attr('x1', xa).attr('x2', xa).attr('y1', 0).attr('y2', 6);
     if (phone && i === 0) {
       // the 1950s band is only three years wide: its name sits on a second row so it never touches the 1960s name
-      ax.append('text').attr('x', M.l - 2).attr('y', 42).attr('text-anchor', 'start').text(d);
+      ax.append('text')
+        .attr('x', M.l - 2)
+        .attr('y', 42)
+        .attr('text-anchor', 'start')
+        .text(d);
     } else if ((phone ? i % 2 === 1 : true) && tw(d, 13, 500) <= xb - xa + 14)
       ax.append('text')
         .attr('x', (xa + xb) / 2)
@@ -416,54 +482,58 @@ export function drawB(el = document.getElementById('svgB')) {
     `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('tkB').textContent = capSentence(stateB.group);
   document.getElementById('noteB').textContent = plain
-    ? 'Darker parts are tested or used; lighter parts are still in development. A state with both kinds is counted in both groups.'
+    ? 'Each state counts once for kinetic capabilities and once for non-kinetic capabilities. A state with both counts twice. Darker parts are tested or used; lighter parts are in development.'
     : kin
-      ? 'A state with both kinds appears in both groups.'
-      : 'A state with two capabilities is counted twice.';
+      ? 'Each state counts once per group. A state with both kinetic and non-kinetic capabilities counts twice.'
+      : 'Each state counts once per capability category. A state with capabilities in several categories counts in each.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   setKey(
     'legendB',
-    keyMarkup(plain ? [
-      {
-        head: 'Fill',
-        items: [
-          [sw(`style="fill:${ink};fill-opacity:.9"`), 'Darker: tested or used', 28],
-          [sw(`style="fill:${ink};fill-opacity:.38"`), 'Lighter: still in development', 28],
-          [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
-        ],
-      },
-    ] : [
-      {
-        head: 'Fill',
-        items: [
-          [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
-          [
-            `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
-              sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
-            'Developing or latent',
-            28,
+    keyMarkup(
+      plain
+        ? [
+            {
+              head: 'Fill',
+              items: [
+                [sw(`style="fill:${ink};fill-opacity:.9"`), 'Darker: tested or used', 28],
+                [sw(`style="fill:${ink};fill-opacity:.38"`), 'Lighter: still in development', 28],
+                [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+              ],
+            },
+          ]
+        : [
+            {
+              head: 'Fill',
+              items: [
+                [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
+                [
+                  `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
+                    sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
+                  'Developing or latent',
+                  28,
+                ],
+                [
+                  `<defs><pattern id="kD" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" style="fill:${ink};fill-opacity:.1"/><circle cx="3" cy="3" r="1.6" style="fill:${ink}"/></pattern></defs>` +
+                    sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
+                  'Developing, our reading (SWF’s table has no data)',
+                  28,
+                ],
+                [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
+              ],
+            },
+            {
+              head: 'Range bar',
+              items: [
+                [
+                  '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
+                  'Demonstrated only (low end) to demonstrated plus developing (high end)',
+                  18,
+                ],
+              ],
+            },
           ],
-          [
-            `<defs><pattern id="kD" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" style="fill:${ink};fill-opacity:.1"/><circle cx="3" cy="3" r="1.6" style="fill:${ink}"/></pattern></defs>` +
-              sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
-            'Developing, our reading (SWF’s table has no data)',
-            28,
-          ],
-          [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
-        ],
-      },
-      {
-        head: 'Range bar',
-        items: [
-          [
-            '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
-            'Demonstrated only (low end) to demonstrated plus developing (high end)',
-            18,
-          ],
-        ],
-      },
-    ]),
+    ),
   );
   const cnt = (d, p) => `<span class="nw"><b>${d}</b> demonstrated</span>, <span class="nw"><b>${p}</b> developing</span>`;
   table(
@@ -477,10 +547,10 @@ export function drawB(el = document.getElementById('svgB')) {
           P_ = Object.keys(o).filter((k) => o[k] === 'P' && !isNoData(c.key, d, k)),
           N_ = Object.keys(o).filter((k) => o[k] === 'P' && isNoData(c.key, d, k));
         const groups = [
-            ['Demonstrated', D_],
-            ['Developing', P_],
-            ['Developing, our reading (SWF’s table has no data)', N_],
-          ].filter(([, l]) => l.length);
+          ['Demonstrated', D_],
+          ['Developing', P_],
+          ['Developing, our reading (SWF’s table has no data)', N_],
+        ].filter(([, l]) => l.length);
         return groups.length
           ? `<span class="cnt-line"><span class="cn">${cnt(D_.length, P_.length + N_.length)}</span><details class="st"><summary aria-label="Show states: ${c.label}, ${d}">Show states</summary>${groups.map(([h, l]) => `<p><b>${h}:</b> ${l.join(', ')}</p>`).join('')}</details></span>`
           : `<span class="cnt-line"><span class="cn">${cnt(0, 0)}</span></span>`;

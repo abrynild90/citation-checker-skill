@@ -162,3 +162,31 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
   section.chart.chart-first#chartA{margin-top:0;padding-top:var(--s-4)}
   #chartA .yr-bar{margin-top:0}
 }
+
+/* The recorded pairs carry the comparison; the range is a reading aid. */
+.pat-big { display:block; padding:0; border:0; border-radius:0; background:none; box-shadow:none; }
+.pat-big .pb-main { display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:4px 12px; }
+.pat-big .pb-lead { margin:0; font:500 20px/1.4 var(--serif); }
+.pat-big .pb-num { margin:0; font:500 24px/1.3 var(--serif); letter-spacing:0; }
+.pat-big .pb-note { grid-column:1 / -1; margin:8px 0 20px; max-width:75ch; }
+.pat-big .pb-track[hidden] { display:none; }
+.pat-big .pb-pairs { display:block; padding:0; border:0; }
+.pair-comparison { list-style:none; padding:0; margin:0; }
+.pair-comparison li { display:grid; grid-template-columns:minmax(0,1fr) minmax(160px,1.25fr) minmax(0,1fr); align-items:center; gap:24px; padding:18px 0; border-top:1px solid var(--line); font:400 15px/1.4 var(--sans); }
+.pair-event,.pair-law { display:grid; gap:4px; }
+.pair-event b,.pair-law b { font-weight:500; }
+.pair-event>span,.pair-law>span { color:var(--muted); font-size:13px; }
+.pair-law b { color:var(--accent-2); }
+.pair-duration { display:grid; gap:8px; }
+.pair-duration strong { font-size:14px; font-weight:600; }
+.pair-track { display:block; height:10px; position:relative; }
+.pair-track:before { content:''; position:absolute; inset:4px 0 auto; border-top:1px solid var(--line); }
+.pair-track i { position:relative; display:block; height:10px; border-top:2px solid var(--accent); top:3px; }
+.pair-track i:after { content:''; position:absolute; top:-5px; right:0; height:8px; border-right:2px solid var(--accent-2); }
+@media(max-width:760px) {
+ .pat-big .pb-main { display:block; }
+ .pat-big .pb-num { margin-top:4px; }
+ .pair-comparison li { grid-template-columns:minmax(0,1fr); gap:10px; padding:20px 0; }
+ .pair-duration { grid-row:2; }
+ .pair-law { padding-left:18px; }
+}

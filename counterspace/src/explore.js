@@ -6,7 +6,7 @@
 // ============================================================================
 import { CO, D, NK, byId, parse } from './app.js';
 import { gap, yearsBetween } from './links.js';
-import { hooks } from './shared.js';
+import { fragmentId, hooks } from './shared.js';
 
 // years: the chart uses the shared year axis, so the pinned law strip above it lines up. svg: the box the chart is drawn into.
 const TABS = [
@@ -59,7 +59,7 @@ const targetOf = (id) => {
 
 // Opened from the address bar or a link: show the tab, then bring its top (tabs included) or the named part into view.
 function fromHash() {
-  const t = targetOf(decodeURIComponent(location.hash.slice(1)));
+  const t = targetOf(fragmentId(location.hash));
   if (!t) return;
   showTab(panelOf(t)?.id || t.id);
   requestAnimationFrame(() => t.scrollIntoView({ block: 'start', behavior: 'auto' }));
@@ -192,7 +192,7 @@ export function mountExplore() {
     'click',
     (e) => {
       const a = e.target.closest?.('a[href^="#"]');
-      const t = a && targetOf(decodeURIComponent(a.getAttribute('href').slice(1)));
+      const t = a && targetOf(fragmentId(a.getAttribute('href')));
       if (t) showTab(panelOf(t)?.id || t.id);
     },
     true,

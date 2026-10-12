@@ -15,7 +15,7 @@ const root = path.resolve('.'),
   out = process.env.OUT || 'qa',
   PORT = +(process.env.PORT || 8881);
 const BASELINE = path.join(root, 'tools/qa-baseline.json'),
-  AXE_URL = 'https://cdn.jsdelivr.net/npm/axe-core@4.10.2/axe.min.js';
+  AXE_FILE = path.join(root, 'tools/node_modules/axe-core/axe.min.js');
 const SECTIONS = ['legalBand', 'chartA', 'chartC', 'chartR', 'chartB', 'lag'];
 const VIEWPORTS = [
   ['1440', 1440, 900],
@@ -135,7 +135,7 @@ const phDiff = (a, b) => {
 };
 async function axe(p) {
   try {
-    await p.addScriptTag({ url: AXE_URL });
+    await p.addScriptTag({ path: AXE_FILE });
     const r = await p.evaluate(() => window.axe.run(document, { resultTypes: ['violations'] }));
     return r.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, sample: v.nodes[0]?.target?.join(' ').slice(0, 90) }));
   } catch (e) {
@@ -486,7 +486,7 @@ await run('keyboard-walk', { viewport: { width: 1440, height: 900 }, colorScheme
       const band = document.getElementById('legalBand')?.getBoundingClientRect();
       const b = a.getBoundingClientRect();
       const stuck = band && band.top <= 1 && band.bottom > 0;
-      return { k, covered: !!stuck && b.top >= 0 && b.top < band.bottom - 2 && b.bottom > band.top };
+      return { k, covered: !!stuck && !a.closest('#legalBand, #rail, .skip') && b.top >= 0 && b.top < band.bottom - 2 && b.bottom > band.top };
     }, kind.toString());
     if (r.k) seen.add(r.k);
     if (r.covered) hidden.push(i);

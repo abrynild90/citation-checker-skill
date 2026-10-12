@@ -422,7 +422,7 @@ const methods = {
             t < (it.labelFrom ?? -1)
               ? null
               : (typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt) ||
-                (it.fill(t, g.attributes.position.array) > 0
+                (it.fill(t, g.attributes.position.array, g.attributes.aCol?.array) > 0
                   ? [3 * (it.labelIdx ?? 0), 3 * (it.labelIdx ?? 0) + 1, 3 * (it.labelIdx ?? 0) + 2].map((i) => g.attributes.position.array[i])
                   : null),
           null,

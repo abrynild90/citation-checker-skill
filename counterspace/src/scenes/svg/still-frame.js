@@ -187,6 +187,11 @@ export async function stillFromSVG(svg, title, cite) {
   g.fillStyle = '#070b17';
   g.fillRect(0, 0, W, H);
   g.drawImage(img, (W - vb.width * fit) / 2, (bodyH - vb.height * fit) / 2, vb.width * fit, vb.height * fit);
-  drawBand(g, W, bodyH, stillMeta(sims.get(svg)?.cfg, title, cite));
+  const meta = stillMeta(sims.get(svg)?.cfg, title, cite);
+  if (svg.dataset.explanation) {
+    meta.source = `Source: ${String(cite || '').trim().replace(/[.;,\s]+$/, '')}.`;
+    meta.note = 'Schematic diagram. Geometry is illustrative.';
+  }
+  drawBand(g, W, bodyH, meta);
   return c.toDataURL('image/png');
 }

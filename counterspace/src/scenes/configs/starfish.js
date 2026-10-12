@@ -6,6 +6,7 @@ const PH = IS_PHONE ? 1.05 : 1; // phoneK, the distance factor of the 375 stage
 
 export const STARFISH = {
   id: 'starfish',
+  explanationAlt: 'Schematic magnetic-field cross-section. Electrons from the nuclear blast follow field lines and also spread around Earth. The field shape, belt extent and dots are illustrative.',
   date: '1962-07-09',
   title: 'Starfish Prime: a nuclear explosion in space (1962)',
   shells: ['LEO'],
@@ -59,8 +60,20 @@ export const STARFISH = {
       dx: -96,
       dy: 4,
     },
-    { type: 'flash', at: [16.5, -169.2, 400], t0: 0.14, strong: IS_PHONE, size: IS_PHONE ? 0.34 : 0.27, span: 0.4, color: '#fff3c4', label: 'Detonation ~400 km', short: 'Detonation', dx: 34, dy: -34 },
-    { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14, opacity: IS_PHONE ? 0.6 : 0.5 },
+    {
+      type: 'flash',
+      at: [16.5, -169.2, 400],
+      t0: 0.14,
+      strong: IS_PHONE,
+      size: IS_PHONE ? 0.34 : 0.27,
+      span: 0.4,
+      color: '#fff3c4',
+      label: 'Detonation ~400 km',
+      short: 'Detonation',
+      dx: 34,
+      dy: -34,
+    },
+    { type: 'field', lon: -169.2, Ls: [1.18, 1.4, 1.7], color: '#c9b0ff', t0: 0.14, opacity: IS_PHONE ? 0.75 : 0.68 },
     {
       type: 'belt',
       at: [16.5, -169.2],

@@ -20,12 +20,12 @@
   type="image/svg+xml"
   href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070b16'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%233a7bd5'/%3E%3Cellipse cx='16' cy='16' rx='12.5' ry='5' transform='rotate(-24 16 16)' fill='none' stroke='%23ffc86b' stroke-width='1.8'/%3E%3Ccircle cx='26.6' cy='11.4' r='2' fill='%23ffc86b'/%3E%3C/svg%3E"
 >
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style id="cs-fonts">/*__FONTS__*/</style>
 <style>/*__CSS__*/</style>
 </head>
 <body>
 <!--__ICONS__-->
+<noscript><p class="wrap">Enable JavaScript to use the interactive charts, scenes and downloads.</p></noscript>
 <a class="skip" href="#timeline">Skip to the timeline</a>
 <header class="top scope-dark" id="top">
   <div class="topbar">
@@ -47,12 +47,13 @@
   <section class="hero" aria-labelledby="pageTitle">
     <div class="hero-grid">
       <div class="hero-copy" id="heroCopy">
-        <h1 class="hero-title" id="pageTitle"><span class="h1-main">Counterspace, <span class="nb">1957–2026:</span></span> <span
+        <h1 class="hero-title" id="pageTitle"><span class="h1-main">Counter<wbr>space, <span class="nb">1957–2026:</span></span> <span
           class="h1-sub">the weapons and the law that trailed them</span></h1>
         <div class="hero-text">
           <p data-avoid class="lede">Counterspace is the name for weapons and methods that can attack or disable satellites. This page shows them, and the laws and policies
             that followed, against the same years, from 1957 to 2026.</p>
         </div>
+        <nav class="hero-jumps" aria-label="Start exploring"><a href="#scenes">3D scenes</a><a href="#timeline">Timeline</a><a href="#sources">Sources</a></nav>
       </div>
       <figure class="hero-figure" id="heroFigure">
         <div class="stage" id="heroPic" role="img" aria-describedby="heroAlt"></div>
@@ -70,8 +71,7 @@
           <button class="btn small" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
             href="#i-replay"/></svg><span>Replay</span></button>
         </figcaption>
-        <div class="hero-glance" id="heroGlance" hidden></div>
-        <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Check your connection and reload.<button class="btn small" type="button" onclick="location.reload()"><svg
+        <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Reload the page to try again.<button class="btn small" type="button" onclick="location.reload()"><svg
           class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Reload</button></p>
         <div class="sr" id="heroAlt"></div>
       </figure>
@@ -86,7 +86,8 @@
           <button class="btn quiet" id="hdAgain" type="button"><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Draw them on the picture again</button></p>
       </section>
       <div class="hero-actions" id="start" role="group" aria-label="Where to start">
-        <a class="btn primary" href="#timeline"><span id="heroGo">See the timeline</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
+        <button class="btn primary" id="firstLookOpen" type="button" aria-expanded="false" aria-controls="firstLook">Start with one example</button>
+        <a class="btn" href="#timeline"><span id="heroGo">See the timeline</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
         <button class="btn" id="tourBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
         <p class="hero-seen" id="heroSeen" aria-live="polite" hidden></p>
       </div>
@@ -95,13 +96,34 @@
 </header>
 
 <main>
+<section id="firstLook" class="first-look wrap" aria-labelledby="firstLookTitle" hidden>
+  <p class="eyebrow">One event, one later treaty</p>
+  <h2 id="firstLookTitle" tabindex="-1">What can a timeline tell us?</h2>
+  <ol class="first-look-progress" aria-label="Choose a part of the introduction">
+    <li><button type="button" data-look="0" aria-current="step">1. The test</button></li>
+    <li><button type="button" data-look="1">2. The treaty</button></li>
+    <li><button type="button" data-look="2">3. The qualification</button></li>
+  </ol>
+  <div class="first-look-dates" aria-label="Chronology">
+    <p><time datetime="1962-07-09">9 July 1962</time><strong>Starfish Prime</strong></p>
+    <p id="firstLookTreaty" hidden><time datetime="1963-08-05">5 August 1963</time><strong>Limited Test Ban Treaty signed</strong></p>
+  </div>
+  <div id="firstLookCopy" class="first-look-copy" aria-live="polite" aria-atomic="true"></div>
+  <div class="first-look-actions">
+    <button class="btn" id="firstLookBack" type="button">Previous</button>
+    <button class="btn primary" id="firstLookNext" type="button">Next: the treaty</button>
+    <a class="btn" id="firstLookDone" href="#timeline" hidden>Explore the timeline</a>
+    <button class="btn" id="firstLookScene" type="button">See the test in 3D</button>
+  </div>
+</section>
 
 <section class="scenes" id="scenes" aria-labelledby="hScenes">
   <div class="wrap">
     <header class="chapter-head scenes-head">
       <h2 data-avoid id="hScenes">Thirteen events, up close</h2>
-      <p data-avoid class="lede">Each 3D scene takes under a minute and tells one story from the charts below, with its source. Point at a picture and it tells you one thing. Or take the first tile and let the page choose.</p>
+      <p data-avoid class="lede">Each 3D scene takes under a minute and tells one story from the charts below, with its source. Browse the pictures, or choose any of the thirteen events from the list.</p>
       <div class="tools scenes-tools">
+        <label class="scene-choose">All events <select id="sceneChoose" aria-label="Choose a 3D event"><option value="">Choose an event…</option></select></label>
         <span class="strip-nav" role="group" aria-label="Move along the scenes">
           <button class="btn icon" id="stripPrev" type="button" aria-label="Show earlier scenes" disabled><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
           <button class="btn icon" id="stripNext" type="button" aria-label="Show more scenes"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
@@ -119,11 +141,14 @@
       <p data-avoid class="lede">Each symbol is a treaty, resolution, pledge or expert manual about weapons in space, set on its year. Every anti-satellite test sits below, on the same years. The strip follows you down.</p>
 
       <p data-avoid class="takeaway" id="tkLaw"></p>
+      <label class="law-choose">Find a law or policy <select id="legalChoose"><option value="">Choose one of the 19 items…</option></select></label>
+      <div id="legalChoice" class="law-choice" hidden></div>
+      <ul class="legend legal-quick-key" id="legalQuickKey" aria-label="Main timeline symbols"></ul>
       <div class="law-row">
       <details class="about keybox" id="keyLegal"><summary>How to read this chart</summary>
         <ul data-avoid class="legend" id="legendLegal" aria-label="Key to the law and policy timeline"></ul>
         <p data-avoid class="words-line in-fold"><b>Words on this page:</b> <abbr title="Global navigation satellite system">GNSS</abbr> means satellite navigation such as GPS. ICAO is the International Civil Aviation Organization, the United Nations agency for flight. DA-ASAT means direct-ascent anti-satellite, a missile launched from Earth to hit a satellite. PAROS stands for the prevention of an arms race in outer space.</p></details>
-        <button class="btn small yr-intro" id="yrIntro" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Scrub through time</button>
+        <button class="btn small yr-intro" id="yrIntro" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Move through the years</button>
       </div>
     </header>
   </div>
@@ -140,7 +165,7 @@
     </div>
   </div>
   <div class="wrap law-detail">
-    <details class="table only-phone" id="legalPhone" open><summary>All 19 law and policy items, in date order</summary><ul class="legal-list"
+    <details class="table only-phone" id="legalPhone"><summary>All 19 law and policy items, in date order</summary><ul class="legal-list"
       id="legalList"></ul></details>
       <div class="dl-group law-tools">
     <div class="zoom-ctl"><button class="btn small" id="zoomBtn" type="button" aria-expanded="false" aria-controls="legalZoomWrap"><svg class="ico" aria-hidden="true"><use href="#i-zoom"/></svg><span>Zoom in on 2021–2026</span></button><span class="zoom-note">The shaded years are crowded. The zoom names every item in them.</span></div>
@@ -166,10 +191,11 @@
         <p data-avoid class="takeaway" id="tkA"></p>
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
       </header>
+      <p class="chart-key-inline">Point = one test · Bubble = catalogued debris · Dashed ring = reported maximum height · Play symbol = scene. Select a point for its source.</p>
       <div class="yr-bar" id="yrBar" role="group" aria-labelledby="yrTitle">
         <button class="yr-play" id="yrPlay" type="button" aria-label="Play from 1957" title="Play from 1957"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
         <div class="yr-line">
-          <p class="yr-title" id="yrTitle">Scrub through time</p>
+          <p class="yr-title" id="yrTitle">Move through the years</p>
           <p class="yr-cap" id="yrCap" hidden></p>
           <p class="yr-tally" id="yrTally"></p>
         </div>
@@ -221,7 +247,7 @@
     <div class="wrap">
       <header class="chapter-head quiz-head">
         <h2 data-avoid id="hQuiz">Test yourself: which came first?</h2>
-        <p data-avoid class="lede">Four guesses about real pairs from our records. Pick one to see the true order and the gap. Two tend to surprise people.</p>
+        <p data-avoid class="lede">Four questions about events and legal steps in our records. Choose an answer to see the dates and the time between them.</p>
       </header>
       <div id="quiz"></div>
     </div>
@@ -230,12 +256,12 @@
   <section class="explore ref-band" id="explore" aria-labelledby="hRef">
     <div class="wrap">
       <header class="ref-head">
-        <h2 data-avoid id="hRef">The evidence, when you want it</h2>
-        <p data-avoid class="lede">The story above stands on its own. Below are four more charts with their data tables and downloads, and every source. Nothing here is required reading.</p>
+        <h2 data-avoid id="hRef">Charts and sources</h2>
+        <p data-avoid class="lede">Compare capabilities, operations and legal developments in four more charts. Each includes its data table, sources and a download.</p>
       </header>
       <div class="ref-sub">
         <h3 data-avoid id="hExplore">Explore the data</h3>
-        <p data-avoid>Four more charts, one at a time. Pick one.</p>
+        <p data-avoid>Choose a chart to read its data and sources.</p>
       </div>
       <div class="xpanels" id="xpanels">
         <section class="chart xpanel" id="chartC" role="tabpanel" aria-labelledby="xct-chartC" tabindex="-1">
@@ -257,6 +283,7 @@
           <p data-avoid class="callout">The rules that govern these operations are soft law (expert manuals that are not binding) or carry military exemptions, such as
             Article 48 of the Constitution of the International Telecommunication Union (ITU), the United Nations agency for radio and telecommunications.</p>
           </div>
+          <p class="chart-key-inline">Solid fill: attributed by governments or an international body · Outline: researchers or analysts · Dashed: alleged, unconfirmed. Select an entry for its source.</p>
           <div class="svgbox" id="svgC"></div>
           <details class="table refold" id="foldC"><summary>Key, data table and download</summary>
             <div class="rf-body">
@@ -283,6 +310,7 @@
           <p data-avoid class="takeaway" id="tkR"></p>
           <div class="note-line" id="noteR0"><p data-avoid><b>A close approach is not an attack.</b> Most are inspections, servicing missions or technology tests.</p>
           </div>
+          <div class="chart-key-inline symbol-key"><ul aria-label="Shapes in this chart"><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="4"/></svg>Close approach</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="3" y="3" width="10" height="10" rx="2"/></svg>Docking</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2 15 14H1Z"/></svg>Capture and tow</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1 15 8 8 15 1 8Z"/></svg>Object release</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="1" y="5" width="14" height="6" rx="2"/></svg>Spaceplane mission</li></ul><p>Outlined shapes indicate uncertainty. Select a shape for its name and source.</p></div>
           <div class="svgbox" id="svgR"></div>
           <details class="table refold" id="foldR"><summary>Key, data table and download</summary>
             <div class="rf-body">
@@ -307,7 +335,14 @@
           </header>
           <p data-avoid class="takeaway" id="tkB"></p>
           <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
-          <div class="svgbox" id="svgB"></div>
+          <div id="capPhone" class="cap-phone">
+            <label for="capDecade">Compare capabilities in the <select id="capDecade"></select></label>
+            <div id="capPhoneRows" aria-live="polite"></div>
+            <p id="capPhoneNote" class="note"></p>
+            <button class="btn small" id="capHistory" type="button" aria-expanded="false" aria-controls="svgB">Show all decades</button>
+          </div>
+          <p class="phone-chart-hint cap-history-hint">Scroll across to compare all eight decades. Select a bar for its states and sources.</p>
+          <div class="svgbox" id="svgB" tabindex="0" role="region" aria-label="Capabilities by decade"></div>
           <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
           <div class="callout-row">
             <p data-avoid class="callout" id="calloutB"></p>
@@ -315,7 +350,7 @@
           <details class="table refold" id="foldB"><summary>Key, data table and download</summary>
             <div class="rf-body">
               <div class="rf-sec"><h5 class="sub-h">How to read this chart</h5><ul data-avoid class="legend" id="legendB" aria-label="Key to the capability chart"></ul>
-            <p data-avoid class="b-read"><b>Reading the 2020s bar:</b> the low number counts capabilities that have been tested or used, and the high number adds those still in development. This chart does not use the shared years.</p>
+            <p data-avoid class="b-read"><b>Reading the 2020s bar:</b> the low number counts capabilities that have been tested or used, and the high number adds those still in development. Unlike the other charts, this one groups events by decade.</p>
             <p>For the 2020s, the states and capabilities come from SWF’s 2026 assessment of 13 countries. Whether a capability counts as demonstrated
               (tested or used) or as still developing is our reading of SWF’s text, so the range bar is the uncertain part: its low end counts demonstrated
               capabilities only, and its high end adds those still developing. Dotted segments are capabilities we class as developing where SWF’s country
@@ -331,11 +366,11 @@
         <section class="chart xpanel" id="lag" role="tabpanel" aria-labelledby="xct-lag" tabindex="-1">
           <header class="chapter-head sub">
             <h4 data-avoid id="hL">How long the law took to follow</h4>
-            <p data-avoid class="lede">Each pair links a space weapon or attack to the first later legal step our records connect with it. The big number is the wait between the two. It shows order in time and says nothing about cause.</p>
+            <p data-avoid class="lede">Each pair links an attack to the first later legal step connected in our records. Bars show the wait, not causation.</p>
 
           </header>
           <p data-avoid class="takeaway" id="tkL"></p>
-          <p data-avoid class="note block">Unlike the other charts, this one does not use the shared years. Every bar starts at zero on the same scale, so a longer bar is a longer wait.</p>
+          <p data-avoid class="note block">Each bar starts at zero on the same scale. Longer bars mean longer waits.</p>
           <div class="svgbox" id="svgL"></div>
           <details class="table refold" id="foldL"><summary>Key, data table and download</summary>
             <div class="rf-body">
@@ -356,6 +391,7 @@
       <p data-avoid>One report supplies almost every weapon and operation: the Secure World Foundation’s <i>Global Counterspace Capabilities</i> (9th edition, April 2026). The
         laws and policies come from the treaties and documents themselves.</p>
     </div>
+    <p class="source-actions"><a class="btn small" href="#srcList">Find a cited source</a><a class="btn small" href="#srcCite">How to cite this page</a></p>
     <div class="sources-layout">
       <nav class="sub-nav" aria-label="In this section">
         <ul>
@@ -397,7 +433,7 @@
     <div class="foot-cols">
       <section aria-labelledby="fAbout">
         <h2 id="fAbout">About this page</h2>
-        <p>Counterspace Timeline is a companion to <i>Space Security Law: Governance Beyond the Atmosphere</i> by Aaron Brynildson. It was built for teaching.</p>
+        <p>Counterspace Timeline is a companion to <i>Space Security Law: Governance Beyond the Atmosphere</i> by Aaron Brynildson. It is intended for teaching.</p>
         <p>No data is stored in your browser.</p>
       </section>
       <section aria-labelledby="fData">
@@ -413,14 +449,14 @@
       </section>
     </div>
     <div class="foot-base">
-      <span>Counterspace Timeline, 1957–2026</span>
-      <nav class="foot-nav" aria-label="Footer"><a href="#srcCite">How to cite</a><a href="#sources">Sources</a></nav>
+      <span>Counterspace Timeline, 1957–2026<br><small>Page updated: October 2026</small></span>
+      <nav class="foot-nav" aria-label="Footer"><a href="#scenes">Scenes</a><a href="#explore">Data</a><a href="#srcCite">How to cite</a><a href="#sources">Sources</a></nav>
       <a class="btn quiet" href="#top"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Back to the top</a>
     </div>
   </div>
 </footer>
 
-<div class="card" id="card" role="tooltip" aria-hidden="true"></div>
+<div class="card" id="card" role="tooltip" aria-hidden="true" inert></div>
 
 <!--__OVERLAY__-->
 
@@ -428,7 +464,8 @@
 <script id="cs-land" type="application/json">/*__LAND__*/</script>
 <script id="cs-earth" type="application/json">/*__EARTH__*/</script>
 <script id="cs-posters" type="application/json">/*__POSTERS__*/</script>
-<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" onerror="document.documentElement.classList.add('no-cdn')"></script>
+<script id="cs-licenses" type="application/json">/*__LICENSES__*/</script>
+<script>/*__D3__*/</script>
 <script>addEventListener('load',function(){if(typeof d3==='undefined')document.documentElement.classList.add('no-cdn')})</script>
 <script type="module">
 /*__APP__*/

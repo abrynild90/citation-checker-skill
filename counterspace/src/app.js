@@ -247,13 +247,12 @@ export class Placer {
     return q;
   }
 }
+export const SCENE_BADGE_MARKUP = '<g class="badge3d"><circle r="6"/><path class="top" d="M-1.6,-3L3,0L-1.6,3Z"/></g>';
 export function badge(g, x, y) {
-  // 3D badge: an isometric cube (shape, not color). Omitted from static exports: the cube means nothing in a figure and has no key entry there.
+  // A small play symbol connects a chart entry to its scene. Omitted from static exports, which have no interaction.
   if (EXPORTING) return;
-  const b = g.append('g').attr('class', 'badge3d').attr('transform', `translate(${x},${y}) scale(${typeof innerWidth !== 'undefined' && innerWidth >= 1024 && !EXPORTING ? 1.0 : 0.9})`).attr('aria-hidden', 'true');
-  b.append('path').attr('class', 'top').attr('d', 'M0,-6 L5.2,-3 L0,0 L-5.2,-3Z');
-  b.append('path').attr('d', 'M-5.2,-3 L0,0 L0,6 L-5.2,3Z');
-  b.append('path').attr('d', 'M5.2,-3 L0,0 L0,6 L5.2,3Z');
+  g.append('g').attr('class', 'badge3d').attr('transform', `translate(${x},${y}) scale(${typeof innerWidth !== 'undefined' && innerWidth >= 1024 ? 1 : 0.9})`)
+    .attr('aria-hidden', 'true').html(SCENE_BADGE_MARKUP.replace('<g class="badge3d">', '').replace('</g>', ''));
 }
 export const star = (r) => {
   const p = [];

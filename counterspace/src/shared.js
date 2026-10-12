@@ -21,3 +21,9 @@ export const settled = () =>
     ]),
     new Promise((r) => setTimeout(r, 12000)), // never wait for ever on a failed font or draw
   ]);
+
+// Malformed percent escapes are valid URL fragments but must not crash navigation.
+export const fragmentId = (hash) => {
+  const raw = hash.replace(/^#/, '');
+  try { return decodeURIComponent(raw); } catch { return raw; }
+};

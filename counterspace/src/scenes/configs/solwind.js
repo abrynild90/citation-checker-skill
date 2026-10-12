@@ -4,6 +4,9 @@ import { IS_PHONE } from '../core.js';
 
 export const SOLWIND = {
   id: 'solwind',
+  explanationAlt:
+    'Sequence of the Solwind interception: collision at about 530 km, spreading fragments, and a later Secure World Foundation count of none remaining from 285 tracked fragments. Symbols and timing are illustrative.',
+  noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   fitPct: 0.99,
   date: '1985-09-13',
   title: 'Solwind: a US missile destroys a satellite (1985)',
@@ -17,6 +20,9 @@ export const SOLWIND = {
     'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons. ' +
     'The positions and the debris spread are drawn to show the idea. They are not calculated.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (285 tracked, 0 still in orbit); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
+  modelNote:
+    'Solwind’s broad shape follows NASA’s P78-1 photograph: a wheel-shaped body beneath an upright solar sail. Its size, orientation and motion here are illustrative.',
+  modelSource: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/p78-1.html',
   related: null,
   event: 'us-1985-solwind',
   launchPhoneK: 1.2,
@@ -31,19 +37,33 @@ export const SOLWIND = {
   latePct: 0.85,
   camGlide: true,
   burstPadFrom: 0.4,
+  fitFillKeys: IS_PHONE ? [0.68, 0.7, 0.85, 0.9, 0.9, 0.9] : undefined, // room for the wheel and sail above the caption during the climb
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
   fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
   sunView: IS_PHONE ? undefined : { az: -45, el: 22 }, // desktop: the Pacific coast and the Earth under the pair are in daylight, not a dull night side
   lightsK: 0.5, // softer city lights: the break-up pieces and the missile stay readable over the coast
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
-  hit: { lat: 37.5, lon: -135.0, alt: 530, inc: 97.6, t: 0.5, wa: 0.45, wf: 0.5 },
-  liveOff: { 'ASM-135': [-80, -62], 'F-15': [150, -100], Impact: [188, -98], Solwind: [178, -24] }, // the missile's pill sits above the F-15 with a leader down to the arc
+  hit: {
+    lat: 37.5,
+    lon: -135.0,
+    alt: 530,
+    inc: 97.6,
+    t: 0.5,
+    wa: 0.45,
+    wf: 0.5,
+  },
+  liveOff: {
+    'ASM-135': [-80, -62],
+    'F-15': [150, -100],
+    Impact: [188, -98],
+    Solwind: [178, -24],
+  }, // the missile's pill sits above the F-15 with a leader down to the arc
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
-  narrowK: 0.95, // phone: a lighter tighten, the debris cloud at its widest stays inside the frame
+  narrowK: 1.08, // compact views leave a margin around the late debris cloud
   narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
-  phoneOff: { 'ASM-135': [70, -84] },
+  phoneOff: { 'ASM-135': [70, -84], 'F-15': [128, -55] },
   actors: [
     {
       type: 'aircraft',
@@ -65,29 +85,70 @@ export const SOLWIND = {
     },
     {
       type: 'target',
+      variant: 'solwind',
       label: 'Solwind P78-1',
       color: C.tgt,
       big: 5,
-      minPx: IS_PHONE ? 40 : 56,
-      maxPx: IS_PHONE ? 60 : 96, // the satellite reads at t=0.2, before the intercept
+      minPx: IS_PHONE ? 50 : 68,
+      maxPx: IS_PHONE ? 72 : 108, // readable before the intercept, while remaining clear of the aircraft
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
       impactDy: IS_PHONE ? -81 : undefined,
-      tickUntil: 0.84, // the tick retires with the last fragment
+      tickUntil: 0.88, // the tick retires with the last fragment
       endLabel: 'Impact point: 0 of 285 in orbit',
       endShort: '0 of 285 in orbit',
-      endFrom: 0.84,
+      endFrom: 0.88,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
     },
-    { type: 'intercept', from: 'aircraft', t0: 0.24, color: C.int, label: 'ASM-135', thick: 0.0065, rocket: { minPx: 62, maxPx: 78 }, strong: true, flash: 0.4, flashSpan: 0.22, flashCap: 0.9, coreK: 0.5, linger: 0.3, lingerK: 0.5, lingerEnd: 0.93, retire: 0.06 },
-    { type: 'debris', count: 285, spreadAlt: 150, spreadInc: 2.6, spreadRaan: 1.8, dv: 0.6, hideEmpty: true, decay: 0.9, decayWin: [0.7, 0.84], color: '#ffd2a6', palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] }, darkHalo: 0.8, size: 0.06, minPx: 4, maxPx: 10, additive: false, trail: { n: 5, dt: 0.012, k: 0.6 }, lateGlow: true },
+    {
+      type: 'intercept',
+      from: 'aircraft',
+      t0: 0.24,
+      color: C.int,
+      label: 'ASM-135',
+      thick: 0.0065,
+      rocket: { minPx: 62, maxPx: 78 },
+      strong: true,
+      flash: 0.24,
+      flashSpan: 0.14,
+      flashCap: 0.9,
+      coreK: 0.5,
+      linger: 0.3,
+      lingerK: 0.5,
+      lingerEnd: 0.72,
+      retire: 0.06,
+    },
+    {
+      type: 'debris',
+      label: 'Fragments',
+      dx: 50, dy: -30,
+      count: 285,
+      spreadAlt: 150,
+      spreadInc: 2.6,
+      spreadRaan: 1.8,
+      dv: 0.6,
+      hideEmpty: true,
+      decay: 0.9,
+      decayWin: [0.7, 0.87],
+      color: '#ffd2a6',
+      palette: { hot: [0.95, 1, 1], mid: [0.6, 0.9, 1], cool: [0.5, 0.78, 1] },
+      darkHalo: 0.8,
+      hard: true,
+      size: 0.036,
+      minPx: 2.5,
+      maxPx: 5,
+      additive: false,
+      lateGlow: true,
+    },
   ],
   still: 0.45,
   status: [
     [0, 'F-15 in a steep, supersonic climb'],
     [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
-    [0.52, 'Collision at about 530 km; fragments spread, then fall out of orbit', 'Collision at about 530 km'],
-    [0.75, 'Fast-forward: fragments decay; SWF counts all 285 out of orbit', 'Decay: all 285 out (SWF)'],
+    [0.52, 'Collision at about 530 km', 'Collision at about 530 km'],
+    [0.62, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],
+    [0.75, 'Time passes: fragments fall out of orbit', 'Time passes: fragments fall out of orbit'],
+    [0.88, 'SWF, 2026: 0 of 285 tracked fragments remain in orbit', 'Later count: 0 of 285 remain (SWF)'],
   ],
 };

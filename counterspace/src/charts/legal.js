@@ -3,7 +3,7 @@
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { D, DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { D, DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, SCENE_BADGE_MARKUP, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
 import { activate, addGuide, bindMark, legalCard, legalKindOf, legalKindWords, legend, rove, setGuide, table } from '../ui.js';
 import { hooks } from '../shared.js';
 
@@ -53,12 +53,12 @@ const NAMES = {
   'woomera-2024': { t: 'Woomera Manual (soft law)', m: 'Woomera Manual*', s: 'Woomera*' },
   'unsc-veto-2024': { t: 'Russian veto: nuclear weapons in orbit', m: 'Russian veto (nuclear weapons)', s: 'Russian veto' },
   'itu-rrb-2024': { t: 'ITU Radio Regulations Board: grave concern', m: 'ITU Board: grave concern', s: 'ITU Board ’24' },
-  'icao-2025': { t: 'ICAO Assembly: GNSS interference an infraction', m: 'ICAO finding on GNSS', s: 'Aviation body ’25' },
+  'icao-2025': { t: 'ICAO Assembly: GNSS interference an infraction', m: 'ICAO finding on GNSS', s: 'ICAO ’25' },
   'itu-rrb-2025': {
     t: 'ITU Radio Regulations Board urges Russia to stop interference',
     l: 'ITU Radio Regulations Board urges Russia to stop',
     m: 'ITU Board urges Russia to stop',
-    s: 'ITU Board ’25',
+    s: 'ITU ’25',
   },
 };
 // Card, table and list titles are set once, here, so ui.js and lag.js can read l.title without importing this module's tables.
@@ -76,11 +76,15 @@ const nameAt = (d, size) => {
 export const GLOSSARY = [
   ['Space Treaty', 'The Outer Space Treaty (1967).'],
   ['ABM Treaty', 'Anti-Ballistic Missile Treaty (1972). Article XII bars interference with the other side’s means of verifying the treaty.'],
+  ['ICAO', 'The International Civil Aviation Organization, the United Nations agency for civil aviation.'],
   ['Aviation body', 'The International Civil Aviation Organization (ICAO), the United Nations agency for civil aviation.'],
   ['CD', 'Conference on Disarmament.'],
   ['Cyber manual', 'Tallinn Manual 2.0: an expert manual on how international law applies to cyber operations.'],
   ['DA-ASAT', 'Direct-ascent anti-satellite: a missile launched from Earth to destroy or damage a satellite.'],
-  ['Draft treaty, Draft treaty II', 'The draft Treaty on the Prevention of the Placement of Weapons in Outer Space (PPWT), put forward by Russia and China, and its updated version.'],
+  [
+    'Draft treaty, Draft treaty II',
+    'The draft Treaty on the Prevention of the Placement of Weapons in Outer Space (PPWT), put forward by Russia and China, and its updated version.',
+  ],
   ['GNSS', 'Global navigation satellite systems, such as GPS.'],
   ['ITU', 'International Telecommunication Union, the United Nations agency for telecommunications.'],
   ['ITU Board', 'The ITU Radio Regulations Board.'],
@@ -131,7 +135,10 @@ function lightLinked(lawId) {
   document.querySelectorAll('.mark.linked').forEach((n) => n.classList.remove('hl', 'linked'));
   if (!lawId) return;
   for (const p of D.lag_pairs.pairs)
-    if (p.law === lawId) document.querySelectorAll(`#svgA [data-id="${p.event}"], #svgC [data-id="${p.event}"], #svgR [data-id="${p.event}"]`).forEach((n) => n.classList.add('hl', 'linked'));
+    if (p.law === lawId)
+      document
+        .querySelectorAll(`#svgA [data-id="${p.event}"], #svgC [data-id="${p.event}"], #svgR [data-id="${p.event}"]`)
+        .forEach((n) => n.classList.add('hl', 'linked'));
 }
 const ZOOM = [parse('2021-06-01'), parse('2026-07-01')];
 // On a wide screen the zoom's time axis starts and ends at the same page positions as the main chart's, so the panel's own padding is taken off its gutters.
@@ -240,7 +247,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .filter((d) => !crowd(d))
       .forEach((d) => {
         const c = clusters.at(-1);
-        if (c && d._cx - c.at(-1)._cx < 200) c.push(d);
+        if (c && (zoom || d._cx - c.at(-1)._cx < 200)) c.push(d);
         else clusters.push([d]);
       });
     // The preferred side comes first; the others are there so a label near an edge or in a tight cluster can still find room.
@@ -368,8 +375,9 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
         }
       });
   }
-  const yMark = compact ? TP * Math.max(maxT, 2) + (tight ? 6 : 10) : // the pinned strip keeps one height whatever the window shows
-     Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + (strip ? 20 : 28)),
+  const yMark = compact
+      ? TP * Math.max(maxT, 2) + (tight ? 6 : 10) // the pinned strip keeps one height whatever the window shows
+      : Math.max(maxExt ? maxExt + 16 : 0, TP * maxT + (strip ? 20 : 28)),
     dnSpace = !compact && maxDn >= 0 ? OFF0 + maxDn * PITCH + 8 : 0;
   // Negotiation periods: bars in rows below the symbol line (and below any labels hanging under it), each named just above its bar.
   const lanes = [];
@@ -600,8 +608,14 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
   });
   bindMark(pg, strip ? null : legalCard, strip ? tapLegal : activate);
   // Pointing at a law also lights the weapon points our records link to it, on the charts below (the shared years line them up with the law)
-  pg.on('mouseenter.guide focus.guide', (ev, d) => (setGuide(parse(d.start)), lightLinked(d.id))).on('mouseleave.guide blur.guide', () => (setGuide(null), lightLinked(null)));
-  sg.on('mouseenter.guide focus.guide', (ev, d) => (setGuide(parse(d.start)), lightLinked(d.id))).on('mouseleave.guide blur.guide', () => (setGuide(null), lightLinked(null)));
+  pg.on('mouseenter.guide focus.guide', (ev, d) => (setGuide(parse(d.start)), lightLinked(d.id))).on(
+    'mouseleave.guide blur.guide',
+    () => (setGuide(null), lightLinked(null)),
+  );
+  sg.on('mouseenter.guide focus.guide', (ev, d) => (setGuide(parse(d.start)), lightLinked(d.id))).on(
+    'mouseleave.guide blur.guide',
+    () => (setGuide(null), lightLinked(null)),
+  );
   rove(svg.selectAll('.mark'));
   svg
     .append('g')
@@ -657,22 +671,62 @@ function drawOverview(strip) {
   }
   const W = Math.max(300, host.clientWidth || host.parentElement.clientWidth),
     ml = 44,
-    x = d3.scaleUtc().domain(DOMAIN).range([ml, W - 12]),
+    x = d3
+      .scaleUtc()
+      .domain(DOMAIN)
+      .range([ml, W - 12]),
     H = 66,
     yT = 14,
     yL = 40;
-  const g = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', 'Overview of 1957 to 2026: anti-satellite tests above, laws and policies below. The outlined box is the part shown in the strip below.');
-  g.append('rect').attr('class', 'ov-win').attr('x', ml).attr('y', 1).attr('width', 60).attr('height', H - 14).attr('rx', 4);
-  g.append('text').attr('x', 0).attr('y', yT + 4).attr('class', 'lm-name').text('Tests');
-  g.append('text').attr('x', 0).attr('y', yL + 4).attr('class', 'lm-name').text('Laws');
-  KIN.forEach((e) => g.append('circle').attr('cx', x(parse(e.date))).attr('cy', yT).attr('r', 2.6).attr('class', 'ov-test'));
+  const g = d3
+    .create('svg')
+    .attr('width', W)
+    .attr('height', H)
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img')
+    .attr(
+      'aria-label',
+      'Overview of 1957 to 2026: anti-satellite tests above, laws and policies below. The outlined box is the part shown in the strip below.',
+    );
+  g.append('rect')
+    .attr('class', 'ov-win')
+    .attr('x', ml)
+    .attr('y', 1)
+    .attr('width', 60)
+    .attr('height', H - 14)
+    .attr('rx', 4);
+  g.append('text')
+    .attr('x', 0)
+    .attr('y', yT + 4)
+    .attr('class', 'lm-name')
+    .text('Tests');
+  g.append('text')
+    .attr('x', 0)
+    .attr('y', yL + 4)
+    .attr('class', 'lm-name')
+    .text('Laws');
+  KIN.forEach((e) =>
+    g
+      .append('circle')
+      .attr('cx', x(parse(e.date)))
+      .attr('cy', yT)
+      .attr('r', 2.6)
+      .attr('class', 'ov-test'),
+  );
   LEGAL.filter((l) => l.kind !== 'negotiation_span').forEach((l) =>
-    g.append('g').attr('transform', `translate(${x(parse(l.start))},${yL}) scale(.5)`).html(glyphMarkup(legalKindOf(l))),
+    g
+      .append('g')
+      .attr('transform', `translate(${x(parse(l.start))},${yL}) scale(.5)`)
+      .html(glyphMarkup(legalKindOf(l))),
   );
   [1960, 1980, 2000, 2020].forEach((yr) => {
     const px = x(parse(`${yr}-01-01`));
-    g.append('text').attr('x', px).attr('y', H - 1).attr('text-anchor', 'middle').attr('class', 'lm-year').text(yr);
+    g.append('text')
+      .attr('x', px)
+      .attr('y', H - 1)
+      .attr('text-anchor', 'middle')
+      .attr('class', 'lm-year')
+      .text(yr);
   });
   host.innerHTML = '';
   host.appendChild(g.node());
@@ -707,7 +761,7 @@ function stripPos() {
   const win = document.querySelector('#legalOv .ov-win');
   if (win) {
     const ox = x.range();
-    win.setAttribute('x', ox[0] + ((a / sw) * (el._ovW - ox[0] - 12)));
+    win.setAttribute('x', ox[0] + (a / sw) * (el._ovW - ox[0] - 12));
     win.setAttribute('width', Math.max(10, (el.clientWidth / sw) * (el._ovW - ox[0] - 12)));
   }
   const f = box.querySelector('i');
@@ -743,16 +797,30 @@ export function drawLawMini() {
   const L1 = layout(host),
     W = L1.W,
     M = { l: miniFor === 'chartA' ? 50 : 40, r: L1.M.r }, // the anti-satellite chart leaves room for its altitude numbers
-    x = d3.scaleUtc().domain(DOMAIN).range([M.l, W - M.r]);
+    x = d3
+      .scaleUtc()
+      .domain(DOMAIN)
+      .range([M.l, W - M.r]);
   const H = 40,
     yL = 24;
   const g = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'presentation');
   g.append('text').attr('x', 0).attr('y', 15).attr('class', 'lm-name').text('Law');
-  g.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', yL).attr('y2', yL).attr('class', 'lm-axis');
+  g.append('line')
+    .attr('x1', M.l)
+    .attr('x2', W - M.r)
+    .attr('y1', yL)
+    .attr('y2', yL)
+    .attr('class', 'lm-axis');
   LEGAL.filter((l) => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981')).forEach((l) => {
     const a = x(parse(l.start)),
       b = l.end ? x(parse(l.end)) : x(DOMAIN[1]);
-    g.append('rect').attr('x', a).attr('y', yL - 2).attr('width', Math.max(3, b - a)).attr('height', 4).attr('rx', 2).attr('style', BAR_STYLE);
+    g.append('rect')
+      .attr('x', a)
+      .attr('y', yL - 2)
+      .attr('width', Math.max(3, b - a))
+      .attr('height', 4)
+      .attr('rx', 2)
+      .attr('style', BAR_STYLE);
   });
   LEGAL.filter((l) => l.kind !== 'negotiation_span').forEach((l) => {
     g.append('g')
@@ -761,7 +829,12 @@ export function drawLawMini() {
   });
   [1960, 1980, 2000, 2020].forEach((yr) => {
     const px = x(parse(`${yr}-01-01`));
-    g.append('line').attr('x1', px).attr('x2', px).attr('y1', yL).attr('y2', yL + 4).attr('class', 'lm-axis');
+    g.append('line')
+      .attr('x1', px)
+      .attr('x2', px)
+      .attr('y1', yL)
+      .attr('y2', yL + 4)
+      .attr('class', 'lm-axis');
     g.append('text').attr('x', px).attr('y', 38).attr('text-anchor', 'middle').attr('class', 'lm-year').text(yr);
   });
   inner.innerHTML = '';
@@ -797,7 +870,7 @@ export function setZoomOpen(open, scrollTo) {
   wrap.classList.toggle('open', open);
   wrap.classList.remove('settled');
   btn.setAttribute('aria-expanded', String(open));
-  btn.querySelector('span').textContent = open ? 'Close the 2021–2026 zoom' : 'Zoom in on 2021–2026';
+  btn.querySelector('span').textContent = open ? 'Hide recent developments' : 'Show recent developments: 2021–2026';
   btn.querySelector('use').setAttribute('href', open ? '#i-minus' : '#i-zoom');
   const done = () => wrap.classList.toggle('settled', wrap.classList.contains('open'));
   clearTimeout(setZoomOpen.t);
@@ -805,6 +878,7 @@ export function setZoomOpen(open, scrollTo) {
   if (open && !was && scrollTo) requestAnimationFrame(() => legalScroll());
 }
 export function initZoomControl() {
+  setZoomOpen(true);
   document.getElementById('zoomBtn')?.addEventListener('click', () => setZoomOpen(!document.getElementById('legalZoomWrap').classList.contains('open')));
   addEventListener('beforeprint', () => setZoomOpen(true));
 }
@@ -847,7 +921,10 @@ function legalScrollMain() {
     // in "Explore the data" the strip comes only once the open chart's own drawing (the part that shares its years) reaches it, never over the heading, the cards or the notes
     xBox = ex && ex.dataset.years === '1' ? document.querySelector('.xpanel:not([data-off]) .svgbox') : null,
     exAligned = !!xBox && xBox.getBoundingClientRect().top < bh;
-  band.classList.toggle('off', !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (exOver && tr.top < 0)));
+  band.classList.toggle(
+    'off',
+    !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (exOver && tr.top < 0)),
+  );
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).
   const topY = document.getElementById('bandTop').getBoundingClientRect().top,
@@ -888,7 +965,7 @@ function legalScrollMain() {
   if (band.contains(document.activeElement) && document.activeElement.closest('svg')) return applyReading(); // never rebuild under a focused symbol
   band.classList.remove('reading'); // the strip is measured whole; applyReading puts the one-row form back below
   const h0 = band.offsetHeight;
-  if (!legalCompact) (bandFullH = h0), document.documentElement.style.setProperty('--band-full-h', h0 + 'px');
+  if (!legalCompact) ((bandFullH = h0), document.documentElement.style.setProperty('--band-full-h', h0 + 'px'));
   legalCompact = stuck;
   stripDom = want;
   drawLegal();
@@ -940,7 +1017,13 @@ export function landOnMark(m, smooth) {
       const s = stripAt(y);
       return hd.t - y >= s + 2 ? 1 : hd.b - y <= s - 2 || hd.b - y <= 0 ? 2 : 0; // 1: the heading is whole below the strip, 2: wholly behind it, 0: cut by its edge
     },
-    own = Math.min(maxY, Math.max(0, Math.round(sec.getBoundingClientRect().top + scrollY - num(getComputedStyle(sec).scrollMarginTop) - num(getComputedStyle(root).scrollPaddingTop)))),
+    own = Math.min(
+      maxY,
+      Math.max(
+        0,
+        Math.round(sec.getBoundingClientRect().top + scrollY - num(getComputedStyle(sec).scrollMarginTop) - num(getComputedStyle(root).scrollPaddingTop)),
+      ),
+    ),
     mid = (y) => Math.abs((mk.t + mk.b) / 2 - y - (topAt(y) + (vh - topAt(y)) / 2));
   let y = own;
   if (!(fits(own) && clear(own) === 1)) {
@@ -1054,7 +1137,8 @@ addEventListener(
   { passive: true },
 );
 // A jump that ends without a wheel (a link, an address, a tab) is checked again when it lands.
-for (const ev of ['scrollend', 'hashchange', 'popstate']) addEventListener(ev, () => (clearTimeout(settleT), (settleT = setTimeout(legalScroll, ev === 'scrollend' ? 30 : 120))));
+for (const ev of ['scrollend', 'hashchange', 'popstate'])
+  addEventListener(ev, () => (clearTimeout(settleT), (settleT = setTimeout(legalScroll, ev === 'scrollend' ? 30 : 120))));
 addEventListener('load', () => setTimeout(legalScroll, 400));
 
 // ---------------------------------------------------------------- key, list, glossary and table
@@ -1072,6 +1156,31 @@ function drawLegalList() {
 }
 export function drawLegalKey() {
   drawLegalList();
+  const choose = document.getElementById('legalChoose'),
+    choice = document.getElementById('legalChoice');
+  if (choose && !choose.dataset.set) {
+    choose.dataset.set = '1';
+    choose.innerHTML += [...LEGAL]
+      .sort((a, b) => a.start.localeCompare(b.start))
+      .map((l) => `<option value="${esc(l.id)}">${fmtY(parse(l.start))} · ${esc(l.title)}</option>`)
+      .join('');
+    choose.addEventListener('change', () => {
+      const law = LEGAL.find((l) => l.id === choose.value);
+      choice.hidden = !law;
+      choice.innerHTML = law ? legalCard(law) + '<button class="btn small" type="button" id="clearLawChoice">Clear selection</button>' : '';
+      choice.querySelector('button')?.addEventListener('click', () => {
+        choice.hidden = true;
+        choose.value = '';
+        choose.focus();
+      });
+    });
+  }
+  const quick = legend('legalQuickKey', 18, 16);
+  quick.item(glyphMarkup('treaty'), 'Treaty');
+  quick.item(glyphMarkup('resolution'), 'Resolution or finding (not binding)');
+  quick.item(glyphMarkup('soft'), 'Expert manual (not binding)');
+  quick.item(SCENE_BADGE_MARKUP, 'Scene');
+  quick.done();
   const K = legend('legendLegal', 22, 18),
     li = K.item;
   li(glyphMarkup('treaty'), 'Treaty');
@@ -1082,8 +1191,8 @@ export function drawLegalKey() {
   li(glyphMarkup('veto'), 'Veto in the UN Security Council');
   li(`<rect x="-9" y="-3.5" width="18" height="7" rx="3.5" style="${BAR_STYLE}"/>`, 'Years of negotiation');
   li(
-    '<g class="badge3d"><path class="top" d="M0,-6 L5.2,-3 L0,0 L-5.2,-3Z"/><path d="M-5.2,-3 L0,0 L0,6 L-5.2,3Z"/><path d="M5.2,-3 L0,0 L0,6 L5.2,3Z"/></g>',
-    'Select a cube icon to open a 3D explainer',
+    SCENE_BADGE_MARKUP,
+    'Select a play symbol to open a scene',
   );
   K.done();
   // The key is folded at every width; its summary opens it.

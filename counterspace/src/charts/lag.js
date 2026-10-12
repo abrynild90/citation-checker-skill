@@ -150,7 +150,7 @@ export function drawL(el = document.getElementById('svgL')) {
     r.title = wrapRuns(runs, W - 2 * PAD, TS);
     r.note = r.w.note ? wrapRuns([{ t: r.w.note, quiet: true }], W - 2 * PAD, NS) : [];
     r.block = 10 + TL * r.title.length + (r.note.length ? 4 + NL * r.note.length : 0);
-    r.rowH = r.block + 24 + 22 + 16;
+    r.rowH = r.block + 24 + 22 + (phone ? 8 : 16);
   });
   const H = top + info.reduce((s, r) => s + r.rowH, 0) + 46,
     yAx = H - 38;

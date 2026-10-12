@@ -184,20 +184,27 @@ export function drawMethod() {
   ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
       are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
       graphics are reproduced.</p>
-    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). Small versions are built
-      into the page. The full-size images are fetched from a fixed copy hosted on jsDelivr, a public file host, only when you interact with the globe at the
-      top of the page or open a 3D explainer, and never when animation is switched off on your device. Coastlines in the still diagrams come from Natural
-      Earth (public domain) through the world-atlas dataset.</p>`)}
+    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). More detailed Earth images load from jsDelivr when you interact with the globe or open a 3D explainer. They do not load when your device is set to limit animation. Coastlines come from Natural Earth (public domain).</p>`)}
 </div>
 </div>
 </div>
 <div class="msec">
   <h4 id="srcList">All cited sources (${cites.length})</h4>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
-  <ol class="cites">${cites.join('')}</ol>
+  <label class="source-find">Find a source <input id="sourceFind" type="search" placeholder="Title, institution or year" aria-controls="citedSources"></label>
+  <p class="note" id="sourceCount" role="status">${cites.length} sources</p>
+  <ol class="cites" id="citedSources">${cites.join('')}</ol>
   <p class="only-phone"><a class="to-top" href="#top">Back to the top</a></p>
   <p>The data table behind each chart lists every entry with its source and page reference.</p></div>
 </details>`;
+
+  const find = document.getElementById('sourceFind'), sourceItems = [...document.querySelectorAll('#citedSources > li')];
+  find.addEventListener('input', () => {
+    const words = find.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    sourceItems.forEach(li => { li.hidden = !words.every(word => li.textContent.toLocaleLowerCase().includes(word)); });
+    const count = sourceItems.filter(li => !li.hidden).length;
+    document.getElementById('sourceCount').textContent = `${count} of ${sourceItems.length} sources${count ? '' : '. Try a different title, institution or year'}`;
+  });
 
   // The long reference material sits in one disclosure; while it is closed the section's contents list has nothing to point at, so it steps aside.
   const fold = document.getElementById('srcDetails'),

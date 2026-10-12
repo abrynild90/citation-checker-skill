@@ -113,7 +113,7 @@ function drawAtmosphere(svg, defs, U, GX, GY, GR) {
   stop(lg, 0.58, '#5b9cf2', 0.5);
   stop(lg, 0.82, '#3a68c4', 0.4);
   stop(lg, 1, '#34589f', 0.34);
-  const band = Math.max(2, Math.min(GR * 0.03, 7)),
+  const band = Math.max(1.5, Math.min(GR * 0.018, 4.5)),
     pad = band * 4,
     f = defs
       .append('filter')
@@ -132,7 +132,7 @@ function drawAtmosphere(svg, defs, U, GX, GY, GR) {
     .attr('fill', 'none')
     .attr('stroke', `url(#${U}-atm)`)
     .attr('stroke-width', band)
-    .attr('opacity', 0.55)
+    .attr('opacity', 0.28)
     .attr('filter', `url(#${U}-atmblur)`);
   svg
     .append('circle')
@@ -141,7 +141,7 @@ function drawAtmosphere(svg, defs, U, GX, GY, GR) {
     .attr('r', GR + 0.4)
     .attr('fill', 'none')
     .attr('stroke', `url(#${U}-atm)`)
-    .attr('stroke-width', Math.max(1.2, Math.min(GR * 0.006, 2.4)));
+    .attr('stroke-width', Math.max(0.8, Math.min(GR * 0.004, 1.4)));
 }
 
 // The Earth: the lit photograph (day and night images by the sun) as soon as imagery exists. Until then, for a few milliseconds, a flat dark disc that the

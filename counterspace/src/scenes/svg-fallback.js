@@ -16,6 +16,7 @@ import { requestFullEarth, wantsFullEarth } from './svg/upgrade.js';
 import { prewarmEarth } from './svg/earth-raster.js';
 import { fontFaceCSS, rememberSim, simOf } from './svg/still-frame.js';
 import { SANS } from '../fonts.js';
+import { renderExplanation } from './svg/explanations.js';
 
 prewarmEarth(); // a worker starts decoding the embedded Earth images while the page boots, so the first picture finds it ready
 
@@ -25,6 +26,16 @@ prewarmEarth(); // a worker starts decoding the embedded Earth images while the 
 let svgSeq = 0; // unique gradient/clip ids per SVG (several static SVGs can be in the document at once)
 
 export function renderSVG(sim, el, t = sim.still, opts = {}) {
+  if (!opts.panel && sim.cfg.explanationAlt) {
+    const note = el.querySelector('.illus .full');
+    if (note) note.textContent = 'Schematic diagram. Geometry is illustrative.';
+    if (!opts.print) fitBanner(el);
+    const node = renderExplanation(sim, el, { ...opts, t });
+    if (node) {
+      if (!opts.print && !opts.W) watchStage(sim, el, t, el.clientWidth, el.clientHeight);
+      return node;
+    }
+  }
   if (sim.cfg.panels && !opts.panel) return renderPanels(sim, el, renderSVG, opts);
   const t0 = performance.now(),
     hero = !!sim.cfg.spin && !opts.panel;
@@ -51,7 +62,12 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     const x = Math.cos(la * DEG) * Math.sin(lo * DEG),
       y = Math.sin(la * DEG);
     const front = Math.cos(la * DEG) * Math.cos(lo * DEG);
-    return { x: x * q.r, y: -y * q.r, z: front * q.r, hidden: front < 0 && Math.hypot(x * q.r, y * q.r) < 1 };
+    return {
+      x: x * q.r,
+      y: -y * q.r,
+      z: front * q.r,
+      hidden: front < 0 && Math.hypot(x * q.r, y * q.r) < 1,
+    };
   };
   if (hero && !opts.print) t = heroTime(sim, unit, t);
   const fit = fitFrame(sim, el, t, opts, W, H, unit);
@@ -64,11 +80,7 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
   const path = d3.geoPath(proj);
   const showGlobe = panelShowsGlobe(opts, CX, CY, R, W, H);
   const { GX, GY, GR, gproj, gpath, limb } = pickGlobe(opts, W, cl, CX, CY, R, fTop, fBot, proj, path, showGlobe);
-  const svg = d3
-    .create('svg')
-    .attr('viewBox', `0 0 ${W} ${H}`)
-    .attr('role', 'img')
-    .attr('aria-label', `${sim.cfg.title}: still diagram`);
+  const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${sim.cfg.title}: still diagram`);
   const defs = addDefs(svg, U, { GX, GY, GR, gpath });
   // The saved image draws this SVG as an image, which cannot see the page's fonts: the print layout carries the ones it uses.
   if (opts.print) defs.append('style').text(fontFaceCSS());
@@ -78,9 +90,35 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     svg.append('rect').attr('width', W).attr('height', H).attr('fill', '#070b16');
   }
   drawStars(svg, W, H, { cx: GX, cy: GY, r: GR * 1.06 });
-  const S = createDrawState({ sim, opts, t, W, H, svg, project, path, CX, CY, R, showGlobe, craftBase });
+  const S = createDrawState({
+    sim,
+    opts,
+    t,
+    W,
+    H,
+    svg,
+    project,
+    path,
+    CX,
+    CY,
+    R,
+    showGlobe,
+    craftBase,
+  });
   if (!hero) drawShells(S);
-  drawGlobe(svg, defs, U, { sim, rot, W, H, GX, GY, GR, gproj, gpath, limb, print: !!(opts.print || opts.syncEarth) });
+  drawGlobe(svg, defs, U, {
+    sim,
+    rot,
+    W,
+    H,
+    GX,
+    GY,
+    GR,
+    gproj,
+    gpath,
+    limb,
+    print: !!(opts.print || opts.syncEarth),
+  });
   if (limb) drawLimbTag(svg, W, fBot, S.marks, S.fs, !!(opts.panel && opts.title));
   S.g = svg.append('g').attr('font-family', SANS).attr('font-size', 11);
   Object.assign(S, { GX, GY, GR });
@@ -102,7 +140,11 @@ export function renderSVG(sim, el, t = sim.still, opts = {}) {
     requestFullEarth(sim);
   }
   if (!opts.print && !opts.panel && !opts.W) watchStage(sim, el, t, W, H);
-  if (!opts.print) performance.measure('cs:diagram-' + sim.cfg.id, { start: t0, end: performance.now() }); // shows in window.__cs.perf()
+  if (!opts.print)
+    performance.measure('cs:diagram-' + sim.cfg.id, {
+      start: t0,
+      end: performance.now(),
+    }); // shows in window.__cs.perf()
   return svg.node();
 }
 
@@ -118,7 +160,7 @@ function watchStage(sim, el, t, W, H) {
   new ResizeObserver(() => {
     clearTimeout(st.timer);
     st.timer = setTimeout(() => {
-      if (el.querySelector(':scope > canvas') || !el.querySelector(':scope > svg')) return; // the live globe (or nothing) is on the stage
+      if (el.querySelector(':scope > canvas:not([hidden])') || !el.querySelector(':scope > svg')) return; // the live globe (or nothing) is on the stage
       if (simOf(el.querySelector(':scope > svg')) !== st.sim) return; // a different picture has taken the stage
       const nw = el.clientWidth,
         nh = el.clientHeight;

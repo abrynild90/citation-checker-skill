@@ -121,9 +121,10 @@ def main():
     data = dict(events=events, sources=sources, legal=read_json('data/legal.json'), caps=read_json('data/capabilities.json'),
                 lag_pairs=read_json('data/lag_pairs.json'),
                 schema={k: schema[k] for k in ('schema_version', 'ledger_as_of', 'scope_rule', 'co_scope_rule', 'page_strings')})
+    # D3 and Three.js are pinned build inputs, embedded so file:// and offline use need no CDN.
     # NOMIN=1: unminified bundle with an inline source map (readable stack traces when chasing a page error)
     nomin = bool(os.environ.get('NOMIN'))
-    js = esbuild(['--bundle', '--format=iife', '--legal-comments=none', '--charset=utf8', 'boot.js']
+    js = esbuild(['--bundle', '--format=iife', '--legal-comments=none', '--charset=utf8', '--alias:three=' + str(R / 'tools/node_modules/three/build/three.module.js'), 'boot.js']
                  + (['--sourcemap=inline'] if nomin else ['--minify']))
     tpl = (R / 'src/template.html').read_text()
     # The page is assembled from parts: src/template.html (page markup), src/partials/*.html (scene viewer, icon sprite) and src/styles/*.css.
@@ -139,8 +140,12 @@ def main():
             .replace('/*__LAND__*/', script_json(pack_land(read_json('src/land.json'))))
             .replace('/*__EARTH__*/', script_json(earth_json()) + '</script><script id="cs-earth-hd" type="application/json">' + script_json(earth_hd_json()))
             .replace('/*__POSTERS__*/', script_json(posters_json()))
-            .replace('/*__APP__*/', js))
+            .replace('/*__LICENSES__*/', script_json({name: (R / 'tools/node_modules' / name / 'LICENSE').read_text() for name in ('d3', 'three')}))
+            .replace('/*__D3__*/', (R / 'tools/node_modules/d3/dist/d3.min.js').read_text().replace('</', '<\\/'))
+            .replace('/*__APP__*/', js.replace('</', '<\\/')))
     out = pathlib.Path(os.environ['OUTFILE']) if os.environ.get('OUTFILE') else R / 'index.html'
+    # Shader strings from Three.js contain insignificant trailing spaces.
+    html = '\n'.join(line.rstrip() for line in html.split('\n'))
     out.write_text(html)
     print(out, len(html.encode()) // 1024, 'KB (esbuild module graph, src/boot.js)')
 

@@ -42,11 +42,14 @@
         <div class="story-scroll" id="asideBody" tabindex="0" role="region" aria-label="The story of this scene">
           <p class="sv-dyk" id="sceneDyk" hidden></p>
           <p class="sv-lede" id="sceneCaption"></p>
-          <button class="sv-more" id="sceneMore" type="button" aria-expanded="false" aria-controls="sceneCaption"><svg class="ico" aria-hidden="true"
+          <div id="sceneEpisodes" class="scene-episodes" role="group" aria-label="Choose an episode" hidden></div>
+          <button class="sv-more" id="sceneMore" type="button" aria-expanded="false" aria-controls="sceneCaption sceneStepsBox"><svg class="ico" aria-hidden="true"
             focusable="false"><use href="#i-down"/></svg><span>Read the full account</span></button>
           <section class="sv-steps" id="sceneStepsSection" aria-labelledby="stepsH">
             <h3 id="stepsH">What happens</h3>
             <p class="sv-note" id="stepsNote"></p>
+            <label class="step-choose">Jump to a step <select id="sceneStepChoose" aria-controls="sceneView sceneSteps"></select></label>
+            <p id="sceneCurrentStep" class="current-step"></p>
             <div class="sv-all" id="sceneStepsBox">
               <ol id="sceneSteps"></ol>
             </div>
@@ -70,6 +73,7 @@
       </div>
       <div class="sv-srcrow" id="sceneSrcLine">
         <button class="sl-btn" id="slSource" type="button" aria-expanded="false" aria-controls="slPop"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>Source</button>
+        <button class="sl-btn" id="scDiagram" type="button" aria-label="Show explanatory diagram" hidden>Diagram</button>
         <span class="sl-links" id="slLinks"></span>
         <div class="sl-pop" id="slPop" role="region" aria-label="Source and notes" hidden></div>
         <div class="sl-pop" id="slNextPop" role="region" aria-label="Where to go next" hidden><div class="sv-next-links" id="slNextLinks"></div></div>

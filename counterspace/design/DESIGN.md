@@ -149,9 +149,9 @@ then why it matters. Never explain the software.
 
 | Name | Title of the section |
 |---|---|
-| Law and weapons timeline | Law and weapons on one timeline (the law strip, "Scrub through time", then: How high the tests went, and the debris they left) |
+| Law and weapons timeline | Law and weapons on one timeline (the law strip, "Move through the years", then: How high the tests went, and the debris they left) |
 | What the pattern shows | What the pattern shows (four findings, each linking to its chart) |
-| The evidence, when you want it | The reference band after the quiz, in two parts: Explore the data (cards, one chart at a time) and Where every fact comes from |
+| Charts and sources | The reference band after the quiz, in two parts: Explore the data (cards, one chart at a time) and Where every fact comes from |
 | Explore the data | Explore the data (cards that are also the tabs, one chart at a time) |
 | Jamming, lasers and cyber (tab) | Attacks that leave satellites in orbit |
 | Close approaches (tab) | Satellites that fly close to other satellites |
@@ -171,11 +171,11 @@ fact, never from jokes about harm. Rules of thumb, in order of importance:
    2024 veto was about nuclear weapons in orbit), the plain sentence wins.
 2. **Short sentences, concrete numbers.** "Only four of the 19 items are treaties. Three are expert manuals, which bind no one." beats a long sentence with "and".
 3. **One surprising fact a section, said once.** The scenes (a fighter jet as the launch pad), the timeline (four treaties of 19), the pattern (4 months to 15.1 years), the quiz
-   (two answers catch people out) and the reference band (nothing there is required reading) each get one. Do not stack several.
-4. **Dry, not clever.** A little understatement is welcome: "Nothing here is required reading." "Four questions, no pressure." "The strip follows you down." No puns, no
+   and the reference band each get one. Do not stack several.
+4. **Dry, not clever.** Use direct instructions and results. Avoid reassurance, assumed reactions and stock introductions such as "Did you know". No puns, no
    exclamation marks, no addressing the reader as "folks", no jokes at the expense of the events or the people in them.
 5. **Say what the reader will see, then let them look.** Section ledes name what is on the screen and what to do with it, in one or two sentences, and stop.
-6. **Wrong answers are fair guesses.** The quiz says "A fair guess, but no." and then gives the true order; it never scolds.
+6. **Quiz results are direct.** Give the result and the true order without guessing how readers feel or how other people answer.
 7. **Same claim, new words.** Rewriting for voice never changes a number, a date, a name, a hedge or a source. When in doubt, keep the old wording and add nothing.
 
 ### 3.3 Never
@@ -204,16 +204,16 @@ no wording errors.
 2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list: 3D scenes,
    the timeline, the pattern, the quiz, "Explore the data" and "Sources and method" (the last two are the two halves of the reference band, see item 3).
 3. **Two layers, the second one quiet.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, one timeline chapter (the law strip and the
-   anti-satellite test chart on the same years), "What the pattern shows" (it opens on one large line, the range of the waits, with the longest pair drawn between its dates, then four findings computed from the data, each linking to its chart) and the quiz, which sits just after the pattern it echoes. Layer two is the **reference band**, headed "The evidence, when you want it": a hairline, an h2 of 24 to 32 px and one line, then two parts set a size down
+   anti-satellite test chart on the same years), "What the pattern shows" (it opens on one large line, the range of the waits, with the longest pair drawn between its dates, then four findings computed from the data, each linking to its chart) and the quiz, which sits just after the pattern it echoes. Layer two is the **reference band**, headed "Charts and sources": a hairline, an h2 of 24 to 32 px and one line, then two parts set a size down
    (sans h3 of 17 px, ledes of 15 to 17 px, chart titles of 21 to 25 px, tighter spacing, no background change so every chart keeps the page as its ground). The first part is "Explore the data":
    four compact cards (a small picture, a name and one line each, about 80 px high) that are also the tabs, one for each remaining chart (jamming, lasers and cyber; close approaches; who can do what; how long the law took). One chart shows at a time, with its own title, one-sentence takeaway, any notes, and then one disclosure,
    "Key, data table and download" (the key, the table and the download button together, with the entry count on it), sharing a row with the way on to the next chart. The second part is "Where every fact
    comes from": one line and one disclosure, "Read the sources and method", with the copy-citation button at its end. The whole page is about 6,800 px tall at 1440 x 900 with the first chart open. Nothing is removed: every chart, table and download stays, and print shows every tab. The cards follow the ARIA tabs pattern
    (arrow keys, Home, End, one tab stop), and an address that names a chart or something inside one (`#chartC`, `#lag`, `#tableC`) opens its tab first. Panels not chosen stay laid out at full width,
-   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline (with "Scrub through time"), pattern, quiz, the reference band (explore, then sources).
+   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline (with "Move through the years"), pattern, quiz, the reference band (explore, then sources).
 4. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, an optional callout, and one disclosure, "Key, data table and download" (the key, the table and the download button together; the law timeline keeps its key beside the strip and its own "Show the data behind this chart"). No label above
    the title, no number. A chart inside a chapter takes an h3 and a quieter lede; inside the reference band it takes an h4 (the band is h2, its two parts h3).
-5. **Law strip and "Scrub through time".** Beside "How to read this chart" the chapter head offers "Scrub through time"; the control itself is a thin row above the test chart that stays under the pinned strip while the chart is read
+5. **Law strip and "Move through the years".** Beside "How to read this chart" the chapter head offers "Move through the years"; the control itself is a thin row above the test chart that stays under the pinned strip while the chart is read
    (hidden on a phone). Its line starts and ends where the charts' year axes do. Dragging it, the arrow keys (one year; Page Up and Page Down ten; Home and End the ends) or Play (1957 to 2026 in about twelve
    seconds; the button becomes "Skip") fog the years it has not reached on the strip, the zoom panel and the test chart together, with a running tally ("1968: 25 tests, 2 laws") counted from the same entries;
    the thumb sitting at the end means no fog. Play ends on the longest wait in the pair data, drawn along the slider's own line the way the hero draws a link, and named in a sentence. Reduced motion has no
