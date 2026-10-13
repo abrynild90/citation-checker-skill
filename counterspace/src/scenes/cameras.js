@@ -285,8 +285,10 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             const L = c.trackPath.launch,
               r = at0(t, asp);
             if (!L || t >= L.until) return r;
-            const w = 1 - smooth(Math.max(0, t / L.until)),
+            const h0 = L.hold ?? 0, // the framing stays tight until t = hold, then eases out to the ring framing by t = until
+              w = 1 - smooth(Math.max(0, (t - h0) / (L.until - h0))),
               q = pose(t, asp, false, false, L.dMin);
+            if (L.k) q.pos = add(q.look, scl(add(q.pos, scl(q.look, -1)), L.k)); // L.k < 1: moves in closer than the fit, so the vehicle fills more of the frame
             return { pos: add(scl(r.pos, 1 - w), scl(q.pos, w)), look: add(scl(r.look, 1 - w), scl(q.look, w)), up: null };
           };
         return {
