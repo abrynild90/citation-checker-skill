@@ -681,7 +681,7 @@ export const rocketMethods = {
       const qa = rec.q1 || (rec.q1 = new T.Quaternion());
       qa.copy(acObj.quaternion);
       qa.multiply(rec.q0.setFromAxisAngle(rec.v1.set(1, 0, 0), 0.2 * Math.min(1, tau))); // nose dips as it falls
-      obj.quaternion.copy((rec.q2 ||= new T.Quaternion()).copy(qa).slerp(rec.q3 ? rec.q3.copy(obj.quaternion) : (rec.q3 = obj.quaternion.clone()), smooth((tau - 0.9) / 1.6)));
+      obj.quaternion.copy((rec.q2 ||= new T.Quaternion()).copy(qa).slerp(rec.q3 ? rec.q3.copy(obj.quaternion) : (rec.q3 = obj.quaternion.clone()), smooth((tau - 0.9) / 2.5))); // the swing from the carrier's attitude onto the path is a steady turn over about 3.5 drop spans
     }
   },
   // ------------------------------------------------------------ smoke trail
