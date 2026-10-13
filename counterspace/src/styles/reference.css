@@ -26,7 +26,7 @@
 @media (max-width:420px){.ref-band .xcard{grid-template-columns:minmax(0,1fr);}.ref-band .xc-pic{display:none}.ref-band .xc-t,.ref-band .xc-l{grid-column:1}}
 
 /* ---- one chart at a time, closer to its cards and set a size down */
-.ref-band section.chart.xpanel{padding:var(--s-5) 0 var(--s-2)}
+.ref-band section.chart.xpanel{padding:calc(var(--s-5) + 28px) 0 var(--s-2)} /* room between the row of cards and the panel's heading */
 .ref-band .chapter-head.sub{margin-bottom:var(--s-3);gap:var(--s-1) var(--s-6)}
 .ref-band .chapter-head.sub>h4{grid-column:1;margin:0;max-width:24em;font:500 clamp(21px,1.9vw,25px)/1.2 var(--serif);letter-spacing:-.008em;text-wrap:balance;color:var(--text)}
 @media (min-width:1200px){.ref-band .chapter-head.sub>h4{grid-row:1;max-width:none}}
@@ -142,3 +142,11 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .sources.ref-band .cites>li { padding-block:10px; border-bottom:1px solid var(--line); }
 .ref-band .record-find { background:none; border-radius:0; border:0; border-top:1px solid var(--line); margin-top:20px; }
 .pat-big { padding:0; }
+
+/* The reader that opens with "Find an entry" (or "Read the 2020s assessment by state") shares the row of the key-table-download pill: the same pill, the same
+   baseline; opened, it takes the row's whole width and its fields drop under its own button. */
+.ref-foot>.record-find{flex:0 0 auto;margin:0;padding:0;border:0;border-radius:0;background:none}
+.ref-foot>.record-find[open]{flex:1 0 100%}
+.ref-foot>.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans)}
+.ref-foot>.record-find>.record-tools,.ref-foot>.record-find>.state-choose{margin-top:var(--s-3)}
+@media (min-width:641px){.ref-foot{align-items:center}}
