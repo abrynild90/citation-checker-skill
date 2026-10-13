@@ -649,7 +649,13 @@ export const rocketMethods = {
     let carry = 0.5;
     if (tau >= 0 && tau < 1) carry = 0.5 + 1.6 * tau * tau;
     else if (tau >= 1) carry = 2.1 * (1 - smooth((tau - 1) / 3.2));
-    const base = tau < 0 ? apos : p;
+    let base = tau < 0 ? apos : p;
+    if (tau >= 0 && tau < 1.2) {
+      // the path starts a little off the carrier's own position: the missile eases onto it over the drop instead of snapping across at the release
+      const p0 = (rec.p0 ||= rec.it.pos(fx.t0)),
+        w = 1 - smooth(tau / 1.2);
+      if (p0) base = [p[0] - (p0[0] - apos[0]) * w, p[1] - (p0[1] - apos[1]) * w, p[2] - (p0[2] - apos[2]) * w];
+    }
     obj.position.set(base[0], base[1], base[2]).addScaledVector(upv, -carry * Lr);
     // the carrier flies low in the picture (a few hundredths of an Earth radius above the surface), so a missile hung a half length under its belly or dropped
     // a length or two below it would sink into the globe and vanish: its height is kept above the surface (AIR_FLOOR)
