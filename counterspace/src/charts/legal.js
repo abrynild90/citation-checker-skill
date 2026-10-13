@@ -444,17 +444,15 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     .attr('y2', yMark)
     .style('stroke', 'var(--line-strong)')
     .style('stroke-width', compact ? 1 : 1.5);
+  // The pinned (one-row) strip carries the chapter's title in one small line at its top left, above the symbols' row (which starts lower, and whose first marks
+  // stand clear of it); the heading itself has scrolled away by the time the strip is pinned.
   if (compact)
     svg
       .append('text')
       .attr('class', 'band-label')
       .attr('x', 2)
-      .attr('y', yMark - 2)
-      .text('Law and')
-      .append('tspan')
-      .attr('x', 2)
-      .attr('dy', 13)
-      .text('policy');
+      .attr('y', 9.5)
+      .text('Law and weapons on one timeline');
   // labels and their leaders
   const lg = svg.append('g').attr('class', 'lbls').attr('aria-hidden', 'true');
   const TONE = { normal: ['var(--text)', 'var(--muted)'], soft: ['var(--accent-2)', 'var(--accent-2)'], quiet: ['var(--muted)', 'var(--muted)'] };
