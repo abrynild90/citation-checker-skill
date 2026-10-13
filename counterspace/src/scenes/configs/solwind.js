@@ -110,7 +110,7 @@ export const SOLWIND = {
       labelFollow: true, // the leader stays on the missile itself (the vehicle is drawn all the way to the hit)
       hold: -0.004, // and the label goes with the vehicle, which is consumed 0.004 before the hit (gl-rocket pos), not after it
       thick: 0.0065,
-      rocket: { minPx: 70, maxPx: 88 }, // a little larger so its plume and fins read next to the F-15 (+13%)
+      rocket: { minPx: 86, maxPx: 108, ramp: { k: 1.5, until: 0.35 }, smokeK: 1.7 }, // a little larger so its plume and fins read next to the F-15 (+13%)
       strong: true,
       flash: 0.24,
       flashSpan: 0.14,

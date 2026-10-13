@@ -56,6 +56,9 @@ export const DN2 = {
         maxPx: IS_PHONE ? 64 : 82,
         glowMin: 10,
         glowMax: 16,
+        pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 },
+        ramp: { k: IS_PHONE ? 1.2 : 1.5, until: 0.3 },
+        smokeK: 1.6,
         burn: 0.2, // a short powered phase, then a long coast to the apogee
         stage: { s: 0.09 }, // the reports speak of upper stages: one lower stage drops away early in the burn (the count of stages is not claimed)
       },
@@ -172,6 +175,7 @@ export const DN2 = {
         fill: IS_PHONE ? 0.86 : 0.76,
         zoom: IS_PHONE ? 1.3 : 1.42,
         lookK: 0.4,
+        launch: { until: 0.3, dMin: IS_PHONE ? 0.7 : 0.55 }, // opens tight on Xichang and the climbing rocket, then eases out to the whole path
       },
     },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame

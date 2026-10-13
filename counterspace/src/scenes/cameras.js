@@ -240,7 +240,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           sd = norm(cross3(up, [0, 1, 0])),
           tilt = (c.trackPath.tilt ?? 30) * DEG,
           n = norm(add(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1))), [0, c.trackPath.lift ?? 0, 0])),
-          pose = (t, asp, geo, ring) => {
+          pose = (t, asp, geo, ring, dMin = 1.2) => {
             const pl = it.pts(t),
               P = [
                 all[0],
@@ -256,7 +256,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             }
             const look = scl(centroid(P.concat([[0, 0, 0]])), c.trackPath.lookK ?? 1); // lookK < 1 pulls the view toward the Earth's centre
             const q = fitPose(P, n, look, {
-              dMin: 1.2,
+              dMin,
               dMax: 12,
               fillX: c.trackPath.fill ?? 0.8,
               fillY: (c.trackPath.fill ?? 0.8) * 0.8,
@@ -266,7 +266,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             if (ring && c.trackPath.zoom) q.pos = add(look, scl(add(q.pos, scl(look, -1)), 1 / c.trackPath.zoom));
             return { ...q, up: null };
           },
-          at = (t, asp) => {
+          at0 = (t, asp) => {
             const g0 = c.trackPath.geoT ?? 0.35;
             if (!c.trackPath.ring) return pose(t, asp, t > g0, false);
             // the ring framing is blended in over the 0.14 before geoT + 0.14, so the camera glides out instead of jumping
@@ -278,6 +278,16 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               look: add(scl(A.look, 1 - w), scl(B.look, w)),
               up: null,
             };
+          };
+          // trackPath.launch (opt-in) { until, dMin }: the camera opens tight on the launch site and the climbing rocket (closest fit allowed dMin), then eases out
+          // to the ring framing by t = until
+        const at = (t, asp) => {
+            const L = c.trackPath.launch,
+              r = at0(t, asp);
+            if (!L || t >= L.until) return r;
+            const w = 1 - smooth(Math.max(0, t / L.until)),
+              q = pose(t, asp, false, false, L.dMin);
+            return { pos: add(scl(r.pos, 1 - w), scl(q.pos, w)), look: add(scl(r.look, 1 - w), scl(q.look, w)), up: null };
           };
         return {
           name: c.name,
