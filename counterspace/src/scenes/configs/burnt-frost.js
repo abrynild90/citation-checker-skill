@@ -58,8 +58,8 @@ export const BURNT_FROST = {
       hideFrom: 0.58,
       dx: 0,
       dy: 44,
-      minPx: IS_PHONE ? 72 : 100,
-      maxPx: IS_PHONE ? 135 : 160,
+      minPx: IS_PHONE ? 72 : 92,
+      maxPx: IS_PHONE ? 135 : 140,
     },
     {
       type: 'target',
@@ -89,7 +89,7 @@ export const BURNT_FROST = {
       thick: 0.0055,
       label: 'SM-3 interceptor',
       short: 'SM-3',
-      rocket: { style: 'slim', minPx: 56, maxPx: 86, glowMin: 24, glowMax: 40, launch: 'vls', ramp: { k: 1.5, until: 0.35 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
+      rocket: { style: 'slim', minPx: 92, maxPx: 125, glowMin: 14, glowMax: 24, launch: 'vls', ramp: { k: 1.2, until: 0.35 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,

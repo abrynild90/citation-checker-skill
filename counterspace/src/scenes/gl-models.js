@@ -984,8 +984,8 @@ export const modelMethods = {
       strip(sd * 0.0020, 0.0415, sd * 0.0090, 0.016, 0.0024, 0.0032, 0.65);
     });
     // churned wake astern, as wide as the transom, and the V arms that diverge beyond it
-    strip(0, Z0 + 0.001, 0, -0.112, 0.0108, 0.0135, 0.75);
-    [-1, 1].forEach((sd) => strip(sd * 0.0060, Z0 + 0.002, sd * 0.0165, -0.098, 0.0036, 0.0058, 0.45));
+    strip(0, Z0 + 0.001, 0, -0.075, 0.0100, 0.0115, 0.6); // a short churned trail: it reads as the ship's own wake, not as streaks
+    [-1, 1].forEach((sd) => strip(sd * 0.0058, Z0 + 0.002, sd * 0.0125, -0.060, 0.0030, 0.0046, 0.3));
     g.position.y = 0;
     g.userData.tintMat = side;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
