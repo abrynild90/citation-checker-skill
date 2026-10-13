@@ -11,16 +11,19 @@
 .scenes-acts{display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center}
 .scenes-acts .btn .ico{margin-right:var(--s-2)}
 .strip-nav{display:inline-flex;gap:var(--s-2)}
-.posters{--n:1.6;--gap:var(--s-5);list-style:none;margin:0;padding:8px 8px var(--s-4);margin-inline:-8px;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - (var(--n) - 1) * var(--gap)) / var(--n));gap:var(--gap);
-  overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:8px;scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+.posters{--n:1.6;--frac:.6;--gap:var(--s-5);list-style:none;margin:0;padding:8px 8px var(--s-4);margin-inline:-8px;display:grid;grid-auto-flow:column;--cw:calc((100% - (var(--n) - 1) * var(--gap)) / var(--n));grid-auto-columns:var(--cw);gap:var(--gap);
+  overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:8px;scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
 /* the clipped end fades out instead of ending in a hard cut; each fade shows only while there is more to see that way */
 .posters{--fade-l:0px;--fade-r:0px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--fade-l),#000 calc(100% - var(--fade-r)),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--fade-l),#000 calc(100% - var(--fade-r)),transparent 100%)}
-.posters.more-l{--fade-l:56px}.posters.more-r{--fade-r:72px}
-@media (min-width:520px){.posters{--n:2.3}}
-@media (min-width:700px){.posters{--n:3.3}}
-@media (min-width:1100px){.posters{--n:4.3}}
-@media (min-width:1800px){.posters{--n:4.3}}
+.posters.more-l{--fade-l:8px}.posters.more-r{--fade-r:72px}
+@media (min-width:520px){.posters{--n:2.3;--frac:.3}}
+@media (min-width:700px){.posters{--n:3.3;--frac:.3}}
+@media (min-width:1100px){.posters{--n:4.3;--frac:.3}}
+@media (min-width:1800px){.posters{--n:4.3;--frac:.3}}
 .posters>li{scroll-snap-align:start}
+/* the strip ends with a little room (the width the next card's peek has at the start), so the last page, like every other, starts on a card: script adds the spacer and --cards */
+.posters.has-pad{grid-template-columns:repeat(var(--cards),var(--cw)) calc(var(--frac) * (var(--cw) + var(--gap)) - var(--gap))}
+.posters>li.pad{scroll-snap-align:none;pointer-events:none}
 .pcard{min-width:0}
 .pc-btn{all:unset;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;gap:var(--s-2) var(--s-2);width:100%;cursor:pointer;color:var(--text);border-radius:var(--r-2)}
 .pc-btn:focus-visible{outline:3px solid var(--focus);outline-offset:4px}

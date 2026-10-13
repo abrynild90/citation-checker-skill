@@ -117,6 +117,14 @@ function stripControls(grid) {
   const prev = document.getElementById('stripPrev'),
     next = document.getElementById('stripNext');
   if (!prev || !next) return;
+  if (!grid.querySelector(':scope > .pad')) {
+    const pad = document.createElement('li');
+    pad.className = 'pad';
+    pad.setAttribute('aria-hidden', 'true');
+    grid.append(pad);
+    grid.style.setProperty('--cards', String(grid.children.length - 1));
+    grid.classList.add('has-pad');
+  }
   const sync = () => {
     prev.disabled = grid.scrollLeft < 4;
     next.disabled = grid.scrollLeft + grid.clientWidth > grid.scrollWidth - 4;
@@ -124,7 +132,18 @@ function stripControls(grid) {
     grid.classList.toggle('more-l', !prev.disabled);
     grid.classList.toggle('more-r', !next.disabled);
   };
-  const go = (dir) => grid.scrollBy({ left: dir * grid.clientWidth * 0.85, behavior: REDUCED ? 'auto' : 'smooth' });
+  // A page is a whole number of cards: the strip snaps to a card's start (charts: .posters in discover.css), so the card at the left edge is never cut mid-word.
+  const go = (dir) => {
+    const cards = [...grid.children].filter((c) => !c.classList.contains('pad')),
+      box = grid.getBoundingClientRect().left,
+      at = cards.map((c) => c.getBoundingClientRect().left - box + grid.scrollLeft - 8), // where the strip rests with this card first (8 px: its scroll-padding)
+      pitch = cards.length > 1 ? at[1] - at[0] : grid.clientWidth,
+      gap = pitch - cards[0].getBoundingClientRect().width,
+      page = Math.max(1, Math.floor((grid.clientWidth - 16 + gap) / pitch)),
+      now = at.reduce((n, x, i) => (Math.abs(x - grid.scrollLeft) < Math.abs(at[n] - grid.scrollLeft) ? i : n), 0),
+      to = Math.min(cards.length - 1, Math.max(0, now + dir * page));
+    grid.scrollTo({ left: Math.max(0, at[to]), behavior: REDUCED ? 'auto' : 'smooth' });
+  };
   prev.onclick = () => go(-1);
   next.onclick = () => go(1);
   grid.addEventListener('scroll', sync, { passive: true });
