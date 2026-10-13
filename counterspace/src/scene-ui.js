@@ -833,14 +833,13 @@ export function closeScene(nav) {
   // focused mark opens its card, which would be left open over the page.
   const live = (n) => n && n !== document.body && document.contains(n) && !n.inert && n.getClientRects().length > 0;
   const inStrip = (id) => id && document.querySelector(`#scenes .pc-btn[data-id="${id}"]`);
-  const target = [returnFocus, inStrip(closing.id), $('tourBtn')].find(live);
+  // The first of those that is on screen takes it (closing a scene never scrolls the page: focus lands without moving it, and a candidate that is out of the window is
+  // the last choice).
+  const shown = (n) => live(n) && ((r) => r.bottom > 0 && r.top < innerHeight)(n.getBoundingClientRect());
+  const chain = [returnFocus, inStrip(closing.id), $('tourBtn')];
+  const target = chain.find(shown) || chain.find(live);
   returnFocus = null;
-  // Focus returns without moving the page (the card is where the reader left it); only a card that is wholly out of the window is brought back into it.
   target?.focus({ preventScroll: true });
-  if (target) {
-    const r = target.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > innerHeight) target.scrollIntoView({ block: 'nearest' });
-  }
   if (target?.matches?.('.mark, [data-id]:not(.pc-btn)')) hideCard(); // a chart mark that opened the scene takes focus back without showing its card again
   document.dispatchEvent(new CustomEvent('cs:closed', { detail: { nav: nav === true } }));
 }
