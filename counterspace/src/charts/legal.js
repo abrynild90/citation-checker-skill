@@ -883,7 +883,7 @@ export function setZoomOpen(open, scrollTo, instant) {
   if (open && !was && scrollTo) requestAnimationFrame(() => legalScroll());
 }
 export function initZoomControl() {
-  setZoomOpen(true);
+  setZoomOpen(true, false, true); // open from the first frame: a fold that grew after the page had landed on a chart below it would push that chart down
   document.getElementById('zoomBtn')?.addEventListener('click', () => setZoomOpen(!document.getElementById('legalZoomWrap').classList.contains('open')));
   addEventListener('beforeprint', () => setZoomOpen(true));
 }
