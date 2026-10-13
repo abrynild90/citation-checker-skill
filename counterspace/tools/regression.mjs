@@ -223,7 +223,7 @@ try {
   await keep.route('**/*', (route) => (route.request().url().startsWith(url) ? route.continue() : route.abort()));
   await keep.goto(url);
   await keep.waitForFunction(() => window.__cs && document.querySelector('#posterGrid .pc-btn'));
-  await keep.evaluate(() => document.getElementById('posterGrid').scrollIntoView({ block: 'center' }));
+  await keep.evaluate(() => document.querySelector('#posterGrid .pc-btn[data-id="starfish"]').scrollIntoView({ block: 'center' })); // the whole card on screen: a click then scrolls nothing
   await keep.waitForTimeout(900);
   const y0 = await keep.evaluate(() => scrollY);
   assert.equal(y0 > 400, true, 'the strip is well down the page');
