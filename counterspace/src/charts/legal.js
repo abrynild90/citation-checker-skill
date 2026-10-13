@@ -451,7 +451,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .append('text')
       .attr('class', 'band-label')
       .attr('x', 2)
-      .attr('y', 9.5)
+      .attr('y', 9)
       .text('Law and weapons on one timeline');
   // labels and their leaders
   const lg = svg.append('g').attr('class', 'lbls').attr('aria-hidden', 'true');

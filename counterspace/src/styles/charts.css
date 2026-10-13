@@ -130,6 +130,7 @@
 .gridline path{display:none}
 .gridline.minor line{stroke-dasharray:2 5;stroke-opacity:.6}
 .band-label{fill:var(--muted);font:600 10px var(--sans);letter-spacing:0}
+.legal-band text.band-label{font-size:11.5px}
 .ann{fill:var(--text);font:600 13px var(--sans)}
 .ann-sub{fill:var(--muted);font:400 13px var(--sans)}
 .ann,.ann-sub,.lbls text{paint-order:stroke;stroke:var(--ground);stroke-width:3.5px;stroke-linejoin:round}
