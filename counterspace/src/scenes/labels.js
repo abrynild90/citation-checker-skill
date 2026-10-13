@@ -362,8 +362,7 @@ export function placeLabels(list, W, H, reserved = [], disc = null, obst = [], m
               dy0 = Math.max(Math.abs(Y - disc.cy) - h / 2, 0);
             if (dy0 >= disc.r) continue;
             const hx = Math.sqrt(disc.r * disc.r - dy0 * dy0) + w / 2 + 1;
-            tryAt(disc.cx + hx, Y);
-            tryAt(disc.cx - hx, Y);
+            for (const X of [disc.cx + hx, disc.cx - hx]) if (Math.hypot(X - x0, Y - y0) <= R) tryAt(X, Y);
           }
       }
       if (mem) {
