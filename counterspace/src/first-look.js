@@ -1,5 +1,6 @@
 import { byId } from './app.js';
 import { openScene } from './scene-ui.js';
+import { posterURL } from './scenes/posters.js';
 
 // An optional, reader-paced introduction; dates and source links match the records.
 const section = document.getElementById('firstLook');
@@ -35,3 +36,11 @@ document.getElementById('firstLookNext').onclick = () => {
   if (step === 2) document.getElementById('firstLookDone').focus({ preventScroll: true });
 };
 document.getElementById('firstLookScene').onclick = () => openScene('starfish');
+document.getElementById('firstLookPoster').onclick = () => openScene('starfish');
+try {
+  const u = posterURL('starfish');
+  if (u) document.getElementById('firstLookImg').src = u;
+  else document.getElementById('firstLookPoster').hidden = true;
+} catch {
+  document.getElementById('firstLookPoster').hidden = true;
+}

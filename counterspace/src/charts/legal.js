@@ -923,10 +923,11 @@ function legalScrollMain() {
     exOver = !!ex && ex.getBoundingClientRect().bottom < innerHeight * 0.7, // the chart section has been read to its end: the sources and the footer are what is on screen
     // in "Explore the data" the strip comes only once the open chart's own drawing (the part that shares its years) reaches it, never over the heading, the cards or the notes
     xBox = ex && ex.dataset.years === '1' ? document.querySelector('.xpanel:not([data-off]) .svgbox') : null,
-    exAligned = !!xBox && xBox.getBoundingClientRect().top < bh;
+    exAligned = !!xBox && xBox.getBoundingClientRect().top < bh,
+    qz = document.getElementById('quizBand'); // the test-yourself questions are not drawn on the strip's years: the strip leaves when that section begins
   band.classList.toggle(
     'off',
-    !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (exOver && tr.top < 0)),
+    !isPhoneNow() && (performance.now() < offUntil || (!!pat && pat.getBoundingClientRect().top < bh && !exAligned) || (!!qz && qz.getBoundingClientRect().top < bh && !exAligned) || (exOver && tr.top < 0)),
   );
   // The strip shrinks to its short form only once the band's own place in the page has scrolled out by the amount it shrinks, so the space it
   // keeps for the content below stays hidden behind the pinned strip (no blank band between the strip and the zoom panel).

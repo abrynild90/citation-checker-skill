@@ -289,6 +289,23 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 /* A short introduction stays under the reader's control, with a stable text area. */
 .first-look { padding-block: 48px; scroll-margin-top: 70px; }
 .first-look h2 { max-width: 28ch; }
+.first-look-fig { display: none; margin: 0; }
+@media (min-width: 960px) {
+  .first-look:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 46%); column-gap: clamp(40px, 5vw, 96px); align-content: start; }
+  .first-look > :not(.first-look-fig) { grid-column: 1; }
+  .first-look-fig { display: block; grid-column: 2; grid-row: 1 / span 8; align-self: center; }
+}
+.first-look-poster { position: relative; display: block; width: 100%; padding: 0; border: 1px solid var(--line-strong); border-radius: 12px; overflow: hidden; background: var(--bg-2); cursor: pointer; box-shadow: var(--shadow-2, 0 8px 30px rgba(0,0,0,.25)); }
+.first-look-poster img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.first-look-play { position: absolute; left: 12px; bottom: 12px; padding: 6px 14px; border-radius: 999px; background: var(--surface, #151a26); color: var(--text); border: 1px solid var(--line-strong); font: 500 13px/1.4 var(--sans); }
+.first-look-poster:hover .first-look-play, .first-look-poster:focus-visible .first-look-play { border-color: var(--accent); }
+.first-look-fig figcaption { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; margin-top: 18px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.first-look-fig figcaption time { color: var(--text); font-weight: 500; }
+.first-look-axis { grid-column: 1 / -1; display: flex; align-items: center; gap: 0; }
+.first-look-axis i { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex: none; }
+.first-look-axis b { flex: 1; height: 2px; background: var(--line-strong); }
+.first-look-axis-r { text-align: right; }
+
 .first-look-progress { display: flex; flex-wrap: wrap; gap: 8px 20px; list-style: none; padding: 0; margin: 24px 0; }
 .first-look-progress button { min-height: 44px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; cursor: pointer; padding: 8px 0; }
 .first-look-progress [aria-current] { color: var(--text); border-color: var(--accent); }
