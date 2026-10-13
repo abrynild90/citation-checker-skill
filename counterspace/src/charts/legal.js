@@ -862,11 +862,12 @@ let bandFullH = 0;
 let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
 // The 2021 to 2026 zoom starts folded, so the first screen of the timeline shows laws and tests together. The button opens it; it also opens for print and for a
 // keyboard or link visit to anything inside it. Folded, it stays laid out at full width (only its height is 0), so its drawing never needs redoing.
-export function setZoomOpen(open, scrollTo) {
+export function setZoomOpen(open, scrollTo, instant) {
   const wrap = document.getElementById('legalZoomWrap'),
     btn = document.getElementById('zoomBtn');
   if (!wrap || !btn) return;
   const was = wrap.classList.contains('open');
+  if (instant) wrap.style.transition = 'none'; // a landing needs the final layout at once, not 320 ms later
   wrap.classList.toggle('open', open);
   wrap.classList.remove('settled');
   btn.setAttribute('aria-expanded', String(open));
@@ -874,7 +875,11 @@ export function setZoomOpen(open, scrollTo) {
   btn.querySelector('use').setAttribute('href', open ? '#i-minus' : '#i-zoom');
   const done = () => wrap.classList.toggle('settled', wrap.classList.contains('open'));
   clearTimeout(setZoomOpen.t);
-  setZoomOpen.t = setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 340);
+  if (instant) {
+    void wrap.offsetHeight; // the new height is laid out with no transition, then the transition is given back
+    wrap.style.transition = '';
+    done();
+  } else setZoomOpen.t = setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 340);
   if (open && !was && scrollTo) requestAnimationFrame(() => legalScroll());
 }
 export function initZoomControl() {
@@ -1079,6 +1084,26 @@ export function landOnMark(m, smooth) {
   requestAnimationFrame(wait);
 }
 
+// Every way to "the timeline" (the hero's buttons, the chapter rail, the skip link, an address ending in #timeline) lands in one place: the pinned strip at the top
+// edge of the window and, under it, the heading of the test chart and the first cluster of tests. The 2021 to 2026 zoom (a fold under the strip) is closed for the
+// landing, so it does not push the tests below the window; its button is the first thing under the strip when the reader scrolls back up. Where the window is too
+// short to show the whole strip and the tests (less than 220 px of the chart under it), the landing goes on until the strip has shrunk to its one-row form.
+// Called just before the jump, so the room is measured as it will be; the jump itself is the browser's (scroll-margin-top in charts.css reads --land-extra).
+export function prepareTimelineLanding() {
+  if (isPhoneNow()) return;
+  const tl = document.getElementById('timeline'),
+    top = document.getElementById('bandTop'),
+    svg = document.getElementById('svgA');
+  if (!tl || !top || !svg) return;
+  if (document.getElementById('legalZoomWrap')?.classList.contains('open')) setZoomOpen(false, false, true);
+  const doc = (el) => el.getBoundingClientRect().top + scrollY,
+    root = document.documentElement,
+    bandH = parseFloat(root.style.getPropertyValue('--band-h')) || 0,
+    shrink = bandFullH && bandH ? Math.max(0, bandFullH - bandH) : 0,
+    plot = doc(svg) - doc(top), // from the strip's own place to the top of the test drawing, with the strip whole
+    to = doc(top) + (innerHeight - plot < 220 && shrink ? shrink + 12 : 0); // the strip whole at the top edge, or already in its short form
+  root.style.setProperty('--land-extra', Math.max(0, Math.round(to - doc(tl) - 23)) + 'px');
+}
 // Measures the sticky (compact) band's height once per layout so section anchors clear it exactly (--band-h drives scroll-margin-top), and how far the
 // band sits below the top of its chapter heading so a link to the band keeps that heading in view (--law-head-h).
 export function probeBand() {
@@ -1088,16 +1113,6 @@ export function probeBand() {
     document.documentElement.style.setProperty('--law-head-h', Math.round(law.offsetHeight - pad + 16) + 'px');
   }
   if (isPhoneNow()) return;
-  // "See the timeline" lands with the chapter heading at the top, which in a short window leaves the cluster of tests in low Earth orbit below the fold. The landing
-  // moves down by the height of the heading, so the pinned strip, the test chart's heading and slider and the low-orbit tests arrive together.
-  const tl = document.getElementById('timeline'),
-    leo = document.querySelector('#svgA [data-zone="100"]');
-  if (tl && leo) {
-    const top = tl.getBoundingClientRect().top + scrollY,
-      low = leo.getBoundingClientRect().bottom + scrollY - (top + 23), // where the bottom of the low-orbit zone sits on arrival (the timeline lands 23 px above the window)
-      cap = (document.getElementById('lawHead')?.offsetHeight || 0) + 24;
-    document.documentElement.style.setProperty('--land-extra', (low - innerHeight + 24 > 40 ? cap : 0) + 'px'); // all or nothing: a heading cut across its middle looks worse than either. 40 px: a cluster that ends under the window's lower edge (1920x1080 by 43 px) gets the same landing as 1440x900, heading above, cluster whole
-  }
   const band = document.getElementById('legalBand'),
     was = legalCompact,
     root = document.documentElement.style;

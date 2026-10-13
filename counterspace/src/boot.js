@@ -10,7 +10,7 @@ import { chipsB, drawB } from './charts/b.js';
 import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
 import { timed } from './app.js';
-import { drawLegal, drawLegalKey, initZoomControl, landOnMark, legalOff, legalScroll } from './charts/legal.js';
+import { drawLegal, drawLegalKey, initZoomControl, landOnMark, legalOff, legalScroll, prepareTimelineLanding } from './charts/legal.js';
 import { fragmentId, hooks, markFirstDrawn, settled } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
@@ -114,10 +114,17 @@ nameThemeButton();
 // page then moves again. Instead nothing scrolls until the page has settled (shared.js settled(): load, fonts, first draw); then everything below is drawn, any closed
 // disclosure that holds the target is opened, and the page scrolls to the target in one move. A second look a moment later only corrects a landing that something
 // moved, and only while the reader has not scrolled by hand.
-const hashId = () => fragmentId(location.hash);
+// (a cold load's address is set aside by the head script until the page has landed: see template.html)
+const pendingHash = () => location.hash || window.__hash0 || '';
+const putHashBack = () => {
+  const h = window.__hash0;
+  window.__hash0 = null;
+  if (h && !location.hash) history.replaceState(history.state, '', location.href.split('#')[0] + h);
+};
+const hashId = () => fragmentId(pendingHash());
 let moved = false;
 ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => (moved = true), { once: true, passive: true }));
-addEventListener('hashchange', () => (moved = false));
+addEventListener('hashchange', () => ((moved = false), (window.__hash0 = null)));
 
 // A link to something inside a closed disclosure opens it first (a chart's "How we classified these" points into the sources section, for one).
 // The sources section keeps its long reading in one disclosure that starts closed: an address or a link that names the section (the footer's "Sources", the
@@ -158,6 +165,7 @@ function jumpToHash(again) {
     // the landing does not wait for it (the target is where it will stay: nothing drawn below it can move it)
     const ex = document.getElementById('explore');
     if (!ex || ex.contains(t) || ex.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING) hooks.drawRest?.();
+    if (id === 'timeline') hooks.prepareTimeline?.();
     openAround(id);
     revealIn(t); // a chart in "Explore the data" sits in a tab: show the tab first
   }
@@ -178,16 +186,20 @@ function jumpToHash(again) {
 }
 addEventListener('hashchange', () => {
   const id = hashId();
-  if (id === 'legalBand' || openAround(id)) requestAnimationFrame(() => jumpToHash());
+  if (id === 'timeline') hooks.prepareTimeline?.();
+  if (id === 'legalBand' || id === 'timeline' || openAround(id)) requestAnimationFrame(() => jumpToHash());
 });
+// a link to the timeline: the room under the strip is measured (and the zoom folded) before the browser's own jump, which then lands once
+document.addEventListener('click', (e) => e.target.closest?.('a[href="#timeline"]') && hooks.prepareTimeline?.(), true);
 let jumpedAt = 0;
 // The row of cards above "Explore the data" can still settle for a moment after the jump (its height is the room kept above the panel): within the few seconds after
 // the landing, and while the reader has not touched the page, the address lands again where it belongs.
-document.addEventListener('cs:cardsized', () => location.hash && jumpedAt && performance.now() - jumpedAt < 8000 && requestAnimationFrame(() => jumpToHash(true)));
-if (location.hash)
+document.addEventListener('cs:cardsized', () => pendingHash() && jumpedAt && performance.now() - jumpedAt < 8000 && requestAnimationFrame(() => jumpToHash(true)));
+if (pendingHash())
   settled().then(() => {
     jumpedAt = performance.now();
     jumpToHash();
+    putHashBack();
     // once more after two frames and again after the page has been idle for a moment: normally nothing has moved, and nothing happens
     requestAnimationFrame(() => requestAnimationFrame(() => jumpToHash(true)));
     [500, 1200, 2600, 4500].forEach((ms) => setTimeout(() => jumpToHash(true), ms)); // each look does nothing when the target already stands where a jump puts it
@@ -239,6 +251,7 @@ hooks.drawRest = drawRest;
 hooks.drawLazy = drawLazy;
 hooks.legalScroll = legalScroll;
 hooks.legalOff = legalOff;
+hooks.prepareTimeline = prepareTimelineLanding;
 hooks.landOnMark = landOnMark;
 function drawAll(lazy = false) {
   guides.length = 0;
