@@ -993,4 +993,44 @@ export const modelMethods = {
     Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });
     return g;
   },
+  // A small, generic launch-complex marker (a stand-in, not a particular pad): a square concrete base plate with a pale edge, a dark flame deflector at its centre,
+  // a lattice tower on one side with a swing arm toward the vehicle, and a short guide rail on the other. Drawn under a rocket until liftoff (sim.js, rocket.pad).
+  _padModel(pos) {
+    const T = this.T,
+      g = new T.Group(),
+      plate = this._mat(0x434b5e, { roughness: 0.8 }),
+      edge = this._mat(0x838ea3),
+      dark = this._mat(0x151a26),
+      steel = this._mat(0xdfe5f0, { metalness: 0.3, roughness: 0.45, emissive: 0x2a3140 }),
+      mark = this._mat(0xff8a4a, { emissive: 0xff8a4a, emissiveIntensity: 0.6 });
+    const box = (w, h, d, m, x, y, z) => {
+      const q = new T.Mesh(new T.BoxGeometry(w, h, d), m);
+      q.position.set(x, y + h / 2, z);
+      g.add(q);
+      return q;
+    };
+    box(0.0378, 0.0010, 0.0378, edge, 0, 0, 0); // the edge of the plate
+    box(0.0345, 0.0016, 0.0345, plate, 0, 0, 0);
+    const d = new T.Mesh(new T.CylinderGeometry(0.0072, 0.0072, 0.0006, 20), dark); // the flame deflector
+    d.position.y = 0.0019;
+    g.add(d);
+    box(0.0034, 0.0004, 0.0300, dark, 0, 0.0016, 0); // a flame trench running off to the sides
+    // the tower: four legs, cross braces, a swing arm, and an orange warning light on top
+    const tx = 0.0125;
+    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box(0.0007, 0.052, 0.0007, steel, tx + dx * 0.0016, 0.0016, dz * 0.0016);
+    for (let k = 0; k < 7; k++) {
+      const y = 0.0016 + 0.0075 * k;
+      box(0.0039, 0.0006, 0.0006, steel, tx, y, -0.0016);
+      box(0.0039, 0.0006, 0.0006, steel, tx, y, 0.0016);
+      box(0.0006, 0.0006, 0.0039, steel, tx - 0.0016, y, 0);
+      box(0.0006, 0.0006, 0.0039, steel, tx + 0.0016, y, 0);
+    }
+    box(0.0150, 0.0014, 0.0014, steel, tx - 0.0075, 0.0400, 0); // the swing arm, reaching toward the vehicle
+    box(0.0016, 0.0016, 0.0016, mark, tx, 0.0536, 0);
+    box(0.0012, 0.0300, 0.0012, steel, -0.0112, 0.0016, 0); // the guide rail on the other side
+    box(0.0030, 0.0006, 0.0030, steel, -0.0112, 0.0016, 0);
+    g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
+    Object.assign(g.userData, { span: 0.0385, minPx: 40, maxPx: 60 });
+    return g;
+  },
 };

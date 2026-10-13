@@ -685,6 +685,7 @@ export function buildSim(cfg) {
           minPx: a.rocket.minPx ?? 26,
           maxPx: a.rocket.maxPx ?? 48,
           rocketStyle: a.rocket.style,
+          ramp: a.rocket.ramp, // opt-in { k, until }: drawn k times larger at the pad, easing to its normal size by this fraction of the flight (see _fitModels)
           // flight look (gl-rocket.js): ignition at t0, the vehicle is consumed at the hit; burn is the fraction of the flight under thrust (the rest is coast)
           fx: {
             t0: a.t0,
@@ -693,6 +694,7 @@ export function buildSim(cfg) {
             alt0: a.from === 'aircraft' ? (cfg.actors.find((x) => x.type === 'aircraft')?.alt ?? 12) : 0,
             air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop } : null,
             cold: a.rocket.launch === 'vls',
+            smokeK: a.rocket.smokeK,
             stage: a.rocket.stage,
             seed: a.t0 * 10,
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
@@ -707,6 +709,12 @@ export function buildSim(cfg) {
             };
           },
         });
+      // opt-in launch site (rocket.pad): a small launch-complex marker (base plate, flame deflector, tower, rail) stands under the vehicle until a moment after liftoff
+      if (a.rocket?.pad) {
+        const at = scl(norm(from), 1.002),
+          until = a.t0 + (a.rocket.pad.hold ?? 0.03);
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60 });
+      }
       if (!a.rocket)
         items.push({
           kind: 'point',
@@ -978,13 +986,14 @@ export function buildSim(cfg) {
             kind: 'point',
             shape: 'rocket',
             rocketStyle: a.rocket.style,
+            ramp: a.rocket.ramp,
             color: '#ff8a8a',
             scale: 1,
             minPx: a.rocket.minPx ?? 30,
             maxPx: a.rocket.maxPx ?? 54,
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
-            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
+            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, smokeK: a.rocket.smokeK, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
           });
         } else
           items.push({

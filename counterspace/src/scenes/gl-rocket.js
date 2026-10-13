@@ -713,6 +713,7 @@ export const rocketMethods = {
       tE = Math.max(t0 + 1e-4, rec.tSmoke),
       TA = 0.2, // e-folding age of the smoke (scene time): the trail persists through the rest of the flight and fades with age
       wind = (rec.wind ||= new T.Vector3().crossVectors(new T.Vector3(0, 1, 0), rec.up0).normalize()),
+      sk = fx.smokeK ?? 1, // opt-in (rocket.smokeK): a larger, denser trail for a scene whose launch is small in the frame
       bodyD = 0.0084 * rec.f * (rec.rk.slim ? 0.62 : 1); // the vehicle's drawn diameter
     let any = false;
     const pa = it.pos(t0 + 1e-4),
@@ -749,10 +750,10 @@ export const rocketMethods = {
       pos[3 * k + 1] = a[1] - (dy / dl) * back + wind.y * (wl + lat);
       pos[3 * k + 2] = a[2] - (dz / dl) * back + wind.z * (wl + lat);
       const spread = 1 + 2.4 * gr + 1.1 * near * (0.3 + gr);
-      sz[k] = bodyD * 1.7 * spread;
+      sz[k] = bodyD * 1.7 * spread * sk;
       // overlapping soft discs add up: each one carries a share of the opacity that keeps the column's density about constant whatever its length
       const dense = 0.3 + 0.7 * Math.sqrt(rho); // thinner trail in thinner air
-      al[k] = Math.min(0.72, (2.2 * spacing) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
+      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spacing * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
       wm[k] = Math.exp(-age / 0.012) * 0.8;
       if (al[k] > 0.003) any = true;
     }
