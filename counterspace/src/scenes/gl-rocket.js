@@ -509,6 +509,10 @@ export const rocketMethods = {
     return true;
   },
   // ------------------------------------------------------------ per frame, after the models are sized: plume, flash, heat, staging, air launch, smoke
+  // The stage-size factor for a vehicle's pixel floor and cap: 1 up to the 1440 x 900 stage (652 px tall), then growing with it to 1.4.
+  _rkStage(bh) {
+    return Math.min(1.4, Math.max(1, this._stageH(bh) / 652));
+  },
   _rocketFrame() {
     if (!this._rkt?.length) return;
     const T = this.T,
@@ -528,7 +532,7 @@ export const rocketMethods = {
         if (p) {
           const d = Math.max(0.15, Math.hypot(p[0] - cp.x, p[1] - cp.y, p[2] - cp.z)),
             px = (ud.span * ud.base * sc) / d,
-            b = this._modelBoost || 1;
+            b = (this._modelBoost || 1) * this._rkStage(bh);
           rec.f = (ud.base * Math.min(Math.max(px, ud.minPx * k * b), ud.maxPx * k * b)) / px;
         }
       }

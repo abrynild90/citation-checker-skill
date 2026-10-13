@@ -55,7 +55,7 @@ export const STARFISH = {
       head: true,
       thick: 0.0035,
       ghostOpacity: 0.45,
-      rocket: { minPx: IS_PHONE ? 54 : 100, maxPx: IS_PHONE ? 70 : 140, glowMin: 24, glowMax: 40, ramp: { k: IS_PHONE ? 1.3 : 1.7, until: 0.55 }, burn: 0.7, smokeK: 1.9 },
+      rocket: { minPx: IS_PHONE ? 54 : 120, maxPx: IS_PHONE ? 70 : 160, glowMin: 24, glowMax: 40, ramp: { k: IS_PHONE ? 1.3 : 1.7, until: 0.55 }, burn: 0.7, smokeK: 1.9 },
       opt: true,
       dx: -96,
       dy: 4,

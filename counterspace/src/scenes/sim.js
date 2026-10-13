@@ -969,7 +969,7 @@ export function buildSim(cfg) {
             const s = clamp01((t - a.t0) / (a.t1 - a.t0)) * N,
               i = Math.min(N - 1, Math.floor(s)),
               f = s - i;
-            return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
+            return s >= 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null; // before ignition the vehicle stands at the launch point (s = 0)
           };
           const kvMark = {
             kind: 'point',

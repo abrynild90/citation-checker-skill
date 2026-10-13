@@ -828,7 +828,7 @@ export class GLHost {
       v.setFromMatrixPosition(obj.matrixWorld);
       const d = Math.max(0.15, v.distanceTo(cp)),
         px = (u.span * u.base * sc) / d,
-        b = (this._modelBoost || 1) * (u.rk && this._fz?.w ? 1 + 1.5 * this._fz.w : 1), // print stills draw craft a little larger relative to the frame; a rocket grows as the wheel zoom closes in on it
+        b = (this._modelBoost || 1) * (u.rk && this._fz?.w ? 1 + 1.5 * this._fz.w : 1) * (u.rk ? this._rkStage(bh) : 1), // a rocket grows with the stage (a 1920 window draws it as large, relative to the frame, as a 1440 one); print stills draw craft a little larger relative to the frame; a rocket grows as the wheel zoom closes in on it
         f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       // opt-in launch ramp (it.ramp { k, until }): a vehicle on the pad and in the first of its climb is drawn k times larger, easing to its normal size by this fraction of its flight
       const rp = it.ramp && it.fx ? 1 + (it.ramp.k - 1) * (1 - smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / Math.max(1e-4, (it.fx.t1 - it.fx.t0) * it.ramp.until))))) : 1;
