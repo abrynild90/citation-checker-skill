@@ -108,7 +108,7 @@ export const SOLWIND = {
       color: C.int,
       label: 'ASM-135',
       thick: 0.0065,
-      rocket: { minPx: 62, maxPx: 78 },
+      rocket: { minPx: 70, maxPx: 88 }, // a little larger so its plume and fins read next to the F-15 (+13%)
       strong: true,
       flash: 0.24,
       flashSpan: 0.14,

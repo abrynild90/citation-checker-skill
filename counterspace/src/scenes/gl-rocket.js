@@ -20,6 +20,7 @@ const SMOKE_TOP = 40; // km: the smoke trail exists only below this illustrative
 const ILL = 0.4; // illustrative altitude = 0.4 x the altitude the picture's squeezed scale stands for (so the air thins out by about the Karman line, 100 km)
 const RAMP_UP = 0.005; // t: motor thrust builds over this
 const RAMP_DOWN = 0.008; // t: and dies away over this at burnout
+const AIR_FLOOR = 1.022; // Earth radii: an air-launched missile is kept at least this far from the Earth's centre (the globe's surface is at 1)
 const FLASH_T = 0.012; // t: the ignition flash lasts this long
 const SEP_AGE = 0.05; // t: the unit of the age of a stage separation (the lower stage drifts clear in the first fifth of it, 1% of the scene, and is gone by 1.7 of it)
 
@@ -137,7 +138,7 @@ export const rocketMethods = {
       nose = this._mat(slim ? 0x3a4050 : tipCol.getHex(), { metalness: slim ? 0.55 : 0.2, roughness: slim ? 0.4 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
       dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       darkU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
-      fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45 }) : this._mat(tipCol.getHex(), { metalness: 0.2, roughness: 0.4 }),
+      fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(tipCol.getHex(), { metalness: 0.2, roughness: 0.4, vertexColors: true }),
       rx = PI / 2;
     // dimensions (z along the axis): nozzle exit, body, split between the lower and upper part, nose tip
     const D = slim
@@ -167,7 +168,8 @@ export const rocketMethods = {
     }
     np.reverse(); // base first, tip last
     Ku.geo(nose, lathe(T, np, 22), 0, 0, 0, rx);
-    // swept fins (a thin extruded trapezoid): radial, axial; four around the body
+    // swept fins: a thin extruded trapezoid with a bevelled edge, tapering in thickness from the root to the tip, with a darker edge (vertex shade: the faces
+    // are light, the bevel and the rim darker), four of them in a cross around the body
     const finGeo = (r0, r1, zTE, zLE0, zLE1, th) => {
       const sh = new T.Shape();
       sh.moveTo(r0, zTE);
@@ -175,15 +177,26 @@ export const rocketMethods = {
       sh.lineTo(r1, zLE1);
       sh.lineTo(r0, zLE0);
       sh.closePath();
-      const g = new T.ExtrudeGeometry(sh, { depth: th, bevelEnabled: false });
+      const bv = th * 0.3,
+        g = new T.ExtrudeGeometry(sh, { depth: th, bevelEnabled: true, bevelThickness: bv, bevelSize: bv * 0.8, bevelOffset: 0, bevelSegments: 1 });
       g.translate(0, 0, -th / 2);
+      const pos = g.attributes.position,
+        nor = g.attributes.normal,
+        col = new Float32Array(pos.count * 3);
+      for (let i = 0; i < pos.count; i++) {
+        const shade = Math.abs(nor.getZ(i)) > 0.95 ? 1 : 0.38; // flat faces vs the bevelled rim
+        col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = shade;
+        pos.setZ(i, pos.getZ(i) * (1 - 0.6 * clamp01((pos.getX(i) - r0) / (r1 - r0)))); // thinner towards the tip
+      }
+      g.setAttribute('color', new T.BufferAttribute(col, 3));
+      g.computeVertexNormals();
       g.rotateX(PI / 2); // radial stays x, axial (shape y) becomes z, thickness becomes y
       return g;
     };
     for (let k = 0; k < 4; k++) {
       const a = (k * PI) / 2;
-      if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0062, -0.0262, -0.016, -0.0222, 0.0005), 0, 0, 0, 0, 0, a);
-      else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0112, -0.0182, -0.0072, -0.0128, 0.0007), 0, 0, 0, 0, 0, a);
+      if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0062, -0.0262, -0.016, -0.0222, 0.0008), 0, 0, 0, 0, 0, a);
+      else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0112, -0.0182, -0.0072, -0.0128, 0.0011), 0, 0, 0, 0, 0, a);
     }
     const lower = Kl.build(),
       upper = Ku.build(),
@@ -510,7 +523,8 @@ export const rocketMethods = {
         e = 1 - Math.pow(st.rho, 0.55), // 0 in dense air, towards 1 in vacuum
         nozW = sepNow ? D.rU : D.rL,
         wob = rec.wob || [0, 0];
-      const outerLen = (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr),
+      const ak = fx.air ? 1.3 : 1; // an air-launched missile is small beside its carrier: its plume and ignition flash are drawn a little larger
+      const outerLen = ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr),
         outerW = nozW * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr);
       const tm = t * this.sim.cfg.duration,
         U = rk.outer.material.uniforms,
@@ -533,12 +547,12 @@ export const rocketMethods = {
       rk.outer.visible = rk.core.visible = vis && thr > 0.004;
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
       rk.glow.visible = vis && thr > 0.004 && !hide;
-      rk.glow.scale.setScalar(0.013 + 0.01 * thr + 0.008 * e);
+      rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak);
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
       rk.glow.position.z = -0.003;
       rk.flash.visible = vis && st.flash > 0.01 && !hide;
       const reLit = sepNow && t >= rec.burns[rec.burns.length - 1][0]; // the upper stage's own ignition: a small flash, not the first launch burst
-      rk.flash.scale.setScalar((0.016 + 0.03 * st.flash) * (reLit ? 0.5 : 1));
+      rk.flash.scale.setScalar((0.016 + 0.03 * st.flash) * (reLit ? 0.5 : 1) * ak);
       rk.flash.material.opacity = Math.min(0.85, st.flash) * (reLit ? 0.6 : 1);
       rk.flash.position.z = -0.004;
       // puff: a pop of gas at the separation, a burst of steam at the cold-launch pop
@@ -588,8 +602,25 @@ export const rocketMethods = {
     else if (tau >= 1) carry = 2.1 * (1 - smooth((tau - 1) / 3.2));
     const base = tau < 0 ? apos : p;
     obj.position.set(base[0], base[1], base[2]).addScaledVector(upv, -carry * Lr);
+    // the carrier flies low in the picture (a few hundredths of an Earth radius above the surface), so a missile hung a half length under its belly or dropped
+    // a length or two below it would sink into the globe and vanish: its height is kept above the surface (AIR_FLOOR)
+    // seen from above the carrier's airframe would hide it as well: after the release it swings out to the side, about a wing's semi-span, and trails a little
+    // aft, then settles back onto its path (the offsets are in the aircraft's own frame, so they do not depend on the camera; zero at the release)
+    if (tau > 0) {
+      const right = (rec.vr ||= new T.Vector3()).set(1, 0, 0).applyQuaternion(acObj.quaternion),
+        fwd = (rec.vf ||= new T.Vector3()).set(0, 0, 1).applyQuaternion(acObj.quaternion);
+      if (rec.side == null) {
+        const q = rec.it.pos(fx.t0 + 0.04) || p;
+        rec.side = (q[0] - apos[0]) * right.x + (q[1] - apos[1]) * right.y + (q[2] - apos[2]) * right.z >= 0 ? 1 : -1; // toward the side its path leaves on
+      }
+      const lat = smooth(tau / 1.6) * (1 - smooth((tau - 2.4) / 3.6)),
+        aft = smooth(tau / 1.2) * (1 - smooth((tau - 2.4) / 3.6));
+      obj.position.addScaledVector(right, rec.side * 0.9 * Lr * lat).addScaledVector(fwd, -0.5 * Lr * aft);
+    }
+    const rr = obj.position.length();
+    if (rr < AIR_FLOOR) obj.position.multiplyScalar(AIR_FLOOR / rr);
     // a released missile is smaller than the carrier: kept to 0.7 of its drawn size until it drops clear
-    obj.scale.multiplyScalar(0.7 + 0.3 * smooth(tau / 1.5));
+    obj.scale.multiplyScalar(0.7 + 0.3 * smooth(tau / 1.0));
     if (tau < 0) obj.quaternion.copy(acObj.quaternion);
     else {
       const qa = rec.q1 || (rec.q1 = new T.Quaternion());
