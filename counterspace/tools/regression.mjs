@@ -29,6 +29,22 @@ try {
     await page.waitForFunction(() => window.__cs && document.querySelector('#svgA svg'));
     await page.evaluate(() => window.__cs.audit());
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}: overflow`);
+    // The hero's jump links sit under the picture's invisible hit layer on wide screens: each must take a real click and move the page.
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => scrollTo(0, 0));
+      const box = await page.evaluate((i) => {
+        const a = document.querySelectorAll('.hero-jumps a')[i],
+          r = a.getBoundingClientRect(),
+          x = r.x + r.width / 2,
+          y = r.y + r.height / 2;
+        return { x, y, on: document.elementFromPoint(x, y) === a, name: a.textContent };
+      }, i);
+      assert.equal(box.on, true, `${width}: hero link "${box.name}" is covered at its centre`);
+      await page.mouse.click(box.x, box.y);
+      await page.waitForFunction(() => scrollY > 100, null, { timeout: 8000 }).catch(() => {});
+      assert.equal(await page.evaluate(() => scrollY > 100), true, `${width}: a click on the hero link "${box.name}" did not navigate`);
+    }
+    await page.evaluate(() => scrollTo(0, 0));
     const clippedAltitudeLabels = await page.evaluate(() =>
       [...document.querySelectorAll('#svgA .axis .tick text')]
         .filter((el) => el.getBoundingClientRect().left < document.getElementById('svgA').getBoundingClientRect().left - 1)
