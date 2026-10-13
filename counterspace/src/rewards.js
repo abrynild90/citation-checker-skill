@@ -2,7 +2,8 @@
 // rewards.js: the small payoffs that draw real pairs on the hero's resting picture (memory only, nothing is stored). A scene watched whose weapon has a pair
 // draws that pair at once; three scenes seen, seven scenes seen and three or four quiz answers right each draw one more, preferring a pair whose scene was
 // watched. Each one is a real pair from data/lag_pairs.json; the picture picks it (hero-timeline.js, revealPair).
-// Provides: earn(key), earnWatched(id), freshReward(), freshLine(), showInHero(), toHero(). A "cs:reward" event on the document announces each new one.
+// Provides: earn(key), earnWatched(id), freshReward(), freshLine(), showInHero(), toHero(), heroInView(), offerLink(). Closing a scene never moves the page: the link is
+// already drawn, and when the hero is out of sight a small note says so and offers "Show me" (offerLink); when most of it is on screen the link pulses in place. A "cs:reward" event on the document announces each new one.
 // ============================================================================
 import { REDUCED } from './app.js';
 import { pulseReveal, revealPair } from './hero-timeline.js';
@@ -38,6 +39,7 @@ export function earnWatched(id) {
 }
 // The links the reader has not looked at yet (a scene opened since then retires them).
 export const freshReward = () => ((fresh = fresh.filter((f) => seenScenes.size <= f.at)), fresh.at(-1) || null);
+export const freshCount = () => (freshReward(), fresh.length);
 // "1 new link on the picture: Mission Shakti to UN resolution 77/41", or '' when there is none. `where` names the picture ("on the picture", "on the top picture").
 export function freshLine(where = 'on the picture') {
   freshReward();
@@ -72,3 +74,63 @@ export function showInHero(key = fresh.at(-1)?.key) {
     document.dispatchEvent(new CustomEvent('cs:reward', { detail: null }));
   });
 }
+
+// How much of the hero picture is on screen (0 to 1), and whether that is most of it (then a pulse in place is seen, and nothing needs to scroll).
+export function heroInView() {
+  const r = (document.getElementById('heroStage') || document.getElementById('heroPic'))?.getBoundingClientRect();
+  if (!r || !r.height) return false;
+  return Math.min(r.bottom, innerHeight) - Math.max(r.top, 0) >= r.height * 0.7;
+}
+// The link pulses where it is, with no scroll (the hero is already on screen).
+export function pulseInPlace(key = fresh.at(-1)?.key) {
+  pulseReveal(key);
+  document.dispatchEvent(new CustomEvent('cs:reward', { detail: null }));
+}
+
+// A small, quiet note that stays out of the way: it says what was drawn on the hero picture and offers "Show me" (which does scroll, because the reader asked).
+// It never takes focus, goes after about eight seconds (it waits while the pointer or keyboard is on it) and when a scene opens.
+let noteEl = null,
+  noteT = 0;
+export function dropNote() {
+  clearTimeout(noteT);
+  const n = noteEl;
+  noteEl = null;
+  if (!n) return;
+  n.classList.remove('in');
+  setTimeout(() => n.remove(), REDUCED ? 0 : 260);
+}
+export function offerLink(text, go) {
+  dropNote();
+  const n = document.createElement('div');
+  n.className = 'reward-note';
+  n.setAttribute('role', 'status');
+  const t = document.createElement('span');
+  t.className = 'rn-text';
+  t.textContent = text;
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'rn-go';
+  b.textContent = 'Show me';
+  const x = document.createElement('button');
+  x.type = 'button';
+  x.className = 'rn-x';
+  x.setAttribute('aria-label', 'Dismiss this note');
+  x.innerHTML = '<svg class="ico" aria-hidden="true"><use href="#i-close"/></svg>';
+  b.addEventListener('click', () => (dropNote(), go()));
+  x.addEventListener('click', dropNote);
+  n.append(t, b, x);
+  document.body.append(n);
+  noteEl = n;
+  void n.offsetWidth;
+  n.classList.add('in');
+  const arm = () => {
+    clearTimeout(noteT);
+    noteT = setTimeout(dropNote, 8000);
+  };
+  n.addEventListener('pointerenter', () => clearTimeout(noteT));
+  n.addEventListener('pointerleave', arm);
+  n.addEventListener('focusin', () => clearTimeout(noteT));
+  n.addEventListener('focusout', arm);
+  arm();
+}
+document.addEventListener('cs:opening', dropNote);

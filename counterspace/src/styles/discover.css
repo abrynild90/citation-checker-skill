@@ -114,3 +114,15 @@
 .scene-choose select{font:400 14px/1.4 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:10px;max-width:360px;min-width:0}
 .scene-choose select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:519px){.posters{--n:1.12;--gap:16px}.scene-choose{width:100%}.scene-choose select{flex:1;width:0}.scenes-tools{flex-wrap:wrap}.posters.more-r{--fade-r:24px}}
+
+/* The note that says a scene earned a link on the hero picture. It stands at the foot of the window, never moves the page and never takes focus; "Show me" is the only thing
+   that scrolls. */
+.reward-note{position:fixed;z-index:var(--z-card);left:50%;bottom:calc(var(--s-5) + env(safe-area-inset-bottom));display:flex;align-items:center;gap:var(--s-3);max-width:min(560px,calc(100vw - 2*var(--s-4)));padding:var(--s-2) var(--s-2) var(--s-2) var(--s-4);border:1px solid var(--line-strong);border-radius:var(--r-pill);background:var(--surface);color:var(--text);box-shadow:var(--shadow-2);font:500 14px/1.4 var(--sans);opacity:0;transform:translate(-50%,10px);transition:opacity var(--dur-2) var(--ease),transform var(--dur-3) var(--ease)}
+.reward-note.in{opacity:1;transform:translate(-50%,0)}
+.rn-text{min-width:0}
+.rn-go{appearance:none;flex:none;min-height:36px;padding:0 var(--s-4);border:0;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent,#fff);font:600 14px/1 var(--sans);cursor:pointer}
+.rn-x{appearance:none;flex:none;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}
+.rn-x .ico{width:16px;height:16px}
+.rn-go:focus-visible,.rn-x:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+@media(max-width:760px){.reward-note{bottom:calc(76px + env(safe-area-inset-bottom));border-radius:var(--r-3,16px)}}
+@media(prefers-reduced-motion:reduce){.reward-note{transition:none}}

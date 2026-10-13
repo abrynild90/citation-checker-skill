@@ -8,7 +8,7 @@ import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
 import { FACTS, pickSurprise } from './discover-data.js';
 import { seenScenes } from './shared.js';
-import { earn, freshLine, showInHero, toHero } from './rewards.js';
+import { earn, freshCount, freshLine, heroInView, offerLink, pulseInPlace, showInHero, toHero } from './rewards.js';
 import { playPairs, revealCapacity, revealedCount } from './hero-timeline.js';
 
 const yearOf = (s) => s.date.slice(0, 4);
@@ -71,7 +71,8 @@ function drawGallery() {
 }
 
 // Rewards, in memory only (see rewards.js): a scene watched whose weapon has a pair draws that pair on the hero's resting picture; the third and the seventh scene seen
-// each draw one more. When the scene that earned a link is closed, the page brings the hero into view and pulses the new link once.
+// each draw one more. Closing a scene never moves the page: the link is already drawn, so when most of the hero is on screen it pulses where it is, and otherwise a small
+// note near the strip says "1 new link on the hero picture" and its "Show me" button (the reader's own click) scrolls up and pulses it.
 const MILES = [3, 7];
 let given = 0,
   toShow = null, // the reward to show when the scene on screen is closed
@@ -91,8 +92,17 @@ document.addEventListener('cs:closed', (e) => {
   // A close that is the first half of a jump elsewhere (a chart, the timeline, the quiz) leaves the page where the jump puts it: the link is already drawn, and the
   // hero's own note names it for when the reader comes back (the draw-in of all the pairs waits for the next ordinary close).
   if (e.detail?.nav) return;
-  if (pending) return drawIn(); // the draw-in of every pair covers a link just earned
-  if (k) setTimeout(() => showInHero(k), 250);
+  if (pending) {
+    // 13 of 13: the pairs draw themselves in on the hero. In place when the hero is on screen; otherwise the reader is offered the draw-in, and the page stays put.
+    shown = true;
+    pending = false;
+    if (heroInView()) return setTimeout(() => playPairs(), 250);
+    return offerLink(`All ${STRIP.length} scenes seen. The pairs draw themselves on the hero picture.`, () => drawIn());
+  }
+  if (!k) return;
+  if (heroInView()) return setTimeout(() => pulseInPlace(k), 250);
+  const n = freshCount() || 1;
+  offerLink(`${n === 1 ? '1 new link' : `${n} new links`} on the hero picture.`, () => showInHero(k));
 });
 
 // The arrows move the strip by about one screenful of cards and switch off at either end; the cards themselves stay the way in for keyboards.
@@ -243,8 +253,6 @@ function placePairs() {
 addEventListener('resize', placePairs);
 // At 13 of 13 (when the scene that made it 13 is closed): the pairs draw themselves in, then the row says where they are.
 function drawIn() {
-  shown = true;
-  pending = false;
   toHero(() => playPairs());
 }
 document.addEventListener('cs:recap', () => ((shown = true), (pending = false)));
