@@ -157,8 +157,13 @@ function openAround(id) {
 const anchorOf = (id) => document.getElementById(id === 'legalBand' ? 'lawHead' : id);
 let landed = null; // where the jump put the target, for the one correction
 function jumpToHash(again) {
-  const id = hashId(),
-    t = id && anchorOf(id);
+  const id = hashId();
+  let t = id && anchorOf(id);
+  // a part of the sources reading is drawn with the rest of the page: draw it (and open the fold that holds it) before looking for it
+  if (id && !t && !moved && !again) {
+    openAround(id);
+    t = anchorOf(id);
+  }
   if (!t || moved) return;
   if (!again) {
     // everything below is drawn first only when the target sits at or under the charts that are drawn lazily; above them, drawing waits for the idle pass and
