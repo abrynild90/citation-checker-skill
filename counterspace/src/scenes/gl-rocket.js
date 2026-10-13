@@ -20,6 +20,7 @@ const SMOKE_TOP = 40; // km: the smoke trail exists only below this illustrative
 const ILL = 0.4; // illustrative altitude = 0.4 x the altitude the picture's squeezed scale stands for (so the air thins out by about the Karman line, 100 km)
 const RAMP_UP = 0.005; // t: motor thrust builds over this
 const RAMP_DOWN = 0.008; // t: and dies away over this at burnout
+const COAST_RATE = 62; // rad per unit of scene time (3.5 degrees per 0.001): the fastest the nose turns in the coast
 const PLUME_FLOOR = 1.002; // Earth radii: the exhaust is cut where it meets the surface
 const AIR_FLOOR = 1.022; // Earth radii: an air-launched missile is kept at least this far from the Earth's centre (the globe's surface is at 1)
 const FLASH_T = 0.012; // t: the ignition flash lasts this long
@@ -405,6 +406,43 @@ export const rocketMethods = {
     for (const [a] of rec.burns) if (t >= a && t < a + FLASH_T * 2.5) flash = Math.max(flash, Math.exp(-(t - a) / (FLASH_T * 0.45)) * clamp01((t - a) / 0.0012 + 0.35));
     return { p, alt, rho, thr, flash, lastIg, sec: (t - fx.t0) * this.sim.cfg.duration };
   },
+  // Coast attitude (after the last burnout): the nose follows the flight direction at 0.3 of the pace and never turns faster than COAST_RATE, so the reversal of
+  // a straight up-and-down arc (a vertical rise and fall) is a slow tumble, not a flip. A pure function of t: the follower is stepped on a fixed grid of
+  // scene time from burnout (cached per vehicle: the path never changes) and the last, partial step lands on t, so scrubbing in either direction agrees.
+  _coastDir(rec, it, tb, t, p) {
+    const T = this.T,
+      G = 0.004,
+      d = 0.008,
+      c = (rec.cd ||= { dirs: [], tgt: new T.Vector3(), ax: new T.Vector3(), q: new T.Quaternion() });
+    const aim = (te, out) => {
+      const qa = it.pos(te - d) || p,
+        qb = it.pos(te + d) || p;
+      out.set(qb[0] - qa[0], qb[1] - qa[1], qb[2] - qa[2]);
+      if (out.lengthSq() < 1e-14) return false;
+      out.normalize();
+      return true;
+    };
+    const turn = (a, out, max) => {
+      const ang = Math.acos(Math.max(-1, Math.min(1, a.dot(c.tgt))));
+      if (ang <= max) return out.copy(c.tgt);
+      c.ax.crossVectors(a, c.tgt);
+      if (c.ax.lengthSq() < 1e-10) c.ax.crossVectors(a, rec.up0); // a straight reversal: turn about the axis across the local vertical
+      if (c.ax.lengthSq() < 1e-10) c.ax.set(1, 0, 0).cross(a);
+      c.ax.normalize();
+      return out.copy(a).applyQuaternion(c.q.setFromAxisAngle(c.ax, max));
+    };
+    if (!c.dirs.length) c.dirs.push(aim(tb, c.tgt) ? c.tgt.clone() : rec.lastDir.clone());
+    const k = Math.min(Math.floor((t - tb) / G), 400);
+    for (let i = c.dirs.length; i <= k; i++) {
+      const prev = c.dirs[i - 1];
+      c.dirs.push(aim(tb + 0.3 * i * G, c.tgt) ? turn(prev, new T.Vector3(), COAST_RATE * G) : prev.clone());
+    }
+    const base = c.dirs[k],
+      rest = t - tb - k * G;
+    if (aim(tb + 0.3 * (t - tb), c.tgt)) turn(base, rec.lastDir, COAST_RATE * Math.max(0, rest));
+    else rec.lastDir.copy(base);
+    return rec.lastDir;
+  },
   // ------------------------------------------------------------ pose: position is already set by the dyn loop; this orients the vehicle
   _rocketPose(it, obj, t, p) {
     const rec = obj.userData.rec;
@@ -419,13 +457,8 @@ export const rocketMethods = {
     // coast: no thrust steers the vehicle, so its attitude changes slowly (it follows the flight direction at a fraction of the pace) and a pitch-over at the
     // top of the arc is a slow roll of the nose, not a flip
     const tb = rec.burns[rec.burns.length - 1][1];
-    if (t > tb) {
-      const te = tb + 0.3 * (t - tb),
-        qa = it.pos(te - d) || p,
-        qb = it.pos(te + d) || p;
-      vel.set(qb[0] - qa[0], qb[1] - qa[1], qb[2] - qa[2]);
-    }
-    if (vel.lengthSq() > 1e-14) rec.lastDir.copy(vel).normalize();
+    if (t > tb) this._coastDir(rec, it, tb, t, p);
+    else if (vel.lengthSq() > 1e-14) rec.lastDir.copy(vel).normalize();
     const dir = rec.v2.copy(rec.lastDir),
       up = rec.v3.set(p[0], p[1], p[2]).normalize();
     rec.speed = speed;
