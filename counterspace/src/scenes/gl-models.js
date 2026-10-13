@@ -796,13 +796,13 @@ export const modelMethods = {
       const hi = new T.ExtrudeGeometry(sh, { depth: 0.0021, bevelEnabled: false });
       hi.rotateX(Math.PI / 2);
       hi.translate(0, 0.0038, 0);
-      g.add(new T.Mesh(hi, this._mat(0x6a758c)));
+      g.add(new T.Mesh(hi, this._mat(0xa6b1c5))); // the hull side: lighter than the keel band and the deck, so the hull reads as a hull
       // a dark weather deck inset in the hull top, so the superstructure stands on it
       const dk = new T.ExtrudeGeometry(sh, { depth: 0.0006, bevelEnabled: false });
       dk.rotateX(Math.PI / 2);
       dk.scale(0.8, 1, 0.9);
       dk.translate(0, 0.0046, 0);
-      g.add(new T.Mesh(dk, this._mat(0x30394a)));
+      g.add(new T.Mesh(dk, this._mat(0x586379)));
       // a narrow churned wake that fades astern, a faint bow wave on each side, and a few foam flecks: a ship in the water, not a cone of light
       const fade = (pts, cols, idx, op) => {
         const wg = new T.BufferGeometry();
@@ -828,23 +828,23 @@ export const modelMethods = {
         [-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0006, 0.0006, -0.07, 0.0006, 0.0006, -0.07],
         [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
         [0, 2, 1, 1, 2, 3],
-        0.34,
+        0.24,
       );
       // a tapered V wake: two thin arms that diverge astern and fade out
       [-1, 1].forEach((sd) =>
         fade(
-          [sd * 0.002, 0.0006, -0.034, sd * 0.0036, 0.0006, -0.034, sd * 0.0165, 0.0006, -0.105, sd * 0.0172, 0.0006, -0.105],
+          [sd * 0.002, 0.0006, -0.034, sd * 0.0036, 0.0006, -0.034, sd * 0.0112, 0.0006, -0.082, sd * 0.0119, 0.0006, -0.082],
           [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
           [0, 2, 1, 1, 2, 3],
-          0.3,
+          0.09, // a faint V astern, not rays
         ),
       );
       [-1, 1].forEach((sd) =>
         fade(
-          [sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0128, 0.0006, -0.03, sd * 0.0134, 0.0006, -0.03],
+          [sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0092, 0.0006, -0.022, sd * 0.0097, 0.0006, -0.022],
           [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
           [0, 2, 1, 1, 2, 3],
-          0.22,
+          0.08,
         ),
       );
     } else {
@@ -859,8 +859,10 @@ export const modelMethods = {
       g.add(q);
       return q;
     };
-    box(0.0058, 0.0004, 0.014, deck, 0, 0, -0.026); // helicopter pad
+    if (o.shade) box(0.0056, 0.0004, 0.0098, this._mat(0x7d8aa0), 0, 0, -0.0285); // helicopter pad: a short, lighter square on the flat deck, with the deck's dark showing round it
+    else box(0.0058, 0.0004, 0.014, deck, 0, 0, -0.026); // helicopter pad
     box(0.0056, 0.0042, 0.0125, up, 0, 0, 0.0035); // forward deckhouse
+    if (o.shade) box(0.0058, 0.0006, 0.0127, this._mat(0x232b3a), 0, 0.002, 0.0035); // a dark band of windows round the deckhouse
     box(0.0046, 0.0032, 0.0085, up, 0, 0, -0.0105); // aft deckhouse
     box(0.0034, 0.0038, 0.0034, up, 0, 0.0042, 0.006); // bridge
     [-0.0038, -0.0072].forEach((z) => {
