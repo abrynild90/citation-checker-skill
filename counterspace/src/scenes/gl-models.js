@@ -905,8 +905,8 @@ export const modelMethods = {
       TOP = 0.0052, // the main deck
       FORE = 0.0072; // the forecastle deck, raised at the bow
     const keel = this._mat(0x10151f),
-      side = this._mat(0x5a6577, { roughness: 0.6 }),
-      rim = this._mat(0x9aa5b8),
+      side = this._mat(0x485366, { roughness: 0.6 }),
+      rim = this._mat(0x7b869a),
       deckMat = this._mat(0x394254),
       stripe = this._mat(0xe9edf5, { emissive: 0x2a3140 }),
       light = this._mat(0xd3d9e5),
@@ -977,15 +977,15 @@ export const modelMethods = {
     const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
     ring.rotateX(Math.PI / 2);
     ring.translate(0, Y * 0.6, 0);
-    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.26, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.14, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
     // bow wave: bright ribbons that run back along each side from the stem and spread
     [-1, 1].forEach((sd) => {
-      strip(sd * 0.0014, 0.0435, sd * 0.0105, -0.004, 0.0034, 0.0052, 0.9);
-      strip(sd * 0.0020, 0.0415, sd * 0.0090, 0.016, 0.0024, 0.0032, 0.8);
+      strip(sd * 0.0014, 0.0435, sd * 0.0105, -0.004, 0.0034, 0.0052, 0.8);
+      strip(sd * 0.0020, 0.0415, sd * 0.0090, 0.016, 0.0024, 0.0032, 0.65);
     });
     // churned wake astern, as wide as the transom, and the V arms that diverge beyond it
-    strip(0, Z0 + 0.001, 0, -0.112, 0.0108, 0.0135, 0.95);
-    [-1, 1].forEach((sd) => strip(sd * 0.0060, Z0 + 0.002, sd * 0.0165, -0.098, 0.0036, 0.0058, 0.62));
+    strip(0, Z0 + 0.001, 0, -0.112, 0.0108, 0.0135, 0.75);
+    [-1, 1].forEach((sd) => strip(sd * 0.0060, Z0 + 0.002, sd * 0.0165, -0.098, 0.0036, 0.0058, 0.45));
     g.position.y = 0;
     g.userData.tintMat = side;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
