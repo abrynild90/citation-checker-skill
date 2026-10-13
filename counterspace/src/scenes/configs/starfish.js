@@ -162,7 +162,7 @@ export const STARFISH = {
   captionShort: true, // the picture's caption is the short text: the step list beside it carries the full sentence
   status: [
     [0, 'Thor rocket climbs toward about 400 km', 'Thor climbs to ~400 km'],
-    [0.16, 'Detonation: electrons caught in Earth’s magnetic field', 'Detonation: electrons trapped'],
+    [0.14, 'Detonation: electrons caught in Earth’s magnetic field', 'Detonation: electrons trapped'],
     [0.3, 'Trapped electrons spread north, south, east and west along field lines', 'Electrons spread along field lines'],
     [0.75, 'The belt has drifted around Earth', 'Belt drifts around Earth'],
     [0.82, 'SWF: tests like this damaged or destroyed satellites then in orbit', 'SWF: such tests damaged satellites'],
