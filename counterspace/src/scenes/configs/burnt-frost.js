@@ -30,6 +30,7 @@ export const BURNT_FROST = {
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62] }, // the collision frame: Impact to the left, the falling pieces to the right
+  offSteps: { 'SM-3': [[0, 130, 20]] }, // the SM-3 pill is asked for just beside the missile; the placer then holds it at the nearest slot off the planet, a short leader
   camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,

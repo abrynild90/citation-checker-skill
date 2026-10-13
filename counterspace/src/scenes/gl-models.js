@@ -5,6 +5,40 @@
 import { norm } from './core.js';
 import { foilCanvas } from './earth.js';
 
+// A soft strip of foam for a ship's wake: bright at the start (v = 0), streaked, soft at both sides and gone at the far end (v = 1). Drawn once, in memory.
+let wakeCv = null;
+function wakeCanvas() {
+  if (wakeCv) return wakeCv;
+  const w = 64,
+    h = 256,
+    c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const g = c.getContext('2d'),
+    im = g.createImageData(w, h),
+    hash = (a, b) => {
+      const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    };
+  for (let y = 0; y < h; y++) {
+    const along = Math.pow(1 - y / (h - 1), 1.35);
+    for (let x = 0; x < w; x++) {
+      const d = Math.abs(x - (w - 1) / 2) / (w / 2),
+        side = Math.exp(-d * d * 3.4),
+        streak = 0.62 + 0.38 * Math.sin(x * 0.85 + y * 0.03 + hash(Math.floor(x / 7), 3) * 6.28) * Math.sin(x * 0.37 - y * 0.021 + 1.3),
+        a = Math.min(1, side * along * streak * 1.25);
+      const i = (y * w + x) * 4;
+      im.data[i] = 235;
+      im.data[i + 1] = 244;
+      im.data[i + 2] = 255;
+      im.data[i + 3] = Math.round(a * 255);
+    }
+  }
+  g.putImageData(im, 0, 0);
+  wakeCv = c;
+  return c;
+}
+
 // Part kit: a craft is built from many small boxes, cylinders and swept shapes. Each part is placed with a position and rotation (inside optional nested
 // groups), baked into its geometry, and all parts that share a material are merged into one mesh, so a whole craft costs a handful of draw calls.
 export class Kit {
@@ -778,7 +812,7 @@ export const modelMethods = {
       g = new T.Group(),
       hull = this._mat(0x8b95a8),
       deck = this._mat(0x5d6779),
-      up = this._mat(o.shade ? 0xb4bdcc : 0xdde2ee),
+      up = this._mat(0xdde2ee),
       gun = this._mat(0x9aa3b5);
     const sh = new T.Shape();
     sh.moveTo(-0.0036, -0.036);
@@ -787,82 +821,19 @@ export const modelMethods = {
     sh.quadraticCurveTo(0.0034, 0.03, 0, 0.042);
     sh.quadraticCurveTo(-0.0034, 0.03, -0.0043, 0.008);
     sh.closePath();
-    if (o.shade) {
-      // opt-in (ship actor `shade`): a dark waterline band under a lighter upper hull, and a white wake astern
-      const lo = new T.ExtrudeGeometry(sh, { depth: 0.0017, bevelEnabled: false });
-      lo.rotateX(Math.PI / 2);
-      lo.translate(0, 0.0017, 0);
-      g.add(new T.Mesh(lo, this._mat(0x151b27))); // a dark keel band
-      const hi = new T.ExtrudeGeometry(sh, { depth: 0.0021, bevelEnabled: false });
-      hi.rotateX(Math.PI / 2);
-      hi.translate(0, 0.0038, 0);
-      g.add(new T.Mesh(hi, this._mat(0xa6b1c5))); // the hull side: lighter than the keel band and the deck, so the hull reads as a hull
-      // a dark weather deck inset in the hull top, so the superstructure stands on it
-      const dk = new T.ExtrudeGeometry(sh, { depth: 0.0006, bevelEnabled: false });
-      dk.rotateX(Math.PI / 2);
-      dk.scale(0.8, 1, 0.9);
-      dk.translate(0, 0.0046, 0);
-      g.add(new T.Mesh(dk, this._mat(0x586379)));
-      // a narrow churned wake that fades astern, a faint bow wave on each side, and a few foam flecks: a ship in the water, not a cone of light
-      const fade = (pts, cols, idx, op) => {
-        const wg = new T.BufferGeometry();
-        wg.setAttribute('position', new T.Float32BufferAttribute(pts, 3));
-        wg.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
-        wg.setIndex(idx);
-        g.add(
-          new T.Mesh(
-            wg,
-            new T.MeshBasicMaterial({
-              vertexColors: true,
-              color: 0xdfeaff,
-              transparent: true,
-              opacity: op,
-              depthWrite: false,
-              blending: T.AdditiveBlending,
-              side: T.DoubleSide,
-            }),
-          ),
-        );
-      };
-      fade(
-        [-0.0026, 0.0006, -0.036, 0.0026, 0.0006, -0.036, -0.0006, 0.0006, -0.07, 0.0006, 0.0006, -0.07],
-        [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-        [0, 2, 1, 1, 2, 3],
-        0.24,
-      );
-      // a tapered V wake: two thin arms that diverge astern and fade out
-      [-1, 1].forEach((sd) =>
-        fade(
-          [sd * 0.002, 0.0006, -0.034, sd * 0.0036, 0.0006, -0.034, sd * 0.0112, 0.0006, -0.082, sd * 0.0119, 0.0006, -0.082],
-          [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-          [0, 2, 1, 1, 2, 3],
-          0.09, // a faint V astern, not rays
-        ),
-      );
-      [-1, 1].forEach((sd) =>
-        fade(
-          [sd * 0.0044, 0.0006, 0.026, sd * 0.0049, 0.0006, 0.026, sd * 0.0092, 0.0006, -0.022, sd * 0.0097, 0.0006, -0.022],
-          [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-          [0, 2, 1, 1, 2, 3],
-          0.08,
-        ),
-      );
-    } else {
-      const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
-      hg.rotateX(Math.PI / 2);
-      hg.translate(0, 0.0038, 0);
-      g.add(new T.Mesh(hg, hull));
-    }
+    if (o.shade) return this._warshipModel(pos);
+    const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
+    hg.rotateX(Math.PI / 2);
+    hg.translate(0, 0.0038, 0);
+    g.add(new T.Mesh(hg, hull));
     const box = (w, h, d, m, x, y, z) => {
       const q = new T.Mesh(new T.BoxGeometry(w, h, d), m);
       q.position.set(x, 0.0038 + h / 2 + y, z);
       g.add(q);
       return q;
     };
-    if (o.shade) box(0.0056, 0.0004, 0.0098, this._mat(0x7d8aa0), 0, 0, -0.0285); // helicopter pad: a short, lighter square on the flat deck, with the deck's dark showing round it
-    else box(0.0058, 0.0004, 0.014, deck, 0, 0, -0.026); // helicopter pad
+    box(0.0058, 0.0004, 0.014, deck, 0, 0, -0.026); // helicopter pad
     box(0.0056, 0.0042, 0.0125, up, 0, 0, 0.0035); // forward deckhouse
-    if (o.shade) box(0.0058, 0.0006, 0.0127, this._mat(0x232b3a), 0, 0.002, 0.0035); // a dark band of windows round the deckhouse
     box(0.0046, 0.0032, 0.0085, up, 0, 0, -0.0105); // aft deckhouse
     box(0.0034, 0.0038, 0.0034, up, 0, 0.0042, 0.006); // bridge
     [-0.0038, -0.0072].forEach((z) => {
@@ -882,6 +853,141 @@ export const modelMethods = {
     g.add(barrel);
     g.position.y = 0;
     g.userData.tintMat = hull;
+    g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
+    g.rotateY(0.6);
+    Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });
+    return g;
+  },
+  // Opt-in warship (ship actor `shade`; Burnt Frost's USS Lake Erie), drawn for a reader who has never seen one: a wide, dark-grey hull on a darker waterline band, a
+  // raised forecastle at the bow (the sheer), a pale deck stripe, a layered superstructure (deckhouse, bridge, mast with a radar, two funnels, a gun, a helicopter
+  // ring) and white water: a bow wave, a foam outline round the hull and a V wake astern. About as long as the old model (stern -0.036, bow 0.042) so labels hold.
+  _warshipModel(pos) {
+    const T = this.T,
+      g = new T.Group();
+    const hw = (z) => {
+      if (z < -0.02) return 0.0057 + ((z + 0.036) / 0.016) * 0.0015;
+      if (z < 0.01) return 0.0072;
+      const u = Math.min(1, (z - 0.01) / 0.032);
+      return 0.0072 * Math.pow(1 - Math.pow(u, 1.7), 0.9);
+    };
+    // the plan of the hull between two stations, `inset` narrower on each side (an x, z outline; ExtrudeGeometry reads it as x, y)
+    const plan = (za, zb, inset = 0, grow = 1) => {
+      const sh = new T.Shape(),
+        n = 22,
+        zs = Array.from({ length: n + 1 }, (_, i) => za + ((zb - za) * i) / n);
+      zs.forEach((z, i) => (i ? sh.lineTo(Math.max(0, hw(z) * grow - inset), z) : sh.moveTo(Math.max(0, hw(z) * grow - inset), z)));
+      [...zs].reverse().forEach((z) => sh.lineTo(-Math.max(0, hw(z) * grow - inset), z));
+      sh.closePath();
+      return sh;
+    };
+    const layer = (shape, y0, y1, mat) => {
+      const ge = new T.ExtrudeGeometry(shape, { depth: y1 - y0, bevelEnabled: false });
+      ge.rotateX(Math.PI / 2);
+      ge.translate(0, y1, 0);
+      const m = new T.Mesh(ge, mat);
+      g.add(m);
+      return m;
+    };
+    const box = (w, h, d, mat, x, y, z) => {
+      const q = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+      q.position.set(x, y + h / 2, z);
+      g.add(q);
+      return q;
+    };
+    const cyl = (r0, r1, h, mat, x, y, z, seg = 10) => {
+      const q = new T.Mesh(new T.CylinderGeometry(r0, r1, h, seg), mat);
+      q.position.set(x, y + h / 2, z);
+      g.add(q);
+      return q;
+    };
+    const Z0 = -0.036,
+      Z1 = 0.042,
+      TOP = 0.0052, // the main deck
+      FORE = 0.0072; // the forecastle deck, raised at the bow
+    const keel = this._mat(0x10151f),
+      side = this._mat(0x5a6577, { roughness: 0.6 }),
+      rim = this._mat(0x9aa5b8),
+      deckMat = this._mat(0x394254),
+      stripe = this._mat(0xe9edf5, { emissive: 0x2a3140 }),
+      light = this._mat(0xd3d9e5),
+      glass = this._mat(0x182030, { metalness: 0.4, roughness: 0.35 }),
+      funnel = this._mat(0x454e5f),
+      soot = this._mat(0x0b0e14),
+      metal = this._mat(0x9aa4b6);
+    // hull: a dark waterline band, the grey side, then the forecastle (the bow rises: the sheer) with a pale rim round the deck edge
+    layer(plan(Z0, Z1), 0, 0.0021, keel);
+    layer(plan(Z0, Z1), 0.0021, TOP, side);
+    layer(plan(0.008, Z1), TOP, FORE, side);
+    layer(plan(Z0, 0.008, 0, 1), TOP, TOP + 0.0003, rim);
+    layer(plan(0.008, Z1), FORE, FORE + 0.0003, rim);
+    layer(plan(Z0 + 0.0008, 0.0078, 0.0009), TOP + 0.0003, TOP + 0.0005, deckMat);
+    layer(plan(0.0102, Z1 - 0.0016, 0.0009), FORE + 0.0003, FORE + 0.0005, deckMat);
+    // the pale deck stripe: down the middle of the main deck and along the forecastle
+    box(0.0017, 0.0003, 0.043, stripe, 0, TOP + 0.0005, -0.0137);
+    box(0.0017, 0.0003, 0.0224, stripe, 0, FORE + 0.0005, 0.0225);
+    // forecastle: a gun mount, a missile-cell block and a short anchor winch
+    box(0.0042, 0.0003, 0.0052, this._mat(0x252d3c), 0, FORE + 0.0005, 0.0180);
+    cyl(0.0014, 0.0017, 0.0018, metal, 0, FORE + 0.0005, 0.0285, 10);
+    const barrel = new T.Mesh(new T.CylinderGeometry(0.00035, 0.00035, 0.0056, 5), metal);
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.set(0, FORE + 0.0017, 0.0328);
+    g.add(barrel);
+    // the superstructure in three layers: a long deckhouse, a bridge block on its forward end, then the mast; two funnels and a second deckhouse astern
+    const D0 = TOP + 0.0005;
+    box(0.0072, 0.0040, 0.0150, light, 0, D0, 0.0005); // forward deckhouse
+    box(0.0075, 0.0007, 0.0152, glass, 0, D0 + 0.0019, 0.0005); // its band of windows
+    box(0.0054, 0.0034, 0.0058, this._mat(0xe4e9f2), 0, D0 + 0.0040, 0.0043); // bridge block
+    box(0.0057, 0.0007, 0.0060, glass, 0, D0 + 0.0053, 0.0045); // bridge windows
+    box(0.0050, 0.0004, 0.0062, metal, 0, D0 + 0.0074, 0.0043); // bridge roof
+    cyl(0.00042, 0.0006, 0.0125, metal, 0, D0 + 0.0078, 0.0036, 6); // the mast
+    box(0.0054, 0.0004, 0.0004, metal, 0, D0 + 0.0150, 0.0036); // yardarm
+    box(0.0030, 0.0003, 0.0015, this._mat(0xc2cada), 0, D0 + 0.0198, 0.0036); // radar
+    box(0.0058, 0.0030, 0.0090, light, 0, D0, -0.0120); // aft deckhouse
+    [-0.0095, -0.0145].forEach((z) => {
+      cyl(0.0012, 0.0017, 0.0050, funnel, 0, D0 + 0.0030, z, 10); // funnel
+      cyl(0.0012, 0.0012, 0.0004, soot, 0, D0 + 0.0078, z, 10); // its dark cap
+    });
+    cyl(0.0004, 0.0005, 0.0075, metal, 0, D0 + 0.0030, -0.0188, 5); // the short aft mast
+    box(0.0030, 0.0003, 0.0010, metal, 0, D0 + 0.0090, -0.0188);
+    // the helicopter deck: a lighter square with a pale ring
+    box(0.0086, 0.0003, 0.0100, this._mat(0x7a869b), 0, D0, -0.0285);
+    cyl(0.0021, 0.0021, 0.0002, stripe, 0, D0 + 0.0003, -0.0285, 18);
+    cyl(0.0016, 0.0016, 0.0003, this._mat(0x7a869b), 0, D0 + 0.0003, -0.0285, 18);
+    // white water, soft-edged foam strips (additive, fading out): a bow wave on each side, a foam outline round the hull, a churned wake and a V astern
+    const tex = this._gtex(wakeCanvas(), () => new T.CanvasTexture(wakeCanvas()));
+    const Y = 0.0007,
+      white = (op) => new T.MeshBasicMaterial({ map: tex, color: 0xffffff, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide });
+    // a ribbon from (x0, z0) to (x1, z1): w0 wide at the start (bright) and w1 at the end (gone)
+    const strip = (x0, z0, x1, z1, w0, w1, op) => {
+      const dx = x1 - x0,
+        dz = z1 - z0,
+        L = Math.hypot(dx, dz),
+        px = -dz / L,
+        pz = dx / L,
+        gm = new T.BufferGeometry();
+      gm.setAttribute(
+        'position',
+        new T.Float32BufferAttribute([x0 - (px * w0) / 2, Y, z0 - (pz * w0) / 2, x0 + (px * w0) / 2, Y, z0 + (pz * w0) / 2, x1 - (px * w1) / 2, Y, z1 - (pz * w1) / 2, x1 + (px * w1) / 2, Y, z1 + (pz * w1) / 2], 3),
+      );
+      gm.setAttribute('uv', new T.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 1, 1], 2));
+      gm.setIndex([0, 2, 1, 1, 2, 3]);
+      g.add(new T.Mesh(gm, white(op)));
+    };
+    // the foam outline: the hull's plan, a little larger, flat on the water
+    const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
+    ring.rotateX(Math.PI / 2);
+    ring.translate(0, Y * 0.6, 0);
+    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.26, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+    // bow wave: bright ribbons that run back along each side from the stem and spread
+    [-1, 1].forEach((sd) => {
+      strip(sd * 0.0014, 0.0435, sd * 0.0105, -0.004, 0.0034, 0.0052, 0.9);
+      strip(sd * 0.0020, 0.0415, sd * 0.0090, 0.016, 0.0024, 0.0032, 0.8);
+    });
+    // churned wake astern, as wide as the transom, and the V arms that diverge beyond it
+    strip(0, Z0 + 0.001, 0, -0.112, 0.0108, 0.0135, 0.95);
+    [-1, 1].forEach((sd) => strip(sd * 0.0060, Z0 + 0.002, sd * 0.0165, -0.098, 0.0036, 0.0058, 0.62));
+    g.position.y = 0;
+    g.userData.tintMat = side;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
     g.rotateY(0.6);
     Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });
