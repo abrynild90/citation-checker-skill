@@ -7,6 +7,11 @@ import { LABEL, dotCss, fitBanner, pillCss } from './labels.js';
 import { ringCanvas, spriteCanvas } from './earth.js';
 
 const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FOLLOW_DMIN = 0.12; // closest the zoom of a following camera gets to its rocket (world units; the model is drawn at full detail here)
+const smoothstep01 = (x) => {
+  const u = Math.min(1, Math.max(0, x));
+  return u * u * (3 - 2 * u);
+};
 
 // ---------------------------------------------------------------- WebGL host (single shared renderer)
 export class GLHost {
@@ -30,6 +35,7 @@ export class GLHost {
     this.lock = null;
     this._act = null;
     this._user = false; // the viewer dragged or zoomed: a following camera stays where they put it until they pick a preset
+    this._fz = { m: 1, mT: 1, raf: 0 }; // the wheel zoom of a following camera on a rocket scene: distance to the rocket relative to the preset's (1 = the preset's own view)
     this._bindDrag();
     this.ro = new ResizeObserver(() => this.resize());
   }
@@ -322,6 +328,7 @@ export class GLHost {
         : null;
     this.camIdx = i;
     this._user = false;
+    this._fzReset();
     this.hideShell = !!c.hideShell;
     this._syncShell();
     const nv = this._nar({ pos: c.pos, look: c.look || [0, 0, 0], up: c.up }, c);
@@ -335,6 +342,85 @@ export class GLHost {
     this._tw = !instant && prev && !REDUCED_MOTION && !this.sim.cfg.spin ? { t0: performance.now(), ...prev } : null;
     if (this._tw && !this.playing) this._twLoop();
     this.render();
+  }
+  // ---- wheel zoom of a following camera on a scene with a drawn rocket: the camera dollies toward the rocket (the preset's own view is the farthest the zoom-in
+  // starts from), the view centre eases onto the rocket as it nears, and the distance never gets closer than FOLLOW_DMIN, so the vehicle stays in frame. The preset
+  // keeps following the action (nothing freezes), and a preset pick or a scene load resets it. Other cameras keep the plain zoom below.
+  _fzReset() {
+    cancelAnimationFrame(this._fz?.raf || 0);
+    this._fz = { m: 1, mT: 1, raf: 0 };
+  }
+  // The rocket the camera follows at t: the one in flight, else the nearest in time (its position clamped to its flight), or null on a scene without one.
+  _rocketFocus(t) {
+    let best = null,
+      bd = 1e9;
+    for (const { it } of this.dyn) {
+      if (it.shape !== 'rocket' || !it.fx) continue;
+      const d = t < it.fx.t0 ? it.fx.t0 - t : t > it.fx.t1 ? t - it.fx.t1 : 0;
+      if (d < bd) {
+        bd = d;
+        best = it;
+      }
+    }
+    if (!best) return null;
+    return best.pos(Math.min(Math.max(t, best.fx.t0 + 1e-4), best.fx.t1 - 0.005)) || best.pos(best.fx.t0 + 0.004);
+  }
+  // The followed view at t with the wheel zoom applied: { pos, look, up } like the preset's own.
+  _followView(t, fc) {
+    const v = this._nar(fc.follow(t, this.camera.aspect), fc),
+      fz = this._fz;
+    if (!fz || fz.m === 1) {
+      if (fz) fz.w = 0;
+      return v;
+    }
+    const F = this._rocketFocus(t);
+    if (!F) return v;
+    const P = v.pos,
+      D0 = Math.hypot(P[0] - F[0], P[1] - F[1], P[2] - F[2]) || 1,
+      mmin = Math.min(1, FOLLOW_DMIN / D0),
+      m = Math.max(mmin, fz.m),
+      w = m < 1 ? smoothstep01((1 - m) / Math.max(1e-6, 1 - mmin)) : 0; // how far the view centre has moved from the preset's onto the rocket
+    fz.w = w; // the drawn rocket grows with it (see _fitModels), so zooming in shows more of the vehicle, not only more of the planet
+    return {
+      ...v,
+      pos: P.map((x, j) => F[j] + (x - F[j]) * m),
+      look: v.look.map((x, j) => x + (F[j] - x) * w),
+    };
+  }
+  // One wheel step on a following camera with a rocket: returns false when this camera is not one (the plain zoom then applies).
+  _followWheel(dir) {
+    const fc = this.sim.cams[this.camIdx];
+    if (!fc?.follow || this._user) return false;
+    const F = this._rocketFocus(this.t);
+    if (!F) return false;
+    const v = this._nar(fc.follow(this.t, this.camera.aspect), fc),
+      D0 = Math.hypot(v.pos[0] - F[0], v.pos[1] - F[1], v.pos[2] - F[2]) || 1,
+      fz = this._fz;
+    fz.mT = Math.max(Math.min(1, FOLLOW_DMIN / D0), Math.min(Math.max(1, 12 / D0), fz.mT * (1 + dir * 0.08 * 2.2)));
+    this._fzEase();
+    return true;
+  }
+  _fzEase() {
+    const fz = this._fz;
+    cancelAnimationFrame(fz.raf);
+    const step = () => {
+      const a = Math.log(fz.m),
+        b = Math.log(fz.mT),
+        done = REDUCED_MOTION || Math.abs(b - a) < 0.004;
+      fz.m = done ? fz.mT : Math.exp(a + (b - a) * 0.28); // eased toward the target: a few frames
+      if (fz.m > 0.999 && fz.m < 1.001) fz.m = 1;
+      const fc = this.sim.cams[this.camIdx];
+      if (fc?.follow && !this._user) {
+        const v = this._followView(this.t, fc);
+        this.target.set(...v.look);
+        this.camera.position.set(...v.pos);
+        this.camera.up.set(...(v.up || [0, 1, 0]));
+        this.camera.lookAt(this.target);
+        if (!this.playing) this.render();
+      }
+      fz.raf = done ? 0 : requestAnimationFrame(step);
+    };
+    step();
   }
   // Frames while a view change glides (a playing scene renders anyway; a scene being dragged or paused still needs them).
   _twLoop() {
@@ -473,7 +559,7 @@ export class GLHost {
     // Following presets (a camera fixed to a moving craft, or a dolly that tracks the action) are re-solved for every t.
     const fc = this.sim.cams[this.camIdx];
     if (fc?.follow && !this._user) {
-      const v = this._nar(fc.follow(t, this.camera.aspect), fc);
+      const v = this._followView(t, fc);
       this.target.set(...v.look);
       this.camera.position.set(...v.pos);
       this.camera.up.set(...(v.up || [0, 1, 0]));
@@ -742,7 +828,7 @@ export class GLHost {
       v.setFromMatrixPosition(obj.matrixWorld);
       const d = Math.max(0.15, v.distanceTo(cp)),
         px = (u.span * u.base * sc) / d,
-        b = this._modelBoost || 1, // print stills draw craft a little larger relative to the frame
+        b = (this._modelBoost || 1) * (u.rk && this._fz?.w ? 1 + 1.5 * this._fz.w : 1), // print stills draw craft a little larger relative to the frame; a rocket grows as the wheel zoom closes in on it
         f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       obj.scale.setScalar(u.base * f);
     }
@@ -850,6 +936,7 @@ export class GLHost {
     if (this.playing) this.raf = requestAnimationFrame(loop);
   }
   unload() {
+    this._fzReset?.();
     this._running = false;
     this.playing = false;
     this._fadeEl?.remove();
@@ -944,6 +1031,7 @@ export class GLHost {
       (e) => {
         e.preventDefault();
         this.interrupt();
+        if (this._followWheel(Math.sign(e.deltaY))) return; // a following camera on a rocket scene: dolly toward the rocket, keep following
         this._user = true;
         const p = this.camera.position,
           o = p.clone().sub(this.target);
