@@ -656,7 +656,7 @@ export function buildSim(cfg) {
         color: a.color,
         width: 2,
         label: a.label,
-        labelAt: bez(a.labelS ?? 0.5),
+        labelAt: a.labelFollow ? (t) => bez(Math.min(1, Math.max(0.04, (t - a.t0) / (tgt.t - a.t0)))) : bez(a.labelS ?? 0.5), // labelFollow (opt-in): the leader ends on the missile's head, which is drawn, not on a fixed point of its path
         labelEnd: tgt.t + (a.hold ?? 0.03), // a.hold: the label outlives the hit (the still is taken just after it)
         pts: (t) => {
           if (spent(t)) return [];

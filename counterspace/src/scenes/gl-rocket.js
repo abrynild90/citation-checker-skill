@@ -141,22 +141,37 @@ export const rocketMethods = {
       dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       darkU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(tipCol.getHex(), { metalness: 0.2, roughness: 0.4, vertexColors: true }),
+      // slim only: an accent in the vehicle's own colour (stage stripes), so the close-up reads as a built rocket and not as one white tube
+      accent = slim ? this._mat(tipCol.getHex(), { metalness: 0.3, roughness: 0.42, vertexColors: true }) : null,
+      accentU = slim ? this._mat(tipCol.getHex(), { metalness: 0.3, roughness: 0.42, vertexColors: true }) : null,
       rx = PI / 2;
     // dimensions (z along the axis): nozzle exit, body, split between the lower and upper part, nose tip
     const D = slim
       ? { zN: -0.0275, zB: -0.0245, zS: -0.0005, zI: 0.0035, zT: 0.0215, zNose: 0.034, rL: 0.0028, rU: 0.0021 }
       : { zN: -0.0255, zB: -0.0185, zS: -0.0045, zI: -0.0045, zT: 0.0185, zNose: 0.034, rL: 0.0042, rU: 0.0042 };
     // lower part: nozzle bell, thrust skirt, booster body with panel lines and a dark band, fins
-    Kl.geo(dark, lathe(T, [[D.rL * 0.58, D.zN, 0.7], [D.rL * 0.6, D.zN + 0.0004, 0.55], [D.rL * 0.4, D.zN + 0.0042, 0.5], [D.rL * 0.36, D.zN + 0.0048, 0.5]], 16), 0, 0, 0, rx);
+    if (slim)
+      // a flared engine bell with a bright rim, a throat and a collar where it meets the skirt
+      Kl.geo(dark, lathe(T, [[D.rL * 0.84, D.zN - 0.0002, 1.0], [D.rL * 0.8, D.zN + 0.0002, 0.75], [D.rL * 0.62, D.zN + 0.002, 0.6], [D.rL * 0.45, D.zN + 0.0038, 0.5], [D.rL * 0.34, D.zN + 0.0054, 0.45], [D.rL * 0.5, D.zN + 0.0058, 0.5]], 18), 0, 0, 0, rx);
+    else Kl.geo(dark, lathe(T, [[D.rL * 0.58, D.zN, 0.7], [D.rL * 0.6, D.zN + 0.0004, 0.55], [D.rL * 0.4, D.zN + 0.0042, 0.5], [D.rL * 0.36, D.zN + 0.0048, 0.5]], 16), 0, 0, 0, rx);
     Kl.geo(dark, lathe(T, [[D.rL * 0.8, D.zB - 0.0035, 0.8], [D.rL * 1.0, D.zB, 0.9]], 18), 0, 0, 0, rx);
     const linesL = slim ? [-0.0185, -0.0125, -0.0065] : [-0.0125, -0.0085];
     Kl.geo(white, lathe(T, bodyProfile(D.rL, D.rL, D.zB, D.zS, linesL), 22), 0, 0, 0, rx);
-    if (slim) Kl.geo(dark, lathe(T, [[D.rL * 1.02, D.zS - 0.0016, 0.9], [D.rL * 1.02, D.zS, 0.9]], 20), 0, 0, 0, rx);
+    if (slim) {
+      // the interstage: a dark ring against the upper stage and, below it, a stripe in the vehicle's colour between two thin grooves
+      Kl.geo(dark, lathe(T, [[D.rL * 1.02, D.zS - 0.0016, 0.9], [D.rL * 1.02, D.zS, 0.9]], 20), 0, 0, 0, rx);
+      Kl.geo(accent, lathe(T, [[D.rL * 1.025, D.zS - 0.0032, 0.95], [D.rL * 1.025, D.zS - 0.0021, 0.95]], 20), 0, 0, 0, rx);
+    }
     // upper part: interstage taper (slim), body, nose
     if (slim) {
       Ku.geo(whiteU, lathe(T, bodyProfile(D.rL, D.rU, D.zS, D.zI, []), 20), 0, 0, 0, rx);
-      Ku.geo(darkU, lathe(T, [[D.rU * 0.55, D.zS - 0.0013, 0.55], [D.rU * 0.9, D.zS - 0.0004, 0.7]], 14), 0, 0, 0, rx); // the upper stage's own nozzle
-      Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zI, D.zT, [0.009, 0.0145]), 20), 0, 0, 0, rx);
+      // the upper stage's own engine bell and the dark base plate it stands on (what shows once the lower stage has dropped away)
+      Ku.geo(darkU, lathe(T, [[D.rU * 0.95, D.zS - 0.0004, 0.75], [D.rU * 0.8, D.zS - 0.0012, 0.65], [D.rU * 0.62, D.zS - 0.0023, 0.55], [D.rU * 0.5, D.zS - 0.0031, 0.5]], 16), 0, 0, 0, rx);
+      Ku.geo(darkU, lathe(T, [[D.rL * 1.0, D.zS + 0.0001, 0.6], [D.rU * 0.9, D.zS - 0.0004, 0.6]], 20), 0, 0, 0, rx);
+      Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zI, D.zT, [0.0145]), 20), 0, 0, 0, rx);
+      // two stripes on the body: a dark band and one in the vehicle's colour
+      Ku.geo(darkU, lathe(T, [[D.rU * 1.03, 0.0086, 0.85], [D.rU * 1.03, 0.0098, 0.85]], 20), 0, 0, 0, rx);
+      Ku.geo(accentU, lathe(T, [[D.rU * 1.03, 0.0104, 0.95], [D.rU * 1.03, 0.0118, 0.95]], 20), 0, 0, 0, rx);
     } else {
       Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zS, D.zT, [0.0, 0.0065, 0.0135]), 22), 0, 0, 0, rx);
       Ku.geo(darkU, lathe(T, [[D.rU * 1.02, 0.0073, 0.85], [D.rU * 1.02, 0.0085, 0.85]], 20), 0, 0, 0, rx); // the dark band
@@ -197,13 +212,13 @@ export const rocketMethods = {
     };
     for (let k = 0; k < 4; k++) {
       const a = (k * PI) / 2;
-      if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0062, -0.0262, -0.016, -0.0222, 0.0008), 0, 0, 0, 0, 0, a);
+      if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0068, -0.0264, -0.0165, -0.0226, 0.0009), 0, 0, 0, 0, 0, a);
       else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0112, -0.0182, -0.0072, -0.0128, 0.0011), 0, 0, 0, 0, 0, a);
     }
     const lower = Kl.build(),
       upper = Ku.build(),
       g = new T.Group();
-    for (const m of [white, dark, fin]) m.transparent = true; // the lower part fades out as it falls away after a separation
+    for (const m of slim ? [white, dark, fin, accent] : [white, dark, fin]) m.transparent = true; // the lower part fades out as it falls away after a separation
     g.add(upper, lower);
     // ---- exhaust rig at the nozzle: outer plume, bright core, a glow and an ignition flash
     const rig = new T.Group(),
@@ -258,7 +273,7 @@ export const rocketMethods = {
     g.add(puff);
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
-    g.userData.rk = { D, slim, lower, upper, rig, outer, core, glow, flash, heat, puff, nose, lowerMats: [white, dark, fin] };
+    g.userData.rk = { D, slim, lower, upper, rig, outer, core, glow, flash, heat, puff, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -549,7 +564,7 @@ export const rocketMethods = {
           for (const m of rk.lowerMats) m.opacity = 1;
         }
       }
-      rk.rig.position.z = sepNow ? D.zS - 0.0008 : D.zN;
+      rk.rig.position.z = sepNow ? D.zS - (rk.slim ? 0.0029 : 0.0008) : D.zN;
       rk.rig.visible = vis;
       // ---- plume
       const hide = vis && occluded([cp.x, cp.y, cp.z], [obj.position.x, obj.position.y, obj.position.z]);

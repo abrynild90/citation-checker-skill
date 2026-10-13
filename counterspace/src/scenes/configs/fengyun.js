@@ -70,7 +70,7 @@ export const FENGYUN = {
       strong: true,
       coreK: 0.85,
       flash: 0.3,
-      rocket: IS_PHONE ? undefined : { minPx: 54, maxPx: 70 },
+      rocket: IS_PHONE ? undefined : { minPx: 73, maxPx: 94 }, // 35% larger than before, so the vehicle reads at the default framing
     }, // a bright core and a second white ring: the hit reads against the debris plume
     {
       type: 'debris',
