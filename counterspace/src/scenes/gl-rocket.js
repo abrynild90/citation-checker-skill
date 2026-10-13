@@ -20,6 +20,7 @@ const SMOKE_TOP = 40; // km: the smoke trail exists only below this illustrative
 const ILL = 0.4; // illustrative altitude = 0.4 x the altitude the picture's squeezed scale stands for (so the air thins out by about the Karman line, 100 km)
 const RAMP_UP = 0.005; // t: motor thrust builds over this
 const RAMP_DOWN = 0.008; // t: and dies away over this at burnout
+const PLUME_FLOOR = 1.002; // Earth radii: the exhaust is cut where it meets the surface
 const AIR_FLOOR = 1.022; // Earth radii: an air-launched missile is kept at least this far from the Earth's centre (the globe's surface is at 1)
 const FLASH_T = 0.012; // t: the ignition flash lasts this long
 const SEP_AGE = 0.05; // t: the unit of the age of a stage separation (the lower stage drifts clear in the first fifth of it, 1% of the scene, and is gone by 1.7 of it)
@@ -524,8 +525,23 @@ export const rocketMethods = {
         nozW = sepNow ? D.rU : D.rL,
         wob = rec.wob || [0, 0];
       const ak = fx.air ? 1.3 : 1; // an air-launched missile is small beside its carrier: its plume and ignition flash are drawn a little larger
-      const outerLen = ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr),
-        outerW = nozW * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr);
+      // the plume never runs into the globe: its length is cut where the exhaust axis meets the surface (a vehicle standing on the pad or skimming low
+      // over it shows the flame ending at the ground, not a flame buried in it)
+      let outerLen = ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr);
+      if (thr > 0.004) {
+        const sc = obj.scale.x,
+          dv = rec.v1.set(0, 0, 1).applyQuaternion(obj.quaternion),
+          rz = rk.rig.position.z * sc,
+          px = obj.position.x + dv.x * rz,
+          py = obj.position.y + dv.y * rz,
+          pz = obj.position.z + dv.z * rz,
+          b = -(px * dv.x + py * dv.y + pz * dv.z), // p . (-d)
+          c = px * px + py * py + pz * pz - PLUME_FLOOR * PLUME_FLOOR,
+          disc = b * b - c;
+        if (c < 0) outerLen = 0;
+        else if (disc > 0 && -b - Math.sqrt(disc) > 0) outerLen = Math.min(outerLen, (-b - Math.sqrt(disc)) / sc);
+      }
+      const outerW = nozW * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr);
       const tm = t * this.sim.cfg.duration,
         U = rk.outer.material.uniforms,
         C = rk.core.material.uniforms;
