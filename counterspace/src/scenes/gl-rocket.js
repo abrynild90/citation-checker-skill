@@ -15,11 +15,13 @@ const PI = Math.PI;
 const invAlt = (r) => (r <= 1 ? 0 : Math.pow((r - 1) / 1.4, 1 / 0.45) * GEO_ALT);
 const SCALE_H = 14; // km: air density falls to 1/e over this height in the pictures (a little taller than real, so the dense-air look lasts a visible moment)
 const rhoAt = (alt) => Math.exp(-Math.max(0, alt) / SCALE_H);
+const HEAT_TOP = 40; // km: no nose heating at or above this illustrative altitude (the air is too thin)
 const SMOKE_TOP = 40; // km: the smoke trail exists only below this illustrative altitude and has faded out entirely a little above it
 const ILL = 0.4; // illustrative altitude = 0.4 x the altitude the picture's squeezed scale stands for (so the air thins out by about the Karman line, 100 km)
 const RAMP_UP = 0.005; // t: motor thrust builds over this
 const RAMP_DOWN = 0.008; // t: and dies away over this at burnout
 const FLASH_T = 0.012; // t: the ignition flash lasts this long
+const SEP_AGE = 0.05; // t: the unit of the age of a stage separation (the lower stage drifts clear in the first fifth of it, 1% of the scene, and is gone by 1.7 of it)
 
 // ---------------------------------------------------------------- shaders
 const PLUME_VS = `attribute float aA; attribute float aTh;
@@ -234,7 +236,7 @@ export const rocketMethods = {
     g.add(rig);
     // nose heating: a faint glow at the tip, driven with the nose material's emissive
     const heat = spr(0xff8a40, 0);
-    heat.position.z = D.zNose - 0.001;
+    heat.position.z = D.zNose - 0.0015;
     g.add(heat);
     // a puff (gas at a separation, steam at a cold launch) that rides the rig's position
     const puff = spr(0xe9edf6, 0);
@@ -330,7 +332,7 @@ export const rocketMethods = {
     rec.burns = [[t0 + rec.popT, st ? t0 + st.s * (t1 - t0) - 0.004 : rec.burnEnd]];
     if (st) {
       rec.tSep = t0 + st.s * (t1 - t0);
-      rec.burns.push([rec.tSep + (st.gap ?? 0.012), rec.burnEnd]);
+      rec.burns.push([rec.tSep + (st.gap ?? 0.016), rec.burnEnd]);
     }
     // the smoke trail: soft billboards at emission times along the part of the flight inside the atmosphere, aged and faded from the scene time
     const K = IS_PHONE ? 36 : 56,
@@ -476,15 +478,22 @@ export const rocketMethods = {
       // ---- staging: the lower part drops away tumbling slowly, with a brief puff; the exhaust moves to the upper stage's nozzle
       const D = rk.D;
       let sepAge = -1;
-      if (rec.tSep != null) sepAge = (t - rec.tSep) / 0.05;
+      if (rec.tSep != null) sepAge = (t - rec.tSep) / SEP_AGE;
       const sepNow = sepAge >= 0;
       if (rk.lower) {
         rk.lower.visible = vis && (!sepNow || sepAge < 1.7);
         if (sepNow && rk.lower.visible) {
+          // clean separation: the two stages are collinear at the instant of separation, then the lower one drifts aft on a small relative velocity (the upper
+          // one starts to accelerate away when its motor lights) and picks up a slow differential tumble about its own middle, so nothing hinges at the joint
           const u = sepAge,
-            off = 0.0035 * u + 0.034 * u * u; // it coasts while the upper stage accelerates away
-          rk.lower.position.set(0.0006 * u, 0.0004 * u, -off);
-          rk.lower.rotation.set(0.9 * u, 0.55 * u, 0.4 * u); // slow tumble
+            off = 0.03 * u + 0.1 * u * u,
+            cz = 0.5 * (D.zN + D.zS),
+            e3 = rec.e3 || (rec.e3 = new T.Euler()),
+            pr = rec.pr || (rec.pr = new T.Vector3());
+          e3.set(0.8 * u * u, 0.5 * u * u, 0.36 * u * u);
+          pr.set(0, 0, cz).applyEuler(e3); // the middle of the lower part, turned: the part rotates about it, not about its forward end
+          rk.lower.rotation.copy(e3);
+          rk.lower.position.set(0.0006 * u - pr.x, 0.0004 * u - pr.y, cz - pr.z - off);
           const fade = 1 - smooth((u - 1.1) / 0.6);
           for (const m of rk.lowerMats) m.opacity = fade;
         } else if (rk.lower.position.z !== 0) {
@@ -528,25 +537,36 @@ export const rocketMethods = {
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
       rk.glow.position.z = -0.003;
       rk.flash.visible = vis && st.flash > 0.01 && !hide;
-      rk.flash.scale.setScalar(0.016 + 0.03 * st.flash);
-      rk.flash.material.opacity = Math.min(0.85, st.flash);
+      const reLit = sepNow && t >= rec.burns[rec.burns.length - 1][0]; // the upper stage's own ignition: a small flash, not the first launch burst
+      rk.flash.scale.setScalar((0.016 + 0.03 * st.flash) * (reLit ? 0.5 : 1));
+      rk.flash.material.opacity = Math.min(0.85, st.flash) * (reLit ? 0.6 : 1);
       rk.flash.position.z = -0.004;
       // puff: a pop of gas at the separation, a burst of steam at the cold-launch pop
       let puff = 0,
         puffZ = rk.rig.position.z + 0.002;
-      if (sepNow && sepAge < 0.5) puff = Math.max(puff, (1 - sepAge / 0.5) * 0.7) * (sepAge < 0.02 ? sepAge / 0.02 : 1);
+      if (sepNow && sepAge < 0.3) puff = Math.max(puff, (1 - sepAge / 0.3) * 0.7) * (sepAge < 0.03 ? sepAge / 0.03 : 1); // a small puff of gas, over about 1.5% of the scene
       if (fx.cold && t >= fx.t0 && t < fx.t0 + rec.popT + 0.01) puff = Math.max(puff, 0.8 * clamp01(1 - (t - fx.t0) / (rec.popT + 0.01)));
       rk.puff.visible = vis && puff > 0.01 && !hide;
       rk.puff.position.z = puffZ;
-      rk.puff.scale.setScalar(0.02 + 0.05 * (1 - puff));
-      rk.puff.material.opacity = puff * 0.55;
-      // ---- nose heating: high speed in the dense part of the atmosphere
+      const sepPuff = sepNow; // a separation puff is small (the width of the stage); the cold-launch steam keeps its larger size
+      rk.puff.scale.setScalar(sepPuff ? 0.007 + 0.013 * (1 - puff) : 0.02 + 0.05 * (1 - puff));
+      rk.puff.material.opacity = puff * (sepPuff ? 0.4 : 0.55);
+      // ---- nose heating: follows the dynamic pressure (air density x speed squared), so it is zero in vacuum: nothing above about 40 km (illustrative) and none in the coast
+      // above the atmosphere. The glow is a small sprite at the nose tip, sized with the vehicle (it is a child of the model), and the nose's own emissive does the rest.
       const vrel = (rec.speed || 0) / rec.vmax,
-        heat = 0.7 * clamp01(Math.sqrt(st.rho) * vrel * vrel * vrel * 1.1) * clamp01((st.alt - 7) / 9);
+        qdyn = st.rho * vrel * vrel,
+        air = 1 - smooth((st.alt - HEAT_TOP * 0.6) / (HEAT_TOP * 0.4)), // fades to zero by the top of the air
+        heat = 0.7 * clamp01(Math.sqrt(clamp01(qdyn) * 1.6) * vrel) * clamp01((st.alt - 7) / 9) * air;
       rk.nose.emissiveIntensity = heat * 1.4;
       rk.heat.visible = vis && heat > 0.04 && !hide;
-      rk.heat.material.opacity = heat * 0.7;
-      rk.heat.scale.setScalar(0.014 + 0.026 * heat);
+      rk.heat.material.opacity = heat * 0.5;
+      rk.heat.scale.setScalar(0.007 + 0.011 * heat);
+      // the plain glow marker that shares the path with a drawn vehicle sat mid-body and stayed lit all the way through the vacuum: it is not drawn; the
+      // nose glow above (dynamic pressure, attached to the nose) is the only halo
+      if (fx.marker) {
+        rec.kv ||= this.dyn.find((d) => d.it === fx.marker);
+        if (rec.kv) rec.kv.obj.visible = false;
+      }
       this._smokeFrame(rec, t, st, Lr, vis);
     }
   },

@@ -667,13 +667,14 @@ export function buildSim(cfg) {
       // The SM-3 is drawn from the first instant of its flight (t0): the head is already clear of the deck (s0) with a short exhaust plume behind it.
       const s0 = 0.04,
         sAt = (t) => Math.max(s0, clamp01((t - a.t0) / (tgt.t - a.t0)));
-      items.push({
+      const kvMark = {
         kind: 'point',
         shape: 'kv',
         color: a.color,
         dim: a.rocket ? 0.3 : undefined, // a drawn vehicle has its own exhaust: the coloured glow is only a faint marker behind it
         pos: (t) => (t >= a.t0 - 1e-6 && t < tgt.t ? bez(sAt(t)) : null),
-      });
+      };
+      items.push(kvMark);
       if (a.rocket)
         // a drawn interceptor with its exhaust flame rides the head of the arc
         items.push({
@@ -694,6 +695,7 @@ export function buildSim(cfg) {
             cold: a.rocket.launch === 'vls',
             stage: a.rocket.stage,
             seed: a.t0 * 10,
+            marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
           },
           // stands at the launch point from the start, then rides the arc
           pos: (t) => (t < tgt.t - 0.004 ? bez(sAt(t)) : null),
@@ -961,7 +963,7 @@ export function buildSim(cfg) {
               f = s - i;
             return s > 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null;
           };
-          items.push({
+          const kvMark = {
             kind: 'point',
             shape: 'kv',
             color: a.color,
@@ -970,7 +972,8 @@ export function buildSim(cfg) {
             kvMax: a.rocket.glowMax ?? 38,
             dim: 0.3, // the drawn vehicle has its own exhaust: the coloured glow is only a faint marker behind it
             pos: headPos,
-          });
+          };
+          items.push(kvMark);
           items.push({
             kind: 'point',
             shape: 'rocket',
@@ -981,7 +984,7 @@ export function buildSim(cfg) {
             maxPx: a.rocket.maxPx ?? 54,
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
-            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stage: a.rocket.stage, seed: a.t0 * 10 },
+            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
           });
         } else
           items.push({
