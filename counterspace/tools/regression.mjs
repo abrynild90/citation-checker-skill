@@ -216,6 +216,33 @@ try {
   assert.deepEqual(liveRemote, []);
   console.log('offline live 3D OK');
   await live.close();
+  // Closing a scene opened from the strip never moves the page (a first-time scene earns a link on the hero: a note offers it, nothing scrolls by itself).
+  const keep = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' });
+  const keepErrors = [];
+  keep.on('pageerror', (e) => keepErrors.push(e.message));
+  await keep.route('**/*', (route) => (route.request().url().startsWith(url) ? route.continue() : route.abort()));
+  await keep.goto(url);
+  await keep.waitForFunction(() => window.__cs && document.querySelector('#posterGrid .pc-btn'));
+  await keep.evaluate(() => document.getElementById('posterGrid').scrollIntoView({ block: 'center' }));
+  await keep.waitForTimeout(900);
+  const y0 = await keep.evaluate(() => scrollY);
+  assert.equal(y0 > 400, true, 'the strip is well down the page');
+  await keep.click('#posterGrid .pc-btn[data-id="starfish"]');
+  await keep.waitForFunction(() => document.getElementById('overlay').classList.contains('open'));
+  await keep.waitForTimeout(1500);
+  await keep.keyboard.press('Escape');
+  let drift = 0;
+  for (let i = 0; i < 20; i++) {
+    await keep.waitForTimeout(250);
+    drift = Math.max(drift, Math.abs((await keep.evaluate(() => scrollY)) - y0));
+  }
+  assert.equal(drift <= 2, true, `closing a scene moved the page by ${drift}px`);
+  assert.equal(await keep.evaluate(() => !!document.querySelector('.reward-note .rn-go')), true, 'the new link is offered in a note');
+  await keep.click('.reward-note .rn-go');
+  await keep.waitForFunction(() => scrollY < 200, null, { timeout: 8000 });
+  assert.deepEqual(keepErrors, []);
+  console.log('closing a scene keeps the page where it was OK');
+  await keep.close();
 } finally {
   await browser.close();
   server.close();
