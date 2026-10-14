@@ -384,7 +384,7 @@ export const rocketMethods = {
     for (let k = 0; k <= 240; k++) {
       const ta = t0 + ((t1 - t0) * k) / 240,
         a = it.pos(Math.max(ta, t0 + 1e-4));
-      if (a && this._rocketAlt(rec, Math.hypot(...a)) > SMOKE_TOP + 5) {
+      if (a && this._rocketAlt(rec, Math.hypot(...a)) > SMOKE_TOP * (fx.smokeTopK ?? 1) + 5) {
         tSmoke = ta;
         break;
       }
@@ -814,7 +814,8 @@ export const rocketMethods = {
       }
       const alt = this._rocketAlt(rec, Math.hypot(...a)),
         rho = rhoAt(alt);
-      const fadeAlt = 1 - smooth((alt - SMOKE_TOP * 0.55) / (SMOKE_TOP * 0.9 - SMOKE_TOP * 0.55)); // gone above about 40 km
+      const ST = SMOKE_TOP * (fx.smokeTopK ?? 1), // opt-in (rocket.smokeTopK): a longer column on a climb of several hundred km, so the trail reaches the vehicle
+        fadeAlt = 1 - smooth((alt - ST * 0.55) / (ST * 0.9 - ST * 0.55)); // gone above about 40 km
       // behind the nozzle, then drifting with a fixed wind and billowing wider with age
       const gr = 1 - Math.exp(-age / 0.07),
         ph = Math.sin(k * 7.3 + 1.7),
@@ -826,7 +827,7 @@ export const rocketMethods = {
         dz = b[2] - a[2],
         dl = Math.hypot(dx, dy, dz) || 1,
         back = 0.45 * Lr;
-      const wl = 0.7 * Lr * gr + 0.06 * Lr * ph; // wind drift
+      const wl = (fx.smokeWind ?? 1) * 0.7 * Lr * gr + 0.06 * Lr * ph; // wind drift (opt-in rocket.smokeWind scales it)
       const lat = near * gr * 0.6 * Lr * (S.seed[k] - 0.5) * 2; // the pad cloud spreads sideways
       pos[3 * k] = a[0] - (dx / dl) * back + wind.x * (wl + lat);
       pos[3 * k + 1] = a[1] - (dy / dl) * back + wind.y * (wl + lat);
@@ -835,7 +836,16 @@ export const rocketMethods = {
       sz[k] = bodyD * 1.7 * spread * sk;
       // overlapping soft discs add up: each one carries a share of the opacity that keeps the column's density about constant whatever its length
       const dense = 0.3 + 0.7 * Math.sqrt(rho); // thinner trail in thinner air
-      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spacing * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * Math.exp((-age * (1 - nk) * nearRaw) / 0.05) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
+      // opt-in (rocket.smokeLocal): each puff's share of the opacity follows the local spacing of the puffs along the path, so the slow first seconds of a lift-off do not
+      // stack their puffs into one dense ball that hangs behind the climbing vehicle: the column stays one trail from the pad to the vehicle
+      let spc = spacing;
+      if (fx.smokeLocal) {
+        const dh = (tE - t0) / S.K,
+          q1 = it.pos(Math.max(t0, te - dh * 0.5)),
+          q2 = it.pos(Math.min(tE, te + dh * 0.5));
+        if (q1 && q2) spc = Math.max(spacing * fx.smokeLocal, Math.hypot(q2[0] - q1[0], q2[1] - q1[1], q2[2] - q1[2]));
+      }
+      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spc * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * Math.exp((-age * (1 - nk) * nearRaw) / 0.05) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
       wm[k] = Math.exp(-age / 0.012) * 0.8;
       if (al[k] > 0.003) any = true;
     }
