@@ -50,6 +50,7 @@ function drawGallery() {
   });
   stripControls(grid);
   rovingTiles(grid);
+  fitFacts(grid);
   // Scenes already watched wear a small "Seen" tag (in memory only); the count and the new links are told once, under the hero's actions (heroSeen)
   const sync = () => {
     grid.querySelectorAll('.pc-btn').forEach((b) => {
@@ -122,6 +123,36 @@ function rovingTiles(grid) {
     e.preventDefault();
     tiles[Math.min(tiles.length - 1, Math.max(0, to))].focus();
   });
+}
+// The hover card over a poster is as tall as the picture: its text is set so that every line is whole. If the fact is too long at 14 px it steps down to 13 px and 12.5 px,
+// and a fact that still does not fit stops at a whole line with an ellipsis (never cut through a line). The measure is redone when the cards change size.
+function fitFacts(grid) {
+  const fit = () => {
+    for (const f of grid.querySelectorAll('.pc-fact')) {
+      const pic = f.parentElement,
+        room = pic.clientHeight;
+      if (!room) continue;
+      f.classList.remove('clamp');
+      f.style.maxHeight = 'none';
+      let done = false;
+      for (const px of ['', '13px', '12.5px']) {
+        f.style.fontSize = px;
+        if (f.offsetHeight <= room - 1) {
+          done = true;
+          break;
+        }
+      }
+      f.style.maxHeight = '';
+      if (done) continue;
+      const cs = getComputedStyle(f),
+        lines = Math.max(1, Math.floor((room - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / parseFloat(cs.lineHeight)));
+      f.style.setProperty('--fl', String(lines));
+      f.classList.add('clamp');
+    }
+  };
+  fit();
+  document.fonts?.ready.then(fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(grid);
 }
 function stripControls(grid) {
   const prev = document.getElementById('stripPrev'),
