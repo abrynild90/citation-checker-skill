@@ -30,7 +30,7 @@ export const FENGYUN = {
   launchCam: 'second',
   fitSouth: 50, // the first views look from the south, so the vehicle on the pad stands up in the frame (from above it was a speck of 70 px)
   fitLateView: [24, 35], // turn smoothly toward an oblique ring view after the cloud spreads
-  fitLateViewFrom: 0.5,
+  fitLateViewFrom: 0.4, // the first views look from the south (fitSouth), so the turn toward the ring view starts a key earlier (0.5 cropped the debris at the frame foot)
   staticCenter: [24, 35], // oblique to the near-polar orbit: a ring, rather than an edge-on plume
   orbitAt: [24, 35, 4.6],
   fitMinKeys: IS_PHONE ? [1.9, 0] : [1.45, 2.0], // the first key frames the Xichang to satellite arc close, so the interceptor and the satellite read as craft
