@@ -17,7 +17,7 @@ const H = Math.round((W * 9) / 16);
 const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
   starfish: 0.6, // the belt pulled out around the whole Earth, the burst inside it
-  solwind: 0.2, // the nose-up F-15 with the ASM-135 under it and the textured satellite in frame
+  solwind: 0.27, // the F-15 and the missile climbing toward the textured satellite, all clear of the frame edges
   fengyun: 0.16, // the launch, the interceptor and the satellite clear of it in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.3, // the rocket climbing the arc with its plume and trail, the GEO ring around the Earth
@@ -39,7 +39,7 @@ const POSTER_VIEW = {
   gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
   spaceplanes: { cam: 2, boost: 1.3 }, // OTV-7's elongated orbit around the Earth
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
-  solwind: { cam: 0, back: 0.82, boost: 1.8 }, // close on the impact, the satellite several times larger
+  solwind: { cam: 0, back: 1.2, lift: 0.04, right: 0.22, boost: 1.45 }, // the F-15, the missile and the satellite it climbs toward, whole in one frame
   shakti: { back: 0.72, right: 0.1, boost: 1.7 },
   fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
   dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
