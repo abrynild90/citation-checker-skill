@@ -2,7 +2,7 @@
 // scenes/cameras.js: camera presets for a simulated scene: wide/polar/zoom views, follow and frame cameras, the dolly camera of the hit scenes and the
 // still-frame camera (renderer-independent; used by sim.js)
 // ============================================================================
-import { DEG, GEO_ALT, IS_PHONE, add, dot, len, ll, norm, rAlt, scl, smooth } from './core.js';
+import { DEG, GEO_ALT, IS_PHONE, add, dot, len, ll, norm, occluded, rAlt, scl, smooth } from './core.js';
 
 // `ctx` is what buildSim has collected by the time the items exist: the config, the items, the hit definition, the target and aircraft positions, the
 // focus point, the anchors and the keyframed crafts. Returns the camera list and `stillCamFor(t, aspect)`.
@@ -213,7 +213,56 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         d = scl(u, -w * e.k * D * tanFor(asp)[1]);
       return { ...v, pos: add(v.pos, d), look: add(v.look, d) };
     };
-    return { name: 'Follow the action', follow: atShift, ...atShift(0), hideShell: true };
+    // debrisFit (opt-in) { mx, my, from }: the camera never lets the live debris leave the frame. For every aspect the distance the key poses need to keep every
+    // visible fragment inside the fractions mx / my of the half-width / half-height is solved on a fine time grid (the same pose as the one drawn), widened over
+    // neighbouring times and blurred, so the pull-back is one smooth move (never a cut, never ahead of the hit) and only ever moves the camera out.
+    const fitDeb = cfg.debrisFit,
+      cl = items.find((i) => i.kind === 'cloud' && i.dynCol && !i.colored),
+      NG = 100,
+      scaleTab = {};
+    const debrisScale = (asp) => {
+      const key = Math.round(asp * 40);
+      if (scaleTab[key]) return scaleTab[key];
+      const [tanH, tanV] = tanFor(asp),
+        mx = fitDeb.mx ?? 0.92,
+        my = fitDeb.my ?? 0.88,
+        arr = new Float32Array(cl.n * 3),
+        raw = new Array(NG + 1).fill(1);
+      for (let g = 0; g <= NG; g++) {
+        const tk = g / NG;
+        if (tk <= ht + 0.01 || tk < (fitDeb.from ?? 0)) continue;
+        cl.fill(tk, arr);
+        const v = atShift(tk, asp),
+          fw = norm(add(v.look, scl(v.pos, -1))),
+          r = norm(cross3(fw, v.up || [0, 1, 0])),
+          u = cross3(r, fw),
+          D0 = len(add(v.look, scl(v.pos, -1)));
+        let need = 1;
+        for (let k = 0; k < cl.n; k++) {
+          const q = [arr[3 * k], arr[3 * k + 1], arr[3 * k + 2]];
+          if (!q[0] && !q[1] && !q[2]) continue;
+          if (occluded(v.pos, q)) continue;
+          const w = add(q, scl(v.pos, -1)),
+            depth = dot(w, fw);
+          need = Math.max(need, 1 + (Math.abs(dot(w, r)) / (tanH * mx) - depth) / D0, 1 + (Math.abs(dot(w, u)) / (tanV * my) - depth) / D0);
+        }
+        raw[g] = Math.min(need, fitDeb.max ?? 2.2);
+      }
+      // widen (maximum over +-5 samples), then two box blurs of radius 2 (support +-4 <= 5, so the result never falls below the need)
+      let e = raw.map((_, g) => Math.max(...raw.slice(Math.max(0, g - 5), Math.min(NG, g + 5) + 1)));
+      for (let pass = 0; pass < 2; pass++) e = e.map((_, g) => { let a = 0, c = 0; for (let j = g - 2; j <= g + 2; j++) { a += e[Math.max(0, Math.min(NG, j))]; c++; } return a / c; });
+      return (scaleTab[key] = e);
+    };
+    const atFit = (t, asp = ASPECT) => {
+      const v = atShift(t, asp);
+      if (!fitDeb || !cl || t <= ht) return v;
+      const e = debrisScale(asp),
+        x = Math.max(0, Math.min(NG, t * NG)),
+        i = Math.min(NG - 1, Math.floor(x)),
+        S = Math.exp(Math.log(e[i] + (e[i + 1] - e[i]) * (x - i)) * smooth((t - ht) / 0.03)); // eased in from the hit: the pull-back never runs ahead of it
+      return S <= 1.0005 ? v : { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), S)) };
+    };
+    return { name: 'Follow the action', follow: atFit, ...atFit(0), hideShell: true };
   };
   if (cfg.cameras)
     cams = cfg.cameras.map((c0) => {

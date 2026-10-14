@@ -27,6 +27,7 @@ export const FENGYUN = {
   related: 'unga-77-41',
   event: 'cn-2007-fy1c',
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
+  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision to the end
   launchCam: 'second',
   preDrift: { t0: 0.14, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad (with the vapour venting and the tower light), so the opening is not still
   fitSouth: 50, // the first views look from the south, so the vehicle on the pad stands up in the frame (from above it was a speck of 70 px)
@@ -87,6 +88,7 @@ export const FENGYUN = {
       maxPx: 5.5,
       size: 0.034,
       label: 'Debris ring',
+      appear: 0.32, // the fragments and their label come up with the step that names them (the collision step), not in the 0.02 before it
       labelEdge: true, // live: the label points at a fragment on the ring's outer edge, so the leader stays short
       dx: 70,
       dy: 24,

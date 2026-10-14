@@ -829,7 +829,8 @@ export function buildSim(cfg) {
         labelDy: a.dy,
         vis: 0,
         fill(t, out, colr) {
-          const dt = t - tgt.t;
+          const dt = t - tgt.t,
+            da = t - Math.max(tgt.t, a.appear ?? 0); // a.appear (opt-in): the fragments are not drawn before this time (the step that names them)
           // Retire a historical cloud before a later source count is shown; do not invent surviving positions.
           const cloudFade = a.fadeOut ? 1 - smooth((t - a.fadeOut[0]) / (a.fadeOut[1] - a.fadeOut[0])) : 1;
           // a.ring { t1, ease }: opt-in closed ring: each fragment's along-track offset grows from 0 at the hit to its own share of the full circle at t1
@@ -842,7 +843,7 @@ export function buildSim(cfg) {
             let x = 0,
               y = 0,
               z = 0;
-            if (dt > 0 && cloudFade > 0) {
+            if (dt > 0 && cloudFade > 0 && !(a.appear != null && t < a.appear)) {
               const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
               let alt = tgt.alt + p.da * fat * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
@@ -888,7 +889,7 @@ export function buildSim(cfg) {
                   fade *
                   cloudFade *
                   (0.4 + 0.6 * core * core) *
-                  (dt > 0 && dt < 0.02 ? dt / 0.02 : 1) *
+                  (da > 0 && da < 0.02 ? da / 0.02 : 1) *
                   (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1),
               ); // lateBoost (opt-in): the old fragments get brighter, so a thin late ring stays visible
             }
