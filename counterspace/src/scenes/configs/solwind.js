@@ -11,6 +11,7 @@ export const SOLWIND = {
   date: '1985-09-13',
   title: 'Solwind: a US missile destroys a satellite (1985)',
   shells: ['LEO'],
+  shellShort: IS_PHONE ? { LEO: 'LEO' } : undefined, // phone: a short ring label keeps its leader short in the orbit view
   duration: 12,
   lede: 'On 13 September 1985 a US F-15 fighter fired an anti-satellite missile that destroyed the Solwind P78-1 satellite, about 530 km above the Earth. The missile’s homing vehicle steered itself and destroyed the satellite by collision.',
   caption:
@@ -68,7 +69,7 @@ export const SOLWIND = {
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
   narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
-  phoneOff: { 'ASM-135': [96, -24], 'F-15': [128, -55] },
+  phoneOff: { 'ASM-135': [114, -34], 'F-15': [64, -92] },
   actors: [
     {
       type: 'aircraft',
