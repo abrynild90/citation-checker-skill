@@ -737,8 +737,8 @@ export function buildSim(cfg) {
       // opt-in launch site (rocket.pad): a small launch-complex marker (base plate, flame deflector, tower, rail) stands under the vehicle until a moment after liftoff
       if (a.rocket?.pad) {
         const at = scl(norm(from), 1.002),
-          until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
+          until = a.t0 + (a.rocket.pad.hold ?? 0.07);
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, t0: a.t0, until, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       if (!a.rocket)
         items.push({
@@ -1048,8 +1048,8 @@ export function buildSim(cfg) {
       // opt-in launch site (rocket.pad): the launch-complex marker stands under the vehicle until a moment after liftoff (as for an interceptor)
       if (a.rocket?.pad) {
         const at = scl(g0, 1.002),
-          until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
+          until = a.t0 + (a.rocket.pad.hold ?? 0.07);
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, t0: a.t0, until, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       focus = focus || a.from;
     }
