@@ -546,6 +546,7 @@ function fillStory(cfg) {
   dykEl.classList.toggle('pending', (FACT_FROM[cfg.id] ?? 0) > 0); // held back until the step it describes
   // the "Did you know" line is left out when the account's own first sentence already says it
   dykEl.hidden = !FACTS[cfg.id] || same(splitSentences(cfg.caption || cfg.lede || '')[0] || '', FACTS[cfg.id]);
+  requestAnimationFrame(() => requestAnimationFrame(fitSteps)); // the list is fitted again with the line state known (held back: its room is reserved while it measures)
   expanded = false;
   asideBody.classList.remove('expanded');
   panel.classList.remove('reading-account');
@@ -948,7 +949,15 @@ function stepAt(t) {
 }
 function markStep(k) {
   // the "Did you know" line appears once the active step is the one it describes (its place stays reserved, so nothing shifts)
-  dykEl.classList.toggle('pending', (steps[k]?.t ?? 0) < (FACT_FROM[cur?.id] ?? 0) - 1e-6);
+  const dykWas = dykEl.classList.contains('pending'),
+    dykNow = (steps[k]?.t ?? 0) < (FACT_FROM[cur?.id] ?? 0) - 1e-6;
+  dykEl.classList.toggle('pending', dykNow);
+  if (dykWas && !dykNow && WIDE.matches && !dykEl.hidden) {
+    // it grows in over a third of a second (the room is under the list, so the foot does not move)
+    dykEl.classList.add('reveal');
+    clearTimeout(dykTimer);
+    dykTimer = setTimeout(() => dykEl.classList.remove('reveal'), 450);
+  }
   $('sceneCurrentStep').textContent = steps[k]?.text || '';
   const act = cur?.acts?.findIndex((a) => (steps[k]?.t ?? 0) >= a.t0 && (steps[k]?.t ?? 0) < a.t1);
   $('sceneEpisodes')
@@ -1087,7 +1096,18 @@ function rowsFit() {
   return { n, h, avail };
 }
 // A note opened under "About this picture" or "Where to go next" sits in the column, so the column scrolls; it is measured as if the note were closed.
+let dykTimer = 0;
 function fitSteps() {
+  // the "Did you know" line holds no room before its step, but the list is fitted as if it did (it grows into that room when the line comes in)
+  const held = dykEl.classList.contains('pending') && !dykEl.classList.contains('reserve');
+  if (held) dykEl.classList.add('reserve');
+  try {
+    fitStepsNoted();
+  } finally {
+    if (held) dykEl.classList.remove('reserve');
+  }
+}
+function fitStepsNoted() {
   const noted = asideBody.classList.contains('has-note'),
     at = asideBody.scrollTop,
     open = noted ? Object.values(pairBodies).filter((n) => !n.hidden) : [];

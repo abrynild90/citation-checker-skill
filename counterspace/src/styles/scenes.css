@@ -2334,7 +2334,13 @@
     font: 400 15px/1.5 var(--sans);
     color: var(--text);
   }
-  .overlay .sv-dyk.pending { visibility: hidden; }
+  /* before its step the line takes no room (no blank band above the first step); the list is still fitted as if it were there (fitSteps adds .reserve while it
+     measures), so when the line comes in it grows into the room under the list, the foot stays where it is and nothing is squeezed */
+  .overlay .sv-dyk.pending { display: none; }
+  .overlay .sv-dyk.pending.reserve { display: block; visibility: hidden; }
+  .overlay .sv-dyk.reveal { overflow: hidden; animation: dykIn 380ms var(--ease, ease) both; }
+  @keyframes dykIn { from { max-height: 0; opacity: 0; padding-block: 0; margin-bottom: 0; } to { max-height: 14em; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .overlay .sv-dyk.reveal { animation: none; } }
   .overlay .sv-dyk b { font-weight: 600; color: var(--accent-2); margin-right: 4px; }
   .overlay .story-scroll.pin > .story-foot { margin-top: auto; }
   .overlay .story-scroll.pin { min-height: 100%; }

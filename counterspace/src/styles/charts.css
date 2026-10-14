@@ -52,7 +52,7 @@
 .legal-band{position:relative;z-index:20;background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:var(--s-3) 0 0;
   scroll-margin-top:var(--law-head-h,220px)}
 @media (min-width:761px){.legal-band{position:sticky;top:0}}
-.legal-band.compact{padding:3px 0 0;border-top-color:transparent;border-bottom-color:var(--line-strong)}
+.legal-band.compact{padding:11px 0 0;/* the title line keeps about 10 px under the window's top edge */border-top-color:transparent;border-bottom-color:var(--line-strong)}
 .legal-band.reading #legalSvg{max-height:var(--row-h,60px);overflow:hidden}
 .legal-band svg{display:block;width:100%;height:auto}
 #legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
