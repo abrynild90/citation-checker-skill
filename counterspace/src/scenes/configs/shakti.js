@@ -92,6 +92,7 @@ export const SHAKTI = {
       strong: true,
       coreK: 0.35,
       flashSpan: 0.14,
+      retire: 0.22, // the spent interceptor path (the faint predicted arc and the bright wake run along one line) is removed a moment after the hit: no doubled line into the impact point
       linger: 0.2,
       lingerK: 0.6,
       lingerEnd: 0.7,
