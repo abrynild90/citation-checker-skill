@@ -682,8 +682,16 @@ function anchorNote(note) {
   note.style.bottom = '';
   note.style.maxHeight = '';
   note.style.minHeight = '';
+  note.style.left = '';
+  note.style.right = '';
   const wr = $('asideWrap').getBoundingClientRect(),
     pr = $('svPair').getBoundingClientRect();
+  // the card stands in the column the rows stand in: its edges are the list's own (the row highlight's left edge, the list's right edge), not the panel's gutter
+  const lr = stepsEl.getBoundingClientRect();
+  if (lr.width > 200 && !STACKED.matches) {
+    note.style.left = Math.max(0, Math.round((lr.left - wr.left) * 10) / 10) + 'px';
+    note.style.right = Math.max(0, Math.round((wr.right - lr.right) * 10) / 10) + 'px';
+  }
   if (!pr.height || pr.top < wr.top + 140 || pr.top > wr.bottom) return;
   const edge = note === lawCard ? pr.top : pr.bottom + 4,
     room = wr.bottom - edge - 8;
