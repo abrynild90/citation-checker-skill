@@ -716,6 +716,7 @@ export function buildSim(cfg) {
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,
             stage: a.rocket.stage,
+            plumeK: a.rocket.plumeK, // opt-in: a longer, wider exhaust
             seed: a.t0 * 10,
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
           },
@@ -737,7 +738,7 @@ export function buildSim(cfg) {
       if (a.rocket?.pad) {
         const at = scl(norm(from), 1.002),
           until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60 });
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       if (!a.rocket)
         items.push({
@@ -1021,7 +1022,7 @@ export function buildSim(cfg) {
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
             fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, follow: !!a.rocket.follow, smokeK: a.rocket.smokeK,
-            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
+            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, plumeK: a.rocket.plumeK, seed: a.t0 * 10, marker: kvMark },
           });
         } else
           items.push({
@@ -1048,7 +1049,7 @@ export function buildSim(cfg) {
       if (a.rocket?.pad) {
         const at = scl(g0, 1.002),
           until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60 });
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       focus = focus || a.from;
     }

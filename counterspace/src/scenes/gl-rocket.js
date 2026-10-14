@@ -594,14 +594,16 @@ export const rocketMethods = {
           // clean separation: the two stages are collinear at the instant of separation, then the lower one drifts aft on a small relative velocity (the upper
           // one starts to accelerate away when its motor lights) and picks up a slow differential tumble about its own middle, so nothing hinges at the joint
           const u = sepAge,
-            off = 0.03 * u + 0.1 * u * u,
+            sd = fx.stage.drift ?? 1, // stage.drift / stage.tumble / stage.puff (opt-in): a more visible drop-away (faster fall-back, a faster tumble, a bigger puff of gas)
+            off = sd * (0.03 * u + 0.1 * u * u),
             cz = 0.5 * (D.zN + D.zS),
             e3 = rec.e3 || (rec.e3 = new T.Euler()),
-            pr = rec.pr || (rec.pr = new T.Vector3());
-          e3.set(0.8 * u * u, 0.5 * u * u, 0.36 * u * u);
+            pr = rec.pr || (rec.pr = new T.Vector3()),
+            tk = fx.stage.tumble ?? 1;
+          e3.set(0.8 * tk * u * u, 0.5 * tk * u * u, 0.36 * tk * u * u);
           pr.set(0, 0, cz).applyEuler(e3); // the middle of the lower part, turned: the part rotates about it, not about its forward end
           rk.lower.rotation.copy(e3);
-          rk.lower.position.set(0.0006 * u - pr.x, 0.0004 * u - pr.y, cz - pr.z - off);
+          rk.lower.position.set(0.0006 * sd * u - pr.x, 0.0004 * sd * u - pr.y, cz - pr.z - off);
           const fade = 1 - smooth((u - 1.1) / 0.6);
           for (const m of rk.lowerMats) m.opacity = fade;
         } else if (rk.lower.position.z !== 0) {
@@ -621,7 +623,8 @@ export const rocketMethods = {
       const ak = fx.air ? 1.3 : 1; // an air-launched missile is small beside its carrier: its plume and ignition flash are drawn a little larger
       // the plume never runs into the globe: its length is cut where the exhaust axis meets the surface (a vehicle standing on the pad or skimming low
       // over it shows the flame ending at the ground, not a flame buried in it)
-      let outerLen = ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr);
+      const pk = fx.plumeK ?? 1; // fx.plumeK (opt-in): a longer, wider, brighter exhaust for a vehicle that is small in the frame
+      let outerLen = pk * ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr);
       if (thr > 0.004) {
         const sc = obj.scale.x,
           dv = rec.v1.set(0, 0, 1).applyQuaternion(obj.quaternion),
@@ -635,7 +638,7 @@ export const rocketMethods = {
         if (c < 0) outerLen = 0;
         else if (disc > 0 && -b - Math.sqrt(disc) > 0) outerLen = Math.min(outerLen, (-b - Math.sqrt(disc)) / sc);
       }
-      const outerW = nozW * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr);
+      const outerW = nozW * (1 + 0.5 * (pk - 1)) * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr);
       const tm = t * this.sim.cfg.duration,
         U = rk.outer.material.uniforms,
         C = rk.core.material.uniforms;
@@ -657,7 +660,7 @@ export const rocketMethods = {
       rk.outer.visible = rk.core.visible = vis && thr > 0.004;
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
       rk.glow.visible = vis && thr > 0.004 && !hide;
-      rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak);
+      rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)));
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
       rk.glow.position.z = -0.003;
       rk.flash.visible = vis && st.flash > 0.01 && !hide;
@@ -673,8 +676,9 @@ export const rocketMethods = {
       rk.puff.visible = vis && puff > 0.01 && !hide;
       rk.puff.position.z = puffZ;
       const sepPuff = sepNow; // a separation puff is small (the width of the stage); the cold-launch steam keeps its larger size
-      rk.puff.scale.setScalar(sepPuff ? 0.007 + 0.013 * (1 - puff) : 0.02 + 0.05 * (1 - puff));
-      rk.puff.material.opacity = puff * (sepPuff ? 0.4 : 0.55);
+      const pf = sepPuff ? (fx.stage?.puff ?? 1) : 1;
+      rk.puff.scale.setScalar((sepPuff ? 0.007 + 0.013 * (1 - puff) : 0.02 + 0.05 * (1 - puff)) * pf);
+      rk.puff.material.opacity = Math.min(0.9, puff * (sepPuff ? 0.4 : 0.55) * pf);
       // ---- nose heating: follows the dynamic pressure (air density x speed squared), so it is zero in vacuum: nothing above about 40 km (illustrative) and none in the coast
       // above the atmosphere. The glow is a small sprite at the nose tip, sized with the vehicle (it is a child of the model), and the nose's own emissive does the rest.
       const vrel = (rec.speed || 0) / rec.vmax,
