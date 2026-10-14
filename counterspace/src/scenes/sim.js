@@ -696,6 +696,7 @@ export function buildSim(cfg) {
             alt0: a.from === 'aircraft' ? (cfg.actors.find((x) => x.type === 'aircraft')?.alt ?? 12) : 0,
             air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop } : null,
             cold: a.rocket.launch === 'vls',
+            stand: !!a.rocket.pad,
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,
             stage: a.rocket.stage,
@@ -896,7 +897,8 @@ export function buildSim(cfg) {
         const w0 = Math.sin((1 - s) * om) / Math.sin(om || 1),
           w1 = Math.sin(s * om) / Math.sin(om || 1);
         const d = om < 1e-3 ? g0 : norm(add(scl(g0, w0), scl(g1, w1)));
-        all.push(scl(d, rAlt(a.apex * Math.sin(Math.PI * s))));
+        // ascent (opt-in, an exponent): the path only climbs, ending at the top point (a vehicle that rises to the burst point), not up and back down
+        all.push(scl(d, rAlt(a.ascent ? a.apex * Math.pow(s, a.ascent) : a.apex * Math.sin(Math.PI * s))));
       }
       items.push({
         kind: 'curve',
@@ -972,6 +974,7 @@ export function buildSim(cfg) {
             const s = clamp01((t - a.t0) / (a.t1 - a.t0)) * N,
               i = Math.min(N - 1, Math.floor(s)),
               f = s - i;
+            if (s >= N && a.rocket.endHold && t < a.t1 + a.rocket.endHold) return all[N]; // endHold (opt-in): the vehicle stays at the end point a moment (inside the flash there)
             return s >= 0 && s < N ? add(scl(all[i], 1 - f), scl(all[i + 1], f)) : null; // before ignition the vehicle stands at the launch point (s = 0)
           };
           const kvMark = {
@@ -996,7 +999,7 @@ export function buildSim(cfg) {
             maxPx: a.rocket.maxPx ?? 54,
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
-            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, smokeK: a.rocket.smokeK,
+            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
           });
         } else
@@ -1019,6 +1022,12 @@ export function buildSim(cfg) {
             kvMax: 30,
             pos: headPos,
           });
+      }
+      // opt-in launch site (rocket.pad): the launch-complex marker stands under the vehicle until a moment after liftoff (as for an interceptor)
+      if (a.rocket?.pad) {
+        const at = scl(g0, 1.002),
+          until = a.t0 + (a.rocket.pad.hold ?? 0.03);
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60 });
       }
       focus = focus || a.from;
     }

@@ -526,8 +526,15 @@ export const rocketMethods = {
         vis = obj.visible;
       const ud = obj.userData;
       // the displayed scale is kept when the vehicle is not drawn (the smoke trail is sized from it)
-      if (vis) rec.f = obj.scale.x;
-      else if (!rec.fSet) {
+      if (vis) {
+        rec.f = obj.scale.x;
+        // standing on a launch pad (fx.stand): the nozzle never sinks below the plate, so the vehicle holds down until the path has climbed clear of it, then rises
+        if (fx.stand) {
+          const r = obj.position.length(),
+            need = 1.002 - rk.D.zN * obj.scale.x * 0.92;
+          if (r < need) obj.position.multiplyScalar(need / r);
+        }
+      } else if (!rec.fSet) {
         const p = it.pos(fx.t0 + 0.004);
         if (p) {
           const d = Math.max(0.15, Math.hypot(p[0] - cp.x, p[1] - cp.y, p[2] - cp.z)),
