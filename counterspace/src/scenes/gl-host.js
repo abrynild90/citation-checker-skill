@@ -832,7 +832,8 @@ export class GLHost {
         f = Math.min(Math.max(px, u.minPx * k * b), u.maxPx * k * b) / px;
       // opt-in launch ramp (it.ramp { k, until }): a vehicle on the pad and in the first of its climb is drawn k times larger, easing to its normal size by this fraction of its flight
       const rp = it.ramp && it.fx ? 1 + (it.ramp.k - 1) * (1 - smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / Math.max(1e-4, (it.fx.t1 - it.fx.t0) * it.ramp.until))))) : 1;
-      obj.scale.setScalar(u.base * f * rp);
+      const pk = it.preK && it.fx ? it.preK + (1 - it.preK) * smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / 0.03))) : 1; // opt-in preK: small while it waits at the launch point
+      obj.scale.setScalar(u.base * f * rp * pk);
     }
     this._rocketFrame(); // rocket exhaust, smoke and staging follow the models' drawn size
     // Bounded dazzle glare: the target and its leader remain readable through the beam.

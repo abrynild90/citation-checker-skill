@@ -89,7 +89,7 @@ export const BURNT_FROST = {
       thick: 0.0055,
       label: 'SM-3 interceptor',
       short: 'SM-3',
-      rocket: { style: 'slim', minPx: 92, maxPx: 125, glowMin: 14, glowMax: 24, launch: 'vls', ramp: { k: 1.2, until: 0.35 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
+      rocket: { style: 'slim', minPx: 92, maxPx: 125, glowMin: 14, glowMax: 24, launch: 'vls', preK: 0.8, ramp: { k: 1.2, until: 0.35 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,
@@ -128,7 +128,7 @@ export const BURNT_FROST = {
   ],
   still: 0.47,
   status: [
-    [0, 'Interceptor rises toward the satellite'],
+    [0, 'The ship readies an interceptor for the satellite'],
     [0.25, 'Interceptor closes on the satellite', 'Interceptor closing in'],
     [0.44, 'Collision at about 220 km', 'Collision at about 220 km'],
     [0.54, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],

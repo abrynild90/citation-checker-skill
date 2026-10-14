@@ -685,6 +685,7 @@ export function buildSim(cfg) {
           minPx: a.rocket.minPx ?? 26,
           maxPx: a.rocket.maxPx ?? 48,
           rocketStyle: a.rocket.style,
+          preK: a.rocket.preK, // opt-in: drawn this fraction of its size while it waits at the launch point, easing to full size just after t0
           ramp: a.rocket.ramp, // opt-in { k, until }: drawn k times larger at the pad, easing to its normal size by this fraction of the flight (see _fitModels)
           // flight look (gl-rocket.js): ignition at t0, the vehicle is consumed at the hit; burn is the fraction of the flight under thrust (the rest is coast)
           fx: {
@@ -700,7 +701,7 @@ export function buildSim(cfg) {
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
           },
           // stands at the launch point from the start, then rides the arc
-          pos: (t) => ((a.rocket.launch === 'vls' ? t >= a.t0 - 1e-6 : true) && t < tgt.t - 0.004 ? bez(sAt(t)) : null), // a vertical-launch missile is inside its cell (not drawn) until the gas pop at t0
+          pos: (t) => (t < tgt.t - 0.004 ? bez(a.rocket.launch === 'vls' && t < a.t0 - 1e-6 ? 0.012 : sAt(t)) : null), // a vertical-launch missile stands in its cell (drawn small, no plume: preK) until the gas pop at t0
           orient: (t) => {
             const sv = sAt(t);
             return {
