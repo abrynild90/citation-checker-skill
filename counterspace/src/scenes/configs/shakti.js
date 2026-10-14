@@ -87,6 +87,7 @@ export const SHAKTI = {
       t0: 0.16,
       color: C.int,
       label: 'PDV Mk-II',
+      hold: -0.004, // the pill goes with the vehicle (consumed at the hit): no leader left pointing at the place it was
       flash: 0.24,
       flashCap: 0.62,
       strong: true,

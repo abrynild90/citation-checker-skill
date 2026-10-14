@@ -8,6 +8,7 @@ import { modelMethods } from './gl-models.js';
 import { earthMethods } from './gl-earth.js';
 import { spaceMethods } from './gl-space.js';
 import { rocketMethods } from './gl-rocket.js';
+import { padMethods } from './gl-pad.js';
 
 const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz;
@@ -653,5 +654,5 @@ const methods = {
 
 // Adds this file's methods to GLHost.prototype. Called once from app.js, after gl-host.js is loaded and before any scene opens.
 export function installGLItems(GLHost) {
-  Object.assign(GLHost.prototype, methods, modelMethods, earthMethods, spaceMethods, rocketMethods);
+  Object.assign(GLHost.prototype, methods, modelMethods, earthMethods, spaceMethods, rocketMethods, padMethods);
 }

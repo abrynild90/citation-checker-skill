@@ -38,6 +38,7 @@ export const BURNT_FROST = {
   keyTimes: IS_PHONE ? undefined : [0, 0.189, 0.42, 0.52, 0.6, 0.68, 0.76, 0.84, 1], // desktop: more keys through the fall, each fitted to the debris, so the streaks and fragments stay in frame
   fitDebrisT: IS_PHONE ? undefined : 0.76, // the last keys keep the framing of the widest cloud: the end is the impact region and its trail, not a close-up of one point
   fitPct: 0.95,
+  fitGlobeOnly: !IS_PHONE, // the last keys frame the globe itself (centred and filled), not the debris that has all gone: no dark void
   fitGlobeFrom: IS_PHONE ? undefined : 0.84, // the last keys keep the whole globe in frame, with the impact point and the trail on it
 
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.9, 0.9], // desktop: the opening frames the ship and the satellite close, so the interceptor in its cell reads
@@ -79,8 +80,8 @@ export const BURNT_FROST = {
       endLabel: 'Impact point: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
       endShort: '0 of 175 in orbit',
       endFrom: 0.9,
-      endDx: -150,
-      endDy: -60,
+      endDx: 85, // the end label sits right of the impact point, off the Japanese city lights
+      endDy: -48,
       bright: true,
       fallUntil: 0.87,
       fall: [

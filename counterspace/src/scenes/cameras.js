@@ -146,11 +146,15 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
           if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
           // fitGlobeFrom (opt-in): from this key on the whole globe is kept in the frame (the last view is the Earth, not a close-up of the crossing)
+          // fitGlobeOnly (opt-in): in those last keys the frame is the globe itself (and the impact point on it), centred and filled, not the debris that has already gone
+          const globeOnly = cfg.fitGlobeOnly && cfg.fitGlobeFrom != null && tk >= cfg.fitGlobeFrom;
+          if (globeOnly) P.length = 0;
           if (cfg.fitGlobeFrom != null && tk >= cfg.fitGlobeFrom) for (const g of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) P.push(scl(g, 1.03));
+          if (globeOnly) P.push(tgt.hitPos);
           return fitPose(
             P,
             cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : nAt(tk),
-            scl(cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97),
+            scl(globeOnly ? scl(centroid(P), cfg.fitGlobeLook ?? 1) : cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), globeOnly ? 1 : (cfg.lookK ?? 0.97)),
             {
               dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time
               dMax: cfg.fitMax ?? 6.5,
@@ -259,7 +263,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       const e = debrisScale(asp),
         x = Math.max(0, Math.min(NG, t * NG)),
         i = Math.min(NG - 1, Math.floor(x)),
-        S = Math.exp(Math.log(e[i] + (e[i + 1] - e[i]) * (x - i)) * smooth((t - ht) / 0.03)); // eased in from the hit: the pull-back never runs ahead of it
+        S = Math.exp(Math.log(e[i] + (e[i + 1] - e[i]) * (x - i)) * smooth((t - ht) / (fitDeb.ease ?? 0.03))); // eased in from the hit (fitDeb.ease: a longer ease for a slower pull-back): the pull-back never runs ahead of it
       return S <= 1.0005 ? v : { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), S)) };
     };
     return { name: 'Follow the action', follow: atFit, ...atFit(0), hideShell: true };

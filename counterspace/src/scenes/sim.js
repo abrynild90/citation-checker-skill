@@ -635,7 +635,7 @@ export function buildSim(cfg) {
       const from = a.from === 'aircraft' ? aircraftPos(a.t0) : ll(a.from[0], a.from[1], 1.005);
       const to = tgt.hitPos;
       const mid = norm(add(from, to));
-      const ctrl = scl(mid, Math.max(len(from), len(to)) + 0.2);
+      const ctrl = scl(mid, Math.max(len(from), len(to)) + (a.arcLift ?? 0.2)); // arcLift (opt-in): how far the path bows outward past the higher end (a near-direct run for an air launch)
       const bez = (s) => add(add(scl(from, (1 - s) * (1 - s)), scl(ctrl, 2 * (1 - s) * s)), scl(to, s * s));
       const N = 60,
         all = [];
@@ -737,8 +737,8 @@ export function buildSim(cfg) {
       // opt-in launch site (rocket.pad): a small launch-complex marker (base plate, flame deflector, tower, rail) stands under the vehicle until a moment after liftoff
       if (a.rocket?.pad) {
         const at = scl(norm(from), 1.002),
-          until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
+          until = a.t0 + (a.rocket.pad.hold ?? 0.07);
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, t0: a.t0, until, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       if (!a.rocket)
         items.push({
@@ -1048,8 +1048,8 @@ export function buildSim(cfg) {
       // opt-in launch site (rocket.pad): the launch-complex marker stands under the vehicle until a moment after liftoff (as for an interceptor)
       if (a.rocket?.pad) {
         const at = scl(g0, 1.002),
-          until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
+          until = a.t0 + (a.rocket.pad.hold ?? 0.07);
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, t0: a.t0, until, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       focus = focus || a.from;
     }
