@@ -18,7 +18,7 @@ const Q = +(process.env.Q || 0.82);
 const POSTER_T = {
   starfish: 0.6, // the belt pulled out around the whole Earth, the burst inside it
   solwind: 0.2, // the nose-up F-15 with the ASM-135 under it and the textured satellite in frame
-  fengyun: 0.22, // the launch, the interceptor and the satellite in one frame, before the debris saturates the picture
+  fengyun: 0.16, // the launch, the interceptor and the satellite clear of it in one frame, before the debris saturates the picture
   'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
   dn2: 0.3, // the rocket climbing the arc with its plume and trail, the GEO ring around the Earth
   shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
@@ -41,7 +41,7 @@ const POSTER_VIEW = {
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 0.82, boost: 1.8 }, // close on the impact, the satellite several times larger
   shakti: { back: 0.72, right: 0.1, boost: 1.7 },
-  fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
+  fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
   dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
