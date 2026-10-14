@@ -1010,27 +1010,35 @@ function followStep(li, instant) {
   if (!stepsBox.open || !r.height) return;
   if (STACKED.matches && !expanded && own === asideBody) return; // The live caption follows the action; the reader controls the account’s scroll position. // the list is folded away (phone)
   if (own === stepsEl) {
-    // move to a step boundary so the list rests on whole steps: the active step lands fully in view
-    const y = stepsEl.scrollTop,
-      maxY = stepsEl.scrollHeight - stepsEl.clientHeight,
-      need = li.offsetTop + li.offsetHeight - stepsEl.clientHeight;
-    let to = y;
-    if (li.offsetTop < y - 1) to = li.offsetTop;
-    else if (need > y + 1) {
-      to = maxY;
-      for (const c of visibleStepRows())
-        if (c.offsetTop >= need - 1) {
-          to = Math.min(maxY, c.offsetTop);
-          break;
-        }
-    }
+    // The list is a window of whole rows that rests on a row edge. Row 1 is at the top at the start, the last row is whole in view at the end, and in
+    // between the playing row stays inside with the next one below it when there is room (the window moves as little as it can).
+    const kids = visibleStepRows(),
+      k = kids.indexOf(li);
+    if (k < 0) return;
+    const H = stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0),
+      topOf = (i) => kids[i].offsetTop,
+      botOf = (i) => kids[i].offsetTop + kids[i].offsetHeight,
+      fits = (a, b) => botOf(b) - topOf(a) <= H + 1.5,
+      last = kids.length - 1;
+    let lo = 0;
+    while (lo < k && !fits(lo, Math.min(k + 1, last))) lo++; // the first row that still lets the playing row and the one after it show
+    lo = Math.min(lo, k);
+    let sMax = 0;
+    while (sMax < last && !fits(sMax, last)) sMax++; // the first row from which all the rest shows: the window never rests below it
+    const y = stepsEl.scrollTop;
+    let cur = 0;
+    kids.forEach((c, i) => {
+      if (c.offsetTop <= y + 1) cur = i;
+    });
+    const hi = Math.max(lo, k - 1);
+    const s0 = k === 0 ? 0 : Math.min(sMax, Math.max(lo, Math.min(hi, cur)));
+    const to = Math.min(stepsEl.scrollHeight - stepsEl.clientHeight, topOf(s0));
     if (Math.abs(to - y) > 1) {
       // The active row is never seen half-way: a row below the window jumps in at once; the glide is only for a row already whole in view
-      const inView =
-        li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1;
+      const inView = li.offsetTop >= y - 1 && li.offsetTop + li.offsetHeight <= y + H + 1;
       const smooth = inView && !(REDUCED || instant || Math.abs(to - y) > stepsEl.clientHeight * 1.5);
       stepsEl.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' });
-      if (!smooth) trimSteps(); // the clip follows the jump at once, so the active row is whole on the very next frame
+      if (!smooth) trimSteps();
       // a smooth scroll that did not arrive (a busy page, a browser that skips it) is finished at once, so the list always rests on its row
       if (smooth)
         setTimeout(() => {
@@ -1068,39 +1076,27 @@ function followStep(li, instant) {
   if (dy) own.scrollBy({ top: dy, behavior: REDUCED || instant ? 'auto' : 'smooth' });
 }
 const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && getComputedStyle(stepsEl).overflowY !== 'visible';
-// The list shows whole steps at rest. The story column is a flex column whose list takes what the lede and the foot leave; this measures how many whole
-// rows that is and cuts the list to the last row boundary, so no row is ever sliced. If fewer than three or four rows would fit, the lede gives way
-// (two sentences, one, none). A fade appears at an edge only while rows are hidden there.
-const MAX_ROWS = 5; // at most five whole steps show at once on a desktop window; the "Read the full account" fold and the scene's own progress carry the rest
-function rowsFit() {
-  stepsEl.style.removeProperty('--sp');
+// The list of steps shows EVERY row whenever the column can hold them: first as drawn, then with tighter rows and tighter spacing around it (the
+// "st-compact" and "st-tight" modes of the column). Only when even the tightest setting cannot hold them all does the list become a window of whole rows
+// that uses all the height there is, with a cue under it that counts the rows beyond ("2 more steps") and a step that follows the animation.
+const STEP_MODES = ['', 'st-compact', 'st-tight'];
+let fitCost = 0; // what the last fit left out of the list: rows hidden (x10) plus how tight the mode is, so the "Did you know" line can tell what it costs
+const stepCue = $('stepsCue');
+function setStepMode(i) {
+  STEP_MODES.forEach((c, k) => c && asideBody.classList.toggle(c, k === i));
+}
+function resetList() {
   stepsEl.style.height = '';
   stepsEl.style.flex = '';
-  const avail = stepsEl.clientHeight;
-  let n = 0,
-    h = 0;
-  const cap = STACKED.matches ? Infinity : MAX_ROWS; // a long list shows about six rows at a time on a desktop window, never a list taller than the picture
-  if (stepsEl.scrollHeight <= avail + 1 && visibleStepRows().length <= cap) return { n: visibleStepRows().length, h: 0, avail };
-  const first = visibleStepRows()[0];
-  for (const li of visibleStepRows()) {
-    const b = li.offsetTop + li.offsetHeight;
-    if (b <= avail + 1 && n < cap) {
-      n++;
-      h = b;
-    } else break;
-  }
-  if (!n && first) {
-    n = 1; // never less than one whole row: the column scrolls a little rather than slice it
-    h = first.offsetHeight;
-  }
-  return { n, h, avail };
+  stepsEl.style.removeProperty('--sp');
+  stepsEl.style.paddingBottom = '';
+  stepsEl.style.clipPath = '';
 }
 // A note opened under "About this picture" or "Where to go next" sits in the column, so the column scrolls; it is measured as if the note were closed.
 let dykTimer = 0;
 // The "Did you know" line shows only when it costs the steps nothing: if the list is shorter with the line than without it (a row clipped, a window
 // of fewer rows, blank room above the line), the line stays out for that scene and window size.
 const dykOn = () => WIDE.matches && !dykEl.hidden && !dykEl.classList.contains('nofit');
-const listH = () => stepsEl.getBoundingClientRect().height;
 function fitSteps() {
   // the line holds no room before its step, but the list is fitted as if it did (it grows into that room when the line comes in)
   const held = dykEl.classList.contains('pending') && !dykEl.classList.contains('reserve'),
@@ -1111,11 +1107,10 @@ function fitSteps() {
     if (want) {
       dykEl.classList.add('nofit');
       fitStepsNoted();
-      const bare = listH(),
-        bareClipped = stepsEl.scrollHeight - stepsEl.clientHeight;
+      const bare = fitCost;
       dykEl.classList.remove('nofit');
       fitStepsNoted();
-      if (listH() < bare - 1 || stepsEl.scrollHeight - stepsEl.clientHeight > bareClipped + 1) {
+      if (fitCost > bare) {
         dykEl.classList.add('nofit');
         fitStepsNoted();
       }
@@ -1144,103 +1139,144 @@ function fitStepsNoted() {
 }
 function fitStepsClosed() {
   if (!cur) return;
-  stepsEl.style.height = '';
-  stepsEl.style.flex = '';
-  stepsEl.style.removeProperty('--sp');
-  stepsEl.style.paddingBottom = '';
+  resetList();
+  stepsBox.classList.remove('has-cue');
+  stepCue.hidden = true;
+  asideBody.classList.remove('st-measure');
   asideBody.classList.remove('pin'); // measured with the foot in its natural place; pinned to the bottom at the end
-  // a phone with more than four steps, or a short phone screen: the list shows the playing step only and the picture keeps the height
-  // The steps are read-only here: every row is drawn whole, at its natural height, and the story column scrolls if it must (no fixed-height window).
-  const one = false;
-  overlay.classList.toggle('steps-one', one);
+  overlay.classList.toggle('steps-one', false);
+  fitCost = 0;
   if (!visibleStepRows().length) return;
-  if (expanded) return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
-  // Phone with more than four steps: the list shows the playing step only (more height for the picture); a phone with fewer shows up to three rows.
-  const want = one ? 1 : Math.min(visibleStepRows().length, COMPACT.matches ? 3 : 4);
-  let r;
-  for (let lvl = 0; lvl <= 1; lvl++) {
-    setLede(lvl);
-    r = rowsFit();
-    if (asideBody.scrollHeight <= asideBody.clientHeight + 1) break; // every row fits whole, with nothing to scroll
-    if (lvl === 1) break;
+  if (expanded) {
+    setStepMode(-1);
+    return fadeSteps(); // the whole account is open: the column scrolls and the list keeps its full height
   }
-  if (STACKED.matches) r.h = 0; // phone and tablet: every row at its natural height, the column scrolls; desktop: a window of whole rows
-  if (r.h && !STACKED.matches) {
-    // The window rests on a row at every step of the story, so the rows left under the last resting place can be shorter than the window and leave a blank band
-    // above the cue. Of the heights that are a whole number of consecutive rows, take the one that leaves the least blank at any resting place.
-    const kids = visibleStepRows(),
-      top = kids.map((k) => k.offsetTop),
-      bot = kids.map((k) => k.offsetTop + k.offsetHeight),
-      total = bot.at(-1),
-      blank = (H) => {
-        let worst = 0;
-        for (let k = 0; k < kids.length; k++) {
-          let end = top[k];
-          for (let m = k; m < kids.length && bot[m] - top[k] <= H + 0.5; m++) end = bot[m];
-          worst = Math.max(worst, H - (end - top[k]));
-          if (total - top[k] <= H + 0.5) break;
-        }
-        return worst;
-      };
-    let best = r.h,
-      bestCost = blank(r.h);
-    for (let i = 0; i < kids.length; i++)
-      for (let j = i; j < kids.length; j++) {
-        const H = bot[j] - top[i];
-        if (H > r.avail + 0.5 || H < r.avail * 0.7 || j - i + 1 > MAX_ROWS) continue;
-        const c = blank(H);
-        if (c < bestCost - 1 || (Math.abs(c - bestCost) <= 1 && H > best)) ((best = H), (bestCost = c));
-      }
-    if (best < r.h || best > r.h) {
-      r.h = best;
-      r.n = 0;
-      for (const b of bot) if (b <= best + 0.5) r.n++;
-      r.n = Math.max(1, r.n);
+  if (STACKED.matches) {
+    // phone and tablet: every row at its natural height, the column scrolls
+    setStepMode(-1);
+    for (let lvl = 0; lvl <= 1; lvl++) {
+      setLede(lvl);
+      if (asideBody.scrollHeight <= asideBody.clientHeight + 1) break;
     }
-  }
-  if (r.h) {
-    stepsEl.style.flex = '0 0 auto';
-    stepsEl.style.height = r.h + 'px';
-    r.sp = Math.min(8, Math.max(0, Math.floor(((r.avail - r.h) / (2 * r.n)) * 50) / 50 - 0.02));
-  } else if (r.n < visibleStepRows().length) r.sp = 0;
-  else if (!r.h) {
-    // every row fits: a share of what is left under the content goes into the rows, so the column has no gap at its foot
     const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
       ab = asideBody.getBoundingClientRect(),
-      slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0;
-    r.sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * visibleStepRows().length)) : 0;
+      slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0,
+      sp = slack > 16 && asideBody.scrollHeight <= asideBody.clientHeight + 1 ? Math.min(10, (slack * 0.75) / (2 * visibleStepRows().length)) : 0;
+    if (sp > 0.5) stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
+    const li = stepsEl.children[Math.max(0, stepIdx)];
+    if (li && stepIdx >= 0) followStep(li, true);
+    fadeSteps();
+    return;
   }
-  if (r.sp > 0.5) {
-    stepsEl.style.setProperty('--sp', r.sp.toFixed(2) + 'px');
-    if (r.h) stepsEl.style.height = r.h + r.sp * 2 * r.n + 0.8 + 'px';
-  }
-  if (r.h) {
-    // so that every row can rest at the top of the list (also the last ones), the end of the list gets the room the last whole window leaves
-    const kids = visibleStepRows(),
-      H = parseFloat(stepsEl.style.height),
-      total = kids.at(-1).offsetTop + kids.at(-1).offsetHeight;
-    let pad = 0;
-    for (let k = kids.length - 1; k >= 0; k--) {
-      const left = total - kids[k].offsetTop;
-      if (left > H + 1.5) break;
-      pad = H - left;
-    }
-    if (pad > 0.5) stepsEl.style.paddingBottom = pad + 'px';
-  }
-  // desktop: if the column still overflows (a rounding, a late font), take the last whole row out of the window rather than let the column scroll under the cue
-  if (r.h && !STACKED.matches) {
-    const kids = visibleStepRows();
-    for (let k = r.n; k > 1 && asideBody.scrollHeight > asideBody.clientHeight + 0.5; k--) {
-      stepsEl.style.height = kids[k - 2].offsetTop + kids[k - 2].offsetHeight + 'px';
-    }
-  }
-  asideBody.classList.toggle('pin', WIDE.matches && !STACKED.matches && !expanded); // the source and the related law rest at the foot of the column
+  setLede(0);
+  fitDesktop();
+  asideBody.classList.toggle('pin', WIDE.matches && !expanded); // the source and the related law rest at the foot of the column
   const li = stepsEl.children[Math.max(0, stepIdx)];
   if (li && stepIdx >= 0) followStep(li, true);
+  else if (stepIdx < 0) stepsEl.scrollTop = 0;
   snapList(li);
   fadeSteps();
   trimSteps();
   requestAnimationFrame(() => requestAnimationFrame(trimSteps)); // and again once the rows have settled at their final sizes
+}
+// Desktop: a column of fixed height. Try the settings from loose to tight until every row fits; if none does, cut the list to the whole rows that fit.
+function fitDesktop() {
+  const kids = visibleStepRows(),
+    total = kids.length;
+  const naturalOver = () => {
+    asideBody.classList.add('st-measure'); // the list and its section take their natural height, so the column's overflow is exactly what does not fit
+    const over = asideBody.scrollHeight - asideBody.clientHeight,
+      h = stepsEl.getBoundingClientRect().height;
+    asideBody.classList.remove('st-measure');
+    return { over, h };
+  };
+  let fitMode = -1;
+  for (let i = 0; i < STEP_MODES.length; i++) {
+    setStepMode(i);
+    if (naturalOver().over <= 1) {
+      fitMode = i;
+      break;
+    }
+  }
+  if (fitMode >= 0) {
+    // every row fits whole: no window, no cue. Of the room that is left under the content, a share goes into the rows as a little air.
+    setStepMode(fitMode);
+    fitCost = fitMode;
+    const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
+      ab = asideBody.getBoundingClientRect(),
+      slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0,
+      sp = fitMode === 0 && slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * total)) : 0;
+    if (sp > 0.5) stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
+    stepsEl.style.flex = '0 0 auto';
+    return;
+  }
+  // Not all of them fit, even set tight: a window of whole rows with a cue under it. The setting that shows the most rows wins (the looser one on a tie).
+  stepsBox.classList.add('has-cue');
+  stepCue.hidden = false; // the cue's own height is part of what the window leaves
+  stepCue.querySelector('span').textContent = '9 more steps';
+  let best = null;
+  for (let i = 0; i < STEP_MODES.length; i++) {
+    setStepMode(i);
+    const { over, h } = naturalOver(),
+      avail = h - over;
+    let n = 0;
+    for (const li of kids) if (li.offsetTop + li.offsetHeight <= avail + 1) n++;
+    if (!best || n > best.n) best = { i, n, avail };
+  }
+  setStepMode(best.i);
+  fitCost = total - best.n > 0 ? (total - best.n) * 10 + best.i : best.i;
+  const r = { n: Math.max(1, best.n), avail: best.avail, h: 0 };
+  const bot = kids.map((k) => k.offsetTop + k.offsetHeight),
+    top = kids.map((k) => k.offsetTop);
+  r.h = bot[r.n - 1] - top[0];
+  // The window rests on a row at every step of the story, so the rows left under the last resting place can be shorter than the window and leave a blank
+  // band above the cue. Of the heights that are a whole number of consecutive rows, take the one that leaves the least blank at any resting place.
+  const sum = bot.at(-1),
+    blank = (H) => {
+      let worst = 0;
+      for (let k = 0; k < kids.length; k++) {
+        let end = top[k];
+        for (let m = k; m < kids.length && bot[m] - top[k] <= H + 0.5; m++) end = bot[m];
+        worst = Math.max(worst, H - (end - top[k]));
+        if (sum - top[k] <= H + 0.5) break;
+      }
+      return worst;
+    };
+  let pick = r.h,
+    pickCost = blank(r.h);
+  for (let i = 0; i < kids.length; i++)
+    for (let j = i; j < kids.length; j++) {
+      const H = bot[j] - top[i];
+      if (H > r.avail + 0.5 || H < r.avail * 0.7) continue;
+      const c = blank(H);
+      if (c < pickCost - 1 || (Math.abs(c - pickCost) <= 1 && H > pick)) ((pick = H), (pickCost = c));
+    }
+  if (pick !== r.h) {
+    r.h = pick;
+    r.n = Math.max(1, bot.filter((b) => b <= pick + 0.5).length);
+  }
+  stepsEl.style.flex = '0 0 auto';
+  stepsEl.style.height = r.h + 'px';
+  const sp = Math.min(8, Math.max(0, Math.floor(((r.avail - r.h) / (2 * r.n)) * 50) / 50 - 0.02));
+  if (sp > 0.5) {
+    stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
+    stepsEl.style.height = r.h + sp * 2 * r.n + 0.8 + 'px';
+  }
+  // so that every row can rest at the top of the list (also the last ones), the end of the list gets the room the last whole window leaves
+  const H = parseFloat(stepsEl.style.height),
+    end = kids.at(-1).offsetTop + kids.at(-1).offsetHeight;
+  let pad = 0;
+  for (let k = kids.length - 1; k >= 0; k--) {
+    const left = end - kids[k].offsetTop;
+    if (left > H + 1.5) break;
+    pad = H - left;
+  }
+  if (pad > 0.5) stepsEl.style.paddingBottom = pad + 'px';
+  // if the column still overflows (a rounding, a late font), take the last whole row out of the window rather than let the column scroll under the cue
+  for (let k = r.n; k > 1 && asideBody.scrollHeight > asideBody.clientHeight + 0.5; k--) {
+    stepsEl.style.height = kids[k - 2].offsetTop + kids[k - 2].offsetHeight + 'px';
+    stepsEl.style.paddingBottom = '';
+  }
 }
 // After a re-fit the list may rest between two rows (the rows changed size): move it to the nearest row edge that keeps the active row in view.
 function snapList(active) {
@@ -1281,7 +1317,53 @@ function fadeSteps() {
   const sc = listScrolls() && stepsEl.clientHeight > 120; // a window of a single row is not faded away
   stepsEl.classList.toggle('can-up', sc && stepsEl.scrollTop > 3);
   stepsEl.classList.toggle('can-down', sc && stepsEl.scrollHeight - stepsEl.clientHeight - stepsEl.scrollTop > 3);
+  syncCue();
 }
+// The cue under a window that cannot show every row: it counts the rows beyond the edge ("2 more steps", "1 earlier step") and moves the window a page
+function cueCounts() {
+  const y = stepsEl.scrollTop,
+    end = y + stepsEl.clientHeight - (parseFloat(stepsEl.style.clipPath?.split(' ')[2]) || 0) + 1.5;
+  let above = 0,
+    below = 0;
+  for (const li of visibleStepRows()) {
+    if (li.offsetTop + li.offsetHeight <= y + 1.5) above++;
+    else if (li.offsetTop + li.offsetHeight > end) below++;
+  }
+  return { above, below };
+}
+function syncCue() {
+  const on = stepsBox.classList.contains('has-cue') && !!stepsEl.style.height && listScrolls() && !expanded;
+  stepCue.hidden = !on;
+  if (!on) return;
+  const { above, below } = cueCounts(),
+    many = (n) => `${n} more step${n === 1 ? '' : 's'}`;
+  stepCue.classList.toggle('up', !below && above > 0);
+  stepCue.querySelector('span').textContent = below ? (above ? `${above} earlier, ${many(below)}` : many(below)) : above ? `${above} earlier step${above === 1 ? '' : 's'}` : '';
+}
+stepCue.onclick = () => {
+  const { below } = cueCounts(),
+    kids = visibleStepRows(),
+    y = stepsEl.scrollTop,
+    H = stepsEl.clientHeight,
+    maxY = stepsEl.scrollHeight - H;
+  lastUserScroll = performance.now();
+  let to;
+  if (below) {
+    // the next window starts at the first row that was not whole
+    const next = kids.find((li) => li.offsetTop + li.offsetHeight > y + H + 1.5);
+    to = Math.min(maxY, next ? next.offsetTop : maxY);
+  } else {
+    const prev = kids.filter((li) => li.offsetTop < y - 1);
+    let s = prev.length ? prev.at(-1) : null;
+    for (const li of prev)
+      if (y - li.offsetTop <= H + 1.5) {
+        s = li;
+        break;
+      }
+    to = s ? s.offsetTop : 0;
+  }
+  stepsEl.scrollTo({ top: Math.max(0, to), behavior: REDUCED ? 'auto' : 'smooth' });
+};
 let snapTimer = 0,
   liRO = null; // watches the rows: a row that wraps differently (a font arriving, a new width) re-fits the list
 stepsEl.addEventListener(
