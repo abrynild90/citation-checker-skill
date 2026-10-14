@@ -432,7 +432,7 @@ function setLede(level, count) {
   // The intro is two sentences at every width (one when the room is tight); the full account is behind "Read the full account".
   const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? 2 : 1));
   // On a wide window the story opens with a "Did you know" line; an intro sentence that says the same thing is left out of the intro (the full account keeps it)
-  const dyk = WIDE.matches && !dykEl.hidden,
+  const dyk = dykOn(),
     pool = dyk ? (expanded ? splitSentences(full) : sentences).filter((t, i) => !i || !same(t, FACTS[cur.id])) : sentences;
   // The full account leaves out the sentence the "Did you know" line above it already says, so no sentence shows twice
   let shown = expanded ? (dyk ? pool.join(' ') : full) : pool.slice(0, max).join(' ');
@@ -952,7 +952,7 @@ function markStep(k) {
   const dykWas = dykEl.classList.contains('pending'),
     dykNow = (steps[k]?.t ?? 0) < (FACT_FROM[cur?.id] ?? 0) - 1e-6;
   dykEl.classList.toggle('pending', dykNow);
-  if (dykWas && !dykNow && WIDE.matches && !dykEl.hidden) {
+  if (dykWas && !dykNow && dykOn()) {
     // it grows in over a third of a second (the room is under the list, so the foot does not move)
     dykEl.classList.add('reveal');
     clearTimeout(dykTimer);
@@ -1097,12 +1097,29 @@ function rowsFit() {
 }
 // A note opened under "About this picture" or "Where to go next" sits in the column, so the column scrolls; it is measured as if the note were closed.
 let dykTimer = 0;
+// The "Did you know" line shows only when it costs the steps nothing: if the list is shorter with the line than without it (a row clipped, a window
+// of fewer rows, blank room above the line), the line stays out for that scene and window size.
+const dykOn = () => WIDE.matches && !dykEl.hidden && !dykEl.classList.contains('nofit');
+const listH = () => stepsEl.getBoundingClientRect().height;
 function fitSteps() {
-  // the "Did you know" line holds no room before its step, but the list is fitted as if it did (it grows into that room when the line comes in)
-  const held = dykEl.classList.contains('pending') && !dykEl.classList.contains('reserve');
+  // the line holds no room before its step, but the list is fitted as if it did (it grows into that room when the line comes in)
+  const held = dykEl.classList.contains('pending') && !dykEl.classList.contains('reserve'),
+    want = WIDE.matches && !dykEl.hidden;
+  dykEl.classList.remove('nofit');
   if (held) dykEl.classList.add('reserve');
   try {
-    fitStepsNoted();
+    if (want) {
+      dykEl.classList.add('nofit');
+      fitStepsNoted();
+      const bare = listH(),
+        bareClipped = stepsEl.scrollHeight - stepsEl.clientHeight;
+      dykEl.classList.remove('nofit');
+      fitStepsNoted();
+      if (listH() < bare - 1 || stepsEl.scrollHeight - stepsEl.clientHeight > bareClipped + 1) {
+        dykEl.classList.add('nofit');
+        fitStepsNoted();
+      }
+    } else fitStepsNoted();
   } finally {
     if (held) dykEl.classList.remove('reserve');
   }
