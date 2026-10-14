@@ -710,7 +710,11 @@ export function buildSim(cfg) {
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
           },
           // stands at the launch point from the start, then rides the arc
-          pos: (t) => (t < tgt.t - 0.004 + (a.rocket.endHold ?? 0) ? bez(a.rocket.launch === 'vls' && t < a.t0 - 1e-6 ? 0.012 : sAt(t)) : null), // a vertical-launch missile stands in its cell (drawn small, no plume: preK) until the gas pop at t0
+          // a vertical-launch missile stands in its cell (drawn small, no plume: preK) until the gas pop at t0, then rises out of it over the pop (no jump)
+          pos: (t) =>
+            t < tgt.t - 0.004 + (a.rocket.endHold ?? 0)
+              ? bez(a.rocket.launch === 'vls' ? Math.max(0.012 + (s0 - 0.012) * smooth(clamp01((t - a.t0) / 0.012)), clamp01((t - a.t0) / (tgt.t - a.t0))) : sAt(t))
+              : null,
           orient: (t) => {
             const sv = sAt(t);
             return {

@@ -236,9 +236,11 @@ export const rocketMethods = {
     }
     const lower = Kl.build(),
       upper = Ku.build(),
-      g = new T.Group();
+      g = new T.Group(),
+      inner = new T.Group(); // everything of the vehicle; lifted along its axis when it stands on a pad (the item's own position stays on the path)
+    g.add(inner);
     for (const m of slim ? [white, dark, fin, accent] : [white, dark, fin]) m.transparent = true; // the lower part fades out as it falls away after a separation
-    g.add(upper, lower);
+    inner.add(upper, lower);
     // ---- exhaust rig at the nozzle: outer plume, bright core, a glow and an ignition flash
     const rig = new T.Group(),
       mk = (core) => {
@@ -282,22 +284,22 @@ export const rocketMethods = {
       flash = spr(0xfff0c8, 0);
     rig.add(outer, core, glow, flash);
     rig.position.z = D.zN;
-    g.add(rig);
+    inner.add(rig);
     // nose heating: a faint glow at the tip, driven with the nose material's emissive
     const heat = spr(0xff8a40, 0);
     heat.position.z = D.zNose - 0.0015;
-    g.add(heat);
+    inner.add(heat);
     // a thin highlight ring round the vehicle while it waits to launch (fx.waitRing)
     const ring = new T.Sprite(new T.SpriteMaterial({ map: this._gtex(ringCanvas(), () => new T.CanvasTexture(ringCanvas())), color: 0xffc78f, transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: T.AdditiveBlending }));
     ring.renderOrder = 5;
     ring.visible = false;
-    g.add(ring);
+    inner.add(ring);
     // a puff (gas at a separation, steam at a cold launch) that rides the rig's position
     const puff = spr(0xe9edf6, 0);
-    g.add(puff);
+    inner.add(puff);
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
-    g.userData.rk = { D, slim, lower, upper, rig, outer, core, glow, flash, heat, puff, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, heat, puff, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -553,11 +555,12 @@ export const rocketMethods = {
       if (vis) {
         rec.f = obj.scale.x;
         // standing on a launch pad (fx.stand): the nozzle never sinks below the plate, so the vehicle holds down until the path has climbed clear of it, then rises
+        // (the vehicle is lifted inside its own group: the item's position stays on the path, whatever the camera does to the drawn size)
         if (fx.stand) {
-          const r = obj.position.length(),
-            need = 1.002 - rk.D.zN * obj.scale.x * 0.92;
-          if (r < need) obj.position.multiplyScalar(need / r);
-        }
+          const need = 1.002 - rk.D.zN * obj.scale.x * 0.92;
+          rec.lift = Math.max(0, need - obj.position.length()) / obj.scale.x;
+        } else rec.lift = 0;
+        rk.inner.position.z = rec.lift;
       } else if (!rec.fSet) {
         const p = it.pos(fx.t0 + 0.004);
         if (p) {
@@ -614,7 +617,7 @@ export const rocketMethods = {
       if (thr > 0.004) {
         const sc = obj.scale.x,
           dv = rec.v1.set(0, 0, 1).applyQuaternion(obj.quaternion),
-          rz = rk.rig.position.z * sc,
+          rz = (rk.rig.position.z + (rec.lift || 0)) * sc,
           px = obj.position.x + dv.x * rz,
           py = obj.position.y + dv.y * rz,
           pz = obj.position.z + dv.z * rz,
