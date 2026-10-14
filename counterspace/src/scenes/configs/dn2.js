@@ -52,12 +52,12 @@ export const DN2 = {
       ghostOpacity: 0.25, // the whole planned path stays readable before the rocket flies it
       rocket: {
         style: 'slim',
-        minPx: IS_PHONE ? 46 : 112,
-        maxPx: IS_PHONE ? 64 : 135,
+        minPx: IS_PHONE ? 54 : 112,
+        maxPx: IS_PHONE ? 72 : 135,
         glowMin: 10,
         glowMax: 16,
         pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 },
-        ramp: { k: IS_PHONE ? 1.3 : 1.4, until: 0.3 },
+        ramp: { k: IS_PHONE ? 1.8 : 1.4, until: 0.3 },
         smokeK: 1.6,
         burn: 0.2, // a short powered phase, then a long coast to the apogee
         stage: { s: 0.09, gap: 0 }, // the reports speak of upper stages: one lower stage drops away early in the burn (the count of stages is not claimed)
