@@ -147,7 +147,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             },
           );
         }));
-    const at = (t, asp = ASPECT) => {
+    const at0 = (t, asp = ASPECT) => {
       const poses = posesFor(asp);
       let i = 0;
       while (i < keys.length - 2 && t > keys[i + 1]) i++;
@@ -176,6 +176,15 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         look: add(scl(a.look, 1 - s), scl(b.look, s)),
         up: null,
       };
+    };
+    // preDrift (opt-in) { t0, k, out }: a slow push-in while the vehicle waits (the camera closes by the fraction k by t0), released over `out` after it
+    const at = (t, asp = ASPECT) => {
+      const v = at0(t, asp),
+        d = cfg.preDrift;
+      if (!d) return v;
+      const u = smooth(t / d.t0) * (1 - smooth((t - d.t0) / (d.out ?? 0.08))),
+        k = 1 - d.k * u;
+      return { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), k)) };
     };
     return { name: 'Follow the action', follow: at, ...at(0), hideShell: true };
   };

@@ -702,6 +702,7 @@ export function buildSim(cfg) {
             air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop } : null,
             cold: a.rocket.launch === 'vls',
             stand: !!a.rocket.pad,
+            vent: !!a.rocket.vent, // opt-in: vapour vents off the vehicle and pools at the pad while it waits
             waitRing: !!a.rocket.waitRing, // opt-in: a thin highlight ring round the vehicle while it waits for launch
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,

@@ -1068,6 +1068,7 @@ export const modelMethods = {
     box(0.0012, 0.0300, 0.0012, steel, -0.0112, 0.0016, 0); // the guide rail on the other side
     box(0.0030, 0.0006, 0.0030, steel, -0.0112, 0.0016, 0);
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
+    g.userData.padMark = mark; // the tower's warning light blinks while the vehicle waits (gl-host.js update)
     Object.assign(g.userData, { span: 0.0385, minPx: 40, maxPx: 60 });
     return g;
   },

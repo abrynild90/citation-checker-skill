@@ -297,9 +297,17 @@ export const rocketMethods = {
     // a puff (gas at a separation, steam at a cold launch) that rides the rig's position
     const puff = spr(0xe9edf6, 0);
     inner.add(puff);
+    // pre-launch venting (fx.vent): soft white vapour (normal blending, so it reads on a bright surface) that streams off the vehicle and gathers at the pad
+    const vent = [0, 1, 2, 3, 4].map(() => {
+      const s = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xf2f5fb, transparent: true, opacity: 0, depthWrite: false, depthTest: false }));
+      s.renderOrder = 5;
+      s.visible = false;
+      inner.add(s);
+      return s;
+    });
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
-    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, heat, puff, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -682,6 +690,28 @@ export const rocketMethods = {
       if (fx.marker) {
         rec.kv ||= this.dyn.find((d) => d.it === fx.marker);
         if (rec.kv) rec.kv.obj.visible = false;
+      }
+      // ---- pre-launch venting (fx.vent): vapour streams off the upper body (three puffs) and rolls out along the pad (two), thinning away as the motor lights
+      {
+        const va = fx.vent && vis && !hide ? clamp01(t / 0.02) * (1 - smooth((t - fx.t0) / 0.012)) : 0;
+        rk.vent.forEach((s, i) => {
+          s.visible = va > 0.01;
+          if (!s.visible) return;
+          const ph = (tm * 0.55 + i * 0.37 + 0.13) % 1,
+            fade = Math.sin(PI * ph) ** 1.2;
+          if (i < 3) {
+            // from a vent on the upper body: rises and leans away with the breeze
+            s.position.set(D.rU * (1.2 + 0.7 * ph), 0, D.zT - 0.008 - 0.004 * i + 0.012 * ph);
+            s.scale.setScalar(0.007 + 0.017 * ph);
+            s.material.opacity = va * 0.5 * fade;
+          } else {
+            // boil-off at the base: low clouds spreading sideways over the plate
+            const sd = i === 3 ? 1 : -1;
+            s.position.set(sd * (0.006 + 0.022 * ph), 0, D.zN + 0.004 + 0.003 * ph);
+            s.scale.setScalar(0.011 + 0.016 * ph);
+            s.material.opacity = va * 0.42 * fade;
+          }
+        });
       }
       // ---- the waiting highlight ring (fx.waitRing): fades as the motor lights
       const wr = fx.waitRing ? 1 - smooth((t - fx.t0) / 0.012) : 0;

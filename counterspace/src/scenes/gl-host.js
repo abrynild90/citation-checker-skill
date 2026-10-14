@@ -595,6 +595,7 @@ export class GLHost {
         obj.visible = !!p;
         if (p) obj.position.set(...p);
         const ud = obj.userData;
+        if (ud.padMark) ud.padMark.emissiveIntensity = (Math.floor(t * this.sim.cfg.duration * 1.6) & 1) * 0.9 + 0.12; // the tower's warning light blinks
         if (it.shape === 'jammer' && ud.rings)
           ud.rings.forEach((r, k) => {
             const ph = (t * this.sim.cfg.duration * 0.7 + k / 3) % 1;
