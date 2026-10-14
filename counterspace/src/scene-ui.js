@@ -1245,7 +1245,7 @@ function fitDesktop() {
     const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
       ab = asideBody.getBoundingClientRect(),
       slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0,
-      sp = fitMode === 0 && slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * total)) : 0;
+      sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * total)) : 0;
     if (sp > 0.5) stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
     stepsEl.style.flex = '0 0 auto';
     return;
