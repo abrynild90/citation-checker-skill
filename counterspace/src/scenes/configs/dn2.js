@@ -61,7 +61,7 @@ export const DN2 = {
         smokeK: 1.6,
         follow: true, // a ballistic arc: the spent stage keeps its nose on the path through the coast and the fall (no tumble hanging off the path end)
         burn: 0.2, // a short powered phase, then a long coast to the apogee
-        stage: { s: 0.09, gap: 0 }, // the reports speak of upper stages: one lower stage drops away early in the burn (the count of stages is not claimed)
+        // no dropped stage: the reports speak of upper stages, but the count is not claimed, and the spent grey stub drifted unlabeled to the frame edge
       },
       apexT: 0.47,
       rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth
@@ -106,6 +106,8 @@ export const DN2 = {
         },
       ],
     },
+    // a short re-entry flash where the path ends, so the rocket does not just vanish (illustrative: the reports give only "over the Indian Ocean")
+    { type: 'flash', at: [-20.0, 78.0, 0], t0: 0.87, color: '#ffe2b0', ringColor: '#ffb27a', size: 0.17, span: 0.09, strong: true },
     {
       type: 'ring',
       alt: GEO_ALT,
@@ -176,7 +178,7 @@ export const DN2 = {
         fill: IS_PHONE ? 0.86 : 0.76,
         zoom: IS_PHONE ? 1.3 : 1.42,
         lookK: 0.4,
-        launch: { until: 0.3, hold: 0.1, k: IS_PHONE ? 0.95 : 0.88, dMin: IS_PHONE ? 0.7 : 0.55 }, // opens tight on Xichang and the climbing rocket, then eases out to the whole path
+        launch: { until: 0.3, hold: 0.1, k: IS_PHONE ? 0.95 : 0.88, dMin: IS_PHONE ? 0.7 : 0.55, south: 40 }, // opens tight on Xichang and the climbing rocket, then eases out to the whole path
       },
     },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame

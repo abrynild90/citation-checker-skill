@@ -284,7 +284,10 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           sd = norm(cross3(up, [0, 1, 0])),
           tilt = (c.trackPath.tilt ?? 30) * DEG,
           n = norm(add(add(scl(up, Math.cos(tilt)), scl(sd, Math.sin(tilt) * (c.trackPath.side ?? 1))), [0, c.trackPath.lift ?? 0, 0])),
-          pose = (t, asp, geo, ring, dMin = 1.2) => {
+          padN = norm(all[0]),
+          padNorth = cross3(padN, norm(cross3([0, 1, 0], padN))),
+          launchView = (deg) => norm(add(scl(padN, Math.cos(deg * DEG)), scl(padNorth, -Math.sin(deg * DEG)))),
+          pose = (t, asp, geo, ring, dMin = 1.2, nv = n) => {
             const pl = it.pts(t),
               P = [
                 all[0],
@@ -299,7 +302,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               P.push(all[all.length >> 1]);
             }
             const look = scl(centroid(P.concat([[0, 0, 0]])), c.trackPath.lookK ?? 1); // lookK < 1 pulls the view toward the Earth's centre
-            const q = fitPose(P, n, look, {
+            const q = fitPose(P, nv, look, {
               dMin,
               dMax: 12,
               fillX: c.trackPath.fill ?? 0.8,
@@ -331,7 +334,9 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             if (!L || t >= L.until) return r;
             const h0 = L.hold ?? 0, // the framing stays tight until t = hold, then eases out to the ring framing by t = until
               w = 1 - smooth(Math.max(0, (t - h0) / (L.until - h0))),
-              q = pose(t, asp, false, false, L.dMin);
+              // L.south (opt-in, degrees): the opening is seen from south of the pad, so the pad sits on the visible disc and the local vertical points up in the frame
+              // (the rocket climbs upward in the picture instead of lying sideways at the limb); the view eases to the ring framing as before
+              q = pose(t, asp, false, false, L.dMin, L.south ? launchView(L.south) : n);
             if (L.k) q.pos = add(q.look, scl(add(q.pos, scl(q.look, -1)), L.k)); // L.k < 1: moves in closer than the fit, so the vehicle fills more of the frame
             return { pos: add(scl(r.pos, 1 - w), scl(q.pos, w)), look: add(scl(r.look, 1 - w), scl(q.look, w)), up: null };
           };
