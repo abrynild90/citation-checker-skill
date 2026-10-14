@@ -126,6 +126,17 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
       posesFor = (asp) =>
         (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
+          // fitLaunchKeys (opt-in): at these keys the camera is fitted to the launch point and the carrier alone (a close opening on the vehicle); the target comes into frame as it pulls back
+          if (cfg.fitLaunchKeys?.includes(ki) && arc) {
+            const L = [arc.from].concat(aircraftPos ? [aircraftPos(0), aircraftPos(tk)] : []);
+            return fitPose(L, nAt(tk), scl(centroid(L), cfg.lookK ?? 0.97), {
+              dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3,
+              dMax: cfg.fitMax ?? 6.5,
+              fillX: cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9,
+              fillY: (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
+              asp,
+            });
+          }
           const P = (cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? [tgt.hitPos] : core).slice(); // dropCoreFrom (opt-in): later keys frame the hit and debris only
           // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
           if (burst && tk <= ht + 0.16 && tk >= (cfg.burstPadFrom ?? 0)) P.push(...burstPad); // burstPadFrom (opt-in): the early keys are fitted to the craft alone

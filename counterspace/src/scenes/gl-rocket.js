@@ -737,9 +737,10 @@ export const rocketMethods = {
     const apos = ac.pos(Math.min(t, fx.t0)) || p,
       upv = rec.v3.set(apos[0], apos[1], apos[2]).normalize();
     // the shift of the missile from where the path puts it: under the aircraft at first (a pylon), dropping away at release, then back onto the path
-    let carry = 0.5;
-    if (tau >= 0 && tau < 1) carry = 0.5 + 1.6 * tau * tau;
-    else if (tau >= 1) carry = 2.1 * (1 - smooth((tau - 1) / 3.2));
+    const c0 = fx.air.carry ?? 0.5; // opt-in (rocket.carry): how far under the belly it hangs, in its own lengths
+    let carry = c0;
+    if (tau >= 0 && tau < 1) carry = c0 + 1.6 * tau * tau;
+    else if (tau >= 1) carry = (c0 + 1.6) * (1 - smooth((tau - 1) / 3.2));
     let base = tau < 0 ? apos : p;
     if (tau >= 0 && tau < 1.2) {
       // the path starts a little off the carrier's own position: the missile eases onto it over the drop instead of snapping across at the release
@@ -747,7 +748,10 @@ export const rocketMethods = {
         w = 1 - smooth(tau / 1.2);
       if (p0) base = [p[0] - (p0[0] - apos[0]) * w, p[1] - (p0[1] - apos[1]) * w, p[2] - (p0[2] - apos[2]) * w];
     }
-    obj.position.set(base[0], base[1], base[2]).addScaledVector(upv, -carry * Lr);
+    // hung under the aircraft's belly (its own up axis, which a climbing aircraft has tilted), then falling along the local vertical
+    const ay = (rec.vy ||= new T.Vector3()).set(0, 1, 0).applyQuaternion(acObj.quaternion),
+      dn = (rec.vd ||= new T.Vector3()).copy(ay).lerp(upv, tau <= 0 ? 0 : smooth(Math.min(1, tau))).normalize();
+    obj.position.set(base[0], base[1], base[2]).addScaledVector(dn, -carry * Lr);
     // the carrier flies low in the picture (a few hundredths of an Earth radius above the surface), so a missile hung a half length under its belly or dropped
     // a length or two below it would sink into the globe and vanish: its height is kept above the surface (AIR_FLOOR)
     // seen from above the carrier's airframe would hide it as well: after the release it swings out to the side, about a wing's semi-span, and trails a little

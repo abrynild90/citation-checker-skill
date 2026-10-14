@@ -559,6 +559,14 @@ export function buildSim(cfg) {
         beamDy: a.beamDy,
         beamMaxPx: a.beamMaxPx,
         pos: (t) => pos(Math.min(t, a.t1)),
+        // opt-in climb { deg }: the nose is raised for the zoom climb (a pull-up over the first third of the flight, held, then easing down as the aircraft leaves)
+        pitch: a.climb
+          ? (t) => {
+              const s = clamp01((t - a.t0) / (a.t1 - a.t0)),
+                u = a.exit ? clamp01((t - a.t1) / a.exit.dur) : 0;
+              return ((a.climb * Math.PI) / 180) * (0.3 + 0.7 * smooth(s / 0.35)) * (1 - 0.75 * u);
+            }
+          : null,
       };
       if (a.labelUntil != null) {
         // labelUntil: the aircraft's pill retires at this time (still frames keep it), so it does not crowd the missile and the collision
@@ -571,7 +579,7 @@ export function buildSim(cfg) {
         const Pc = (s) => {
           const la = lerp(a.path[0][0], a.path[1][0], s),
             lo = lerp(a.path[0][1], a.path[1][1], s);
-          return ll(la, lo, r + 0.03 * s);
+          return ll(la, lo, r + (a.rise ?? 0.03) * s);
         };
         aircraftPos = (t) => Pc(clamp01((Math.min(t, a.t1) - a.t0) / (a.t1 - a.t0)));
         item.pos = (t) => (t >= a.t0 - 1e-6 ? aircraftPos(t) : null);
@@ -582,7 +590,7 @@ export function buildSim(cfg) {
               s = 1 + a.exit.k * u * (2 - u),
               la = lerp(a.path[0][0], a.path[1][0], s),
               lo = lerp(a.path[0][1], a.path[1][1], s);
-            return ll(la, lo, r + 0.03 * (1 - 0.7 * u));
+            return ll(la, lo, r + (a.rise ?? 0.03) * (1 - 0.7 * u));
           };
           item.pos = (t) => (t < a.t0 - 1e-6 || t > a.t1 + a.exit.dur ? null : t <= a.t1 ? aircraftPos(t) : ex(t));
         }
@@ -699,7 +707,7 @@ export function buildSim(cfg) {
             t1: tgt.t,
             burn: a.rocket.burn ?? 0.55,
             alt0: a.from === 'aircraft' ? (cfg.actors.find((x) => x.type === 'aircraft')?.alt ?? 12) : 0,
-            air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop } : null,
+            air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop, carry: a.rocket.carry } : null,
             cold: a.rocket.launch === 'vls',
             stand: !!a.rocket.pad,
             vent: !!a.rocket.vent, // opt-in: vapour vents off the vehicle and pools at the pad while it waits
