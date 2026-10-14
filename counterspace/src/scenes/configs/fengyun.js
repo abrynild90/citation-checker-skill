@@ -26,9 +26,10 @@ export const FENGYUN = {
   modelSource: 'https://orbitaldebris.jsc.nasa.gov/quarterly-news/pdfs/odqnv13i3.pdf',
   related: 'unga-77-41',
   event: 'cn-2007-fy1c',
-  hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.9 },
+  hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 1.0 },
   debrisFit: {}, // the camera keeps the live debris inside the frame from the collision to the end
   launchCam: 'second',
+  camScale: 1.4, // the launch-site view stands back a little: the satellite, further off early on, is still in frame at t=0.1
   preDrift: { t0: 0.14, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad (with the vapour venting and the tower light), so the opening is not still
   fitSouth: 50, // the first views look from the south, so the vehicle on the pad stands up in the frame (from above it was a speck of 70 px)
   fitLateView: [24, 35], // turn smoothly toward an oblique ring view after the cloud spreads
