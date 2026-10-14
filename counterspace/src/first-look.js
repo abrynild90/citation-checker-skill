@@ -22,7 +22,18 @@ function show(n) {
   document.getElementById('firstLookDone').hidden = step !== 2;
   section.querySelectorAll('[data-look]').forEach((b, i) => (i === step ? b.setAttribute('aria-current', 'step') : b.removeAttribute('aria-current')));
 }
+let scrollBefore = null; // where the page was when the panel opened, so closing it puts the reader back there
+const closePanel = (focusOpen = true) => {
+  if (section.hidden) return;
+  section.hidden = true;
+  const open = document.getElementById('firstLookOpen');
+  open.setAttribute('aria-expanded', 'false');
+  if (focusOpen) open.focus({ preventScroll: true });
+  if (scrollBefore != null) window.scrollTo({ left: scrollBefore.x, top: scrollBefore.y, behavior: 'instant' });
+  scrollBefore = null;
+};
 document.getElementById('firstLookOpen').onclick = (e) => {
+  if (section.hidden) scrollBefore = { x: window.scrollX, y: window.scrollY };
   section.hidden = false;
   e.currentTarget.setAttribute('aria-expanded', 'true');
   show(step);
@@ -35,10 +46,7 @@ document.addEventListener('keydown', (e) => {
   const a = document.activeElement;
   if (a && a !== document.body && !section.contains(a)) return; // focus is elsewhere (a scene, a menu): Esc is theirs
   e.preventDefault();
-  section.hidden = true;
-  const open = document.getElementById('firstLookOpen');
-  open.setAttribute('aria-expanded', 'false');
-  open.focus();
+  closePanel();
 });
 section.querySelectorAll('[data-look]').forEach((b) => (b.onclick = () => show(+b.dataset.look)));
 document.getElementById('firstLookBack').onclick = () => show(step - 1);

@@ -2321,12 +2321,13 @@
 .overlay .sv-recap-line { margin: 0; max-width: 40em; font: 400 17px/1.55 var(--sans); color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .overlay .sv-nextup { animation: none; } }
 
-/* ---------- Wide window (1500 px and up): the story opens with a "Did you know" line, and the foot of the column rests at the bottom of it */
+/* ---------- Wide window (1500 px and up): a "Did you know" line sits in the free room under the list (above the foot), and the foot of the column rests at the bottom of it.
+   It is below the caption and steps, so when its step comes in nothing above it moves. */
 .overlay .sv-dyk { display: none; }
 @media (min-width: 1500px) {
   .overlay .sv-dyk:not([hidden]) {
     display: block;
-    margin: 0 0 var(--s-3);
+    margin: var(--s-3) 0 0;
     padding: var(--s-3) var(--s-4);
     max-width: 32em;
     border-radius: var(--r-2);
