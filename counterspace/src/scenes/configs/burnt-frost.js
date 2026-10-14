@@ -80,8 +80,8 @@ export const BURNT_FROST = {
       endLabel: 'Impact point: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
       endShort: '0 of 175 in orbit',
       endFrom: 0.9,
-      endDx: 95, // the end label sits right of the impact point, off the Japanese city lights
-      endDy: -70,
+      endDx: 85, // the end label sits right of the impact point, off the Japanese city lights
+      endDy: -48,
       bright: true,
       fallUntil: 0.87,
       fall: [

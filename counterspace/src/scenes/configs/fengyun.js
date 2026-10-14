@@ -27,7 +27,7 @@ export const FENGYUN = {
   related: 'unga-77-41',
   event: 'cn-2007-fy1c',
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 1.0 },
-  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision to the end
+  debrisFit: IS_PHONE ? {} : { my: 0.76 }, // the camera keeps the live debris inside the frame from the collision to the end (desktop: below the banner band, also on a short 1280x800 or 1366x768 stage)
   launchCam: 'second',
   camScale: 1.4, // the launch-site view stands back a little: the satellite, further off early on, is still in frame at t=0.1
   preDrift: { t0: 0.14, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad (with the vapour venting and the tower light), so the opening is not still

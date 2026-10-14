@@ -108,6 +108,7 @@ export const STARFISH = {
         dx: 30,
         dy: 60,
         staticPh: -0.75, // static: drawn further along its orbit, off the Earth's centre
+        from: IS_PHONE ? undefined : 0.44, // desktop: the satellite is drawn once it has entered the frame (it crossed the top edge, half cut, while the camera pulled back)
         fail: { t: 0.8, label: 'Satellite damaged', short: 'Satellite damaged' },
       },
     },
