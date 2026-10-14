@@ -297,9 +297,17 @@ export const rocketMethods = {
     // a puff (gas at a separation, steam at a cold launch) that rides the rig's position
     const puff = spr(0xe9edf6, 0);
     inner.add(puff);
+    // pre-launch venting (fx.vent): soft white vapour (normal blending, so it reads on a bright surface) that streams off the vehicle and gathers at the pad
+    const vent = [0, 1, 2, 3, 4].map(() => {
+      const s = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xf2f5fb, transparent: true, opacity: 0, depthWrite: false, depthTest: false }));
+      s.renderOrder = 5;
+      s.visible = false;
+      inner.add(s);
+      return s;
+    });
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
-    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, heat, puff, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -376,7 +384,7 @@ export const rocketMethods = {
     for (let k = 0; k <= 240; k++) {
       const ta = t0 + ((t1 - t0) * k) / 240,
         a = it.pos(Math.max(ta, t0 + 1e-4));
-      if (a && this._rocketAlt(rec, Math.hypot(...a)) > SMOKE_TOP + 5) {
+      if (a && this._rocketAlt(rec, Math.hypot(...a)) > SMOKE_TOP * (fx.smokeTopK ?? 1) + 5) {
         tSmoke = ta;
         break;
       }
@@ -683,6 +691,28 @@ export const rocketMethods = {
         rec.kv ||= this.dyn.find((d) => d.it === fx.marker);
         if (rec.kv) rec.kv.obj.visible = false;
       }
+      // ---- pre-launch venting (fx.vent): vapour streams off the upper body (three puffs) and rolls out along the pad (two), thinning away as the motor lights
+      {
+        const va = fx.vent && vis && !hide ? clamp01(t / 0.02) * (1 - smooth((t - fx.t0) / 0.012)) : 0;
+        rk.vent.forEach((s, i) => {
+          s.visible = va > 0.01;
+          if (!s.visible) return;
+          const ph = (tm * 0.55 + i * 0.37 + 0.13) % 1,
+            fade = Math.sin(PI * ph) ** 1.2;
+          if (i < 3) {
+            // from a vent on the upper body: rises and leans away with the breeze
+            s.position.set(D.rU * (1.2 + 0.7 * ph), 0, D.zT - 0.008 - 0.004 * i + 0.012 * ph);
+            s.scale.setScalar(0.007 + 0.017 * ph);
+            s.material.opacity = va * 0.5 * fade;
+          } else {
+            // boil-off at the base: low clouds spreading sideways over the plate
+            const sd = i === 3 ? 1 : -1;
+            s.position.set(sd * (0.006 + 0.022 * ph), 0, D.zN + 0.004 + 0.003 * ph);
+            s.scale.setScalar(0.011 + 0.016 * ph);
+            s.material.opacity = va * 0.42 * fade;
+          }
+        });
+      }
       // ---- the waiting highlight ring (fx.waitRing): fades as the motor lights
       const wr = fx.waitRing ? 1 - smooth((t - fx.t0) / 0.012) : 0;
       rk.ring.visible = vis && wr > 0.01 && !hide;
@@ -707,9 +737,10 @@ export const rocketMethods = {
     const apos = ac.pos(Math.min(t, fx.t0)) || p,
       upv = rec.v3.set(apos[0], apos[1], apos[2]).normalize();
     // the shift of the missile from where the path puts it: under the aircraft at first (a pylon), dropping away at release, then back onto the path
-    let carry = 0.5;
-    if (tau >= 0 && tau < 1) carry = 0.5 + 1.6 * tau * tau;
-    else if (tau >= 1) carry = 2.1 * (1 - smooth((tau - 1) / 3.2));
+    const c0 = fx.air.carry ?? 0.5; // opt-in (rocket.carry): how far under the belly it hangs, in its own lengths
+    let carry = c0;
+    if (tau >= 0 && tau < 1) carry = c0 + 1.6 * tau * tau;
+    else if (tau >= 1) carry = (c0 + 1.6) * (1 - smooth((tau - 1) / 3.2));
     let base = tau < 0 ? apos : p;
     if (tau >= 0 && tau < 1.2) {
       // the path starts a little off the carrier's own position: the missile eases onto it over the drop instead of snapping across at the release
@@ -717,7 +748,10 @@ export const rocketMethods = {
         w = 1 - smooth(tau / 1.2);
       if (p0) base = [p[0] - (p0[0] - apos[0]) * w, p[1] - (p0[1] - apos[1]) * w, p[2] - (p0[2] - apos[2]) * w];
     }
-    obj.position.set(base[0], base[1], base[2]).addScaledVector(upv, -carry * Lr);
+    // hung under the aircraft's belly (its own up axis, which a climbing aircraft has tilted), then falling along the local vertical
+    const ay = (rec.vy ||= new T.Vector3()).set(0, 1, 0).applyQuaternion(acObj.quaternion),
+      dn = (rec.vd ||= new T.Vector3()).copy(ay).lerp(upv, tau <= 0 ? 0 : smooth(Math.min(1, tau))).normalize();
+    obj.position.set(base[0], base[1], base[2]).addScaledVector(dn, -carry * Lr);
     // the carrier flies low in the picture (a few hundredths of an Earth radius above the surface), so a missile hung a half length under its belly or dropped
     // a length or two below it would sink into the globe and vanish: its height is kept above the surface (AIR_FLOOR)
     // seen from above the carrier's airframe would hide it as well: after the release it swings out to the side, about a wing's semi-span, and trails a little
@@ -780,7 +814,8 @@ export const rocketMethods = {
       }
       const alt = this._rocketAlt(rec, Math.hypot(...a)),
         rho = rhoAt(alt);
-      const fadeAlt = 1 - smooth((alt - SMOKE_TOP * 0.55) / (SMOKE_TOP * 0.9 - SMOKE_TOP * 0.55)); // gone above about 40 km
+      const ST = SMOKE_TOP * (fx.smokeTopK ?? 1), // opt-in (rocket.smokeTopK): a longer column on a climb of several hundred km, so the trail reaches the vehicle
+        fadeAlt = 1 - smooth((alt - ST * 0.55) / (ST * 0.9 - ST * 0.55)); // gone above about 40 km
       // behind the nozzle, then drifting with a fixed wind and billowing wider with age
       const gr = 1 - Math.exp(-age / 0.07),
         ph = Math.sin(k * 7.3 + 1.7),
@@ -792,7 +827,7 @@ export const rocketMethods = {
         dz = b[2] - a[2],
         dl = Math.hypot(dx, dy, dz) || 1,
         back = 0.45 * Lr;
-      const wl = 0.7 * Lr * gr + 0.06 * Lr * ph; // wind drift
+      const wl = (fx.smokeWind ?? 1) * 0.7 * Lr * gr + 0.06 * Lr * ph; // wind drift (opt-in rocket.smokeWind scales it)
       const lat = near * gr * 0.6 * Lr * (S.seed[k] - 0.5) * 2; // the pad cloud spreads sideways
       pos[3 * k] = a[0] - (dx / dl) * back + wind.x * (wl + lat);
       pos[3 * k + 1] = a[1] - (dy / dl) * back + wind.y * (wl + lat);
@@ -801,7 +836,16 @@ export const rocketMethods = {
       sz[k] = bodyD * 1.7 * spread * sk;
       // overlapping soft discs add up: each one carries a share of the opacity that keeps the column's density about constant whatever its length
       const dense = 0.3 + 0.7 * Math.sqrt(rho); // thinner trail in thinner air
-      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spacing * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * Math.exp((-age * (1 - nk) * nearRaw) / 0.05) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
+      // opt-in (rocket.smokeLocal): each puff's share of the opacity follows the local spacing of the puffs along the path, so the slow first seconds of a lift-off do not
+      // stack their puffs into one dense ball that hangs behind the climbing vehicle: the column stays one trail from the pad to the vehicle
+      let spc = spacing;
+      if (fx.smokeLocal) {
+        const dh = (tE - t0) / S.K,
+          q1 = it.pos(Math.max(t0, te - dh * 0.5)),
+          q2 = it.pos(Math.min(tE, te + dh * 0.5));
+        if (q1 && q2) spc = Math.max(spacing * fx.smokeLocal, Math.hypot(q2[0] - q1[0], q2[1] - q1[1], q2[2] - q1[2]));
+      }
+      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spc * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * Math.exp((-age * (1 - nk) * nearRaw) / 0.05) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
       wm[k] = Math.exp(-age / 0.012) * 0.8;
       if (al[k] > 0.003) any = true;
     }

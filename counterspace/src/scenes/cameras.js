@@ -126,6 +126,17 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
       posesFor = (asp) =>
         (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
+          // fitLaunchKeys (opt-in): at these keys the camera is fitted to the launch point and the carrier alone (a close opening on the vehicle); the target comes into frame as it pulls back
+          if (cfg.fitLaunchKeys?.includes(ki) && arc) {
+            const L = [arc.from].concat(aircraftPos ? [aircraftPos(0), aircraftPos(tk)] : []);
+            return fitPose(L, nAt(tk), scl(centroid(L), cfg.lookK ?? 0.97), {
+              dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3,
+              dMax: cfg.fitMax ?? 6.5,
+              fillX: cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9,
+              fillY: (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
+              asp,
+            });
+          }
           const P = (cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? [tgt.hitPos] : core).slice(); // dropCoreFrom (opt-in): later keys frame the hit and debris only
           // the expanding burst ring (flash sprite) must fit inside the frame too, not just its centre
           if (burst && tk <= ht + 0.16 && tk >= (cfg.burstPadFrom ?? 0)) P.push(...burstPad); // burstPadFrom (opt-in): the early keys are fitted to the craft alone
@@ -134,6 +145,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           if (tk > ht)
             P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
           if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
+          // fitGlobeFrom (opt-in): from this key on the whole globe is kept in the frame (the last view is the Earth, not a close-up of the crossing)
+          if (cfg.fitGlobeFrom != null && tk >= cfg.fitGlobeFrom) for (const g of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) P.push(scl(g, 1.03));
           return fitPose(
             P,
             cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : nAt(tk),
@@ -147,7 +160,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             },
           );
         }));
-    const at = (t, asp = ASPECT) => {
+    const at0 = (t, asp = ASPECT) => {
       const poses = posesFor(asp);
       let i = 0;
       while (i < keys.length - 2 && t > keys[i + 1]) i++;
@@ -177,7 +190,30 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         up: null,
       };
     };
-    return { name: 'Follow the action', follow: at, ...at(0), hideShell: true };
+    // preDrift (opt-in) { t0, k, out }: a slow push-in while the vehicle waits (the camera closes by the fraction k by t0), released over `out` after it
+    const at = (t, asp = ASPECT) => {
+      const v = at0(t, asp),
+        d = cfg.preDrift;
+      if (!d) return v;
+      const u = smooth(t / d.t0) * (1 - smooth((t - d.t0) / (d.out ?? 0.08))),
+        k = 1 - d.k * u;
+      return { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), k)) };
+    };
+    // endShift (opt-in) { from, to, k }: the picture slides up by the fraction k of the half-height between these times, clear of a card that comes up at the foot of the stage
+    const atShift = (t, asp = ASPECT) => {
+      const v = at(t, asp),
+        e = cfg.endShift;
+      if (!e) return v;
+      const w = smooth((t - e.from) / (e.to - e.from));
+      if (w <= 0) return v;
+      const fw = norm(add(v.look, scl(v.pos, -1))),
+        r = norm(cross3(fw, v.up || [0, 1, 0])),
+        u = cross3(r, fw),
+        D = len(add(v.look, scl(v.pos, -1))),
+        d = scl(u, -w * e.k * D * tanFor(asp)[1]);
+      return { ...v, pos: add(v.pos, d), look: add(v.look, d) };
+    };
+    return { name: 'Follow the action', follow: atShift, ...atShift(0), hideShell: true };
   };
   if (cfg.cameras)
     cams = cfg.cameras.map((c0) => {

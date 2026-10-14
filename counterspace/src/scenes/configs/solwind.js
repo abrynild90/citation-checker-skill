@@ -38,6 +38,10 @@ export const SOLWIND = {
   camGlide: true,
   burstPadFrom: 0.4,
   fitFillKeys: IS_PHONE ? [0.68, 0.7, 0.85, 0.9, 0.9, 0.9] : undefined, // room for the wheel and sail above the caption during the climb
+  fitSouth: IS_PHONE ? undefined : 48, // desktop: the opening views look from the south, so the climb of the F-15 is seen from the side (nose up) and not from above
+  fitSouthTo: 0.3,
+  fitLaunchKeys: IS_PHONE ? undefined : [0], // desktop: the opening frame is cut tight on the F-15 and its missile, then pulls back to show the satellite
+  fitMinKeys: IS_PHONE ? undefined : [1.15],
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
   fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
@@ -50,7 +54,7 @@ export const SOLWIND = {
     alt: 530,
     inc: 97.6,
     t: 0.5,
-    wa: 0.45,
+    wa: IS_PHONE ? 0.45 : 0.2, // desktop: the satellite is nearer the fighter in the opening frame, so the camera can come in on the F-15
     wf: 0.5,
   },
   liveOff: {
@@ -73,12 +77,14 @@ export const SOLWIND = {
       ],
       alt: 12,
       fighter: true,
+      climb: 40, // the nose is raised for the zoom climb
+      rise: 0.05, // and the aircraft gains height faster along its path
       t0: 0.0,
       t1: 0.24,
       scale: IS_PHONE ? 3.0 : 4.4, // desktop: 1.5x so the aircraft reads next to the satellite
-      minPx: IS_PHONE ? 55 : 92,
-      maxPx: IS_PHONE ? 78 : 150,
-      exit: { dur: 0.2, k: 0.6 }, // after the release the F-15 eases down and leaves
+      minPx: IS_PHONE ? 55 : 140,
+      maxPx: IS_PHONE ? 78 : 190,
+      exit: { dur: 0.1, k: 0.6 }, // after the release the F-15 eases down and leaves
       label: 'F-15 zoom climb',
       labelUntil: 0.22,
       dx: -64,
@@ -111,7 +117,7 @@ export const SOLWIND = {
       labelFollow: true, // the leader stays on the missile itself (the vehicle is drawn all the way to the hit)
       hold: -0.004, // and the label goes with the vehicle, which is consumed 0.004 before the hit (gl-rocket pos), not after it
       thick: 0.0065,
-      rocket: { minPx: 105, maxPx: 135, endHold: 0.01, ramp: { k: 1.5, until: 0.35 }, smokeK: 1.7 }, // a little larger so its plume and fins read next to the F-15 (+13%)
+      rocket: { minPx: 105, maxPx: 135, carry: 0.22, endHold: 0.01, ramp: { k: 1.5, until: 0.35 }, smokeK: 1.7 }, // a little larger so its plume and fins read next to the F-15 (+13%)
       strong: true,
       flash: 0.24,
       flashSpan: 0.14,

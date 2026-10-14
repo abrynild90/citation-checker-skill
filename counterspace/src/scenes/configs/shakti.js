@@ -28,6 +28,7 @@ export const SHAKTI = {
   earlyKey: true,
   burstPadFrom: 0.3, // the first key frames are fitted to the island, the interceptor and the satellite, not the later burst ring
   fitSouthTo: 0.38, // after the hit the view returns to the side view (the burst and the debris stay framed)
+  preDrift: { t0: 0.16, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad (with the vapour venting and the tower light)
   fitSouth: 52, // the view is turned toward the south, so the vehicle on its pad stands upright in the frame (seen from the side of the Earth it lay on its side)
   lookK: 0.9, // the Earth sits nearer the middle of the frame, not against its left edge
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
@@ -91,7 +92,7 @@ export const SHAKTI = {
       linger: 0.2,
       lingerK: 0.6,
       lingerEnd: 0.7,
-      rocket: { style: 'slim', endHold: 0.01, minPx: IS_PHONE ? 72 : 135, maxPx: IS_PHONE ? 104 : 170, glowMin: 12, glowMax: 22, ramp: { k: IS_PHONE ? 1.8 : 1.7, until: 0.3 }, smokeK: 2.1, smokeNear: 0.3, smokeTA: 0.06, pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 } }, // desktop: 35% larger, so the vehicle reads at the default framing
+      rocket: { style: 'slim', endHold: 0.01, minPx: IS_PHONE ? 72 : 135, maxPx: IS_PHONE ? 104 : 170, glowMin: 12, glowMax: 22, ramp: { k: IS_PHONE ? 1.8 : 1.7, until: 0.3 }, smokeK: 2.1, smokeNear: 0.3, smokeTA: 0.06, vent: true, pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 } }, // desktop: 35% larger, so the vehicle reads at the default framing
     },
     {
       type: 'debris',

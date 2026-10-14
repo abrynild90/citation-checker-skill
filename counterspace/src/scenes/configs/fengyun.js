@@ -28,6 +28,7 @@ export const FENGYUN = {
   event: 'cn-2007-fy1c',
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
   launchCam: 'second',
+  preDrift: { t0: 0.14, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad (with the vapour venting and the tower light), so the opening is not still
   fitSouth: 50, // the first views look from the south, so the vehicle on the pad stands up in the frame (from above it was a speck of 70 px)
   fitLateView: [24, 35], // turn smoothly toward an oblique ring view after the cloud spreads
   fitLateViewFrom: 0.4, // the first views look from the south (fitSouth), so the turn toward the ring view starts a key earlier (0.5 cropped the debris at the frame foot)
@@ -71,7 +72,7 @@ export const FENGYUN = {
       strong: true,
       coreK: 0.85,
       flash: 0.3,
-      rocket: IS_PHONE ? undefined : { style: 'slim', endHold: 0.01, minPx: 135, maxPx: 165, ramp: { k: 1.35, until: 0.3 }, burn: 0.8, smokeK: 1.7 }, // 35% larger than before, so the vehicle reads at the default framing
+      rocket: IS_PHONE ? undefined : { style: 'slim', endHold: 0.01, minPx: 135, maxPx: 165, ramp: { k: 1.35, until: 0.3 }, burn: 0.8, smokeK: 1.7, pad: { minPx: 44, maxPx: 64 }, vent: true }, // 35% larger than before, so the vehicle reads at the default framing
     }, // a bright core and a second white ring: the hit reads against the debris plume
     {
       type: 'debris',

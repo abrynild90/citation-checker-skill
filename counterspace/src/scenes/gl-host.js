@@ -595,6 +595,7 @@ export class GLHost {
         obj.visible = !!p;
         if (p) obj.position.set(...p);
         const ud = obj.userData;
+        if (ud.padMark) ud.padMark.emissiveIntensity = (Math.floor(t * this.sim.cfg.duration * 1.6) & 1) * 0.9 + 0.12; // the tower's warning light blinks
         if (it.shape === 'jammer' && ud.rings)
           ud.rings.forEach((r, k) => {
             const ph = (t * this.sim.cfg.duration * 0.7 + k / 3) % 1;
@@ -622,8 +623,13 @@ export class GLHost {
           } else if (!ud.f) {
             ud.f = new T.Vector3(0, 0, 1).addScaledVector(up, -up.z).normalize();
           }
-          const side = new T.Vector3().crossVectors(up, ud.f).normalize();
-          obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(side, up, ud.f));
+          const side = new T.Vector3().crossVectors(up, ud.f).normalize(),
+            pitch = it.pitch ? it.pitch(t) : 0; // a climbing aircraft (it.pitch): the nose is raised about its wing axis
+          if (pitch) {
+            const fw = ud.f.clone().multiplyScalar(Math.cos(pitch)).addScaledVector(up, Math.sin(pitch)),
+              uw = up.clone().multiplyScalar(Math.cos(pitch)).addScaledVector(ud.f, -Math.sin(pitch));
+            obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(side, uw, fw));
+          } else obj.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(side, up, ud.f));
         }
         if (ud.sat && p && !ud.oriented) {
           const q = it.pos(t + 0.002);
