@@ -39,7 +39,7 @@ export const SOLWIND = {
   burstPadFrom: 0.4,
   fitFillKeys: IS_PHONE ? [0.68, 0.7, 0.85, 0.9, 0.9, 0.9] : undefined, // room for the wheel and sail above the caption during the climb
   fitSouth: IS_PHONE ? undefined : 48, // desktop: the opening views look from the south, so the climb of the F-15 is seen from the side (nose up) and not from above
-  fitSouthTo: 0.3,
+  fitSouthTo: 0.5, // the view stays one way until the hit: the missile flies one way, toward the satellite (the turn to the side view is after it)
   fitLaunchKeys: IS_PHONE ? undefined : [0], // desktop: the opening frame is cut tight on the F-15 and its missile, then pulls back to show the satellite
   fitMinKeys: IS_PHONE ? undefined : [1.15],
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
@@ -55,7 +55,7 @@ export const SOLWIND = {
     alt: 530,
     inc: 97.6,
     t: 0.5,
-    wa: IS_PHONE ? 0.45 : 0.28, // desktop: the satellite is well above and away from the fighter while it climbs (an air launch at about 12 km, not a fighter at orbit height)
+    wa: IS_PHONE ? 0.45 : 0.1, // desktop: the satellite waits near the interception point, up on the missile's side of the picture, so the missile visibly flies to it (not away from a satellite below)
     wf: 0.5,
   },
   liveOff: {
@@ -113,6 +113,7 @@ export const SOLWIND = {
       type: 'intercept',
       from: 'aircraft',
       t0: 0.24,
+      arcLift: 0.03, // a near-direct run from the F-15 to the satellite (a high bow made the missile look to fly away and come back)
       color: C.int,
       label: 'ASM-135',
       labelFollow: true, // the leader stays on the missile itself (the vehicle is drawn all the way to the hit)

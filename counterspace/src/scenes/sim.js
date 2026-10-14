@@ -635,7 +635,7 @@ export function buildSim(cfg) {
       const from = a.from === 'aircraft' ? aircraftPos(a.t0) : ll(a.from[0], a.from[1], 1.005);
       const to = tgt.hitPos;
       const mid = norm(add(from, to));
-      const ctrl = scl(mid, Math.max(len(from), len(to)) + 0.2);
+      const ctrl = scl(mid, Math.max(len(from), len(to)) + (a.arcLift ?? 0.2)); // arcLift (opt-in): how far the path bows outward past the higher end (a near-direct run for an air launch)
       const bez = (s) => add(add(scl(from, (1 - s) * (1 - s)), scl(ctrl, 2 * (1 - s) * s)), scl(to, s * s));
       const N = 60,
         all = [];
