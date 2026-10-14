@@ -754,14 +754,43 @@ const pairBtns = { about: $('svAboutBtn'), next: $('svNextBtn') },
 function togglePair(which) {
   if (which && cur) host?.interrupt();
   if (which) (toggleSrc(false), toggleNextPop(false), toggleLawCard(false)); // one note at a time over the story column
-  asideBody.classList.toggle('has-note', !!which); // the list of steps keeps its own height; the column scrolls to the note (see scenes.css)
+  // On a desktop window the note floats over the end of the column, under its row (like the related-law card): the column does not scroll and the list keeps its
+  // place. In a stacked layout it is part of the column, and the column scrolls to it (see scenes.css).
+  const float = !!which && !STACKED.matches;
+  asideBody.classList.toggle('has-note', !!which && !float);
   Object.keys(pairBtns).forEach((k) => {
     const on = k === which;
     pairBtns[k].setAttribute('aria-expanded', String(on));
     pairBodies[k].hidden = !on;
+    pairBodies[k].classList.toggle('float-note', on && float);
   });
-  if (which) revealNote(pairBodies[which]);
+  if (which) float ? dockNote(pairBodies[which]) : revealNote(pairBodies[which]);
 }
+// A floating note stands in the list's column, from just under its row to the foot of the story column; it scrolls inside itself when its text is longer.
+function dockNote(note) {
+  note.style.top = note.style.left = note.style.width = note.style.maxHeight = note.style.minHeight = '';
+  const ab = asideBody.getBoundingClientRect(),
+    lr = stepsEl.getBoundingClientRect(),
+    pair = $('svPair'),
+    top = pair.offsetTop + pair.offsetHeight + 4,
+    room = asideBody.scrollTop + asideBody.clientHeight - top - 8;
+  note.style.left = Math.round(lr.left - ab.left - asideBody.clientLeft) + 'px';
+  note.style.width = Math.round(lr.width) + 'px';
+  note.style.top = top + 'px';
+  note.style.maxHeight = Math.max(90, Math.round(room)) + 'px';
+  // a note that ends inside the foot (the source line, the related-law button) would leave a strip of it showing under its edge: it reaches down over the whole foot
+  const foot = $('sceneFoot'),
+    nr = note.getBoundingClientRect(),
+    last = [...foot.children].filter((c) => c.getClientRects().length).at(-1);
+  if (last && nr.bottom > foot.getBoundingClientRect().top + 1) {
+    const to = Math.min(ab.bottom - 8, Math.max(nr.bottom, last.getBoundingClientRect().bottom + 8));
+    note.style.minHeight = Math.round(to - nr.top) + 'px';
+  }
+}
+addEventListener('resize', () => {
+  const open = Object.values(pairBodies).find((n) => !n.hidden);
+  if (open?.classList.contains('float-note')) dockNote(open);
+});
 // Bring the opened note into the column's view, and the related-law button under it too when both fit; when they do not, the note is whole and the button is
 // one scroll away (the column's fade at its foot says so). The column never rests with a line of the source or the button cut at its foot.
 function revealNote(body) {

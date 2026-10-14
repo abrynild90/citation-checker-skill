@@ -2713,3 +2713,14 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
     bottom: calc(100% - 14.5px - var(--sp, 0px));
   }
 }
+
+/* A note under "About this picture" or "Where to go next" on a desktop window floats over the end of the column, under its row (scene-ui.js dockNote) */
+.overlay .story-scroll > .sv-pbody.float-note {
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-2);
+}
