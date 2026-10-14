@@ -498,7 +498,7 @@ export const rocketMethods = {
     // coast: no thrust steers the vehicle, so its attitude changes slowly (it follows the flight direction at a fraction of the pace) and a pitch-over at the
     // top of the arc is a slow roll of the nose, not a flip
     const tb = rec.burns[rec.burns.length - 1][1];
-    if (t > tb) this._coastDir(rec, it, tb, t, p);
+    if (t > tb && !fx.follow) this._coastDir(rec, it, tb, t, p); // fx.follow (opt-in): a ballistic arc keeps the nose on the path through the coast and the fall
     else if (vel.lengthSq() > 1e-14) rec.lastDir.copy(vel).normalize();
     const dir = rec.v2.copy(rec.lastDir),
       up = rec.v3.set(p[0], p[1], p[2]).normalize();

@@ -1009,7 +1009,7 @@ export function buildSim(cfg) {
             maxPx: a.rocket.maxPx ?? 54,
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
-            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, smokeK: a.rocket.smokeK,
+            fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, follow: !!a.rocket.follow, smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
           });
         } else
