@@ -813,8 +813,10 @@
 .overlay .sv-toast {
   position: absolute;
   z-index: 6;
-  right: var(--sv-pad);
+  left: 50%;
+  transform: translateX(-50%); /* above the middle of the control bar: clear of the law card and the source row at the right */
   bottom: calc(100% + 14px);
+  width: max-content;
   max-width: min(420px, calc(100% - 2 * var(--sv-pad)));
   margin: 0;
   padding: 10px 14px;
@@ -1091,6 +1093,8 @@
   }
   .overlay .sv-toast {
     left: var(--sv-pad);
+    transform: none;
+    width: auto;
     max-width: none;
   }
 }
@@ -2330,6 +2334,7 @@
     font: 400 15px/1.5 var(--sans);
     color: var(--text);
   }
+  .overlay .sv-dyk.pending { visibility: hidden; }
   .overlay .sv-dyk b { font-weight: 600; color: var(--accent-2); margin-right: 4px; }
   .overlay .story-scroll.pin > .story-foot { margin-top: auto; }
   .overlay .story-scroll.pin { min-height: 100%; }
@@ -2555,3 +2560,6 @@
     font-size: 28px;
   }
 }
+
+/* after a touch or a click, no focus ring stays on the dialog's buttons when the page moves focus itself; a keyboard press brings it back */
+html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important; }

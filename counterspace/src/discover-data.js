@@ -21,6 +21,9 @@ export const FACTS = {
   spaceplanes: 'The US X-37B has flown eight missions. Six of them lasted between 224 and 908 days.',
 };
 
+// The scene time from which each "Did you know" line matches what the animation shows (wide window); the others hold from the first frame.
+export const FACT_FROM = { starfish: 0.1, solwind: 0.24, fengyun: 0.3, 'burnt-frost': 0.4, shakti: 0.38, cosmos1408: 0.3, 'sj21-tug': 0.5 };
+
 // Short names for the "Where to go next" row.
 export const SHORT = {
   starfish: 'Starfish Prime',

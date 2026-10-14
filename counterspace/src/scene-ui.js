@@ -21,7 +21,7 @@ import { hooks, seenScenes } from './shared.js';
 import { revealIn } from './explore.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
 import { stillFromSVG } from './scenes/svg/still-frame.js';
-import { FACTS, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
+import { FACTS, FACT_FROM, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 import * as THREE from 'three';
 export let host = null,
   glOK = null;
@@ -542,7 +542,8 @@ function fillStory(cfg) {
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   sentences = splitSentences(cfg.lede || cfg.caption);
-  dykEl.innerHTML = FACTS[cfg.id] ? `${esc(FACTS[cfg.id])}` : '';
+  dykEl.innerHTML = FACTS[cfg.id] ? `<b>Did you know</b> ${esc(FACTS[cfg.id])}` : '';
+  dykEl.classList.toggle('pending', (FACT_FROM[cfg.id] ?? 0) > 0); // held back until the step it describes
   // the "Did you know" line is left out when the account's own first sentence already says it
   dykEl.hidden = !FACTS[cfg.id] || same(splitSentences(cfg.caption || cfg.lede || '')[0] || '', FACTS[cfg.id]);
   expanded = false;
@@ -946,6 +947,8 @@ function stepAt(t) {
   return k;
 }
 function markStep(k) {
+  // the "Did you know" line appears once the active step is the one it describes (its place stays reserved, so nothing shifts)
+  dykEl.classList.toggle('pending', (steps[k]?.t ?? 0) < (FACT_FROM[cur?.id] ?? 0) - 1e-6);
   $('sceneCurrentStep').textContent = steps[k]?.text || '';
   const act = cur?.acts?.findIndex((a) => (steps[k]?.t ?? 0) >= a.t0 && (steps[k]?.t ?? 0) < a.t1);
   $('sceneEpisodes')
@@ -1817,6 +1820,10 @@ function seek(e) {
   setPlayBtn(false);
   host.update(Math.max(a0, Math.min(a1, host.t + ((e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 5 : 1)) / dur)));
 }
+// A ring shows only for a keyboard user: after a touch or a click, a focus the page moves itself (to the scene's title, the list button, the play button)
+// leaves no ring behind on the buttons (the X, the arrows).
+document.addEventListener('pointerdown', () => document.documentElement.classList.add('ptr'), true);
+document.addEventListener('keydown', (e) => e.key !== 'Escape' && document.documentElement.classList.remove('ptr'), true);
 document.addEventListener('keydown', (e) => {
   if (!cur || e.defaultPrevented) return;
   hideHint();
