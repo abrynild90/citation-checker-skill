@@ -89,7 +89,7 @@ export const BURNT_FROST = {
       thick: 0.0055,
       label: 'SM-3 interceptor',
       short: 'SM-3',
-      rocket: { style: 'slim', minPx: 92, maxPx: 125, glowMin: 14, glowMax: 24, launch: 'vls', preK: 0.8, ramp: { k: 1.2, until: 0.35 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
+      rocket: { style: 'slim', minPx: 92, maxPx: 125, glowMin: 14, glowMax: 24, launch: 'vls', preK: 1.0, waitRing: true, waitLabel: true, ramp: { k: 1.2, until: 0.35 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,

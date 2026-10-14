@@ -89,6 +89,25 @@ void main(){
   gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.85));
 }`;
 
+// A thin soft ring (a highlight round a vehicle that waits to launch). Drawn once, in memory.
+let ringCv = null;
+function ringCanvas() {
+  if (ringCv) return ringCv;
+  const n = 128,
+    c = document.createElement('canvas');
+  c.width = c.height = n;
+  const g = c.getContext('2d'),
+    gr = g.createRadialGradient(n / 2, n / 2, n * 0.4, n / 2, n / 2, n * 0.5);
+  gr.addColorStop(0, 'rgba(255,255,255,0)');
+  gr.addColorStop(0.55, 'rgba(255,255,255,0.9)');
+  gr.addColorStop(0.7, 'rgba(255,255,255,0.35)');
+  gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr;
+  g.fillRect(0, 0, n, n);
+  ringCv = c;
+  return c;
+}
+
 // ---------------------------------------------------------------- geometry helpers
 // A body of revolution along +z (nose at +z) with per-vertex shading: profile points are [radius, z, shade].
 function lathe(T, prof, segs = 20) {
@@ -134,10 +153,10 @@ export const rocketMethods = {
       slim = style === 'slim',
       Kl = new Kit(T),
       Ku = new Kit(T),
-      white = this._mat(slim ? 0xd6dae2 : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true }),
-      whiteU = this._mat(slim ? 0xd6dae2 : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true }),
+      white = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
+      whiteU = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
       tipCol = new T.Color(color).lerp(new T.Color(0xffffff), 0.1),
-      nose = this._mat(slim ? 0x3a4050 : tipCol.getHex(), { metalness: slim ? 0.55 : 0.2, roughness: slim ? 0.4 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
+      nose = this._mat(slim ? 0x566074 : tipCol.getHex(), { metalness: slim ? 0.55 : 0.2, roughness: slim ? 0.4 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
       dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       darkU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(tipCol.getHex(), { metalness: 0.2, roughness: 0.4, vertexColors: true }),
@@ -268,12 +287,17 @@ export const rocketMethods = {
     const heat = spr(0xff8a40, 0);
     heat.position.z = D.zNose - 0.0015;
     g.add(heat);
+    // a thin highlight ring round the vehicle while it waits to launch (fx.waitRing)
+    const ring = new T.Sprite(new T.SpriteMaterial({ map: this._gtex(ringCanvas(), () => new T.CanvasTexture(ringCanvas())), color: 0xffc78f, transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: T.AdditiveBlending }));
+    ring.renderOrder = 5;
+    ring.visible = false;
+    g.add(ring);
     // a puff (gas at a separation, steam at a cold launch) that rides the rig's position
     const puff = spr(0xe9edf6, 0);
     g.add(puff);
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
-    g.userData.rk = { D, slim, lower, upper, rig, outer, core, glow, flash, heat, puff, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    g.userData.rk = { D, slim, lower, upper, rig, outer, core, glow, flash, heat, puff, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -655,6 +679,14 @@ export const rocketMethods = {
       if (fx.marker) {
         rec.kv ||= this.dyn.find((d) => d.it === fx.marker);
         if (rec.kv) rec.kv.obj.visible = false;
+      }
+      // ---- the waiting highlight ring (fx.waitRing): fades as the motor lights
+      const wr = fx.waitRing ? 1 - smooth((t - fx.t0) / 0.012) : 0;
+      rk.ring.visible = vis && wr > 0.01 && !hide;
+      if (rk.ring.visible) {
+        const pulse = 0.5 + 0.5 * Math.sin(tm * 5);
+        rk.ring.scale.setScalar(0.066 + 0.005 * pulse);
+        rk.ring.material.opacity = wr * (0.4 + 0.2 * pulse);
       }
       this._smokeFrame(rec, t, st, Lr, vis);
     }

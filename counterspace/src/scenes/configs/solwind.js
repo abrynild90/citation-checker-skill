@@ -72,6 +72,7 @@ export const SOLWIND = {
         [35.0, -124.0],
       ],
       alt: 12,
+      fighter: true,
       t0: 0.0,
       t1: 0.24,
       scale: IS_PHONE ? 3.0 : 4.4, // desktop: 1.5x so the aircraft reads next to the satellite

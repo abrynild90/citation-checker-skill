@@ -544,6 +544,7 @@ export function buildSim(cfg) {
       const item = {
         kind: 'point',
         shape: 'aircraft',
+        fighter: a.fighter, // opt-in: the twin-engine fighter model (gl-models.js) in place of the airliner
         prim: true,
         scale: a.gnss ? null : (a.scale ?? 1.1),
         minPx: a.minPx,
@@ -687,6 +688,10 @@ export function buildSim(cfg) {
           rocketStyle: a.rocket.style,
           endHold: a.rocket.endHold, // opt-in: stays drawn on the target this long past the hit, inside the flash (no early vanish)
           preK: a.rocket.preK, // opt-in: drawn this fraction of its size while it waits at the launch point, easing to full size just after t0
+          // opt-in waitLabel (live only; the pill of the path takes over at t0): the waiting vehicle is named from the first frame
+          ...(a.rocket.waitLabel
+            ? { label: a.label, short: a.short, labelDx: a.rocket.waitDx ?? 0, labelDy: a.rocket.waitDy ?? 0, labelFn: (t, narrow) => (t < a.t0 && !narrow ? a.label : null), statusColor: () => a.color }
+            : {}),
           ramp: a.rocket.ramp, // opt-in { k, until }: drawn k times larger at the pad, easing to its normal size by this fraction of the flight (see _fitModels)
           // flight look (gl-rocket.js): ignition at t0, the vehicle is consumed at the hit; burn is the fraction of the flight under thrust (the rest is coast)
           fx: {
@@ -697,6 +702,7 @@ export function buildSim(cfg) {
             air: a.from === 'aircraft' && aircraftItem ? { it: aircraftItem, drop: a.rocket.drop } : null,
             cold: a.rocket.launch === 'vls',
             stand: !!a.rocket.pad,
+            waitRing: !!a.rocket.waitRing, // opt-in: a thin highlight ring round the vehicle while it waits for launch
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,
             stage: a.rocket.stage,

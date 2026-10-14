@@ -634,7 +634,8 @@ export const modelMethods = {
   },
   // Airliner: white fuselage with a pointed nose and a tapered tail, swept wings, two engines, a tail fin and stabilisers. The airframe colour is the
   // aircraft's status colour (GNSS fine or lost).
-  _aircraftModel(halo) {
+  _aircraftModel(halo, fighter) {
+    if (fighter) return this._fighterModel();
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
@@ -673,6 +674,48 @@ export const modelMethods = {
       sd.renderOrder = -1;
       g.add(sd);
     }
+    Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
+    return g;
+  },
+  // Twin-engine air-superiority fighter (the F-15 of the Solwind test), nose along +z, wings along x, up +y, drawn at the airliner's overall size so labels hold:
+  // grey livery, a long flat fuselage with a bubble canopy, two engines with open nozzles, box intakes under the wing roots, swept clipped wings, two
+  // all-moving tailplanes and two canted fins. Broad shape only (no markings, no weapons: the missile is drawn by the scene).
+  _fighterModel() {
+    const T = this.T,
+      K = new Kit(T),
+      PI = Math.PI,
+      grey = this._mat(0x6a7385, { side: T.DoubleSide, metalness: 0.3, roughness: 0.55, emissive: 0x0c1018 }),
+      dgrey = this._mat(0x434b5b, { side: T.DoubleSide, metalness: 0.3, roughness: 0.55, emissive: 0x080b10 }),
+      dark = this._mat(0x1a1e28, { metalness: 0.5, roughness: 0.5 }),
+      glass = this._mat(0x2b3f66, { metalness: 0.6, roughness: 0.18, emissive: 0x0d1a33 });
+    const poly = (pts) => {
+      const sh = new T.Shape();
+      pts.forEach((q, i) => (i ? sh.lineTo(q[0], q[1]) : sh.moveTo(q[0], q[1])));
+      sh.closePath();
+      return new T.ShapeGeometry(sh);
+    };
+    const sym = (half) => half.concat(half.slice().reverse().map((q) => [-q[0], q[1]])); // a right half-outline, mirrored into a whole one
+    // fuselage: a wide flat centre section, a pointed radome and the twin engines with their nozzles
+    K.box(grey, 0.0070, 0.0030, 0.0200, 0, 0, -0.0045);
+    K.geo(dark, new T.CylinderGeometry(0.0002, 0.0025, 0.0120, 14), 0, 0, 0.0160, PI / 2, 0, 0, 1, 1, 0.62);
+    for (const x of [-1, 1]) {
+      K.cyl(grey, 0.0017, 0.0018, 0.0155, x * 0.0022, -0.0004, -0.0122, PI / 2, 0, 0, 14);
+      K.cyl(dgrey, 0.0015, 0.0018, 0.0034, x * 0.0022, -0.0004, -0.0205, PI / 2, 0, 0, 14);
+      K.cyl(dark, 0.0012, 0.0012, 0.0006, x * 0.0022, -0.0004, -0.0222, PI / 2, 0, 0, 14);
+      // box intakes under the wing roots, with a dark mouth
+      K.box(dgrey, 0.0024, 0.0022, 0.0080, x * 0.0040, -0.0016, 0.0020);
+      K.box(dark, 0.0019, 0.0017, 0.0004, x * 0.0040, -0.0016, 0.0062);
+    }
+    // canopy
+    K.geo(glass, new T.SphereGeometry(0.0016, 14, 10), 0, 0.0020, 0.0078, 0, 0, 0, 0.78, 0.72, 2.1);
+    // swept, clipped wings and tailplanes (flat outlines: x across, shape y becomes z, forward)
+    K.geo(dgrey, poly(sym([[0.0025, 0.0050], [0.0150, -0.0030], [0.0150, -0.0087], [0.0025, -0.0108]])), 0, 0.0001, 0, PI / 2, 0, 0);
+    K.geo(grey, poly(sym([[0.0030, -0.0140], [0.0092, -0.0170], [0.0092, -0.0200], [0.0030, -0.0200]])), 0, 0.0001, 0, PI / 2, 0, 0);
+    // twin fins, canted outwards
+    for (const x of [-1, 1])
+      K.group(x * 0.0030, 0.0013, 0, 0, 0, -x * 0.2, () => K.geo(dgrey, poly([[-0.0085, 0], [-0.0140, 0.0078], [-0.0188, 0.0078], [-0.0198, 0]]), 0, 0, 0, 0, -PI / 2, 0));
+    const g = K.build();
+    g.userData.tintMat = this._mat(0xffffff); // the status colour of an airliner does not apply: the livery keeps its greys
     Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
     return g;
   },
@@ -977,15 +1020,10 @@ export const modelMethods = {
     const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
     ring.rotateX(Math.PI / 2);
     ring.translate(0, Y * 0.6, 0);
-    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.14, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
-    // bow wave: bright ribbons that run back along each side from the stem and spread
-    [-1, 1].forEach((sd) => {
-      strip(sd * 0.0014, 0.0435, sd * 0.0105, -0.004, 0.0034, 0.0052, 0.8);
-      strip(sd * 0.0020, 0.0415, sd * 0.0090, 0.016, 0.0024, 0.0032, 0.65);
-    });
-    // churned wake astern, as wide as the transom, and the V arms that diverge beyond it
-    strip(0, Z0 + 0.001, 0, -0.075, 0.0100, 0.0115, 0.6); // a short churned trail: it reads as the ship's own wake, not as streaks
-    [-1, 1].forEach((sd) => strip(sd * 0.0058, Z0 + 0.002, sd * 0.0125, -0.060, 0.0030, 0.0046, 0.3));
+    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.05, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
+    // churned wake astern, as wide as the transom, and the V arms that diverge beyond it: the white water is behind the stern only (nothing alongside the bow)
+    strip(0, Z0 + 0.001, 0, -0.058, 0.0100, 0.0115, 0.5); // a short churned trail: it reads as the ship's own wake, not as streaks
+    [-1, 1].forEach((sd) => strip(sd * 0.0058, Z0 + 0.002, sd * 0.0135, -0.062, 0.0030, 0.0046, 0.4));
     g.position.y = 0;
     g.userData.tintMat = side;
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));

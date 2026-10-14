@@ -325,7 +325,7 @@ const methods = {
         if (it.small) Object.assign(m.userData, { minPx: 11, maxPx: 30 }); // a released sub-satellite: smaller than its parent, still a model
       } else if (it.shape === 'plane') m = it.variant === 'winged' ? this._wingedModel(it.color, it.bright, !!(it.state || it.glow)) : this._planeModel(it.color, it.bright, !!(it.state || it.glow));
       else if (it.shape === 'rocket') m = this._rocketModel(it.color, it.rocketStyle);
-      else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state);
+      else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state, it.fighter);
       else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0), !!it.state);
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0), { shade: it.shade });
       else if (it.shape === 'pad') m = this._padModel(it.at);
