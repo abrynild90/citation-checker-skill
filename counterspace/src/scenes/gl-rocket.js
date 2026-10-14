@@ -145,7 +145,9 @@ function bodyProfile(r0, r1, z0, z1, lines = [], shade = 1, groove = 0.7, grad =
   return pts;
 }
 // A cool rim light (sky and Earth-shine) along the silhouette of a vehicle material, so the white body keeps its edge against the dark side of the Earth and space.
-function rimify(m, k = 0.5) {
+// panels (opt-in): the body is also given a little life, a slightly different tone for each skin panel (rings of panels along the axis, six round it) and faint
+// streaks of grime that run down from the engines' end of the vehicle (all from the model-space position: no texture to download).
+function rimify(m, k = 0.5, panels = false) {
   m.onBeforeCompile = (sh) => {
     sh.fragmentShader = sh.fragmentShader.replace(
       '#include <lights_fragment_end>',
@@ -153,8 +155,25 @@ function rimify(m, k = 0.5) {
       { float rimF = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 2.4);
         reflectedLight.directDiffuse += vec3(0.50, 0.68, 1.0) * rimF * ${k.toFixed(2)}; }`,
     );
+    if (!panels) return;
+    sh.vertexShader = 'varying vec3 vOP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vOP = position;');
+    sh.fragmentShader =
+      `varying vec3 vOP;
+      float hh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float vn2(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hh(i), hh(i + vec2(1.0, 0.0)), f.x), mix(hh(i + vec2(0.0, 1.0)), hh(i + vec2(1.0, 1.0)), f.x), f.y); }
+      ` +
+      sh.fragmentShader.replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        { float ang = atan(vOP.y, vOP.x);
+          float pv = hh(vec2(floor(vOP.z / 0.0032), floor(ang * 0.9549 + 3.0))) - 0.5;
+          float st = vn2(vec2(ang * 9.0, vOP.z * 60.0));
+          float low = clamp(0.5 - vOP.z * 12.0, 0.0, 1.0);
+          diffuseColor.rgb *= 1.0 + pv * 0.09 - 0.1 * st * low; }`,
+      );
   };
-  m.customProgramCacheKey = () => 'rkrim' + k;
+  m.customProgramCacheKey = () => 'rkrim' + k + (panels ? 'p' : '');
   return m;
 }
 
@@ -251,7 +270,7 @@ export const rocketMethods = {
       if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0068, -0.0264, -0.0165, -0.0226, 0.0009), 0, 0, 0, 0, 0, a);
       else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0112, -0.0182, -0.0072, -0.0128, 0.0011), 0, 0, 0, 0, 0, a);
     }
-    for (const m of [white, whiteU, nose, dark, darkU, fin, bell, bellU, accent, accentU]) if (m) rimify(m, m === nose ? 0.4 : 0.5);
+    for (const m of [white, whiteU, nose, dark, darkU, fin, bell, bellU, accent, accentU]) if (m) rimify(m, m === nose ? 0.4 : 0.5, m === white || m === whiteU);
     const lower = Kl.build(),
       upper = Ku.build(),
       g = new T.Group(),
