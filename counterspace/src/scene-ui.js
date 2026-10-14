@@ -1180,27 +1180,59 @@ function fitStepsClosed() {
   requestAnimationFrame(() => requestAnimationFrame(trimSteps)); // and again once the rows have settled at their final sizes
 }
 // Desktop: a column of fixed height. Try the settings from loose to tight until every row fits; if none does, cut the list to the whole rows that fit.
+// The setting is one for the whole scene (the tightest any episode needs), so the list does not move when the episode changes.
+function naturalOver() {
+  asideBody.classList.add('st-measure'); // the list and its section take their natural height, so the column's overflow is exactly what does not fit
+  const over = asideBody.scrollHeight - asideBody.clientHeight,
+    h = stepsEl.getBoundingClientRect().height;
+  asideBody.classList.remove('st-measure');
+  return { over, h };
+}
+// The cue is part of what a window leaves: it is shown (with its longest text) while the room is measured
+function showCueForMeasure() {
+  stepsBox.classList.add('has-cue');
+  stepCue.hidden = false;
+  stepCue.querySelector('span').textContent = '9 more steps';
+}
+// For the rows showing now: the loosest setting that holds every row, or else the one that shows the most whole rows in a window
+function modeFor() {
+  for (let i = 0; i < STEP_MODES.length; i++) {
+    setStepMode(i);
+    if (naturalOver().over <= 1) return i;
+  }
+  showCueForMeasure();
+  const kids = visibleStepRows();
+  let best = { i: 0, n: -1 };
+  for (let i = 0; i < STEP_MODES.length; i++) {
+    setStepMode(i);
+    const { over, h } = naturalOver();
+    let n = 0;
+    for (const li of kids) if (li.offsetTop + li.offsetHeight <= h - over + 1) n++;
+    if (n > best.n) best = { i, n };
+  }
+  stepsBox.classList.remove('has-cue');
+  stepCue.hidden = true;
+  return best.i;
+}
 function fitDesktop() {
   const kids = visibleStepRows(),
     total = kids.length;
-  const naturalOver = () => {
-    asideBody.classList.add('st-measure'); // the list and its section take their natural height, so the column's overflow is exactly what does not fit
-    const over = asideBody.scrollHeight - asideBody.clientHeight,
-      h = stepsEl.getBoundingClientRect().height;
-    asideBody.classList.remove('st-measure');
-    return { over, h };
-  };
-  let fitMode = -1;
-  for (let i = 0; i < STEP_MODES.length; i++) {
-    setStepMode(i);
-    if (naturalOver().over <= 1) {
-      fitMode = i;
-      break;
+  // the episodes of the scene each show their own steps: the setting that holds the fullest of them holds all
+  const all = [...stepsEl.children],
+    was = all.map((li) => li.hidden),
+    acts = !expanded && cur?.acts && (!stillOnly || curSim?.cfg.explanationByStep) ? cur.acts : null;
+  let fitMode = 0;
+  if (acts && acts.length > 1)
+    for (const e of acts) {
+      all.forEach((li, i) => (li.hidden = steps[i].t < e.t0 || steps[i].t >= e.t1));
+      if (visibleStepRows().length) fitMode = Math.max(fitMode, modeFor());
     }
-  }
+  all.forEach((li, i) => (li.hidden = was[i]));
+  fitMode = Math.max(fitMode, modeFor());
+  setStepMode(fitMode);
+  if (naturalOver().over > 1) fitMode = -fitMode - 1; // a window is needed in this setting (decoded below)
   if (fitMode >= 0) {
     // every row fits whole: no window, no cue. Of the room that is left under the content, a share goes into the rows as a little air.
-    setStepMode(fitMode);
     fitCost = fitMode;
     const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
       ab = asideBody.getBoundingClientRect(),
@@ -1210,21 +1242,13 @@ function fitDesktop() {
     stepsEl.style.flex = '0 0 auto';
     return;
   }
-  // Not all of them fit, even set tight: a window of whole rows with a cue under it. The setting that shows the most rows wins (the looser one on a tie).
-  stepsBox.classList.add('has-cue');
-  stepCue.hidden = false; // the cue's own height is part of what the window leaves
-  stepCue.querySelector('span').textContent = '9 more steps';
-  let best = null;
-  for (let i = 0; i < STEP_MODES.length; i++) {
-    setStepMode(i);
-    const { over, h } = naturalOver(),
-      avail = h - over;
-    let n = 0;
-    for (const li of kids) if (li.offsetTop + li.offsetHeight <= avail + 1) n++;
-    if (!best || n > best.n) best = { i, n, avail };
-  }
-  setStepMode(best.i);
-  fitCost = total - best.n > 0 ? (total - best.n) * 10 + best.i : best.i;
+  // Not all of them fit, even set this tight: a window of whole rows with a cue under it, using all the height there is.
+  fitMode = -fitMode - 1;
+  showCueForMeasure();
+  const { over, h } = naturalOver(),
+    best = { i: fitMode, avail: h - over };
+  best.n = kids.filter((li) => li.offsetTop + li.offsetHeight <= best.avail + 1).length;
+  fitCost = (total - best.n) * 10 + best.i;
   const r = { n: Math.max(1, best.n), avail: best.avail, h: 0 };
   const bot = kids.map((k) => k.offsetTop + k.offsetHeight),
     top = kids.map((k) => k.offsetTop);
