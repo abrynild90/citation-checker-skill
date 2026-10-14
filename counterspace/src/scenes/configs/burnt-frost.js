@@ -34,9 +34,15 @@ export const BURNT_FROST = {
   camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
+  fitLaunchKeys: IS_PHONE ? undefined : [0], // desktop: the opening is fitted to the ship alone, close, so the interceptor in its cell reads; the satellite comes into frame as the view pulls back
+  fitMinKeys: [0.42],
   dropCoreFrom: 0.55, // after the fall begins the camera frames the debris, not the ship
+  keyTimes: IS_PHONE ? undefined : [0, 0.189, 0.42, 0.52, 0.6, 0.68, 0.76, 0.84, 1], // desktop: more keys through the fall, each fitted to the debris, so the streaks and fragments stay in frame
+  fitDebrisT: IS_PHONE ? undefined : 0.76, // the last keys keep the framing of the widest cloud: the end is the impact region and its trail, not a close-up of one point
+  fitPct: 0.95,
+  fitGlobeFrom: IS_PHONE ? undefined : 0.84, // the last keys keep the whole globe in frame, with the impact point and the trail on it
 
-  fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.62, 0.78], // desktop: the first two key frames sit tight on the ship and the satellite, the second tighter, so the camera is already pushing in from the first second
+  fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.5, 0.78], // desktop: the first two key frames sit tight on the ship and the satellite, the second tighter, so the camera is already pushing in from the first second
   burstPadFrom: IS_PHONE ? undefined : 0.3, // desktop: the early keys are fitted to the craft alone (the burst ring is not in frame yet)
   fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
   hit: {
@@ -94,6 +100,7 @@ export const BURNT_FROST = {
       thick: 0.0055,
       label: 'SM-3 interceptor',
       short: 'SM-3',
+      labelFollow: true, // the leader ends on the missile's head, not on a fixed point of its arc
       rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', preK: 1.0, waitRing: true, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
