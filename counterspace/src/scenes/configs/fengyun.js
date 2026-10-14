@@ -28,6 +28,7 @@ export const FENGYUN = {
   event: 'cn-2007-fy1c',
   hit: { lat: 35.5, lon: 106.5, alt: 880, inc: 98.6, t: 0.3, wa: 0.4 },
   launchCam: 'second',
+  fitSouth: 50, // the first views look from the south, so the vehicle on the pad stands up in the frame (from above it was a speck of 70 px)
   fitLateView: [24, 35], // turn smoothly toward an oblique ring view after the cloud spreads
   fitLateViewFrom: 0.5,
   staticCenter: [24, 35], // oblique to the near-polar orbit: a ring, rather than an edge-on plume
