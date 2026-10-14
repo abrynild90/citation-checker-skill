@@ -89,8 +89,8 @@ export const SOLWIND = {
       label: 'Solwind P78-1',
       color: C.tgt,
       big: 5,
-      minPx: IS_PHONE ? 50 : 68,
-      maxPx: IS_PHONE ? 72 : 108, // readable before the intercept, while remaining clear of the aircraft
+      minPx: IS_PHONE ? 50 : 58,
+      maxPx: IS_PHONE ? 72 : 88, // readable before the intercept, while remaining clear of the aircraft
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
@@ -110,7 +110,7 @@ export const SOLWIND = {
       labelFollow: true, // the leader stays on the missile itself (the vehicle is drawn all the way to the hit)
       hold: -0.004, // and the label goes with the vehicle, which is consumed 0.004 before the hit (gl-rocket pos), not after it
       thick: 0.0065,
-      rocket: { minPx: 86, maxPx: 108, ramp: { k: 1.5, until: 0.35 }, smokeK: 1.7 }, // a little larger so its plume and fins read next to the F-15 (+13%)
+      rocket: { minPx: 105, maxPx: 135, endHold: 0.01, ramp: { k: 1.5, until: 0.35 }, smokeK: 1.7 }, // a little larger so its plume and fins read next to the F-15 (+13%)
       strong: true,
       flash: 0.24,
       flashSpan: 0.14,
