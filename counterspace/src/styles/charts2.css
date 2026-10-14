@@ -297,9 +297,9 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 
 /* Questions read down the page, with answers beside them where space permits. */
 .quiz .q-list { display:block; }
-.quiz .q,.quiz .q-list.all-done .q { display:grid; grid-template-columns:minmax(220px,.85fr) minmax(0,1.5fr); grid-template-rows:auto auto; column-gap:32px; row-gap:6px; padding:24px 0; border:0; border-top:1px solid var(--line); border-radius:0; background:none; box-shadow:none; margin:0; }
+.quiz .q,.quiz .q-list.all-done .q { display:grid; grid-template-columns:minmax(220px,.85fr) minmax(0,1.5fr); grid-template-rows:auto 1fr; align-content:start; column-gap:32px; row-gap:6px; padding:24px 0; border:0; border-top:1px solid var(--line); border-radius:0; background:none; box-shadow:none; margin:0; }
 .quiz .q .q-ask { grid-column:1; grid-row:1; min-height:0; height:auto; font-size:21px; }
-.quiz .q .q-hint,.quiz .q-list.all-done .q>.q-hint { grid-column:1; grid-row:2; margin:0; }
+.quiz .q .q-hint,.quiz .q-list.all-done .q>.q-hint { grid-column:1; grid-row:2; align-self:start; margin:0; }
 .quiz .q .q-body,.quiz .q-list.all-done .q>.q-body { grid-column:2; grid-row:1 / span 2; margin:0; }
 .quiz .q-opts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
 .quiz .q-list.all-done .q-out:before,.quiz .q-list.all-done .q-out:after { display:none; }

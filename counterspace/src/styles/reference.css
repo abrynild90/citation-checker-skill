@@ -150,3 +150,14 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .ref-foot>.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans)}
 .ref-foot>.record-find>.record-tools,.ref-foot>.record-find>.state-choose{margin-top:var(--s-3)}
 @media (min-width:641px){.ref-foot{align-items:center}}
+
+/* short blurbs and ledes never leave a single word alone on their last line */
+.chapter-head>.lede,.chapter-head>.takeaway,.pat-t,.lede{text-wrap:balance}
+.site-foot p,.words-line,.note-line{text-wrap:pretty}
+
+/* footer row on the same three columns as the blocks above: the name on the first column edge, the links on the second, the top button on the third; one baseline */
+@media (min-width:700px){
+  .foot-base{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--s-5);align-items:baseline;justify-content:normal}
+  .foot-base>.foot-nav{justify-self:start}
+  .foot-base>.btn.quiet{justify-self:end;position:relative;top:4px} /* its label sits on the links' baseline (the arrow icon has none) */
+}
