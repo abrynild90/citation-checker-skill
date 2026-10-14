@@ -36,6 +36,8 @@ export const COSMOS1408 = {
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; Table 2-4, p. 02-21.',
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',
+  earthSharp: 0.8, // an unsharp mask on the Earth photograph: the late globe (small, or magnified) stays crisp
+  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision on
   hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 },
   phoneHide: ['Plesetsk', 'Nudol', 'Debris of'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
   camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact', 'Debris of'] },
@@ -68,6 +70,7 @@ export const COSMOS1408 = {
         label: 'ISS orbit (schematic)',
         short: 'ISS orbit',
         iss: true,
+        from: 0.35, // the station is drawn once it is clear of the foot of the frame (before, it rode the bottom edge and the caption)
         big: IS_PHONE ? 1.35 : 2,
         minPx: IS_PHONE ? 54 : 64,
         maxPx: IS_PHONE ? 84 : 120,

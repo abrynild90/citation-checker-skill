@@ -382,7 +382,7 @@ export function buildSim(cfg) {
             labelFn: (t, n) => (t >= a.sat.fail.t ? (n ? a.sat.fail.short : a.sat.fail.label) : n ? a.sat.short : a.sat.label),
             statusColor: (t) => (t >= a.sat.fail.t ? '#ff9a9a' : '#dfe6f7'),
           }),
-          pos: (t) => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed),
+          pos: (t) => (t < (a.sat.from ?? -1) ? null : orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed)), // sat.from (opt-in): the craft is not drawn before this time (it would sit on the frame edge)
           staticPos: a.sat.staticPh != null ? (t) => orbitPos(a.alt, a.inc, raan, phase + a.sat.staticPh + t * 2 * Math.PI * a.sat.speed) : null,
         });
       if (a.sats)

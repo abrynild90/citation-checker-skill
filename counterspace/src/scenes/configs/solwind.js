@@ -48,6 +48,7 @@ export const SOLWIND = {
   sunView: IS_PHONE ? undefined : { az: -45, el: 22 }, // desktop: the Pacific coast and the Earth under the pair are in daylight, not a dull night side
   lightsK: 0.5, // softer city lights: the break-up pieces and the missile stay readable over the coast
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
+  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision on
   hit: {
     lat: 37.5,
     lon: -135.0,

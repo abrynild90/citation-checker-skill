@@ -28,7 +28,7 @@ void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal)
 // the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -55,6 +55,12 @@ void main(){
   float ndl = dot(N, L), ndv = clamp(dot(N, V), 0.0, 1.0);
   vec3 Nb = relief(N);
   vec3 day = mix(texture2D(uDayA, vUv).rgb, texture2D(uDayB, vUv).rgb, uFade);
+  if (uSharp > 0.0) {
+    // cfg.earthSharp (opt-in): an unsharp mask on the photograph (a sharper mip level, minus a blurred one) so the coast, ranges and cloud edges stay crisp on a small or a magnified globe
+    vec3 dA = mix(texture2D(uDayA, vUv, -0.5 * uSharp).rgb, texture2D(uDayB, vUv, -0.5 * uSharp).rgb, uFade);
+    vec3 dB = mix(texture2D(uDayA, vUv, 1.5).rgb, texture2D(uDayB, vUv, 1.5).rgb, uFade);
+    day = max(dA + (dA - dB) * 0.9 * uSharp, vec3(0.0));
+  }
   float water = smoothstep(0.35, 0.65, texture2D(uMask, vUv).r);
   float dt = texture2D(uCloud, vUv * vec2(26.0, 13.0)).g + 0.5 * texture2D(uCloud, vUv * vec2(71.0, 35.5) + 0.37).g - 0.75;
   float magL = 1.0 - smoothstep(0.25, 1.0, max(fwidth(vUv.x), fwidth(vUv.y)) * 4096.0);
@@ -257,6 +263,7 @@ export const earthMethods = {
         uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
         uDay: { value: this.sim.cfg.dayK ?? 1 }, // cfg.dayK: an opt-in gain on the lit side (dark ocean in daylight)
         uSea: { value: this.sim.cfg.seaK ?? 0 }, // cfg.seaK: an opt-in blue lift of the sunlit sea (dark ocean in the picture)
+        uSharp: { value: this.sim.cfg.earthSharp ?? 0 }, // cfg.earthSharp: an opt-in unsharp mask on the day picture (close-ups of a soft photograph)
         uBump: { value: 0 },
       };
     this._eu = u;
