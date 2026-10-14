@@ -112,7 +112,11 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       // (a rocket standing on its pad stands upright in the frame, not on its side)
       south = (cfg.fitSouth ?? 0) * DEG,
       north = cross3(cn, norm(cross3([0, 1, 0], cn))),
-      n = south ? norm(add(scl(cn, Math.cos(south)), scl(north, -Math.sin(south)))) : norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
+      nTilt = norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
+      nSouth = south ? norm(add(scl(cn, Math.cos(south)), scl(north, -Math.sin(south)))) : nTilt,
+      n = nSouth,
+      // fitSouthTo (opt-in, scene time): the keys after it return to the usual side view (the burst and the debris are framed from the side, as before)
+      nAt = (tk) => (south && cfg.fitSouthTo != null && tk > cfg.fitSouthTo + 1e-9 ? nTilt : nSouth),
       cache = {},
       burst = items.find((i) => i.kind === 'flash' && i.big && tgt.hitPos && i.pos === tgt.hitPos) || items.find((i) => i.kind === 'flash' && i.big),
       hn = norm(tgt.hitPos),
@@ -132,7 +136,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
           return fitPose(
             P,
-            cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : n,
+            cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : nAt(tk),
             scl(cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), cfg.lookK ?? 0.97),
             {
               dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time

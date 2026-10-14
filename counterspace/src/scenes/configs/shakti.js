@@ -27,6 +27,7 @@ export const SHAKTI = {
   launchAt: [2.67, 1.55, 0.5],
   earlyKey: true,
   burstPadFrom: 0.3, // the first key frames are fitted to the island, the interceptor and the satellite, not the later burst ring
+  fitSouthTo: 0.38, // after the hit the view returns to the side view (the burst and the debris stay framed)
   fitSouth: 52, // the view is turned toward the south, so the vehicle on its pad stands upright in the frame (seen from the side of the Earth it lay on its side)
   lookK: 0.9, // the Earth sits nearer the middle of the frame, not against its left edge
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town

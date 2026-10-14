@@ -40,7 +40,7 @@ const POSTER_VIEW = {
   spaceplanes: { cam: 2, boost: 1.3 }, // OTV-7's elongated orbit around the Earth
   rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 0.82, boost: 1.8 }, // close on the impact, the satellite several times larger
-  shakti: { back: 0.4, right: 0.12, boost: 1.7 },
+  shakti: { back: 0.72, right: 0.1, boost: 1.7 },
   fengyun: { back: 0.7, boost: 1.8, right: 0.08 },
   dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
