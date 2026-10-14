@@ -9,8 +9,15 @@ export const COSMOS1408 = {
   fitPct: 0.92,
   latePct: 0.8, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
   fitCross: true,
-  fitFillKeys: IS_PHONE ? [0.74, 0.9, 0.9, 0.9, 0.9] : undefined, // 375: the first frame keeps the satellite clear of the caption
-  keyTimes: [0, 0.2, 0.46, 0.62, 1], // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut
+  fitFillKeys: IS_PHONE ? [0.74, 0.9, 0.9, 0.9, 0.9] : [0.6, 0.62, 0.9, 0.94, 0.66],
+  fitGlobeFrom: IS_PHONE ? undefined : 1, // desktop: the last view is the whole Earth, which leaves the foot of the stage to the February 2026 card
+  endShift: IS_PHONE ? undefined : { from: 0.7, to: 0.84, k: 0.3 }, // 375: the first frame keeps the satellite clear of the caption
+  keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.46, 0.62, 1], // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
+  fitSouth: IS_PHONE ? undefined : 52, // desktop: the view looks from the south, so the vehicle on its pad stands upright in the frame (from above it was a speck of 15 px)
+  fitSouthTo: 0.34, // after the hit the view returns to the side view (the cloud and the ISS crossing are framed as before)
+  fitMinKeys: IS_PHONE ? undefined : [1.45, 2.0], // the first key frames the Plesetsk to satellite arc close, so the interceptor and the satellite read as craft
+  preDrift: IS_PHONE ? undefined : { t0: 0.17, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad
+  lookK: IS_PHONE ? undefined : 0.9,
   date: '2021-11-15',
   title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',
   shells: ['LEO'],
@@ -89,7 +96,7 @@ export const COSMOS1408 = {
       t0: 0.17,
       color: C.int,
       label: 'Nudol',
-      rocket: { style: 'slim', minPx: 44, maxPx: 60, glowMin: 14, glowMax: 26 }, // a drawn interceptor with exhaust and smoke, like the other launch scenes
+      rocket: IS_PHONE ? { style: 'slim', minPx: 44, maxPx: 60, glowMin: 14, glowMax: 26 } : { style: 'slim', endHold: 0.01, minPx: 135, maxPx: 165, glowMin: 14, glowMax: 26, ramp: { k: 1.35, until: 0.3 }, burn: 0.8, smokeK: 1.7, pad: { minPx: 44, maxPx: 64 }, vent: true }, // a drawn interceptor with exhaust and smoke, like the other launch scenes
       strong: true,
       flash: 0.2,
       coreK: 0.4,

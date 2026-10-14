@@ -134,6 +134,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           if (tk > ht)
             P.push(...debrisPts(cfg.fitDebrisT != null ? Math.min(tk, cfg.fitDebrisT) : tk, tk > ht + 0.12 && cfg.latePct ? cfg.latePct : (cfg.fitPct ?? 0.8)));
           if (cfg.fitCross && items._cross && tk > ht) P.push(items._cross); // fitCross: the crossing with the other orbit (the ISS's) stays in view
+          // fitGlobeFrom (opt-in): from this key on the whole globe is kept in the frame (the last view is the Earth, not a close-up of the crossing)
+          if (cfg.fitGlobeFrom != null && tk >= cfg.fitGlobeFrom) for (const g of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) P.push(scl(g, 1.03));
           return fitPose(
             P,
             cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : nAt(tk),
@@ -186,7 +188,21 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         k = 1 - d.k * u;
       return { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), k)) };
     };
-    return { name: 'Follow the action', follow: at, ...at(0), hideShell: true };
+    // endShift (opt-in) { from, to, k }: the picture slides up by the fraction k of the half-height between these times, clear of a card that comes up at the foot of the stage
+    const atShift = (t, asp = ASPECT) => {
+      const v = at(t, asp),
+        e = cfg.endShift;
+      if (!e) return v;
+      const w = smooth((t - e.from) / (e.to - e.from));
+      if (w <= 0) return v;
+      const fw = norm(add(v.look, scl(v.pos, -1))),
+        r = norm(cross3(fw, v.up || [0, 1, 0])),
+        u = cross3(r, fw),
+        D = len(add(v.look, scl(v.pos, -1))),
+        d = scl(u, -w * e.k * D * tanFor(asp)[1]);
+      return { ...v, pos: add(v.pos, d), look: add(v.look, d) };
+    };
+    return { name: 'Follow the action', follow: atShift, ...atShift(0), hideShell: true };
   };
   if (cfg.cameras)
     cams = cfg.cameras.map((c0) => {
