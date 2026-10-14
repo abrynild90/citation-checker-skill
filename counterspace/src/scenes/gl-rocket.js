@@ -131,16 +131,31 @@ const ogive = (R, L, x) => {
   const rho = (R * R + L * L) / (2 * R);
   return Math.max(0, Math.sqrt(Math.max(0, rho * rho - (L - x) * (L - x))) + R - rho);
 };
-// Straight body with thin panel lines (a darker groove ring) at the given z positions.
-function bodyProfile(r0, r1, z0, z1, lines = [], shade = 1, groove = 0.7) {
-  const pts = [[r0, z0, shade]],
+// Straight body with thin panel lines (a darker groove ring) at the given z positions. grad [a, b]: the shade runs from a (at z0) to b (at z1), e.g. sooty
+// near the engines and clean above.
+function bodyProfile(r0, r1, z0, z1, lines = [], shade = 1, groove = 0.7, grad = [1, 1]) {
+  const gs = (z) => shade * (grad[0] + ((grad[1] - grad[0]) * (z - z0)) / (z1 - z0)),
+    pts = [[r0, z0, gs(z0)]],
     at = (z) => r0 + ((r1 - r0) * (z - z0)) / (z1 - z0);
   for (const z of lines) {
     const r = at(z);
-    pts.push([at(z - 0.0003), z - 0.0003, shade], [r * 0.988, z - 0.00012, shade * groove], [r * 0.988, z + 0.00012, shade * groove], [at(z + 0.0003), z + 0.0003, shade]);
+    pts.push([at(z - 0.0003), z - 0.0003, gs(z)], [r * 0.988, z - 0.00012, gs(z) * groove], [r * 0.988, z + 0.00012, gs(z) * groove], [at(z + 0.0003), z + 0.0003, gs(z)]);
   }
-  pts.push([r1, z1, shade]);
+  pts.push([r1, z1, gs(z1)]);
   return pts;
+}
+// A cool rim light (sky and Earth-shine) along the silhouette of a vehicle material, so the white body keeps its edge against the dark side of the Earth and space.
+function rimify(m, k = 0.5) {
+  m.onBeforeCompile = (sh) => {
+    sh.fragmentShader = sh.fragmentShader.replace(
+      '#include <lights_fragment_end>',
+      `#include <lights_fragment_end>
+      { float rimF = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 2.4);
+        reflectedLight.directDiffuse += vec3(0.50, 0.68, 1.0) * rimF * ${k.toFixed(2)}; }`,
+    );
+  };
+  m.customProgramCacheKey = () => 'rkrim' + k;
+  return m;
 }
 
 export const rocketMethods = {
@@ -159,7 +174,9 @@ export const rocketMethods = {
       nose = this._mat(slim ? 0x566074 : tipCol.getHex(), { metalness: slim ? 0.55 : 0.2, roughness: slim ? 0.4 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
       dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       darkU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
-      fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(tipCol.getHex(), { metalness: 0.2, roughness: 0.4, vertexColors: true }),
+      fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(0xaab2c2, { metalness: 0.45, roughness: 0.42, vertexColors: true }), // the default vehicle: grey metal fins (only the nose carries the vehicle's colour)
+      bell = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true, emissive: 0xff6a1c, emissiveIntensity: 0 }), // engine bells: they glow when the motor burns
+      bellU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true, emissive: 0xff6a1c, emissiveIntensity: 0 }),
       // slim only: an accent in the vehicle's own colour (stage stripes), so the close-up reads as a built rocket and not as one white tube
       accent = slim ? this._mat(tipCol.getHex(), { metalness: 0.3, roughness: 0.42, vertexColors: true }) : null,
       accentU = slim ? this._mat(tipCol.getHex(), { metalness: 0.3, roughness: 0.42, vertexColors: true }) : null,
@@ -171,11 +188,11 @@ export const rocketMethods = {
     // lower part: nozzle bell, thrust skirt, booster body with panel lines and a dark band, fins
     if (slim)
       // a flared engine bell with a bright rim, a throat and a collar where it meets the skirt
-      Kl.geo(dark, lathe(T, [[D.rL * 0.84, D.zN - 0.0002, 1.0], [D.rL * 0.8, D.zN + 0.0002, 0.75], [D.rL * 0.62, D.zN + 0.002, 0.6], [D.rL * 0.45, D.zN + 0.0038, 0.5], [D.rL * 0.34, D.zN + 0.0054, 0.45], [D.rL * 0.5, D.zN + 0.0058, 0.5]], 18), 0, 0, 0, rx);
-    else Kl.geo(dark, lathe(T, [[D.rL * 0.58, D.zN, 0.7], [D.rL * 0.6, D.zN + 0.0004, 0.55], [D.rL * 0.4, D.zN + 0.0042, 0.5], [D.rL * 0.36, D.zN + 0.0048, 0.5]], 16), 0, 0, 0, rx);
+      Kl.geo(bell, lathe(T, [[D.rL * 0.84, D.zN - 0.0002, 1.0], [D.rL * 0.8, D.zN + 0.0002, 0.75], [D.rL * 0.62, D.zN + 0.002, 0.6], [D.rL * 0.45, D.zN + 0.0038, 0.5], [D.rL * 0.34, D.zN + 0.0054, 0.45], [D.rL * 0.5, D.zN + 0.0058, 0.5]], 18), 0, 0, 0, rx);
+    else Kl.geo(bell, lathe(T, [[D.rL * 0.58, D.zN, 0.7], [D.rL * 0.6, D.zN + 0.0004, 0.55], [D.rL * 0.4, D.zN + 0.0042, 0.5], [D.rL * 0.36, D.zN + 0.0048, 0.5]], 16), 0, 0, 0, rx);
     Kl.geo(dark, lathe(T, [[D.rL * 0.8, D.zB - 0.0035, 0.8], [D.rL * 1.0, D.zB, 0.9]], 18), 0, 0, 0, rx);
     const linesL = slim ? [-0.0185, -0.0125, -0.0065] : [-0.0125, -0.0085];
-    Kl.geo(white, lathe(T, bodyProfile(D.rL, D.rL, D.zB, D.zS, linesL), 22), 0, 0, 0, rx);
+    Kl.geo(white, lathe(T, bodyProfile(D.rL, D.rL, D.zB, D.zS, linesL, 1, 0.7, [0.6, 1.0]), 22), 0, 0, 0, rx); // sooty near the engines, clean above
     if (slim) {
       // the interstage: a dark ring against the upper stage and, below it, a stripe in the vehicle's colour between two thin grooves
       Kl.geo(dark, lathe(T, [[D.rL * 1.02, D.zS - 0.0016, 0.9], [D.rL * 1.02, D.zS, 0.9]], 20), 0, 0, 0, rx);
@@ -185,16 +202,16 @@ export const rocketMethods = {
     if (slim) {
       Ku.geo(whiteU, lathe(T, bodyProfile(D.rL, D.rU, D.zS, D.zI, []), 20), 0, 0, 0, rx);
       // the upper stage's own engine bell and the dark base plate it stands on (what shows once the lower stage has dropped away)
-      Ku.geo(darkU, lathe(T, [[D.rU * 0.95, D.zS - 0.0004, 0.75], [D.rU * 0.8, D.zS - 0.0012, 0.65], [D.rU * 0.62, D.zS - 0.0023, 0.55], [D.rU * 0.5, D.zS - 0.0031, 0.5]], 16), 0, 0, 0, rx);
+      Ku.geo(bellU, lathe(T, [[D.rU * 0.95, D.zS - 0.0004, 0.75], [D.rU * 0.8, D.zS - 0.0012, 0.65], [D.rU * 0.62, D.zS - 0.0023, 0.55], [D.rU * 0.5, D.zS - 0.0031, 0.5]], 16), 0, 0, 0, rx);
       Ku.geo(darkU, lathe(T, [[D.rL * 1.0, D.zS + 0.0001, 0.6], [D.rU * 0.9, D.zS - 0.0004, 0.6]], 20), 0, 0, 0, rx);
       Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zI, D.zT, [0.0145]), 20), 0, 0, 0, rx);
       // two stripes on the body: a dark band and one in the vehicle's colour
       Ku.geo(darkU, lathe(T, [[D.rU * 1.03, 0.0086, 0.85], [D.rU * 1.03, 0.0098, 0.85]], 20), 0, 0, 0, rx);
       Ku.geo(accentU, lathe(T, [[D.rU * 1.03, 0.0104, 0.95], [D.rU * 1.03, 0.0118, 0.95]], 20), 0, 0, 0, rx);
     } else {
-      Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zS, D.zT, [0.0, 0.0065, 0.0135]), 22), 0, 0, 0, rx);
+      Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zS, D.zT, [0.0, 0.0065, 0.0135], 1, 0.7, [0.86, 1.0]), 22), 0, 0, 0, rx);
       Ku.geo(darkU, lathe(T, [[D.rU * 1.02, 0.0073, 0.85], [D.rU * 1.02, 0.0085, 0.85]], 20), 0, 0, 0, rx); // the dark band
-      Ku.geo(darkU, lathe(T, [[D.rU * 0.55, D.zS - 0.0012, 0.55], [D.rU * 0.9, D.zS - 0.0003, 0.7]], 14), 0, 0, 0, rx);
+      Ku.geo(bellU, lathe(T, [[D.rU * 0.55, D.zS - 0.0012, 0.55], [D.rU * 0.9, D.zS - 0.0003, 0.7]], 14), 0, 0, 0, rx);
     }
     const L = D.zNose - D.zT,
       np = [];
@@ -234,6 +251,7 @@ export const rocketMethods = {
       if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0068, -0.0264, -0.0165, -0.0226, 0.0009), 0, 0, 0, 0, 0, a);
       else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0112, -0.0182, -0.0072, -0.0128, 0.0011), 0, 0, 0, 0, 0, a);
     }
+    for (const m of [white, whiteU, nose, dark, darkU, fin, bell, bellU, accent, accentU]) if (m) rimify(m, m === nose ? 0.4 : 0.5);
     const lower = Kl.build(),
       upper = Ku.build(),
       g = new T.Group(),
@@ -281,8 +299,10 @@ export const rocketMethods = {
         return s;
       },
       glow = spr(0xffb060, 0.8),
-      flash = spr(0xfff0c8, 0);
-    rig.add(outer, core, glow, flash);
+      flash = spr(0xfff0c8, 0),
+      hot = spr(0xfffbe8, 0.9), // a small white-hot disc at the nozzle exit, inside the orange glow
+      sepFlash = spr(0xfff6e0, 0); // the flash of the separation charges at the interstage
+    rig.add(outer, core, glow, hot, flash);
     rig.position.z = D.zN;
     inner.add(rig);
     // nose heating: a faint glow at the tip, driven with the nose material's emissive
@@ -307,7 +327,8 @@ export const rocketMethods = {
     });
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
-    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    inner.add(sepFlash);
+    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, hot, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -663,6 +684,21 @@ export const rocketMethods = {
       rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)));
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
       rk.glow.position.z = -0.003;
+      rk.hot.visible = vis && thr > 0.004 && !hide;
+      rk.hot.scale.setScalar((0.0062 + 0.003 * thr) * ak * (1 + 0.3 * (pk - 1)) * (1 - 0.35 * e));
+      rk.hot.material.opacity = Math.min(1, 1.1 * thr) * (1 - 0.5 * e);
+      rk.hot.position.z = -0.0016;
+      // the engine bells glow while the motor burns (the lower one until the separation, then the upper one)
+      rk.bell.emissiveIntensity = (sepNow ? 0 : 1.5) * thr;
+      rk.bellU.emissiveIntensity = (sepNow ? 1.5 : 0) * thr;
+      // separation flash: a bright burst at the interstage as the lower part lets go
+      {
+        const sf = sepNow ? Math.exp(-sepAge * 11) * clamp01(sepAge / 0.012 + 0.2) : 0;
+        rk.sepFlash.visible = vis && sf > 0.02 && !hide;
+        rk.sepFlash.position.z = D.zS;
+        rk.sepFlash.scale.setScalar((0.012 + 0.03 * sf) * (fx.stage?.puff ?? 1) ** 0.5);
+        rk.sepFlash.material.opacity = Math.min(0.95, sf);
+      }
       rk.flash.visible = vis && st.flash > 0.01 && !hide;
       const reLit = sepNow && t >= rec.burns[rec.burns.length - 1][0]; // the upper stage's own ignition: a small flash, not the first launch burst
       rk.flash.scale.setScalar((0.016 + 0.03 * st.flash) * (reLit ? 0.5 : 1) * ak);
