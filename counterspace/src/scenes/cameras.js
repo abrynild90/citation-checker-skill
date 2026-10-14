@@ -259,7 +259,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       const e = debrisScale(asp),
         x = Math.max(0, Math.min(NG, t * NG)),
         i = Math.min(NG - 1, Math.floor(x)),
-        S = Math.exp(Math.log(e[i] + (e[i + 1] - e[i]) * (x - i)) * smooth((t - ht) / 0.03)); // eased in from the hit: the pull-back never runs ahead of it
+        S = Math.exp(Math.log(e[i] + (e[i + 1] - e[i]) * (x - i)) * smooth((t - ht) / (fitDeb.ease ?? 0.03))); // eased in from the hit (fitDeb.ease: a longer ease for a slower pull-back): the pull-back never runs ahead of it
       return S <= 1.0005 ? v : { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), S)) };
     };
     return { name: 'Follow the action', follow: atFit, ...atFit(0), hideShell: true };

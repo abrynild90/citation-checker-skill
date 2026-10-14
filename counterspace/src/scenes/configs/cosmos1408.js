@@ -12,7 +12,7 @@ export const COSMOS1408 = {
   fitFillKeys: IS_PHONE ? [0.74, 0.9, 0.9, 0.9, 0.9] : [0.6, 0.62, 0.9, 0.92, 0.94, 0.7], // 375: the first frame keeps the satellite clear of the caption
   fitGlobeFrom: IS_PHONE ? undefined : 1, // desktop: the last view is the whole Earth, which leaves the foot of the stage to the February 2026 card
   endShift: IS_PHONE ? undefined : { from: 0.7, to: 0.84, k: 0.38 }, // the picture slides up between these times, clear of the card that comes up at the foot of the stage
-  keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.4, 0.52, 0.64, 1], // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
+  keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.46, 0.58, 0.68, 1], // desktop: the pull-back from the pad view to the whole cloud takes 0.16 after the hit (no cut) // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
   fitSouth: IS_PHONE ? undefined : 52, // desktop: the view looks from the south, so the vehicle on its pad stands upright in the frame (from above it was a speck of 15 px)
   fitSouthTo: 0.34, // after the hit the view returns to the side view (the cloud and the ISS crossing are framed as before)
   fitMinKeys: IS_PHONE ? undefined : [1.45, 2.0], // the first key frames the Plesetsk to satellite arc close, so the interceptor and the satellite read as craft
@@ -37,7 +37,7 @@ export const COSMOS1408 = {
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',
   earthSharp: 0.8, // an unsharp mask on the Earth photograph: the late globe (small, or magnified) stays crisp
-  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision on
+  debrisFit: IS_PHONE ? {} : { ease: 0.12 }, // the camera keeps the live debris inside the frame from the collision on (desktop: the extra pull-back eases in over 0.12)
   hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 },
   phoneHide: ['Plesetsk', 'Nudol', 'Debris of'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
   camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact', 'Debris of'] },
