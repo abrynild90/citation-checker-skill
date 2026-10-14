@@ -108,7 +108,11 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
     let sd = cross3(cn, [0, 1, 0]);
     if (len(sd) < 0.2) sd = [1, 0, 0];
     const tilt = (cfg.fitTilt ?? 24) * DEG,
-      n = norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
+      // fitSouth (opt-in, degrees): the view is turned toward the south instead of the side, so the local vertical at the launch site points up in the picture
+      // (a rocket standing on its pad stands upright in the frame, not on its side)
+      south = (cfg.fitSouth ?? 0) * DEG,
+      north = cross3(cn, norm(cross3([0, 1, 0], cn))),
+      n = south ? norm(add(scl(cn, Math.cos(south)), scl(north, -Math.sin(south)))) : norm(add(scl(cn, Math.cos(tilt)), scl(norm(sd), Math.sin(tilt) * (cfg.fitSide ?? 1)))),
       cache = {},
       burst = items.find((i) => i.kind === 'flash' && i.big && tgt.hitPos && i.pos === tgt.hitPos) || items.find((i) => i.kind === 'flash' && i.big),
       hn = norm(tgt.hitPos),
