@@ -29,6 +29,17 @@ document.getElementById('firstLookOpen').onclick = (e) => {
   document.getElementById('firstLookTitle').focus({ preventScroll: true });
   section.scrollIntoView({ block: 'start', behavior: 'instant' });
 };
+// Esc closes the panel and returns to the button that opened it (the Skip button stays).
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || e.defaultPrevented || section.hidden) return;
+  const a = document.activeElement;
+  if (a && a !== document.body && !section.contains(a)) return; // focus is elsewhere (a scene, a menu): Esc is theirs
+  e.preventDefault();
+  section.hidden = true;
+  const open = document.getElementById('firstLookOpen');
+  open.setAttribute('aria-expanded', 'false');
+  open.focus();
+});
 section.querySelectorAll('[data-look]').forEach((b) => (b.onclick = () => show(+b.dataset.look)));
 document.getElementById('firstLookBack').onclick = () => show(step - 1);
 document.getElementById('firstLookNext').onclick = () => {
