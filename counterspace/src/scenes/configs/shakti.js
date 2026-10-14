@@ -35,6 +35,7 @@ export const SHAKTI = {
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   phoneHide: ['PDV'], // 375: Microsat-R and the island are enough around the strike
   fitFillKeys: IS_PHONE ? undefined : [0.95, 0.85, 0.8, 0.76, 0.68, 0.62], // desktop: the opening is tight on the pad, then eases out
+  fitMinKeys: IS_PHONE ? undefined : [null, null, null, null, 1.55, 2.0], // desktop: the last keys stay out, so the Earth is not a close-up of a few pixels of land (the debris has burned up by then)
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped
   liveOff: {
     Impact: [-200, -50],
@@ -44,6 +45,8 @@ export const SHAKTI = {
   }, // the two pills sit on opposite sides of the strike, one above and one below
   camOff: { 1: { PDV: [130, -115], 'Abdul Kalam': [-150, 40] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
   phoneOff: { 'Abdul Kalam': [-105, 0], Impact: [110, -60] }, // compact views keep names off the launch plume and Earth limb
+  earthSharp: 0.8, // an unsharp mask on the Earth photograph: the late globe (small, or magnified) stays crisp
+  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision on
   hit: {
     lat: 26.0,
     lon: 95.0,
@@ -89,6 +92,7 @@ export const SHAKTI = {
       strong: true,
       coreK: 0.35,
       flashSpan: 0.14,
+      retire: 0.22, // the spent interceptor path (the faint predicted arc and the bright wake run along one line) is removed a moment after the hit: no doubled line into the impact point
       linger: 0.2,
       lingerK: 0.6,
       lingerEnd: 0.7,

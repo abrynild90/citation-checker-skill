@@ -291,7 +291,10 @@ const methods = {
         this._label(
           it.label,
           (t) => {
-            const la = typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt; // a function (opt-in, path labelNear): the label follows a point of the line
+            let la = typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt; // a function (opt-in, path labelNear): the label follows a point of the line
+            // rocketT0 (opt-in): the leader ends on the drawn vehicle itself (an air-launched missile hangs under, then swings clear of, its carrier: not on the path)
+            const rk = it.rocketT0 != null ? this._rkt?.find((r) => r.fx.t0 === it.rocketT0) : null;
+            if (la && rk?.obj?.visible) la = [rk.obj.position.x, rk.obj.position.y, rk.obj.position.z];
             return it.labelEnd != null && t > it.labelEnd ? null : it.labelStart != null && t < it.labelStart ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? la : null) : la;
           },
           null,
@@ -328,7 +331,7 @@ const methods = {
       else if (it.shape === 'aircraft') m = this._aircraftModel(!!it.state, it.fighter);
       else if (it.shape === 'site') m = it.pin ? this._pinModel(it.color, it.pos(0)) : this._siteModel(it.color, it.pos(0), !!it.state);
       else if (it.shape === 'ship') m = this._shipModel(it.pos(0), { shade: it.shade });
-      else if (it.shape === 'pad') m = this._padModel(it.at);
+      else if (it.shape === 'pad') m = this._padModel(it.at, it);
       else if (it.shape === 'jammer') m = this._jammerModel(it.color, it.pos(0));
       else {
         if (it.shape === 'sat') {

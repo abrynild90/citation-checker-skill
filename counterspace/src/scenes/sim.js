@@ -382,7 +382,7 @@ export function buildSim(cfg) {
             labelFn: (t, n) => (t >= a.sat.fail.t ? (n ? a.sat.fail.short : a.sat.fail.label) : n ? a.sat.short : a.sat.label),
             statusColor: (t) => (t >= a.sat.fail.t ? '#ff9a9a' : '#dfe6f7'),
           }),
-          pos: (t) => orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed),
+          pos: (t) => (t < (a.sat.from ?? -1) ? null : orbitPos(a.alt, a.inc, raan, phase + t * 2 * Math.PI * a.sat.speed)), // sat.from (opt-in): the craft is not drawn before this time (it would sit on the frame edge)
           staticPos: a.sat.staticPh != null ? (t) => orbitPos(a.alt, a.inc, raan, phase + a.sat.staticPh + t * 2 * Math.PI * a.sat.speed) : null,
         });
       if (a.sats)
@@ -666,6 +666,7 @@ export function buildSim(cfg) {
         width: 2,
         label: a.label,
         labelAt: a.labelFollow ? (t) => bez(Math.min(1, Math.max(0.04, (t - a.t0) / (tgt.t - a.t0)))) : bez(a.labelS ?? 0.5), // labelFollow (opt-in): the leader ends on the missile's head, which is drawn, not on a fixed point of its path
+        rocketT0: a.labelFollow && a.rocket ? a.t0 : null, // the label follows the drawn vehicle (gl-items)
         labelEnd: tgt.t + (a.hold ?? 0.03), // a.hold: the label outlives the hit (the still is taken just after it)
         pts: (t) => {
           if (spent(t)) return [];
@@ -715,6 +716,7 @@ export function buildSim(cfg) {
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,
             stage: a.rocket.stage,
+            plumeK: a.rocket.plumeK, // opt-in: a longer, wider exhaust
             seed: a.t0 * 10,
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
           },
@@ -736,7 +738,7 @@ export function buildSim(cfg) {
       if (a.rocket?.pad) {
         const at = scl(norm(from), 1.002),
           until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60 });
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       if (!a.rocket)
         items.push({
@@ -829,7 +831,8 @@ export function buildSim(cfg) {
         labelDy: a.dy,
         vis: 0,
         fill(t, out, colr) {
-          const dt = t - tgt.t;
+          const dt = t - tgt.t,
+            da = t - Math.max(tgt.t, a.appear ?? 0); // a.appear (opt-in): the fragments are not drawn before this time (the step that names them)
           // Retire a historical cloud before a later source count is shown; do not invent surviving positions.
           const cloudFade = a.fadeOut ? 1 - smooth((t - a.fadeOut[0]) / (a.fadeOut[1] - a.fadeOut[0])) : 1;
           // a.ring { t1, ease }: opt-in closed ring: each fragment's along-track offset grows from 0 at the hit to its own share of the full circle at t1
@@ -842,7 +845,7 @@ export function buildSim(cfg) {
             let x = 0,
               y = 0,
               z = 0;
-            if (dt > 0 && cloudFade > 0) {
+            if (dt > 0 && cloudFade > 0 && !(a.appear != null && t < a.appear)) {
               const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
               let alt = tgt.alt + p.da * fat * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
@@ -888,7 +891,7 @@ export function buildSim(cfg) {
                   fade *
                   cloudFade *
                   (0.4 + 0.6 * core * core) *
-                  (dt > 0 && dt < 0.02 ? dt / 0.02 : 1) *
+                  (da > 0 && da < 0.02 ? da / 0.02 : 1) *
                   (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1),
               ); // lateBoost (opt-in): the old fragments get brighter, so a thin late ring stays visible
             }
@@ -1019,7 +1022,7 @@ export function buildSim(cfg) {
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
             fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, follow: !!a.rocket.follow, smokeK: a.rocket.smokeK,
-            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, seed: a.t0 * 10, marker: kvMark },
+            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, plumeK: a.rocket.plumeK, seed: a.t0 * 10, marker: kvMark },
           });
         } else
           items.push({
@@ -1046,7 +1049,7 @@ export function buildSim(cfg) {
       if (a.rocket?.pad) {
         const at = scl(g0, 1.002),
           until = a.t0 + (a.rocket.pad.hold ?? 0.03);
-        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60 });
+        items.push({ kind: 'point', shape: 'pad', color: a.color, at, pos: (t) => (t < until ? at : null), minPx: a.rocket.pad.minPx ?? 40, maxPx: a.rocket.pad.maxPx ?? 60, bright: !!a.rocket.pad.bright, island: !!a.rocket.pad.island });
       }
       focus = focus || a.from;
     }

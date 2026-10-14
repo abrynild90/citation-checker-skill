@@ -48,13 +48,14 @@ export const SOLWIND = {
   sunView: IS_PHONE ? undefined : { az: -45, el: 22 }, // desktop: the Pacific coast and the Earth under the pair are in daylight, not a dull night side
   lightsK: 0.5, // softer city lights: the break-up pieces and the missile stay readable over the coast
   cloudK: 0.07, // a thinner cloud deck: the white bank beside the subject read as a blob
+  debrisFit: {}, // the camera keeps the live debris inside the frame from the collision on
   hit: {
     lat: 37.5,
     lon: -135.0,
     alt: 530,
     inc: 97.6,
     t: 0.5,
-    wa: IS_PHONE ? 0.45 : 0.2, // desktop: the satellite is nearer the fighter in the opening frame, so the camera can come in on the F-15
+    wa: IS_PHONE ? 0.45 : 0.28, // desktop: the satellite is well above and away from the fighter while it climbs (an air launch at about 12 km, not a fighter at orbit height)
     wf: 0.5,
   },
   liveOff: {
@@ -84,7 +85,7 @@ export const SOLWIND = {
       scale: IS_PHONE ? 3.0 : 4.4, // desktop: 1.5x so the aircraft reads next to the satellite
       minPx: IS_PHONE ? 55 : 140,
       maxPx: IS_PHONE ? 78 : 190,
-      exit: { dur: 0.1, k: 0.6 }, // after the release the F-15 eases down and leaves
+      exit: { dur: 0.07, k: 0.25 }, // after the release the F-15 eases down and leaves (short, so it is gone before the satellite is close)
       label: 'F-15 zoom climb',
       labelUntil: 0.22,
       dx: -64,
