@@ -1015,6 +1015,7 @@ function markStep(k) {
   });
   if (refit) {
     stepsEl.scrollTop = 0;
+    fitSteps(); // at once: the rows that came in must never be drawn for a frame in a list fitted to the other rows
     requestAnimationFrame(fitSteps);
   }
   // the active row is set in a heavier weight and may wrap differently: the clip that cuts the window at its last whole row is measured again
