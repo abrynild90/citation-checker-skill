@@ -294,6 +294,10 @@ export function buildSim(cfg) {
         staticAt: a.staticAt,
         staticPin: a.staticPin,
         labelDy: a.dy,
+        // labelHide (opt-in [t0, t1]): the live pill is left out in that window (the print still names the site), e.g. while a debris cloud peaks around it
+        ...(a.labelHide
+          ? { labelFn: (t, narrow, still) => (!still && t >= a.labelHide[0] && t < a.labelHide[1] ? null : narrow && a.short ? a.short : a.label), statusColor: () => a.color }
+          : {}),
       });
     if (a.type === 'place')
       // a place name with no marker (a sea or region named in the scene's title): a plain label at a lat/lon, no leader

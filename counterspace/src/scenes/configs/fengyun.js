@@ -52,7 +52,7 @@ export const FENGYUN = {
   lightsK: 0.5, // softer night lights over East Asia
   stillImpact: true, // the print also labels the impact point
   actors: [
-    { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground },
+    { type: 'site', at: [28.2, 102.0], label: 'Xichang', color: C.ground, labelHide: IS_PHONE ? undefined : [0.31, 0.6] }, // desktop: the pill is left out while the fresh cloud peaks around the site (it sat on the fragments)
     {
       type: 'target',
       variant: 'fengyun',
@@ -61,8 +61,8 @@ export const FENGYUN = {
       big: true,
       minPx: IS_PHONE ? 60 : 100,
       maxPx: IS_PHONE ? 90 : 140,
-      impactDx: 150,
-      impactDy: -80,
+      impactDx: 125,
+      impactDy: -34,
       impactUntil: 0.6,
     },
     {
