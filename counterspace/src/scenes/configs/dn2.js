@@ -116,6 +116,7 @@ export const DN2 = {
       color: C.geo,
       thick: 0.006,
       opacity: 0.9,
+      fadeDisc: 0.1, // the ring passes in front of the globe's face only as a faint line (it read as a cut across the disc at the start)
     },
   ],
   still: 0.62,

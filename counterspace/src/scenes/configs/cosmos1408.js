@@ -13,7 +13,7 @@ export const COSMOS1408 = {
   fitGlobeOnly: !IS_PHONE, // the last view is the globe itself, filled and centred (no empty space for debris that has gone)
   fitGlobeFrom: IS_PHONE ? undefined : 1, // desktop: the last view is the whole Earth, which leaves the foot of the stage to the February 2026 card
   endShift: IS_PHONE ? undefined : { from: 0.7, to: 0.84, k: 0.3 }, // the picture slides up between these times, clear of the card that comes up at the foot of the stage
-  cardFit: IS_PHONE ? undefined : { top: 44, bottom: 205, gap: 8 }, // desktop: the last (globe-only) view fills the stage height between the banner and the February 2026 card (measured in px, so the card never covers the globe)
+  cardFit: IS_PHONE ? undefined : { top: 44, bottom: 205, gap: 34 }, // desktop: the last (globe-only) view fills the stage height between the banner and the February 2026 card (measured in px, so the card never covers the globe)
   keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.5, 0.6, 0.7, 1], // desktop: the pull-back from the pad view to the whole cloud takes 0.2 after the hit (no cut) // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
   fitSouth: IS_PHONE ? undefined : 52, // desktop: the view looks from the south, so the vehicle on its pad stands upright in the frame (from above it was a speck of 15 px)
   fitSouthTo: 0.34, // after the hit the view returns to the side view (the cloud and the ISS crossing are framed as before)
