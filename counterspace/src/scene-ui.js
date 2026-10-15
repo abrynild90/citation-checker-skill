@@ -705,9 +705,9 @@ function anchorNote(note) {
     // a card whose text does not fit the room (a long citation in a short window) takes a little more: down to the foot's edge, and up into the gap above the row
     const over = note.scrollHeight - note.clientHeight;
     if (over > 1) {
-      const up = Math.min(Math.max(0, over - 6), 12);
+      const up = Math.min(Math.max(0, over - 2), 16); // (it stops 6 px above the foot's edge, not 2: the card never looks pressed against the bar)
       note.style.top = Math.round(edge - wr.top - up) + 'px';
-      note.style.maxHeight = Math.round(room + 6 + up) + 'px';
+      note.style.maxHeight = Math.round(room + 2 + up) + 'px';
     }
     const nr = note.getBoundingClientRect(),
       br = lawBtn.getBoundingClientRect();
