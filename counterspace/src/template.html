@@ -137,12 +137,17 @@
       <div class="tools scenes-tools">
         <label class="scene-choose">All events <select id="sceneChoose" aria-label="Choose a 3D event"><option value="">Choose an event…</option></select></label>
         <span class="strip-nav" role="group" aria-label="Move along the scenes">
+          <span class="pstrip-count" id="stripCount" aria-hidden="true"></span>
           <button class="btn icon" id="stripPrev" type="button" aria-label="Show earlier scenes" disabled><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
           <button class="btn icon" id="stripNext" type="button" aria-label="Show more scenes"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
         </span>
       </div>
     </header>
-    <ol class="posters" id="posterGrid"></ol>
+    <div class="posters-frame">
+      <ol class="posters" id="posterGrid"></ol>
+      <button class="pstrip-arrow prev" id="pstripPrev" type="button" tabindex="-1" aria-hidden="true" disabled><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
+      <button class="pstrip-arrow next" id="pstripNext" type="button" tabindex="-1" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
+    </div>
   </div>
 </section>
 
