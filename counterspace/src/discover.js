@@ -15,9 +15,9 @@ const yearOf = (s) => s.date.slice(0, 4);
 // Titles end with the year in brackets; the card shows the year on its own line.
 const nameOf = (s) => s.title.replace(/\s*\((\d{4}[^)]*)\)\s*$/, '');
 
-// The strip opens with the scenes that land hardest; the rest follow, and every scene is in it. The year on each card keeps the dates readable.
-const STRIKING = ['starfish', 'fengyun', 'cosmos1408', 'viasat', 'sj21-tug', 'laser', 'burnt-frost', 'shakti', 'solwind', 'dn2', 'gnss', 'rpo', 'spaceplanes'];
-const STRIP = [...ORDER].sort((a, b) => STRIKING.indexOf(a.id) - STRIKING.indexOf(b.id));
+// The strip runs in date order, oldest first (the order of ORDER, the same as the scene window's own 1 / 13 count and its Previous / Next buttons), so the cards read as a
+// timeline; the year on each card keeps the dates readable. "Surprise me" closes the strip.
+const STRIP = ORDER;
 
 function drawGallery() {
   const grid = document.getElementById('posterGrid');
@@ -166,9 +166,30 @@ function stripControls(grid) {
     grid.style.setProperty('--cards', String(grid.children.length - 1));
     grid.classList.add('has-pad');
   }
+  // The same two arrows again at the picture's edges (aria-hidden and out of the tab order: the pair above is the one for assistive technology and keyboards), and a count
+  // of the cards in view ("1 to 4 of 13"), so the strip says both that it goes on and how far.
+  const ePrev = document.getElementById('pstripPrev'),
+    eNext = document.getElementById('pstripNext'),
+    count = document.getElementById('stripCount');
   const sync = () => {
     prev.disabled = grid.scrollLeft < 4;
     next.disabled = grid.scrollLeft + grid.clientWidth > grid.scrollWidth - 4;
+    if (ePrev) ePrev.disabled = prev.disabled;
+    if (eNext) eNext.disabled = next.disabled;
+    const pic = grid.querySelector('.pc-pic');
+    if (pic && grid.parentElement) grid.parentElement.style.setProperty('--edge-top', Math.round(pic.offsetTop + pic.offsetHeight / 2) + 'px');
+    // a card cut by either edge shows its picture only: its title never ends in half a word
+    for (const c of grid.querySelectorAll('.pcard')) {
+      const r = c.getBoundingClientRect(),
+        b = grid.getBoundingClientRect();
+      c.classList.toggle('cut', r.left < b.left - 4 || r.right > b.right + 4);
+    }
+    if (count) {
+      const cards = [...grid.querySelectorAll('.pcard:has(.pc-btn)')],
+        box = grid.getBoundingClientRect(),
+        seen = cards.map((c, i) => [c.getBoundingClientRect(), i]).filter(([r]) => r.left >= box.left - 4 && r.right <= box.right + 4).map(([, i]) => i + 1);
+      count.textContent = seen.length ? (seen.length === 1 ? `${seen[0]} of ${cards.length}` : `${seen[0]} to ${seen[seen.length - 1]} of ${cards.length}`) : '';
+    }
     // a soft fade on the end that is cut off, so a half-visible card reads as "more this way", never as a mistake
     grid.classList.toggle('more-l', !prev.disabled);
     grid.classList.toggle('more-r', !next.disabled);
@@ -187,6 +208,8 @@ function stripControls(grid) {
   };
   prev.onclick = () => go(-1);
   next.onclick = () => go(1);
+  if (ePrev) ePrev.onclick = () => go(-1);
+  if (eNext) eNext.onclick = () => go(1);
   grid.addEventListener('scroll', sync, { passive: true });
   addEventListener('resize', sync);
   sync();

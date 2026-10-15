@@ -117,10 +117,11 @@ export const SHAKTI = {
         cool: [1, 0.8, 0.42],
       }, // warm fragments with short trails; the dark halo separates them from the amber city lights
       darkHalo: 0.92, // a dark disc behind every fragment lifts it off the lit land
+      glow: { size: 2.7, gain: 0.5 }, // and a hot additive halo (brightest while fresh) lifts it off pale terrain such as Tibet: tan dots on tan land had little contrast
       hard: true, // crisp gold-white fragments with a bright centre: not another soft amber town light
       size: 0.036,
-      minPx: 2.5,
-      maxPx: 5,
+      minPx: 3,
+      maxPx: 6,
       additive: false,
       lateGlow: false,
     },

@@ -147,7 +147,7 @@ export class GLHost {
     const w = this.el.clientWidth,
       h = this.el.clientHeight,
       top = w < 520 ? 46 : 36,
-      bot = (this.statusEl && this.status ? this.statusEl.offsetHeight : 0) + 14;
+      bot = (this.statusEl && this.status && !this._capTop ? this.statusEl.offsetHeight : 0) + 14; // a caption at the top (cfg.statusTop) leaves the foot of the picture alone
     const s = Math.round(Math.max(0, (bot - top) / 2) + (w < 520 ? (this.sim?.cfg.phoneLift ?? 0) : (this.sim?.cfg.lift ?? 0)));
     if (s === this._viewShift) return;
     this._viewShift = s;
@@ -194,6 +194,7 @@ export class GLHost {
       pillCss({ warm: true, block: true }) +
       ';left:50%;bottom:10px;top:auto;transform:translateX(-50%);white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 16px)';
     this.labelLayer.appendChild(this.statusEl);
+    this._capTop = false;
     this.factEl = null;
     if (sim.cfg.factCard) {
       const c = sim.cfg.factCard;
@@ -799,6 +800,15 @@ export class GLHost {
         sp.style.cssText = 'display:block;margin-top:2px;font-weight:500;opacity:.88';
         sp.textContent = this._tagLine;
         this.statusEl.appendChild(sp);
+      }
+      // cfg.statusTop (opt-in, a scene time): on a wide stage the caption sits under the banner at the top until this time, where the foot of the picture is Earth
+      // (a caption pill over the lower globe), and drops to its usual place at the foot afterwards
+      const top = !!(this.sim.cfg.statusTop != null && this.el.clientWidth >= 640 && t <= this.sim.cfg.statusTop);
+      if (top !== !!this._capTop) {
+        this._capTop = top;
+        this.statusEl.classList.toggle('cap-top', top);
+        this.statusEl.style.top = top ? '46px' : 'auto';
+        this.statusEl.style.bottom = top ? 'auto' : '10px';
       }
       this._applyBands();
     }

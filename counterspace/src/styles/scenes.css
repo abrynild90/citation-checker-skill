@@ -1381,7 +1381,8 @@
 @media (min-width: 761px) and (min-aspect-ratio: 1/1) and (min-height: 1000px) {
 }
 
-.overlay #sceneView .hlabel[style*="bottom: 10px"] {
+.overlay #sceneView .hlabel[style*="bottom: 10px"],
+.overlay #sceneView .hlabel.cap-top {
   max-width: calc(100% - 16px) !important;
   display: -webkit-box !important;
   -webkit-box-orient: vertical;
@@ -1390,7 +1391,8 @@
   overflow: hidden;
 }
 /* the note "drawn for illustration" is the chip at the top; the caption does not say it again */
-.overlay #sceneView .hlabel[style*="bottom: 10px"] > span {
+.overlay #sceneView .hlabel[style*="bottom: 10px"] > span,
+.overlay #sceneView .hlabel.cap-top > span {
   display: none !important;
 }
 
@@ -1819,7 +1821,8 @@
 .overlay .sv-hint span[hidden]{display:none}
 /* In-picture status caption on a wide stage: a calm pill of at most about 60 characters a line, capped width, not edge to edge */
 @media (min-width: 761px) {
-  .overlay #sceneView .hlabel[style*="bottom: 10px"] {
+  .overlay #sceneView .hlabel[style*="bottom: 10px"],
+  .overlay #sceneView .hlabel.cap-top {
     max-width: min(56em, calc(100% - 32px)) !important;
     text-wrap: balance;
   }
@@ -1842,7 +1845,7 @@
 
 /* Source pills wrap to a second line rather than touch the panel edge */
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px), (max-width: 900px) and (max-aspect-ratio: 1/1), (min-width: 761px) and (min-aspect-ratio: 1/1) and (max-height: 860px) {
-  .overlay .sv-srcrow { flex-wrap: wrap; padding-block: 4px; }
+  .overlay .sv-srcrow { flex-wrap: wrap; padding-block: 4px 8px; } /* a little more under the last row of pills: they sat 2-3 px above the foot bar */
   .overlay .sl-links { flex-wrap: wrap; flex: 1 1 auto; }
 }
 /* Short desktop window (1366x768, 1280x720, 1280x800, 1440x800): the "About this picture / Where to go next" row is not in the story column, so its two ways on sit in the
@@ -1855,7 +1858,7 @@
   .overlay .sv-srcrow {
     gap: 6px;
     row-gap: 2px;
-    padding-block: 3px;
+    padding-block: 3px 7px;
   }
   .overlay .sl-btn,
   .overlay .sv-srcrow .pill {
@@ -2727,3 +2730,8 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-2);
 }
+
+/* A note open over the story column (About this picture, Where to go next) covers the "Did you know" box under it whole: a strip of that box showed under the note's lower edge
+   as a faint ghost edge */
+.overlay .story-scroll:has(> .sv-pbody:not([hidden])) > .sv-dyk,
+.overlay .story-wrap:has(> .sv-pbody:not([hidden])) .sv-dyk { visibility: hidden; }

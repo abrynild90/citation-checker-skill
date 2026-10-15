@@ -16,6 +16,8 @@ export const COSMOS1408 = {
   cardFit: IS_PHONE ? undefined : { top: 44, bottom: 205, gap: 34 }, // desktop: the last (globe-only) view fills the stage height between the banner and the February 2026 card (measured in px, so the card never covers the globe)
   keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.5, 0.6, 0.7, 1], // desktop: the pull-back from the pad view to the whole cloud takes 0.2 after the hit (no cut) // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
   fitSouth: IS_PHONE ? undefined : 52, // desktop: the view looks from the south, so the vehicle on its pad stands upright in the frame (from above it was a speck of 15 px)
+  fitRoll: IS_PHONE ? undefined : { from: 0.29, to: 0.37, deg: 62, back: [0.64, 0.8] }, // desktop: the view rolls as it pulls back from the pad, so the near-polar orbit and its debris run across the picture, not up it
+  statusTop: IS_PHONE ? undefined : 0.74, // desktop: until the globe-only view the caption sits under the banner (at the foot it covered the lower globe); then it returns below the card
   fitSouthTo: 0.34, // after the hit the view returns to the side view (the cloud and the ISS crossing are framed as before)
   fitMinKeys: IS_PHONE ? undefined : [1.45, 2.0], // the first key frames the Plesetsk to satellite arc close, so the interceptor and the satellite read as craft
   preDrift: IS_PHONE ? undefined : { t0: 0.17, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad
@@ -39,7 +41,7 @@ export const COSMOS1408 = {
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',
   earthSharp: 0.8, // an unsharp mask on the Earth photograph: the late globe (small, or magnified) stays crisp
-  debrisFit: IS_PHONE ? {} : { ease: 0.2 }, // the camera keeps the live debris inside the frame from the collision on (desktop: the extra pull-back eases in over 0.2)
+  debrisFit: IS_PHONE ? {} : { ease: 0.1 }, // the camera keeps the live debris inside the frame from the collision on (desktop: the extra pull-back eases in over 0.1)
   hit: { lat: 66.0, lon: 52.0, alt: 470, inc: 82.6, t: 0.3, wa: 0.4, wf: 0.6 },
   phoneHide: ['Plesetsk', 'Nudol', 'Debris of'], // 375: the launch site is secondary here; the Impact and Cosmos 1408 labels carry the picture
   camHide: { 2: ['Impact'], 3: ['Plesetsk', 'Impact', 'Debris of'] },
@@ -116,6 +118,7 @@ export const COSMOS1408 = {
       spreadInc: 3.4,
       spreadRaan: 1.6,
       dv: 1.7,
+      lobes: { core: 0.2, gap: 0.3, cone: 0.5, wide: 1.5, couple: 0.5 }, // velocity-dispersed lobes along the orbit (a fan ahead and a fan behind), not one vertical curtain
       decay: 0.25,
       late: { t0: 0.34, k: 7, kr: 1.2 },
       lateBoost: 0.4, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end
@@ -152,7 +155,7 @@ export const COSMOS1408 = {
     'Cosmos 1408': [-100, 14],
     Plesetsk: [-96, 44],
     'ISS orbit': [150, -54],
-    Impact: [150, -64],
+    Impact: [140, -88],
   }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [235, -30] }, // the still: the ISS label sits just right of the globe's edge
   status: [
@@ -160,6 +163,6 @@ export const COSMOS1408 = {
     [0.32, 'Collision at about 470 km: debris spreads and crosses the ISS orbit', 'Collision at about 470 km; debris spreads'],
     [0.6, '2021: debris spreads across the ISS’s orbital height; the crew sheltered', '2021: debris crosses the ISS’s orbital height'],
     [0.76, 'Time passes. The historical cloud fades; it is not a map of surviving fragments', 'Historical cloud fades; later count follows'],
-    [0.84, 'February 2026: SWF counts 5 of more than 1,800 tracked fragments still in orbit', 'February 2026: 5 tracked fragments remain (SWF)'],
+    [0.84, 'February 2026: SWF’s count of the fragments still in orbit', 'February 2026: SWF’s count of fragments in orbit'], // the card under the globe carries the numbers; the caption does not say them again
   ],
 };
