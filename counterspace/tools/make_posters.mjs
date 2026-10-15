@@ -19,8 +19,8 @@ const POSTER_T = {
   starfish: 0.6, // the belt pulled out around the whole Earth, the burst inside it
   solwind: 0.27, // the F-15 and the missile climbing toward the textured satellite, all clear of the frame edges
   fengyun: 0.16, // the launch, the interceptor and the satellite clear of it in one frame, before the debris saturates the picture
-  'burnt-frost': 0.29, // the SM-3 well into its climb from the ship, the satellite above it, still apart (the model is drawn until the hit)
-  dn2: 0.24, // the rocket climbing the arc with its plume and trail, the GEO ring around the Earth
+  'burnt-frost': 0.25, // the SM-3 well into its climb from the ship, the satellite above it, still apart (the model is drawn until the hit)
+  dn2: 0.27, // the rocket climbing the arc with its plume and trail, the GEO ring around the Earth
   shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
@@ -34,18 +34,18 @@ const POSTER_T = {
 // Override from the shell with C_<id>=<preset> and P_<id>=px,py,pz,lx,ly,lz[,fov].
 const POSTER_VIEW = {
   viasat: { cam: 0, back: 1.12, boost: 2.4 }, // the ground network and the KA-SAT beams: the satellite at the foot of the beams, Europe above
-  'sj21-tug': { cam: 4, back: 1.1, lift: -0.05, right: 0.0, boost: 1.5 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
+  'sj21-tug': { cam: 0, back: 0.9, lift: -0.05, right: 0.0, boost: 2.2 }, // the looking-down view: the docked pair above the belt line, the Earth's limb below it
   starfish: { cam: 0, back: 1.1 }, // the full-globe composition of the first camera, the whole Earth inside the frame
   gnss: { cam: 0, back: 1.35, lift: 0.04, boost: 1.9 }, // the jammer zone whole, with both planes (one red, one green)
   spaceplanes: { cam: 0, boost: 1.3 }, // the X-37B over the limb, orbit lines around it
-  rpo: { cam: 1, back: 1.25 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
+  rpo: { cam: 1, back: 1.25, boost: 2.2 }, // one hero frame: the SJ-21 and SJ-25 pair on the GEO belt, Earth lit below
   solwind: { cam: 0, back: 1.2, lift: 0.04, right: 0.22, boost: 1.45 }, // the F-15, the missile and the satellite it climbs toward, whole in one frame
   cosmos1408: { back: 1.2, right: -0.22 }, // the whole Earth and the debris band inside the frame
   shakti: { back: 0.72, right: 0.1, boost: 1.7 },
   fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
-  dn2: { back: 0.95, boost: 1.8, right: 0.3 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
+  dn2: { back: 1.05, boost: 1.8, right: 0.45, lift: -0.2 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   laser: { cam: 1, back: 1.75, right: 0.2, boost: 2.2 }, // pulled back from the ground: sharp limb haze and night lights instead of blurry close terrain
-  'burnt-frost': { boost: 1.3, rel: { from: 'USS Lake Erie', to: 'USA-193', el: 6, az: -90, D: 0.7, lift: 0.06 } }, // seen from the side of the ship, low over the horizon: the ship lies along the limb, the SM-3 climbs from it and the satellite is clear above it (head-on, the three stood in one line like a spear)
+  'burnt-frost': { boost: 1.8, rel: { from: 'USS Lake Erie', to: 'USA-193', el: 5, az: -100, D: 0.4, lift: 0.02 } }, // seen from the side of the ship, low over the horizon: the ship lies along the limb, the SM-3 climbs from it and the satellite is clear above it (head-on, the three stood in one line like a spear)
 };
 const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
