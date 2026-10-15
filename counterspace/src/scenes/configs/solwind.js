@@ -66,6 +66,7 @@ export const SOLWIND = {
     Impact: [188, -98],
     Solwind: [178, -24],
   }, // the missile's pill sits above the F-15 with a leader down to the arc
+  offSteps: { Solwind: [[0, -150, -6], [0.3, 178, -24]] }, // the opening: the satellite is small and high at the left, its name sits beside it in space, clear of the Earth's glow
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
