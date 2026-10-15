@@ -924,19 +924,49 @@ export const modelMethods = {
       g = new T.Group(),
       m = this._mat(this._c(color), { side: T.DoubleSide, emissive: this._c(color), emissiveIntensity: 0.3 }),
       dm = this._mat(0xf2f4fa, { side: T.DoubleSide, emissive: 0x556070, metalness: 0.25, roughness: 0.4 });
-    const base = new T.Mesh(new T.CylinderGeometry(0.008, 0.009, 0.0022, 12), m);
+    // a ground station that reads as one from any side: a dark plinth with a ring in the site's colour, a tapered mast and a real concave dish on a short yoke
+    // (a pale bowl with a darker inside and a bright rim), a feed on two struts. (A white hemisphere on a white disc read as a snowman from above.)
+    const plinth = this._mat(0x3c4556, { metalness: 0.4, roughness: 0.6 }),
+      bowOut = this._mat(0xcfd5e2, { side: T.DoubleSide, metalness: 0.35, roughness: 0.42, emissive: 0x1a2030 }),
+      bowIn = this._mat(0x6c7689, { side: T.DoubleSide, metalness: 0.4, roughness: 0.5 });
+    const base = new T.Mesh(new T.CylinderGeometry(0.0082, 0.0092, 0.0020, 14), plinth);
     g.add(base);
-    const mast = new T.Mesh(new T.CylinderGeometry(0.0013, 0.0019, 0.022, 6), m);
-    mast.position.y = 0.0115;
+    const bring = new T.Mesh(new T.TorusGeometry(0.0087, 0.00055, 6, 24), m);
+    bring.rotation.x = Math.PI / 2;
+    bring.position.y = 0.0012;
+    g.add(bring);
+    const mast = new T.Mesh(new T.CylinderGeometry(0.0012, 0.0019, 0.0150, 8), m);
+    mast.position.y = 0.0085;
     g.add(mast);
-    const dish = new T.Mesh(new T.SphereGeometry(0.0085, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), dm);
-    dish.position.y = 0.024;
-    dish.rotation.x = -0.75;
+    const R = 0.0088,
+      dep = 0.0036,
+      pts = [],
+      pts2 = [];
+    for (let i = 0; i <= 10; i++) {
+      pts.push(new T.Vector2((R * i) / 10, dep * (i / 10) ** 2));
+      pts2.push(new T.Vector2((R * 0.96 * i) / 10, dep * (i / 10) ** 2 + 0.0004));
+    }
+    const dish = new T.Group();
+    dish.add(new T.Mesh(new T.LatheGeometry(pts, 20), bowOut));
+    dish.add(new T.Mesh(new T.LatheGeometry(pts2, 20), bowIn));
+    const rim = new T.Mesh(new T.TorusGeometry(R, 0.00042, 5, 24), dm);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = dep;
+    dish.add(rim);
+    for (const sx of [-1, 1]) {
+      const st = new T.Mesh(new T.CylinderGeometry(0.00022, 0.00022, 0.0105, 4), dm);
+      st.position.set(sx * R * 0.5, dep + 0.0042, 0);
+      st.rotation.z = -sx * 0.5;
+      dish.add(st);
+    }
+    const feed = new T.Mesh(new T.CylinderGeometry(0.0005, 0.0003, 0.0022, 6), m);
+    feed.position.y = dep + 0.0092;
+    dish.add(feed);
+    dish.position.y = 0.0168;
+    dish.rotation.order = 'YXZ';
+    dish.rotation.y = 0.95; // turned about the mast so no view looks straight into the bowl (that read as a ball)
+    dish.rotation.x = -0.7;
     g.add(dish);
-    const feed = new T.Mesh(new T.CylinderGeometry(0.0004, 0.0004, 0.008, 4), m);
-    feed.position.set(0, 0.0285, 0.0045);
-    feed.rotation.x = 0.6;
-    g.add(feed);
     if (halo) {
       const h = new T.Sprite(
         new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.16, depthWrite: false, blending: T.AdditiveBlending }),
