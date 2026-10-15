@@ -117,6 +117,34 @@ const methods = {
         cl.labelIdx = best ? best.idx : keep;
         if (best) p = best.p;
       }
+      // cloud.labelCentre (live, opt-in): the label points at the visible fragment nearest the middle of the visible cloud, not at one fixed fragment (which can be a
+      // lone dot far from the rest once the others have burned up or left the frame)
+      if (p && cl?.labelCentre && !noBanner) {
+        const arr = this.dyn.find((d) => d.it === cl)?.obj.geometry.attributes.position.array,
+          pts = [];
+        if (arr)
+          for (let i = 0; i < cl.n; i++) {
+            if (!arr[3 * i] && !arr[3 * i + 1] && !arr[3 * i + 2]) continue;
+            const wq = world([arr[3 * i], arr[3 * i + 1], arr[3 * i + 2]]);
+            if (hidden(wq)) continue;
+            const u2 = new T.Vector3(...wq).project(this.camera);
+            pts.push([u2.x, u2.y, wq]);
+          }
+        if (pts.length) {
+          const mx = pts.reduce((a, q) => a + q[0], 0) / pts.length,
+            my = pts.reduce((a, q) => a + q[1], 0) / pts.length;
+          let bq = pts[0],
+            bd = 1e9;
+          for (const q of pts) {
+            const d = Math.hypot(q[0] - mx, q[1] - my);
+            if (d < bd) {
+              bd = d;
+              bq = q;
+            }
+          }
+          p = bq[2];
+        }
+      }
       if (!p) {
         raw.push(null);
         continue;

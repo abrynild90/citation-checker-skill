@@ -44,6 +44,7 @@ export const SOLWIND = {
   keyTimes: [0, 0.225, 0.38, 0.5, 0.62, 1], // camera key poses: opening, mid-climb, the missile's coast, the hit (with its burst), the debris
   fitLaunchKeys: IS_PHONE ? undefined : [0], // desktop: the opening frame is cut tight on the F-15 and its missile, then pulls back to show the satellite
   fitMinKeys: IS_PHONE ? undefined : [1.15],
+  fitDownKeys: IS_PHONE ? undefined : [0, 0.17, 0.17, 0, 0, 0], // desktop: the mid-climb and coast views slide down, so the missile and the satellite keep a margin under the banner (they rode the top edge)
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
   fitTilt: 40, // the view is turned toward the side, so the debris cloud shows against space, not half hidden behind the limb
   lookK: IS_PHONE ? 0.97 : 0.84, // desktop: the Earth sits nearer the middle of the frame, not against its left edge
@@ -137,6 +138,7 @@ export const SOLWIND = {
     {
       type: 'debris',
       label: 'Fragments',
+      labelCentre: true, // live: the pill points at the fragment nearest the middle of the visible cloud (it pointed at a lone dot beside it)
       dx: 50, dy: -30,
       count: 285,
       spreadAlt: 150,
