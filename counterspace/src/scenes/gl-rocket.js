@@ -185,6 +185,7 @@ export const rocketMethods = {
   _rocketModel(color, style) {
     const T = this.T,
       slim = style === 'slim',
+      asat = style === 'asat', // the default vehicle with a small dark kill vehicle in place of the nose cone (an air-launched anti-satellite missile)
       Kl = new Kit(T),
       Ku = new Kit(T),
       white = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
@@ -239,7 +240,39 @@ export const rocketMethods = {
       np.push([Math.max(0.00004, ogive(D.rU, L, x)), D.zNose - x, i < 2 ? 0.55 : 1]); // the last bit of the tip is darker (heat shield)
     }
     np.reverse(); // base first, tip last
-    Ku.geo(nose, lathe(T, np, 22), 0, 0, 0, rx);
+    let kvG = null;
+    if (asat) {
+      // a short adapter in the vehicle's colour, then the kill vehicle on its own: graphite body, a white thermal band, a gold band in the vehicle's colour, a ring of
+      // small divert thrusters and a blue sensor dome. It is built about its own centre (its group sits at kvz on the axis) so it can fly on alone after the separation.
+      const rK = 0.0033,
+        lK = 0.0125,
+        Kk = new Kit(T),
+        graphite = this._mat(0x2f3644, { metalness: 0.7, roughness: 0.34, vertexColors: true }),
+        band = this._mat(0xeceff5, { metalness: 0.3, roughness: 0.4, vertexColors: true }),
+        gold = this._mat(0xd2a54a, { metalness: 0.9, roughness: 0.32, vertexColors: true }),
+        glass = this._mat(0x2a4a8a, { metalness: 0.8, roughness: 0.14, vertexColors: true, emissive: 0x0c1c44 }),
+        thr = this._mat(0x262c38, { metalness: 0.7, roughness: 0.4 });
+      Ku.geo(nose, lathe(T, [[D.rU, D.zT, 0.9], [D.rU * 0.96, D.zT + 0.0004, 1], [rK * 1.1, D.zT + 0.0026, 1]], 22), 0, 0, 0, rx);
+      const zc = D.zT + 0.0026 + lK / 2; // the kill vehicle's centre
+      Kk.geo(graphite, lathe(T, [[rK, -lK / 2, 0.8], [rK, lK / 2 - 0.0006, 1]], 20), 0, 0, 0, rx);
+      Kk.geo(band, lathe(T, [[rK * 1.04, -lK / 2 + 0.0008, 1], [rK * 1.04, -lK / 2 + 0.0019, 1]], 20), 0, 0, 0, rx);
+      Kk.geo(gold, lathe(T, [[rK * 1.04, -lK / 2 + 0.0023, 1], [rK * 1.04, -lK / 2 + 0.0032, 1]], 20), 0, 0, 0, rx);
+      const dp = [];
+      for (let i = 0; i <= 8; i++) {
+        const a = (i / 8) * (PI / 2);
+        dp.push([Math.max(0.00004, rK * 0.96 * Math.cos(a)), lK / 2 - 0.0006 + rK * 0.96 * Math.sin(a), 1]);
+      }
+      Kk.geo(glass, lathe(T, dp, 20), 0, 0, 0, rx);
+      for (let k = 0; k < 6; k++) {
+        const a = (k * PI) / 3;
+        Kk.box(thr, 0.0006, 0.0006, 0.0013, Math.cos(a) * rK * 1.1, Math.sin(a) * rK * 1.1, 0.0004, 0, 0, a);
+      }
+      for (const m of [graphite, band, gold, glass, thr]) rimify(m, 0.5);
+      kvG = Kk.build();
+      kvG.position.z = zc;
+      kvG.userData.zc = zc;
+      kvG.userData.mats = [graphite, band, gold, glass, thr];
+    } else Ku.geo(nose, lathe(T, np, 22), 0, 0, 0, rx);
     // swept fins: a thin extruded trapezoid with a bevelled edge, tapering in thickness from the root to the tip, with a darker edge (vertex shade: the faces
     // are light, the bevel and the rim darker), four of them in a cross around the body
     const finGeo = (r0, r1, zTE, zLE0, zLE1, th) => {
@@ -278,6 +311,26 @@ export const rocketMethods = {
     g.add(inner);
     for (const m of slim ? [white, dark, fin, accent] : [white, dark, fin]) m.transparent = true; // the lower part fades out as it falls away after a separation
     inner.add(upper, lower);
+    if (kvG) {
+      // the kill vehicle rides the nose until the separation, then flies on alone (the body drops away and fades): its own group, with two cold-gas thruster puffs
+      g.add(kvG);
+      const bodyMats = [white, whiteU, nose, dark, darkU, fin, bell, bellU];
+      for (const m of bodyMats) m.transparent = true;
+      kvG.userData.bodyMats = bodyMats;
+      // a soft cool glow round the vehicle once it is alone (no depth test, so the satellite never hides it)
+      const halo = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xa9d2ff, transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: T.AdditiveBlending }));
+      halo.renderOrder = 5;
+      halo.visible = false;
+      kvG.add(halo);
+      kvG.userData.halo = halo;
+      kvG.userData.puffs = [-1, 1].map((sd) => {
+        const sp = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xcfe2ff, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending }));
+        sp.position.set(sd * 0.0044, sd * 0.0008, -0.0046);
+        sp.visible = false;
+        kvG.add(sp);
+        return sp;
+      });
+    }
     // ---- exhaust rig at the nozzle: outer plume, bright core, a glow and an ignition flash
     const rig = new T.Group(),
       mk = (core) => {
@@ -347,7 +400,7 @@ export const rocketMethods = {
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
     inner.add(sepFlash);
-    g.userData.rk = { D, slim, inner, lower, upper, rig, outer, core, glow, flash, hot, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -780,9 +833,49 @@ export const rocketMethods = {
         rk.ring.scale.setScalar(0.066 + 0.005 * pulse);
         rk.ring.material.opacity = wr * (0.4 + 0.2 * pulse);
       }
+      if (rk.kv && fx.kv) this._kvFrame(rec, t, vis, hide);
       this._smokeFrame(rec, t, st, Lr, vis);
     }
   },
+  // The kill vehicle of an anti-satellite missile (fx.kv { at }): it rides the nose until the separation time, then the spent body drops away aft (tumbling a little,
+  // fading out) while the small vehicle flies on alone, easing onto the path point so it arrives on the target at the hit; cold-gas thruster puffs flicker beside it.
+  // Everything is a function of t (the body offset, tumble and fade included), so scrubbing agrees.
+  _kvFrame(rec, t, vis, hide) {
+    const T = this.T,
+      rk = rec.rk,
+      kv = rk.kv,
+      ts = rec.fx.kv.at,
+      u = (t - ts) / (rec.fx.kv.age ?? SEP_AGE),
+      sep = u >= 0,
+      w = smooth((t - ts) / Math.max(1e-4, rec.fx.t1 - ts)),
+      z0 = kv.userData.zc;
+    kv.visible = vis;
+    kv.position.z = z0 * (1 - w);
+    kv.scale.setScalar(1 + (rec.fx.kv.grow ?? 0.25) * smooth((t - ts) / 0.07));
+    // the spent body: aft of the vehicle, a slow tumble about its middle, fading out
+    const e3 = (rec.e3 ||= new T.Euler()),
+      uu = Math.max(0, u),
+      off = 0.012 * uu + 0.03 * uu * uu;
+    rk.inner.visible = vis && (!sep || u < 1.9);
+    rk.inner.position.z = (rec.lift || 0) - (sep ? off : 0);
+    rk.inner.rotation.copy(e3.set(0.3 * uu * uu, 0.45 * uu * uu, 0.18 * uu * uu));
+    const fade = 1 - smooth((uu - 0.5) / 1.3);
+    for (const m of kv.userData.bodyMats) m.opacity = fade;
+    // cold-gas puffs
+    const tm = t * this.sim.cfg.duration,
+      on = vis && sep && !hide ? smooth(u / 0.4) : 0,
+      ha = kv.userData.halo;
+    ha.visible = on > 0.02;
+    ha.material.opacity = 0.5 * on;
+    ha.scale.setScalar(0.017);
+    kv.userData.puffs.forEach((sp, i) => {
+      const v = Math.pow(Math.max(0, Math.sin(tm * (23 + 9 * i) + i * 2.1)), 5);
+      sp.visible = on > 0.02 && v > 0.02;
+      sp.material.opacity = 0.85 * v * on;
+      sp.scale.setScalar(0.0062 + 0.0058 * v);
+    });
+  },
+
   // Carried under the aircraft until release (it.fx.air: the aircraft item), then released: a free fall of a short span before the motor lights.
   _rocketAir(rec, st, t, Lr) {
     const fx = rec.fx,

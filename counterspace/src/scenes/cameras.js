@@ -116,7 +116,14 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       nSouth = south ? norm(add(scl(cn, Math.cos(south)), scl(north, -Math.sin(south)))) : nTilt,
       n = nSouth,
       // fitSouthTo (opt-in, scene time): the keys after it return to the usual side view (the burst and the debris are framed from the side, as before)
-      nAt = (tk) => (south && cfg.fitSouthTo != null && tk > cfg.fitSouthTo + 1e-9 ? nTilt : nSouth),
+      // fitSouthBlend (opt-in, [from, to] scene time): instead of a switch, the view turns from the south view to the side view gradually between these times
+      nAt = (tk) => {
+        if (south && cfg.fitSouthBlend) {
+          const w = smooth((tk - cfg.fitSouthBlend[0]) / (cfg.fitSouthBlend[1] - cfg.fitSouthBlend[0]));
+          return norm(add(scl(nSouth, 1 - w), scl(nTilt, w)));
+        }
+        return south && cfg.fitSouthTo != null && tk > cfg.fitSouthTo + 1e-9 ? nTilt : nSouth;
+      },
       cache = {},
       burst = items.find((i) => i.kind === 'flash' && i.big && tgt.hitPos && i.pos === tgt.hitPos) || items.find((i) => i.kind === 'flash' && i.big),
       hn = norm(tgt.hitPos),

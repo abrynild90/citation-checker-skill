@@ -295,7 +295,14 @@ const methods = {
             let la = typeof it.labelAt === 'function' ? it.labelAt(t) : it.labelAt; // a function (opt-in, path labelNear): the label follows a point of the line
             // rocketT0 (opt-in): the leader ends on the drawn vehicle itself (an air-launched missile hangs under, then swings clear of, its carrier: not on the path)
             const rk = it.rocketT0 != null ? this._rkt?.find((r) => r.fx.t0 === it.rocketT0) : null;
-            if (la && rk?.obj?.visible) la = [rk.obj.position.x, rk.obj.position.y, rk.obj.position.z];
+            if (la && rk?.obj?.visible) {
+              if (rk.rk.kv && rk.fx.kv) {
+                // a missile with a kill vehicle (fx.kv): the leader ends on the vehicle, which flies on alone after the separation
+                rk.obj.updateMatrixWorld(true);
+                const w = rk.rk.kv.getWorldPosition((this._kvw ||= new T.Vector3()));
+                la = [w.x, w.y, w.z];
+              } else la = [rk.obj.position.x, rk.obj.position.y, rk.obj.position.z];
+            }
             return it.labelEnd != null && t > it.labelEnd ? null : it.labelStart != null && t < it.labelStart ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? la : null) : la;
           },
           null,
