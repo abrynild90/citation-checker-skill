@@ -139,7 +139,7 @@ export const DN2 = {
   liveText: { '10,000': '10,000 km (China)', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
   liveOff: {
     'DN-2 path': [-30, -34],
-    Xichang: [-60, -40],
+    Xichang: [-70, -56],
     '10,000': [10, 42],
     '≥30,000': [-100, 34],
     GEO: [20, 74],
@@ -160,7 +160,13 @@ export const DN2 = {
       [0.45, 40, 104],
       [0.7, 20, 74],
     ],
-  }, // while the rocket is at the apogee the 10,000 and GEO pills step clear of it; // once the rocket is back down the path pill goes straight up so its leader clears the apogee pill
+    '≥30,000': [
+      [0, -100, 34],
+      [0.4, -140, -6],
+      [0.8, -78, 90], // the descending rocket crosses the pill's left side: it drops below the marker instead, its right end left of the GEO pill
+      [0.9, -100, 34],
+    ], // listed last, so it is checked against where the others landed. While the rocket sits on the apogee its pill hangs level to the left, so the leader meets the hull from the side
+  }, // while the rocket is at the apogee the 10,000 and GEO pills step clear of it; once the rocket is back down the path pill goes straight up so its leader clears the apogee pill
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
