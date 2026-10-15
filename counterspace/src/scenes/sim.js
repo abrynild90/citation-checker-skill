@@ -718,6 +718,7 @@ export function buildSim(cfg) {
             stage: a.rocket.stage,
             kv: a.rocket.kv, // opt-in { at }: a small kill vehicle rides the nose (style 'asat') and flies on alone after this time (gl-rocket _kvFrame)
             plumeK: a.rocket.plumeK, // opt-in: a longer, wider exhaust
+            endFade: a.rocket.endFade, // opt-in: after the hit the spent vehicle drifts on (rocket.endDrift) and fades out over this span
             seed: a.t0 * 10,
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
           },
@@ -725,7 +726,9 @@ export function buildSim(cfg) {
           // a vertical-launch missile stands in its cell (drawn small, no plume: preK) until the gas pop at t0, then rises out of it over the pop (no jump)
           pos: (t) =>
             t < tgt.t - 0.004 + (a.rocket.endHold ?? 0)
-              ? bez(a.rocket.launch === 'vls' ? Math.max(0.012 + (s0 - 0.012) * smooth(clamp01((t - a.t0) / 0.012)), clamp01((t - a.t0) / (tgt.t - a.t0))) : sAt(t))
+              ? t > tgt.t && a.rocket.endDrift
+                ? add(bez(1), scl(norm(add(bez(1), scl(bez(0.97), -1))), a.rocket.endDrift * (t - tgt.t))) // endDrift (opt-in): past the hit the vehicle coasts on along its last heading
+                : bez(a.rocket.launch === 'vls' ? Math.max(0.012 + (s0 - 0.012) * smooth(clamp01((t - a.t0) / 0.012)), clamp01((t - a.t0) / (tgt.t - a.t0))) : sAt(t))
               : null,
           orient: (t) => {
             const sv = sAt(t);

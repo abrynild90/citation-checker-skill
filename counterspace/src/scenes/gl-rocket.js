@@ -404,7 +404,7 @@ export const rocketMethods = {
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
     inner.add(sepFlash);
-    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin] };
+    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -708,6 +708,20 @@ export const rocketMethods = {
           rk.lower.rotation.set(0, 0, 0);
           for (const m of rk.lowerMats) m.opacity = 1;
         }
+      }
+      // fx.endFade (opt-in, scene time): after the hit the spent vehicle drifts on and fades out over this span (its disappearance is deliberate, not a cut)
+      if (fx.endFade) {
+        const k = clamp01((t - fx.t1) / fx.endFade),
+          on = k > 0;
+        if (on !== !!rec.fadeOn) {
+          for (const m of rk.allMats) {
+            m.transparent = on;
+            m.needsUpdate = true;
+            if (!on) m.opacity = 1;
+          }
+          rec.fadeOn = on;
+        }
+        if (on) for (const m of rk.allMats) m.opacity = 1 - smooth(k);
       }
       rk.rig.position.z = sepNow ? D.zS - (rk.slim ? 0.0029 : 0.0008) : D.zN;
       rk.rig.visible = vis;
