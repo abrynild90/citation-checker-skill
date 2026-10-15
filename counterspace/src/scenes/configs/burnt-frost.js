@@ -69,7 +69,7 @@ export const BURNT_FROST = {
       dy: 44,
       minPx: IS_PHONE ? 72 : 150,
       maxPx: IS_PHONE ? 135 : 190,
-      camK: IS_PHONE ? undefined : { 0: 1.4 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
+      camK: IS_PHONE ? undefined : { 0: 1.28 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
     },
     {
       type: 'target',
