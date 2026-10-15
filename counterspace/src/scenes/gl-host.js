@@ -867,6 +867,7 @@ export class GLHost {
       f.mat.uniforms.uOp.value = f.op * (1 - k);
       f.mesh.visible = k < 1;
     }
+    for (const f of this.fadeInLines || []) f.mat.opacity = f.op * Math.max(0, Math.min(1, (this.t - f.T[0]) / (f.T[1] - f.T[0])));
     // Orbit lines that fade out around their craft (it.gapIds): the line never runs through a model.
     for (const { mat, ids, near } of this.gapRings || []) {
       if (near) mat.uniforms.uNear.value.set(...near.pos, (!near.cams || near.cams.includes(this.camIdx)) && !this._modelBoost ? near.r : 0);
@@ -986,6 +987,7 @@ export class GLHost {
       this.tubeMats = [];
       this.gapRings = [];
       this.fadeRings = [];
+      this.fadeInLines = [];
       this.scene.clear();
       this.scene = null;
       this.earthMat = null;

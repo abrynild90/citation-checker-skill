@@ -14,12 +14,15 @@ const ATMO_VS = `varying vec3 vN; varying vec3 vP; varying vec3 vW;
 void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vP = mv.xyz;
 vW = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * mv; }`;
 
-const PT_VS = `attribute vec4 aCol; uniform float uScale; uniform float uSize; uniform float uMin; uniform float uMax; uniform float uVar; uniform float uD0; varying vec4 vC;
+const PT_VS = `attribute vec4 aCol; attribute float aSz; uniform float uScale; uniform float uSize; uniform float uMin; uniform float uMax; uniform float uVar; uniform float uD0; varying vec4 vC;
 void main(){ vC = aCol; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv;
 float dz = max(-mv.z, 0.1);
 float k = 1.0;
-if (uVar > 1.5) { k = mix(0.5, 2.0, clamp(aCol.a, 0.0, 1.0)); } else if (uVar > 0.0) { k = mix(1.0, 0.55 + 0.9 * clamp(aCol.a, 0.0, 1.0), uVar); vC.a *= mix(1.0, clamp(1.2 - 1.1 * (dz - uD0) / uD0, 0.45, 1.0), uVar); }
-gl_PointSize = clamp(k * uSize * uScale / dz, uMin, uMax); }`;
+if (uVar > 2.5) { k = 1.0; } else if (uVar > 1.5) { k = mix(0.5, 2.0, clamp(aCol.a, 0.0, 1.0)); } else if (uVar > 0.0) { k = mix(1.0, 0.55 + 0.9 * clamp(aCol.a, 0.0, 1.0), uVar); vC.a *= mix(1.0, clamp(1.2 - 1.1 * (dz - uD0) / uD0, 0.45, 1.0), uVar); }
+float ps = clamp(k * uSize * uScale / dz, uMin, uMax);
+// uVar > 2.5 (debris, hard fragments): each fragment has its own size (aSz, log-normal: many small, a few large), applied after the clamp so the spread survives
+if (uVar > 2.5) ps = clamp(clamp(uSize * uScale / dz, uMin, uMax) * aSz, 1.3, uMax * 1.6);
+gl_PointSize = ps; }`;
 // Soft gaussian falloff, normal alpha blending: dense clumps saturate to the particle colour, never to white.
 const PT_FS = `uniform float uGain; varying vec4 vC;
 void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; float f = exp(-r * r * 3.4) * (1.0 - smoothstep(0.8, 1.0, r));
@@ -45,7 +48,7 @@ float r = min(uR, uMaxPx * d / uScale) * mix(uTaper, 1.0, pow(uv.x, 1.2));
 vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
 const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail;
-uniform vec4 uGap0; uniform vec4 uGap1; uniform vec4 uNear; uniform float uFar; uniform float uDisc; uniform float uDash; varying float vU; varying vec3 vP;
+uniform vec4 uGap0; uniform vec4 uGap1; uniform vec4 uNear; uniform float uFar; uniform float uDisc; uniform float uDiscMin; uniform float uDash; varying float vU; varying vec3 vP;
 // uTail > 0: only the last uTail of the tube length behind the head is visible (a capped wake)
 void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
 if (uTail > 0.0) f *= clamp((vU - (uHead - uTail)) / uTail, 0.0, 1.0);
@@ -55,7 +58,7 @@ if (uFar > 0.0) { float fc = dot(normalize(vP), normalize(cameraPosition)); floa
 // uDash > 0 (opt-in): the line is broken into that many dashes along its length (a measuring line)
 if (uDash > 0.0) f *= step(0.42, fract(vU * uDash));
 // uDisc > 0 (opt-in): the line fades where it projects onto the Earth's disc (an orbit seen across the globe reads as an orbit, not a scratch)
-if (uDisc > 0.0) { vec3 dr = normalize(vP - cameraPosition); vec3 cl = cameraPosition + dr * dot(-cameraPosition, dr); f *= smoothstep(uDisc, uDisc * 1.03, length(cl)); }
+if (uDisc > 0.0) { vec3 dr = normalize(vP - cameraPosition); vec3 cl = cameraPosition + dr * dot(-cameraPosition, dr); f *= mix(uDiscMin, 1.0, smoothstep(uDisc, uDisc * 1.03, length(cl))); }
 // uNear (opt-in, ring arcNear): only the arc within radius w of a point (xyz) is drawn, so a follow view shows one belt arc, not both ends of a ring that wraps the camera
 if (uNear.w > 0.0) f *= 1.0 - smoothstep(uNear.w * 0.75, uNear.w, distance(vP, uNear.xyz));
 if (uGap0.w > 0.0) f *= smoothstep(uGap0.w * 0.7, uGap0.w * 1.5, distance(vP, uGap0.xyz));
@@ -138,6 +141,7 @@ const methods = {
           uFar: { value: 0 },
           uDash: { value: 0 },
           uDisc: { value: 0 },
+          uDiscMin: { value: 0 },
         },
       });
     m.userData = { maxPx };
@@ -245,6 +249,7 @@ const methods = {
         line.userData.rgb = col(it.color);
       } else line = new T.Line(g, new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: it.opacity ?? 1 }));
       root.add(line);
+      if (it.fadeIn && !it.dynamic) (this.fadeInLines ||= []).push({ mat: line.material, op: it.opacity ?? 1, T: it.fadeIn }); // opt-in [t0, t1]: a plain line fades in over that time span
       if (it.dynamic || it.gate) this.dyn.push({ it, obj: line });
       if (it.thick) {
         // bright tube so the path reads at any zoom; dynamic ones are revealed with drawRange
@@ -275,6 +280,7 @@ const methods = {
         if (it.fade) tube.material.uniforms.uFar.value = 1; // opt-in thin line, dimmer and dashed on the far side
         if (it.dash) tube.material.uniforms.uDash.value = it.dash; // opt-in dashed line (dash count along its length)
         if (it.fadeDisc) tube.material.uniforms.uDisc.value = 1;
+        if (typeof it.fadeDisc === 'number') tube.material.uniforms.uDiscMin.value = it.fadeDisc; // a number < 1: the line stays that faint over the disc
         if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds, near: it.arcNear });
         if (it.fadeT) (this.fadeRings ||= []).push({ mat: tube.material, op: it.opacity ?? 1, T: it.fadeT, cams: it.fadeCams, mesh: tube });
         if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
@@ -386,7 +392,8 @@ const methods = {
       const deb = it.dynCol && !it.colored,
         mn = it.minPx ?? (deb ? 3 : 2);
       const pm = this._ptMat(it.size, IS_PHONE ? mn + 1 : mn, it.maxPx ?? (deb ? 11 : 9), IS_PHONE ? 1.15 : 1);
-      if (deb) pm.uniforms.uVar.value = it.hard ? 2 : 1; // debris: dots differ in size and brightness, and fade with distance from the camera
+      if (it.sizes) g.setAttribute('aSz', new T.BufferAttribute(it.sizes, 1)); // per-fragment size factor (hard debris)
+      if (deb) pm.uniforms.uVar.value = it.hard ? (it.sizes ? 3 : 2) : 1; // debris: dots differ in size and brightness, and fade with distance from the camera
       if (deb && it.hard) pm.fragmentShader = PT_FS_HARD;
       if (it.additive) pm.blending = T.AdditiveBlending; // opt-in: bright additive sprites read against dark terrain
       const pts = new T.Points(g, pm);
