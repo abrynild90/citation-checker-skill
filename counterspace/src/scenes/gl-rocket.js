@@ -254,7 +254,7 @@ export const rocketMethods = {
         graphite = this._mat(0x2f3644, { metalness: 0.7, roughness: 0.34, vertexColors: true }),
         band = this._mat(0xeceff5, { metalness: 0.3, roughness: 0.4, vertexColors: true }),
         gold = this._mat(0xd2a54a, { metalness: 0.9, roughness: 0.32, vertexColors: true }),
-        glass = this._mat(0x2a4a8a, { metalness: 0.8, roughness: 0.14, vertexColors: true, emissive: 0x0c1c44 }),
+        glass = this._mat(0x27418a, { metalness: 0.3, roughness: 0.5, vertexColors: true, emissive: 0x0a1630 }), // a matte sensor window, not a glossy blue ball that reads as glass in front of the target
         thr = this._mat(0x262c38, { metalness: 0.7, roughness: 0.4 });
       Ku.geo(nose, lathe(T, [[D.rU, D.zT, 0.9], [D.rU * 0.96, D.zT + 0.0004, 1], [rK * 1.1, D.zT + 0.0026, 1]], 22), 0, 0, 0, rx);
       const zc = D.zT + 0.0026 + lK / 2; // the kill vehicle's centre
@@ -911,8 +911,8 @@ export const rocketMethods = {
       on = vis && sep && !hide ? smooth(u / 0.4) : 0,
       ha = kv.userData.halo;
     ha.visible = on > 0.02;
-    ha.material.opacity = 0.5 * on;
-    ha.scale.setScalar(0.017);
+    ha.material.opacity = 0.24 * on; // a faint cool glow (it was a bright blue orb over the satellite behind it)
+    ha.scale.setScalar(0.013);
     kv.userData.puffs.forEach((sp, i) => {
       const v = Math.pow(Math.max(0, Math.sin(tm * (23 + 9 * i) + i * 2.1)), 5);
       sp.visible = on > 0.02 && v > 0.02;

@@ -282,11 +282,14 @@ export const modelMethods = {
     if (variant === 'solwind') {
       // The wheel beneath a single upright sail is the defining outline in the photograph: a ribbed drum with rim rings and a dark deck, a framed
       // cell-gridded sail on two struts, a gold instrument box with a dark aperture, whip antennas and thruster nubs.
-      const dark = this._mat(0x1b2029, { metalness: 0.5, roughness: 0.5 }),
-        gold = this._foil(0xd8a64a),
-        white = this._mat(0xe6e9f0, { metalness: 0.3, roughness: 0.42 });
+      // Opaque, matte materials: a metallic drum mirrors the cold blue environment and reads as glass, so the drum is painted aluminium (low metalness), wrapped in
+      // gold thermal foil whose reflections are kept soft.
+      const dark = this._mat(0x1b2029, { metalness: 0.3, roughness: 0.6 }),
+        gold = this._foil(0xd8a64a, { metalness: 0.55, roughness: 0.5, bumpScale: 1.2 }),
+        white = this._mat(0xe6e9f0, { metalness: 0.15, roughness: 0.5 }),
+        drum = this._mat(0xc8ccd6, { metalness: 0.18, roughness: 0.55, emissive: 0x20242c, emissiveIntensity: 1 });
       const R = 0.0148;
-      K.cyl(this._foil(0xa3adc0), R, R, 0.0072, 0, -0.0133, 0, 0, 0, 0, 40);
+      K.cyl(drum, R, R, 0.0072, 0, -0.0133, 0, 0, 0, 0, 40);
       for (let k = 0; k < 24; k++) {
         const angle = (k * PI) / 12;
         K.box(metal, 0.0004, 0.0074, 0.0004, Math.sin(angle) * R, -0.0133, Math.cos(angle) * R, 0, angle, 0);
@@ -294,7 +297,8 @@ export const modelMethods = {
       K.cyl(dark, R * 0.97, R * 0.97, 0.0005, 0, -0.0094, 0, 0, 0, 0, 40); // the deck
       K.ring(metal, R, 0.0005, 0, -0.0097, 0, PI / 2);
       K.ring(metal, R, 0.0005, 0, -0.0169, 0, PI / 2);
-      K.cyl(foil, R * 0.95, R * 0.95, 0.0012, 0, -0.0173, 0, 0, 0, 0, 40); // the gold base
+      K.cyl(gold, R * 1.012, R * 1.012, 0.0030, 0, -0.0150, 0, 0, 0, 0, 40); // a band of gold thermal foil round the lower drum
+      K.cyl(gold, R * 0.95, R * 0.95, 0.0012, 0, -0.0173, 0, 0, 0, 0, 40); // the gold base
       K.cyl(dark, 0.0034, 0.0042, 0.0008, 0, -0.0181, 0, 0, 0, 0, 20); // a thruster plate under it
       // sail: frame, cell glass (front) and back, a centre rib, two struts down to the deck
       K.group(0, 0.0062, -0.0020, 0, 0, 0, () => {
