@@ -14,9 +14,9 @@ export const COSMOS1408 = {
   fitGlobeFrom: IS_PHONE ? undefined : 1, // desktop: the last view is the whole Earth, which leaves the foot of the stage to the February 2026 card
   endShift: IS_PHONE ? undefined : { from: 0.7, to: 0.84, k: 0.3 }, // the picture slides up between these times, clear of the card that comes up at the foot of the stage
   cardFit: IS_PHONE ? undefined : { top: 44, bottom: 205, gap: 34 }, // desktop: the last (globe-only) view fills the stage height between the banner and the February 2026 card (measured in px, so the card never covers the globe)
-  keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.5, 0.6, 0.7, 1], // desktop: the pull-back from the pad view to the whole cloud takes 0.2 after the hit (no cut) // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
+  keyTimes: IS_PHONE ? [0, 0.2, 0.46, 0.62, 1] : [0, 0.3, 0.37, 0.55, 0.7, 1], // desktop: the pull-back from the pad view to the whole cloud takes 0.2 after the hit (no cut) // the camera pulls back from the launch to the whole cloud over 0.25 of the timeline, not in a 0.1 cut (desktop: the opening is tight on the pad until the hit)
   fitSouth: IS_PHONE ? undefined : 52, // desktop: the view looks from the south, so the vehicle on its pad stands upright in the frame (from above it was a speck of 15 px)
-  fitRoll: IS_PHONE ? undefined : { from: 0.29, to: 0.37, deg: 62, back: [0.64, 0.8] }, // desktop: the view rolls as it pulls back from the pad, so the near-polar orbit and its debris run across the picture, not up it
+  fitRoll: IS_PHONE ? undefined : { from: 0.29, to: 0.37, deg: 28, back: [0.64, 0.8] }, // desktop: the view rolls as it pulls back from the pad, so the near-polar orbit and its debris run across the picture, not up it
   statusTop: IS_PHONE ? undefined : 0.74, // desktop: until the globe-only view the caption sits under the banner (at the foot it covered the lower globe); then it returns below the card
   fitSouthTo: 0.34, // after the hit the view returns to the side view (the cloud and the ISS crossing are framed as before)
   fitMinKeys: IS_PHONE ? undefined : [1.45, 2.0], // the first key frames the Plesetsk to satellite arc close, so the interceptor and the satellite read as craft
@@ -118,7 +118,7 @@ export const COSMOS1408 = {
       spreadInc: 3.4,
       spreadRaan: 1.6,
       dv: 1.7,
-      lobes: { core: 0.2, gap: 0.3, cone: 0.5, wide: 1.5, couple: 0.5 }, // velocity-dispersed lobes along the orbit (a fan ahead and a fan behind), not one vertical curtain
+      lobes: { core: 0.4, gap: 0.1, cone: 0.5, wide: 1.5, couple: 0.5 }, // velocity-dispersed lobes along the orbit (a fan ahead and a fan behind), not one vertical curtain
       decay: 0.25,
       late: { t0: 0.34, k: 7, kr: 1.2 },
       lateBoost: 0.4, // old fragments are brighter and a little larger, so the thinned ring is still visible at the end

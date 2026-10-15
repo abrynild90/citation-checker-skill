@@ -49,6 +49,7 @@ export const DN2 = {
       dx: -40,
       dy: -50,
       head: true,
+      wakeOp: 0.62, // the path behind the rocket stays readable (the coast through the apogee and the fall are slow on screen)
       ghostOpacity: 0.25, // the whole planned path stays readable before the rocket flies it
       rocket: {
         style: 'slim',
@@ -64,7 +65,7 @@ export const DN2 = {
         // no dropped stage: the reports speak of upper stages, but the count is not claimed, and the spent grey stub drifted unlabeled to the frame edge
       },
       apexT: 0.47,
-      rulerFadeIn: [0.08, 0.2],
+      rulerFadeIn: [0.17, 0.25],
       rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth
       staticAt: [0.6, 0.09],
       marks: [
@@ -73,7 +74,7 @@ export const DN2 = {
           label: '10,000 km · China’s stated figure',
           short: '10,000 km (China)',
           phoneFrom: 0.3,
-          from: 0.1, // the tick (and its pill) wait until the view has pulled back from the pad: at the start its ruler ran off the left edge
+          from: 0.2, // the tick (and its pill) wait until the view has finished pulling back from the pad (between 0.14 and 0.17 no slot is free for the pill, so a bare diamond floated over the ocean)
           opt: true,
           color: '#ffd9a0',
           dx: -20,
@@ -99,7 +100,7 @@ export const DN2 = {
           alt: GEO_ALT,
           label: 'GEO ring · 35,786 km',
           short: 'GEO',
-          from: 0.1,
+          from: 0.2,
           opt: true,
           color: C.geo,
           dx: 0,
@@ -140,33 +141,16 @@ export const DN2 = {
   liveOff: {
     'DN-2 path': [-30, -34],
     Xichang: [-70, -56],
-    '10,000': [10, 42],
-    '≥30,000': [-100, 34],
-    GEO: [20, 74],
-  }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
+    '10,000': [-93, 56],
+    '≥30,000': [-95, -84],
+    GEO: [28, 40],
+  }, // each pill keeps one slot for its whole life (no swapping): 10,000 km below-left of its tick, the apogee pill above-left of the apogee marker, GEO just below-right of its tick (clear of the rocket's hull at the apogee)
   offSteps: {
     'DN-2 path': [
       [0, -30, -34],
       [0.8, 0, -62],
     ],
-    '10,000': [
-      [0, 10, 42],
-      [0.4, -20, -50],
-      [0.78, -20, -50],
-      [0.88, 10, 42],
-    ],
-    GEO: [
-      [0, 20, 74],
-      [0.45, 40, 104],
-      [0.7, 20, 74],
-    ],
-    '≥30,000': [
-      [0, -100, 34],
-      [0.4, -140, -6],
-      [0.8, -78, 90], // the descending rocket crosses the pill's left side: it drops below the marker instead, its right end left of the GEO pill
-      [0.9, -100, 34],
-    ], // listed last, so it is checked against where the others landed. While the rocket sits on the apogee its pill hangs level to the left, so the leader meets the hull from the side
-  }, // while the rocket is at the apogee the 10,000 and GEO pills step clear of it; once the rocket is back down the path pill goes straight up so its leader clears the apogee pill
+  }, // once the rocket is back down the path pill goes straight up so its leader clears the apogee pill
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)
