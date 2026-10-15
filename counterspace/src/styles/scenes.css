@@ -2340,8 +2340,10 @@
   .overlay .sv-dyk.pending { display: none; }
   .overlay .sv-dyk.pending.reserve { display: block; visibility: hidden; }
   .overlay .sv-dyk.nofit { display: none !important; } /* no room for it without costing the steps (fitSteps) */
-  .overlay .sv-dyk.reveal { overflow: hidden; animation: dykIn 380ms var(--ease, ease) both; }
-  @keyframes dykIn { from { max-height: 0; opacity: 0; padding-block: 0; margin-bottom: 0; } to { max-height: 14em; opacity: 1; } }
+  .overlay .sv-dyk.reveal { animation: dykIn 380ms var(--ease, ease) both; }
+  /* the reveal never changes the line's box (it is drawn at its full height from the first frame, wiped in by a clip), so a fit that runs while it plays measures
+     the room the line really takes and the list above is never fitted to a half-grown line */
+  @keyframes dykIn { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
   @media (prefers-reduced-motion: reduce) { .overlay .sv-dyk.reveal { animation: none; } }
   .overlay .sv-dyk b { font-weight: 600; color: var(--accent-2); margin-right: 4px; }
   .overlay .story-scroll.pin > .story-foot { margin-top: auto; }
