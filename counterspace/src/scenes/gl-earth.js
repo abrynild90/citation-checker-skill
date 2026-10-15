@@ -28,7 +28,7 @@ void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal)
 // the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp; uniform float uGlint; uniform vec3 uGlintDir;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp; uniform float uSeaWave; uniform float uGlint; uniform vec3 uGlintDir;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -68,6 +68,13 @@ void main(){
     vec3 qd = normalize(vP);
     dt += magL * (0.50 * (vn(qd * 700.0) - 0.5) + 0.35 * (vn(qd * 1700.0 + 5.3) - 0.5) + 0.25 * (vn(qd * 4200.0 + 2.1) - 0.5));
   }
+  float swell = 1.0;
+  if (magL > 0.0 && uSeaWave > 0.0) {
+    // cfg.seaWave (opt-in): fine swell texture on open water where the photograph is magnified, so a close sea is not a soft flat blue
+    vec3 qs = normalize(vP);
+    swell = 1.0 + uSeaWave * magL * water * ((vn(qs * 260.0) - 0.5) * 0.9 + (vn(qs * 700.0 + 1.7) - 0.5) * 0.7 + (vn(qs * 1900.0 + 6.1) - 0.5) * 0.35);
+    day *= swell;
+  }
   day *= 1.0 + dt * (0.7 + 0.45 * magL) * (1.0 - 0.75 * water);
   day = pow(day, vec3(0.96));
   day = mix(day, vec3(dot(day, vec3(0.2126, 0.7152, 0.0722))), 0.10);
@@ -75,7 +82,7 @@ void main(){
   float dayAmt = smoothstep(-0.10, 0.26, ndl);
   float tw = exp(-pow((ndl - 0.04) / 0.13, 2.0));
   vec3 sunCol = mix(vec3(1.0, 0.985, 0.95), vec3(1.0, 0.6, 0.38), clamp(tw * 0.9, 0.0, 1.0));
-  vec3 lit = day * (0.10 + 1.18 * pow(dif, 0.85)) * sunCol * uDay + vec3(0.03, 0.09, 0.20) * uSea * water * (0.15 + dif);
+  vec3 lit = day * (0.10 + 1.18 * pow(dif, 0.85)) * sunCol * uDay + vec3(0.03, 0.09, 0.20) * uSea * water * (0.15 + dif) * swell;
   float lt = smoothstep(0.10, 0.95, mix(texture2D(uLightA, vUv).r, texture2D(uLightB, vUv).r, uFade));
   vec3 lamp = mix(vec3(1.0, 0.46, 0.16), vec3(1.0, 0.88, 0.58), smoothstep(0.25, 0.9, lt)) * lt * (1.0 - 0.9 * water); // no warm patches on the open ocean (cloud and airglow in the night picture)
   vec3 dark = (vec3(0.006, 0.010, 0.024) + day * vec3(0.036, 0.054, 0.100)) * uNight + lamp * 1.15 * uLights;
@@ -272,6 +279,7 @@ export const earthMethods = {
         uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
         uDay: { value: this.sim.cfg.dayK ?? 1 }, // cfg.dayK: an opt-in gain on the lit side (dark ocean in daylight)
         uSea: { value: this.sim.cfg.seaK ?? 0 }, // cfg.seaK: an opt-in blue lift of the sunlit sea (dark ocean in the picture)
+        uSeaWave: { value: this.sim.cfg.seaWave ?? 0 }, // cfg.seaWave: an opt-in fine texture on open water while the picture is magnified
         uSharp: { value: this.sim.cfg.earthSharp ?? 0 }, // cfg.earthSharp: an opt-in unsharp mask on the day picture (close-ups of a soft photograph)
         uBump: { value: 0 },
         uGlint: { value: this.sim.cfg.glintK ?? 0 },

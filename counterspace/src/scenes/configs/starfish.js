@@ -160,6 +160,8 @@ export const STARFISH = {
   dayK: IS_PHONE ? 1.2 : 1.05,
   nightK: 2.4, // the Pacific night side is lifted so the ocean, the island glints and the rocket separate from the dark at t=0
   phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
+  seaWave: IS_PHONE ? 0 : 0.7, // desktop: fine swell texture on the Pacific while the camera is close in (t=0.15-0.25 read soft and flat)
+  earthSharp: IS_PHONE ? 0 : 0.6,
   staticZoom: 1.7,
   staticCenter: [35, -205],
   staticCraftCap: 0.03, // static (screen and print): every icon is at most 3% of the Earth disc area
