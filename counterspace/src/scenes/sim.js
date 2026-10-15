@@ -317,6 +317,7 @@ export function buildSim(cfg) {
         color: '#cfd8ea',
         minPx: a.minPx,
         maxPx: a.maxPx,
+        camK: a.camK, // opt-in { camera index: k }: drawn k times larger on that preset only
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,
@@ -635,7 +636,12 @@ export function buildSim(cfg) {
       const from = a.from === 'aircraft' ? aircraftPos(a.t0) : ll(a.from[0], a.from[1], 1.005);
       const to = tgt.hitPos;
       const mid = norm(add(from, to));
-      const ctrl = scl(mid, Math.max(len(from), len(to)) + (a.arcLift ?? 0.2)); // arcLift (opt-in): how far the path bows outward past the higher end (a near-direct run for an air launch)
+      // arcRise (opt-in): the control point sits above the launch point, this fraction of the way toward the target: a climb that flattens out onto the target's
+      // altitude (a vertical launch), with no overshoot and hook at the end of the path
+      const ctrl =
+        a.arcRise != null
+          ? scl(norm(add(from, scl(add(to, scl(from, -1)), a.arcRise))), len(to) + (a.arcLift ?? 0))
+          : scl(mid, Math.max(len(from), len(to)) + (a.arcLift ?? 0.2)); // arcLift (opt-in): how far the path bows outward past the higher end (a near-direct run for an air launch)
       const bez = (s) => add(add(scl(from, (1 - s) * (1 - s)), scl(ctrl, 2 * (1 - s) * s)), scl(to, s * s));
       const N = 60,
         all = [];

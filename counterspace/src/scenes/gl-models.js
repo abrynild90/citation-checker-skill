@@ -1176,16 +1176,19 @@ export const modelMethods = {
       Z1 = 0.042,
       TOP = 0.0052, // the main deck
       FORE = 0.0072; // the forecastle deck, raised at the bow
-    const keel = this._mat(0x10151f),
-      side = this._mat(0x7a879d, { roughness: 0.55, emissive: 0x1a2232 }),
-      rim = this._mat(0xaab5c9, { emissive: 0x1c2434 }),
-      deckMat = this._mat(0x586480, { emissive: 0x141b29 }),
-      stripe = this._mat(0xe9edf5, { emissive: 0x2a3140 }),
-      light = this._mat(0xe3e8f1, { emissive: 0x20293a }),
-      glass = this._mat(0x182030, { metalness: 0.4, roughness: 0.35 }),
-      funnel = this._mat(0x454e5f),
-      soot = this._mat(0x0b0e14),
-      metal = this._mat(0x9aa4b6);
+    // Opaque naval-grey paint with a small neutral self-light (a fill that stands in for moon and earthshine on the night side), so the hull reads as a solid
+    // grey ship on a dark sea, not a blue see-through shape. Roughness is high and metalness near 0, so the cool environment map does not tint the paint.
+    const paint = (c, k = 0.42, o = {}) => this._mat(c, { metalness: 0.02, roughness: 0.82, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.35, ...o });
+    const keel = paint(0x3a2523, 0.3),
+      side = paint(0x9ba1ab),
+      rim = paint(0xc3c7cf, 0.45),
+      deckMat = paint(0x757b85),
+      stripe = paint(0xf2f2ee, 0.5),
+      light = paint(0xe8e9ec, 0.45),
+      glass = paint(0x1b222d, 0.3, { metalness: 0.3, roughness: 0.4 }),
+      funnel = paint(0x5d626c),
+      soot = paint(0x0b0d11, 0.1),
+      metal = paint(0xb0b4bc);
     // hull: a dark waterline band, the grey side, then the forecastle (the bow rises: the sheer) with a pale rim round the deck edge
     layer(plan(Z0, Z1), 0, 0.0021, keel);
     layer(plan(Z0, Z1), 0.0021, TOP, side);
@@ -1198,7 +1201,7 @@ export const modelMethods = {
     box(0.0017, 0.0003, 0.043, stripe, 0, TOP + 0.0005, -0.0137);
     box(0.0017, 0.0003, 0.0224, stripe, 0, FORE + 0.0005, 0.0225);
     // forecastle: a gun mount, a missile-cell block and a short anchor winch
-    box(0.0042, 0.0003, 0.0052, this._mat(0x252d3c), 0, FORE + 0.0005, 0.0180);
+    box(0.0042, 0.0003, 0.0052, paint(0x30343b), 0, FORE + 0.0005, 0.0180);
     cyl(0.0014, 0.0017, 0.0018, metal, 0, FORE + 0.0005, 0.0285, 10);
     const barrel = new T.Mesh(new T.CylinderGeometry(0.00035, 0.00035, 0.0056, 5), metal);
     barrel.rotation.x = Math.PI / 2;
@@ -1208,12 +1211,12 @@ export const modelMethods = {
     const D0 = TOP + 0.0005;
     box(0.0072, 0.0040, 0.0150, light, 0, D0, 0.0005); // forward deckhouse
     box(0.0075, 0.0007, 0.0152, glass, 0, D0 + 0.0019, 0.0005); // its band of windows
-    box(0.0054, 0.0034, 0.0058, this._mat(0xe4e9f2), 0, D0 + 0.0040, 0.0043); // bridge block
+    box(0.0054, 0.0034, 0.0058, paint(0xeceef1), 0, D0 + 0.0040, 0.0043); // bridge block
     box(0.0057, 0.0007, 0.0060, glass, 0, D0 + 0.0053, 0.0045); // bridge windows
     box(0.0050, 0.0004, 0.0062, metal, 0, D0 + 0.0074, 0.0043); // bridge roof
     cyl(0.00042, 0.0006, 0.0125, metal, 0, D0 + 0.0078, 0.0036, 6); // the mast
     box(0.0054, 0.0004, 0.0004, metal, 0, D0 + 0.0150, 0.0036); // yardarm
-    box(0.0030, 0.0003, 0.0015, this._mat(0xc2cada), 0, D0 + 0.0198, 0.0036); // radar
+    box(0.0030, 0.0003, 0.0015, paint(0xcfd2d8), 0, D0 + 0.0198, 0.0036); // radar
     box(0.0058, 0.0030, 0.0090, light, 0, D0, -0.0120); // aft deckhouse
     [-0.0095, -0.0145].forEach((z) => {
       cyl(0.0012, 0.0017, 0.0050, funnel, 0, D0 + 0.0030, z, 10); // funnel
@@ -1222,9 +1225,9 @@ export const modelMethods = {
     cyl(0.0004, 0.0005, 0.0075, metal, 0, D0 + 0.0030, -0.0188, 5); // the short aft mast
     box(0.0030, 0.0003, 0.0010, metal, 0, D0 + 0.0090, -0.0188);
     // the helicopter deck: a lighter square with a pale ring
-    box(0.0086, 0.0003, 0.0100, this._mat(0x7a869b), 0, D0, -0.0285);
+    box(0.0086, 0.0003, 0.0100, paint(0x858a94), 0, D0, -0.0285);
     cyl(0.0021, 0.0021, 0.0002, stripe, 0, D0 + 0.0003, -0.0285, 18);
-    cyl(0.0016, 0.0016, 0.0003, this._mat(0x7a869b), 0, D0 + 0.0003, -0.0285, 18);
+    cyl(0.0016, 0.0016, 0.0003, paint(0x858a94), 0, D0 + 0.0003, -0.0285, 18);
     // white water, soft-edged foam strips (additive, fading out): a bow wave on each side, a foam outline round the hull, a churned wake and a V astern
     const tex = this._gtex(wakeCanvas(), () => new T.CanvasTexture(wakeCanvas()));
     const Y = 0.0007,
@@ -1251,10 +1254,11 @@ export const modelMethods = {
     ring.translate(0, Y * 0.6, 0);
     g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.05, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
     // churned wake astern, as wide as the transom, and the V arms that diverge beyond it: the white water is behind the stern only (nothing alongside the bow)
-    strip(0, Z0 + 0.001, 0, -0.058, 0.0100, 0.0115, 0.5); // a short churned trail: it reads as the ship's own wake, not as streaks
-    [-1, 1].forEach((sd) => strip(sd * 0.0058, Z0 + 0.002, sd * 0.0135, -0.062, 0.0030, 0.0046, 0.4));
+    strip(0, Z0 + 0.001, 0, -0.062, 0.0110, 0.0125, 0.7); // a churned trail, wide and white at the stern: it reads as the ship's own wake, not as streaks
+    strip(0, Z0 + 0.001, 0, -0.040, 0.0080, 0.0100, 0.7); // a denser core in its first stretch
+    [-1, 1].forEach((sd) => strip(sd * 0.0062, Z0 + 0.002, sd * 0.0150, -0.066, 0.0035, 0.0055, 0.5));
     g.position.y = 0;
-    g.userData.tintMat = side;
+    // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
     g.rotateY(0.6);
     Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });

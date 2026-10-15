@@ -30,7 +30,7 @@ export const BURNT_FROST = {
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62] }, // the collision frame: Impact to the left, the falling pieces to the right
-  offSteps: { 'SM-3': [[0, 130, 20]] }, // the SM-3 pill is asked for just beside the missile; the placer then holds it at the nearest slot off the planet, a short leader
+  offSteps: { 'SM-3': [[0, 130, 20], [0.09, -165, -34], [0.24, null]] }, // the SM-3 pill: right of the missile at the opening, then left of the ship (the larger hull), the placer's own slot once the missile climbs; // the SM-3 pill is asked for just beside the missile; the placer then holds it at the nearest slot off the planet, a short leader
   camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
@@ -43,7 +43,8 @@ export const BURNT_FROST = {
 
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.9, 0.9], // desktop: the opening frames the ship and the satellite close, so the interceptor in its cell reads
   burstPadFrom: IS_PHONE ? undefined : 0.3, // desktop: the early keys are fitted to the craft alone (the burst ring is not in frame yet)
-  fitTilt: IS_PHONE ? undefined : 38, // desktop: the view is turned about 15 degrees from the default
+  fitTilt: IS_PHONE ? undefined : 38,
+  fillK: 0.25, // a neutral fill: the ship and satellite keep their paint on the night side // desktop: the view is turned about 15 degrees from the default
   hit: {
     lat: 29.0,
     lon: -173.0,
@@ -65,6 +66,7 @@ export const BURNT_FROST = {
       dy: 44,
       minPx: IS_PHONE ? 72 : 150,
       maxPx: IS_PHONE ? 135 : 190,
+      camK: IS_PHONE ? undefined : { 0: 1.28 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
     },
     {
       type: 'target',
@@ -93,7 +95,8 @@ export const BURNT_FROST = {
     {
       type: 'intercept',
       from: [22.0, -179.0],
-      arcLift: 0.07, // a near-direct, steeper run to the satellite (the default high bow drew a flat horizontal arc over the disc)
+      arcRise: 0.3, // a vertical-launch climb that flattens onto the satellite's height (the old high bow overshot and hooked back at the end)
+      arcLift: 0.02,
       t0: 0.2,
       color: '#ff8a4a',
       taper: 0.3,
