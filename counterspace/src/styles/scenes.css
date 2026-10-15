@@ -2587,6 +2587,7 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
   flex: none !important;
   height: auto !important;
   max-height: none !important;
+  min-height: 0 !important;
   overflow: visible !important;
   padding-bottom: 0 !important;
   clip-path: none !important;

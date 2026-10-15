@@ -1125,6 +1125,7 @@ function setStepMode(i) {
 }
 function resetList() {
   stepsEl.style.height = '';
+  stepsEl.style.minHeight = '';
   stepsEl.style.flex = '';
   stepsEl.style.removeProperty('--sp');
   stepsEl.style.paddingBottom = '';
@@ -1219,12 +1220,30 @@ function fitStepsClosed() {
 }
 // Desktop: a column of fixed height. Try the settings from loose to tight until every row fits; if none does, cut the list to the whole rows that fit.
 // The setting is one for the whole scene (the tightest any episode needs), so the list does not move when the episode changes.
+// The row that is playing is set in a heavier weight and can wrap onto another line, so the list is a different height for each active row. The list is fitted
+// once for the scene, so whatever it measures must hold for EVERY active row: each visible row is made the active one in turn and the worst is kept (otherwise
+// a list fitted while the first row plays grows past its room when a later row plays, and covers the buttons under it).
+function eachNow(measure) {
+  const rows = visibleStepRows(),
+    was = [...stepsEl.children].map((li) => li.classList.contains('now')),
+    out = [];
+  try {
+    for (const on of rows.length > 1 ? rows : [null]) {
+      if (on) rows.forEach((li) => li.classList.toggle('now', li === on));
+      out.push(measure());
+    }
+  } finally {
+    [...stepsEl.children].forEach((li, i) => li.classList.toggle('now', was[i]));
+  }
+  return out;
+}
 function naturalOver() {
   asideBody.classList.add('st-measure'); // the list and its section take their natural height, so the column's overflow is exactly what does not fit
-  const over = asideBody.scrollHeight - asideBody.clientHeight,
-    h = stepsEl.getBoundingClientRect().height;
+  const worst = eachNow(() => ({ over: asideBody.scrollHeight - asideBody.clientHeight, h: stepsEl.getBoundingClientRect().height })).reduce((a, b) =>
+    b.over > a.over ? b : a,
+  );
   asideBody.classList.remove('st-measure');
-  return { over, h };
+  return worst;
 }
 // The cue is part of what a window leaves: it is shown (with its longest text) while the room is measured
 function showCueForMeasure() {
@@ -1252,6 +1271,11 @@ function modeFor() {
   stepCue.hidden = true;
   return best.i;
 }
+// the room between the last block of the column and the bottom of its padding box
+function bodySlack() {
+  const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1);
+  return last ? asideBody.getBoundingClientRect().bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0;
+}
 function fitDesktop() {
   const kids = visibleStepRows(),
     total = kids.length;
@@ -1272,12 +1296,13 @@ function fitDesktop() {
   if (fitMode >= 0) {
     // every row fits whole: no window, no cue. Of the room that is left under the content, a share goes into the rows as a little air.
     fitCost = fitMode;
-    const last = [...asideBody.children].filter((c) => c.getClientRects().length).at(-1),
-      ab = asideBody.getBoundingClientRect(),
-      slack = last ? ab.bottom - parseFloat(getComputedStyle(asideBody).paddingBottom) - last.getBoundingClientRect().bottom : 0,
+    // the room left under the content is the least any active row leaves
+    const slack = Math.min(...eachNow(() => bodySlack())),
       sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * total)) : 0;
     if (sp > 0.5) stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
     stepsEl.style.flex = '0 0 auto';
+    // the list keeps the height of its tallest state (the row that plays is heavier and may wrap), so the buttons under it never move while the scene plays
+    stepsEl.style.minHeight = Math.max(...eachNow(() => stepsEl.getBoundingClientRect().height)) + 'px';
     return;
   }
   // Not all of them fit, even set this tight: a window of whole rows with a cue under it, using all the height there is.
