@@ -161,3 +161,6 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
   .foot-base>.foot-nav{justify-self:start}
   .foot-base>.btn.quiet{justify-self:end;position:relative;top:4px} /* its label sits on the links' baseline (the arrow icon has none) */
 }
+
+/* sources opened: the summary row reaches back over the list column by the column gap of .sources-layout (24px here), so it starts where the pills above it start */
+@media (min-width:1000px){.sources.ref-band:not(.folded) #methodBody>details.src-fold>summary{margin-left:calc(-190px - 24px);width:calc(100% + 190px + 24px)}}

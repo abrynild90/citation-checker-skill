@@ -291,7 +291,7 @@
    time a dot or tick is pointed at or focused. A phone and a narrow tablet go without. */
 .hero-cue{display:none}
 @media (min-width:1000px){
-  .hero-cap .hero-cue{display:block;margin:6px 0 0;font:500 14px/1.4 var(--sans);color:var(--muted);opacity:0;visibility:hidden;pointer-events:none;
+  .hero-cap .hero-cue{display:block;margin:10px 0 0;font:500 14px/1.4 var(--sans);color:var(--muted);opacity:0;visibility:hidden;pointer-events:none;
     transition:opacity 420ms var(--ease),visibility 0s linear 420ms}
   .hero-cap .hero-cue.on{opacity:1;visibility:visible;transition:opacity 520ms var(--ease),visibility 0s}
   .hero-cap.live .hero-cue,.hero-cap.live .hero-cue.on{opacity:0;visibility:hidden;transition:none}
