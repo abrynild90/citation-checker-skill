@@ -58,6 +58,7 @@ export const DN2 = {
         glowMin: 10,
         glowMax: 16,
         pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 },
+        sizeSteps: IS_PHONE ? null : [[0.18, 1], [0.3, 0.76], [0.84, 0.76], [0.9, 1]], // the rocket was oversized against the globe through the coast: about 25% smaller from the pull-back to the fall
         ramp: { k: IS_PHONE ? 1.8 : 1.25, until: 0.3 }, // desktop: 1.25 so the nose keeps clear of the top edge on a tall stage
         smokeK: 1.6,
         follow: true, // a ballistic arc: the spent stage keeps its nose on the path through the coast and the fall (no tumble hanging off the path end)

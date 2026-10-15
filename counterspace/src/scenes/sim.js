@@ -32,6 +32,15 @@ import { buildCameras } from './cameras.js';
 import { craftPos, makeAnchor } from './co-sim.js';
 import { buildSpaceActor } from './sim-space.js';
 
+// rocket.sizeSteps [[t, k], ...] (opt-in): the drawn vehicle is k times its normal size, blended linearly between the steps (1 before the first, the last k after it)
+const stepsK = (st) =>
+  st &&
+  ((t) => {
+    if (t <= st[0][0]) return st[0][1];
+    for (let i = 1; i < st.length; i++) if (t <= st[i][0]) return st[i - 1][1] + ((st[i][1] - st[i - 1][1]) * (t - st[i - 1][0])) / (st[i][0] - st[i - 1][0]);
+    return st[st.length - 1][1];
+  });
+
 export function buildSim(cfg) {
   const items = [];
   const rnd = mulberry(cfg.id.length * 7919 + 17);
@@ -714,6 +723,7 @@ export function buildSim(cfg) {
             ? { label: a.label, short: a.short, labelDx: a.rocket.waitDx ?? 0, labelDy: a.rocket.waitDy ?? 0, labelFn: (t, narrow) => (t < a.t0 && !narrow ? a.label : null), statusColor: () => a.color }
             : {}),
           ramp: a.rocket.ramp, // opt-in { k, until }: drawn k times larger at the pad, easing to its normal size by this fraction of the flight (see _fitModels)
+          sizeK: stepsK(a.rocket.sizeSteps),
           // flight look (gl-rocket.js): ignition at t0, the vehicle is consumed at the hit; burn is the fraction of the flight under thrust (the rest is coast)
           fx: {
             t0: a.t0,
@@ -1082,6 +1092,7 @@ export function buildSim(cfg) {
             shape: 'rocket',
             rocketStyle: a.rocket.style,
             ramp: a.rocket.ramp,
+            sizeK: stepsK(a.rocket.sizeSteps),
             color: '#ff8a8a',
             scale: 1,
             minPx: a.rocket.minPx ?? 30,
