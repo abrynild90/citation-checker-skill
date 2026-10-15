@@ -34,6 +34,7 @@ export const SHAKTI = {
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
   phoneHide: ['PDV'], // 375: Microsat-R and the island are enough around the strike
+  fitDownKeys: IS_PHONE ? undefined : [0.1, 0.06], // desktop: the opening picture sits a little lower, so the rocket's nose keeps clear of the banner on short stages
   fitFillKeys: IS_PHONE ? undefined : [0.95, 0.85, 0.8, 0.76, 0.68, 0.62], // desktop: the opening is tight on the pad, then eases out
   fitMinKeys: IS_PHONE ? undefined : [null, null, null, null, 1.55, 2.0], // desktop: the last keys stay out, so the Earth is not a close-up of a few pixels of land (the debris has burned up by then)
   camHide: { 3: ['Abdul Kalam', 'PDV', 'LEO'] }, // Polar: the strike is a few px wide there, so its neighbours' labels are dropped

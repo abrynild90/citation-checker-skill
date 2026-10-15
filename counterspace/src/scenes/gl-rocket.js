@@ -813,9 +813,10 @@ export const rocketMethods = {
             fade = Math.sin(PI * ph) ** 1.2;
           if (i < 3) {
             // from a vent on the upper body: rises and leans away with the breeze
-            s.position.set(D.rU * (1.2 + 0.7 * ph), 0, D.zT - 0.008 - 0.004 * i + 0.012 * ph);
-            s.scale.setScalar(0.007 + 0.017 * ph);
-            s.material.opacity = va * 0.5 * fade;
+            // (small, faint wisps off the side of the body: a big soft puff at the top read as a halo round the nose cone)
+            s.position.set(D.rU * (1.5 + 1.8 * ph), 0, D.zT - 0.014 - 0.005 * i + 0.010 * ph);
+            s.scale.setScalar(0.004 + 0.009 * ph);
+            s.material.opacity = va * 0.16 * fade;
           } else {
             // boil-off at the base: low clouds spreading sideways over the plate
             const sd = i === 3 ? 1 : -1;

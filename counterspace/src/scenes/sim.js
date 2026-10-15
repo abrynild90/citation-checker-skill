@@ -1146,6 +1146,6 @@ export function buildSim(cfg) {
     flags,
     stillCamFor,
     still: cfg.still ?? 0.5,
-    sunRef: cams[0].pos,
+    sunRef: cams[0].sunRef || cams[0].pos,
   };
 }
