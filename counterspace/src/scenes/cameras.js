@@ -131,8 +131,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       e2 = cross3(hn, e1),
       bR = burst ? (burst.size ?? 0.3) * 1.7 * 0.5 * (cfg.burstPad ?? 1.3) : 0,
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
-      posesFor = (asp) =>
-        (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
+      posesFor = (asp, hpx) =>
+        (cache[Math.round(asp * 20) + '|' + (hpx | 0)] ||= keys.map((tk, ki) => {
           // fitLaunchKeys (opt-in): at these keys the camera is fitted to the launch point and the carrier alone (a close opening on the vehicle); the target comes into frame as it pulls back
           if (cfg.fitLaunchKeys?.includes(ki) && arc) {
             const L = [arc.from].concat(aircraftPos ? [aircraftPos(0), aircraftPos(tk)] : []);
@@ -166,13 +166,15 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time
               dMax: cfg.fitMax ?? 6.5,
               fillX: cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9, // fitFillKeys (opt-in): the frame fill per key time
-              fillY: (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
+              // cardFit (opt-in { top, bottom, gap }, px): the last, globe-only key fills the stage height that is left between the banner (top) and the card at the foot (bottom, plus
+              // gap), measured in pixels when the stage height is known (hpx), so a taller stage shows a larger globe and a short one never lets the card cover it
+              fillY: globeOnly && cfg.cardFit && hpx ? Math.max(0.3, (hpx - cfg.cardFit.top - cfg.cardFit.bottom - cfg.cardFit.gap) / hpx) : (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
               asp,
             },
           );
         }));
-    const at0 = (t, asp = ASPECT) => {
-      const poses = posesFor(asp);
+    const at0 = (t, asp = ASPECT, hpx) => {
+      const poses = posesFor(asp, hpx);
       let i = 0;
       while (i < keys.length - 2 && t > keys[i + 1]) i++;
       if (cfg.camGlide) {
@@ -202,8 +204,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       };
     };
     // preDrift (opt-in) { t0, k, out }: a slow push-in while the vehicle waits (the camera closes by the fraction k by t0), released over `out` after it
-    const at = (t, asp = ASPECT) => {
-      const v = at0(t, asp),
+    const at = (t, asp = ASPECT, hpx) => {
+      const v = at0(t, asp, hpx),
         d = cfg.preDrift;
       if (!d) return v;
       const u = smooth(t / d.t0) * (1 - smooth((t - d.t0) / (d.out ?? 0.08))),
@@ -211,8 +213,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       return { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), k)) };
     };
     // endShift (opt-in) { from, to, k }: the picture slides up by the fraction k of the half-height between these times, clear of a card that comes up at the foot of the stage
-    const atShift = (t, asp = ASPECT) => {
-      const v = at(t, asp),
+    const atShift = (t, asp = ASPECT, hpx) => {
+      const v = at(t, asp, hpx),
         e = cfg.endShift;
       if (!e) return v;
       const w = smooth((t - e.from) / (e.to - e.from));
@@ -221,7 +223,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         r = norm(cross3(fw, v.up || [0, 1, 0])),
         u = cross3(r, fw),
         D = len(add(v.look, scl(v.pos, -1))),
-        d = scl(u, -w * e.k * D * tanFor(asp)[1]);
+        d = scl(u, -w * (cfg.cardFit && hpx ? (cfg.cardFit.bottom + cfg.cardFit.gap - cfg.cardFit.top) / hpx : e.k) * D * tanFor(asp)[1]);
       return { ...v, pos: add(v.pos, d), look: add(v.look, d) };
     };
     // debrisFit (opt-in) { mx, my, from }: the camera never lets the live debris leave the frame. For every aspect the distance the key poses need to keep every
@@ -264,8 +266,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       for (let pass = 0; pass < 2; pass++) e = e.map((_, g) => { let a = 0, c = 0; for (let j = g - 2; j <= g + 2; j++) { a += e[Math.max(0, Math.min(NG, j))]; c++; } return a / c; });
       return (scaleTab[key] = e);
     };
-    const atFit = (t, asp = ASPECT) => {
-      const v = atShift(t, asp);
+    const atFit = (t, asp = ASPECT, hpx) => {
+      const v = atShift(t, asp, hpx);
       if (!fitDeb || !cl || t <= ht) return v;
       const e = debrisScale(asp),
         x = Math.max(0, Math.min(NG, t * NG)),

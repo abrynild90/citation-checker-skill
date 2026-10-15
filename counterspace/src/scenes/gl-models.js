@@ -431,39 +431,60 @@ export const modelMethods = {
   _c(c) {
     return new this.T.Color(c);
   },
-  // ISS: long integrated truss, four solar-array pairs (a blanket either side of each mast), white radiators, and the pressurised stack
-  // (Zvezda-Zarya-Unity-Destiny in line, Harmony/Columbus/Kibo crossing at the node). Span about 0.11.
+  // ISS: a long integrated truss with its rails, four solar-array masts (two blankets either side, each a pair of cell-gridded wings), white radiator panels, the
+  // pressurised stack (Zvezda-Zarya-Unity-Destiny in line, Harmony/Columbus/Kibo crossing at the node), two small Russian arrays, a robotic arm and gold-foil
+  // nodes. Truss along x (span 0.11), the modules and the blankets along z, up is +y.
   _issModel(color) {
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
-      gray = this._mat(0xc9ced9, { metalness: 0.55, roughness: 0.45 }),
+      gray = this._mat(0xc4c9d4, { metalness: 0.55, roughness: 0.42 }),
       white = this._mat(0xf1f3f8, { metalness: 0.2, roughness: 0.45 }),
       gold = this._foil(0xd9b96a),
       alu = this._mat(0xaab3c2, { metalness: 0.85, roughness: 0.38 }),
-      pan = this._panelMat({ color: 0xffd6a0 }),
-      back = this._mat(0x818a9a, { metalness: 0.3, roughness: 0.6 }),
-      array = (cx, cz, w, d) => {
-        K.box(alu, w, 0.0004, d, cx, 0, cz);
-        K.plane(pan, w - 0.0002, d - 0.0002, cx, 0.00022, cz, -PI / 2, 0, 0);
-        K.plane(back, w - 0.0002, d - 0.0002, cx, -0.00022, cz, PI / 2, 0, 0);
+      dark = this._mat(0x2a303c, { metalness: 0.5, roughness: 0.5 }),
+      pan = this._panelMat({ color: 0x8c9fd8 }),
+      back = this._mat(0x9a7a46, { metalness: 0.5, roughness: 0.55 }),
+      blanket = (cx, cz, w, d) => {
+        K.box(back, w, 0.0005, d, cx, 0, cz);
+        K.plane(pan, w - 0.0004, d - 0.0004, cx, 0.00028, cz, -PI / 2, 0, 0);
+        K.box(alu, w, 0.0006, 0.0004, cx, 0, cz + d / 2);
+        K.box(alu, w, 0.0006, 0.0004, cx, 0, cz - d / 2);
       };
-    K.box(gray, 0.11, 0.0022, 0.0022, 0, 0, 0.004);
-    for (const s of [-1, 1]) {
-      for (const x of [0.046, 0.027]) {
-        K.box(gray, 0.0012, 0.0012, 0.0045, s * x, 0, 0.004);
-        for (const e of [-1, 1]) array(s * x, 0.004 + e * 0.0105, 0.0074, 0.0165);
+    // truss: a box beam with two rails and cross-struts
+    K.box(gray, 0.112, 0.0030, 0.0030, 0, 0, 0.004);
+    K.box(alu, 0.112, 0.0006, 0.0038, 0, 0.0017, 0.004);
+    K.box(alu, 0.112, 0.0006, 0.0038, 0, -0.0017, 0.004);
+    for (let i = -10; i <= 10; i++) K.box(gray, 0.0005, 0.0034, 0.0040, i * 0.0052, 0, 0.004);
+    // arrays: a mast along z with two blankets on each side of it, one pair each way
+    for (const s of [-1, 1])
+      for (const x of [0.0475, 0.0275]) {
+        K.box(gray, 0.0012, 0.0012, 0.078, s * x, 0, 0.004);
+        for (const e of [-1, 1])
+          for (const b of [-1, 1]) blanket(s * x + b * 0.0046, 0.004 + e * 0.0215, 0.0082, 0.0330);
+        K.cyl(gold, 0.0020, 0.0020, 0.0030, s * x, 0, 0.004, 0, 0, PI / 2); // the rotary joint
       }
-      K.box(white, 0.0115, 0.0006, 0.0085, s * 0.0125, 0, -0.0042);
-      K.box(alu, 0.0115, 0.0004, 0.0004, s * 0.0125, 0.0004, -0.0042);
+    // radiators: white panels either side of the centre, behind the truss
+    for (const s of [-1, 1]) {
+      K.box(white, 0.0150, 0.0006, 0.0110, s * 0.0120, 0, -0.0062);
+      K.box(alu, 0.0150, 0.0004, 0.0004, s * 0.0120, 0.0004, -0.0062);
+      K.box(gray, 0.0012, 0.0012, 0.0050, s * 0.0120, 0, -0.0010);
     }
-    K.cyl(white, 0.0034, 0.0034, 0.024, 0, 0, 0.001, PI / 2);
-    K.cyl(white, 0.0027, 0.0027, 0.012, 0, 0, -0.0135, PI / 2);
-    K.cyl(gray, 0.0025, 0.0025, 0.012, 0, 0, 0.0155, PI / 2);
-    K.cyl(white, 0.0031, 0.0031, 0.014, 0, 0, 0.0255, PI / 2);
-    K.cyl(white, 0.0022, 0.0022, 0.02, 0, 0, 0.0155, 0, 0, PI / 2);
-    K.cyl(gold, 0.0017, 0.0017, 0.012, 0, 0.0038, 0.0255, 0, 0, PI / 2);
-    K.ball(gray, 0.0038, 0, 0, 0.0155);
+    // pressurised stack along z, the crossing node, the Japanese and European laboratories, Russian service module and its two arrays, the arm
+    K.cyl(white, 0.0040, 0.0040, 0.0260, 0, 0, 0.0090, PI / 2);
+    K.cyl(white, 0.0031, 0.0031, 0.0140, 0, 0, -0.0160, PI / 2);
+    K.cyl(gray, 0.0029, 0.0029, 0.0120, 0, 0, 0.0270, PI / 2);
+    K.cyl(white, 0.0036, 0.0036, 0.0130, 0, 0, 0.0365, PI / 2);
+    K.cyl(white, 0.0025, 0.0025, 0.0230, 0, 0, 0.0270, 0, 0, PI / 2);
+    K.cyl(gold, 0.0020, 0.0020, 0.0100, 0, 0.0046, 0.0360, 0, 0, PI / 2);
+    K.ball(gray, 0.0042, 0, 0, 0.0270);
+    K.cyl(dark, 0.0033, 0.0033, 0.0006, 0, 0, -0.0235, PI / 2);
+    for (const s of [-1, 1]) {
+      K.box(white, 0.0090, 0.0004, 0.0150, s * 0.0070, 0.0030, -0.0160);
+      K.plane(pan, 0.0086, 0.0146, s * 0.0070, 0.0033, -0.0160, -PI / 2, 0, 0);
+    }
+    K.cyl(alu, 0.0003, 0.0003, 0.0230, 0.0045, 0.0062, 0.0200, 0.4, 0, 0);
+    K.cyl(alu, 0.0003, 0.0003, 0.0150, 0.0060, 0.0100, 0.0310, -0.6, 0, 0);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(white);
     g.userData.iss = true;
