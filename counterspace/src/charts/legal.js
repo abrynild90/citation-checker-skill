@@ -1016,7 +1016,8 @@ export function landOnMark(m, smooth) {
     },
     // the first row of the chart that is clear: under the strip and, on the test chart, under the year slider that is pinned beneath it
     topAt = (y) => stripAt(y) + (yr && y + stripAt(y) > cap ? yr.offsetHeight + 10 : 8),
-    fits = (y) => mk.t - y >= topAt(y) && mk.b - y <= vh - 12,
+    // the mark must also sit in the upper two thirds of the room under the strip, so the rows around it (and the ones under it) are in view, not cut by the window's foot
+    fits = (y) => mk.t - y >= topAt(y) && mk.b - y <= Math.min(vh - 12, topAt(y) + (vh - topAt(y)) * 0.68),
     clear = (y) => {
       const s = stripAt(y);
       return hd.t - y >= s + 2 ? 1 : hd.b - y <= s - 2 || hd.b - y <= 0 ? 2 : 0; // 1: the heading is whole below the strip, 2: wholly behind it, 0: cut by its edge
