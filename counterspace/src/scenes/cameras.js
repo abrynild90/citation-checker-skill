@@ -224,8 +224,21 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       return { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), k)) };
     };
     // endShift (opt-in) { from, to, k }: the picture slides up by the fraction k of the half-height between these times, clear of a card that comes up at the foot of the stage
+    // fitRoll (opt-in) { from, to, deg, back: [from, to] }: the view rolls about its axis by `deg` degrees between `from` and `to` (the track of a near-polar orbit, vertical in an
+    // upright view, runs across the picture instead of up it) and rolls back upright between the two `back` times
+    const rollAt = (v, t) => {
+      const q = cfg.fitRoll;
+      if (!q) return v;
+      const w = smooth((t - q.from) / (q.to - q.from)) * (q.back ? 1 - smooth((t - q.back[0]) / (q.back[1] - q.back[0])) : 1);
+      if (w <= 1e-4) return v;
+      const fw = norm(add(v.look, scl(v.pos, -1))),
+        u0 = norm(add([0, 1, 0], scl(fw, -dot(fw, [0, 1, 0])))),
+        r0 = cross3(fw, u0),
+        th = q.deg * DEG * w;
+      return { ...v, up: add(scl(u0, Math.cos(th)), scl(r0, Math.sin(th))) };
+    };
     const atShift = (t, asp = ASPECT, hpx) => {
-      const v = at(t, asp, hpx),
+      const v = rollAt(at(t, asp, hpx), t),
         e = cfg.endShift;
       if (!e) return v;
       const w = smooth((t - e.from) / (e.to - e.from));

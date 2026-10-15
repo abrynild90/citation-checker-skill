@@ -790,6 +790,23 @@ export function buildSim(cfg) {
           cj: (rnd() - 0.5) * 0.5,
           br: 0.7 + rnd() * 0.3,
         });
+      // lobes (opt-in { core, gap, cone, wide, couple }): velocity-dispersed lobes instead of one bell of speeds. Each fragment carries a kick that sends it ahead of or behind the
+      // parent along the track (a forward kick raises its orbit and a backward one lowers it, `couple`); `core` of them keep the parent's speed, the rest start at least `gap` of the
+      // full speed spread away from it, and the across-track and height spreads grow with the along-track distance (`cone` at the hit, 1 at the lobe's end, all times `wide`),
+      // so the cloud is two fans along the orbit with a pinched middle, the shape of a real anti-satellite debris cloud, not a curtain. Its own generator: the shared sequence is untouched.
+      if (a.lobes) {
+        const lb = a.lobes,
+          lr = mulberry(cfg.id.length * 7919 + n);
+        for (const p of P) {
+          const s = lr() < 0.5 ? -1 : 1,
+            m = lr() < lb.core ? 0.12 * Math.abs(gauss(lr)) : Math.min(1.25, lb.gap + (1 - lb.gap) * Math.abs(gauss(lr)) * 0.75);
+          p.dw = 1 + s * m * a.dv;
+          const k = (lb.cone + (1 - lb.cone) * Math.min(1, m)) * (lb.wide ?? 1);
+          p.di *= k;
+          p.dr *= k;
+          p.da = p.da * (1 - lb.couple) + s * m * a.spreadAlt * lb.couple * (0.6 + 0.8 * lr());
+        }
+      }
       // Hard debris looks like real fragments, not beads: log-normal sizes (many small, a few large), varied tint and brightness, a few glints,
       // slow tumbling brightness and a small 3-D scatter that grows after the break-up (its own generator: the shared sequence is untouched).
       const sizes = a.hard ? new Float32Array(n) : null;

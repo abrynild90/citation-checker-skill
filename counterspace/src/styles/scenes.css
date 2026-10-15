@@ -1381,7 +1381,8 @@
 @media (min-width: 761px) and (min-aspect-ratio: 1/1) and (min-height: 1000px) {
 }
 
-.overlay #sceneView .hlabel[style*="bottom: 10px"] {
+.overlay #sceneView .hlabel[style*="bottom: 10px"],
+.overlay #sceneView .hlabel.cap-top {
   max-width: calc(100% - 16px) !important;
   display: -webkit-box !important;
   -webkit-box-orient: vertical;
@@ -1390,7 +1391,8 @@
   overflow: hidden;
 }
 /* the note "drawn for illustration" is the chip at the top; the caption does not say it again */
-.overlay #sceneView .hlabel[style*="bottom: 10px"] > span {
+.overlay #sceneView .hlabel[style*="bottom: 10px"] > span,
+.overlay #sceneView .hlabel.cap-top > span {
   display: none !important;
 }
 
@@ -1819,7 +1821,8 @@
 .overlay .sv-hint span[hidden]{display:none}
 /* In-picture status caption on a wide stage: a calm pill of at most about 60 characters a line, capped width, not edge to edge */
 @media (min-width: 761px) {
-  .overlay #sceneView .hlabel[style*="bottom: 10px"] {
+  .overlay #sceneView .hlabel[style*="bottom: 10px"],
+  .overlay #sceneView .hlabel.cap-top {
     max-width: min(56em, calc(100% - 32px)) !important;
     text-wrap: balance;
   }
