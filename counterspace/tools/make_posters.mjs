@@ -68,8 +68,11 @@ try {
   page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
   await page.addStyleTag({ content: '#sceneView > :not(canvas), #sceneView .hlabel { visibility: hidden !important; }' }); // pictures without labels, caption or inset
-  for (const id of only) {
-    const t = +(process.env['T_' + id.replace(/-/g, '_')] ?? POSTER_T[id] ?? 0.5);
+  // VARS='[{"tag":"a","t":0.4,"view":{"back":1.5}}]': render several variants of each scene in one run, written to <OUT>/<id>_<tag>.webp (view keys merge over POSTER_VIEW)
+  const variants = process.env.VARS ? JSON.parse(process.env.VARS) : [{}];
+  const jobs = only.flatMap((id) => variants.map((v) => [id, v]));
+  for (const [id, variant] of jobs) {
+    const t = +(variant.t ?? process.env['T_' + id.replace(/-/g, '_')] ?? POSTER_T[id] ?? 0.5);
     await page.evaluate((id) => window.__cs.openScene(id), id);
     await page.waitForFunction(() => window.__cs.earthReady(), null, { timeout: 90000 }); // the full Earth image loads when the first scene opens
     await page.waitForTimeout(1500);
@@ -181,7 +184,7 @@ try {
       await page.waitForTimeout(300);
       continue;
     }
-    const view = { ...(POSTER_VIEW[id] || {}) };
+    const view = { ...(POSTER_VIEW[id] || {}), ...(variant.view || {}) };
     if (process.env['C_' + key] != null) { view.cam = +process.env['C_' + key]; if (!process.env['P_' + key]) delete view.pose; }
     if (process.env['P_' + key]) view.pose = process.env['P_' + key].split(',').map(Number);
     await page.evaluate(
@@ -278,8 +281,8 @@ try {
       },
       { data: png.toString('base64'), W, H, Q },
     );
-    fs.writeFileSync(path.join(out, `${id}.webp`), Buffer.from(b64, 'base64'));
-    console.log(id, 't=' + t, Math.round((b64.length * 3) / 4 / 1024) + ' KB');
+    fs.writeFileSync(path.join(out, `${id}${variant.tag ? '_' + variant.tag : ''}.webp`), Buffer.from(b64, 'base64'));
+    console.log(id, variant.tag || '', 't=' + t, Math.round((b64.length * 3) / 4 / 1024) + ' KB');
     await page.evaluate(() => window.__cs.closeScene());
     await page.waitForTimeout(300);
   }
