@@ -155,7 +155,7 @@ export const COSMOS1408 = {
     'Cosmos 1408': [-100, 14],
     Plesetsk: [-96, 44],
     'ISS orbit': [150, -54],
-    Impact: [150, -64],
+    Impact: [140, -88],
   }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   stillOff: { 'ISS orbit': [235, -30] }, // the still: the ISS label sits just right of the globe's edge
   status: [
