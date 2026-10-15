@@ -76,8 +76,8 @@ nameThemeButton();
       heroGone = !hero || hero.getBoundingClientRect().bottom <= line, // a jump to the first chapter leaves the picture's lower edge in view, and the rail comes with the chapter
       last = starts.length - 1,
       src = starts[last],
-      // the folded sources band is short: it is the current chapter as soon as most of it is on screen, and at the very end of the page whatever else is showing
-      atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 8 || (!!src && src.getBoundingClientRect().top <= innerHeight * 0.8),
+      // the folded sources band is short: it is the current chapter once it fills the lower half of the window (at 0.8 the dot read "Sources and method" while the foot of the last chart was still the page), and at the very end of the page whatever else is showing
+      atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 8 || (!!src && src.getBoundingClientRect().top <= innerHeight * 0.55),
       now = heroGone ? (atEnd ? last : starts.reduce((n, el, i) => (el && el.getBoundingClientRect().top <= line ? i : n), -1)) : -1;
     links.forEach((a, i) => (i === now ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
     rail.classList.toggle('on', now >= 0); // hidden only over the opening picture
