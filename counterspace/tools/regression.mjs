@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import http from 'node:http';
 import { chromium } from 'playwright';
+import { runStepsHit, SIZES as STEPS_SIZES } from './steps_hit_check.mjs';
 const html = fs.readFileSync(new URL('../index.html', import.meta.url));
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'text/html');
@@ -243,6 +244,14 @@ try {
   assert.deepEqual(keepErrors, []);
   console.log('closing a scene keeps the page where it was OK');
   await keep.close();
+  // The story column of every scene: the steps list never covers or moves the buttons under it, at nine desktop window sizes and three times (tools/steps_hit_check.mjs).
+  // STEPS_HIT=0 skips it; STEPS_VPS=1600x900,... and STEPS_ONLY=starfish,... narrow it.
+  if (process.env.STEPS_HIT !== '0') {
+    const sizes = process.env.STEPS_VPS ? process.env.STEPS_VPS.split(',').map((s) => s.split('x').map(Number)) : STEPS_SIZES;
+    const { failures } = await runStepsHit(browser, url, { sizes, only: (process.env.STEPS_ONLY || '').split(',').filter(Boolean), log: console.log });
+    assert.deepEqual(failures, [], `steps list covers or moves the buttons under it:\n${failures.slice(0, 20).join('\n')}`);
+    console.log('steps list vs foot buttons OK');
+  }
 } finally {
   await browser.close();
   server.close();
