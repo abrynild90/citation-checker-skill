@@ -71,7 +71,7 @@ export const SHAKTI = {
       minPx: 64,
       maxPx: 100,
       bright: true,
-      impactUntil: 0.75,
+      impactUntil: 0.88, // the Impact pill stays until the count's own pill takes over (from 0.75 to 0.88 a bare, unlabelled diamond marked the point)
       tickUntil: 0.88,
       endLabel: 'Later count: 0 of 130 in orbit (SWF)',
       endShort: '0 of 130 in orbit (SWF)',
