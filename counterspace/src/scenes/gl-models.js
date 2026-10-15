@@ -5,12 +5,13 @@
 import { norm } from './core.js';
 import { foilCanvas } from './earth.js';
 
-// A soft strip of foam for a ship's wake: bright at the start (v = 0), streaked, soft at both sides and gone at the far end (v = 1). Drawn once, in memory.
+// A strip of foam for a ship's wake: dense white at the start (v = 0, drawn at the top of the canvas), broken into streaks and fine bubbles that thin out with
+// distance, soft at both sides and gone at the far end (v = 1). Opaque-white colour with the foam density in the alpha. Drawn once, in memory.
 let wakeCv = null;
 function wakeCanvas() {
   if (wakeCv) return wakeCv;
-  const w = 64,
-    h = 256,
+  const w = 96,
+    h = 384,
     c = document.createElement('canvas');
   c.width = w;
   c.height = h;
@@ -19,17 +20,37 @@ function wakeCanvas() {
     hash = (a, b) => {
       const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
       return x - Math.floor(x);
+    },
+    // value noise, stretched along the strip (sx wide cells across, sy long cells along)
+    vn = (x, y, sx, sy, seed) => {
+      const u = x / sx,
+        v = y / sy,
+        i = Math.floor(u),
+        j = Math.floor(v),
+        fu = u - i,
+        fv = v - j,
+        s = (t) => t * t * (3 - 2 * t),
+        a = hash(i + seed, j),
+        b = hash(i + 1 + seed, j),
+        c2 = hash(i + seed, j + 1),
+        d = hash(i + 1 + seed, j + 1);
+      return a + (b - a) * s(fu) + (c2 - a) * s(fv) + (a - b - c2 + d) * s(fu) * s(fv);
     };
   for (let y = 0; y < h; y++) {
-    const along = Math.pow(1 - y / (h - 1), 1.35);
+    const t = y / (h - 1),
+      along = Math.pow(1 - t, 1.15);
     for (let x = 0; x < w; x++) {
       const d = Math.abs(x - (w - 1) / 2) / (w / 2),
-        side = Math.exp(-d * d * 3.4),
-        streak = 0.62 + 0.38 * Math.sin(x * 0.85 + y * 0.03 + hash(Math.floor(x / 7), 3) * 6.28) * Math.sin(x * 0.37 - y * 0.021 + 1.3),
-        a = Math.min(1, side * along * streak * 1.25);
+        // a dense core that narrows the foam to the centre, plus a thinner skirt of bubbles either side
+        core = Math.exp(-d * d * (5 + 7 * t)),
+        skirt = Math.exp(-d * d * 2.2) * 0.45,
+        n = 0.45 * vn(x, y, 5, 22, 0) + 0.3 * vn(x, y, 3, 9, 7) + 0.25 * vn(x, y, 1.6, 3.2, 19),
+        foam = (core + skirt) * along,
+        // as the foam thins it breaks into patches: the noise cuts a rising threshold out of it
+        a = Math.max(0, Math.min(1, (foam - (0.1 + 0.5 * t) * (1 - n)) * 2.6 + 0.06 * (1 - t))) * Math.min(1, (1 - t) * 6 + 0.2) * Math.min(1, (1 - d) * 4);
       const i = (y * w + x) * 4;
-      im.data[i] = 235;
-      im.data[i + 1] = 244;
+      im.data[i] = 247;
+      im.data[i + 1] = 251;
       im.data[i + 2] = 255;
       im.data[i + 3] = Math.round(a * 255);
     }
@@ -1210,21 +1231,26 @@ export const modelMethods = {
       FORE = 0.0072; // the forecastle deck, raised at the bow
     // Opaque naval-grey paint with a small neutral self-light (a fill that stands in for moon and earthshine on the night side), so the hull reads as a solid
     // grey ship on a dark sea, not a blue see-through shape. Roughness is high and metalness near 0, so the cool environment map does not tint the paint.
-    const paint = (c, k = 0.42, o = {}) => this._mat(c, { metalness: 0.02, roughness: 0.82, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.35, ...o });
-    const keel = paint(0x3a2523, 0.3),
-      side = paint(0x9ba1ab),
-      rim = paint(0xc3c7cf, 0.45),
-      deckMat = paint(0x757b85),
+    const paint = (c, k = 0.3, o = {}) => this._mat(c, { metalness: 0.06, roughness: 0.74, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.5, ...o });
+    const keel = paint(0x4a2220, 0.28),
+      boot = paint(0xc9ced6, 0.5),
+      // the hull side is a dark naval grey with a softer, glossier coat: it picks up the sun and the glow of the sea instead of reading as flat grey plastic
+      side = paint(0x535b67, 0.2, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.1 }),
+      rim = paint(0x9aa1ac, 0.4),
+      deckMat = paint(0x6a707b, 0.3),
       stripe = paint(0xf2f2ee, 0.5),
-      light = paint(0xe8e9ec, 0.45),
-      glass = paint(0x1b222d, 0.3, { metalness: 0.3, roughness: 0.4 }),
-      funnel = paint(0x5d626c),
+      light = paint(0xe9ebef, 0.42, { roughness: 0.6 }),
+      glass = paint(0x141a24, 0.25, { metalness: 0.5, roughness: 0.22, envMapIntensity: 1.4 }),
+      funnel = paint(0x666b75, 0.3),
       soot = paint(0x0b0d11, 0.1),
-      metal = paint(0xb0b4bc);
+      metal = paint(0xb0b4bc, 0.3, { metalness: 0.45, roughness: 0.4 }),
+      dark = paint(0x2a2e35, 0.2);
     // hull: a dark waterline band, the grey side, then the forecastle (the bow rises: the sheer) with a pale rim round the deck edge
-    layer(plan(Z0, Z1), 0, 0.0021, keel);
-    layer(plan(Z0, Z1), 0.0021, TOP, side);
+    layer(plan(Z0, Z1), 0, 0.0017, keel);
+    layer(plan(Z0, Z1, 0, 1.012), 0.0017, 0.0022, boot); // the pale waterline stripe, a hair proud of the side
+    layer(plan(Z0, Z1), 0.0022, TOP, side);
     layer(plan(0.008, Z1), TOP, FORE, side);
+    layer(plan(0.008, Z1, 0, 1.01), FORE - 0.0003, FORE, rim); // a pale sheer line along the forecastle edge
     layer(plan(Z0, 0.008, 0, 1), TOP, TOP + 0.0003, rim);
     layer(plan(0.008, Z1), FORE, FORE + 0.0003, rim);
     layer(plan(Z0 + 0.0008, 0.0078, 0.0009), TOP + 0.0003, TOP + 0.0005, deckMat);
@@ -1260,10 +1286,34 @@ export const modelMethods = {
     box(0.0086, 0.0003, 0.0100, paint(0x858a94), 0, D0, -0.0285);
     cyl(0.0021, 0.0021, 0.0002, stripe, 0, D0 + 0.0003, -0.0285, 18);
     cyl(0.0016, 0.0016, 0.0003, paint(0x858a94), 0, D0 + 0.0003, -0.0285, 18);
+    // deck detail: missile-cell grids (forward and aft of the deckhouse), two close-in guns, deck-edge boats, a boat davit and the funnel uptakes
+    const cells = (x0, z0, nx, nz, y) => {
+      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) box(0.00052, 0.00022, 0.00052, dark, x0 + (i - (nx - 1) / 2) * 0.00075, y, z0 + j * 0.00075);
+    };
+    cells(0, 0.0128, 6, 4, FORE + 0.0005); // forward cells
+    cells(0, 0.0125, 6, 3, TOP + 0.0005 - 0.0004 + 0.0004); // (on the main deck, ahead of the deckhouse)
+    cells(0, -0.0248, 4, 3, D0 + 0.0003); // aft cells
+    [[0.0, 0.0090, TOP + 0.0005 + 0.0042], [0.0, -0.0040, TOP + 0.0005 + 0.0034]].forEach(([x, z, y]) => {
+      const dome = new T.Mesh(new T.SphereGeometry(0.00085, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2), paint(0xe4e6ea, 0.45));
+      dome.position.set(x, y, z);
+      g.add(dome);
+      box(0.00022, 0.00022, 0.0013, dark, x, y + 0.0005, z + 0.0009);
+    });
+    [-1, 1].forEach((sd) => {
+      box(0.0014, 0.0010, 0.0036, paint(0xd8dadf, 0.4), sd * 0.0043, D0 + 0.0003, -0.0050); // a boat each side of the deckhouse
+      box(0.0004, 0.0004, 0.0030, dark, sd * 0.0050, D0 + 0.0020, -0.0050);
+      box(0.0006, 0.0012, 0.0016, dark, sd * 0.0034, D0 + 0.0040, 0.0043); // radar panel on the bridge flank
+    });
+    [0, 1, 2, 3].forEach((k) => box(0.0014, 0.0003, 0.0007, dark, ((k % 2) - 0.5) * 0.0026, D0 + 0.0030 + 0.0004 * (k >> 1), -0.0170 + 0.0007 * (k >> 1))); // launcher boxes between the funnels and the aft deckhouse
+    // a thin pale rail along each deck edge
+    [-1, 1].forEach((sd) => {
+      box(0.00018, 0.00055, 0.0215, rim, sd * (hw(-0.0270) - 0.00055), TOP + 0.0005, -0.0270);
+      box(0.00018, 0.00055, 0.0170, rim, sd * (hw(0.0190) - 0.00055), FORE + 0.0005, 0.0190 + 0.0032);
+    });
     // white water, soft-edged foam strips (additive, fading out): a bow wave on each side, a foam outline round the hull, a churned wake and a V astern
     const tex = this._gtex(wakeCanvas(), () => new T.CanvasTexture(wakeCanvas()));
     const Y = 0.0007,
-      white = (op) => new T.MeshBasicMaterial({ map: tex, color: 0xffffff, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide });
+      white = (op) => new T.MeshBasicMaterial({ map: tex, color: 0xf2f6ff, transparent: true, opacity: op, depthWrite: false, side: T.DoubleSide });
     // a ribbon from (x0, z0) to (x1, z1): w0 wide at the start (bright) and w1 at the end (gone)
     const strip = (x0, z0, x1, z1, w0, w1, op) => {
       const dx = x1 - x0,
@@ -1276,7 +1326,7 @@ export const modelMethods = {
         'position',
         new T.Float32BufferAttribute([x0 - (px * w0) / 2, Y, z0 - (pz * w0) / 2, x0 + (px * w0) / 2, Y, z0 + (pz * w0) / 2, x1 - (px * w1) / 2, Y, z1 - (pz * w1) / 2, x1 + (px * w1) / 2, Y, z1 + (pz * w1) / 2], 3),
       );
-      gm.setAttribute('uv', new T.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 1, 1], 2));
+      gm.setAttribute('uv', new T.Float32BufferAttribute([0, 1, 1, 1, 0, 0, 1, 0], 2)); // v = 1 is the top row of the (flipped) canvas: the dense start
       gm.setIndex([0, 2, 1, 1, 2, 3]);
       g.add(new T.Mesh(gm, white(op)));
     };
@@ -1284,13 +1334,13 @@ export const modelMethods = {
     const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
     ring.rotateX(Math.PI / 2);
     ring.translate(0, Y * 0.6, 0);
-    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.05, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
-    // churned wake astern, as wide as the transom, and the V arms that diverge beyond it: the white water is behind the stern only (nothing alongside the bow)
-    strip(0, Z0 + 0.001, 0, -0.076, 0.0095, 0.028, 0.6); // turbulent water: as wide as the transom at the stern, spreading and fading with distance (a tapering wake, not parallel streaks)
-    strip(0, Z0 + 0.001, 0, -0.050, 0.0066, 0.0135, 0.62); // a denser core in its first stretch
-    strip(0, Z0 + 0.0005, 0, -0.0215, 0.0085, 0.0120, 0.9); // bright white churn right at the stern
-    [-1, 1].forEach((sd) => strip(sd * 0.0050, Z0 + 0.002, sd * 0.028, -0.074, 0.0034, 0.0080, 0.30)); // the V arms: thin, bright near the stern and opening at the usual shallow angle (short: past the limb they would float in space)
-    [-1, 1].forEach((sd) => strip(sd * 0.0072, 0.030, sd * 0.0125, 0.0, 0.0030, 0.0042, 0.34)); // the bow wave: a short white wedge off each bow quarter
+    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.16, depthWrite: false, side: T.DoubleSide })));
+    // churned wake astern: white foam as wide as the transom that spreads, breaks into patches and thins out with distance, with a thin Kelvin arm each side
+    // (the wake is short: past the limb it would float in space)
+    strip(0, Z0 + 0.001, 0, -0.084, 0.0105, 0.025, 0.85);
+    strip(0, Z0 + 0.0005, 0, -0.058, 0.0078, 0.0115, 1);
+    [-1, 1].forEach((sd) => strip(sd * 0.0046, Z0 + 0.002, sd * 0.019, -0.066, 0.0034, 0.0060, 0.42));
+    [-1, 1].forEach((sd) => strip(sd * 0.0072, 0.030, sd * 0.0125, 0.0, 0.0030, 0.0042, 0.5)); // the bow wave: a short white wedge off each bow quarter
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
