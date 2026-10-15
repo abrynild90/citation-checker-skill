@@ -66,7 +66,7 @@ export const SOLWIND = {
     Impact: [188, -98],
     Solwind: [178, -24],
   }, // the missile's pill sits above the F-15 with a leader down to the arc
-  offSteps: { Solwind: [[0, -150, -6], [0.3, 178, -24]] }, // the opening: the satellite is small and high at the left, its name sits beside it in space, clear of the Earth's glow
+  offSteps: { Solwind: [[0, -150, -6], [0.3, 178, -24]], 'ASM-135': [[0, -105, 46], [0.25, 105, -96], [0.285, -80, -62]] }, // ASM-135: up and right of the missile while it is under the F-15 (a leader from the left ran over the nose), then above-left once it has climbed away; // the opening: the satellite is small and high at the left, its name sits beside it in space, clear of the Earth's glow
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
@@ -88,7 +88,7 @@ export const SOLWIND = {
       scale: IS_PHONE ? 3.0 : 4.4, // desktop: 1.5x so the aircraft reads next to the satellite
       minPx: IS_PHONE ? 55 : 140,
       maxPx: IS_PHONE ? 78 : 190,
-      exit: { dur: 0.07, k: 0.25 }, // after the release the F-15 eases down and leaves (short, so it is gone before the satellite is close)
+      exit: { dur: 0.12, k: 0.45, shrink: 0.18 }, // after the release the F-15 eases down and recedes, small by the time it leaves (the camera glides on meanwhile, so it never pops out mid-frame)
       label: 'F-15 zoom climb',
       labelUntil: 0.22,
       dx: -64,

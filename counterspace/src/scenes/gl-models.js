@@ -900,16 +900,44 @@ export const modelMethods = {
         new T.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, opacity: 0.9 }),
       );
     };
+    // Each flame is a plume with volume: a short orange sheath (the cone, fading to black along its length) and a chain of soft additive blobs down the axis, wide and
+    // red-orange at the tail and narrow, yellow and white near the nozzle, so it glows like a lit exhaust and does not read as a flat pale cone. A hot white core
+    // sits at the nozzle, with a glow round it. gl-host flickers the length (`flames` and each flame's `blobs`).
     const flames = [];
+    const blob = (c, op) => new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: c, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending }));
     for (const x of [-1, 1]) {
       const f = new T.Group();
       f.position.set(x * 0.0026, -0.0003, -0.0218);
-      f.add(cone(0.0019, 0.0170, [1.0, 0.5, 0.18], [0.14, 0.02, 0.0]));
-      f.add(cone(0.00105, 0.0096, [1.0, 0.98, 0.85], [0.4, 0.15, 0.02]));
-      const h = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xffa860, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending }));
-      h.scale.setScalar(0.012);
-      h.position.z = -0.0008;
+      const sheath = cone(0.0017, 0.0150, [0.95, 0.38, 0.08], [0.1, 0.01, 0.0]);
+      sheath.material.opacity = 0.55;
+      f.add(sheath);
+      const blobs = [];
+      // [distance behind the nozzle, size, colour, opacity]
+      for (const [z, sz, c, op] of [
+        [0.0005, 0.0042, 0xfff1c8, 0.95],
+        [0.0030, 0.0054, 0xffc060, 0.8],
+        [0.0058, 0.0062, 0xff8a28, 0.62],
+        [0.0088, 0.0066, 0xf0561a, 0.46],
+        [0.0120, 0.0062, 0xc83a12, 0.3],
+        [0.0152, 0.0052, 0x8c2810, 0.18],
+      ]) {
+        const b = blob(c, op);
+        b.scale.setScalar(sz);
+        b.position.z = -z;
+        b.userData = { z, sz, op };
+        f.add(b);
+        blobs.push(b);
+      }
+      const core = new T.Mesh(
+        new T.ConeGeometry(0.00085, 0.0075, 12, 1, true).rotateX(-PI / 2).translate(0, 0, -0.00375),
+        new T.MeshBasicMaterial({ color: 0xfff6dc, transparent: true, opacity: 0.8, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide }),
+      ); // the hot core
+      f.add(core);
+      const h = blob(0xffa860, 0.7);
+      h.scale.setScalar(0.015);
+      h.position.z = -0.001;
       f.add(h);
+      f.userData.blobs = blobs;
       g.add(f);
       flames.push(f);
     }

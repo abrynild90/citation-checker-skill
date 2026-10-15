@@ -594,6 +594,7 @@ export function buildSim(cfg) {
             return ll(la, lo, r + (a.rise ?? 0.03) * (1 - 0.7 * u));
           };
           item.pos = (t) => (t < a.t0 - 1e-6 || t > a.t1 + a.exit.dur ? null : t <= a.t1 ? aircraftPos(t) : ex(t));
+          if (a.exit.shrink != null) item.sizeK = (t) => 1 - (1 - a.exit.shrink) * smooth(clamp01((t - a.t1) / a.exit.dur)); // exit.shrink (opt-in): it recedes to this fraction of its size by the time it leaves, so it never pops out at full size
         }
         const all = [];
         for (let k = 0; k <= 30; k++) all.push(Pc(k / 30));
