@@ -350,8 +350,8 @@ export const rocketMethods = {
             uW: { value: 0.003 },
             uExp: { value: 0 },
             uWob: { value: new T.Vector2() },
-            uC0: { value: new T.Color(core ? 0xfff6d2 : 0xff9a3c) },
-            uC1: { value: new T.Color(core ? 0xffc66a : 0xe2431a) },
+            uC0: { value: new T.Color(core ? 0xffffff : 0xffa840) },
+            uC1: { value: new T.Color(core ? 0xffd678 : 0xd8381a) }, // a white-hot core fading to yellow; an orange body fading to red
             uInt: { value: 1 },
             uTime: { value: 0 },
             uDia: { value: 0 },
@@ -744,15 +744,16 @@ export const rocketMethods = {
       U.uExp.value = e;
       U.uInt.value = (0.95 - 0.4 * e) * thr;
       U.uTime.value = tm;
-      U.uDia.value = 0;
       U.uWob.value.set(wob[0] * 2.4, wob[1] * 2.4);
-      C.uLen.value = outerLen * (0.5 + 0.1 * (1 - e));
-      C.uW.value = outerW * (0.5 + 0.1 * (1 - e));
+      C.uLen.value = outerLen * (0.52 + 0.14 * (1 - e));
+      C.uW.value = outerW * (0.46 + 0.1 * (1 - e));
       C.uExp.value = e * 0.8;
-      C.uInt.value = (1.25 - 0.45 * e) * thr;
+      C.uInt.value = (1.5 - 0.6 * e) * thr;
       C.uTime.value = tm;
-      C.uDia.value = 1.25 * (1 - smooth(e / 0.55)) * thr; // shock diamonds: first stage, dense air
-      C.uDiaN.value = 4.5;
+      C.uDia.value = 2.0 * (1 - smooth(e / 0.6)) * thr; // shock diamonds: first stage, dense air (bright beads along the core, fading as the air thins and the plume spreads)
+      C.uDiaN.value = 5.5;
+      U.uDia.value = 0.5 * (1 - smooth(e / 0.5)) * thr;
+      U.uDiaN.value = 5.5;
       C.uWob.value.set(wob[0] * 2.4, wob[1] * 2.4);
       rk.outer.visible = rk.core.visible = vis && thr > 0.004;
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
@@ -1002,7 +1003,7 @@ export const rocketMethods = {
           q2 = it.pos(Math.min(tE, te + dh * 0.5));
         if (q1 && q2) spc = Math.max(spacing * fx.smokeLocal, Math.hypot(q2[0] - q1[0], q2[1] - q1[1], q2[2] - q1[2]));
       }
-      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spc * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / 0.003) * Math.exp((-age * (1 - nk) * nearRaw) / 0.05) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
+      al[k] = Math.min(0.72 * (1 + 0.3 * (sk - 1)), (2.2 * spc * (1 + 0.5 * (sk - 1))) / sz[k]) * dense * fadeAlt * Math.exp(-age / TA) * clamp01(age / (fx.smokeRamp ?? 0.012)) * Math.exp((-age * (1 - nk) * nearRaw) / 0.05) * (rec.fx.cold && te < fx.t0 + rec.popT ? 1.15 : 1);
       wm[k] = Math.exp(-age / 0.012) * 0.8;
       if (al[k] > 0.003) any = true;
     }
