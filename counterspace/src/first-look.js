@@ -6,8 +6,8 @@ import { posterURL } from './scenes/posters.js';
 const section = document.getElementById('firstLook');
 const source = (id, label) => `<a href="${byId[id].source_url}" target="_blank" rel="noopener">${label}<span class="sr"> (opens in a new tab)</span></a>`;
 const parts = [
-  `<h3>A nuclear test in space</h3><p>The United States detonated Starfish Prime about 400 km above Earth on 9 July 1962.</p><p>${source('us-1962-starfish-prime', 'Read the test record and source')}</p>`,
-  `<h3>A treaty followed, 13 months later</h3><p>The Limited Test Ban Treaty was signed on 5 August 1963 and entered into force on 10 October. It bans nuclear tests in outer space.</p><p>${source('ltbt-1963', 'Read the treaty')}</p>`,
+  `<h3>A nuclear test in space</h3><p>The United States detonated Starfish Prime about 400 km above Earth on 9&nbsp;July&nbsp;1962.</p><p>${source('us-1962-starfish-prime', 'Read the test record and source')}</p>`,
+  `<h3>A treaty followed, 13 months later</h3><p>The Limited Test Ban Treaty was signed on 5&nbsp;August&nbsp;1963 and entered into force on 10&nbsp;October. It bans nuclear tests in outer space.</p><p>${source('ltbt-1963', 'Read the treaty')}</p>`,
   `<h3>Later does not mean caused by</h3><p>The treaty followed Starfish Prime. That sequence alone does not show that the test caused the agreement. The U.S. Office of the Historian points to the Cuban Missile Crisis and concern about radioactive fallout.</p><p><a href="https://history.state.gov/milestones/1961-1968/limited-ban" target="_blank" rel="noopener">Read the historical context<span class="sr"> (opens in a new tab)</span></a></p>`,
 ];
 let step = 0;

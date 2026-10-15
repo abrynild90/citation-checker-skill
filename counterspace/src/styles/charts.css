@@ -71,11 +71,11 @@
 /* wide windows: the zoom button, the data fold and the download button share one row under the strip (the zoom opens below that row; an opened table goes under the zoom) */
 @media (min-width:901px){
   .law-tools{position:relative;flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:var(--s-4)}
-  .law-tools>.zoom-ctl{order:0;padding:var(--s-2) 0}
+  .law-tools>.zoom-ctl{order:0;padding:var(--s-3) 0 var(--s-2)}
   .law-tools>#legalKey{order:1;margin:0;flex:0 1 auto}
   .law-tools>.zoom-wrap{order:2;flex:0 0 100%}
   .law-tools>#legalKey[open]{order:3;flex:0 0 100%;margin-top:var(--s-2)}
-  .law-tools>.dl-row{order:4;position:absolute;right:0;top:var(--s-2);height:auto;margin:0}
+  .law-tools>.dl-row{order:4;position:absolute;right:0;top:var(--s-3);height:auto;margin:0}
   .law-tools>.dl-row .dl-wrap{position:static}
   .law-tools .zoom-note{display:none}
 }
