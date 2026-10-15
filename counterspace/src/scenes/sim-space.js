@@ -74,7 +74,12 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       label: a.label,
       short: a.short,
       labelFrom: a.t0 + 0.1,
-      labelAt: (t) => ll(0, a.at[1] + 0.5833 * 180 * spread(t), rAlt(0.7 * 6371)), // a point on the outer equatorial field line, where particles are
+      // a.labelLat / a.labelLon (opt-in, degrees): the label names a point of the belt on a mid-latitude arch nearer the burst, where its beads and arches are, not the equatorial far side (a
+      // lone dot in empty space off the limb)
+      labelAt: (t) =>
+        a.labelLat != null
+          ? ll(a.labelLat, a.at[1] + (a.labelLon ?? 0.3) * 180 * spread(t), rAlt((a.L[1] * Math.cos(a.labelLat * DEG) ** 2 - 1) * 6371))
+          : ll(0, a.at[1] + 0.5833 * 180 * spread(t), rAlt(0.7 * 6371)), // a point on the outer equatorial field line, where particles are
       labelDx: 60,
       labelDy: 30,
       fill(t, out) {

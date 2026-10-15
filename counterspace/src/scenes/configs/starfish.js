@@ -88,6 +88,8 @@ export const STARFISH = {
       color: C.belt,
       size: IS_PHONE ? 0.026 : 0.017,
       nLon: 12,
+      labelLat: 30,
+      labelLon: 0,
       label: 'Artificial radiation belt',
       short: 'Radiation belt',
     },
@@ -118,8 +120,8 @@ export const STARFISH = {
   // live desktop (px from their referents, default camera): Detonation, Johnston and Thor sit in a column just left of the leftmost field-line arc, over the
   // dark Pacific, each with its own short leader (listed first: the later ones are checked against where these landed); the belt label hangs a few px
   // above the belt point it names
-  liveOff: { Detonation: [-190, -66], Johnston: [-150, 30], Thor: [125, -30], Artificial: [-60, -21], 'Satellite damaged': [165, -50] },
-  offSteps: { Johnston: [[0, -130, 80], [0.14, -150, 30]] }, // the pad opening: the Johnston chip sits below-left, its leader clear of the rocket; once the rocket is away it returns to its place in the column
+  liveOff: { Detonation: [-190, -78], Johnston: [-150, 30], Thor: [125, -30], Artificial: [-60, -21], 'Satellite damaged': [165, -50] },
+  offSteps: { Johnston: [[0, -130, 80], [0.14, -150, 30], [0.5, -70, 104]] }, // the pad opening: the Johnston chip sits below-left, its leader clear of the rocket; once the rocket is away it returns to its place in the column
   // Near and Polar (px from their referents, desktop width): Thor and Detonation fan out from the burst with short leaders that miss each other's chips;
   // on Polar the labels sit left and right of the burst (clear of the caption) and the satellite chip hugs the satellite
   camOff: {
