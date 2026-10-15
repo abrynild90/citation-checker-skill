@@ -25,7 +25,7 @@ const POSTER_T = {
   cosmos1408: 0.6,
   gnss: 0.35, // both airliners in view: one already red, one still fine
   viasat: 0.56, // the modems going red region by region over Europe, the beams still lit
-  laser: 0.5,
+  laser: 0.58, // MSTI-3 high on the limb with its glow, the beam down to White Sands, city lights and haze below (the earlier close view was a half-frame of upscaled terrain)
   'sj21-tug': 0.6,
   rpo: 0.3,
   spaceplanes: 0.06, // the X-37B large over the limb with its orbit lines (the whole-orbit view at 0.42 was a small globe with two blue dots)
@@ -44,6 +44,7 @@ const POSTER_VIEW = {
   shakti: { back: 0.72, right: 0.1, boost: 1.7 },
   fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
   dn2: { back: 0.95, boost: 1.8, right: 0.3 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
+  laser: { cam: 1, back: 1.75, right: 0.2, boost: 2.2 }, // pulled back from the ground: sharp limb haze and night lights instead of blurry close terrain
   'burnt-frost': { boost: 1.3, rel: { from: 'USS Lake Erie', to: 'USA-193', el: 6, az: -90, D: 0.7, lift: 0.06 } }, // seen from the side of the ship, low over the horizon: the ship lies along the limb, the SM-3 climbs from it and the satellite is clear above it (head-on, the three stood in one line like a spear)
 };
 const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
