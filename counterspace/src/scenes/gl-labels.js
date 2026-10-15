@@ -268,13 +268,13 @@ const methods = {
       offs = noBanner ? this.sim.cfg.stillOff : camOffs || (this.camIdx === 0 ? (w >= 700 ? this.sim.cfg.liveOff : w < 520 ? this.sim.cfg.phoneOff : null) : null),
       offK = noBanner ? w / 1000 : w >= 700 ? Math.min(1, w / 798) : 1; // cfg.stillOff (PNG stills): px at a 1000 px wide frame
     // cfg.offSteps { 'Label start': [[from t, dx, dy], ...] } (opt-in, live default camera, desktop width): the fixed offset changes with time
-    // (a pill that must sit outside a zone early and inside it later); it replaces that label's liveOff entry (a step with dx null: no fixed offset, the placer's own slot).
+    // (a pill that must sit outside a zone early and inside it later; a step with a 4th element 'ease' is reached by a straight-line blend from the step before); it replaces that label's liveOff entry (a step with dx null: no fixed offset, the placer's own slot).
     const stepOffs = !noBanner && this.camIdx === 0 && w >= 700 && !camOffs && this.sim.cfg.offSteps;
-    const offsAll = stepOffs ? { ...Object.fromEntries(Object.entries(offs || {}).filter(([n]) => !(n in stepOffs))), ...Object.fromEntries(Object.entries(stepOffs).map(([n, st]) => { const k = st.filter((e) => e[0] <= this.t).pop() || st[0]; return [n, k[1] == null ? null : [k[1], k[2]]]; }).filter((e) => e[1])) } : offs;
+    const offsAll = stepOffs ? { ...Object.fromEntries(Object.entries(offs || {}).filter(([n]) => !(n in stepOffs))), ...Object.fromEntries(Object.entries(stepOffs).map(([n, st]) => { const k = st.filter((e) => e[0] <= this.t).pop() || st[0], nx = st[st.indexOf(k) + 1]; if (nx && nx[3] === 'ease' && k[1] != null && nx[1] != null) { const f = Math.max(0, (this.t - k[0]) / (nx[0] - k[0])); return [n, [k[1] + (nx[1] - k[1]) * f, k[2] + (nx[2] - k[2]) * f]]; } return [n, k[1] == null ? null : [k[1], k[2]]]; }).filter((e) => e[1])) } : offs;
     const moved = new Set(); // labels a scene offset or the push-apart moved off the placer's own slot: checked again below
     if (offsAll)
       Object.entries(offsAll).forEach(([n, d]) => {
-        if (this.sim.cfg.offFrom?.[n] > this.t) return; // cfg.offFrom { 'Label start': t } (opt-in): the fixed offset applies only from this time
+        if (!stepOffs?.[n] && this.sim.cfg.offFrom?.[n] > this.t) return; // cfg.offFrom { 'Label start': t } (opt-in): the fixed offset applies only from this time (an offSteps entry has its own times)
         const i = raw.findIndex((r) => r && r.text.startsWith(n));
         if (i < 0 || !pl[i]) return;
         const r = raw[i],
