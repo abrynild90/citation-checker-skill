@@ -84,7 +84,7 @@ void main(){
   float lit = smoothstep(-0.2, 0.35, dot(normalize(vP), uSun));
   vec3 col = mix(vec3(0.16, 0.19, 0.28), vec3(0.97, 0.95, 0.92), lit);
   float s = dot(vec2(d.x, -d.y), vSun2);
-  col *= 0.8 + 0.4 * clamp(0.5 + s * 1.6, 0.0, 1.0);
+  col *= 0.6 + 0.72 * clamp(0.5 + s * 1.9, 0.0, 1.0); // a sun-lit side and a shaded side on every puff, so the column has volume
   col = mix(col, vec3(1.0, 0.62, 0.3), 0.55 * vWarm);
   gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.85));
 }`;
@@ -735,7 +735,10 @@ export const rocketMethods = {
       // the plume never runs into the globe: its length is cut where the exhaust axis meets the surface (a vehicle standing on the pad or skimming low
       // over it shows the flame ending at the ground, not a flame buried in it)
       const pk = fx.plumeK ?? 1; // fx.plumeK (opt-in): a longer, wider, brighter exhaust for a vehicle that is small in the frame
-      let outerLen = pk * ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr);
+      // lift-off (the first ~10 km of the climb, illustrative): a longer, brighter, slightly wider exhaust, flickering a little (a pure function of the scene time)
+      const low = 1 - smooth(st.alt / 12),
+        flick = 1 + (0.07 * Math.sin(t * this.sim.cfg.duration * 53 + fx.t0 * 90) + 0.05 * Math.sin(t * this.sim.cfg.duration * 97)) * thr;
+      let outerLen = pk * ak * (sepNow ? 0.8 : 1) * (0.026 + 0.062 * e) * (0.3 + 0.7 * thr) * (1 + 0.5 * low * thr) * (1 + 0.5 * (flick - 1));
       if (thr > 0.004) {
         const sc = obj.scale.x,
           dv = rec.v1.set(0, 0, 1).applyQuaternion(obj.quaternion),
@@ -749,20 +752,20 @@ export const rocketMethods = {
         if (c < 0) outerLen = 0;
         else if (disc > 0 && -b - Math.sqrt(disc) > 0) outerLen = Math.min(outerLen, (-b - Math.sqrt(disc)) / sc);
       }
-      const outerW = nozW * (1 + 0.5 * (pk - 1)) * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr);
+      const outerW = nozW * (1 + 0.5 * (pk - 1)) * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr) * (1 + 0.16 * low * thr);
       const tm = t * this.sim.cfg.duration,
         U = rk.outer.material.uniforms,
         C = rk.core.material.uniforms;
       U.uLen.value = outerLen;
       U.uW.value = outerW;
       U.uExp.value = e;
-      U.uInt.value = (0.95 - 0.4 * e) * thr;
+      U.uInt.value = (0.95 - 0.4 * e) * thr * (1 + 0.28 * low) * flick;
       U.uTime.value = tm;
       U.uWob.value.set(wob[0] * 2.4, wob[1] * 2.4);
       C.uLen.value = outerLen * (0.52 + 0.14 * (1 - e));
       C.uW.value = outerW * (0.46 + 0.1 * (1 - e));
       C.uExp.value = e * 0.8;
-      C.uInt.value = (1.5 - 0.6 * e) * thr;
+      C.uInt.value = (1.5 - 0.6 * e) * thr * (1 + 0.28 * low) * flick;
       C.uTime.value = tm;
       C.uDia.value = 2.0 * (1 - smooth(e / 0.6)) * thr; // shock diamonds: first stage, dense air (bright beads along the core, fading as the air thins and the plume spreads)
       C.uDiaN.value = 5.5;
@@ -779,6 +782,24 @@ export const rocketMethods = {
       rk.hot.scale.setScalar((0.0062 + 0.003 * thr) * ak * (1 + 0.3 * (pk - 1)) * (1 - 0.35 * e));
       rk.hot.material.opacity = Math.min(1, 1.1 * thr) * (1 - 0.5 * e);
       rk.hot.position.z = -0.0016;
+      // exhaust glow on the ground at low altitude: a warm pool on the surface under the vehicle that fades out over the first ~15 km of the climb
+      {
+        const gg = (rec.gg ||= (() => {
+          const s = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xff9a4a, transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: T.AdditiveBlending }));
+          s.renderOrder = 3;
+          s.visible = false;
+          obj.parent?.add(s);
+          return s;
+        })());
+        const lg = thr > 0.004 ? thr * (1 - smooth((st.alt - 0.6) / 14)) : 0;
+        gg.visible = vis && lg > 0.01 && !hide;
+        if (gg.visible) {
+          const q = rec.v1.set(obj.position.x, obj.position.y, obj.position.z).normalize().multiplyScalar(1.0022);
+          gg.position.copy(q);
+          gg.scale.setScalar(Lr * (0.5 + 0.35 * lg) * (1 + 0.4 * (flick - 1)));
+          gg.material.opacity = 0.5 * lg;
+        }
+      }
       // the engine bells glow while the motor burns (the lower one until the separation, then the upper one)
       rk.bell.emissiveIntensity = (sepNow ? 0 : 1.5) * thr;
       rk.bellU.emissiveIntensity = (sepNow ? 1.5 : 0) * thr;
