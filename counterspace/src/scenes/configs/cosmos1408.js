@@ -157,6 +157,7 @@ export const COSMOS1408 = {
     'ISS orbit': [150, -54],
     Impact: [140, -88],
   }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
+  offSteps: { Plesetsk: [[0, -96, 44], [0.34, -50, 20]] }, // once the view pulls back to the whole globe the Plesetsk pill hugs its site (it sat over Greenland, a long leader away)
   stillOff: { 'ISS orbit': [235, -30] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],
