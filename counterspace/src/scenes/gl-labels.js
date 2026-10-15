@@ -297,7 +297,9 @@ const methods = {
           qx = Math.max(x - r.w / 2, Math.min(x + r.w / 2, r.px)),
           qy = Math.max(y - r.h / 2, Math.min(y + r.h / 2, r.py));
         // the placer's own slot stays when the fixed one would land on another label (it knows nothing of this override)
-        if (pl.some((q, j) => j !== i && q && raw[j] && Math.abs(q.x - x) < (raw[j].w + r.w) / 2 && Math.abs(q.y - y) < (raw[j].h + r.h) / 2)) return;
+        // (cfg.offPending, opt-in: a label that has a fixed offset of its own still to apply does not block this one: two pills whose fixed slots sit on each other's placer slots otherwise both stay put)
+        const later = (j) => this.sim.cfg.offPending && !moved.has(j) && Object.keys(offsAll).some((m) => raw[j].text.startsWith(m) && !(this.sim.cfg.offFrom?.[m] > this.t));
+        if (pl.some((q, j) => j !== i && q && raw[j] && !later(j) && Math.abs(q.x - x) < (raw[j].w + r.w) / 2 && Math.abs(q.y - y) < (raw[j].h + r.h) / 2)) return;
         Object.assign(pl[i], { x, y, leader: true, ax: r.px, ay: r.py, qx, qy });
         moved.add(i);
       });

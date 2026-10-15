@@ -120,9 +120,11 @@ export const DN2 = {
       color: C.geo,
       thick: 0.006,
       opacity: 0.9,
+      fadeCams: [0], fadeInT: [0.1, 0.24], // the ring is edge-on at the opening (two flat yellow lines across the frame): it fades in as the view pulls back
       fadeDisc: 0.1, // the ring passes in front of the globe's face only as a faint line (it read as a cut across the disc at the start)
     },
   ],
+  nightK: 1.8, // a lifted night ambient: the dark side of the globe keeps its land and ocean readable and stops reading as a dark glass ball against the sky
   still: 0.62,
   stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it
   camDist: 7.5,
@@ -151,6 +153,7 @@ export const DN2 = {
       [0.8, 0, -62],
     ],
   }, // once the rocket is back down the path pill goes straight up so its leader clears the apogee pill
+  offPending: true, // the 10,000 km and apogee pills each keep their own fixed slot (one above, one below the ruler), with no swap while the rocket passes
   camOff: { 1: { 'DN-2 path': [-175, -66] } },
   // phone: the path and GEO labels are dropped (the status line and the ring itself carry them); 10,000 km sits below-left of its marker and the
   // apogee label drops straight below its own marker, so the labels no longer converge right of the Earth (default camera, raw px)

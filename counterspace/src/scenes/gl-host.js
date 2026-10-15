@@ -874,8 +874,9 @@ export class GLHost {
     // Orbit lines with an opt-in fade-out over a time span (it.fadeT), on the listed cameras only when it.fadeCams is given.
     for (const f of this.fadeRings || []) {
       const k = !f.cams || f.cams.includes(this.camIdx) ? Math.max(0, Math.min(1, (this.t - f.T[0]) / (f.T[1] - f.T[0]))) : 0;
-      f.mat.uniforms.uOp.value = f.op * (1 - k);
-      f.mesh.visible = k < 1;
+      const kin = f.In && (!f.cams || f.cams.includes(this.camIdx)) ? Math.max(0, Math.min(1, (this.t - f.In[0]) / (f.In[1] - f.In[0]))) : 1;
+      f.mat.uniforms.uOp.value = f.op * (1 - k) * kin;
+      f.mesh.visible = k < 1 && kin > 0;
     }
     for (const f of this.fadeInLines || []) f.mat.opacity = f.op * Math.max(0, Math.min(1, (this.t - f.T[0]) / (f.T[1] - f.T[0])));
     // Orbit lines that fade out around their craft (it.gapIds): the line never runs through a model.
