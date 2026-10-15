@@ -1235,9 +1235,9 @@ export const modelMethods = {
     const keel = paint(0x4a2220, 0.28),
       boot = paint(0xc9ced6, 0.5),
       // the hull side is a dark naval grey with a softer, glossier coat: it picks up the sun and the glow of the sea instead of reading as flat grey plastic
-      side = paint(0x535b67, 0.2, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.1 }),
+      side = paint(0x353c47, 0.14, { metalness: 0.4, roughness: 0.36, envMapIntensity: 1.3 }),
       rim = paint(0x9aa1ac, 0.4),
-      deckMat = paint(0x6a707b, 0.3),
+      deckMat = paint(0x7d838e, 0.32),
       stripe = paint(0xf2f2ee, 0.5),
       light = paint(0xe9ebef, 0.42, { roughness: 0.6 }),
       glass = paint(0x141a24, 0.25, { metalness: 0.5, roughness: 0.22, envMapIntensity: 1.4 }),
