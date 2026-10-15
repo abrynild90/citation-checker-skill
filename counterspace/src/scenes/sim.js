@@ -780,6 +780,26 @@ export function buildSim(cfg) {
           cj: (rnd() - 0.5) * 0.5,
           br: 0.7 + rnd() * 0.3,
         });
+      // Hard debris looks like real fragments, not beads: log-normal sizes (many small, a few large), varied tint and brightness, a few glints,
+      // slow tumbling brightness and a small 3-D scatter that grows after the break-up (its own generator: the shared sequence is untouched).
+      const sizes = a.hard ? new Float32Array(n) : null;
+      if (a.hard) {
+        const fr = mulberry(cfg.id.length * 104729 + n);
+        for (let k = 0; k < n; k++) {
+          const p = P[k],
+            glint = fr() < 0.035;
+          p.sz = Math.max(0.3, Math.min(2.6, Math.exp(gauss(fr) * 0.5) * 0.68)) * (glint ? 1.5 : 1);
+          p.gl = glint;
+          p.tv = Math.max(-0.6, Math.min(1, gauss(fr) * 0.45 + 0.2)); // tint: -0.6 warm white .. 1 deep orange
+          p.tw = fr() < 0.4 ? 0.2 + fr() * 0.5 : 0; // tumbling fragments flicker; the rest are steady
+          p.tf = 40 + fr() * 110;
+          p.tp = fr() * 6.2832;
+          p.jx = gauss(fr);
+          p.jy = gauss(fr);
+          p.jz = gauss(fr);
+          sizes[k] = p.sz;
+        }
+      }
       // Fragments start hot (pale orange) and cool to dim red with age; each has its own tint and brightness. Soft sprites, normal blending: no white clipping.
       let HOT = [1, 0.8, 0.5],
         MID = [1, 0.5, 0.2],
@@ -825,6 +845,7 @@ export function buildSim(cfg) {
         additive: a.additive,
         darkHalo: a.darkHalo,
         hard: a.hard,
+        sizes,
         trail: a.trail,
         hideEmpty: a.hideEmpty,
         label: a.label,
@@ -869,6 +890,12 @@ export function buildSim(cfg) {
                 x = q[0];
                 y = q[1];
                 z = q[2];
+                if (a.hard) {
+                  const js = (a.scatter ?? 0.012) * Math.min(1, dt * 8); // a small 3-D scatter: the cloud has depth, not a line of beads
+                  x += p.jx * js;
+                  y += p.jy * js;
+                  z += p.jz * js;
+                }
                 vis++;
               }
             }
@@ -880,9 +907,12 @@ export function buildSim(cfg) {
                 c = age < 0.4 ? lerp3(HOT, MID, age / 0.4) : lerp3(MID, COOL, (age - 0.4) / 0.6),
                 fade = 1 - (a.lateGlow ? 0.2 : 0.45) * age,
                 k4 = 4 * k;
-              colr[k4] = c[0] * p.br;
-              colr[k4 + 1] = c[1] * p.br;
-              colr[k4 + 2] = c[2] * p.br;
+              const hv = a.hard ? p.br * (p.gl ? 1.5 : 0.82) : p.br,
+                tg = a.hard ? 1 - 0.16 * p.tv : 1,
+                tb = a.hard ? 1 - 0.4 * p.tv : 1;
+              colr[k4] = c[0] * hv;
+              colr[k4 + 1] = c[1] * hv * tg;
+              colr[k4 + 2] = c[2] * hv * tb;
               // velocity-sorted: fragments near the parent's speed stay bright and large, the fast and slow tails are dimmer and smaller
               const core = 1 - Math.min(1, Math.abs(p.dw - 1) / (a.dv * 1.6 || 1));
               colr[k4 + 3] = Math.min(
@@ -893,7 +923,8 @@ export function buildSim(cfg) {
                   cloudFade *
                   (0.4 + 0.6 * core * core) *
                   (da > 0 && da < 0.02 ? da / 0.02 : 1) *
-                  (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1),
+                  (a.lateBoost && a.late ? 1 + a.lateBoost * clamp01((t - a.late.t0) / 0.3) : 1) *
+                  (a.hard && p.tw ? 1 - p.tw * (0.5 + 0.5 * Math.sin(t * p.tf + p.tp)) : 1),
               ); // lateBoost (opt-in): the old fragments get brighter, so a thin late ring stays visible
             }
           }

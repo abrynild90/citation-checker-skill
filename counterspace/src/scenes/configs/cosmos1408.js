@@ -123,6 +123,7 @@ export const COSMOS1408 = {
       maxPx: 4.5, // the band keeps spreading along and across the orbit instead of a smear over the pole
       lateGlow: true, // old fragments stay clearly visible near the ISS ring
       hard: true, // crisp fragments with a bright centre: not another soft orange town light
+      scatter: 0.03, // a broader 3-D scatter: the cloud is a cloud, not a curtain
       palette: {
         hot: [1, 0.98, 0.9],
         mid: [1, 0.9, 0.74],
