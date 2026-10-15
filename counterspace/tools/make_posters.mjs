@@ -19,7 +19,7 @@ const POSTER_T = {
   starfish: 0.6, // the belt pulled out around the whole Earth, the burst inside it
   solwind: 0.27, // the F-15 and the missile climbing toward the textured satellite, all clear of the frame edges
   fengyun: 0.16, // the launch, the interceptor and the satellite clear of it in one frame, before the debris saturates the picture
-  'burnt-frost': 0.4, // the SM-3 about to reach the textured satellite (the model is drawn until the hit)
+  'burnt-frost': 0.29, // the SM-3 well into its climb from the ship, the satellite above it, still apart (the model is drawn until the hit)
   dn2: 0.3, // the rocket climbing the arc with its plume and trail, the GEO ring around the Earth
   shakti: 0.44, // the impact flash and shock ring with the first warm fragments over the Bay of Bengal
   cosmos1408: 0.6,
@@ -43,7 +43,7 @@ const POSTER_VIEW = {
   shakti: { back: 0.72, right: 0.1, boost: 1.7 },
   fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
   dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
-  'burnt-frost': { back: 0.66, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
+  'burnt-frost': { boost: 1.3, rel: { from: 'USS Lake Erie', to: 'USA-193', el: 6, az: -90, D: 0.7, lift: 0.06 } }, // seen from the side of the ship, low over the horizon: the ship lies along the limb, the SM-3 climbs from it and the satellite is clear above it (head-on, the three stood in one line like a spear)
 };
 const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
@@ -215,6 +215,29 @@ try {
           const up = h.camera.up.clone().applyQuaternion(h.camera.quaternion).multiplyScalar(view.lift);
           h.camera.position.add(up);
           h.target.add(up);
+          h.camera.lookAt(h.target);
+          h._user = true;
+          h.render();
+        }
+        if (view.rel) {
+          // rel { from, to, el, az, D, lift, sh }: the camera stands D from the point between two labelled craft, el degrees above the horizon of the first and az degrees round it
+          // (0 = east of it), looking at that point raised by `lift`; the picture is the side of the line between them, not along it
+          const o = view.rel,
+            P = (n) => h.dyn.find((d) => d.it.label === n && d.it.kind === 'point').obj.position.clone(),
+            a = P(o.from),
+            b = P(o.to),
+            V = a.constructor,
+            m = a.clone().add(b).multiplyScalar(0.5),
+            U = a.clone().normalize(),
+            E = new V(0, 1, 0).cross(U).normalize(),
+            N = U.clone().cross(E).normalize(),
+            el = (o.el * Math.PI) / 180,
+            az = (o.az * Math.PI) / 180,
+            dir = E.clone().multiplyScalar(Math.cos(el) * Math.cos(az)).add(N.clone().multiplyScalar(Math.cos(el) * Math.sin(az))).add(U.clone().multiplyScalar(Math.sin(el))),
+            look = m.clone().add(U.clone().multiplyScalar(o.lift || 0)).add(E.clone().multiplyScalar(o.sh || 0));
+          h.camera.position.copy(look).add(dir.multiplyScalar(o.D));
+          h.target.copy(look);
+          h.camera.up.set(0, 1, 0);
           h.camera.lookAt(h.target);
           h._user = true;
           h.render();
