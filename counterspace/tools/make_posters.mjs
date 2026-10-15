@@ -43,7 +43,7 @@ const POSTER_VIEW = {
   shakti: { back: 0.72, right: 0.1, boost: 1.7 },
   fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
   dn2: { back: 0.85, boost: 1.8, right: 0.55 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
-  'burnt-frost': { back: 0.5, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
+  'burnt-frost': { back: 0.66, boost: 1.8 }, // close on the SM-3, the textured satellite and the ship just before the hit
 };
 const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
