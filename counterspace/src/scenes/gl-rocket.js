@@ -691,6 +691,8 @@ export const rocketMethods = {
           // clean separation: the two stages are collinear at the instant of separation, then the lower one drifts aft on a small relative velocity (the upper
           // one starts to accelerate away when its motor lights) and picks up a slow differential tumble about its own middle, so nothing hinges at the joint
           const u = sepAge,
+            // stage.scale (opt-in): the spent lower part swells to this factor about its forward end over the first quarter of its drop-away (a far-off camera shows it as a stub)
+            ss = 1 + ((fx.stage.scale ?? 1) - 1) * smooth(u / 0.25),
             sd = fx.stage.drift ?? 1, // stage.drift / stage.tumble / stage.puff (opt-in): a more visible drop-away (faster fall-back, a faster tumble, a bigger puff of gas)
             off = sd * (0.03 * u + 0.1 * u * u),
             cz = 0.5 * (D.zN + D.zS),
@@ -698,14 +700,16 @@ export const rocketMethods = {
             pr = rec.pr || (rec.pr = new T.Vector3()),
             tk = fx.stage.tumble ?? 1;
           e3.set(0.8 * tk * u * u, 0.5 * tk * u * u, 0.36 * tk * u * u);
-          pr.set(0, 0, cz).applyEuler(e3); // the middle of the lower part, turned: the part rotates about it, not about its forward end
+          pr.set(0, 0, ss * cz).applyEuler(e3); // the middle of the lower part, turned: the part rotates about it, not about its forward end
           rk.lower.rotation.copy(e3);
-          rk.lower.position.set(0.0006 * sd * u - pr.x, 0.0004 * sd * u - pr.y, cz - pr.z - off);
+          rk.lower.scale.setScalar(ss);
+          rk.lower.position.set(0.0006 * sd * u - pr.x, 0.0004 * sd * u - pr.y, D.zS + ss * (cz - D.zS) - pr.z - off);
           const fade = 1 - smooth((u - 1.1) / 0.6);
           for (const m of rk.lowerMats) m.opacity = fade;
         } else if (rk.lower.position.z !== 0) {
           rk.lower.position.set(0, 0, 0);
           rk.lower.rotation.set(0, 0, 0);
+          rk.lower.scale.setScalar(1);
           for (const m of rk.lowerMats) m.opacity = 1;
         }
       }
