@@ -249,6 +249,7 @@ const methods = {
         line.userData.rgb = col(it.color);
       } else line = new T.Line(g, new T.LineBasicMaterial({ color: col(it.color), transparent: true, opacity: it.opacity ?? 1 }));
       root.add(line);
+      if (it.fadeIn && !it.dynamic) (this.fadeInLines ||= []).push({ mat: line.material, op: it.opacity ?? 1, T: it.fadeIn }); // opt-in [t0, t1]: a plain line fades in over that time span
       if (it.dynamic || it.gate) this.dyn.push({ it, obj: line });
       if (it.thick) {
         // bright tube so the path reads at any zoom; dynamic ones are revealed with drawRange

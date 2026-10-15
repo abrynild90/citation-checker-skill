@@ -64,6 +64,7 @@ export const DN2 = {
         // no dropped stage: the reports speak of upper stages, but the count is not claimed, and the spent grey stub drifted unlabeled to the frame edge
       },
       apexT: 0.47,
+      rulerFadeIn: [0.08, 0.2],
       rulerFrom: 10000, // the altitude ruler starts at its first tick, so no faint line runs through the Earth
       staticAt: [0.6, 0.09],
       marks: [
@@ -72,6 +73,7 @@ export const DN2 = {
           label: '10,000 km · China’s stated figure',
           short: '10,000 km (China)',
           phoneFrom: 0.3,
+          from: 0.1, // the tick (and its pill) wait until the view has pulled back from the pad: at the start its ruler ran off the left edge
           opt: true,
           color: '#ffd9a0',
           dx: -20,
@@ -97,6 +99,7 @@ export const DN2 = {
           alt: GEO_ALT,
           label: 'GEO ring · 35,786 km',
           short: 'GEO',
+          from: 0.1,
           opt: true,
           color: C.geo,
           dx: 0,
@@ -138,7 +141,7 @@ export const DN2 = {
     'DN-2 path': [-30, -34],
     Xichang: [-60, -40],
     '10,000': [10, 42],
-    '≥30,000': [-10, -96],
+    '≥30,000': [-100, 34],
     GEO: [20, 74],
   }, // the two pills at the apogee fan out up-right and down-right: their leaders no longer cross
   offSteps: {
@@ -148,8 +151,9 @@ export const DN2 = {
     ],
     '10,000': [
       [0, 10, 42],
-      [0.45, -40, -52],
-      [0.7, 10, 42],
+      [0.4, -20, -50],
+      [0.78, -20, -50],
+      [0.88, 10, 42],
     ],
     GEO: [
       [0, 20, 74],

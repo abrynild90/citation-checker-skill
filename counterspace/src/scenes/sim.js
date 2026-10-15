@@ -996,7 +996,8 @@ export function buildSim(cfg) {
           pts: () => [scl(d, a.rulerFrom != null ? rAlt(a.rulerFrom) : 1), scl(d, rAlt(GEO_ALT) * 1.02)],
           color: '#dfe6f7',
           opacity: 0.5,
-        }); // rulerFrom (opt-in): the ruler starts at this altitude (km), not on the surface
+          fadeIn: a.rulerFadeIn,
+        }); // rulerFadeIn (opt-in [t0, t1]): the ruler fades in once the view has pulled back; rulerFrom (opt-in): the ruler starts at this altitude (km), not on the surface
         a.marks.forEach((m) =>
           items.push({
             kind: 'point',
@@ -1012,7 +1013,7 @@ export function buildSim(cfg) {
             staticPin: m.staticPin,
             labelDx: m.dx ?? 0,
             labelDy: m.dy ?? 0,
-            pos: (t) => ((m.apex && t < tApex) || (IS_PHONE && m.phoneFrom && t < m.phoneFrom) ? null : scl(d, rAlt(m.alt))), // phoneFrom (opt-in): on a phone the marker waits until this t
+            pos: (t) => ((m.apex && t < tApex) || (m.from != null && t < m.from) || (IS_PHONE && m.phoneFrom && t < m.phoneFrom) ? null : scl(d, rAlt(m.alt))), // phoneFrom (opt-in): on a phone the marker waits until this t
           }),
         );
       }
