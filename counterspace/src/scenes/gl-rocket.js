@@ -204,7 +204,7 @@ export const rocketMethods = {
     // dimensions (z along the axis): nozzle exit, body, split between the lower and upper part, nose tip
     const D = slim
       ? { zN: -0.0275, zB: -0.0245, zS: -0.0005, zI: 0.0035, zT: 0.0215, zNose: 0.034, rL: 0.0028, rU: 0.0021 }
-      : { zN: -0.0255, zB: -0.0185, zS: -0.0045, zI: -0.0045, zT: 0.0185, zNose: 0.034, rL: 0.0042, rU: 0.0042 };
+      : { zN: -0.0255, zB: -0.0185, zS: -0.0045, zI: -0.0045, zT: 0.0185, zNose: 0.0385, rL: 0.0035, rU: 0.0035 }; // slimmer and longer than before (it read as stubby, with oversized fins)
     // lower part: nozzle bell, thrust skirt, booster body with panel lines and a dark band, fins
     if (slim)
       // a flared engine bell with a bright rim, a throat and a collar where it meets the skirt
@@ -213,6 +213,10 @@ export const rocketMethods = {
     Kl.geo(dark, lathe(T, [[D.rL * 0.8, D.zB - 0.0035, 0.8], [D.rL * 1.0, D.zB, 0.9]], 18), 0, 0, 0, rx);
     const linesL = slim ? [-0.0185, -0.0125, -0.0065] : [-0.0125, -0.0085];
     Kl.geo(white, lathe(T, bodyProfile(D.rL, D.rL, D.zB, D.zS, linesL, 1, 0.7, [0.6, 1.0]), 22), 0, 0, 0, rx); // sooty near the engines, clean above
+    if (!slim) {
+      // the spent booster is a closed cylinder: a dark interstage collar with a domed top (the upper part's own base hides it until the separation)
+      Kl.geo(dark, lathe(T, [[D.rL * 1.02, D.zS - 0.0016, 0.9], [D.rL * 1.02, D.zS, 0.9], [D.rL * 0.6, D.zS + 0.0006, 0.7], [0.00006, D.zS + 0.0011, 0.6]], 20), 0, 0, 0, rx);
+    }
     if (slim) {
       // the interstage: a dark ring against the upper stage and, below it, a stripe in the vehicle's colour between two thin grooves
       Kl.geo(dark, lathe(T, [[D.rL * 1.02, D.zS - 0.0016, 0.9], [D.rL * 1.02, D.zS, 0.9]], 20), 0, 0, 0, rx);
@@ -301,7 +305,7 @@ export const rocketMethods = {
     for (let k = 0; k < 4; k++) {
       const a = (k * PI) / 2;
       if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0068, -0.0264, -0.0165, -0.0226, 0.0009), 0, 0, 0, 0, 0, a);
-      else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0112, -0.0182, -0.0072, -0.0128, 0.0011), 0, 0, 0, 0, 0, a);
+      else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0076, -0.0182, -0.0092, -0.0140, 0.0010), 0, 0, 0, 0, 0, a);
     }
     for (const m of [white, whiteU, nose, dark, darkU, fin, bell, bellU, accent, accentU]) if (m) rimify(m, m === nose ? 0.4 : 0.5, m === white || m === whiteU);
     const lower = Kl.build(),
