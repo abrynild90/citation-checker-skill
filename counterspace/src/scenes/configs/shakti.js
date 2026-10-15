@@ -97,7 +97,7 @@ export const SHAKTI = {
       linger: 0.2,
       lingerK: 0.6,
       lingerEnd: 0.7,
-      rocket: { style: 'slim', endHold: 0.01, minPx: IS_PHONE ? 72 : 135, maxPx: IS_PHONE ? 104 : 170, glowMin: 12, glowMax: 22, ramp: { k: IS_PHONE ? 1.8 : 1.7, until: 0.3 }, smokeK: 2.1, smokeNear: 0.3, smokeTA: 0.06, vent: true, pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 } }, // desktop: 35% larger, so the vehicle reads at the default framing
+      rocket: { sizeSteps: IS_PHONE ? null : [[0, 0.78], [0.12, 0.78], [0.26, 1]], style: 'slim', endHold: 0.01, minPx: IS_PHONE ? 72 : 135, maxPx: IS_PHONE ? 104 : 170, glowMin: 12, glowMax: 22, ramp: { k: IS_PHONE ? 1.8 : 1.7, until: 0.3 }, smokeK: 2.1, smokeNear: 0.3, smokeTA: 0.06, vent: true, pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 } }, // desktop: 35% larger, so the vehicle reads at the default framing
     },
     {
       type: 'debris',

@@ -74,7 +74,7 @@ export const FENGYUN = {
       strong: true,
       coreK: 0.85,
       flash: 0.3,
-      rocket: IS_PHONE ? undefined : { style: 'slim', endHold: 0.06, endDrift: 1.2, endFade: 0.05, minPx: 135, maxPx: 165, ramp: { k: 1.35, until: 0.3 }, burn: 0.8, smokeK: 1.7, pad: { minPx: 44, maxPx: 64 }, vent: true }, // 35% larger than before, so the vehicle reads at the default framing
+      rocket: IS_PHONE ? undefined : { sizeSteps: [[0, 0.72], [0.1, 0.72], [0.22, 1]], style: 'slim', endHold: 0.06, endDrift: 1.2, endFade: 0.05, minPx: 135, maxPx: 165, ramp: { k: 1.35, until: 0.3 }, burn: 0.8, smokeK: 1.7, pad: { minPx: 44, maxPx: 64 }, vent: true }, // 35% larger than before, so the vehicle reads at the default framing
     }, // a bright core and a second white ring: the hit reads against the debris plume
     {
       type: 'debris',
