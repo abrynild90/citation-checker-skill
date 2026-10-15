@@ -56,15 +56,15 @@ export const BURNT_FROST = {
   actors: [
     {
       type: 'ship',
-      at: [22.0, -163.0],
+      at: [22.0, -179.0],
       label: 'USS Lake Erie',
       shade: true,
       labelUntil: 0.56,
       hideFrom: 0.58,
       dx: 0,
       dy: 44,
-      minPx: IS_PHONE ? 72 : 92,
-      maxPx: IS_PHONE ? 135 : 140,
+      minPx: IS_PHONE ? 72 : 150,
+      maxPx: IS_PHONE ? 135 : 190,
     },
     {
       type: 'target',
@@ -92,7 +92,8 @@ export const BURNT_FROST = {
     },
     {
       type: 'intercept',
-      from: [22.0, -163.0],
+      from: [22.0, -179.0],
+      arcLift: 0.07, // a near-direct, steeper run to the satellite (the default high bow drew a flat horizontal arc over the disc)
       t0: 0.2,
       color: '#ff8a4a',
       taper: 0.3,
@@ -106,7 +107,7 @@ export const BURNT_FROST = {
       coreK: 0.55,
       strong: true,
       retire: 0.14,
-      hold: -0.14,
+      hold: -0.03, // the SM-3 pill stays with the missile until just before the hit
       flashSpan: 0.12,
       linger: 0.2,
       lingerK: 0.5,

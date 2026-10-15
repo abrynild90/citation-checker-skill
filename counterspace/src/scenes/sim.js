@@ -716,6 +716,7 @@ export function buildSim(cfg) {
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,
             stage: a.rocket.stage,
+            kv: a.rocket.kv, // opt-in { at }: a small kill vehicle rides the nose (style 'asat') and flies on alone after this time (gl-rocket _kvFrame)
             plumeK: a.rocket.plumeK, // opt-in: a longer, wider exhaust
             seed: a.t0 * 10,
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
@@ -1145,6 +1146,6 @@ export function buildSim(cfg) {
     flags,
     stillCamFor,
     still: cfg.still ?? 0.5,
-    sunRef: cams[0].pos,
+    sunRef: cams[0].sunRef || cams[0].pos,
   };
 }

@@ -152,6 +152,46 @@ function chamferBox(T, w, h, d, r, b) {
   return g;
 }
 
+// A lofted body along +z from cross-sections {z, w, t, b, x, y}: half-width w, height t above and b below the centre (x, y), each section a superellipse. Closed at both ends.
+export function lofted(T, secs, ring = 16, power = 2.6) {
+  const n = secs.length,
+    pos = new Float32Array((n * ring + 2) * 3),
+    idx = [];
+  for (let i = 0; i < n; i++) {
+    const s = secs[i];
+    for (let j = 0; j < ring; j++) {
+      const a = (j / ring) * Math.PI * 2,
+        c = Math.cos(a),
+        sn = Math.sin(a),
+        px = s.w * Math.sign(c) * Math.pow(Math.abs(c), 2 / power),
+        py = (sn >= 0 ? s.t : s.b) * Math.sign(sn) * Math.pow(Math.abs(sn), 2 / power);
+      pos.set([(s.x || 0) + px, (s.y || 0) + py, s.z], (i * ring + j) * 3);
+    }
+  }
+  const c0 = n * ring,
+    c1 = c0 + 1;
+  pos.set([secs[0].x || 0, secs[0].y || 0, secs[0].z], c0 * 3);
+  pos.set([secs[n - 1].x || 0, secs[n - 1].y || 0, secs[n - 1].z], c1 * 3);
+  for (let i = 0; i < n - 1; i++)
+    for (let j = 0; j < ring; j++) {
+      const a = i * ring + j,
+        b = i * ring + ((j + 1) % ring),
+        c = (i + 1) * ring + j,
+        d = (i + 1) * ring + ((j + 1) % ring);
+      idx.push(a, c, b, b, c, d);
+    }
+  for (let j = 0; j < ring; j++) {
+    idx.push(c0, j, (j + 1) % ring);
+    idx.push(c1, (n - 1) * ring + ((j + 1) % ring), (n - 1) * ring + j);
+  }
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.BufferAttribute(pos, 3));
+  g.setAttribute('uv', new T.BufferAttribute(new Float32Array((n * ring + 2) * 2), 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
 // Environment map colours (linear, so values above 1 are bright light): black sky above, a cold dim horizon, earthshine below.
 const ENV_SPACE = [0.01, 0.014, 0.03],
   ENV_HORIZON = [0.1, 0.14, 0.24],
@@ -240,17 +280,42 @@ export const modelMethods = {
       });
     };
     if (variant === 'solwind') {
-      // The wheel beneath a single upright sail is the defining outline in the photograph.
-      K.cyl(this._foil(0x9faabd), 0.017, 0.017, 0.008, 0, -0.014, 0, 0, 0, 0, 32);
-      for (let k = 0; k < 12; k++) {
-        const angle = (k * PI) / 6;
-        K.box(metal, 0.0004, 0.0075, 0.0004, Math.sin(angle) * 0.017, -0.014, Math.cos(angle) * 0.017, 0, angle, 0);
+      // The wheel beneath a single upright sail is the defining outline in the photograph: a ribbed drum with rim rings and a dark deck, a framed
+      // cell-gridded sail on two struts, a gold instrument box with a dark aperture, whip antennas and thruster nubs.
+      const dark = this._mat(0x1b2029, { metalness: 0.5, roughness: 0.5 }),
+        gold = this._foil(0xd8a64a),
+        white = this._mat(0xe6e9f0, { metalness: 0.3, roughness: 0.42 });
+      const R = 0.0148;
+      K.cyl(this._foil(0xa3adc0), R, R, 0.0072, 0, -0.0133, 0, 0, 0, 0, 40);
+      for (let k = 0; k < 24; k++) {
+        const angle = (k * PI) / 12;
+        K.box(metal, 0.0004, 0.0074, 0.0004, Math.sin(angle) * R, -0.0133, Math.cos(angle) * R, 0, angle, 0);
       }
-      K.cyl(foil, 0.016, 0.016, 0.0014, 0, -0.0185, 0, 0, 0, 0, 32);
-      K.ring(metal, 0.017, 0.0005, 0, -0.0097, 0, PI / 2);
-      K.box(foil, 0.008, 0.008, 0.007, 0, -0.006, 0.004);
-      array(0.03, 0.028, 0, 0.007, -0.002);
-      K.box(metal, 0.0006, 0.028, 0.0006, 0, 0.007, -0.0015);
+      K.cyl(dark, R * 0.97, R * 0.97, 0.0005, 0, -0.0094, 0, 0, 0, 0, 40); // the deck
+      K.ring(metal, R, 0.0005, 0, -0.0097, 0, PI / 2);
+      K.ring(metal, R, 0.0005, 0, -0.0169, 0, PI / 2);
+      K.cyl(foil, R * 0.95, R * 0.95, 0.0012, 0, -0.0173, 0, 0, 0, 0, 40); // the gold base
+      K.cyl(dark, 0.0034, 0.0042, 0.0008, 0, -0.0181, 0, 0, 0, 0, 20); // a thruster plate under it
+      // sail: frame, cell glass (front) and back, a centre rib, two struts down to the deck
+      K.group(0, 0.0062, -0.0020, 0, 0, 0, () => {
+        const w = 0.0245,
+          h = 0.0290;
+        K.box(metal, w, h, 0.0005);
+        K.plane(panel, w - 0.0012, h - 0.0012, 0, 0, 0.00029);
+        K.plane(back, w - 0.0012, h - 0.0012, 0, 0, -0.00029, 0, PI, 0);
+        K.box(metal, 0.0004, h, 0.0009, 0, 0, 0);
+        for (const sx of [-1, 1]) K.box(metal, 0.0005, h, 0.0009, sx * w * 0.5, 0, 0);
+        for (const sy of [-1, 1]) K.box(metal, w, 0.0005, 0.0009, 0, sy * h * 0.5, 0);
+      });
+      for (const sx of [-1, 1]) K.box(metal, 0.0005, 0.0075, 0.0005, sx * 0.0085, -0.0035, -0.0020, 0, 0, -sx * 0.18);
+      // instruments on the deck: a gold box with a dark aperture, a smaller white box, whips
+      K.box(gold, 0.0085, 0.0058, 0.0075, 0.0004, -0.0064, 0.0062);
+      K.cyl(dark, 0.0020, 0.0020, 0.0009, 0.0004, -0.0060, 0.0104, PI / 2, 0, 0, 14);
+      K.box(white, 0.0042, 0.0034, 0.0042, -0.0082, -0.0075, 0.0066);
+      K.box(white, 0.0042, 0.0034, 0.0042, 0.0094, -0.0075, 0.0030);
+      K.cyl(metal, 0.00018, 0.00018, 0.0140, 0.0088, 0.0032, -0.0050, 0.3, 0, -0.25);
+      K.cyl(metal, 0.00018, 0.00018, 0.0100, -0.0092, -0.0008, 0.0010, -0.2, 0, 0.3);
+      for (const a of [0, PI / 2, PI, -PI / 2]) K.box(dark, 0.0010, 0.0010, 0.0016, Math.sin(a) * 0.0155, -0.0150, Math.cos(a) * 0.0155, 0, a, 0);
     } else {
       // FY-1C: box body and two long solar arrays; detail beyond this is deliberately omitted.
       K.geo(foil, chamferBox(T, 0.009, 0.009, 0.009, 0.0006, 0.0002));
@@ -260,7 +325,7 @@ export const modelMethods = {
     }
     const g = K.build();
     if (variant === 'solwind') g.rotation.y = -Math.PI * 0.45; // an illustrative three-quarter attitude keeps the sail visible
-    Object.assign(g.userData, { span: variant === 'solwind' ? 0.044 : 0.046, minPx: 15, maxPx: 50 });
+    Object.assign(g.userData, { span: variant === 'solwind' ? 0.040 : 0.046, minPx: 15, maxPx: 50 });
     return g;
   },
   _satModel(color, halo, bright, variant) {
@@ -366,39 +431,60 @@ export const modelMethods = {
   _c(c) {
     return new this.T.Color(c);
   },
-  // ISS: long integrated truss, four solar-array pairs (a blanket either side of each mast), white radiators, and the pressurised stack
-  // (Zvezda-Zarya-Unity-Destiny in line, Harmony/Columbus/Kibo crossing at the node). Span about 0.11.
+  // ISS: a long integrated truss with its rails, four solar-array masts (two blankets either side, each a pair of cell-gridded wings), white radiator panels, the
+  // pressurised stack (Zvezda-Zarya-Unity-Destiny in line, Harmony/Columbus/Kibo crossing at the node), two small Russian arrays, a robotic arm and gold-foil
+  // nodes. Truss along x (span 0.11), the modules and the blankets along z, up is +y.
   _issModel(color) {
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
-      gray = this._mat(0xc9ced9, { metalness: 0.55, roughness: 0.45 }),
+      gray = this._mat(0xc4c9d4, { metalness: 0.55, roughness: 0.42 }),
       white = this._mat(0xf1f3f8, { metalness: 0.2, roughness: 0.45 }),
       gold = this._foil(0xd9b96a),
       alu = this._mat(0xaab3c2, { metalness: 0.85, roughness: 0.38 }),
-      pan = this._panelMat({ color: 0xffd6a0 }),
-      back = this._mat(0x818a9a, { metalness: 0.3, roughness: 0.6 }),
-      array = (cx, cz, w, d) => {
-        K.box(alu, w, 0.0004, d, cx, 0, cz);
-        K.plane(pan, w - 0.0002, d - 0.0002, cx, 0.00022, cz, -PI / 2, 0, 0);
-        K.plane(back, w - 0.0002, d - 0.0002, cx, -0.00022, cz, PI / 2, 0, 0);
+      dark = this._mat(0x2a303c, { metalness: 0.5, roughness: 0.5 }),
+      pan = this._panelMat({ color: 0x8c9fd8 }),
+      back = this._mat(0x9a7a46, { metalness: 0.5, roughness: 0.55 }),
+      blanket = (cx, cz, w, d) => {
+        K.box(back, w, 0.0005, d, cx, 0, cz);
+        K.plane(pan, w - 0.0004, d - 0.0004, cx, 0.00028, cz, -PI / 2, 0, 0);
+        K.box(alu, w, 0.0006, 0.0004, cx, 0, cz + d / 2);
+        K.box(alu, w, 0.0006, 0.0004, cx, 0, cz - d / 2);
       };
-    K.box(gray, 0.11, 0.0022, 0.0022, 0, 0, 0.004);
-    for (const s of [-1, 1]) {
-      for (const x of [0.046, 0.027]) {
-        K.box(gray, 0.0012, 0.0012, 0.0045, s * x, 0, 0.004);
-        for (const e of [-1, 1]) array(s * x, 0.004 + e * 0.0105, 0.0074, 0.0165);
+    // truss: a box beam with two rails and cross-struts
+    K.box(gray, 0.112, 0.0030, 0.0030, 0, 0, 0.004);
+    K.box(alu, 0.112, 0.0006, 0.0038, 0, 0.0017, 0.004);
+    K.box(alu, 0.112, 0.0006, 0.0038, 0, -0.0017, 0.004);
+    for (let i = -10; i <= 10; i++) K.box(gray, 0.0005, 0.0034, 0.0040, i * 0.0052, 0, 0.004);
+    // arrays: a mast along z with two blankets on each side of it, one pair each way
+    for (const s of [-1, 1])
+      for (const x of [0.0475, 0.0275]) {
+        K.box(gray, 0.0012, 0.0012, 0.078, s * x, 0, 0.004);
+        for (const e of [-1, 1])
+          for (const b of [-1, 1]) blanket(s * x + b * 0.0046, 0.004 + e * 0.0215, 0.0082, 0.0330);
+        K.cyl(gold, 0.0020, 0.0020, 0.0030, s * x, 0, 0.004, 0, 0, PI / 2); // the rotary joint
       }
-      K.box(white, 0.0115, 0.0006, 0.0085, s * 0.0125, 0, -0.0042);
-      K.box(alu, 0.0115, 0.0004, 0.0004, s * 0.0125, 0.0004, -0.0042);
+    // radiators: white panels either side of the centre, behind the truss
+    for (const s of [-1, 1]) {
+      K.box(white, 0.0150, 0.0006, 0.0110, s * 0.0120, 0, -0.0062);
+      K.box(alu, 0.0150, 0.0004, 0.0004, s * 0.0120, 0.0004, -0.0062);
+      K.box(gray, 0.0012, 0.0012, 0.0050, s * 0.0120, 0, -0.0010);
     }
-    K.cyl(white, 0.0034, 0.0034, 0.024, 0, 0, 0.001, PI / 2);
-    K.cyl(white, 0.0027, 0.0027, 0.012, 0, 0, -0.0135, PI / 2);
-    K.cyl(gray, 0.0025, 0.0025, 0.012, 0, 0, 0.0155, PI / 2);
-    K.cyl(white, 0.0031, 0.0031, 0.014, 0, 0, 0.0255, PI / 2);
-    K.cyl(white, 0.0022, 0.0022, 0.02, 0, 0, 0.0155, 0, 0, PI / 2);
-    K.cyl(gold, 0.0017, 0.0017, 0.012, 0, 0.0038, 0.0255, 0, 0, PI / 2);
-    K.ball(gray, 0.0038, 0, 0, 0.0155);
+    // pressurised stack along z, the crossing node, the Japanese and European laboratories, Russian service module and its two arrays, the arm
+    K.cyl(white, 0.0040, 0.0040, 0.0260, 0, 0, 0.0090, PI / 2);
+    K.cyl(white, 0.0031, 0.0031, 0.0140, 0, 0, -0.0160, PI / 2);
+    K.cyl(gray, 0.0029, 0.0029, 0.0120, 0, 0, 0.0270, PI / 2);
+    K.cyl(white, 0.0036, 0.0036, 0.0130, 0, 0, 0.0365, PI / 2);
+    K.cyl(white, 0.0025, 0.0025, 0.0230, 0, 0, 0.0270, 0, 0, PI / 2);
+    K.cyl(gold, 0.0020, 0.0020, 0.0100, 0, 0.0046, 0.0360, 0, 0, PI / 2);
+    K.ball(gray, 0.0042, 0, 0, 0.0270);
+    K.cyl(dark, 0.0033, 0.0033, 0.0006, 0, 0, -0.0235, PI / 2);
+    for (const s of [-1, 1]) {
+      K.box(white, 0.0090, 0.0004, 0.0150, s * 0.0070, 0.0030, -0.0160);
+      K.plane(pan, 0.0086, 0.0146, s * 0.0070, 0.0033, -0.0160, -PI / 2, 0, 0);
+    }
+    K.cyl(alu, 0.0003, 0.0003, 0.0230, 0.0045, 0.0062, 0.0200, 0.4, 0, 0);
+    K.cyl(alu, 0.0003, 0.0003, 0.0150, 0.0060, 0.0100, 0.0310, -0.6, 0, 0);
     const g = K.build();
     g.userData.body = g.userData.meshes.get(white);
     g.userData.iss = true;
@@ -678,45 +764,158 @@ export const modelMethods = {
     return g;
   },
   // Twin-engine air-superiority fighter (the F-15 of the Solwind test), nose along +z, wings along x, up +y, drawn at the airliner's overall size so labels hold:
-  // grey livery, a long flat fuselage with a bubble canopy, two engines with open nozzles, box intakes under the wing roots, swept clipped wings, two
-  // all-moving tailplanes and two canted fins. Broad shape only (no markings, no weapons: the missile is drawn by the scene).
+  // a lofted fuselage (pointed radome, bubble canopy and spine, wide mid-section, twin engine tubes), box intakes under the wing roots, thick swept clipped wings
+  // with flap panels, two all-moving tailplanes, two tall canted fins and two open nozzles with an afterburner glow. Broad shape only (no markings, no weapons:
+  // the missile is drawn by the scene).
   _fighterModel() {
     const T = this.T,
       K = new Kit(T),
       PI = Math.PI,
-      grey = this._mat(0x6a7385, { side: T.DoubleSide, metalness: 0.3, roughness: 0.55, emissive: 0x0c1018 }),
-      dgrey = this._mat(0x434b5b, { side: T.DoubleSide, metalness: 0.3, roughness: 0.55, emissive: 0x080b10 }),
-      dark = this._mat(0x1a1e28, { metalness: 0.5, roughness: 0.5 }),
-      glass = this._mat(0x2b3f66, { metalness: 0.6, roughness: 0.18, emissive: 0x0d1a33 });
-    const poly = (pts) => {
+      skin = this._mat(0x727d91, { side: T.DoubleSide, metalness: 0.32, roughness: 0.46, emissive: 0x0e131c }),
+      belly = this._mat(0x4a5467, { side: T.DoubleSide, metalness: 0.3, roughness: 0.5, emissive: 0x0a0e15 }),
+      panel = this._mat(0x5b6679, { side: T.DoubleSide, metalness: 0.3, roughness: 0.5, emissive: 0x0a0e15 }),
+      fin = this._mat(0x626d82, { side: T.DoubleSide, metalness: 0.3, roughness: 0.48, emissive: 0x0c1119 }),
+      dark = this._mat(0x14171f, { side: T.DoubleSide, metalness: 0.5, roughness: 0.5 }),
+      radome = this._mat(0x3a4150, { metalness: 0.4, roughness: 0.38 }),
+      metal = this._mat(0x9aa2b0, { side: T.DoubleSide, metalness: 0.85, roughness: 0.34 }),
+      burnt = this._mat(0x3c3430, { side: T.DoubleSide, metalness: 0.7, roughness: 0.5, emissive: 0xff5a14, emissiveIntensity: 0.55 }),
+      glass = this._mat(0x1d2f55, { metalness: 0.95, roughness: 0.08, emissive: 0x0a1630, envMapIntensity: 1.6 });
+    // a flat plate from a polygon: shape (x, y) becomes (x, z) on the horizontal plane, thick in y
+    const slab = (pts, th, bev = 0.00008) => {
       const sh = new T.Shape();
       pts.forEach((q, i) => (i ? sh.lineTo(q[0], q[1]) : sh.moveTo(q[0], q[1])));
       sh.closePath();
-      return new T.ShapeGeometry(sh);
+      const g = new T.ExtrudeGeometry(sh, { depth: th, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 1 });
+      g.translate(0, 0, -th / 2);
+      g.rotateX(PI / 2); // shape y becomes z; thickness becomes y
+      return g;
     };
-    const sym = (half) => half.concat(half.slice().reverse().map((q) => [-q[0], q[1]])); // a right half-outline, mirrored into a whole one
-    // fuselage: a wide flat centre section, a pointed radome and the twin engines with their nozzles
-    K.box(grey, 0.0070, 0.0030, 0.0200, 0, 0, -0.0045);
-    K.geo(dark, new T.CylinderGeometry(0.0002, 0.0025, 0.0120, 14), 0, 0, 0.0160, PI / 2, 0, 0, 1, 1, 0.62);
+    const mirror = (pts) => pts.map(([x, z]) => [-x, z]).reverse();
+    // fuselage: sections along z, each with a half-width and a top and bottom height (superellipse in between)
+    const body = lofted(T, [
+      { z: 0.0222, w: 0.00008, t: 0.00008, b: 0.00008 },
+      { z: 0.0212, w: 0.0005, t: 0.0005, b: 0.0004 },
+      { z: 0.0192, w: 0.0012, t: 0.0012, b: 0.001 },
+      { z: 0.0160, w: 0.0020, t: 0.0019, b: 0.0015 },
+      { z: 0.0120, w: 0.0027, t: 0.0021, b: 0.0019 },
+      { z: 0.0070, w: 0.0037, t: 0.0018, b: 0.0023 },
+      { z: 0.0000, w: 0.0048, t: 0.0016, b: 0.0024 },
+      { z: -0.0070, w: 0.0052, t: 0.0014, b: 0.0023 },
+      { z: -0.0140, w: 0.0046, t: 0.0013, b: 0.0020 },
+      { z: -0.0195, w: 0.0040, t: 0.0011, b: 0.0016 },
+    ]);
+    K.geo(skin, body);
+    // dark radome tip over the nose (a short lofted cap), pitot boom
+    K.geo(radome, lofted(T, [
+      { z: 0.0226, w: 0.00006, t: 0.00006, b: 0.00006 },
+      { z: 0.0212, w: 0.0005, t: 0.0005, b: 0.0004 },
+      { z: 0.0190, w: 0.0013, t: 0.0013, b: 0.0011 },
+      { z: 0.0170, w: 0.0017, t: 0.0016, b: 0.0013 },
+    ]));
+    K.cyl(metal, 0.00009, 0.00005, 0.0042, 0, 0, 0.0245, PI / 2);
+    // belly: a darker keel under the centre section
+    K.geo(belly, lofted(T, [
+      { z: 0.0100, w: 0.0016, t: 0.0001, b: 0.0004, y: -0.0022 },
+      { z: 0.0020, w: 0.0030, t: 0.0001, b: 0.0006, y: -0.0027 },
+      { z: -0.0080, w: 0.0030, t: 0.0001, b: 0.0006, y: -0.0026 },
+      { z: -0.0160, w: 0.0020, t: 0.0001, b: 0.0004, y: -0.0021 },
+    ]));
+    // dorsal spine and canopy: a low ridge from the cockpit to the tail, the glass bubble over the cockpit and its dark frame
+    K.geo(panel, lofted(T, [
+      { z: 0.0040, w: 0.0008, t: 0.0004, b: 0.0001, y: 0.0019 },
+      { z: -0.0020, w: 0.0016, t: 0.0007, b: 0.0001, y: 0.0019 },
+      { z: -0.0090, w: 0.0020, t: 0.0008, b: 0.0001, y: 0.0016 },
+      { z: -0.0160, w: 0.0012, t: 0.0004, b: 0.0001, y: 0.0014 },
+    ]));
+    K.geo(glass, new T.SphereGeometry(0.0017, 18, 12), 0, 0.0020, 0.0100, 0, 0, 0, 0.82, 0.78, 2.7);
+    K.geo(dark, new T.TorusGeometry(0.0014, 0.00014, 5, 18, PI), 0, 0.0021, 0.0057, 0, 0, 0, 1, 0.9, 1); // canopy arch (rear)
+    K.box(dark, 0.0001, 0.0001, 0.0092, 0.00115, 0.0022, 0.0098, 0, 0, 0, 1, 1, 1);
+    K.box(dark, 0.0001, 0.0001, 0.0092, -0.00115, 0.0022, 0.0098, 0, 0, 0, 1, 1, 1);
+    // airbrake plate behind the canopy
+    K.box(panel, 0.0020, 0.00025, 0.0034, 0, 0.0027, -0.0042);
+    // engines and nozzles, side by side at the tail
     for (const x of [-1, 1]) {
-      K.cyl(grey, 0.0017, 0.0018, 0.0155, x * 0.0022, -0.0004, -0.0122, PI / 2, 0, 0, 14);
-      K.cyl(dgrey, 0.0015, 0.0018, 0.0034, x * 0.0022, -0.0004, -0.0205, PI / 2, 0, 0, 14);
-      K.cyl(dark, 0.0012, 0.0012, 0.0006, x * 0.0022, -0.0004, -0.0222, PI / 2, 0, 0, 14);
-      // box intakes under the wing roots, with a dark mouth
-      K.box(dgrey, 0.0024, 0.0022, 0.0080, x * 0.0040, -0.0016, 0.0020);
-      K.box(dark, 0.0019, 0.0017, 0.0004, x * 0.0040, -0.0016, 0.0062);
+      K.cyl(skin, 0.0021, 0.0021, 0.0096, x * 0.0026, -0.0003, -0.0132, PI / 2, 0, 0, 16);
+      K.cyl(burnt, 0.0016, 0.0019, 0.0030, x * 0.0026, -0.0003, -0.0201, PI / 2, 0, 0, 16, true);
+      K.cyl(dark, 0.0013, 0.0013, 0.0002, x * 0.0026, -0.0003, -0.0190, PI / 2, 0, 0, 14);
+      K.cyl(metal, 0.0020, 0.0020, 0.0003, x * 0.0026, -0.0003, -0.0216, PI / 2, 0, 0, 16, true);
+      // boxy intakes below the wing roots: a sloped front with a dark mouth and a bright lip
+      K.geo(skin, lofted(T, [
+        { z: 0.0082, w: 0.0010, t: 0.0003, b: 0.0004, x: x * 0.0043, y: -0.0019 },
+        { z: 0.0060, w: 0.0013, t: 0.0007, b: 0.0010, x: x * 0.0043, y: -0.0018 },
+        { z: 0.0000, w: 0.0016, t: 0.0010, b: 0.0013, x: x * 0.0046, y: -0.0017 },
+        { z: -0.0060, w: 0.0018, t: 0.0012, b: 0.0014, x: x * 0.0048, y: -0.0014 },
+      ], 4));
+      K.box(dark, 0.0017, 0.0019, 0.0002, x * 0.0043, -0.0019, 0.0083);
+      K.box(metal, 0.0020, 0.00018, 0.00035, x * 0.0043, -0.0030, 0.0081);
     }
-    // canopy
-    K.geo(glass, new T.SphereGeometry(0.0016, 14, 10), 0, 0.0020, 0.0078, 0, 0, 0, 0.78, 0.72, 2.1);
-    // swept, clipped wings and tailplanes (flat outlines: x across, shape y becomes z, forward)
-    K.geo(dgrey, poly(sym([[0.0025, 0.0050], [0.0150, -0.0030], [0.0150, -0.0087], [0.0025, -0.0108]])), 0, 0.0001, 0, PI / 2, 0, 0);
-    K.geo(grey, poly(sym([[0.0030, -0.0140], [0.0092, -0.0170], [0.0092, -0.0200], [0.0030, -0.0200]])), 0, 0.0001, 0, PI / 2, 0, 0);
+    // wings: swept, clipped at the tip, slightly drooped, with a flap panel on each trailing edge
+    const wing = [[0.0040, 0.0052], [0.0150, -0.0032], [0.0150, -0.0087], [0.0040, -0.0106]];
+    const flap = [[0.0050, -0.0074], [0.0102, -0.0080], [0.0102, -0.0092], [0.0050, -0.0102]];
+    for (const x of [-1, 1]) {
+      K.group(0, 0.0000, 0, 0, 0, -x * 0.035, () => {
+        K.geo(skin, slab(x > 0 ? wing : mirror(wing), 0.00065), 0, 0.0001, 0);
+        K.geo(panel, slab(x > 0 ? flap : mirror(flap), 0.0001), 0, 0.00048, 0);
+        // wing-tip rail
+        K.box(dark, 0.00028, 0.0003, 0.0036, x * 0.0149, 0.0001, -0.0057);
+      });
+    }
+    // all-moving tailplanes
+    const tp = [[0.0044, -0.0128], [0.0108, -0.0164], [0.0108, -0.0196], [0.0044, -0.0200]];
+    for (const x of [-1, 1]) K.geo(fin, slab(x > 0 ? tp : mirror(tp), 0.0004), 0, -0.0004, 0);
     // twin fins, canted outwards
-    for (const x of [-1, 1])
-      K.group(x * 0.0030, 0.0013, 0, 0, 0, -x * 0.2, () => K.geo(dgrey, poly([[-0.0085, 0], [-0.0140, 0.0078], [-0.0188, 0.0078], [-0.0198, 0]]), 0, 0, 0, 0, -PI / 2, 0));
+    const fpoly = [[-0.0092, 0.0008], [-0.0142, 0.0082], [-0.0190, 0.0082], [-0.0206, 0.0008]];
+    const finGeo = () => {
+      const sh = new T.Shape();
+      fpoly.forEach((q, i) => (i ? sh.lineTo(q[0], q[1]) : sh.moveTo(q[0], q[1])));
+      sh.closePath();
+      const g = new T.ExtrudeGeometry(sh, { depth: 0.00045, bevelEnabled: true, bevelThickness: 0.00007, bevelSize: 0.00007, bevelSegments: 1 });
+      g.translate(0, 0, -0.000225);
+      g.rotateY(PI / 2); // shape x runs along z, shape y up, thickness across
+      g.scale(1, 1, -1);
+      return g;
+    };
+    for (const x of [-1, 1]) {
+      K.group(x * 0.0034, 0.0006, 0, 0, 0, -x * 0.1, () => {
+        K.geo(fin, finGeo());
+        K.box(dark, 0.0005, 0.0004, 0.0044, 0, 0.0084, -0.0166); // fin-tip pod
+      });
+    }
     const g = K.build();
+    // afterburner: a hot white-yellow core and an orange sheath behind each nozzle (additive, fading to black along the length), plus a small glow
+    const cone = (r, len, c0, c1) => {
+      const geo = new T.ConeGeometry(r, len, 14, 1, true),
+        pos = geo.attributes.position,
+        col = new Float32Array(pos.count * 3);
+      for (let i = 0; i < pos.count; i++) {
+        const u = 1 - (pos.getY(i) + len / 2) / len, // 0 at the tail tip, 1 at the nozzle
+          c = [c1[0] + (c0[0] - c1[0]) * u * u, c1[1] + (c0[1] - c1[1]) * u * u, c1[2] + (c0[2] - c1[2]) * u * u];
+        col.set(c, 3 * i);
+      }
+      geo.setAttribute('color', new T.BufferAttribute(col, 3));
+      geo.rotateX(-PI / 2); // tip towards -z
+      geo.translate(0, 0, -len / 2);
+      return new T.Mesh(
+        geo,
+        new T.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, opacity: 0.9 }),
+      );
+    };
+    const flames = [];
+    for (const x of [-1, 1]) {
+      const f = new T.Group();
+      f.position.set(x * 0.0026, -0.0003, -0.0218);
+      f.add(cone(0.0019, 0.0170, [1.0, 0.5, 0.18], [0.14, 0.02, 0.0]));
+      f.add(cone(0.00105, 0.0096, [1.0, 0.98, 0.85], [0.4, 0.15, 0.02]));
+      const h = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: 0xffa860, transparent: true, opacity: 0.85, depthWrite: false, blending: T.AdditiveBlending }));
+      h.scale.setScalar(0.012);
+      h.position.z = -0.0008;
+      f.add(h);
+      g.add(f);
+      flames.push(f);
+    }
+    g.userData.flames = flames;
     g.userData.tintMat = this._mat(0xffffff); // the status colour of an airliner does not apply: the livery keeps its greys
-    Object.assign(g.userData, { span: 0.042, minPx: 19, maxPx: 44 });
+    Object.assign(g.userData, { span: 0.0446, minPx: 19, maxPx: 44 });
     return g;
   },
   // Ground site: base plate, mast and a tilted dish (small pylon/dish glyph), standing on the local vertical.
@@ -725,19 +924,49 @@ export const modelMethods = {
       g = new T.Group(),
       m = this._mat(this._c(color), { side: T.DoubleSide, emissive: this._c(color), emissiveIntensity: 0.3 }),
       dm = this._mat(0xf2f4fa, { side: T.DoubleSide, emissive: 0x556070, metalness: 0.25, roughness: 0.4 });
-    const base = new T.Mesh(new T.CylinderGeometry(0.008, 0.009, 0.0022, 12), m);
+    // a ground station that reads as one from any side: a dark plinth with a ring in the site's colour, a tapered mast and a real concave dish on a short yoke
+    // (a pale bowl with a darker inside and a bright rim), a feed on two struts. (A white hemisphere on a white disc read as a snowman from above.)
+    const plinth = this._mat(0x3c4556, { metalness: 0.4, roughness: 0.6 }),
+      bowOut = this._mat(0xcfd5e2, { side: T.DoubleSide, metalness: 0.35, roughness: 0.42, emissive: 0x1a2030 }),
+      bowIn = this._mat(0x6c7689, { side: T.DoubleSide, metalness: 0.4, roughness: 0.5 });
+    const base = new T.Mesh(new T.CylinderGeometry(0.0082, 0.0092, 0.0020, 14), plinth);
     g.add(base);
-    const mast = new T.Mesh(new T.CylinderGeometry(0.0013, 0.0019, 0.022, 6), m);
-    mast.position.y = 0.0115;
+    const bring = new T.Mesh(new T.TorusGeometry(0.0087, 0.00055, 6, 24), m);
+    bring.rotation.x = Math.PI / 2;
+    bring.position.y = 0.0012;
+    g.add(bring);
+    const mast = new T.Mesh(new T.CylinderGeometry(0.0012, 0.0019, 0.0150, 8), m);
+    mast.position.y = 0.0085;
     g.add(mast);
-    const dish = new T.Mesh(new T.SphereGeometry(0.0085, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), dm);
-    dish.position.y = 0.024;
-    dish.rotation.x = -0.75;
+    const R = 0.0088,
+      dep = 0.0036,
+      pts = [],
+      pts2 = [];
+    for (let i = 0; i <= 10; i++) {
+      pts.push(new T.Vector2((R * i) / 10, dep * (i / 10) ** 2));
+      pts2.push(new T.Vector2((R * 0.96 * i) / 10, dep * (i / 10) ** 2 + 0.0004));
+    }
+    const dish = new T.Group();
+    dish.add(new T.Mesh(new T.LatheGeometry(pts, 20), bowOut));
+    dish.add(new T.Mesh(new T.LatheGeometry(pts2, 20), bowIn));
+    const rim = new T.Mesh(new T.TorusGeometry(R, 0.00042, 5, 24), dm);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = dep;
+    dish.add(rim);
+    for (const sx of [-1, 1]) {
+      const st = new T.Mesh(new T.CylinderGeometry(0.00022, 0.00022, 0.0105, 4), dm);
+      st.position.set(sx * R * 0.5, dep + 0.0042, 0);
+      st.rotation.z = -sx * 0.5;
+      dish.add(st);
+    }
+    const feed = new T.Mesh(new T.CylinderGeometry(0.0005, 0.0003, 0.0022, 6), m);
+    feed.position.y = dep + 0.0092;
+    dish.add(feed);
+    dish.position.y = 0.0168;
+    dish.rotation.order = 'YXZ';
+    dish.rotation.y = 0.95; // turned about the mast so no view looks straight into the bowl (that read as a ball)
+    dish.rotation.x = -0.7;
     g.add(dish);
-    const feed = new T.Mesh(new T.CylinderGeometry(0.0004, 0.0004, 0.008, 4), m);
-    feed.position.set(0, 0.0285, 0.0045);
-    feed.rotation.x = 0.6;
-    g.add(feed);
     if (halo) {
       const h = new T.Sprite(
         new T.SpriteMaterial({ map: this.spriteTex, color: this._c(color), transparent: true, opacity: 0.16, depthWrite: false, blending: T.AdditiveBlending }),
@@ -948,11 +1177,11 @@ export const modelMethods = {
       TOP = 0.0052, // the main deck
       FORE = 0.0072; // the forecastle deck, raised at the bow
     const keel = this._mat(0x10151f),
-      side = this._mat(0x485366, { roughness: 0.6 }),
-      rim = this._mat(0x7b869a),
-      deckMat = this._mat(0x394254),
+      side = this._mat(0x7a879d, { roughness: 0.55, emissive: 0x1a2232 }),
+      rim = this._mat(0xaab5c9, { emissive: 0x1c2434 }),
+      deckMat = this._mat(0x586480, { emissive: 0x141b29 }),
       stripe = this._mat(0xe9edf5, { emissive: 0x2a3140 }),
-      light = this._mat(0xd3d9e5),
+      light = this._mat(0xe3e8f1, { emissive: 0x20293a }),
       glass = this._mat(0x182030, { metalness: 0.4, roughness: 0.35 }),
       funnel = this._mat(0x454e5f),
       soot = this._mat(0x0b0e14),

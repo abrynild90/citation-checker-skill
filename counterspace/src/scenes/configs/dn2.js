@@ -178,7 +178,7 @@ export const DN2 = {
         fill: IS_PHONE ? 0.86 : 0.76,
         zoom: IS_PHONE ? 1.3 : 1.42,
         lookK: 0.4,
-        launch: { until: 0.3, hold: 0.1, k: IS_PHONE ? 0.95 : 0.88, dMin: IS_PHONE ? 0.7 : 0.55, south: 40 }, // opens tight on Xichang and the climbing rocket, then eases out to the whole path
+        launch: { until: 0.3, hold: 0.1, k: IS_PHONE ? 0.95 : 0.88, down: IS_PHONE ? 0 : 0.32, dMin: IS_PHONE ? 0.7 : 0.55, south: 40 }, // opens tight on Xichang and the climbing rocket, then eases out to the whole path
       },
     },
     // Side view: in close (Earth ~40% of the frame width); the far side of the GEO ring is cropped on purpose, the arc and its markers stay in frame

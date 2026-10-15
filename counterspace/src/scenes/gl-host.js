@@ -367,7 +367,7 @@ export class GLHost {
   }
   // The followed view at t with the wheel zoom applied: { pos, look, up } like the preset's own.
   _followView(t, fc) {
-    const v = this._nar(fc.follow(t, this.camera.aspect), fc),
+    const v = this._nar(fc.follow(t, this.camera.aspect, this.el.clientHeight), fc),
       fz = this._fz;
     if (!fz || fz.m === 1) {
       if (fz) fz.w = 0;
@@ -393,7 +393,7 @@ export class GLHost {
     if (!fc?.follow || this._user) return false;
     const F = this._rocketFocus(this.t);
     if (!F) return false;
-    const v = this._nar(fc.follow(this.t, this.camera.aspect), fc),
+    const v = this._nar(fc.follow(this.t, this.camera.aspect, this.el.clientHeight), fc),
       D0 = Math.hypot(v.pos[0] - F[0], v.pos[1] - F[1], v.pos[2] - F[2]) || 1,
       fz = this._fz;
     fz.mT = Math.max(Math.min(1, FOLLOW_DMIN / D0), Math.min(Math.max(1, 12 / D0), fz.mT * (1 + dir * 0.08 * 2.2)));
@@ -439,7 +439,7 @@ export class GLHost {
     if (!c || this._user || !tw) return;
     const T = this.T,
       cam = this.camera,
-      v = this._nar(c.follow ? c.follow(this.t, cam.aspect) : { pos: c.pos, look: c.look || [0, 0, 0], up: c.up }, c);
+      v = this._nar(c.follow ? c.follow(this.t, cam.aspect, this.el.clientHeight) : { pos: c.pos, look: c.look || [0, 0, 0], up: c.up }, c);
     let e = 1;
     if (tw) {
       const f = Math.min(1, (performance.now() - tw.t0) / 360);

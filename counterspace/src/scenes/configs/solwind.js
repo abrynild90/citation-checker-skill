@@ -40,7 +40,8 @@ export const SOLWIND = {
   burstPadFrom: 0.4,
   fitFillKeys: IS_PHONE ? [0.68, 0.7, 0.85, 0.9, 0.9, 0.9] : undefined, // room for the wheel and sail above the caption during the climb
   fitSouth: 48, // desktop: the opening views look from the south, so the climb of the F-15 is seen from the side (nose up) and not from above
-  fitSouthTo: 0.5, // the view stays one way until the hit: the missile flies one way, toward the satellite (the turn to the side view is after it)
+  fitSouthBlend: [0.24, 0.46], // the view turns from the south to the side view gradually while the missile flies and the debris forms (no jump at the hit)
+  keyTimes: [0, 0.225, 0.38, 0.5, 0.62, 1], // camera key poses: opening, mid-climb, the missile's coast, the hit (with its burst), the debris
   fitLaunchKeys: IS_PHONE ? undefined : [0], // desktop: the opening frame is cut tight on the F-15 and its missile, then pulls back to show the satellite
   fitMinKeys: IS_PHONE ? undefined : [1.15],
   earlyKey: true, // the camera is already tight on the F-15 and the satellite during the climb and the release
@@ -65,6 +66,7 @@ export const SOLWIND = {
     Impact: [188, -98],
     Solwind: [178, -24],
   }, // the missile's pill sits above the F-15 with a leader down to the arc
+  offSteps: { Solwind: [[0, -150, -6], [0.3, 178, -24]] }, // the opening: the satellite is small and high at the left, its name sits beside it in space, clear of the Earth's glow
   camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
@@ -98,8 +100,8 @@ export const SOLWIND = {
       label: 'Solwind P78-1',
       color: C.tgt,
       big: 5,
-      minPx: IS_PHONE ? 50 : 58,
-      maxPx: IS_PHONE ? 72 : 88, // readable before the intercept, while remaining clear of the aircraft
+      minPx: IS_PHONE ? 46 : 44,
+      maxPx: IS_PHONE ? 62 : 64, // readable before the intercept, clear of the aircraft and smaller than the missile's kill vehicle's approach path
       bright: true,
       impactLabel: 'Impact: Solwind P78-1',
       impactShort: 'Impact: Solwind P78-1',
@@ -120,7 +122,8 @@ export const SOLWIND = {
       labelFollow: true, // the leader stays on the missile itself (the vehicle is drawn all the way to the hit)
       hold: -0.004, // and the label goes with the vehicle, which is consumed 0.004 before the hit (gl-rocket pos), not after it
       thick: 0.0065,
-      rocket: { minPx: 105, maxPx: 135, carry: 0.22, endHold: 0.01, ramp: { k: 1.5, until: 0.35 }, smokeK: 1.7 }, // a little larger so its plume and fins read next to the F-15 (+13%)
+      // style 'asat': a small graphite kill vehicle (sensor dome, thruster ring) on the nose; at kv.at the spent body drops away and the vehicle flies on alone
+      rocket: { style: 'asat', burn: 0.42, kv: { at: 0.36, grow: 0.55 }, minPx: 95, maxPx: 118, carry: 0.22, endHold: 0.01, ramp: { k: 1.4, until: 0.3 }, smokeK: 1.7 },
       strong: true,
       flash: 0.24,
       flashSpan: 0.14,

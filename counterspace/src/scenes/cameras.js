@@ -67,6 +67,17 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
     const D = Math.min(o.dMax ?? 9, distance + 0.05);
     return { pos: add(look, scl(direction, D)), look };
   };
+  // The picture slides down by the fraction f of the half-height (the camera and its target move up): top margin for a tall vehicle on its pad under the banner.
+  let noShift = false; // true while the sun reference is taken: the sun direction follows the unshifted opening camera, so a margin never re-lights the scene
+  const shiftDown = (v, f, asp) => {
+    if (noShift) return v;
+    const fw = norm(add(v.look, scl(v.pos, -1))),
+      r = norm(cross3(fw, [0, 1, 0])),
+      u = cross3(r, fw),
+      D = len(add(v.look, scl(v.pos, -1))),
+      d = scl(u, f * D * tanFor(asp)[1]);
+    return { ...v, pos: add(v.pos, d), look: add(v.look, d) };
+  };
   const centroid = (pts) => {
     const v = pts.filter(Boolean); // a craft that is not drawn at this t has no position
     return scl(
@@ -116,7 +127,14 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       nSouth = south ? norm(add(scl(cn, Math.cos(south)), scl(north, -Math.sin(south)))) : nTilt,
       n = nSouth,
       // fitSouthTo (opt-in, scene time): the keys after it return to the usual side view (the burst and the debris are framed from the side, as before)
-      nAt = (tk) => (south && cfg.fitSouthTo != null && tk > cfg.fitSouthTo + 1e-9 ? nTilt : nSouth),
+      // fitSouthBlend (opt-in, [from, to] scene time): instead of a switch, the view turns from the south view to the side view gradually between these times
+      nAt = (tk) => {
+        if (south && cfg.fitSouthBlend) {
+          const w = smooth((tk - cfg.fitSouthBlend[0]) / (cfg.fitSouthBlend[1] - cfg.fitSouthBlend[0]));
+          return norm(add(scl(nSouth, 1 - w), scl(nTilt, w)));
+        }
+        return south && cfg.fitSouthTo != null && tk > cfg.fitSouthTo + 1e-9 ? nTilt : nSouth;
+      },
       cache = {},
       burst = items.find((i) => i.kind === 'flash' && i.big && tgt.hitPos && i.pos === tgt.hitPos) || items.find((i) => i.kind === 'flash' && i.big),
       hn = norm(tgt.hitPos),
@@ -124,8 +142,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       e2 = cross3(hn, e1),
       bR = burst ? (burst.size ?? 0.3) * 1.7 * 0.5 * (cfg.burstPad ?? 1.3) : 0,
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
-      posesFor = (asp) =>
-        (cache[Math.round(asp * 20)] ||= keys.map((tk, ki) => {
+      posesFor = (asp, hpx) =>
+        (cache[Math.round(asp * 20) + '|' + (hpx | 0) + (noShift ? 's' : '')] ||= keys.map((tk, ki) => {
           // fitLaunchKeys (opt-in): at these keys the camera is fitted to the launch point and the carrier alone (a close opening on the vehicle); the target comes into frame as it pulls back
           if (cfg.fitLaunchKeys?.includes(ki) && arc) {
             const L = [arc.from].concat(aircraftPos ? [aircraftPos(0), aircraftPos(tk)] : []);
@@ -159,13 +177,15 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time
               dMax: cfg.fitMax ?? 6.5,
               fillX: cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9, // fitFillKeys (opt-in): the frame fill per key time
-              fillY: (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
+              // cardFit (opt-in { top, bottom, gap }, px): the last, globe-only key fills the stage height that is left between the banner (top) and the card at the foot (bottom, plus
+              // gap), measured in pixels when the stage height is known (hpx), so a taller stage shows a larger globe and a short one never lets the card cover it
+              fillY: globeOnly && cfg.cardFit && hpx ? Math.max(0.3, (hpx - cfg.cardFit.top - cfg.cardFit.bottom - cfg.cardFit.gap) / hpx) : (cfg.fitFillKeys?.[ki] ?? cfg.fitFill ?? 0.9) * 0.8,
               asp,
             },
           );
-        }));
-    const at0 = (t, asp = ASPECT) => {
-      const poses = posesFor(asp);
+        }).map((pz, ki) => (cfg.fitDownKeys?.[ki] ? shiftDown(pz, cfg.fitDownKeys[ki], asp) : pz))); // fitDownKeys (opt-in): per key, the picture slides down this fraction of the half-height (a margin under the banner for the vehicle's nose)
+    const at0 = (t, asp = ASPECT, hpx) => {
+      const poses = posesFor(asp, hpx);
       let i = 0;
       while (i < keys.length - 2 && t > keys[i + 1]) i++;
       if (cfg.camGlide) {
@@ -195,8 +215,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       };
     };
     // preDrift (opt-in) { t0, k, out }: a slow push-in while the vehicle waits (the camera closes by the fraction k by t0), released over `out` after it
-    const at = (t, asp = ASPECT) => {
-      const v = at0(t, asp),
+    const at = (t, asp = ASPECT, hpx) => {
+      const v = at0(t, asp, hpx),
         d = cfg.preDrift;
       if (!d) return v;
       const u = smooth(t / d.t0) * (1 - smooth((t - d.t0) / (d.out ?? 0.08))),
@@ -204,8 +224,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       return { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), k)) };
     };
     // endShift (opt-in) { from, to, k }: the picture slides up by the fraction k of the half-height between these times, clear of a card that comes up at the foot of the stage
-    const atShift = (t, asp = ASPECT) => {
-      const v = at(t, asp),
+    const atShift = (t, asp = ASPECT, hpx) => {
+      const v = at(t, asp, hpx),
         e = cfg.endShift;
       if (!e) return v;
       const w = smooth((t - e.from) / (e.to - e.from));
@@ -214,7 +234,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         r = norm(cross3(fw, v.up || [0, 1, 0])),
         u = cross3(r, fw),
         D = len(add(v.look, scl(v.pos, -1))),
-        d = scl(u, -w * e.k * D * tanFor(asp)[1]);
+        d = scl(u, -w * (cfg.cardFit && hpx ? (cfg.cardFit.bottom + cfg.cardFit.gap - cfg.cardFit.top) / hpx : e.k) * D * tanFor(asp)[1]);
       return { ...v, pos: add(v.pos, d), look: add(v.look, d) };
     };
     // debrisFit (opt-in) { mx, my, from }: the camera never lets the live debris leave the frame. For every aspect the distance the key poses need to keep every
@@ -257,8 +277,8 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       for (let pass = 0; pass < 2; pass++) e = e.map((_, g) => { let a = 0, c = 0; for (let j = g - 2; j <= g + 2; j++) { a += e[Math.max(0, Math.min(NG, j))]; c++; } return a / c; });
       return (scaleTab[key] = e);
     };
-    const atFit = (t, asp = ASPECT) => {
-      const v = atShift(t, asp);
+    const atFit = (t, asp = ASPECT, hpx) => {
+      const v = atShift(t, asp, hpx);
       if (!fitDeb || !cl || t <= ht) return v;
       const e = debrisScale(asp),
         x = Math.max(0, Math.min(NG, t * NG)),
@@ -266,7 +286,10 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
         S = Math.exp(Math.log(e[i] + (e[i + 1] - e[i]) * (x - i)) * smooth((t - ht) / (fitDeb.ease ?? 0.03))); // eased in from the hit (fitDeb.ease: a longer ease for a slower pull-back): the pull-back never runs ahead of it
       return S <= 1.0005 ? v : { ...v, pos: add(v.look, scl(add(v.pos, scl(v.look, -1)), S)) };
     };
-    return { name: 'Follow the action', follow: atFit, ...atFit(0), hideShell: true };
+    noShift = true;
+    const sunRef = atFit(0).pos;
+    noShift = false;
+    return { name: 'Follow the action', follow: atFit, ...atFit(0), sunRef, hideShell: true };
   };
   if (cfg.cameras)
     cams = cfg.cameras.map((c0) => {
@@ -391,14 +414,19 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               // (the rocket climbs upward in the picture instead of lying sideways at the limb); the view eases to the ring framing as before
               q = pose(t, asp, false, false, L.dMin, L.south ? launchView(L.south) : n);
             if (L.k) q.pos = add(q.look, scl(add(q.pos, scl(q.look, -1)), L.k)); // L.k < 1: moves in closer than the fit, so the vehicle fills more of the frame
+            if (L.down) Object.assign(q, shiftDown(q, L.down, asp)); // L.down (opt-in): the opening picture slides down by this fraction of the half-height: the nose keeps clear of the banner
             return { pos: add(scl(r.pos, 1 - w), scl(q.pos, w)), look: add(scl(r.look, 1 - w), scl(q.look, w)), up: null };
           };
+        noShift = true;
+        const sunRef = at(0).pos;
+        noShift = false;
         return {
           name: c.name,
           auto: false,
           ref: c.ref,
           follow: at,
           ...at(0),
+          sunRef,
           hideShell: true,
           ringFrame: !!c.trackPath.ring,
         };
