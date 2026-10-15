@@ -124,8 +124,9 @@ export async function runStepsHit(browser, url, { sizes = SIZES, only = [], log 
           const was = (tops[`${m.sig} ${k}`] ??= { v, name });
           if (Math.abs(was.v - v) > 1.5) failures.push(`${here}: ${k} top moved ${was.v} -> ${v} (was at ${was.name})`);
         }
-        const r = (rowsSeen[`${id} ${w}x${h}`] ??= { rows: m.rows, total: m.total, mode: m.mode });
-        r.rows = Math.min(r.rows, m.rows);
+        // rows left out of a window (with its "more steps" cue) at the worst state: reported, not failed, since a window is the designed fallback
+        const r = (rowsSeen[`${id} ${w}x${h}`] ??= { hidden: 0, mode: m.mode });
+        r.hidden = Math.max(r.hidden, m.total - m.rows);
       };
       for (const t of TIMES) {
         await page.evaluate((t) => {
