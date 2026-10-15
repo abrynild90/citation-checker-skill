@@ -1282,9 +1282,9 @@ export const modelMethods = {
     ring.translate(0, Y * 0.6, 0);
     g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.05, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
     // churned wake astern, as wide as the transom, and the V arms that diverge beyond it: the white water is behind the stern only (nothing alongside the bow)
-    strip(0, Z0 + 0.001, 0, -0.062, 0.0110, 0.0125, 0.7); // a churned trail, wide and white at the stern: it reads as the ship's own wake, not as streaks
-    strip(0, Z0 + 0.001, 0, -0.040, 0.0080, 0.0100, 0.7); // a denser core in its first stretch
-    [-1, 1].forEach((sd) => strip(sd * 0.0062, Z0 + 0.002, sd * 0.0150, -0.066, 0.0035, 0.0055, 0.5));
+    strip(0, Z0 + 0.001, 0, -0.078, 0.0095, 0.027, 0.4); // turbulent water: as wide as the transom at the stern, spreading and fading with distance (a tapering wake, not parallel streaks)
+    strip(0, Z0 + 0.001, 0, -0.046, 0.0060, 0.0125, 0.32); // a denser core in its first stretch
+    [-1, 1].forEach((sd) => strip(sd * 0.0050, Z0 + 0.002, sd * 0.030, -0.080, 0.0030, 0.0075, 0.13)); // the V arms: faint, thin and opening at the usual shallow angle
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
