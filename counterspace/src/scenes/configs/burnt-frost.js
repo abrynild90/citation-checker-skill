@@ -29,7 +29,7 @@ export const BURNT_FROST = {
   phoneHide: ['Larger pieces', 'Pieces falling'], // 375: Impact, the illustration pill and the ship label are enough at the top of the frame
   launchAt: [3.3, 0.95, 0.8],
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
-  liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62] }, // the collision frame: Impact to the left, the falling pieces to the right
+  liveOff: { Impact: [-150, -26], 'Larger pieces': [168, -62], 'USS Lake Erie': [150, -4] }, // the collision frame: Impact to the left, the falling pieces to the right
   offSteps: { 'SM-3': [[0, 130, 20], [0.09, -165, -34], [0.24, null]] }, // the SM-3 pill: right of the missile at the opening, then left of the ship (the larger hull), the placer's own slot once the missile climbs; // the SM-3 pill is asked for just beside the missile; the placer then holds it at the nearest slot off the planet, a short leader
   camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
@@ -119,9 +119,10 @@ export const BURNT_FROST = {
     {
       type: 'debris',
       count: 175,
-      spreadAlt: 110,
-      spreadInc: 3.6,
-      spreadRaan: 3.2,
+      spreadAlt: 130,
+      spreadInc: 6.5, // a wider cross-track spread (3.6 / 3.2 before): at t=0.5-0.6 the cloud was a thin orange column along the orbit
+      spreadRaan: 6,
+      scatter: 0.028,
       dv: 0.85,
       drift: 0.9,
       decay: 2.2,
