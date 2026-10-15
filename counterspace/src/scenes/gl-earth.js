@@ -2,7 +2,7 @@
 // scenes/gl-earth.js: GLHost mixin: the planet (day picture with relief, city lights, soft terminator, clouds), its atmosphere, the cloud map
 // (ES module bundled by esbuild from src/boot.js; the methods are installed together with gl-items.js's, see installGLItems.)
 // ============================================================================
-import { IS_PHONE } from './core.js';
+import { IS_PHONE, ll } from './core.js';
 import {
   earthImg,
   earthLow,
@@ -28,7 +28,7 @@ void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal)
 // the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp; uniform float uGlint; uniform vec3 uGlintDir;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -91,6 +91,15 @@ void main(){
   cl *= uCloudAmt;
   float fr = pow(1.0 - ndv, 4.0);
   col += (vec3(0.20, 0.36, 0.62) * fr * 0.30) * water * dayAmt * (1.0 - cl);
+  if (uGlint > 0.0) {
+    // cfg.glintK (opt-in): a long silver path of light on the open sea toward a low light (cfg.glintAt), broken by fine wave glitter, so a low camera sees water, not a flat dark blue
+    vec3 Rg = reflect(-normalize(uGlintDir), N);
+    float sp = max(dot(Rg, V), 0.0);
+    vec3 qg = normalize(vP);
+    float gl = 0.75 + 0.5 * vn(qg * 520.0) + 0.35 * vn(qg * 1500.0 + 4.0);
+    float gs = (pow(sp, 90.0) * 0.9 + pow(sp, 16.0) * 0.30 + pow(sp, 4.0) * 0.10) * gl;
+    col += vec3(0.42, 0.62, 0.95) * gs * uGlint * water * (1.0 - cl) * smoothstep(0.02, 0.2, ndv);
+  }
   vec3 cLit = vec3(1.0, 0.99, 0.97) * (0.10 + 1.08 * pow(max(ndl, 0.0), 0.8)) * sunCol;
   vec3 cloudCol = mix(vec3(0.030, 0.042, 0.075), cLit, dayAmt);
   // cloud albedo fades to nothing at the terminator and on the night side, and stays a soft blue-grey over dark ocean
@@ -265,6 +274,8 @@ export const earthMethods = {
         uSea: { value: this.sim.cfg.seaK ?? 0 }, // cfg.seaK: an opt-in blue lift of the sunlit sea (dark ocean in the picture)
         uSharp: { value: this.sim.cfg.earthSharp ?? 0 }, // cfg.earthSharp: an opt-in unsharp mask on the day picture (close-ups of a soft photograph)
         uBump: { value: 0 },
+        uGlint: { value: this.sim.cfg.glintK ?? 0 },
+        uGlintDir: { value: new T.Vector3(...ll(...(this.sim.cfg.glintAt || [0, 0]))) }, // cfg.glintAt [lat, lon]: the point of the Earth where the glint's light stands overhead
       };
     this._eu = u;
     this._ep = { day: null, lights: null, mask: null, relief: null };

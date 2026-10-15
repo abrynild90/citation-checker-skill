@@ -142,6 +142,28 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       e2 = cross3(hn, e1),
       bR = burst ? (burst.size ?? 0.3) * 1.7 * 0.5 * (cfg.burstPad ?? 1.3) : 0,
       burstPad = [e1, scl(e1, -1), e2, scl(e2, -1)].map((e) => add(tgt.hitPos, scl(e, bR))),
+      // openRel (opt-in) { from: item shape, el, az, lift, sh, w: [weight per key] }: at the keys with a weight the camera stands low over the horizon of the first craft
+      // (el degrees above it, az degrees round it, 0 = east) and looks at the point between it and the target, raised by `lift`: the side of the ship, the sea surface and
+      // the horizon behind the missile's climb, like the poster. The distance is solved so the craft and the target stay in frame; the key blends toward the usual fitted pose by 1 - w.
+      relPose = (pz, ki, asp) => {
+        const o = cfg.openRel,
+          w = o && !noShift ? (o.w[ki] ?? 0) : 0,
+          from = w > 0 && items.find((i) => i.kind === 'point' && i.shape === o.from);
+        if (!from) return pz;
+        const S = from.pos(0),
+          B = tgt.pos(Math.min(keys[ki], ht)),
+          m = scl(add(S, B), 0.5),
+          U = norm(S),
+          E = norm(cross3([0, 1, 0], U)),
+          N = norm(cross3(U, E)),
+          el = o.el * DEG,
+          az = o.az * DEG,
+          dir = add(add(scl(E, Math.cos(el) * Math.cos(az)), scl(N, Math.cos(el) * Math.sin(az))), scl(U, Math.sin(el))),
+          look = add(add(m, scl(U, o.lift || 0)), scl(E, o.sh || 0)),
+          r = fitPose([S, B], dir, look, { dMin: o.dMin ?? 0.3, dMax: 6.5, fillX: o.fill ?? 0.78, fillY: (o.fill ?? 0.78) * 0.8, asp }),
+          s = Math.min(1, w);
+        return { ...pz, pos: add(scl(pz.pos, 1 - s), scl(r.pos, s)), look: add(scl(pz.look, 1 - s), scl(r.look, s)) };
+      },
       posesFor = (asp, hpx) =>
         (cache[Math.round(asp * 20) + '|' + (hpx | 0) + (noShift ? 's' : '')] ||= keys.map((tk, ki) => {
           // fitLaunchKeys (opt-in): at these keys the camera is fitted to the launch point and the carrier alone (a close opening on the vehicle); the target comes into frame as it pulls back
@@ -183,7 +205,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
               asp,
             },
           );
-        }).map((pz, ki) => (cfg.fitDownKeys?.[ki] ? shiftDown(pz, cfg.fitDownKeys[ki], asp) : pz))); // fitDownKeys (opt-in): per key, the picture slides down this fraction of the half-height (a margin under the banner for the vehicle's nose)
+        }).map((pz, ki) => relPose(pz, ki, asp)).map((pz, ki) => (cfg.fitDownKeys?.[ki] ? shiftDown(pz, cfg.fitDownKeys[ki], asp) : pz))); // fitDownKeys (opt-in): per key, the picture slides down this fraction of the half-height (a margin under the banner for the vehicle's nose)
     const at0 = (t, asp = ASPECT, hpx) => {
       const poses = posesFor(asp, hpx);
       let i = 0;

@@ -1282,9 +1282,11 @@ export const modelMethods = {
     ring.translate(0, Y * 0.6, 0);
     g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.05, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })));
     // churned wake astern, as wide as the transom, and the V arms that diverge beyond it: the white water is behind the stern only (nothing alongside the bow)
-    strip(0, Z0 + 0.001, 0, -0.078, 0.0095, 0.027, 0.4); // turbulent water: as wide as the transom at the stern, spreading and fading with distance (a tapering wake, not parallel streaks)
-    strip(0, Z0 + 0.001, 0, -0.046, 0.0060, 0.0125, 0.32); // a denser core in its first stretch
-    [-1, 1].forEach((sd) => strip(sd * 0.0050, Z0 + 0.002, sd * 0.030, -0.080, 0.0030, 0.0075, 0.13)); // the V arms: faint, thin and opening at the usual shallow angle
+    strip(0, Z0 + 0.001, 0, -0.082, 0.0095, 0.030, 0.62); // turbulent water: as wide as the transom at the stern, spreading and fading with distance (a tapering wake, not parallel streaks)
+    strip(0, Z0 + 0.001, 0, -0.050, 0.0066, 0.0135, 0.62); // a denser core in its first stretch
+    strip(0, Z0 + 0.0005, 0, -0.0215, 0.0085, 0.0120, 0.9); // bright white churn right at the stern
+    [-1, 1].forEach((sd) => strip(sd * 0.0050, Z0 + 0.002, sd * 0.034, -0.088, 0.0034, 0.0090, 0.40)); // the V arms: thin, bright near the stern and opening at the usual shallow angle
+    [-1, 1].forEach((sd) => strip(sd * 0.0072, 0.030, sd * 0.0125, 0.0, 0.0030, 0.0042, 0.34)); // the bow wave: a short white wedge off each bow quarter
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));

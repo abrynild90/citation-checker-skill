@@ -23,6 +23,8 @@ export const BURNT_FROST = {
   phoneK: 1.15,
   phoneOff: { 'USS Lake Erie': [90, -66] }, // compact views: the name clears the ship and the caption below
   sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -95, el: 8 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
+  glintK: IS_PHONE ? 0 : 1, // desktop: a silver path of light on the sea toward the pole side, seen from the low opening view
+  glintAt: [76, 1],
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,
   seaK: IS_PHONE ? 2.2 : 0.8, // the Pacific is dark even in daylight: lifted so the ship and satellite separate from it
@@ -35,8 +37,9 @@ export const BURNT_FROST = {
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
   dropCoreFrom: 0.55, // after the fall begins the camera frames the debris, not the ship
-  keyTimes: IS_PHONE ? undefined : [0, 0.189, 0.42, 0.52, 0.6, 0.68, 0.76, 0.84, 1], // desktop: more keys through the fall, each fitted to the debris, so the streaks and fragments stay in frame
+  keyTimes: IS_PHONE ? undefined : [0, 0.189, 0.3, 0.42, 0.52, 0.6, 0.68, 0.76, 0.84, 1], // desktop: more keys through the fall, each fitted to the debris, so the streaks and fragments stay in frame
   fitDebrisT: IS_PHONE ? undefined : 0.76, // the last keys keep the framing of the widest cloud: the end is the impact region and its trail, not a close-up of one point
+  openRel: IS_PHONE ? undefined : { from: 'ship', el: 11, az: -90, lift: 0.05, fill: 0.85, w: [1, 1, 0.5] }, // desktop: the opening is the poster's view, low over the sea beside the ship, easing into the fitted framing at the hit
   fitPct: 0.95,
   fitGlobeOnly: !IS_PHONE, // the last keys frame the globe itself (centred and filled), not the debris that has all gone: no dark void
   fitGlobeFrom: IS_PHONE ? undefined : 0.84, // the last keys keep the whole globe in frame, with the impact point and the trail on it
@@ -66,7 +69,7 @@ export const BURNT_FROST = {
       dy: 44,
       minPx: IS_PHONE ? 72 : 150,
       maxPx: IS_PHONE ? 135 : 190,
-      camK: IS_PHONE ? undefined : { 0: 1.28 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
+      camK: IS_PHONE ? undefined : { 0: 1.5 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
     },
     {
       type: 'target',
