@@ -61,8 +61,8 @@ export const FENGYUN = {
       big: true,
       minPx: IS_PHONE ? 60 : 100,
       maxPx: IS_PHONE ? 90 : 140,
-      impactDx: 125,
-      impactDy: -34,
+      impactDx: IS_PHONE ? 150 : 125, // desktop: the pill sits right of the burst ring, clear of the fragments (phone: unchanged)
+      impactDy: IS_PHONE ? -80 : -34,
       impactUntil: 0.6,
     },
     {
