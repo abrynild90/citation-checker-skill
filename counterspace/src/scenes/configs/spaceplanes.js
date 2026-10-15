@@ -23,7 +23,7 @@ export const SPACEPLANES = {
   explanationAlt:
     'Schematic diagrams of three separate episodes: the first six X-37B missions in low Earth orbit, OTV-7’s elongated orbit with reported February 2024 heights of 323 and 38,838 km and tilt of 59.1 degrees, and China’s spacecraft approaching released objects. Hardware, spacing, orbit shape and orientation are illustrative. Mission purposes are not established.',
   date: '2023-12-28',
-  title: 'Reusable craft that return from orbit: the US X-37B and China’s experimental spacecraft (2010–2026)',
+  title: 'Reusable spaceplanes: the US X-37B and China’s experimental craft (2010–2026)',
   shells: [],
   duration: 32,
   lede: 'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions, and six of them lasted 224 to 908 days. China’s reusable experimental spacecraft has flown three missions, and a fourth launched in February 2026.',
