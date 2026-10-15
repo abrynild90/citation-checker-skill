@@ -427,6 +427,18 @@ const methods = {
         root.add(dp);
         pts.userData.darkHalo = dp;
       }
+      if (deb && it.glow) {
+        // opt-in { size, gain, min, max }: an additive hot halo behind every fragment (white-gold, brightest while fresh, as the colour fades with age), so the fragments
+        // stay clear of pale terrain where a dark disc alone is not enough contrast
+        const gm = this._ptMat(it.size * (it.glow.size ?? 2.8), (IS_PHONE ? mn + 1 : mn) * 1.8, it.glow.max ?? 24, it.glow.gain ?? 0.5);
+        gm.blending = T.AdditiveBlending;
+        gm.uniforms.uVar.value = 1;
+        const gp = new T.Points(g, gm);
+        gp.frustumCulled = false;
+        gp.renderOrder = 3;
+        root.add(gp);
+        pts.userData.glow = gp;
+      }
       if (deb && !it.hard) {
         const hm = this._ptMat(it.size * 3.4, (IS_PHONE ? mn + 1 : mn) * 2.6, 34, it.additive ? 0.2 : 0.11);
         if (it.additive) hm.blending = T.AdditiveBlending;

@@ -854,6 +854,7 @@ export function buildSim(cfg) {
         maxPx: a.maxPx,
         additive: a.additive,
         darkHalo: a.darkHalo,
+        glow: a.glow,
         hard: a.hard,
         sizes,
         trail: a.trail,
