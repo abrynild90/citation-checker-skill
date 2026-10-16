@@ -22,6 +22,13 @@ export const norm = (a) => scl(a, 1 / (len(a) || 1));
 export const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 export const lerp = (a, b, s) => a + (b - a) * s;
 export const clamp01 = (x) => Math.max(0, Math.min(1, x));
+// Guard for the position array of a geometry that is rewritten every frame from a computed path: any non-finite value is replaced by the same component of the
+// previous vertex (0 for the first), in place. three takes a bounding sphere from the whole array on the first draw (it sorts transparent objects by it), and one NaN
+// makes its radius NaN ("Computed radius is NaN" in the console), so a NaN sample must never be left in a buffer, even for a vertex that is not drawn yet.
+export function finitePos(a, n = a.length, stride = 3) {
+  for (let i = 0; i < n; i++) if (!Number.isFinite(a[i])) a[i] = i >= stride ? a[i - stride] : 0;
+  return a;
+}
 export const smooth = (x) => {
   x = clamp01(x);
   return x * x * (3 - 2 * x);

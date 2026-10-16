@@ -2,7 +2,7 @@
 // scenes/gl-host.js: GLHost core: renderer, scene loading, cameras, update loop, playback and disposal (mixins: gl-items, gl-labels, gl-still)
 // (ES module: imports what it uses; bundled by esbuild from src/boot.js. Module map in src/scenes/README.md.)
 // ============================================================================
-import { DEG, IS_PHONE, norm, occluded, scl, smooth, sunFor } from './core.js';
+import { DEG, IS_PHONE, finitePos, norm, occluded, scl, smooth, sunFor } from './core.js';
 import { LABEL, dotCss, fitBanner, pillCss } from './labels.js';
 import { ringCanvas, spriteCanvas } from './earth.js';
 
@@ -260,8 +260,8 @@ export class GLHost {
     this._act = null;
     this._manual = false;
     this._cutOn = false;
+    this.t = 0; // before the first draw: setCam renders, and a host reused from the last scene would draw this one at that scene's time
     this.setCam(0, true);
-    this.t = 0;
     this.update(0);
   }
   get maxTex() {
@@ -572,6 +572,7 @@ export class GLHost {
           a = obj.geometry.attributes.position;
         const n = Math.min(pts.length, a.count);
         for (let k = 0; k < n; k++) a.array.set(pts[k], 3 * k);
+        finitePos(a.array, 3 * n);
         a.needsUpdate = true;
         obj.geometry.setDrawRange(0, n);
         const c = obj.geometry.attributes.color,
@@ -668,6 +669,7 @@ export class GLHost {
         const g = obj.geometry,
           a = g.attributes.position;
         it.fill(t, a.array, it.dynCol ? g.attributes.aCol.array : null);
+        finitePos(a.array);
         a.needsUpdate = true;
         if (it.dynCol) g.attributes.aCol.needsUpdate = true;
         if (it.hideEmpty) obj.visible = it.vis > 0; // opt-in: a cloud with no fragment left is not drawn
@@ -689,6 +691,8 @@ export class GLHost {
             }
           }
           it.fill(t, a.array, g.attributes.aCol.array); // the main fill state (vis count) stays that of t
+          finitePos(a.array);
+          finitePos(tp);
           tr.tg.attributes.position.needsUpdate = true;
           tr.tg.attributes.aCol.needsUpdate = true;
         }
@@ -857,7 +861,8 @@ export class GLHost {
       // opt-in launch ramp (it.ramp { k, until }): a vehicle on the pad and in the first of its climb is drawn k times larger, easing to its normal size by this fraction of its flight
       const rp = it.ramp && it.fx ? 1 + (it.ramp.k - 1) * (1 - smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / Math.max(1e-4, (it.fx.t1 - it.fx.t0) * it.ramp.until))))) : 1;
       const pk = it.preK && it.fx ? it.preK + (1 - it.preK) * smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / 0.03))) : 1; // opt-in preK: small while it waits at the launch point
-      obj.scale.setScalar(u.base * f * rp * pk);
+      const sz = u.base * f * rp * pk;
+      if (Number.isFinite(sz)) obj.scale.setScalar(sz); // a NaN size (a camera pose not solved yet) keeps the last one
       if (u.uSea) u.uSea.value = obj.scale.x; // a ship's sea and wake hug the globe's curvature at the model's drawn scale (see _warshipModel)
     }
     this._rocketFrame(); // rocket exhaust, smoke and staging follow the models' drawn size
