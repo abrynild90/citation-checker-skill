@@ -342,16 +342,19 @@
           <header class="chapter-head sub">
             <h4 data-avoid id="hB">Which states can do what, decade by decade</h4>
             <p data-avoid class="lede">Each bar counts the capabilities states had to attack or interfere with satellites in one decade. Only the 2020s bar rests on the Secure World Foundation’s (SWF) own assessment. Earlier decades are reconstructed.</p>
-            <div class="tools">
+          </header>
+          <p data-avoid class="takeaway" id="tkB"></p>
+          <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
+          <div class="chart-ctl" id="ctlB">
+            <div data-avoid class="chips" id="chipsB" role="group" aria-label="Key: show or hide a kind of capability"></div>
+            <div class="ctl-more">
               <button class="btn small" id="grpMore" aria-expanded="false" aria-controls="grpSeg" type="button"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg><span>More detail</span></button>
               <span class="seg" id="grpSeg" role="group" aria-label="How the capabilities are grouped" hidden>
                 <button class="btn small" id="grpCat" aria-pressed="false" type="button">Five categories</button>
                 <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic and non-kinetic</button>
               </span>
             </div>
-          </header>
-          <p data-avoid class="takeaway" id="tkB"></p>
-          <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
+          </div>
           <div id="capPhone" class="cap-phone">
             <label for="capDecade">Compare capabilities in the <select id="capDecade"></select></label>
             <div id="capPhoneRows" aria-live="polite"></div>
@@ -360,7 +363,6 @@
           </div>
           <p class="phone-chart-hint cap-history-hint">Scroll across to compare all eight decades. Select a bar for its states and sources.</p>
           <div class="svgbox" id="svgB" tabindex="0" role="region" aria-label="Capabilities by decade"></div>
-          <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
           <div class="callout-row">
             <p data-avoid class="callout" id="calloutB"></p>
           </div>
