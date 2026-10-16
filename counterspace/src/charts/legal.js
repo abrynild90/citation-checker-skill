@@ -434,6 +434,12 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .attr('height', H - 1)
       .attr('aria-hidden', 'true');
     svg.append('path').attr('class', 'zoomedge').attr('d', `M${zx0},${H}V1.5H${zx1}V${H}`).attr('aria-hidden', 'true');
+    // The densest cluster is named directly: a short line in the free top row, to the left of the window (no label of the strip reaches that row).
+    if (page && !compact && !strip) {
+      const n = pts.filter(crowd).length,
+        line = [`2021–26: ${n} items, named in the zoom panel`, `2021–26: ${n} items`].find((t) => zx0 - 8 - tw(t, FS, 600) >= M.l + 4);
+      if (n && line) svg.append('text').attr('class', 'zoom-lab').attr('x', zx0 - 8).attr('y', 13).attr('text-anchor', 'end').attr('aria-hidden', 'true').text(line);
+    }
     if (page && !compact && !strip) linkBox = { zx0, zx1, W };
   }
   svg
@@ -452,7 +458,10 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
       .attr('class', 'band-label')
       .attr('x', 2)
       .attr('y', 9)
-      .text('Law and weapons on one timeline');
+      .text('Law and weapons on one timeline')
+      .append('tspan')
+      .attr('class', 'band-chart')
+      .text(stripChart ? ` · same years as: ${stripChart}` : '');
   // labels and their leaders
   const lg = svg.append('g').attr('class', 'lbls').attr('aria-hidden', 'true');
   const TONE = { normal: ['var(--text)', 'var(--muted)'], soft: ['var(--accent-2)', 'var(--accent-2)'], quiet: ['var(--muted)', 'var(--muted)'] };
@@ -857,6 +866,8 @@ function miniShow() {
 }
 let legalCompact = false;
 let bandFullH = 0;
+let stripChart = ''; // the chart the pinned strip is currently over (named in its corner)
+const CHART_NAME = { chartA: 'How high the tests went', chartC: 'Jamming, lasers and cyber', chartR: 'Close approaches' };
 let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
 // The 2021 to 2026 zoom starts folded, so the first screen of the timeline shows laws and tests together. The button opens it; it also opens for print and for a
 // keyboard or link visit to anything inside it. Folded, it stays laid out at full width (only its height is 0), so its drawing never needs redoing.
@@ -951,6 +962,24 @@ function legalScrollMain() {
       .filter((c) => c && c.seen > 120)
       .sort((p, q) => q.seen - p.seen)[0]?.id;
   const want = stuck && under ? chartWindow[under] : null;
+  // the pinned strip names the chart it is over (the test chart, or the open jamming or close-approach tab), in its corner
+  const overId = !stuck
+      ? ''
+      : ['chartA', 'chartR', 'chartC']
+          .map((id) => {
+            const e = document.getElementById(id);
+            if (!e || e.hasAttribute('data-off')) return null;
+            const r = e.getBoundingClientRect();
+            return { id, seen: Math.min(r.bottom, innerHeight) - Math.max(r.top, bandH2) };
+          })
+          .filter((c) => c && c.seen > 120)
+          .sort((p, q) => q.seen - p.seen)[0]?.id || '',
+    chartNm = CHART_NAME[overId] || '';
+  if (chartNm !== stripChart) {
+    stripChart = chartNm;
+    const tag = document.querySelector('#legalSvg .band-chart');
+    if (tag) tag.textContent = chartNm ? ` · same years as: ${chartNm}` : '';
+  }
   const changed = stuck && want !== stripDom;
   // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it. This happens only
   // once the strip is in its short form: its full height is measured (bandFullH, --band-full-h) with the strip whole, never while it is cut to its one row, so
