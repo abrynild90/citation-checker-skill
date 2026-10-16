@@ -2,7 +2,7 @@
 // discover.js: the scene gallery and "Surprise me". Pictures load at once (they are embedded in the page), so the strip is never blank.
 // Needs: scene-ui.js (openScene, ORDER), posters.js, discover-data.js. Provides: mountDiscover().
 // ============================================================================
-import { REDUCED, esc } from './app.js';
+import { REDUCED, esc, escNb } from './app.js';
 import { drawnPara, pairWord, recapLine, recapLinks } from './recap.js';
 import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
@@ -36,7 +36,7 @@ function drawGallery() {
   <button type="button" class="pc-btn" data-id="${esc(s.id)}" aria-labelledby="pn-${esc(s.id)}" aria-describedby="pf-${esc(s.id)}">
     <span class="pc-pic">${img ? `<img src="${img}" alt="" width="640" height="360" loading="eager" decoding="${i < 6 ? 'sync' : 'async'}">` : ''}<span class="pc-play" aria-hidden="true"><svg class="ico"><use href="#i-play"/></svg></span><span class="pc-seen" hidden><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Seen</span><span class="pc-fact" id="pf-${esc(s.id)}">${fact}</span></span>
     <span class="pc-year">${esc(yearOf(s))}</span>
-    <span class="pc-name" id="pn-${esc(s.id)}">${esc(nameOf(s))}</span>
+    <span class="pc-name" id="pn-${esc(s.id)}">${escNb(nameOf(s))}</span>
     <span class="pc-fact-s" aria-hidden="true">${fact}</span>
   </button>
 </li>`;
@@ -124,13 +124,14 @@ function rovingTiles(grid) {
     tiles[Math.min(tiles.length - 1, Math.max(0, to))].focus();
   });
 }
-// The hover card over a poster is as tall as the picture: its text is set so that every line is whole. If the fact is too long at 14 px it steps down to 13 px and 12.5 px,
+// The hover caption over a poster is a strip over its lower part (at most CAPTION_SHARE of the picture): its text is set so that every line is whole. If the fact is too long at 14 px it steps down to 13 px and 12.5 px,
 // and a fact that still does not fit stops at a whole line with an ellipsis (never cut through a line). The measure is redone when the cards change size.
+const CAPTION_SHARE = 0.6; // the hover caption covers at most the lower 60% of a poster, so the picture stays in view
 function fitFacts(grid) {
   const fit = () => {
     for (const f of grid.querySelectorAll('.pc-fact')) {
       const pic = f.parentElement,
-        room = pic.clientHeight;
+        room = Math.round(pic.clientHeight * CAPTION_SHARE);
       if (!room) continue;
       f.classList.remove('clamp');
       f.style.maxHeight = 'none';

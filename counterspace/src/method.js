@@ -11,6 +11,7 @@ export function drawMethod() {
     t
       .replace(/direct-ascent \(DA-ASAT\) test row/g, 'direct-ascent anti-satellite test')
       .replace(/is a row in this ledger/g, 'is an entry in our records')
+      .replace(/direct-ascent anti-satellite \(DA-ASAT\)/g, 'direct-ascent anti-satellite') // already spelled out: drop the abbreviation instead of expanding it twice
       .replace(/DA-ASAT/g, 'direct-ascent anti-satellite')
       .replace(/\brows\b/g, 'entries')
       .replace(/\brow\b/g, 'entry')

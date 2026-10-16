@@ -3,7 +3,7 @@
 // Provides: openScene(), closeScene(), exportStill(), startHero(); owns the single WebGL host.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { REDUCED, byId, ensureLand, esc, fmtD, parse } from './app.js';
+import { REDUCED, byId, ensureLand, esc, escNb, fmtD, parse } from './app.js';
 import { GLHost } from './scenes/gl-host.js';
 import { loadEarth } from './scenes/earth.js';
 import { HERO, SCENES } from './scenes/config.js';
@@ -268,7 +268,7 @@ const sheet = $('sceneSheet'),
   listBtn = $('scList');
 ORDER.forEach((s, i) => {
   const li = document.createElement('li');
-  li.innerHTML = `<button type="button" class="sheet-item"><span class="sh-n">${i + 1}</span><span class="sh-t">${esc(s.title)}</span></button>`;
+  li.innerHTML = `<button type="button" class="sheet-item"><span class="sh-n">${i + 1}</span><span class="sh-t">${escNb(s.title)}</span></button>`;
   li.firstElementChild.onclick = () => {
     toggleSheet(false);
     if (s !== cur) openScene(s.id);
@@ -517,7 +517,7 @@ const PHONE_TITLES = {
 };
 function syncSceneTitle(cfg) {
   const phone = matchMedia('(max-width: 760px)').matches;
-  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
+  titleEl.innerHTML = escNb(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title);
   titleEl.setAttribute('aria-label', cfg.title);
 }
 function arrangeExport() {
@@ -689,8 +689,12 @@ function anchorNote(note) {
   // the card stands in the column the rows stand in: its edges are the list's own (the row highlight's left edge, the list's right edge), not the panel's gutter
   const lr = stepsEl.getBoundingClientRect();
   if (lr.width > 200 && !STACKED.matches) {
-    note.style.left = Math.max(0, Math.round((lr.left - wr.left) * 10) / 10) + 'px';
-    note.style.right = Math.max(0, Math.round((wr.right - lr.right) * 10) / 10) + 'px';
+    // the note also covers the whole width of the foot (source line, related-law button) it docks over, which can reach past the list's right edge: no word of it peeks out beside the note
+    const fr = $('sceneFoot')?.getBoundingClientRect(),
+      left = fr?.width ? Math.min(lr.left, fr.left) : lr.left,
+      right = fr?.width ? Math.max(lr.right, fr.right) : lr.right;
+    note.style.left = Math.max(0, Math.round((left - wr.left) * 10) / 10) + 'px';
+    note.style.right = Math.max(0, Math.round((wr.right - right) * 10) / 10) + 'px';
   }
   if (!pr.height || pr.top < wr.top + 140 || pr.top > wr.bottom) return;
   const edge = note === lawCard ? pr.top : pr.bottom + 4,
@@ -774,8 +778,12 @@ function dockNote(note) {
     pair = $('svPair'),
     top = pair.offsetTop + pair.offsetHeight + 4,
     room = asideBody.scrollTop + asideBody.clientHeight - top - 8;
-  note.style.left = Math.round(lr.left - ab.left - asideBody.clientLeft) + 'px';
-  note.style.width = Math.round(lr.width) + 'px';
+  // the note is as wide as the list and the foot it docks over (the source line can run a little past the list's right edge): no word of the foot peeks out beside it
+  const fw = $('sceneFoot').getBoundingClientRect(),
+    x0 = fw.width ? Math.min(lr.left, fw.left) : lr.left,
+    x1 = fw.width ? Math.max(lr.right, fw.right) : lr.right;
+  note.style.left = Math.round(x0 - ab.left - asideBody.clientLeft) + 'px';
+  note.style.width = Math.round(x1 - x0) + 'px';
   note.style.top = top + 'px';
   note.style.maxHeight = Math.max(90, Math.round(room)) + 'px';
   // a note that ends inside the foot (the source line, the related-law button) would leave a strip of it showing under its edge: it reaches down over the whole foot

@@ -67,6 +67,7 @@ export const fmtLong = d3.utcFormat('%-d %B %Y'),
   fmtMonthYear = d3.utcFormat('%B %Y');
 export const DATA_DATE = fmtLong(parse(SCHEMA.ledger_as_of));
 
+document.getElementById('pageUpdated').textContent = DATA_DATE; // one source for every 'last updated' date: the ledger's as-of date
 document.getElementById('asof').innerHTML =
   `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (April 2026). Data last updated ${DATA_DATE}; ` +
   `debris counts as of February 2026. The Center for Strategic and International Studies (CSIS) <i>Space Threat Assessment 2025</i> was consulted ` +
@@ -169,6 +170,8 @@ export const REGIME_LABEL = {
   ISR_LEO: 'LEO imaging / ISR',
 };
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+// Escaped title/label HTML in which a hyphenated token (X-37B, SJ-21, DN-2) can never break at its hyphen. The text keeps its ordinary hyphen, so search and accessible names are unchanged.
+export const escNb = (s) => esc(s).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
 export const fmtD = (e) => (e.date_precision === 'month' ? fmtMY(parse(e.date)) : fmt(parse(e.date))); // rows dated only to a month show month and year
 export const num = (n) => (n == null ? '—' : d3.format(',')(n));
 export const hasScene = (r) => r.scene_3d && SCENES.some((s) => s.id === r.scene_3d);
