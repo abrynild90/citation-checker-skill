@@ -196,10 +196,11 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 
 /* The answer area keeps its height from the start: the longest answer is laid under it, invisible, so answering moves nothing below it. Before an answer the area
    says what will appear there. */
-.q-slot{display:grid}
+.q-slot{display:grid;margin-top:var(--s-2);padding:var(--s-3) var(--s-4);border:1px dashed var(--line);border-radius:var(--r-2);transition:border-color var(--dur-2) var(--ease)} /* the reserved answer area reads as an intended slot, not a gap; the frame fades once the answer is in */
+.q.done .q-slot{border-color:transparent}
 .q-slot>*{grid-area:1/1;min-width:0}
 .q-ghost{visibility:hidden;pointer-events:none}
-.q-wait{margin:var(--s-2) 0 0;align-self:start;font:400 14px/1.5 var(--sans);color:var(--faint)}
+.q-wait{margin:0;align-self:center;justify-self:center;text-align:center;font:400 14px/1.5 var(--sans);color:var(--faint)}
 .q.done .q-wait{display:none}
 .q-slot>.q-out{align-self:start}
 .q-slot>.q-out:empty{display:none}
