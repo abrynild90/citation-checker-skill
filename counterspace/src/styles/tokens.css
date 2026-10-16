@@ -85,7 +85,7 @@
   --accent-2-soft: rgba(255, 200, 107, 0.16);
   --on-accent: #06101f;
   --thumb: #2a3760;
-  --warn: #ff9b7a;
+  --warn: #ff9b7a; /* red-orange: the quiz's wrong answer and chart hand-off marks; amber (--accent-2) stays the law and China colour */
   --focus: #ffd24d;
   --selection: rgba(124, 196, 255, 0.34);
   --glass: rgba(11, 18, 36, 0.76);

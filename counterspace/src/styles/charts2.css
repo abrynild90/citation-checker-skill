@@ -134,10 +134,10 @@
 .q.done .q-opt.right .q-mark,.q.done .q-opt.wrong .q-mark{width:22px;opacity:1}
 .q-opt.right .q-mark{background:var(--accent);color:var(--bg)}
 .q-opt.right .q-yes{display:block}
-.q-opt.wrong .q-mark{background:var(--accent-2);color:var(--bg)}
+.q-opt.wrong .q-mark{background:var(--warn);color:var(--bg)}
 .q-opt.wrong .q-no{display:block}
 .q-opt.right{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
-.q-opt.wrong{border-style:dashed;border-color:var(--accent-2);box-shadow:inset 0 0 0 1px var(--accent-2)}
+.q-opt.wrong{border-style:dashed;border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
 .q.done .q-opt:not(.right):not(.wrong){opacity:.62}
 .q-out{margin:var(--s-2) 0 0;font:400 15px/1.55 var(--sans);color:var(--muted)}
 .q-out p{margin:0}
@@ -145,7 +145,7 @@
 .q-out b{font-weight:600;color:var(--text)}
 .q-out .q-verdict{font:600 17px/1.3 var(--serif);text-wrap:balance}
 .q-verdict.yes{color:var(--accent)}
-.q-verdict.no{color:var(--accent-2)}
+.q-verdict.no{color:var(--warn)}
 .q-gap{margin:0 2px}
 .q-foot{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-4);margin-top:var(--s-5);padding-top:var(--s-4);border-top:1px solid var(--line)}
 .q-tally{margin:0 auto 0 0;font:600 17px/1.4 var(--serif);color:var(--text)}
@@ -227,7 +227,7 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .q-trail[hidden]{display:none}
 .qt-line{position:absolute;left:calc(12.5% - 6px);right:0;top:50%;border-top:1.6px dashed var(--muted);animation:qt-draw 1300ms var(--ease) 100ms both}
 .qt-dot{position:absolute;left:var(--p);top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--accent-soft);animation:qt-pop 420ms var(--ease) calc(120ms + var(--i) * 300ms) both}
-.qt-dot.miss{background:var(--bg);border:2px dashed var(--accent-2);box-shadow:0 0 0 3px var(--bg)}
+.qt-dot.miss{background:var(--bg);border:2px dashed var(--warn);box-shadow:0 0 0 3px var(--bg)}
 .qt-tick{position:absolute;right:0;top:4px;bottom:4px;width:4px;margin-right:1px;border-radius:2px;background:var(--accent-2);transform-origin:50% 100%;animation:qt-rise 460ms var(--ease) 1350ms both}
 .q-trail.perfect .qt-tick::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid var(--accent-2);border-radius:50%;opacity:0;animation:qt-ring 900ms var(--ease) 1800ms both}
 @keyframes qt-draw{from{clip-path:inset(-6px 100% -6px 0)}to{clip-path:inset(-6px 0 -6px 0)}}

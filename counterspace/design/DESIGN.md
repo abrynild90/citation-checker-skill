@@ -79,6 +79,11 @@ light that seems to come from the data itself. Serif for ideas, sans for facts a
 | `--accent` cool | `#7cc4ff` | `#1b5aa6` |
 | `--accent-2` warm | `#ffc86b` | `#8a5a00` |
 | `--focus` | `#ffd24d` | `#b36b00` |
+| `--warn` red-orange | `#ff9b7a` | `#b2401c` |
+
+Amber (`--accent-2`) carries two data meanings: law (ticks, law years, the guide line) and China (`--c-cn`). Do not use it for a state such as "wrong" or for a label that is not about law. The quiz's wrong answer
+and the missed dot on its trail use `--warn` (red-orange) with a dashed edge and a cross icon, so they are never told apart by colour alone. "Did you know"
+labels and other quiet labels use `--accent` (cool). The "Find it on the chart" landing mark uses `--focus` (see section 2.4).
 
 Data colours (`--c-us`, `--c-ru`, `--c-cn`, ...) keep their current colour-blind-safe values. Text contrast is at least 4.5:1 everywhere (3:1 for
 text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use colour alone to carry meaning: shape, fill or a label always repeats it.
