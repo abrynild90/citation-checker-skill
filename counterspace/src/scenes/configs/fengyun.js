@@ -90,6 +90,7 @@ export const FENGYUN = {
       maxPx: 5.5,
       size: 0.034,
       label: 'Debris ring',
+      growIn: 0.09, // the swath grows out of the break-up point over 0.09 of the timeline (large at once at t=0.35 before)
       appear: 0.32, // the fragments and their label come up with the step that names them (the collision step), not in the 0.02 before it
       labelEdge: true, // live: the label points at a fragment on the ring's outer edge, so the leader stays short
       dx: 70,

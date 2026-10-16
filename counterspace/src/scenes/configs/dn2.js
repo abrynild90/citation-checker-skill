@@ -102,6 +102,7 @@ export const DN2 = {
           label: 'GEO ring · 35,786 km',
           short: 'GEO',
           from: 0.2,
+          labelHide: [0.44, 0.8], // while the 10,000 km and apogee pills are up the GEO pill is left out (its tick and the ring stay; the status line names GEO)
           opt: true,
           color: C.geo,
           dx: 0,
@@ -121,7 +122,7 @@ export const DN2 = {
       color: C.geo,
       thick: 0.006,
       opacity: 0.9,
-      fadeCams: [0], fadeInT: [0.1, 0.24], // the ring is edge-on at the opening (two flat yellow lines across the frame): it fades in as the view pulls back
+      fadeCams: [0], fadeInT: [0.19, 0.31], // the ring is edge-on at the opening (flat yellow strands across the frame, and a hairline over the globe): hidden until the view has pulled back, then it fades in
       fadeDisc: 0.1, // the ring passes in front of the globe's face only as a faint line (it read as a cut across the disc at the start)
     },
   ],
@@ -144,8 +145,8 @@ export const DN2 = {
   liveOff: {
     'DN-2 path': [-30, -34],
     Xichang: [-70, -56],
-    '10,000': [-93, 56],
-    '≥30,000': [-95, -84],
+    '10,000': [-76, 42],
+    '≥30,000': [-80, -64],
     GEO: [28, 40],
   }, // each pill keeps one slot for its whole life (no swapping): 10,000 km below-left of its tick, the apogee pill above-left of the apogee marker, GEO just below-right of its tick (clear of the rocket's hull at the apogee)
   offSteps: {

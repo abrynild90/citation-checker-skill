@@ -904,6 +904,8 @@ export function buildSim(cfg) {
           // a.ring { t1, ease }: opt-in closed ring: each fragment's along-track offset grows from 0 at the hit to its own share of the full circle at t1
           // (ordered by speed, so the ring is evenly filled), then the band keeps widening; the early cloud is a short, fat shell, not a thin wall
           const rs = a.ring ? 1 - (1 - clamp01(dt / (a.ring.t1 - tgt.t))) ** (a.ring.ease ?? 2) : 0;
+          // a.growIn (opt-in, scene time): the swath grows out of the break-up point over this span from its first frame (spread across, along and in height), not large at once
+          const gk = a.growIn ? smooth(clamp01(da / a.growIn)) : 1;
           let vis = 0;
           const dens = Math.min(1, Math.sqrt(300 / n));
           for (let k = 0; k < n; k++) {
@@ -913,7 +915,7 @@ export function buildSim(cfg) {
               z = 0;
             if (dt > 0 && cloudFade > 0 && !(a.appear != null && t < a.appear)) {
               const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
-              let alt = tgt.alt + p.da * fat * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              let alt = tgt.alt + p.da * fat * gk * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
                 // decayWin [t0, t1]: the fast-forward decay: every fragment sinks and burns up inside this window (all gone at t1), so the picture matches the text
                 const sw = clamp01((t - a.decayWin[0]) / (a.decayWin[1] - a.decayWin[0]));
@@ -925,11 +927,11 @@ export function buildSim(cfg) {
                 const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
                   q = orbitPos(
                     alt,
-                    tgt.inc + p.di * (a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1),
-                    tgt.raan + p.dr * (1 + (a.late?.kr ?? 0) * lt),
+                    tgt.inc + p.di * gk * (a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1),
+                    tgt.raan + p.dr * gk * (1 + (a.late?.kr ?? 0) * lt),
                     tgt.uHit +
                       p.du +
-                      (a.ring ? tgt.w * (a.drift ?? 1) * dt + p.ph * rs : tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0))),
+                      (a.ring ? tgt.w * (a.drift ?? 1) * dt + p.ph * rs * gk : tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0))),
                   );
                 x = q[0];
                 y = q[1];
@@ -1057,6 +1059,10 @@ export function buildSim(cfg) {
             staticPin: m.staticPin,
             labelDx: m.dx ?? 0,
             labelDy: m.dy ?? 0,
+            // labelHide (opt-in [t0, t1]): the live pill is left out in that window (the tick stays, the print still names it): one pill fewer where several crowd one spot
+            ...(m.labelHide
+              ? { labelFn: (t, narrow, still) => (!still && t >= m.labelHide[0] && t < m.labelHide[1] ? null : still ? m.label : m.short ?? m.label), statusColor: () => m.color }
+              : {}),
             pos: (t) => ((m.apex && t < tApex) || (m.from != null && t < m.from) || (IS_PHONE && m.phoneFrom && t < m.phoneFrom) ? null : scl(d, rAlt(m.alt))), // phoneFrom (opt-in): on a phone the marker waits until this t
           }),
         );
