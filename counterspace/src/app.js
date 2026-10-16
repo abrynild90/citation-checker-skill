@@ -67,6 +67,7 @@ export const fmtLong = d3.utcFormat('%-d %B %Y'),
   fmtMonthYear = d3.utcFormat('%B %Y');
 export const DATA_DATE = fmtLong(parse(SCHEMA.ledger_as_of));
 
+document.getElementById('pageUpdated').textContent = DATA_DATE; // one source for every 'last updated' date: the ledger's as-of date
 document.getElementById('asof').innerHTML =
   `<b>Source:</b> Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed. (April 2026). Data last updated ${DATA_DATE}; ` +
   `debris counts as of February 2026. The Center for Strategic and International Studies (CSIS) <i>Space Threat Assessment 2025</i> was consulted ` +
