@@ -408,7 +408,8 @@
       <p data-avoid>One report supplies almost every weapon and operation: the Secure World Foundation’s <i>Global Counterspace Capabilities</i> (9th edition, April 2026). The
         laws and policies come from the treaties and documents themselves.</p>
     </div>
-    <p class="source-actions"><a class="btn small" href="#srcList">Find a cited source</a><a class="btn small" href="#srcCite">How to cite this page</a></p>
+    <div class="source-actions" id="sourceActions"><a class="btn small" href="#srcList">Find a cited source</a><a class="btn small" href="#srcCite">How to cite this page</a><button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button><span
+        class="sr" id="citeStatus" role="status" aria-live="polite"></span></div>
     <div class="sources-layout">
       <nav class="sub-nav" aria-label="In this section">
         <ul>
@@ -420,8 +421,6 @@
         </ul>
       </nav>
       <div id="methodBody"></div>
-      <div class="src-copy"><button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button><span
-        class="sr" id="citeStatus" role="status" aria-live="polite"></span></div>
     </div>
     <details class="about hero-more" id="srcMore"><summary>The main source, and orbits in plain words</summary>
       <p class="src-note">The Secure World Foundation (SWF), whose 2026 report is the main source of the facts here, finds that “only non-destructive capabilities are actively
