@@ -741,6 +741,7 @@ export function buildSim(cfg) {
             stage: a.rocket.stage,
             kv: a.rocket.kv, // opt-in { at }: a small kill vehicle rides the nose (style 'asat') and flies on alone after this time (gl-rocket _kvFrame)
             plumeK: a.rocket.plumeK, // opt-in: a longer, wider exhaust
+            plumeDeck: a.rocket.plumeDeck, // opt-in: the exhaust is cut at the deck of the warship it climbs from (gl-rocket.js)
             endFade: a.rocket.endFade, // opt-in: after the hit the spent vehicle drifts on (rocket.endDrift) and fades out over this span
             seed: a.t0 * 10,
             marker: kvMark, // the plain glow marker of the same path: hidden while the vehicle is drawn (gl-rocket.js)
@@ -1116,7 +1117,7 @@ export function buildSim(cfg) {
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
             fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, follow: !!a.rocket.follow, smokeK: a.rocket.smokeK,
-            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, plumeK: a.rocket.plumeK, seed: a.t0 * 10, marker: kvMark },
+            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, plumeK: a.rocket.plumeK, plumeDeck: a.rocket.plumeDeck, seed: a.t0 * 10, marker: kvMark },
           });
         } else
           items.push({

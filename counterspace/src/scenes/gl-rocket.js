@@ -757,6 +757,17 @@ export const rocketMethods = {
           disc = b * b - c;
         if (c < 0) outerLen = 0;
         else if (disc > 0 && -b - Math.sqrt(disc) > 0) outerLen = Math.min(outerLen, (-b - Math.sqrt(disc)) / sc);
+        // fx.plumeDeck (opt-in): a rocket that climbs from a warship, drawn many times larger than life, is cut where its axis meets the ship's deck, so no flame runs on past the hull over the sea
+        if (fx.plumeDeck && outerLen > 0) {
+          const sh = this.dyn.find((d) => d.obj.userData.uSea)?.obj;
+          if (sh) {
+            const fl = Math.min(1.004 + 0.0072 * sh.scale.x, Math.hypot(px, py, pz) - 0.0008),
+              c2 = px * px + py * py + pz * pz - fl * fl,
+              d2 = b * b - c2;
+            if (c2 > 0 && d2 > 0 && -b - Math.sqrt(d2) > 0) outerLen = Math.min(outerLen, (-b - Math.sqrt(d2)) / sc);
+            else if (c2 <= 0) outerLen = Math.min(outerLen, 0.002);
+          }
+        }
       }
       const outerW = nozW * (1 + 0.5 * (pk - 1)) * (0.62 + 0.38 * Math.sqrt(e + 0.2)) * (0.55 + 0.45 * thr) * (1 + 0.16 * low * thr);
       const tm = t * this.sim.cfg.duration,

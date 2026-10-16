@@ -102,7 +102,10 @@ function wakeCanvas() {
         n = 0.45 * vn(x, y, 5, 22, 0) + 0.3 * vn(x, y, 3, 9, 7) + 0.25 * vn(x, y, 1.6, 3.2, 19),
         foam = (core + skirt) * along,
         // as the foam thins it breaks into patches: the noise cuts a rising threshold out of it
-        a = Math.max(0, Math.min(1, (foam - (0.1 + 0.5 * t) * (1 - n)) * 2.6 + 0.06 * (1 - t))) * Math.min(1, (1 - t) * 6 + 0.2) * Math.min(1, (1 - d) * 4);
+        // streaks and bubbles: a second, finer noise breaks the dense core up too, so the wake is foam with texture and a ragged edge, not a flat white wedge
+        n2 = vn(x, y, 1.2, 7, 41) * 0.6 + vn(x, y, 2.6, 2.2, 53) * 0.4,
+        fd = foam * (0.62 + 0.75 * n2),
+        a = Math.max(0, Math.min(1, (fd - (0.1 + 0.5 * t) * (1 - n)) * 2.3 + 0.03 * (1 - t))) * Math.min(1, (1 - t) * 6 + 0.2) * Math.min(1, (1 - d) * 4) ** 1.5;
       const i = (y * w + x) * 4;
       im.data[i] = 247;
       im.data[i + 1] = 251;
@@ -1417,7 +1420,7 @@ export const modelMethods = {
       return m;
     };
     const Y = 0.0007,
-      white = (op) => hug(new T.MeshBasicMaterial({ map: tex, color: 0xf2f6ff, transparent: true, opacity: op, depthWrite: false, side: T.DoubleSide }));
+      white = (op) => hug(new T.MeshBasicMaterial({ map: tex, color: 0xf2f6ff, vertexColors: true, transparent: true, opacity: op, depthWrite: false, side: T.DoubleSide }));
     // the sea itself: a round patch of rippled water about the ship (bow at +z), under the foam
     {
       const seaTex = this._gtex(seaCanvas(), () => new T.CanvasTexture(seaCanvas())),
@@ -1432,7 +1435,7 @@ export const modelMethods = {
       g.add(sea);
     }
     // a ribbon from (x0, z0) to (x1, z1): w0 wide at the start (bright) and w1 at the end (gone)
-    const strip = (x0, z0, x1, z1, w0, w1, op) => {
+    const strip = (x0, z0, x1, z1, w0, w1, op, f0 = 1) => {
       const dx = x1 - x0,
         dz = z1 - z0,
         L = Math.hypot(dx, dz),
@@ -1444,6 +1447,7 @@ export const modelMethods = {
         new T.Float32BufferAttribute([x0 - (px * w0) / 2, Y, z0 - (pz * w0) / 2, x0 + (px * w0) / 2, Y, z0 + (pz * w0) / 2, x1 - (px * w1) / 2, Y, z1 - (pz * w1) / 2, x1 + (px * w1) / 2, Y, z1 + (pz * w1) / 2], 3),
       );
       gm.setAttribute('uv', new T.Float32BufferAttribute([0, 1, 1, 1, 0, 0, 1, 0], 2)); // v = 1 is the top row of the (flipped) canvas: the dense start
+      gm.setAttribute('color', new T.Float32BufferAttribute([1, 1, 1, f0, 1, 1, 1, f0, 1, 1, 1, 1, 1, 1, 1, 1], 4)); // f0: the alpha at the start edge (0 = the foam grows out of nothing, no hard cut)
       gm.setIndex([0, 2, 1, 1, 2, 3]);
       g.add(new T.Mesh(gm, white(op)));
     };
@@ -1451,13 +1455,14 @@ export const modelMethods = {
     const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
     ring.rotateX(Math.PI / 2);
     ring.translate(0, Y * 0.6, 0);
-    g.add(new T.Mesh(ring, hug(new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.16, depthWrite: false, side: T.DoubleSide }))));
+    g.add(new T.Mesh(ring, hug(new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.1, depthWrite: false, side: T.DoubleSide }))));
     // churned wake astern: white foam as wide as the transom that spreads, breaks into patches and thins out with distance, with a thin Kelvin arm each side
     // (the wake is short: past the limb it would float in space)
     strip(0, Z0 + 0.001, 0, -0.084, 0.0105, 0.025, 0.85);
     strip(0, Z0 + 0.0005, 0, -0.058, 0.0078, 0.0115, 1);
-    [-1, 1].forEach((sd) => strip(sd * 0.0046, Z0 + 0.002, sd * 0.017, -0.062, 0.0052, 0.0105, 0.3)); // the Kelvin arms: soft and broad, not two thin spikes
-    [-1, 1].forEach((sd) => strip(sd * 0.0072, 0.030, sd * 0.0125, 0.0, 0.0030, 0.0042, 0.5)); // the bow wave: a short white wedge off each bow quarter
+    // the Kelvin arms: broad, broken foam that grows out of the wake (no hard start edge) and spreads and fades
+    [-1, 1].forEach((sd) => strip(sd * 0.0050, Z0 + 0.002, sd * 0.0205, -0.086, 0.0085, 0.021, 0.3, 0));
+    [-1, 1].forEach((sd) => strip(sd * 0.0072, 0.030, sd * 0.0125, 0.0, 0.0034, 0.0046, 0.5, 0)); // the bow wave: a short white wedge off each bow quarter
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));

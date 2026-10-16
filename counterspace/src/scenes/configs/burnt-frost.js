@@ -112,7 +112,7 @@ export const BURNT_FROST = {
       label: 'SM-3 interceptor',
       short: 'SM-3',
       labelFollow: true, // the leader ends on the missile's head, not on a fixed point of its arc
-      rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', preK: 1.0, waitRing: true, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
+      rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', plumeDeck: true, preK: 1.0, waitRing: true, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,
