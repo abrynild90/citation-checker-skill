@@ -9,11 +9,13 @@ let root = null,
   chipEl = null,
   target = null,
   born = 0,
+  arrived = false,
   raf = 0,
   early = 0,
   last = '';
 const MODS = new Set(['Shift', 'Control', 'Alt', 'Meta', 'CapsLock']);
-const GRACE = 1800; // the landing scroll (smooth, then its check) runs this long; the mark is not "scrolled away" while it does
+const GRACE = 1800; // the landing scroll is followed frame by frame for this long (a scroll or resize event follows it after that)
+const GIVE_UP = 8000; // a mark the page has still not brought into view by now is dropped
 
 function build() {
   root = document.createElement('div');
@@ -45,7 +47,8 @@ function place() {
     vh = innerHeight,
     top = safeTop();
   const off = r.bottom < top - 4 || r.top > vh + 4 || r.right < 0 || r.left > vw;
-  if (off && performance.now() - born > GRACE) return clearLanding();
+  if (!off) arrived = true;
+  else if (arrived || performance.now() - born > GIVE_UP) return clearLanding(); // scrolled away after being seen (or the page never brought it in)
   root.style.visibility = off ? 'hidden' : ''; // while the landing scroll is still bringing the mark in, the ring waits out of sight
   // the ring: the mark's box with room around it, never smaller than a finger
   const pad = 7,
@@ -118,6 +121,7 @@ export function showLanding(el, label) {
   if (!root) build();
   target = el;
   born = performance.now();
+  arrived = false;
   el.classList.add('hl');
   chipEl.textContent = label || '';
   chipEl.hidden = !label;
@@ -131,7 +135,8 @@ export function showLanding(el, label) {
   const t0 = born;
   early = setInterval(() => {
     schedule();
-    if (performance.now() - t0 > GRACE) clearInterval(early);
+    if (arrived && performance.now() - t0 > GRACE) clearInterval(early);
+    else if (performance.now() - t0 > GIVE_UP) clearInterval(early);
   }, 50);
   addEventListener('pointerdown', onPress, true);
   addEventListener('keydown', onKey, true);
