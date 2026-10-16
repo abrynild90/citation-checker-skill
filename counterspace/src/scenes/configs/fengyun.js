@@ -43,7 +43,7 @@ export const FENGYUN = {
   phoneK: 1.14,
   narrowK: 1, // phone: the fitted dolly already frames the debris; a further tighten cut it at the frame edge
   fitFill: IS_PHONE ? 0.88 : 0.78, // 375: the follow camera frames the launch with more sky around it, so the globe is not cropped at the corner
-  liveOff: { 'Fengyun-1C': [0, -70], Xichang: [-60, 34], 'Debris ring': [120, 18], 'SC-19': [-140, -34] }, // desktop: the pill sits above the satellite, clear of the key legend in the lower right
+  liveOff: { 'Fengyun-1C': [0, -70], Xichang: [-60, 34], 'Debris ring': [120, 18], 'SC-19': [112, -62] }, // desktop: Fengyun-1C's pill sits above the satellite, clear of the key legend in the lower right; SC-19's sits up and right of the rocket, so its leader meets the hull's near edge (from the left it ran across the whole body and the nose)
   camOff: { 1: { 'Debris ring': [90, 0] }, 3: { 'Debris ring': [90, 0] } },
   offFrom: { 'Fengyun-1C': 0.18 }, // 375: before the launch the placer's own slot is clear; from here the pill hangs below-right of the satellite
   phoneOff: { 'Fengyun-1C': [18, 52], Xichang: [-50, 36] }, // 375: Xichang sits at the glow of the launch; its chip hangs below-left on a visible leader
