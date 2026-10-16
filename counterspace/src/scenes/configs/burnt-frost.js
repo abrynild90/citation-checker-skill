@@ -33,6 +33,7 @@ export const BURNT_FROST = {
   camHide: { 3: ['Impact'] }, // Polar: the debris cloud is small there and the pill would sit on the disc
   liveOff: { Impact: [-108, -20], 'Larger pieces': [168, -62], 'USS Lake Erie': [150, -4] }, // the collision frame: Impact to the left, the falling pieces to the right
   offSteps: {
+    Impact: [[0, -108, -20], [0.9, -70, -48]], // the collision frame: to the left; the final count (from 0.9) sits close to the limb, clear of Japan's city lights
     'SM-3': [[0, 130, 20], [0.09, -165, -34], [0.24, -165, -34], [0.36, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
     'USA-193': [[0, -34, -80], [0.4, null]], // above and a little left of the satellite until the hit: a steady slot well clear of the SM-3 pill
   },
@@ -88,8 +89,8 @@ export const BURNT_FROST = {
       endLabel: 'Impact point: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
       endShort: '0 of 175 in orbit',
       endFrom: 0.9,
-      endDx: 85, // the end label sits right of the impact point, off the Japanese city lights
-      endDy: -48,
+      endDx: 40, // the end label sits right of the impact point, off the Japanese city lights
+      endDy: -26,
       bright: true,
       fallUntil: 0.87,
       fall: [
