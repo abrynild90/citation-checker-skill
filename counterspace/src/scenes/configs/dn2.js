@@ -58,7 +58,7 @@ export const DN2 = {
         glowMin: 10,
         glowMax: 16,
         pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 },
-        sizeSteps: IS_PHONE ? null : [[0.18, 1], [0.3, 0.76], [0.84, 0.76], [0.9, 1]], // the rocket was oversized against the globe through the coast: about 25% smaller from the pull-back to the fall
+        sizeSteps: IS_PHONE ? null : [[0.18, 1], [0.3, 0.94], [0.84, 0.94], [0.9, 1]], // through the coast the rocket keeps about 95% of its size (it was 76%: at 1440 it was a thin 80 px sliver beside 140 px pills)
         ramp: { k: IS_PHONE ? 1.8 : 1.25, until: 0.3 }, // desktop: 1.25 so the nose keeps clear of the top edge on a tall stage
         smokeK: 1.6,
         follow: true, // a ballistic arc: the spent stage keeps its nose on the path through the coast and the fall (no tumble hanging off the path end)
@@ -146,9 +146,9 @@ export const DN2 = {
     'DN-2 path': [-30, -34],
     Xichang: [-70, -56],
     '10,000': [-76, 42],
-    '≥30,000': [-80, -64],
+    '≥30,000': [-76, -74],
     GEO: [28, 40],
-  }, // each pill keeps one slot for its whole life (no swapping): 10,000 km below-left of its tick, the apogee pill above-left of the apogee marker, GEO just below-right of its tick (clear of the rocket's hull at the apogee)
+  }, // each pill keeps one slot for its whole life (no swapping): 10,000 km below-left of its tick (clear of the disc at every time), the apogee pill up and left of the apogee marker, straight above its leader's end so the leader runs down onto the marker and never over the ruler (a pill below the apogee sat in the rocket's way on the fall, a pill above the 10,000 tick was relocated off the limb early: a hop), GEO just below-right of its tick (clear of the rocket's hull at the apogee)
   offSteps: {
     'DN-2 path': [
       [0, -30, -34],
