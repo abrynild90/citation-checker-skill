@@ -9,8 +9,8 @@ const chapters = [
   ['law', 'Law and policy'],
   ['chartA', 'Altitude and debris'],
   ['pattern', 'What the pattern shows'],
-  ['quizBand', 'Test yourself'],
   ['explore', 'Explore the data'],
+  ['quizBand', 'Test yourself'],
   ['sources', 'Sources and method'],
 ];
 const title = (e) => e.system || e.target_system || e.label || e.id;

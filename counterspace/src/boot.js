@@ -69,7 +69,7 @@ nameThemeButton();
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
-    starts = ['scenes', 'timeline', 'pattern', 'quizBand', 'explore', 'sources'].map((id) => document.getElementById(id)),
+    starts = ['scenes', 'timeline', 'pattern', 'explore', 'quizBand', 'sources'].map((id) => document.getElementById(id)),
     hero = document.getElementById('top');
   const mark = () => {
     const line = innerHeight * 0.4,

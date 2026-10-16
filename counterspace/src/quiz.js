@@ -1,5 +1,5 @@
 // ============================================================================
-// quiz.js: "Test yourself: which came first?", a short guessing game placed right after "What the pattern shows", which it echoes. Every pair is a real pair from the lag data
+// quiz.js: "Test yourself: which came first?", a short guessing game placed after the charts, just before "Where every fact comes from"; it echoes "What the pattern shows". Every pair is a real pair from the lag data
 // (data/lag_pairs.json, through byId); every gap is computed from the two dates. Click a side to commit: the choice locks, the page says plainly whether
 // it was right and shows the real gap. A small tally keeps count (nothing is stored). Needs: app.js (data), charts/lag.js (wording and gap format).
 // Two of the four questions are ones where the likely guess is wrong: the cyberattack that came after its rules (Viasat), and the treaty that took
@@ -187,7 +187,7 @@ export function mountQuiz() {
     <div class="q-sumreal q-ghost" aria-hidden="true" inert><p class="q-tally done">4 of 4 answered correctly.</p><p class="q-pattern">${esc(pattern())}</p><p class="q-reward">All four right. That earns a new link on the picture at the top of the page: Starfish Prime nuclear test and Limited Test Ban Treaty.</p></div></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
-    <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></div></div>`;
+    <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a></div></div>`;
   // Cards side by side start their options level: every title takes the height of the tallest title in its row, measured from the real text (so it follows the width and
   // the font, and is measured again when either changes).
   const fit = () => {
