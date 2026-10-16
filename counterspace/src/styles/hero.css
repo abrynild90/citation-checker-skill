@@ -334,7 +334,7 @@
 .hero-jumps a:hover{text-decoration-color:var(--hero-accent);background:color-mix(in srgb,var(--hero-accent) 10%,transparent)}
 .hero-jumps a:focus-visible{outline:3px solid var(--focus);outline-offset:-2px}
 /* from tablet width up the row hugs the lede (its hit boxes are 34 px high), so it stands clear of the first decades' dots under it */
-@media(min-width:761px){.hero-jumps{margin-top:6px}.hero-jumps a{min-height:34px}}
+@media(min-width:761px){.hero-jumps{margin-top:-4px}.hero-jumps a{min-height:34px}}
 /* Phone readers keep the key facts beneath the picture, clear of its plotted events. */
 @media(max-width:639px){
   .hero-glance{display:block;position:static;padding:16px 0 0;color:var(--muted)}
