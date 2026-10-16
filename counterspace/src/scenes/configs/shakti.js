@@ -43,6 +43,7 @@ export const SHAKTI = {
     PDV: [-40, -120],
     'Microsat-R': [165, 6],
   }, // the two pills sit on opposite sides of the strike, one above and one below
+  offSteps: { 'Abdul Kalam': [[0, -170, -48], [0.06, -170, -48], [0.13, -34, 66, 'ease']] }, // the pad opening: the island pill stands left of the rocket (below it the placer moved it onto the body at 1920); it glides to its usual place below the island once the vehicle is away
   camOff: { 1: { PDV: [130, -115], 'Abdul Kalam': [-150, 40] } }, // From the launch site: the interceptor pill sits right and above the rocket, off the disc
   phoneOff: { 'Abdul Kalam': [-105, 0], Impact: [110, -60] }, // compact views keep names off the launch plume and Earth limb
   earthSharp: 0.8, // an unsharp mask on the Earth photograph: the late globe (small, or magnified) stays crisp
