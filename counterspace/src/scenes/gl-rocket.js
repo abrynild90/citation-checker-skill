@@ -7,7 +7,7 @@
 // (ES module bundled by esbuild from src/boot.js; the methods are installed together with gl-items.js's, see installGLItems.)
 // The vehicles and their trajectories are drawn for illustration: sim.js gives each rocket item an `fx` descriptor (ignition time, flight end, burn fraction).
 // ============================================================================
-import { GEO_ALT, IS_PHONE, clamp01, occluded, smooth } from './core.js';
+import { GEO_ALT, IS_PHONE, clamp01, finitePos, occluded, smooth } from './core.js';
 import { Kit } from './gl-models.js';
 
 const PI = Math.PI;
@@ -660,7 +660,7 @@ export const rocketMethods = {
       const ud = obj.userData;
       // the displayed scale is kept when the vehicle is not drawn (the smoke trail is sized from it)
       if (vis) {
-        rec.f = obj.scale.x;
+        if (Number.isFinite(obj.scale.x)) rec.f = obj.scale.x;
         // standing on a launch pad (fx.stand): the nozzle never sinks below the plate, so the vehicle holds down until the path has climbed clear of it, then rises
         // (the vehicle is lifted inside its own group: the item's position stays on the path, whatever the camera does to the drawn size)
         if (fx.stand) {
@@ -674,7 +674,8 @@ export const rocketMethods = {
           const d = Math.max(0.15, Math.hypot(p[0] - cp.x, p[1] - cp.y, p[2] - cp.z)),
             px = (ud.span * ud.base * sc) / d,
             b = (this._modelBoost || 1) * this._rkStage(bh);
-          rec.f = (ud.base * Math.min(Math.max(px, ud.minPx * k * b), ud.maxPx * k * b)) / px;
+          const f0 = (ud.base * Math.min(Math.max(px, ud.minPx * k * b), ud.maxPx * k * b)) / px;
+          if (Number.isFinite(f0)) rec.f = f0;
         }
       }
       const st = this._rocketState(rec, t),
@@ -1073,6 +1074,7 @@ export const rocketMethods = {
       wm[k] = Math.exp(-age / 0.012) * 0.8;
       if (al[k] > 0.003) any = true;
     }
+    finitePos(pos); // the particles not born yet keep their last position: never a NaN left over from an earlier frame
     S.pts.visible = any;
     S.g.attributes.position.needsUpdate = S.g.attributes.aAl.needsUpdate = S.g.attributes.aSz.needsUpdate = S.g.attributes.aWarm.needsUpdate = true;
   },
