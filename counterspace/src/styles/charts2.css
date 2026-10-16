@@ -98,6 +98,7 @@
 /* A chart's key and its controls come before its data: one row above the bars. In chart B the kind chips are both the key and the filters, and the
    "More detail" toggle (with the grouping choice it reveals) sits in the same row, so no stray button floats between the headline and the chart. */
 .chart-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-4);margin:var(--s-3) 0 var(--s-2)}
+.chart-tools{margin:var(--s-3) 0 var(--s-2)}
 .chart-ctl .chips{margin:0;min-width:0;max-width:100%}
 .chart-ctl .ctl-more{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2)}
 /* Phone: the key row stays above the decade picker; the note that follows the chart keeps its place under it */
