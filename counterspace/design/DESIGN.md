@@ -96,7 +96,7 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 | Small | Plex Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
 | Short label (key group names, table headers) | Plex Sans 600, 12.5 px, uppercase only when 1 to 3 words, tracking 0.08em |
 | Numerals | Plex Sans with tabular figures |
-| Reference band (after the quiz) | one step down: band h2 Newsreader 500 `clamp(24px, 2.3vw, 30px)`, sans h3 600 17 px, chart title (h4) Newsreader 500 `clamp(21px, 1.9vw, 25px)`, ledes Newsreader 15 to 17 px, takeaway Newsreader 500 17 to 19.5 px, callouts 14.5 to 15.5 px |
+| Reference band (charts, then sources after the quiz) | one step down: band h2 Newsreader 500 `clamp(24px, 2.3vw, 30px)`, sans h3 600 17 px, chart title (h4) Newsreader 500 `clamp(21px, 1.9vw, 25px)`, ledes Newsreader 15 to 17 px, takeaway Newsreader 500 17 to 19.5 px, callouts 14.5 to 15.5 px |
 
 ### 2.3 Space, shape, depth, motion
 
@@ -151,7 +151,7 @@ then why it matters. Never explain the software.
 |---|---|
 | Law and weapons timeline | Law and weapons on one timeline (the law strip, "Move through the years", then: How high the tests went, and the debris they left) |
 | What the pattern shows | What the pattern shows (four findings, each linking to its chart) |
-| Charts and sources | The reference band after the quiz, in two parts: Explore the data (cards, one chart at a time) and Where every fact comes from |
+| Charts and sources | The reference band, in two parts (the quiz sits between them): Explore the data (cards, one chart at a time) and Where every fact comes from |
 | Explore the data | Explore the data (cards that are also the tabs, one chart at a time) |
 | Jamming, lasers and cyber (tab) | Attacks that leave satellites in orbit |
 | Close approaches (tab) | Satellites that fly close to other satellites |
@@ -202,7 +202,7 @@ no wording errors.
    on the resting picture as a thin dashed link (memory only), with a note beside the "seen" count. When all 13 scenes have been seen, closing the last one opens a card docked under the buttons
    (never over the picture) with the real pairs drawn as links, one plain line and "Where to next" (the quiz, or the full timeline); the tour's closing slide carries the same recap. Before any interaction no 3D library is loaded.
 2. **Chapter navigation.** The slim rail on the right edge (screens at least 1360 px wide) with six dots; the name shows on hover and focus. It is the page's contents list: 3D scenes,
-   the timeline, the pattern, the quiz, "Explore the data" and "Sources and method" (the last two are the two halves of the reference band, see item 3).
+   the timeline, the pattern, "Explore the data", the quiz and "Sources and method" (the first and last are the two halves of the reference band, see item 3; the quiz sits between them, after the evidence it tests).
 3. **Two layers, the second one quiet.** Layer one is what everyone reads, about five screens at 1440 x 900: hero and start row, the 3D strip, one timeline chapter (the law strip and the
    anti-satellite test chart on the same years), "What the pattern shows" (it opens on one large line, the range of the waits, with the longest pair drawn between its dates, then four findings computed from the data, each linking to its chart) and the quiz, which sits just after the pattern it echoes. Layer two is the **reference band**, headed "Charts and sources": a hairline, an h2 of 24 to 32 px and one line, then two parts set a size down
    (sans h3 of 17 px, ledes of 15 to 17 px, chart titles of 21 to 25 px, tighter spacing, no background change so every chart keeps the page as its ground). The first part is "Explore the data":
@@ -210,7 +210,7 @@ no wording errors.
    "Key, data table and download" (the key, the table and the download button together, with the entry count on it), sharing a row with the way on to the next chart. The second part is "Where every fact
    comes from": one line and one disclosure, "Read the sources and method", with the copy-citation button at its end. The whole page is about 6,800 px tall at 1440 x 900 with the first chart open. Nothing is removed: every chart, table and download stays, and print shows every tab. The cards follow the ARIA tabs pattern
    (arrow keys, Home, End, one tab stop), and an address that names a chart or something inside one (`#chartC`, `#lag`, `#tableC`) opens its tab first. Panels not chosen stay laid out at full width,
-   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline (with "Move through the years"), pattern, quiz, the reference band (explore, then sources).
+   out of sight (`data-off`), so every chart is drawn at its true size whichever tab is open. The order of the page: hero, 3D strip, law and weapons timeline (with "Move through the years"), pattern, the charts (explore), the quiz, then the sources.
 4. **Chapters.** Each has: a title (h2), one plain-language sentence saying what to look for, the chart, an optional callout, and one disclosure, "Key, data table and download" (the key, the table and the download button together; the law timeline keeps its key beside the strip and its own "Show the data behind this chart"). No label above
    the title, no number. A chart inside a chapter takes an h3 and a quieter lede; inside the reference band it takes an h4 (the band is h2, its two parts h3).
 5. **Law strip and "Move through the years".** Beside "How to read this chart" the chapter head offers "Move through the years"; the control itself is a thin row above the test chart that stays under the pinned strip while the chart is read
