@@ -65,6 +65,7 @@ export const BURNT_FROST = {
     {
       type: 'ship',
       at: [22.0, -179.0],
+      heading: 0, // lies across the picture from the pull-back on (it stood up the frame, bow to the limb, like a cut-out); the opening shows it side on
       label: 'USS Lake Erie',
       shade: true,
       labelUntil: 0.56,

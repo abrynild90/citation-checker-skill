@@ -326,6 +326,7 @@ export function buildSim(cfg) {
         kind: 'point',
         shape: 'ship',
         shade: a.shade,
+        heading: a.heading, // opt-in (radians about the local up): the hull's heading; default 0.6
         pos: (t) => (a.hideFrom != null && t >= a.hideFrom ? null : ll(a.at[0], a.at[1], 1.004)),
         color: '#cfd8ea',
         minPx: a.minPx,

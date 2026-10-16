@@ -1146,7 +1146,7 @@ export const modelMethods = {
     sh.quadraticCurveTo(0.0034, 0.03, 0, 0.042);
     sh.quadraticCurveTo(-0.0034, 0.03, -0.0043, 0.008);
     sh.closePath();
-    if (o.shade) return this._warshipModel(pos);
+    if (o.shade) return this._warshipModel(pos, o);
     const hg = new T.ExtrudeGeometry(sh, { depth: 0.0038, bevelEnabled: false });
     hg.rotateX(Math.PI / 2);
     hg.translate(0, 0.0038, 0);
@@ -1186,7 +1186,7 @@ export const modelMethods = {
   // Opt-in warship (ship actor `shade`; Burnt Frost's USS Lake Erie), drawn for a reader who has never seen one: a wide, dark-grey hull on a darker waterline band, a
   // raised forecastle at the bow (the sheer), a pale deck stripe, a layered superstructure (deckhouse, bridge, mast with a radar, two funnels, a gun, a helicopter
   // ring) and white water: a bow wave, a foam outline round the hull and a V wake astern. About as long as the old model (stern -0.036, bow 0.042) so labels hold.
-  _warshipModel(pos) {
+  _warshipModel(pos, o = {}) {
     const T = this.T,
       g = new T.Group();
     const hw = (z) => {
@@ -1375,7 +1375,7 @@ export const modelMethods = {
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
-    g.rotateY(0.6);
+    g.rotateY(o.heading ?? 0.6);
     Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });
     return g;
   },
