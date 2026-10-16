@@ -398,7 +398,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           padN = norm(all[0]),
           padNorth = cross3(padN, norm(cross3([0, 1, 0], padN))),
           launchView = (deg) => norm(add(scl(padN, Math.cos(deg * DEG)), scl(padNorth, -Math.sin(deg * DEG)))),
-          pose = (t, asp, geo, ring, dMin = 1.2, nv = n) => {
+          pose = (t, asp = ASPECT, geo, ring, dMin = 1.2, nv = n) => {
             const pl = it.pts(t),
               P = [
                 all[0],
@@ -424,7 +424,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
             if (ring && c.trackPath.zoom) q.pos = add(look, scl(add(q.pos, scl(look, -1)), 1 / c.trackPath.zoom));
             return { ...q, up: null };
           },
-          at0 = (t, asp) => {
+          at0 = (t, asp = ASPECT) => {
             const g0 = c.trackPath.geoT ?? 0.35;
             if (!c.trackPath.ring) return pose(t, asp, t > g0, false);
             // the ring framing is blended in over the 0.14 before geoT + 0.14, so the camera glides out instead of jumping
@@ -439,7 +439,9 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           };
           // trackPath.launch (opt-in) { until, dMin }: the camera opens tight on the launch site and the climbing rocket (closest fit allowed dMin), then eases out
           // to the ring framing by t = until
-        const at = (t, asp) => {
+        const at = (t, asp = ASPECT) => {
+            // asp defaults like every other follow camera: the opening pose `...at(0)` below is built without a stage aspect, and shiftDown (L.down) turned an
+            // undefined aspect into a NaN position and target (the preset's own pos/look), which the host then drew from before its first update
             const L = c.trackPath.launch,
               r = at0(t, asp);
             if (!L || t >= L.until) return r;
