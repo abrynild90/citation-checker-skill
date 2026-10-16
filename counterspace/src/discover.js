@@ -178,7 +178,7 @@ function stripControls(grid) {
     if (ePrev) ePrev.disabled = prev.disabled;
     if (eNext) eNext.disabled = next.disabled;
     const pic = grid.querySelector('.pc-pic');
-    if (pic && grid.parentElement) grid.parentElement.style.setProperty('--edge-top', Math.round(pic.offsetTop + pic.offsetHeight / 2) + 'px');
+    if (pic && grid.parentElement) grid.parentElement.style.setProperty('--edge-top', Math.round(pic.offsetTop + pic.offsetHeight * 0.2) + 'px');
     // a card cut by either edge shows its picture only: its title never ends in half a word
     for (const c of grid.querySelectorAll('.pcard')) {
       const r = c.getBoundingClientRect(),
