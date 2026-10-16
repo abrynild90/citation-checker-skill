@@ -82,6 +82,8 @@
   .stage{--stage-h:clamp(496px,calc(92vh - 72px - 64px - 24px),716px)}
   .hero-cap{padding:var(--s-3) var(--edge) 0;justify-content:flex-start;align-items:flex-start;gap:var(--s-3)}
   .hero-actions{padding:var(--s-3) var(--edge) 0}
+  /* Replay stands level with the key's line of text (its top edge, not its middle, was level with the line: it sat 7 px low) */
+  .hero-cap .btn{margin-top:-7px}
 }
 @supports (height:100svh){
   @media (min-width:900px){.stage{--stage-h:clamp(496px,calc(92svh - 72px - 64px - 24px),716px)}}

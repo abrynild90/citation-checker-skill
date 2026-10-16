@@ -43,7 +43,7 @@
   #lawHead>.takeaway{grid-row:2;align-self:start}
   #lawHead>.law-choose{grid-column:1;grid-row:3;align-self:start}
   #lawHead>.law-choice{grid-column:1;grid-row:4}
-  #lawHead>.law-row{grid-row:3}
+  #lawHead>.law-row{grid-row:3;margin-top:1px} /* "How to read this chart" and "Move through the years" are level with the find box beside them (its middle, not 11 px under it) */
   #lawHead>.legal-quick-key{grid-column:2;grid-row:4}
 }
 
