@@ -23,7 +23,7 @@ export const BURNT_FROST = {
   phoneK: 1.15,
   phoneOff: { 'USS Lake Erie': [90, -66] }, // compact views: the name clears the ship and the caption below
   sunView: IS_PHONE ? { az: -14, el: 4 } : { az: -95, el: 8 }, // the Pacific sits in daylight with the terminator in view: the ship, missile and satellite get a key light
-  glintK: IS_PHONE ? 0 : 1, // desktop: a silver path of light on the sea toward the pole side, seen from the low opening view
+  glintK: IS_PHONE ? 0 : 0.4, // desktop: a silver path of light on the sea toward the pole side, seen from the low opening view
   glintAt: [76, 1],
   nightK: 1.2,
   dayK: IS_PHONE ? 1.6 : 1.15,
@@ -71,8 +71,8 @@ export const BURNT_FROST = {
       dx: 0,
       dy: 44,
       minPx: IS_PHONE ? 72 : 150,
-      maxPx: IS_PHONE ? 135 : 190,
-      camK: IS_PHONE ? undefined : { 0: 1.28 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
+      maxPx: IS_PHONE ? 135 : 215,
+      camK: IS_PHONE ? undefined : { 0: 1.42 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
     },
     {
       type: 'target',

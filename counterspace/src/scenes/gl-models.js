@@ -1232,10 +1232,14 @@ export const modelMethods = {
     // Opaque naval-grey paint with a small neutral self-light (a fill that stands in for moon and earthshine on the night side), so the hull reads as a solid
     // grey ship on a dark sea, not a blue see-through shape. Roughness is high and metalness near 0, so the cool environment map does not tint the paint.
     const paint = (c, k = 0.3, o = {}) => this._mat(c, { metalness: 0.06, roughness: 0.74, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.5, ...o });
-    const keel = paint(0x4a2220, 0.28),
-      boot = paint(0xc9ced6, 0.5),
+    const keel = paint(0x4a1c1a, 0.3),
+      boot = paint(0x9a4630, 0.42),
+      bootLine = paint(0xd2d6dc, 0.5),
+      upper = paint(0x56606f, 0.12, { metalness: 0.45, roughness: 0.3, envMapIntensity: 1.4 }),
+      seam = paint(0x14181e, 0.05),
+      scuttle = paint(0x0d1015, 0.05),
       // the hull side is a dark naval grey with a softer, glossier coat: it picks up the sun and the glow of the sea instead of reading as flat grey plastic
-      side = paint(0x353c47, 0.14, { metalness: 0.4, roughness: 0.36, envMapIntensity: 1.3 }),
+      side = paint(0x2f3641, 0.1, { metalness: 0.5, roughness: 0.3, envMapIntensity: 1.5 }),
       rim = paint(0x9aa1ac, 0.4),
       deckMat = paint(0x7d838e, 0.32),
       stripe = paint(0xf2f2ee, 0.5),
@@ -1246,13 +1250,25 @@ export const modelMethods = {
       metal = paint(0xb0b4bc, 0.3, { metalness: 0.45, roughness: 0.4 }),
       dark = paint(0x2a2e35, 0.2);
     // hull: a dark waterline band, the grey side, then the forecastle (the bow rises: the sheer) with a pale rim round the deck edge
-    layer(plan(Z0, Z1), 0, 0.0017, keel);
-    layer(plan(Z0, Z1, 0, 1.012), 0.0017, 0.0022, boot); // the pale waterline stripe, a hair proud of the side
-    layer(plan(Z0, Z1), 0.0022, TOP, side);
+    layer(plan(Z0, Z1), 0, 0.0014, keel); // the antifouling red below the water
+    layer(plan(Z0, Z1, 0, 1.014), 0.0014, 0.0024, boot); // the red-brown boot topping at the waterline, a hair proud of the side
+    layer(plan(Z0, Z1, 0, 1.006), 0.0024, 0.0027, bootLine); // a pale line above it
+    layer(plan(Z0, Z1), 0.0027, TOP, side);
+    layer(plan(Z0, Z1, 0, 1.004), 0.0038, TOP, upper); // a lighter upper strake: the hull side has two tones and a step
     layer(plan(0.008, Z1), TOP, FORE, side);
+    layer(plan(0.008, Z1, 0, 1.004), TOP + 0.0006, FORE, upper);
     layer(plan(0.008, Z1, 0, 1.01), FORE - 0.0003, FORE, rim); // a pale sheer line along the forecastle edge
     layer(plan(Z0, 0.008, 0, 1), TOP, TOP + 0.0003, rim);
     layer(plan(0.008, Z1), FORE, FORE + 0.0003, rim);
+    // frames: thin dark seams down the plating, and a row of dark scuttles under the deck edge, so the side reads as plated steel, not one smooth slab
+    for (let z = -0.0335; z < 0.0405; z += 0.0043) {
+      const hi = z > 0.0085 ? FORE : TOP;
+      layer(plan(z, z + 0.00028, 0, 1.0075), 0.0027, hi, seam);
+    }
+    for (let z = -0.031; z < 0.036; z += 0.0043) {
+      const hi = z > 0.0085 ? FORE : TOP;
+      layer(plan(z + 0.0012, z + 0.0021, 0, 1.0085), hi - 0.0011, hi - 0.0006, scuttle);
+    }
     layer(plan(Z0 + 0.0008, 0.0078, 0.0009), TOP + 0.0003, TOP + 0.0005, deckMat);
     layer(plan(0.0102, Z1 - 0.0016, 0.0009), FORE + 0.0003, FORE + 0.0005, deckMat);
     // the pale deck stripe: down the middle of the main deck and along the forecastle
@@ -1309,6 +1325,21 @@ export const modelMethods = {
     [-1, 1].forEach((sd) => {
       box(0.00018, 0.00055, 0.0215, rim, sd * (hw(-0.0270) - 0.00055), TOP + 0.0005, -0.0270);
       box(0.00018, 0.00055, 0.0170, rim, sd * (hw(0.0190) - 0.00055), FORE + 0.0005, 0.0190 + 0.0032);
+    });
+    // deck lights: unlit-material beads (they stay bright on the night side): a red warning light on the mast, white masthead and radar lights, warm lamps on the
+    // bridge wings, the deckhouse flanks and the deck edge, and a green / red pair of running lights on the bridge sides
+    const lamp = (c, r, x, y, z) => {
+      const q = new T.Mesh(new T.SphereGeometry(r, 6, 5), new T.MeshBasicMaterial({ color: c }));
+      q.position.set(x, y, z);
+      g.add(q);
+    };
+    lamp(0xff3b30, 0.00046, 0, D0 + 0.0206, 0.0036);
+    lamp(0xfff4dc, 0.00036, 0, D0 + 0.0162, 0.0036);
+    lamp(0xfff4dc, 0.0003, 0, D0 + 0.0100, -0.0188);
+    [-1, 1].forEach((sd) => {
+      lamp(sd < 0 ? 0xff5648 : 0x5dff8a, 0.00032, sd * 0.0029, D0 + 0.0064, 0.0062);
+      [-0.0050, -0.0004, 0.0042].forEach((z) => lamp(0xffd9a0, 0.00026, sd * 0.0037, D0 + 0.0014, z));
+      [-0.032, -0.022, -0.0145, 0.0146, 0.0235, 0.0325].forEach((z) => lamp(0xffe2b0, 0.00022, sd * (hw(z) - 0.0007), (z > 0.008 ? FORE : TOP) + 0.0009, z));
     });
     // white water, soft-edged foam strips (additive, fading out): a bow wave on each side, a foam outline round the hull, a churned wake and a V astern
     const tex = this._gtex(wakeCanvas(), () => new T.CanvasTexture(wakeCanvas()));
