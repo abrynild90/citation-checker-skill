@@ -222,7 +222,7 @@
 .legend li.bubbles span{line-height:1.45}
 
 /* ------------------------------------------------------------------ data tables: a contained scroll area with a sticky header; cards on phones */
-.tscroll{max-width:100%;max-height:min(72vh,680px);margin-top:var(--s-3);overflow:auto;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface)}
+.tscroll{max-width:100%;max-height:min(72vh,680px);margin-top:var(--s-3);overflow:auto;border:1px solid var(--line);border-radius:var(--r-1);background:var(--surface);padding-bottom:var(--s-1)}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;line-height:1.45}
 th,td{padding:10px 14px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
 th{position:sticky;top:0;z-index:1;background:var(--surface-2);border-bottom:1px solid var(--line-strong);font:600 13px/1.35 var(--sans);color:var(--muted)}

@@ -13,7 +13,7 @@
 /* a sub-title inside the band: a short sans title and one quiet line on the same row */
 .ref-sub{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--s-4);margin:0 0 var(--s-3)}
 .ref-sub h3{margin:0;font:600 17px/1.3 var(--sans);color:var(--text)}
-.ref-sub p{margin:0;font:400 14.5px/1.45 var(--sans);color:var(--muted);max-width:var(--measure-wide,72ch)}
+.ref-sub p{margin:0;font:400 14.5px/1.45 var(--sans);color:var(--muted);max-width:54ch}
 @media (min-width:1800px){.ref-sub h3{font-size:18px}.ref-sub p{font-size:15.5px}}
 
 /* ---- the four cards: a picture at the left, the name and one line at the right (a row of four takes about 80 px, not 190) */
@@ -165,3 +165,6 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 
 /* sources opened: the summary row reaches back over the list column by the column gap of .sources-layout (24px here), so it starts where the pills above it start */
 @media (min-width:1000px){.sources.ref-band:not(.folded) #methodBody>details.src-fold>summary{margin-left:calc(-190px - 24px);width:calc(100% + 190px + 24px)}}
+
+/* the cited-sources list keeps a readable line length on wide screens */
+#citedSources li{max-width:60ch}
