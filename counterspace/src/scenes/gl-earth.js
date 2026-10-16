@@ -68,6 +68,12 @@ void main(){
     vec3 qd = normalize(vP);
     dt += magL * (0.50 * (vn(qd * 700.0) - 0.5) + 0.35 * (vn(qd * 1700.0 + 5.3) - 0.5) + 0.25 * (vn(qd * 4200.0 + 2.1) - 0.5));
   }
+  {
+    // a magnified photograph shows reef rings and shelf edges (turquoise shallows) as ragged bright-blue fringes on the open sea: blue-dominant pixels are pulled down to the blurred picture, so only peaks of shallow colour are lost
+    vec3 dBl = mix(texture2D(uDayA, vUv, 4.0).rgb, texture2D(uDayB, vUv, 4.0).rgb, uFade);
+    float bl = smoothstep(1.25, 1.9, day.b / (day.r + 0.02));
+    day = mix(day, min(day, dBl * 1.04), 0.92 * bl);
+  }
   float swell = 1.0;
   if (magL > 0.0 && uSeaWave > 0.0) {
     // cfg.seaWave (opt-in): fine swell texture on open water where the photograph is magnified, so a close sea is not a soft flat blue
