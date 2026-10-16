@@ -60,6 +60,7 @@ export const COSMOS1408 = {
       color: C.ground,
       dx: -52,
       dy: 16,
+      labelHide: IS_PHONE ? undefined : [0.7, 1.01], // desktop: the globe-only closing views leave no clear slot (the pill rode the top edge and its leader crossed the orbit lines): the launch site is named until the cloud fades
     },
     {
       type: 'ring',
