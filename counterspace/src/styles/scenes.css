@@ -2348,7 +2348,7 @@
      the room the line really takes and the list above is never fitted to a half-grown line */
   @keyframes dykIn { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
   @media (prefers-reduced-motion: reduce) { .overlay .sv-dyk.reveal { animation: none; } }
-  .overlay .sv-dyk b { font-weight: 600; color: var(--accent-2); margin-right: 4px; }
+  .overlay .sv-dyk b { font-weight: 600; color: var(--accent); margin-right: 4px; } /* blue, not amber: amber is kept for law and China */
   .overlay .story-scroll.pin > .story-foot { margin-top: auto; }
   .overlay .story-scroll.pin { min-height: 100%; }
 }

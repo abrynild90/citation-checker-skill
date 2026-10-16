@@ -138,8 +138,19 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 .skip:focus{top:0;left:0;right:0;border-radius:0;border-width:0 0 3px;outline-offset:-3px;padding:19px max(var(--gutter),calc((100% - var(--container)) / 2 + var(--gutter)));box-shadow:0 6px 18px rgba(0,0,0,.28)}
 #timeline:focus{outline:none}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.flash-hl{animation:flash 1.6s ease 2}
-@keyframes flash{0%,100%{filter:none}50%{filter:drop-shadow(0 2px 6px var(--focus))}}
+/* "You landed here" (landmark.js): a ring and a chip in a fixed layer over the mark, so nothing in the page moves. It pulses three times, then stays steady until the
+   reader's next press or key (or the mark scrolls out of view). Both parts are --accent on a --bg gap, so each is 3:1 or better against the page in either theme. */
+.landmark{position:fixed;z-index:var(--z-card);pointer-events:none}
+.landmark[hidden]{display:none}
+.lm-ring{position:absolute;inset:0;border:3px solid var(--accent);border-radius:14px;box-shadow:0 0 0 2px var(--bg),inset 0 0 0 2px var(--bg),0 0 18px 2px var(--accent-soft)}
+.landmark.round .lm-ring{border-radius:50%}
+.lm-ring::after{content:"";position:absolute;inset:-3px;border:3px solid var(--accent);border-radius:inherit;opacity:0}
+.lm-on .lm-ring::after{animation:lm-pulse 1.1s ease-out 3}
+@keyframes lm-pulse{0%{inset:-3px;opacity:.85}100%{inset:-18px;opacity:0}}
+@media (prefers-reduced-motion:reduce){.lm-on .lm-ring::after{animation:none}}
+.lm-chip{position:absolute;max-width:min(340px,calc(100vw - 16px));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 11px;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent);box-shadow:0 0 0 2px var(--bg),var(--shadow-1);font:600 13px/1.3 var(--sans)}
+.lm-chip[hidden]{display:none}
+@media print{.landmark{display:none}}
 /* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene viewer sets its own sizes (all at least 24 px, the AA minimum). */
 @media (pointer:coarse){
   .btn:not(.panel .btn){--h:44px}

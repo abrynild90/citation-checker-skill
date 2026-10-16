@@ -285,14 +285,6 @@
           <header class="chapter-head sub">
             <h4 data-avoid id="hC">Attacks that leave satellites in orbit</h4>
             <p data-avoid class="lede">Each bar is a campaign of jamming, lasers or hacking, and the satellites it targets stay in orbit. A dot is a single event. An arrow means the campaign is still going.</p>
-            <div class="tools">
-              <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart">
-                <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
-                <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
-              </span>
-              <p data-avoid class="note block" id="noteC"></p>
-              <p class="ckey" id="ckeyC" role="group" aria-label="Colour of each country"></p>
-            </div>
           </header>
           <p data-avoid class="takeaway" id="tkC"></p>
           <div class="callout-row">
@@ -301,6 +293,14 @@
             Article 48 of the Constitution of the International Telecommunication Union (ITU), the United Nations agency for radio and telecommunications.</p>
           </div>
           <p class="chart-key-inline key-items"><span>Solid fill: attributed by governments or an international body</span> <span>Outline: researchers or analysts</span> <span>Dashed: alleged, unconfirmed</span> <span class="key-note">Select an entry for its source.</span></p>
+          <div class="tools chart-tools">
+            <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart">
+              <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+              <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
+            </span>
+            <p data-avoid class="note block" id="noteC"></p>
+            <p class="ckey" id="ckeyC" role="group" aria-label="Colour of each country"></p>
+          </div>
           <div class="svgbox" id="svgC"></div>
           <details class="table refold" id="foldC"><summary>Key, data table and download</summary>
             <div class="rf-body">
@@ -314,20 +314,20 @@
           <header class="chapter-head sub">
             <h4 data-avoid id="hR">Satellites that fly close to other satellites</h4>
             <p data-avoid class="lede">Each shape is one close approach (also called a rendezvous or proximity operation, RPO) between a satellite and another object in orbit, set at its start date. Arrows show those still going.</p>
-            <div class="tools">
-              <span class="seg" role="group" aria-label="Years shown in the close-approach chart">
-                <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
-                <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
-              </span>
-              <button class="btn small" id="rAll" type="button" aria-expanded="false" aria-controls="svgR">Show all 68</button>
-              <p data-avoid class="note block" id="noteR"></p>
-              <p data-avoid class="note block" id="noteR2" aria-live="polite"></p>
-            </div>
           </header>
           <p data-avoid class="takeaway" id="tkR"></p>
           <div class="note-line" id="noteR0"><p data-avoid><b>A close approach is not an attack.</b> Most are inspections, servicing missions or technology tests.</p>
           </div>
           <div class="chart-key-inline symbol-key"><ul aria-label="Shapes in this chart"><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="4"/></svg>Close approach</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="3" y="3" width="10" height="10" rx="2"/></svg>Docking</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2 15 14H1Z"/></svg>Capture and tow</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1 15 8 8 15 1 8Z"/></svg>Object release</li><li><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="1" y="5" width="14" height="6" rx="2"/></svg>Spaceplane mission</li></ul><p>Outlined shapes indicate uncertainty. Select a shape for its name and source.</p></div>
+          <div class="tools chart-tools">
+            <span class="seg" role="group" aria-label="Years shown in the close-approach chart">
+              <button class="btn small" id="rFull" aria-pressed="true" type="button">Full span 1957–2026</button>
+              <button class="btn small" id="rFocus" aria-pressed="false" type="button">Zoom 2000–2026</button>
+            </span>
+            <button class="btn small" id="rAll" type="button" aria-expanded="false" aria-controls="svgR">Show all 68</button>
+            <p data-avoid class="note block" id="noteR"></p>
+            <p data-avoid class="note block" id="noteR2" aria-live="polite"></p>
+          </div>
           <div class="svgbox" id="svgR"></div>
           <details class="table refold" id="foldR"><summary>Key, data table and download</summary>
             <div class="rf-body">
@@ -342,16 +342,19 @@
           <header class="chapter-head sub">
             <h4 data-avoid id="hB">Which states can do what, decade by decade</h4>
             <p data-avoid class="lede">Each bar counts the capabilities states had to attack or interfere with satellites in one decade. Only the 2020s bar rests on the Secure World Foundation’s (SWF) own assessment. Earlier decades are reconstructed.</p>
-            <div class="tools">
+          </header>
+          <p data-avoid class="takeaway" id="tkB"></p>
+          <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
+          <div class="chart-ctl" id="ctlB">
+            <div data-avoid class="chips" id="chipsB" role="group" aria-label="Key: show or hide a kind of capability"></div>
+            <div class="ctl-more">
               <button class="btn small" id="grpMore" aria-expanded="false" aria-controls="grpSeg" type="button"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg><span>More detail</span></button>
               <span class="seg" id="grpSeg" role="group" aria-label="How the capabilities are grouped" hidden>
                 <button class="btn small" id="grpCat" aria-pressed="false" type="button">Five categories</button>
                 <button class="btn small" id="grpKin" aria-pressed="false" type="button">Kinetic and non-kinetic</button>
               </span>
             </div>
-          </header>
-          <p data-avoid class="takeaway" id="tkB"></p>
-          <p data-avoid class="note block" id="noteB" aria-live="polite"></p>
+          </div>
           <div id="capPhone" class="cap-phone">
             <label for="capDecade">Compare capabilities in the <select id="capDecade"></select></label>
             <div id="capPhoneRows" aria-live="polite"></div>
@@ -360,7 +363,6 @@
           </div>
           <p class="phone-chart-hint cap-history-hint">Scroll across to compare all eight decades. Select a bar for its states and sources.</p>
           <div class="svgbox" id="svgB" tabindex="0" role="region" aria-label="Capabilities by decade"></div>
-          <div data-avoid class="chips" id="chipsB" role="group" aria-label="Show or hide a kind of capability"></div>
           <div class="callout-row">
             <p data-avoid class="callout" id="calloutB"></p>
           </div>

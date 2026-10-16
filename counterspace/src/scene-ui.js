@@ -19,6 +19,7 @@ import { posterURL } from './scenes/posters.js';
 import { download } from './export.js';
 import { hooks, seenScenes } from './shared.js';
 import { revealIn } from './explore.js';
+import { clearLanding, showLanding } from './landmark.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
 import { stillFromSVG } from './scenes/svg/still-frame.js';
 import { FACTS, FACT_FROM, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
@@ -299,6 +300,7 @@ function syncDots() {
 
 // ---------------------------------------------------------------- open
 export async function openScene(id, originEl, viaTour) {
+  clearLanding();
   const cfg = SCENES.find((s) => s.id === id);
   if (!cfg) return;
   if (!viaTour) endTour(false); // choosing a scene by hand ends the tour
@@ -613,6 +615,10 @@ function nextSceneBtn(id, tag) {
   b.onclick = () => openScene(id);
   return b;
 }
+const sceneName = (id) => {
+  const s = SCENES.find((c) => c.id === id);
+  return s ? `${SHORT_NAME[id] || s.title}, ${s.date.slice(0, 4)}` : '';
+};
 function findOnChart(cfg) {
   const m = markOf(cfg.event);
   closeScene(true);
@@ -624,9 +630,8 @@ function findOnChart(cfg) {
       block: 'center',
       behavior: REDUCED ? 'auto' : 'smooth',
     });
-  m.classList.add('hl', 'flash-hl');
   m.focus({ preventScroll: true });
-  setTimeout(() => m.classList.remove('hl', 'flash-hl'), 3500);
+  showLanding(m, `From: ${sceneName(cfg.id)}`); // a ring and a chip that stay until the reader's next press or key, or the mark scrolls away
 }
 const CHART_ICON = '<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>';
 function fillNext(cfg) {
@@ -1987,23 +1992,21 @@ lawBtn.onclick = () => {
 function seeLawOnTimeline(byKeyboard) {
   const id = cur?.related;
   if (!id) return;
+  const from = cur ? sceneName(cur.id) : ''; // closing the window clears the current scene
   closeScene(true);
-  showLawOnTimeline(id, byKeyboard);
+  showLawOnTimeline(id, byKeyboard, from);
 }
-// The same arrival for the hero's "See it on the timeline" button: the page scrolls to the chapter heading with the strip under it, the law's symbol is ringed
-// and flashes, and the card opens only for a keyboard user.
-export function showLawOnTimeline(id, byKeyboard) {
+// The same arrival for the hero's "See it on the timeline" button: the page scrolls to the chapter heading with the strip under it, the law's symbol gets the
+// landing ring and chip (landmark.js), and the card opens only for a keyboard user.
+export function showLawOnTimeline(id, byKeyboard, from) {
   const m = document.querySelector(`#legalSvg [data-id="${id}"]`);
   if (!m) return;
   $('lawHead')?.scrollIntoView({ block: 'start', behavior: 'auto' });
   hooks.legalScroll?.(); // the strip and the zoom panel settle for the new place at once, not on the next scroll event
-  m.classList.add('hl', 'flash-hl');
   m.focus({ preventScroll: true });
   if (!byKeyboard) hideCard();
   setGuide(parse(byId[id].start));
-  setTimeout(() => {
-    m.classList.remove('hl', 'flash-hl');
-  }, 3500);
+  showLanding(m, from ? `From: ${from}` : byId[id].label ? `Law: ${byId[id].label}` : ''); // stays until the next press or key, or the mark scrolls away
 }
 
 // ---------------------------------------------------------------- story edges: a soft fade at the top and bottom says there is more to scroll
