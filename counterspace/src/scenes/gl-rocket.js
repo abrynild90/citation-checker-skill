@@ -377,8 +377,9 @@ export const rocketMethods = {
       glow = spr(0xffb060, 0.8),
       flash = spr(0xfff0c8, 0),
       hot = spr(0xfffbe8, 0.9), // a small white-hot disc at the nozzle exit, inside the orange glow
-      sepFlash = spr(0xfff6e0, 0); // the flash of the separation charges at the interstage
-    rig.add(outer, core, glow, hot, flash);
+      sepFlash = spr(0xfff6e0, 0), // the flash of the separation charges at the interstage
+      bloom = spr(0xff7a2a, 0); // a wide, faint warm halo round the whole exhaust (dense air only)
+    rig.add(bloom, outer, core, glow, hot, flash);
     rig.position.z = D.zN;
     inner.add(rig);
     // nose heating: a faint glow at the tip, driven with the nose material's emissive
@@ -404,7 +405,7 @@ export const rocketMethods = {
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
     inner.add(sepFlash);
-    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
+    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, bloom, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -645,6 +646,7 @@ export const rocketMethods = {
     return Math.min(1.4, Math.max(1, this._stageH(bh) / 652));
   },
   _rocketFrame() {
+    this._shakeA = 0; // camera vibration at lift-off (applied around the draw in render(); the labels never see it)
     if (!this._rkt?.length) return;
     const T = this.T,
       t = this.t,
@@ -777,11 +779,18 @@ export const rocketMethods = {
       U.uDiaN.value = 5.5;
       C.uWob.value.set(wob[0] * 2.4, wob[1] * 2.4);
       rk.outer.visible = rk.core.visible = vis && thr > 0.004;
+      // lift-off vibration: builds as the motor lights and dies away over the first few km of the climb (an envelope, a pure function of the scene time)
+      if (vis && !hide && thr > 0.004) this._shakeA = Math.max(this._shakeA, thr * (1 - smooth(st.alt / 3)) * (1 - Math.exp(-Math.max(0, t - fx.t0) / 0.003)));
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
       rk.glow.visible = vis && thr > 0.004 && !hide;
       rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)));
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
       rk.glow.position.z = -0.003;
+      // bloom: wide and warm while the motor burns in dense air (thins out with height), brightest with the ignition flash
+      rk.bloom.visible = vis && thr > 0.004 && !hide;
+      rk.bloom.scale.setScalar((0.07 + 0.025 * low) * ak * (1 + 0.5 * (pk - 1)));
+      rk.bloom.material.opacity = (0.2 + 0.16 * Math.min(1, st.flash * 1.5)) * thr * (1 - 0.7 * e) * (0.45 + 0.55 * low);
+      rk.bloom.position.z = -0.006;
       rk.hot.visible = vis && thr > 0.004 && !hide;
       rk.hot.scale.setScalar((0.0062 + 0.003 * thr) * ak * (1 + 0.3 * (pk - 1)) * (1 - 0.35 * e));
       rk.hot.material.opacity = Math.min(1, 1.1 * thr) * (1 - 0.5 * e);

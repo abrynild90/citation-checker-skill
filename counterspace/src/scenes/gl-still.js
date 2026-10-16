@@ -311,6 +311,7 @@ const methods = {
   stillPNG(title, cite, targetW = 3000) {
     // Canvas text must not be measured with fallback metrics: if the faces are still loading (only possible in the first moments), wait.
     if (document.fonts && document.fonts.status !== 'loaded') return fontsReady.then(() => this.stillPNG(title, cite, targetW));
+    this._still = true; // no lift-off camera shake in an export
     const vw = this.el.clientWidth,
       vh = this.el.clientHeight,
       pr = this.renderer.getPixelRatio();
@@ -407,6 +408,7 @@ const methods = {
     cam.aspect = keep.aspect;
     this.renderer.setPixelRatio(pr);
     this.resize();
+    this._still = false;
     return url;
   },
 };
