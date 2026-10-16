@@ -806,6 +806,10 @@ export function buildSim(cfg) {
           cj: (rnd() - 0.5) * 0.5,
           br: 0.7 + rnd() * 0.3,
         });
+      if (a.growJit) {
+        const jr = mulberry(cfg.id.length * 15485863 + n); // its own generator: the shared sequence is untouched
+        for (const p of P) p.gj = gauss(jr);
+      }
       // lobes (opt-in { core, gap, cone, wide, couple }): velocity-dispersed lobes instead of one bell of speeds. Each fragment carries a kick that sends it ahead of or behind the
       // parent along the track (a forward kick raises its orbit and a backward one lowers it, `couple`); `core` of them keep the parent's speed, the rest start at least `gap` of the
       // full speed spread away from it, and the across-track and height spreads grow with the along-track distance (`cone` at the hit, 1 at the lobe's end, all times `wide`),
@@ -907,6 +911,9 @@ export function buildSim(cfg) {
           const rs = a.ring ? 1 - (1 - clamp01(dt / (a.ring.t1 - tgt.t))) ** (a.ring.ease ?? 2) : 0;
           // a.growIn (opt-in, scene time): the swath grows out of the break-up point over this span from its first frame (spread across, along and in height), not large at once
           const gk = a.growIn ? smooth(clamp01(da / a.growIn)) : 1;
+          // a.growMin / a.growJit (opt-in, with growIn): the ACROSS-track and height spread starts at this share of its full width (the along-track length still grows from 0), and each
+          // fragment's share varies by +-growJit, so the first frames show a broad ragged swath, not a thin straight bar of beads
+          const gx = a.growMin ? a.growMin + (1 - a.growMin) * gk : gk;
           let vis = 0;
           const dens = Math.min(1, Math.sqrt(300 / n));
           for (let k = 0; k < n; k++) {
@@ -916,7 +923,9 @@ export function buildSim(cfg) {
               z = 0;
             if (dt > 0 && cloudFade > 0 && !(a.appear != null && t < a.appear)) {
               const fat = a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1; // ring.fat: the early cloud is thicker (a shell around the hit), thinning as the ring closes
-              let alt = tgt.alt + p.da * fat * gk * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
+              const gj = a.growJit ? Math.max(0.15, 1 + a.growJit * p.gj * (1 - gk)) : 1, // ragged early edge: fades to the plain spread as the swath grows
+                gp = gx * gj;
+              let alt = tgt.alt + p.da * fat * gp * Math.min(1, dt * 12) - p.dec * dt * tgt.alt;
               if (a.decayWin) {
                 // decayWin [t0, t1]: the fast-forward decay: every fragment sinks and burns up inside this window (all gone at t1), so the picture matches the text
                 const sw = clamp01((t - a.decayWin[0]) / (a.decayWin[1] - a.decayWin[0]));
@@ -928,8 +937,8 @@ export function buildSim(cfg) {
                 const lt = a.late ? Math.max(0, t - a.late.t0) : 0,
                   q = orbitPos(
                     alt,
-                    tgt.inc + p.di * gk * (a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1),
-                    tgt.raan + p.dr * gk * (1 + (a.late?.kr ?? 0) * lt),
+                    tgt.inc + p.di * gp * (a.ring?.fat ? 1 + a.ring.fat * (1 - rs) : 1),
+                    tgt.raan + p.dr * gp * (1 + (a.late?.kr ?? 0) * lt),
                     tgt.uHit +
                       p.du +
                       (a.ring ? tgt.w * (a.drift ?? 1) * dt + p.ph * rs * gk : tgt.w * (a.drift ?? 1) * (dt * p.dw + (a.late ? a.late.k * lt * (p.dw - 1) : 0))),
