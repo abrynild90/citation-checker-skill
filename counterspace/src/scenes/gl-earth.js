@@ -72,7 +72,8 @@ void main(){
   if (magL > 0.0 && uSeaWave > 0.0) {
     // cfg.seaWave (opt-in): fine swell texture on open water where the photograph is magnified, so a close sea is not a soft flat blue
     vec3 qs = normalize(vP);
-    swell = 1.0 + uSeaWave * magL * water * ((vn(qs * 260.0) - 0.5) * 0.9 + (vn(qs * 700.0 + 1.7) - 0.5) * 0.75 + (vn(qs * 1250.0 + 3.3) - 0.5) * 0.6 + (vn(qs * 2400.0 + 6.1) - 0.5) * 0.45);
+    swell = 1.0 + uSeaWave * magL * water * ((vn(qs * 260.0) - 0.5) * 0.9 + (vn(qs * 700.0 + 1.7) - 0.5) * 0.75 + (vn(qs * 1250.0 + 3.3) - 0.5) * 0.5 + (vn(qs * 2400.0 + 6.1) - 0.5) * 0.28);
+    swell = 0.66 + 0.5 * ((swell - 0.66) + sqrt((swell - 0.66) * (swell - 0.66) + 0.05)); // a soft floor: the troughs stay a dark swell, never black pits
     day *= swell;
   }
   day *= 1.0 + dt * (0.7 + 0.45 * magL) * (1.0 - 0.75 * water);

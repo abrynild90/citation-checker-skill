@@ -38,7 +38,8 @@ function seaCanvas() {
       const dx = (x - S / 2) / (S / 2),
         dy = (y - S / 2) / (S / 2),
         r = Math.hypot(dx, dy),
-        fall = Math.pow(Math.max(0, 1 - r * r), 1.4),
+        // a smooth falloff that is gone well inside the patch's edge (r = 0.8 of its half width), so no outline of the patch is ever drawn
+        fall = (1 - Math.min(1, Math.max(0, (r - 0.12) / 0.68)) ** 2 * (3 - 2 * Math.min(1, Math.max(0, (r - 0.12) / 0.68)))) ** 1.3,
         // ripples: long wind streaks along the ship's length crossed with a finer chop
         n = 0.5 * vn(x, y, 3.5, 14, 3) + 0.3 * vn(x, y, 2.2, 6, 11) + 0.2 * vn(x, y, 1.3, 2.6, 23),
         crest = Math.pow(Math.max(0, n - 0.5) * 2, 1.6),
@@ -1403,6 +1404,10 @@ export const modelMethods = {
     const uSea = { value: 1 };
     g.userData.uSea = uSea;
     const hug = (m) => {
+      // a polygon offset pulls the water toward the camera in depth, so the globe's surface (its depth is coarse at a grazing angle) never cuts it off in a hard edge
+      m.polygonOffset = true;
+      m.polygonOffsetFactor = -4;
+      m.polygonOffsetUnits = -16;
       m.onBeforeCompile = (sh) => {
         sh.uniforms.uSea = uSea;
         sh.vertexShader = sh.vertexShader
