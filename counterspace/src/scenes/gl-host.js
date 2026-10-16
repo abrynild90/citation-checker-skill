@@ -858,6 +858,7 @@ export class GLHost {
       const rp = it.ramp && it.fx ? 1 + (it.ramp.k - 1) * (1 - smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / Math.max(1e-4, (it.fx.t1 - it.fx.t0) * it.ramp.until))))) : 1;
       const pk = it.preK && it.fx ? it.preK + (1 - it.preK) * smooth(Math.max(0, Math.min(1, (this.t - it.fx.t0) / 0.03))) : 1; // opt-in preK: small while it waits at the launch point
       obj.scale.setScalar(u.base * f * rp * pk);
+      if (u.uSea) u.uSea.value = obj.scale.x; // a ship's sea and wake hug the globe's curvature at the model's drawn scale (see _warshipModel)
     }
     this._rocketFrame(); // rocket exhaust, smoke and staging follow the models' drawn size
     // Bounded dazzle glare: the target and its leader remain readable through the beam.

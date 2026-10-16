@@ -5,6 +5,60 @@
 import { norm } from './core.js';
 import { foilCanvas } from './earth.js';
 
+// The sea round a warship: a soft round patch of rippled water (deep blue-green with pale wind streaks and glints, a darker pool under the hull, fading to nothing at the
+// rim) so a ship drawn many times its true size sits ON a sea surface, not on a flat blue haze. v grows along the ship's +z (the bow). Drawn once, in memory.
+let seaCv = null;
+function seaCanvas() {
+  if (seaCv) return seaCv;
+  const S = 256,
+    c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d'),
+    im = g.createImageData(S, S),
+    hash = (a, b) => {
+      const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    },
+    vn = (x, y, sx, sy, seed) => {
+      const u = x / sx,
+        v = y / sy,
+        i = Math.floor(u),
+        j = Math.floor(v),
+        fu = u - i,
+        fv = v - j,
+        sm = (t) => t * t * (3 - 2 * t),
+        a = hash(i + seed, j),
+        b = hash(i + 1 + seed, j),
+        c2 = hash(i + seed, j + 1),
+        d = hash(i + 1 + seed, j + 1);
+      return a + (b - a) * sm(fu) + (c2 - a) * sm(fv) + (a - b - c2 + d) * sm(fu) * sm(fv);
+    };
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++) {
+      const dx = (x - S / 2) / (S / 2),
+        dy = (y - S / 2) / (S / 2),
+        r = Math.hypot(dx, dy),
+        fall = Math.pow(Math.max(0, 1 - r * r), 1.4),
+        // ripples: long wind streaks along the ship's length crossed with a finer chop
+        n = 0.5 * vn(x, y, 3.5, 14, 3) + 0.3 * vn(x, y, 2.2, 6, 11) + 0.2 * vn(x, y, 1.3, 2.6, 23),
+        crest = Math.pow(Math.max(0, n - 0.5) * 2, 1.6),
+        // a darker pool under and just round the hull (the hull is a long ellipse about the middle of the strip)
+        hull = Math.exp(-((dx / 0.12) ** 2 + ((dy - 0.29) / 0.5) ** 2)),
+        i = (y * S + x) * 4,
+        base = 0.3 * fall * (1 - 0.5 * hull),
+        cr = 0.42 * crest * fall * (1 - 0.7 * hull);
+      // blend: the water body (deep teal), then the pale crests over it
+      const a = base + cr * (1 - base);
+      im.data[i] = Math.round((28 * base * (1 - cr) + 190 * cr) / Math.max(a, 1e-3));
+      im.data[i + 1] = Math.round((78 * base * (1 - cr) + 226 * cr) / Math.max(a, 1e-3));
+      im.data[i + 2] = Math.round((112 * base * (1 - cr) + 244 * cr) / Math.max(a, 1e-3));
+      im.data[i + 3] = Math.round(Math.min(1, a) * 255);
+    }
+  g.putImageData(im, 0, 0);
+  seaCv = c;
+  return c;
+}
+
 // A strip of foam for a ship's wake: dense white at the start (v = 0, drawn at the top of the canvas), broken into streaks and fine bubbles that thin out with
 // distance, soft at both sides and gone at the far end (v = 1). Opaque-white colour with the foam density in the alpha. Drawn once, in memory.
 let wakeCv = null;
@@ -1343,8 +1397,35 @@ export const modelMethods = {
     });
     // white water, soft-edged foam strips (additive, fading out): a bow wave on each side, a foam outline round the hull, a churned wake and a V astern
     const tex = this._gtex(wakeCanvas(), () => new T.CanvasTexture(wakeCanvas()));
+    // The model is drawn many times larger than life, so a flat sheet of water would float off the globe's curved surface a little way from the hull (the wake ran off
+    // into the sky at the limb). The water, foam and wake are bent down onto the sphere in the vertex shader: the drop at a distance d from the ship (in world units, d = scale
+    // x local distance) is R - sqrt(R^2 - d^2), put back in the model's own units by dividing by the scale (_fitModels keeps `uSea` at the model's scale).
+    const uSea = { value: 1 };
+    g.userData.uSea = uSea;
+    const hug = (m) => {
+      m.onBeforeCompile = (sh) => {
+        sh.uniforms.uSea = uSea;
+        sh.vertexShader = sh.vertexShader
+          .replace('#include <common>', '#include <common>\n uniform float uSea;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\n float dW = min(0.9, length(transformed.xz) * uSea);\n transformed.y -= (1.0 - sqrt(1.0 - dW * dW) - 0.004) / uSea;');
+      };
+      return m;
+    };
     const Y = 0.0007,
-      white = (op) => new T.MeshBasicMaterial({ map: tex, color: 0xf2f6ff, transparent: true, opacity: op, depthWrite: false, side: T.DoubleSide });
+      white = (op) => hug(new T.MeshBasicMaterial({ map: tex, color: 0xf2f6ff, transparent: true, opacity: op, depthWrite: false, side: T.DoubleSide }));
+    // the sea itself: a round patch of rippled water about the ship (bow at +z), under the foam
+    {
+      const seaTex = this._gtex(seaCanvas(), () => new T.CanvasTexture(seaCanvas())),
+        pg = new T.PlaneGeometry(0.17, 0.17, 24, 24);
+      pg.rotateX(-Math.PI / 2); // y is up; the texture's rows run along +z
+      const uv = pg.attributes.uv,
+        ps = pg.attributes.position;
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, ps.getX(i) / 0.17 + 0.5, 0.5 - ps.getZ(i) / 0.17);
+      const sea = new T.Mesh(pg, hug(new T.MeshBasicMaterial({ map: seaTex, transparent: true, opacity: 1, depthWrite: false })));
+      sea.position.set(0, 0.0004, -0.022);
+      sea.renderOrder = -1;
+      g.add(sea);
+    }
     // a ribbon from (x0, z0) to (x1, z1): w0 wide at the start (bright) and w1 at the end (gone)
     const strip = (x0, z0, x1, z1, w0, w1, op) => {
       const dx = x1 - x0,
@@ -1365,12 +1446,12 @@ export const modelMethods = {
     const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
     ring.rotateX(Math.PI / 2);
     ring.translate(0, Y * 0.6, 0);
-    g.add(new T.Mesh(ring, new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.16, depthWrite: false, side: T.DoubleSide })));
+    g.add(new T.Mesh(ring, hug(new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.16, depthWrite: false, side: T.DoubleSide }))));
     // churned wake astern: white foam as wide as the transom that spreads, breaks into patches and thins out with distance, with a thin Kelvin arm each side
     // (the wake is short: past the limb it would float in space)
     strip(0, Z0 + 0.001, 0, -0.084, 0.0105, 0.025, 0.85);
     strip(0, Z0 + 0.0005, 0, -0.058, 0.0078, 0.0115, 1);
-    [-1, 1].forEach((sd) => strip(sd * 0.0046, Z0 + 0.002, sd * 0.019, -0.066, 0.0034, 0.0060, 0.42));
+    [-1, 1].forEach((sd) => strip(sd * 0.0046, Z0 + 0.002, sd * 0.017, -0.062, 0.0052, 0.0105, 0.3)); // the Kelvin arms: soft and broad, not two thin spikes
     [-1, 1].forEach((sd) => strip(sd * 0.0072, 0.030, sd * 0.0125, 0.0, 0.0030, 0.0042, 0.5)); // the bow wave: a short white wedge off each bow quarter
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
