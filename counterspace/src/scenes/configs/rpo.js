@@ -409,6 +409,12 @@ export const RPO = {
   staticCenter: [28, 92],
   staticStatus: 'Three separate episodes shown together: (1) China and the US in GEO, 2025; (2) Russia in LEO, 2019–20; (3) the US and the UK in GEO, 2025',
   captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence
+  // spelled out in the step list where each term first appears (the wording is the account's own: see the caption above)
+  glossary: [
+    ['GEO', 'GEO (geostationary orbit)'],
+    ['GSSAP', 'GSSAP (Geosynchronous Space Situational Awareness Program)'],
+    ['LEO', 'LEO (low Earth orbit)'],
+  ],
   status: [
     [0, 'GEO, June 2025: China’s SJ-21 drifts west along the belt toward SJ-25', 'GEO 2025: SJ-21 drifts toward SJ-25'],
     [0.08, 'Two US GSSAP satellites move to positions that COMSPOC, a tracking firm, calls “flanking”', 'US GSSAP satellites “flanking” them'],
