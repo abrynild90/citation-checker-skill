@@ -62,6 +62,7 @@
 /* ---- sources: the band's second half, a head of one line and one disclosure */
 .sources.ref-band{padding:var(--s-3) 0 var(--s-6);border-top:0}
 .sources.ref-band .src-head{margin:0 0 var(--s-3);padding-top:var(--s-4);border-top:1px solid var(--line)}
+.sources.ref-band .src-head h3{font:500 clamp(21px,1.8vw,26px)/1.2 var(--serif);letter-spacing:-.01em} /* the band's heading is set like the other sections' (serif), not as a small sans label */
 .sources.ref-band .sources-layout{gap:var(--s-4)}
 .sources.ref-band .hero-more{margin:0 0 var(--s-3)}
 
