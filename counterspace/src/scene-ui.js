@@ -731,7 +731,12 @@ function fitCite() {
   t.textContent = full;
   if (!clipped()) return;
   const words = full.split(' '),
-    text = (n) => words.slice(0, n).join(' ').replace(/[\s,;:(\u2013\u2014-]+$/, '') + '\u2026';
+    // (the cut never leaves a dangling "see", "of" or "in" before the ellipsis)
+    text = (n) => {
+      const w = words.slice(0, n);
+      while (w.length > 1 && /^(see|of|the|and|in|for|to|a|an|at|on|by|with|as|or)$/i.test(w.at(-1).replace(/[,;:]$/, ''))) w.pop();
+      return w.join(' ').replace(/[\s,;:(\u2013\u2014-]+$/, '') + '\u2026';
+    };
   let lo = 1,
     hi = words.length - 1;
   while (lo < hi) {
