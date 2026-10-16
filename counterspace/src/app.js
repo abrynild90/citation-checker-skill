@@ -170,6 +170,8 @@ export const REGIME_LABEL = {
   ISR_LEO: 'LEO imaging / ISR',
 };
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+// Escaped title/label HTML in which a hyphenated token (X-37B, SJ-21, DN-2) can never break at its hyphen. The text keeps its ordinary hyphen, so search and accessible names are unchanged.
+export const escNb = (s) => esc(s).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
 export const fmtD = (e) => (e.date_precision === 'month' ? fmtMY(parse(e.date)) : fmt(parse(e.date))); // rows dated only to a month show month and year
 export const num = (n) => (n == null ? '—' : d3.format(',')(n));
 export const hasScene = (r) => r.scene_3d && SCENES.some((s) => s.id === r.scene_3d);

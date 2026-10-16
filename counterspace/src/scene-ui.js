@@ -3,7 +3,7 @@
 // Provides: openScene(), closeScene(), exportStill(), startHero(); owns the single WebGL host.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { REDUCED, byId, ensureLand, esc, fmtD, parse } from './app.js';
+import { REDUCED, byId, ensureLand, esc, escNb, fmtD, parse } from './app.js';
 import { GLHost } from './scenes/gl-host.js';
 import { loadEarth } from './scenes/earth.js';
 import { HERO, SCENES } from './scenes/config.js';
@@ -268,7 +268,7 @@ const sheet = $('sceneSheet'),
   listBtn = $('scList');
 ORDER.forEach((s, i) => {
   const li = document.createElement('li');
-  li.innerHTML = `<button type="button" class="sheet-item"><span class="sh-n">${i + 1}</span><span class="sh-t">${esc(s.title)}</span></button>`;
+  li.innerHTML = `<button type="button" class="sheet-item"><span class="sh-n">${i + 1}</span><span class="sh-t">${escNb(s.title)}</span></button>`;
   li.firstElementChild.onclick = () => {
     toggleSheet(false);
     if (s !== cur) openScene(s.id);
@@ -517,7 +517,7 @@ const PHONE_TITLES = {
 };
 function syncSceneTitle(cfg) {
   const phone = matchMedia('(max-width: 760px)').matches;
-  titleEl.innerHTML = esc(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title).replace(/[^\s(]+-[^\s)]+/g, (m) => `<span class="nb">${m}</span>`);
+  titleEl.innerHTML = escNb(phone ? PHONE_TITLES[cfg.id] || cfg.title : cfg.title);
   titleEl.setAttribute('aria-label', cfg.title);
 }
 function arrangeExport() {
