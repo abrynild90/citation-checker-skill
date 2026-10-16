@@ -936,7 +936,7 @@ export class GLHost {
     this._rimFrame();
     this._fitModels();
     this._ptUniforms();
-    // lift-off vibration (a rocket's exhaust is burning near the ground): the camera is nudged by about a pixel for the draw only, then put back before the labels
+    // lift-off vibration (a rocket's exhaust is burning near the ground): the camera is nudged by at most ~1.5 px for the draw only (a low tremor while the motor burns in the first ~10 km, see _rocketFrame), then put back before the labels
     // are placed, so the picture trembles and the pills do not. Live playback only: a paused or scrubbed frame, a still export, a poster and every capture stay
     // exactly where the camera is (and reduced motion, or a reader who has taken the view, never shakes)
     const sh = REDUCED_MOTION || this._user || !this.playing || this._still ? 0 : this._shakeA || 0;
@@ -945,7 +945,7 @@ export class GLHost {
       const T = this.T,
         tm = this.t * this.sim.cfg.duration,
         f = (this.el?.clientHeight || 652) / (2 * Math.tan((this.camera.fov * DEG) / 2)),
-        a = (1.3 * sh) / f;
+        a = (0.8 * sh) / f; // two summed sines of about 1.6 together: at most ~1.3 px per axis at full thrust
       q0 = this.camera.quaternion.clone();
       this.camera.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(a * (Math.sin(tm * 71) + 0.6 * Math.sin(tm * 113 + 1.1)), a * (Math.sin(tm * 83 + 2) + 0.6 * Math.sin(tm * 127)), 0)));
     }

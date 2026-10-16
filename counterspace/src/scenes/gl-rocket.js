@@ -779,8 +779,15 @@ export const rocketMethods = {
       U.uDiaN.value = 5.5;
       C.uWob.value.set(wob[0] * 2.4, wob[1] * 2.4);
       rk.outer.visible = rk.core.visible = vis && thr > 0.004;
-      // lift-off vibration: builds as the motor lights and dies away over the first few km of the climb (an envelope, a pure function of the scene time)
-      if (vis && !hide && thr > 0.004) this._shakeA = Math.max(this._shakeA, thr * (1 - smooth(st.alt / 3)) * (1 - Math.exp(-Math.max(0, t - fx.t0) / 0.003)));
+      // lift-off rumble: a low tremor that builds over the first ~0.15 s after ignition, holds for about half a second while the motor burns in the thick of the air and
+      // fades out by ~1.5 s of scene time after ignition (the picture's climb is time-compressed: it covers its first ~10 km in well under a second, so the altitude alone would
+      // end the tremor almost at once; the air-thin part of the climb, past ~150 km of illustrative altitude, never shakes). A pure function of the vehicle's own thrust, its
+      // altitude and the scene time since ignition; never of wall-clock time
+      if (vis && !hide && thr > 0.004) {
+        const se = Math.max(0, (t - st.lastIg) * this.sim.cfg.duration),
+          env = (1 - smooth((se - 0.35) / 1.15)) * (1 - smooth(st.alt / 150)) * smooth(se / 0.15);
+        this._shakeA = Math.max(this._shakeA, thr * env);
+      }
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
       rk.glow.visible = vis && thr > 0.004 && !hide;
       rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)));
