@@ -2178,7 +2178,7 @@ exportBtn.onclick = async () => {
   try {
     toast('Saving image…');
     const url = await exportStill();
-    download(`counterspace-${slug(c.title)}.png`, url, 'image/png');
+    download(`counterspace-timeline-${slug(c.title)}.png`, url, 'image/png');
     toast('Image saved.');
   } catch (e) {
     toast('The image could not be saved. Try your browser’s screenshot tool instead.', 'warn');

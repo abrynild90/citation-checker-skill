@@ -190,7 +190,7 @@ const EXPORT_W = 1200,
 const SOURCE_LINE =
   'Source: SWF 2026 (Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment, 9th ed., Apr. 2026) and the primary sources ' +
   'cited on the page.';
-const CREDIT = 'Counterspace timeline, companion to Space Security Law by Aaron Brynildson';
+const CREDIT = 'Counterspace Timeline, companion to Space Security Law by Aaron Brynildson';
 // A standalone file has no page stylesheet, so it carries the font faces it uses (IBM Plex Sans 400 and 600, where the 600 face is declared "500 600",
 // and Newsreader for the title) as base64 @font-face rules copied from the page's <style id="cs-fonts"> (written by tools/build_page.py).
 function fontFaceCSS() {
