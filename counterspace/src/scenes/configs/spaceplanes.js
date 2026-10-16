@@ -378,6 +378,14 @@ export const SPACEPLANES = {
   still: 0.5,
   stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
   captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence
+  // spelled out in the step list where each term first appears (the wording is the account's own: see the caption above and the ledger notes)
+  glossary: [
+    ['OTV-6', 'OTV-6, for Orbital Test Vehicle'],
+    ['CSSHQ', 'CSSHQ (reusable experimental spacecraft)'],
+    ['Object J cataloged', 'Object J, an object in the tracking catalog'],
+    ['LeoLabs', 'LeoLabs (a tracking company)'],
+    ['PLA', 'PLA (People’s Liberation Army)'],
+  ],
   status: [
     [0, 'X-37B, OTV-1 to OTV-6 (2010–2022): flights of 224, 469, 675, 718, 780 and 908 days (SWF)', 'X-37B OTV-1 to 6: 224 to 908 days'],
     [0.1, 'SWF: X-37B orbits were 300–400 km up, tilted 38°–54° to the equator (hobbyist tracking)', '300–400 km, tilt 38°–54° (SWF)'],

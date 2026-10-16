@@ -43,7 +43,7 @@
   </div>
 
   <div class="bar-tools" role="group" aria-label="Page options">
-    <button class="btn icon theme-btn" id="themeBtn" type="button" aria-label="Switch to light colours" title="Switch to light colours"><svg
+    <button class="btn icon theme-btn" id="themeBtn" type="button" aria-label="Switch to light page colours (the opening picture, the timeline strip and the 3D viewer stay dark)" title="Switch to light page colours (the opening picture, the timeline strip and the 3D viewer stay dark)"><svg
       class="ico i-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="ico i-moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
   <section class="hero" aria-labelledby="pageTitle">
@@ -260,16 +260,6 @@
     </div>
   </section>
 
-  <section class="quiz-band" id="quizBand" aria-labelledby="hQuiz">
-    <div class="wrap">
-      <header class="chapter-head quiz-head">
-        <h2 data-avoid id="hQuiz">Test yourself: which came first?</h2>
-        <p data-avoid class="lede">Four questions about events and legal steps in our records. Choose an answer to see the dates and the time between them.</p>
-      </header>
-      <div id="quiz"></div>
-    </div>
-  </section>
-
   <section class="explore ref-band" id="explore" aria-labelledby="hRef">
     <div class="wrap">
       <header class="ref-head">
@@ -403,6 +393,16 @@
   </section>
 </div>
 
+<section class="quiz-band" id="quizBand" aria-labelledby="hQuiz">
+  <div class="wrap">
+    <header class="chapter-head quiz-head">
+      <h2 data-avoid id="hQuiz">Test yourself: which came first?</h2>
+      <p data-avoid class="lede">Four questions on the pairs the charts above lay out. Choose an answer to see the dates and the time between them.</p>
+    </header>
+    <div id="quiz"></div>
+  </div>
+</section>
+
 <section class="sources folded ref-band" id="sources" aria-labelledby="hS">
   <div class="wrap">
     <div class="ref-sub src-head">
@@ -410,7 +410,8 @@
       <p data-avoid>One report supplies almost every weapon and operation: the Secure World Foundation’s <i>Global Counterspace Capabilities</i> (9th edition, April 2026). The
         laws and policies come from the treaties and documents themselves.</p>
     </div>
-    <p class="source-actions"><a class="btn small" href="#srcList">Find a cited source</a><a class="btn small" href="#srcCite">How to cite this page</a></p>
+    <div class="source-actions" id="sourceActions"><a class="btn small" href="#srcList">Find a cited source</a><a class="btn small" href="#srcCite">How to cite this page</a><button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button><span
+        class="sr" id="citeStatus" role="status" aria-live="polite"></span></div>
     <div class="sources-layout">
       <nav class="sub-nav" aria-label="In this section">
         <ul>
@@ -422,8 +423,6 @@
         </ul>
       </nav>
       <div id="methodBody"></div>
-      <div class="src-copy"><button class="btn small" id="copyCite" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy citation</span></button><span
-        class="sr" id="citeStatus" role="status" aria-live="polite"></span></div>
     </div>
     <details class="about hero-more" id="srcMore"><summary>The main source, and orbits in plain words</summary>
       <p class="src-note">The Secure World Foundation (SWF), whose 2026 report is the main source of the facts here, finds that “only non-destructive capabilities are actively
@@ -440,8 +439,8 @@
     <li data-ch="scenes"><a href="#scenes" title="3D scenes" aria-label="3D scenes"><span class="r-lab">3D scenes</span></a></li>
     <li data-ch="timeline"><a href="#timeline" title="Law and weapons timeline" aria-label="Law and weapons timeline"><span class="r-lab">Law and weapons timeline</span></a></li>
     <li data-ch="pattern"><a href="#pattern" title="What the pattern shows" aria-label="What the pattern shows"><span class="r-lab">What the pattern shows</span></a></li>
-    <li data-ch="quiz"><a href="#quizBand" title="Test yourself" aria-label="Test yourself"><span class="r-lab">Test yourself</span></a></li>
     <li data-ch="explore"><a href="#explore" title="Explore the data" aria-label="Explore the data"><span class="r-lab">Explore the data</span></a></li>
+    <li data-ch="quiz"><a href="#quizBand" title="Test yourself" aria-label="Test yourself"><span class="r-lab">Test yourself</span></a></li>
     <li data-ch="src"><a href="#sources" title="Sources and method" aria-label="Sources and method"><span class="r-lab">Sources and method</span></a></li>
   </ul>
 </nav>

@@ -1,4 +1,4 @@
-/* The reference band: everything after the quiz. "The evidence, when you want it" holds the four extra charts (as cards, one chart at a time) and the sources.
+/* The reference band: the charts (after the pattern) and the sources (after the quiz). "The evidence, when you want it" holds the four extra charts (as cards, one chart at a time) and the sources.
    It is the page's quiet half: a smaller type scale, tighter spacing, and every key, table and download behind one disclosure a chart. Loaded last so these
    rules win on equal specificity. Section 4 of design/DESIGN.md describes the band. */
 
@@ -69,10 +69,12 @@
 /* ---- footer: three short columns, set tighter */
 .site-foot{padding:var(--s-5) 0 var(--s-4)}
 .site-foot h2{margin:0 0 var(--s-2);font-size:17px}
-.site-foot p{font-size:14px;line-height:1.55;margin:0 0 var(--s-1)}
+.site-foot p{font-size:15px;line-height:1.55;margin:0 0 var(--s-1)}
+.site-foot small{font-size:14px} /* the browser's default for <small> made the "Page updated" line 12 px */
+.foot-base,.foot-nav a{font-size:14px}
 .foot-cols{gap:var(--s-5)}
 .foot-base{margin-top:var(--s-4);padding-top:var(--s-3)}
-@media (min-width:1800px){.site-foot p{font-size:15px}}
+@media (min-width:1800px){.site-foot p{font-size:16px}}
 
 /* ---- layer one, set a little tighter so the whole page runs shorter (heads sit closer to what they introduce) */
 .law-intro .chapter-head,.pattern .chapter-head,.quiz-head{margin-bottom:var(--s-4)}
@@ -168,3 +170,14 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 
 /* the cited-sources list keeps a readable line length on wide screens */
 #citedSources li{max-width:60ch}
+/* The sources most relied on: a short list on the page itself, each with its kind of source; the copy button now sits in the row of actions (no longer over the disclosure) */
+.src-top{margin:var(--s-4) 0 0}
+.src-top h4{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
+.st-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.st-list li{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) auto;gap:var(--s-1) var(--s-4);align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font:400 15px/1.45 var(--sans)}
+.st-kind{font:600 13px/1.4 var(--sans);color:var(--muted)}
+.st-list a{font-weight:500;color:var(--accent);overflow-wrap:anywhere}
+.st-n{font-size:14px;color:var(--muted);white-space:nowrap}
+.st-more{margin:var(--s-2) 0 0;font:400 14px/1.5 var(--sans);color:var(--muted)}
+@media (max-width:720px){.st-list li{grid-template-columns:minmax(0,1fr)}.st-n{white-space:normal}}
+.source-actions{gap:var(--s-3)}

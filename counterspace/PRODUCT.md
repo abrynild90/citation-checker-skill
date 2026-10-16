@@ -41,7 +41,7 @@ Commons BY-NC: facts only, quotations of at most 15 words, always attributed), c
 
 ## Brand Commitments
 
-None fixed (confirmed: no fixed branding). The name is "Counterspace Interactive Timeline", companion to the book and its author. Typefaces, colours and layout are open to design.
+None fixed (confirmed: no fixed branding). The name is "Counterspace Timeline", companion to the book and its author. Typefaces, colours and layout are open to design.
 
 ## Evidence on Hand
 

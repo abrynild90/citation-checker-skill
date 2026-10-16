@@ -37,14 +37,14 @@ export function stillMeta(cfg, title, cite) {
   };
 }
 
-// The file name of a saved image: "counterspace-" and the scene title in lower case with hyphens.
+// The file name of a saved image: "counterspace-timeline-" and the scene title in lower case with hyphens.
 export function stillFileName(title) {
   const slug = String(title || 'scene')
     .toLowerCase()
     .replace(/[“”"‘’']/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return `counterspace-${slug}.png`;
+  return `counterspace-timeline-${slug}.png`;
 }
 
 // A standalone SVG has no page stylesheet, and an SVG drawn as an image cannot see the page's fonts: the diagram carries the IBM Plex Sans faces it uses
@@ -144,7 +144,7 @@ export function drawBand(g, W, y0, m) {
     cs = 36 * u,
     mw = orbitMark(g, mx, cr - 0.34 * cs, u),
     parts = [
-      [`500 ${cs}px ${SANS}`, 'Counterspace timeline · companion to '],
+      [`500 ${cs}px ${SANS}`, 'Counterspace Timeline · companion to '],
       [`italic 400 ${cs * 1.06}px ${SERIF}`, 'Space Security Law'],
       [`500 ${cs}px ${SANS}`, ' by Aaron Brynildson'],
     ];

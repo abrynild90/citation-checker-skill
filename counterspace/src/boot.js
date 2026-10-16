@@ -35,7 +35,8 @@ const root = document.documentElement,
   lightQuery = matchMedia('(prefers-color-scheme: light)');
 const currentTheme = () => root.dataset.theme || (lightQuery.matches ? 'light' : 'dark');
 function nameThemeButton() {
-  const label = `Switch to ${currentTheme() === 'light' ? 'dark' : 'light'} colours`;
+  // The light page keeps the opening picture, the pinned strip and the 3D viewer dark on purpose; the label says so before anyone is surprised by it.
+  const label = currentTheme() === 'light' ? 'Switch to dark colours' : 'Switch to light page colours (the opening picture, the timeline strip and the 3D viewer stay dark)';
   themeBtn.setAttribute('aria-label', label);
   themeBtn.title = label;
 }
@@ -69,7 +70,7 @@ nameThemeButton();
 {
   const rail = document.getElementById('rail'),
     links = [...rail.querySelectorAll('a')],
-    starts = ['scenes', 'timeline', 'pattern', 'quizBand', 'explore', 'sources'].map((id) => document.getElementById(id)),
+    starts = ['scenes', 'timeline', 'pattern', 'explore', 'quizBand', 'sources'].map((id) => document.getElementById(id)),
     hero = document.getElementById('top');
   const mark = () => {
     const line = innerHeight * 0.4,

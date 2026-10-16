@@ -4,6 +4,7 @@
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
 import { DATA_DATE, EVENTS, LAST_DA, LEGAL, SCHEMA, esc, fmtLong, parse } from './app.js';
+import { legalKindWords } from './ui.js';
 import { PARTICLE_BUDGET } from './scenes/core.js';
 export function drawMethod() {
   // The data files use their own working vocabulary; the page says the same thing in the reader's words. Quotes become typographic quotes.
@@ -96,6 +97,27 @@ export function drawMethod() {
       `${li('Cases for (b):', m[4] + '.')}${li('Then:', m[5])}${li('Reading an entry:', m[6])}</ul>`
     );
   })();
+  // The few sources most relied on, shown on the page itself (the full list stays in the disclosure). Ranked from the data alone: by how many timeline entries
+  // cite the source, then binding treaties before softer instruments, then by date. Each carries the kind of source the page already uses for legal items
+  // (Treaty, Resolution ...); the report that supplies the events is the main source.
+  const rank = (rs) => [-rs.length, rs[0].kind === 'treaty' ? 0 : 1, rs[0].date || rs[0].start];
+  const top = [...groups.values()]
+    .sort((x, y) => {
+      const a = rank(x), b = rank(y);
+      return a[0] - b[0] || a[1] - b[1] || (a[2] < b[2] ? -1 : a[2] > b[2] ? 1 : 0);
+    })
+    .slice(0, 5)
+    .map((rs) => {
+      const r = rs[0],
+        legal = !!r.kind,
+        title = legal ? r.title || r.label : twoLine(short(r.source_full || r.source), esc(r.source_url)).match(/<a[^>]*>(.*?)<\/a>/)[1].replace(/^.*?\beds?\.,\s*/, ''), // the editors' names stay in the full list
+        n = legal ? 'Legal item on the timeline' : `Cited for ${rs.length} timeline entries`;
+      return `<li><span class="st-kind">${legal ? esc(legalKindWords(r)) : 'Main source'}</span><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${legal ? esc(title) : title}<span class="sr"> (opens in a new tab)</span></a><span class="st-n">${n}</span></li>`;
+    });
+  document.getElementById('sourceActions').insertAdjacentHTML(
+    'beforebegin',
+    `<div class="src-top"><h4 id="srcTopH">The sources most relied on</h4><ol class="st-list" aria-labelledby="srcTopH">${top.join('')}</ol><p class="st-more">All ${groups.size} sources are in the full list under “Read the sources and method”, with the page or table each is cited for.</p></div>`,
+  );
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
   document.getElementById('methodBody').innerHTML = `<details class="table src-fold" id="srcDetails"><summary>Read the sources and method<span class="cnt">${cites.length} sources</span></summary>
 <p class="src-check">To check a fact, open the data table behind its chart, note the source and page reference for the entry, then find that source in the list of all cited sources.</p>

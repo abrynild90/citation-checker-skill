@@ -1017,9 +1017,26 @@ const STEP_NAMES = {
     'Fourth flight',
   ],
 };
+// Glossary on first use. A scene config may list [term, expansion] pairs ("GSSAP", "GSSAP (Geosynchronous Space Situational Awareness Program)"): the first step
+// that names the term spells it out, once, in the same words the scene's account uses, and every later step keeps the short form. The step list, the "Jump to a step"
+// menu and the current-step line all read the same text, so nothing is explained twice and nothing needs a hover.
+export function glossFirst(steps, glossary = []) {
+  const done = new Set();
+  return steps.map((s) => {
+    let text = s.text;
+    glossary.forEach(([term, full]) => {
+      if (done.has(term)) return;
+      const at = text.search(new RegExp(`(?<![\\w-])${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`));
+      if (at < 0) return;
+      done.add(term);
+      text = text.slice(0, at) + full + text.slice(at + term.length);
+    });
+    return text === s.text ? s : { ...s, text };
+  });
+}
 function renderSteps(cfg) {
   const dur = cfg.duration || 0;
-  steps = (cfg.status || cfg.steps || []).filter(Array.isArray).map(([t, text]) => ({ t, text }));
+  steps = glossFirst((cfg.status || cfg.steps || []).filter(Array.isArray).map(([t, text]) => ({ t, text })), cfg.glossary);
   const fine = steps.some((s, i) => i && Math.round(s.t * dur) === Math.round(steps[i - 1].t * dur)); // two steps would read the same: show tenths
   stepIdx = -1;
   stepChoose.innerHTML = steps
@@ -2181,7 +2198,7 @@ exportBtn.onclick = async () => {
   try {
     toast('Saving image…');
     const url = await exportStill();
-    download(`counterspace-${slug(c.title)}.png`, url, 'image/png');
+    download(`counterspace-timeline-${slug(c.title)}.png`, url, 'image/png');
     toast('Image saved.');
   } catch (e) {
     toast('The image could not be saved. Try your browser’s screenshot tool instead.', 'warn');
