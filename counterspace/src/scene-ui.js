@@ -762,9 +762,20 @@ function snapPop(pop) {
   pop.classList.remove('snap');
   let pr = pop.getBoundingClientRect();
   const sr = stepsEl.getBoundingClientRect();
-  if (!pr.height || !sr.height || pr.top <= sr.top || pr.top >= sr.bottom) return;
+  if (!pr.height || !sr.height) return;
+  if (pr.top <= sr.top || pr.top >= sr.bottom) {
+    // opening below (or above) the rows: it still lines up with the story column, edge to edge
+    const box = pop.offsetParent?.getBoundingClientRect();
+    if (box && (Math.abs(pr.left - sr.left) > 0.5 || Math.abs(pr.right - sr.right) > 0.5)) {
+      const cs = getComputedStyle(pop.offsetParent);
+      pop.style.left = Math.round((sr.left - box.left - parseFloat(cs.borderLeftWidth)) * 10) / 10 + 'px';
+      pop.style.right = Math.round((box.right - sr.right - parseFloat(cs.borderRightWidth)) * 10) / 10 + 'px';
+    }
+    return;
+  }
   // the note covers the list's whole column (the rows' own left and right edges, and the time labels in them), so no sliver of a row's label shows beside it
-  const rows = [...stepsEl.children].map((li) => li.getBoundingClientRect()),
+  // (rows with no box, display:none, report left = right = 0 and are left out: they would stretch the note to the window's edge)
+  const rows = [...stepsEl.children].map((li) => li.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0),
     box = pop.offsetParent?.getBoundingClientRect(),
     x0 = Math.min(pr.left, sr.left, ...rows.map((r) => r.left)),
     x1 = Math.max(pr.right, sr.right, ...rows.map((r) => r.right));
