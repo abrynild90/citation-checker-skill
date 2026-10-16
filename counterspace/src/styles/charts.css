@@ -53,6 +53,8 @@
   scroll-margin-top:var(--law-head-h,220px)}
 @media (min-width:761px){.legal-band{position:sticky;top:0}}
 .legal-band.compact{padding:11px 0 0;/* the title line keeps about 10 px under the window's top edge */border-top-color:transparent;border-bottom-color:var(--line-strong)}
+/* chart text passing under the pinned strip fades out along its lower edge instead of showing as a cut line of glyphs (the year slider pinned under the strip has the same fade) */
+@media (min-width:761px){.legal-band.compact:not(.yr-pinned):not(.off)::after{content:"";position:absolute;left:0;right:0;top:100%;height:26px;margin-top:1px;background:linear-gradient(to bottom,var(--bg) 0,var(--bg) 18%,transparent);pointer-events:none}}
 .legal-band.reading #legalSvg{max-height:var(--row-h,60px);overflow:hidden}
 .legal-band svg{display:block;width:100%;height:auto}
 #legalSvg[role="region"]{-webkit-overflow-scrolling:touch}
@@ -325,7 +327,8 @@ td a{overflow-wrap:anywhere}
 @media (max-width:640px){
   .law-mini{display:block;position:sticky;top:0;z-index:45;height:0;pointer-events:none}
   .law-mini-in{display:none;height:40px;margin:0 calc(var(--gutter) * -1);padding:0 var(--gutter);background:var(--bg);border-bottom:1px solid var(--line-strong)}
-  .law-mini.on .law-mini-in{display:block}
+  .law-mini.on .law-mini-in{display:block;position:relative}
+  .law-mini.on .law-mini-in::after{content:"";position:absolute;left:0;right:0;top:100%;height:20px;margin-top:1px;background:linear-gradient(to bottom,var(--bg) 0,var(--bg) 18%,transparent);pointer-events:none}
   .law-mini svg{display:block;overflow:visible}
   .lm-name{fill:var(--muted);font:600 13px var(--sans)}
   .lm-year{fill:var(--faint);font:500 13px var(--sans);font-variant-numeric:tabular-nums}
