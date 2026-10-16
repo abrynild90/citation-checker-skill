@@ -124,9 +124,9 @@
 .q-opt:active:not(:disabled){transform:scale(.99)}
 .q-opt:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .q-opt:disabled{cursor:default;color:var(--text)}
-.q-mark{flex:none;display:grid;place-items:center;width:0;height:22px;overflow:hidden;border-radius:50%;opacity:0;transition:width var(--dur-2) var(--ease),opacity var(--dur-2) var(--ease)}
+.q-mark{flex:none;display:grid;place-items:center;box-sizing:border-box;width:22px;height:22px;overflow:hidden;border-radius:50%;border:1.5px solid var(--faint);transition:background-color var(--dur-2) var(--ease),border-color var(--dur-2) var(--ease)} /* a hollow circle until the answer is in: the mark has its room from the start, so the option's text never rewraps when it fills */
 .q-mark .ico{grid-area:1/1;width:16px;height:16px;display:none}
-.q.done .q-opt.right .q-mark,.q.done .q-opt.wrong .q-mark{width:22px;opacity:1}
+.q.done .q-opt.right .q-mark,.q.done .q-opt.wrong .q-mark{border-color:transparent}
 .q-opt.right .q-mark{background:var(--accent);color:var(--bg)}
 .q-opt.right .q-yes{display:block}
 .q-opt.wrong .q-mark{background:var(--accent-2);color:var(--bg)}
@@ -180,15 +180,28 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 #chartC .callout-row>#quoteC{margin:0} /* the two notes share one top edge */
 @media (min-width:1100px){#chartC .callout-row{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:stretch}}
 
-/* after a wrong answer: the scene that shows the event, as a link inside the sentence */
-.q-watch{display:flex;flex-wrap:wrap;column-gap:.4em;margin-top:var(--s-3);color:var(--text)}
-.q-watch .q-go{order:2;flex:0 0 100%}
-.q-go{all:unset;display:inline;cursor:pointer;font:600 15px/1.55 var(--sans);color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.22em}
-.q-go:hover{text-decoration-thickness:2px}
-.q-go:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:var(--r-1)}
-.q-go .ico{width:14px;height:14px;margin:0 5px -2px 0}
-.q-watch .q-seen{color:var(--muted);white-space:nowrap}
-@media (pointer:coarse){.q-go{padding:10px 0;display:inline-block}}
+/* after a wrong answer: the scene that shows the event, as a plain button ("Watch the scene", then "Watched") with the scene's name beside it */
+.q-watch{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-1) var(--s-3);margin-top:var(--s-2);color:var(--text)}
+.q-go{gap:var(--s-2)}
+.q-go .ico{width:14px;height:14px;margin:0}
+.q-go.seen{color:var(--muted)}
+.q-go.seen .ico{stroke:var(--accent);fill:none;stroke-width:2.4}
+.q-go-name{font:500 14px/1.4 var(--sans);color:var(--muted)}
+@media (pointer:coarse){.q-go{--h:44px}}
+
+/* The answer area keeps its height from the start: the longest answer is laid under it, invisible, so answering moves nothing below it. Before an answer the area
+   says what will appear there. */
+.q-slot{display:grid}
+.q-slot>*{grid-area:1/1;min-width:0}
+.q-ghost{visibility:hidden;pointer-events:none}
+.q-wait{margin:var(--s-2) 0 0;align-self:start;font:400 14px/1.5 var(--sans);color:var(--faint)}
+.q.done .q-wait{display:none}
+.q-slot>.q-out{align-self:start}
+.q-slot>.q-out:empty{display:none}
+.q-sum{display:grid}
+.q-sum>*{grid-area:1/1;min-width:0}
+.q-sum>.q-sumreal:not(.q-ghost){align-self:start}
+.q-trail[hidden]{display:block;visibility:hidden}
 
 /* The little pair-line inside an answered card: the hero's drawing in miniature (a dot for the weapon, a tick for the law, a dashed gap with the time on it),
    drawn in when the answer is given. The earlier of the two stands on the left. */
@@ -278,14 +291,12 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
     .q-list.all-done .q>.q-body{grid-row:3;margin-top:var(--s-2)}
   }
 }
-.q.done .q-hint{display:none}
-.q.done .q-opt{min-height:46px}
-.q.done .q-out{margin-top:var(--s-1)}
+.q.done .q-hint{color:var(--muted)}
+:is(.q.done .q-out,.q-ghost.q-out){margin-top:var(--s-1)}
 @media (min-width:1100px){
-  .q.done .q-out{font-size:14.5px;line-height:1.5}
-  .q.done .q-out .q-verdict{font-size:16.5px}
-  .q.done .q-line{gap:var(--s-2)}
-  .q.done .q-hint{display:block;color:var(--faint)}
+  :is(.q.done .q-out,.q-ghost.q-out){font-size:14.5px;line-height:1.5}
+  :is(.q.done .q-out,.q-ghost.q-out) .q-verdict{font-size:16.5px}
+  :is(.q.done,.q-ghost.q-out) .q-line{gap:var(--s-2)}
   .q-foot{margin-top:var(--s-4)}
   .q-sum{flex:1 1 0;min-width:420px;max-width:80ch}
   .q-trail{height:36px;margin-top:var(--s-3)}
