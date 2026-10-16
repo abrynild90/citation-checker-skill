@@ -83,7 +83,7 @@ light that seems to come from the data itself. Serif for ideas, sans for facts a
 
 Amber (`--accent-2`) carries two data meanings: law (ticks, law years, the guide line) and China (`--c-cn`). Do not use it for a state such as "wrong" or for a label that is not about law. The quiz's wrong answer
 and the missed dot on its trail use `--warn` (red-orange) with a dashed edge and a cross icon, so they are never told apart by colour alone. "Did you know"
-labels and other quiet labels use `--accent` (cool). The "Find it on the chart" landing mark uses `--focus` (see section 2.4).
+labels and other quiet labels use `--accent` (cool). The "Find it on the chart" landing mark uses `--accent` (see section 2.4).
 
 Data colours (`--c-us`, `--c-ru`, `--c-cn`, ...) keep their current colour-blind-safe values. Text contrast is at least 4.5:1 everywhere (3:1 for
 text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use colour alone to carry meaning: shape, fill or a label always repeats it.
@@ -119,6 +119,9 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 - **Segmented control** (year range, grouping, scene views): one rounded track, the selected item sits on a raised thumb that slides.
 - **Icons.** One set only: the sprite in `src/partials/icons.html`, used as `<svg class="ico"><use href="#i-name"/></svg>`. Never use text glyphs
   (`▶ ◀ ⟳ ⤓ ⚖ ✕ ◐`) or emoji as icons. Add new icons to the sprite in the same style (24 px grid, 1.8 px stroke, round caps).
+- **Landing mark** (`landmark.js`, "Find it on the chart" and "See it on the timeline"). A steady `--accent` ring with a `--bg` gap and a pill chip (`From: <scene>`) in a
+  fixed layer over the mark, so nothing in the page moves. It pulses three times (not under reduced motion), then stays until the next pointer press or key, or until
+  the mark has been seen and scrolled out of view. The chip takes the side of the ring that hides the least chart text.
 - **Hover cards.** Small, calm, serif title, a short definition list, a quiet source line. Same card on every chart.
 - **Key.** A single line of swatch and label pairs at 13.5 px, grouped under short plain group names. Hidden behind "How to read this" when long.
 - **Callout** (the one thing to notice): a tinted block with an icon at the start and one or two sentences of serif text. No side stripe.
