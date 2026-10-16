@@ -915,6 +915,9 @@ function legalScrollMain() {
   // The chapter's heading names the strip; once it has scrolled off (a link lands past it in a short window) the strip carries the name itself, in its corner.
   const lh = document.getElementById('lawHead');
   band.classList.toggle('head-gone', !isPhoneNow() && !!lh && lh.getBoundingClientRect().bottom < 8);
+  // the pinned strip fades the chart text passing under its lower edge (charts.css), except where the year slider is pinned right under it: that row has its own fade
+  const yb = document.getElementById('yrBar');
+  band.classList.toggle('yr-pinned', !!yb && Math.abs(yb.getBoundingClientRect().top - band.getBoundingClientRect().bottom) < 2);
   // The strip implies a shared calendar axis, so it stays only over charts that use it: the test chart and, in "Explore the data", the jamming and close-approach
   // tabs, from the top of the drawing. It steps aside over "What the pattern shows", over the two tabs with their own scales (decades; years to law) and at the end of the timeline.
   const pat = document.getElementById('pattern'),

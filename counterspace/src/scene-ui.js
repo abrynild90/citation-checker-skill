@@ -696,6 +696,7 @@ function anchorNote(note) {
     note.style.left = Math.max(0, Math.round((left - wr.left) * 10) / 10) + 'px';
     note.style.right = Math.max(0, Math.round((wr.right - right) * 10) / 10) + 'px';
   }
+  if (note === lawCard) fitCite();
   if (!pr.height || pr.top < wr.top + 140 || pr.top > wr.bottom) return;
   const edge = note === lawCard ? pr.top : pr.bottom + 4,
     room = wr.bottom - edge - 8;
@@ -719,6 +720,33 @@ function anchorNote(note) {
       note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
   }
 }
+// The law card's citation shows two lines; one that is longer ends on a whole word and an ellipsis (the line clamp alone cuts mid-word: "see Office of th...").
+// The card must be shown and at its width when this runs.
+function fitCite() {
+  const c = lawCard.querySelector('.lc-cite'),
+    t = c?.querySelector('.lc-ct');
+  if (!t || lawCard.hidden) return;
+  const full = (t.dataset.full ??= t.textContent),
+    clipped = () => c.scrollHeight > c.clientHeight + 1;
+  t.textContent = full;
+  if (!clipped()) return;
+  const words = full.split(' '),
+    // (the cut never leaves a dangling "see", "of" or "in" before the ellipsis)
+    text = (n) => {
+      const w = words.slice(0, n);
+      while (w.length > 1 && /^(see|of|the|and|in|for|to|a|an|at|on|by|with|as|or)$/i.test(w.at(-1).replace(/[,;:]$/, ''))) w.pop();
+      return w.join(' ').replace(/[\s,;:(\u2013\u2014-]+$/, '') + '\u2026';
+    };
+  let lo = 1,
+    hi = words.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    t.textContent = text(mid);
+    if (clipped()) hi = mid - 1;
+    else lo = mid;
+  }
+  t.textContent = text(lo);
+}
 function toggleSrc(open) {
   if (open && cur) host?.interrupt();
   if (open) toggleNextPop(false); // one note at a time over the story column
@@ -730,10 +758,22 @@ function toggleSrc(open) {
 // the note grows upward to that row's top (its content stays centred in it).
 function snapPop(pop) {
   pop.style.minHeight = '';
+  pop.style.left = pop.style.right = '';
   pop.classList.remove('snap');
-  const pr = pop.getBoundingClientRect(),
-    sr = stepsEl.getBoundingClientRect();
+  let pr = pop.getBoundingClientRect();
+  const sr = stepsEl.getBoundingClientRect();
   if (!pr.height || !sr.height || pr.top <= sr.top || pr.top >= sr.bottom) return;
+  // the note covers the list's whole column (the rows' own left and right edges, and the time labels in them), so no sliver of a row's label shows beside it
+  const rows = [...stepsEl.children].map((li) => li.getBoundingClientRect()),
+    box = pop.offsetParent?.getBoundingClientRect(),
+    x0 = Math.min(pr.left, sr.left, ...rows.map((r) => r.left)),
+    x1 = Math.max(pr.right, sr.right, ...rows.map((r) => r.right));
+  if (box && (x0 < pr.left - 0.5 || x1 > pr.right + 0.5)) {
+    const cs = getComputedStyle(pop.offsetParent);
+    pop.style.left = Math.round((x0 - box.left - parseFloat(cs.borderLeftWidth)) * 10) / 10 + 'px';
+    pop.style.right = Math.round((box.right - x1 - parseFloat(cs.borderRightWidth)) * 10) / 10 + 'px';
+    pr = pop.getBoundingClientRect();
+  }
   for (const li of stepsEl.children) {
     const r = li.getBoundingClientRect();
     if (r.top < pr.top - 1 && r.bottom > pr.top + 1) {
@@ -1915,7 +1955,7 @@ function fillLawCard(cfg) {
     `<p class="lc-when">${esc(legalKindWords(l))} · ${esc(when)}${link ? `<span class="gap-pill" title="The first law our records link to this event">${esc(linkText(link.g))}</span>` : ''}</p>` +
     (l.soft_law ? '' : `<p class="lc-bind">${esc(binds)}</p>`) +
     (link ? '' : `<p class="lc-bind">General background: our records do not pair this event with a later law.</p>`) +
-    `<p class="lc-src"><span class="lc-cite"><b>Source:</b> ${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span></p>` +
+    `<p class="lc-src"><span class="lc-cite"><b>Source:</b> <span class="lc-ct">${esc((l.citation || '').replace(/\s*https?:\/\/\S+/g, ''))}</span></span></p>` +
     `<div class="lc-acts"><button type="button" class="btn small" id="lcTimeline"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>See it on the timeline</button>` +
     `${src}<button type="button" class="btn small quiet" id="lcClose">Close</button></div>`;
   lawCard.querySelector('#lcClose').onclick = () => (toggleLawCard(false), lawBtn.focus());
