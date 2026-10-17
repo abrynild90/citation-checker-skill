@@ -1290,7 +1290,7 @@ function fitStepsClosed() {
   }
   setLede(0);
   fitDesktop();
-  asideBody.classList.toggle('pin', WIDE.matches && !expanded); // the source and the related law rest at the foot of the column
+  asideBody.classList.toggle('pin', !expanded); // the source and the related law rest at the foot of the column (every desktop width: a short scene no longer leaves a blank band under its source)
   const li = stepsEl.children[Math.max(0, stepIdx)];
   if (li && stepIdx >= 0) followStep(li, true);
   else if (stepIdx < 0) stepsEl.scrollTop = 0;
