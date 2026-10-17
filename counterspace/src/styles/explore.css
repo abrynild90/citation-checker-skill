@@ -8,6 +8,18 @@
 @media (min-width:1200px){.chapter-head.sub>:is(h3,h4){grid-row:1;max-width:none}}
 /* a chart's own lede is one step quieter than a chapter's, whatever the screen width */
 .chapter-head.sub>.lede{font:400 clamp(16px,1.25vw,19px)/1.55 var(--serif)}
+/* the chart's one-sentence takeaway sits in its heading box: under the heading at the left, while the lede runs down the right beside both (it spans the first two rows, the
+   second one flexible), so the gold rule is a step under the heading, not under the height of a three-line lede */
+@media (min-width:1200px){
+  .chapter-head.sub:has(>.takeaway){grid-template-rows:auto 1fr}
+  .chapter-head.sub:has(>.takeaway)>.lede{grid-row:1 / span 2}
+  .chapter-head.sub>.takeaway{grid-column:1;grid-row:2;align-self:start;margin:var(--s-1) 0 0}
+  /* chart B: its one-line note about how states count sits under the lede, level with the end of the takeaway */
+  #chartB .chapter-head.sub{grid-template-rows:auto 1fr auto}
+  #chartB .chapter-head.sub>.takeaway{grid-row:2 / span 2}
+  #chartB .chapter-head.sub>.lede{grid-row:1 / span 2}
+  #chartB .chapter-head.sub>.note{grid-column:2;grid-row:3;margin:0}
+}
 section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5);padding-top:var(--s-6)}
 
 /* ---- what the pattern shows */

@@ -151,7 +151,15 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .ref-foot>.record-find{flex:0 0 auto;margin:0;padding:0;border:0;border-radius:0;background:none}
 .ref-foot>.record-find[open]{flex:1 0 100%}
 .ref-foot>.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans)}
-.ref-foot>.record-find>.record-tools,.ref-foot>.record-find>.state-choose{margin-top:var(--s-3)}
+.ref-foot>.record-find>.rec-body{margin-top:var(--s-3)}
+/* opened, wide: the fields are one narrow column at the left and the chosen record fills the rest beside them, instead of a short form over a record with blank space at its right */
+@media (min-width:1100px){
+  .record-find[open]>.rec-body{display:grid;grid-template-columns:minmax(0,24rem) minmax(0,1fr);column-gap:var(--s-7);align-items:start}
+  .record-find[open]>.rec-body>:is(.record-tools,.state-choose,.record-count){grid-column:1}
+  .record-find[open]>.rec-body>.record-tools{grid-template-columns:minmax(0,1fr)}
+  .record-find[open]>.rec-body>.record-count{margin:0}
+  .record-find[open]>.rec-body>.record-result{grid-column:2;grid-row:1 / span 3;border-top:0;padding-top:0}
+}
 @media (min-width:641px){.ref-foot{align-items:center}}
 
 /* short blurbs and ledes never leave a single word alone on their last line */

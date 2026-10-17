@@ -21,7 +21,7 @@ function finder(id, entries, render = card) {
   const section = document.getElementById(id),
     fold = document.createElement('details');
   fold.className = 'record-find';
-  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div>`;
+  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="rec-body"><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div></div>`;
   section.querySelector('.refold').before(fold);
   const input = fold.querySelector('input'),
     select = fold.querySelector('select'),
@@ -87,7 +87,7 @@ function capabilities() {
   ].sort();
   const fold = document.createElement('details');
   fold.className = 'record-find';
-  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div>`;
+  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><div class="rec-body"><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div></div>`;
   document.querySelector('#chartB .refold').before(fold);
   const result = fold.querySelector('.record-result');
   fold.querySelector('select').onchange = (e) => {
