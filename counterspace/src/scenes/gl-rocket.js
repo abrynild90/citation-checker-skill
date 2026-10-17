@@ -828,11 +828,11 @@ export const rocketMethods = {
           if (i === 0) {
             sp.position.z = 0.5 * (D.zNose - D.zN);
             sp.scale.setScalar(0.044 * ck);
-            sp.material.opacity = 0.24 * on;
+            sp.material.opacity = 0.2 * on;
           } else {
-            sp.position.z = -0.008 - 0.0065 * i * ck;
-            sp.scale.setScalar((0.022 - 0.0019 * i) * ck);
-            sp.material.opacity = (0.34 - 0.036 * i) * on;
+            sp.position.z = -0.004 - 0.0048 * i * ck;
+            sp.scale.setScalar((0.030 - 0.0020 * i) * ck);
+            sp.material.opacity = (0.24 - 0.027 * i) * on;
           }
         });
       }
