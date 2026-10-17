@@ -92,6 +92,8 @@
 #chartC #quoteC{margin-top:var(--s-5)}
 
 :is(#chartC,#chartR) .tools p.note{max-width:66ch}
+/* the count of highlighted operations is a line of its own under the controls (as a third column it wrapped to three lines and sat higher than the controls beside it) */
+#chartR .tools p#noteR2{flex:1 1 100%;max-width:none}
 
 .b-read{margin:var(--s-2) 0 0;max-width:var(--measure)}
 .b-read b{font-weight:600;color:var(--text)}
