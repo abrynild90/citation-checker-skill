@@ -17,11 +17,13 @@ const title = (e) => e.system || e.target_system || e.label || e.id;
 const label = (e) => `${(e.date || e.start).slice(0, 4)} · ${e.state || e.actor || ''} · ${title(e)}`;
 const card = (e) => (e.domain === 'kinetic' ? kinCard(e) : e.domain === 'non_kinetic' ? nkCard(e) : coCard(e, false));
 
-function finder(id, entries, render = card) {
+const emptyNote = (icon, text) => `<div class="rec-empty"><svg class="ico" aria-hidden="true"><use href="#i-${icon}"/></svg><p>${text}</p></div>`;
+
+function finder(id, entries, render = card, hint = 'Choose an entry to see its date, place and source here') {
   const section = document.getElementById(id),
     fold = document.createElement('details');
   fold.className = 'record-find';
-  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="rec-body"><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div></div>`;
+  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="rec-body"><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div>${emptyNote('search', hint)}</div>`;
   section.querySelector('.refold').before(fold);
   const input = fold.querySelector('input'),
     select = fold.querySelector('select'),
@@ -87,7 +89,7 @@ function capabilities() {
   ].sort();
   const fold = document.createElement('details');
   fold.className = 'record-find';
-  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><div class="rec-body"><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div></div>`;
+  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><div class="rec-body"><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div>${emptyNote('globe', 'Choose a state to see its 2020s assessment of five capabilities here')}</div>`;
   document.querySelector('#chartB .refold').before(fold);
   const result = fold.querySelector('.record-result');
   fold.querySelector('select').onchange = (e) => {
@@ -119,6 +121,7 @@ export function mountReading() {
         law = pair && byId[pair.law];
       return `<h5>${esc(title(e))}</h5><p>${esc(fmtD(e))}</p>${law ? `<p><b>${pair.months} months</b> to the first later legal step linked in these records.</p>${legalCard(law)}` : '<p>No later legal step is paired with this event in these records.</p>'}<p class="note">Chronology and a recorded connection, not a finding of causation.</p>`;
     },
+    'Choose an event to see the months until the first later legal step here',
   );
   capabilities();
   const nav = document.createElement('nav');
