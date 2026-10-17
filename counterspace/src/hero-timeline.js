@@ -396,7 +396,7 @@ function build(stage) {
   const inside = (b) => b.x0 >= edge - 4 && b.x1 <= W - edge + 4 && b.y0 >= 6 && b.y1 <= yL - 24;
   // ---- zone names, as close to the right edge (the left on a phone) as the marks and notes allow; a phone gives them the first choice of room
   const zones = [
-    { ts: ['Low Earth orbit (up to 2,000 km)', 'Low Earth orbit'], a: LEO[1], order: ['above', 'below'] },
+    { ts: ['Low Earth orbit (up to 2,000 km)', 'Low Earth orbit'], a: LEO[1], order: phone ? ['above', 'below'] : ['above', 'below', 'inside'] }, // 'inside': at the band's lower edge, where the links row and the notes leave no room above it
     { ts: ['Medium Earth orbit (GPS)'], a: MEO, order: phone ? ['below', 'above'] : ['above', 'below'] },
     { ts: ['Geostationary orbit (35,786 km)', 'Geostationary orbit'], a: GEO, order: ['above', 'below'] },
   ];
@@ -409,7 +409,7 @@ function build(stage) {
           for (const where of z.order) {
             const px = phone ? edge + shift : W - edge - shift,
               yy = yAlt(z.a, px),
-              base = where === 'above' ? yy - 7 : yy + 18,
+              base = where === 'above' ? yy - 7 : where === 'inside' ? yAlt(LEO[0], px) - 6 : yy + 18,
               box = { x0: phone ? px : px - w, x1: phone ? px + w : px, y0: base - 13, y1: base + 3 };
             if (!inside(box) || clash(box)) continue;
             text(svg, { x: px, y: base, class: 'ht-zone', 'text-anchor': phone ? 'start' : 'end' }, t);
