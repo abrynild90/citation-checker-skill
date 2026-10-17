@@ -211,9 +211,10 @@ function build(stage) {
   // The words sit in the empty sky at the upper left. The height scale is chosen so the marks of the first decades stay clear below them.
   const rect = stage.getBoundingClientRect(),
     words = wide
-      ? ['.hero-title', '.hero-text .lede'].map((s) => {
-          const node = document.querySelector(s),
-            r = node.getBoundingClientRect();
+      ? ['.hero-title', '.hero-text .lede', '.hero-jumps'].map((s) => {
+          const node = document.querySelector(s) || document.querySelector('.hero-title'),
+            kids = s === '.hero-jumps' ? [...node.children].map((c) => c.getBoundingClientRect()) : [], // the links row is as wide as its column: only the links themselves are in the way
+            r = kids.length ? { left: Math.min(...kids.map((k) => k.left)), right: Math.max(...kids.map((k) => k.right)), top: kids[0].top, bottom: kids[0].bottom } : node.getBoundingClientRect();
           let dy = 0; // the words rise into place when the page opens: measure them where they will rest, not where they are now
           for (let n = node; n && n !== document.body; n = n.parentElement) {
             const t = getComputedStyle(n).transform;
@@ -222,7 +223,7 @@ function build(stage) {
           return { x0: r.left - rect.left - 14, y0: r.top - dy - rect.top - 8, x1: r.right - rect.left + 14, y1: r.bottom - dy - rect.top + 10 };
         })
       : [],
-    wordsBottom = words.length ? Math.max(...words.map((b) => b.y1)) : 0,
+    wordsBottom = words.length ? Math.max(...words.slice(0, 2).map((b) => b.y1)) : 0, // the links row under the text is an obstacle for the zone names and notes but does not move the height scale
     pxDec = wide ? Math.min(W >= 1800 ? 176 : 118, (yL - wordsBottom - 24) / Math.log10(1600 / ALT_MIN)) : (yL - 30) / Math.log10(ALT_MAX / ALT_MIN),
     yAlt = (a, px) => limbY(px) - pxDec * Math.log10(a / ALT_MIN),
     steps = d3.range(0, W + 1, 24).concat(W);
