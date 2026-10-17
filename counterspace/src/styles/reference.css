@@ -175,7 +175,9 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
   .record-find[open]>.rec-body>:is(.record-result,.rec-empty){grid-column:2;grid-row:1 / span 3;align-self:stretch;box-sizing:border-box;min-height:11rem;margin:0;padding:var(--s-4) var(--s-5);border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
   .record-find[open]>.rec-body>.record-result:not([hidden])+.rec-empty{display:none}
   .record-find[open]>.rec-body>.rec-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s-2);text-align:center;color:var(--muted);font:400 15px/1.5 var(--sans)}
-  .rec-empty .ico{width:28px;height:28px;opacity:.55}
+  .rec-empty::before{content:"";width:28px;height:28px;background:currentColor;opacity:.55;-webkit-mask:var(--rec-icon) center / contain no-repeat;mask:var(--rec-icon) center / contain no-repeat}
+  .rec-empty[data-i="search"]{--rec-icon:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2210.8%22 cy=%2210.8%22 r=%226.2%22/%3E%3Cpath d=%22M15.4 15.4L20 20%22/%3E%3C/svg%3E")}
+  .rec-empty[data-i="globe"]{--rec-icon:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%228.6%22/%3E%3Cpath d=%22M3.4 12h17.2%22/%3E%3Cpath d=%22M12 3.4c2.4 2.4 3.6 5.3 3.6 8.6s-1.2 6.2-3.6 8.6c-2.4-2.4-3.6-5.3-3.6-8.6S9.6 5.8 12 3.4z%22/%3E%3C/svg%3E")}
   .rec-empty p{margin:0;max-width:26ch;text-wrap:balance}
   .record-find[open]>.rec-body>.record-result>:first-child{margin-top:0}
   .record-find[open]>.rec-body>.record-result>:last-child{margin-bottom:0}

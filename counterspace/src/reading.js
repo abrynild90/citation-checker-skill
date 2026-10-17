@@ -17,7 +17,8 @@ const title = (e) => e.system || e.target_system || e.label || e.id;
 const label = (e) => `${(e.date || e.start).slice(0, 4)} · ${e.state || e.actor || ''} · ${title(e)}`;
 const card = (e) => (e.domain === 'kinetic' ? kinCard(e) : e.domain === 'non_kinetic' ? nkCard(e) : coCard(e, false));
 
-const emptyNote = (icon, text) => `<div class="rec-empty"><svg class="ico" aria-hidden="true"><use href="#i-${icon}"/></svg><p>${text}</p></div>`;
+// the empty well's icon is drawn in CSS (reference.css, [data-i]), not as an <svg>, so the chart sections' SVG markup (and the QA hashes of it) stay as they were
+const emptyNote = (icon, text) => `<div class="rec-empty" data-i="${icon}"><p>${text}</p></div>`;
 
 function finder(id, entries, render = card, hint = 'Choose an entry to see its date, place and source here') {
   const section = document.getElementById(id),
