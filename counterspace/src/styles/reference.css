@@ -120,8 +120,8 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 
 /* Record readers expose the same sources and uncertainty as the visual marks. */
 .record-find{margin:16px 0 20px;padding:0 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface)}
-.record-find>summary{display:list-item;cursor:pointer;min-height:48px;padding:12px 0;font:600 14px/1.5 var(--sans);color:var(--accent)}
-.record-find>summary>span{margin-left:8px;font-weight:400;color:var(--muted);white-space:nowrap}
+.record-find>summary{display:flex;align-items:center;gap:var(--s-2);list-style:none;cursor:pointer;min-height:48px;padding:12px 0;font:600 14px/1.5 var(--sans);color:var(--accent)}
+.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans);white-space:nowrap}
 .record-tools{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(0,1.3fr);gap:16px}
 .record-tools label,.state-choose{display:grid;gap:6px;font:500 14px/1.5 var(--sans);color:var(--text)}
 .record-find input,.record-find select{min-width:0;width:100%;min-height:44px;font:400 16px/1.4 var(--sans);padding:10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
@@ -160,29 +160,40 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
    baseline; opened, it takes the row's whole width and its fields drop under its own button. */
 .ref-foot>.record-find{flex:0 0 auto;margin:0;padding:0;border:0;border-radius:0;background:none}
 .ref-foot>.record-find[open]{flex:1 0 100%}
-.ref-foot>.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans)}
 .ref-foot>.record-find>.rec-body{margin-top:var(--s-3)}
+.record-find[open]>.rec-body{padding-bottom:0}
 /* opened, wide: the fields are one narrow column at the left and the chosen record sits in a well beside them, from the start (an empty well says what to do); the panel is only as wide as the two,
    so there is no empty white panel to the right. Below 1100 px the fields and the record stack and the empty well is not shown. */
 .rec-empty{display:none}
 .record-find>.rec-body{padding-bottom:var(--s-4)}.ref-foot>.record-find>.rec-body{padding-bottom:0}
 @media (min-width:1100px){
-  .record-find[open]{width:fit-content;max-width:100%}
-  .record-find[open]>.rec-body{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,42rem);column-gap:var(--s-6);align-items:start}
-  .record-find[open]>.rec-body>:is(.record-tools,.state-choose,.record-count){grid-column:1}
+  .record-find[open]>.rec-body{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,1fr);column-gap:var(--s-6);align-items:start}
+  .record-find[open]>.rec-body>:is(.record-tools,.state-choose,.record-count,.rec-clear){grid-column:1}
+  .record-find[open]>.rec-body>.rec-clear{margin-top:var(--s-3);justify-self:start}
   .record-find[open]>.rec-body>.record-tools{grid-template-columns:minmax(0,1fr)}
   .record-find[open]>.rec-body>.record-count{margin:var(--s-3) 0 0}
-  .record-find[open]>.rec-body>:is(.record-result,.rec-empty){grid-column:2;grid-row:1 / span 3;align-self:stretch;box-sizing:border-box;min-height:11rem;margin:0;padding:var(--s-4) var(--s-5);border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+  .record-find[open]>.rec-body>:is(.record-result,.rec-empty){grid-column:2;grid-row:1 / span 4;align-self:stretch;box-sizing:border-box;min-height:11rem;margin:0;padding:var(--s-4) var(--s-5);border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
   .record-find[open]>.rec-body>.record-result:not([hidden])+.rec-empty{display:none}
   .record-find[open]>.rec-body>.rec-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s-2);text-align:center;color:var(--muted);font:400 15px/1.5 var(--sans)}
   .rec-empty::before{content:"";width:28px;height:28px;background:currentColor;opacity:.55;-webkit-mask:var(--rec-icon) center / contain no-repeat;mask:var(--rec-icon) center / contain no-repeat}
   .rec-empty[data-i="search"]{--rec-icon:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2210.8%22 cy=%2210.8%22 r=%226.2%22/%3E%3Cpath d=%22M15.4 15.4L20 20%22/%3E%3C/svg%3E")}
   .rec-empty[data-i="globe"]{--rec-icon:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%228.6%22/%3E%3Cpath d=%22M3.4 12h17.2%22/%3E%3Cpath d=%22M12 3.4c2.4 2.4 3.6 5.3 3.6 8.6s-1.2 6.2-3.6 8.6c-2.4-2.4-3.6-5.3-3.6-8.6S9.6 5.8 12 3.4z%22/%3E%3C/svg%3E")}
   .rec-empty p{margin:0;max-width:26ch;text-wrap:balance}
+  .record-find[open]>.rec-body>.record-result{max-width:none}
   .record-find[open]>.rec-body>.record-result>:first-child{margin-top:0}
   .record-find[open]>.rec-body>.record-result>:last-child{margin-bottom:0}
 }
 @media (min-width:641px){.ref-foot{align-items:center}}
+/* All five readers (the altitude chart's and the four in the evidence band) open the same way: one box across the whole column (the fields at the left, the record's well taking all
+   the width that is left), and the opening row is plain text inside it, not a second pill. Closed, the altitude chart's is a bar and the others are pills in their row. */
+:is(.ref-foot,.ref-band,main) .record-find[open]{display:block;flex:1 0 100%;width:auto;max-width:none;box-sizing:border-box;margin:var(--s-3) 0 var(--s-4);padding:0 var(--s-4) var(--s-4);border:1px solid var(--line-strong);border-radius:12px;background:var(--surface)}
+.ref-foot>.record-find[open]{margin:0}
+.ref-foot>.record-find[open]>summary{border:0;background:none;border-radius:0;padding:0;min-height:48px}
+.ref-foot>.record-find[open]>summary:hover{background:none}
+.ref-foot>.record-find[open]>.rec-body{margin-top:0;padding-bottom:0}
+.rec-clear{margin-top:var(--s-2)}
+.rec-clear:disabled{opacity:.5;cursor:default}
+@media (min-width:1100px){.record-find[open]>.rec-body>.rec-empty{min-height:12rem}}
 
 /* short blurbs and ledes never leave a single word alone on their last line */
 .chapter-head>.lede,.chapter-head>.takeaway,.pat-t,.lede{text-wrap:balance}

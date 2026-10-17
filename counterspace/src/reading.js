@@ -24,12 +24,13 @@ function finder(id, entries, render = card, hint = 'Choose an entry to see its d
   const section = document.getElementById(id),
     fold = document.createElement('details');
   fold.className = 'record-find';
-  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="rec-body"><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div>${emptyNote('search', hint)}</div>`;
+  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="rec-body"><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><button type="button" class="btn small rec-clear" disabled>Clear</button><div class="record-result" hidden></div>${emptyNote('search', hint)}</div>`;
   section.querySelector('.refold').before(fold);
   const input = fold.querySelector('input'),
     select = fold.querySelector('select'),
     result = fold.querySelector('.record-result'),
-    count = fold.querySelector('.record-count');
+    count = fold.querySelector('.record-count'),
+    clear = fold.querySelector('.rec-clear');
   const ordered = [...entries].sort((a, b) => (a.date || a.start).localeCompare(b.date || b.start));
   function fill() {
     const words = input.value.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
@@ -43,10 +44,17 @@ function finder(id, entries, render = card, hint = 'Choose an entry to see its d
     count.textContent = `${matches.length} of ${ordered.length} records${matches.length ? '' : '. Try a different name, state or year'}`;
     result.hidden = true;
     result.replaceChildren();
+    clear.disabled = !input.value;
   }
   input.addEventListener('input', fill);
+  clear.addEventListener('click', () => {
+    input.value = '';
+    fill();
+    input.focus();
+  });
   select.addEventListener('change', () => {
     const e = byId[select.value];
+    clear.disabled = !e && !input.value;
     result.hidden = !e;
     result.innerHTML = e ? render(e) : '';
     if (!e) return;
@@ -90,11 +98,19 @@ function capabilities() {
   ].sort();
   const fold = document.createElement('details');
   fold.className = 'record-find';
-  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><div class="rec-body"><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div>${emptyNote('globe', 'Choose a state to see its 2020s assessment of five capabilities here')}</div>`;
+  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><div class="rec-body"><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><button type="button" class="btn small rec-clear" disabled>Clear</button><div class="record-result" hidden></div>${emptyNote('globe', 'Choose a state to see its 2020s assessment of five capabilities here')}</div>`;
   document.querySelector('#chartB .refold').before(fold);
   const result = fold.querySelector('.record-result');
-  fold.querySelector('select').onchange = (e) => {
+  const pick = fold.querySelector('select'),
+    clear = fold.querySelector('.rec-clear');
+  clear.onclick = () => {
+    pick.value = '';
+    pick.onchange({ target: pick });
+    pick.focus();
+  };
+  pick.onchange = (e) => {
     const state = e.target.value;
+    clear.disabled = !state;
     result.hidden = !state;
     result.innerHTML = state
       ? `<h5>${esc(state)} · 2020s</h5><dl>${Object.entries(names)
@@ -120,7 +136,7 @@ export function mountReading() {
     (e) => {
       const pair = pairs.get(e.id),
         law = pair && byId[pair.law];
-      return `<h5>${esc(title(e))}</h5><p>${esc(fmtD(e))}</p>${law ? `<p><b>${pair.months} months</b> to the first later legal step linked in these records.</p>${legalCard(law)}` : '<p>No later legal step is paired with this event in these records.</p>'}<p class="note">Chronology and a recorded connection, not a finding of causation.</p>`;
+      return `<h5>${esc(title(e))}</h5><p>${esc(fmtD(e.date ? e : { ...e, date: e.start }))}</p>${law ? `<p><b>${pair.months} months</b> to the first later legal step linked in these records.</p>${legalCard(law)}` : '<p>No later legal step is paired with this event in these records.</p>'}<p class="note">Chronology and a recorded connection, not a finding of causation.</p>`;
     },
     'Choose an event to see the months until the first later legal step here',
   );
