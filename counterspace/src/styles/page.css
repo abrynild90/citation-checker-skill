@@ -356,6 +356,15 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 /* reading measure on wide screens (last in the cascade so no section rule widens it again) */
 .src-note,.orbit-note{max-width:52ch}
 ul.legend li.kgroup{max-width:72ch}
-#methodBody :is(p,li){max-width:60ch}
+#methodBody :is(p,li):not(details details *){max-width:60ch}
 .ref-band :is(p,li):not(.kgroup):not(.st-list li):not(.pat-big *){max-width:60ch}
 .q-out,.q-sumreal,.q-sum>*{max-width:62ch} /* quiz answers and the summary keep a readable line length (the reserved ghost copy shares the class, so the reserved height still matches) */
+
+/* chapter-C notes: two columns of the reading measure, flush left, so the pair reads as one block; the sub-chapter lede fills its column at a size that keeps ~70 characters a line */
+@media (min-width:1100px){#chartC .callout-row{grid-template-columns:repeat(2,minmax(0,60ch));justify-content:start}}
+.chapter-head.sub>.lede{max-width:none;font-size:clamp(17px,1.4vw,20px)}
+.q-slot{max-width:calc(62ch + 2 * var(--s-4))} /* the reserved answer slot has the same measure as the answer that fills it */
+@media (min-width:1600px){.chapter-head.sub>.lede{max-width:62ch}}
+
+/* opened 'How to read this chart' sections: prose flows in two measure-wide columns on wide screens instead of one narrow column beside empty space */
+@media (min-width:1200px){.refold .rf-sec{columns:2 26rem;column-gap:var(--s-6)}.refold .rf-sec>:is(h3,h4,h5,.tscroll,table,svg,.dl-row,.scroll-hint){column-span:all}.refold .rf-sec>*{break-inside:avoid}}

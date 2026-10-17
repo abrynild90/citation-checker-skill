@@ -221,5 +221,5 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
 
 /* running text in the page body keeps a readable line length on wide screens (about 75 characters), whatever column it sits in */
-.wrap :is(p,li):not(.callout):not(.kgroup):not(.legend *):not(.st-list li):not(.quiz *):not(.q *):not(.pat-big *):not(.pb-pairs *){max-width:58ch}
+.wrap :is(p,li):not(.callout):not(.kgroup):not(.legend *):not(.st-list li):not(.quiz *):not(.q *):not(.pat-big *):not(.pb-pairs *):not(.chapter-head.sub *){max-width:58ch}
 @media (min-width:1600px){:is(#chartC,#chartR,#chartB) .callout,.callout-row>.callout,.callout{max-width:60ch}}

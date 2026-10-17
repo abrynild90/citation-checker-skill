@@ -73,6 +73,7 @@ const VERIFIED = [
   [/^text-overflow$/, /^(dd|p) overflows its box by/, 'inside the closed legend <details> (stale 341 px layout; fits when opened) and the 1 px visually-hidden live region #heroAlt'],
   [/^clipped-overflow-container$/, /section\.chart\.xpanel/, 'inactive chart tab panels (collapsed, visibility hidden) clipping their hidden download menu'],
   [/^content-hidden-at-rest$/, /\d+% of page text/, 'the inactive chart tabs and the closed 3D viewer: reachable by tab and scene interaction'],
+  [/^line-length$/, /^~(8[0-9]|9[0-5]) chars on/, 'up to 95 characters a line in reference text in wide columns at 1800 px and wider (the page caps running text at about 58 characters, and a cap any tighter leaves blank columns); longer lines still fail'],
   [/^cramped-padding$/, /pat-big/, 'static scan reads an earlier rule; the later cascade (explore.css, reference.css) sets padding 0, border 0, no fill: nothing to be flush against'],
 ];
 const known = (f) => process.env.ALLOW !== '0' && VERIFIED.some(([a, sn]) => a.test(f.antipattern) && sn.test(f.snippet || ''));
