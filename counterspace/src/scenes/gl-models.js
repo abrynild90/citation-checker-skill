@@ -133,10 +133,10 @@ function hullCanvas() {
     Y = (v) => Math.round((1 - v) * H);
   // rows (bottom to top): v 0 .. 0.15 boot-topping and the hull under it, then the side
   const grad = g.createLinearGradient(0, Y(0.15), 0, 0);
-  grad.addColorStop(0, '#444c57'); // low on the side: in the shade of the flare
-  grad.addColorStop(0.28, '#68717d');
-  grad.addColorStop(0.7, '#808994');
-  grad.addColorStop(1, '#929ba6'); // the sunlit upper strake
+  grad.addColorStop(0, '#3b434e'); // low on the side: in the shade of the flare
+  grad.addColorStop(0.28, '#5d6672');
+  grad.addColorStop(0.7, '#767f8b');
+  grad.addColorStop(1, '#87909b'); // the sunlit upper strake
   g.fillStyle = grad;
   g.fillRect(0, 0, W, Y(0.15));
   const bt = g.createLinearGradient(0, Y(0.15), 0, H);
@@ -1370,11 +1370,11 @@ export const modelMethods = {
     const paint = (c, k = 0.3, op = {}) => this._mat(c, { metalness: 0.22, roughness: 0.5, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.9, ...op });
     const hullT = ctex(hullCanvas()),
       deckT = ctex(deckCanvas());
-    const hullMat = this._mat(0xffffff, { map: hullT, emissiveMap: hullT, emissive: 0xffffff, emissiveIntensity: 0.19, metalness: 0.3, roughness: 0.4, envMapIntensity: 1.3 }),
+    const hullMat = this._mat(0xffffff, { map: hullT, emissiveMap: hullT, emissive: 0xffffff, emissiveIntensity: 0.15, metalness: 0.3, roughness: 0.4, envMapIntensity: 1.3 }),
       deckMat = this._mat(0xffffff, { map: deckT, emissiveMap: deckT, emissive: 0xffffff, emissiveIntensity: 0.2, metalness: 0.1, roughness: 0.75, envMapIntensity: 0.5 }),
       rim = paint(0xa9b0ba, 0.4),
-      houseM = paint(0x949da8, 0.26, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.2 }),
-      houseM2 = paint(0x858e9a, 0.24, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.2 }),
+      houseM = paint(0x8e97a3, 0.26, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.2 }),
+      houseM2 = paint(0x7f8894, 0.24, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.2 }),
       roofM = paint(0xb7bdc6, 0.34),
       glass = paint(0x0b1017, 0.35, { metalness: 0.55, roughness: 0.2, envMapIntensity: 1.5 }),
       frame = paint(0x4b5560, 0.3),
