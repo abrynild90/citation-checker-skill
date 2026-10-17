@@ -155,6 +155,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 /* opened, wide: the fields are one narrow column at the left and the chosen record sits in a well beside them, from the start (an empty well says what to do); the panel is only as wide as the two,
    so there is no empty white panel to the right. Below 1100 px the fields and the record stack and the empty well is not shown. */
 .rec-empty{display:none}
+.record-find>.rec-body{padding-bottom:var(--s-4)}.ref-foot>.record-find>.rec-body{padding-bottom:0}
 @media (min-width:1100px){
   .record-find[open]{width:fit-content;max-width:100%}
   .record-find[open]>.rec-body{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,42rem);column-gap:var(--s-6);align-items:start}
