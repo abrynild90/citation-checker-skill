@@ -110,9 +110,9 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .law-choice .lc-h{margin:0 0 var(--s-1);font:600 13px/1.4 var(--sans);color:var(--muted)}.law-choice .src{max-width:60ch;margin:0}
 .law-choice .lc-acts{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-top:var(--s-3)}
 .law-choice .lc-main>:last-child{margin-bottom:0}.law-choice .lc-side{margin-top:var(--s-3)}
-/* wide: the card takes the heading's whole width on its own row, split on the heading's own two columns (same 72 px gap, same 16 px inset): the name, date and what it is under the find box, the source and actions under the lede */
+/* wide: the card takes its own row, as wide as its two columns of text need (a 1.2 to 1 split: the name, date and what it is at the left, the source and actions at the right; it stops at 1100 px so a very wide window does not leave it half empty) */
 @media (min-width:1100px){
-  #lawHead>.law-choice{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--s-8);align-items:start;max-width:none}
+  #lawHead>.law-choice{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);column-gap:var(--s-7);align-items:start;max-width:1100px}
   #lawHead>.law-choice[hidden]{display:none}
   .law-choice .lc-side{margin-top:0}
 }

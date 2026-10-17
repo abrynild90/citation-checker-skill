@@ -31,6 +31,8 @@
 /* wide windows: "How to read this chart" and "Scrub through time" sit under the lede, beside the takeaway, so the strip starts higher */
 @media (min-width:1100px){
   .law-intro{padding-top:var(--s-5)}
+  #lawHead{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} /* two real columns from here (the chapter heads have them from 1200): without them the lede and the key's row made a second, implicit column and the lede dropped under the opened card */
+  #lawHead>.lede{grid-column:2;grid-row:1} /* stays in its own area whatever opens under it (the key, the chosen law's card) */
   #lawHead>.takeaway{grid-column:1;grid-row:2;margin-top:var(--s-1)}
   #lawHead>.law-row{grid-column:2;grid-row:2;margin-top:var(--s-3)}
   #lawHead .keybox{margin-bottom:0}
