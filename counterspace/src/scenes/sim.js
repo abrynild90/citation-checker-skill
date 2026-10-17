@@ -1117,7 +1117,7 @@ export function buildSim(cfg) {
             pos: sm,
             // flight look (gl-rocket.js): ignition at launch (t0), landing at t1; burn is the fraction of the flight under thrust
             fx: { t0: a.t0, t1: a.t1, burn: a.rocket.burn ?? 0.35, alt0: 0, stand: !!a.rocket.pad, follow: !!a.rocket.follow, smokeK: a.rocket.smokeK,
-            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, plumeK: a.rocket.plumeK, plumeDeck: a.rocket.plumeDeck, seed: a.t0 * 10, marker: kvMark },
+            smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA, smokeLocal: a.rocket.smokeLocal, smokeTopK: a.rocket.smokeTopK, smokeWind: a.rocket.smokeWind, stage: a.rocket.stage, plumeK: a.rocket.plumeK, plumeDeck: a.rocket.plumeDeck, coastGlow: a.rocket.coastGlow, seed: a.t0 * 10, marker: kvMark },
           });
         } else
           items.push({

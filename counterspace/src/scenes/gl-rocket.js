@@ -380,6 +380,13 @@ export const rocketMethods = {
       sepFlash = spr(0xfff6e0, 0), // the flash of the separation charges at the interstage
       bloom = spr(0xff7a2a, 0); // a wide, faint warm halo round the whole exhaust (dense air only)
     rig.add(bloom, outer, core, glow, hot, flash);
+    // coast glow (fx.coastGlow, opt-in): a soft halo round the vehicle and a short fading comet tail behind it, so a coasting rocket (no flame) still reads at a small size
+    const coast = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+      const s = spr(0xffb49a, 0);
+      s.visible = false;
+      rig.add(s);
+      return s;
+    });
     rig.position.z = D.zN;
     inner.add(rig);
     // nose heating: a faint glow at the tip, driven with the nose material's emissive
@@ -405,7 +412,7 @@ export const rocketMethods = {
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
     inner.add(sepFlash);
-    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, bloom, sepFlash, bell, bellU, heat, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
+    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, bloom, sepFlash, bell, bellU, heat, coast, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -805,6 +812,30 @@ export const rocketMethods = {
       rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)));
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
       rk.glow.position.z = -0.003;
+      // coast glow (opt-in { k, color }): a halo round the body and a comet tail behind it; it grows in after ignition and is gone with the vehicle
+      {
+        const cg = fx.coastGlow,
+          on = cg && vis && !hide ? smooth(clamp01((t - fx.t0) / 0.05)) * (1 - 0.65 * thr) : 0,
+          ck = cg?.k ?? 1;
+        rk.coast.forEach((sp, i) => {
+          sp.visible = on > 0.01;
+          if (!sp.visible) return;
+          if (cg.color && !sp.userData.tinted) {
+            sp.material.color.set(cg.color);
+            sp.userData.tinted = true;
+          }
+          // sprite 0: the halo, centred on the body (the rig sits at the nozzle: the body's middle is ~0.5 length ahead); 1..4: the tail, aft of the nozzle, smaller and fainter
+          if (i === 0) {
+            sp.position.z = 0.5 * (D.zNose - D.zN);
+            sp.scale.setScalar(0.044 * ck);
+            sp.material.opacity = 0.24 * on;
+          } else {
+            sp.position.z = -0.008 - 0.0065 * i * ck;
+            sp.scale.setScalar((0.022 - 0.0019 * i) * ck);
+            sp.material.opacity = (0.34 - 0.036 * i) * on;
+          }
+        });
+      }
       // bloom: wide and warm while the motor burns in dense air (thins out with height), brightest with the ignition flash
       rk.bloom.visible = vis && thr > 0.004 && !hide;
       rk.bloom.scale.setScalar((0.07 + 0.025 * low) * ak * (1 + 0.5 * (pk - 1)));
