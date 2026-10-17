@@ -34,7 +34,7 @@ export const BURNT_FROST = {
   liveOff: { Impact: [-108, -20], 'Larger pieces': [168, -62], 'USS Lake Erie': [150, -4] }, // the collision frame: Impact to the left, the falling pieces to the right
   offSteps: {
     Impact: [[0, -108, -20], [0.9, -70, -48]], // the collision frame: to the left; the final count (from 0.9) sits close to the limb, clear of Japan's city lights
-    'SM-3': [[0, 130, 20], [0.09, -165, -34], [0.24, -165, -34], [0.36, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
+    'SM-3': [[0, 130, 20], [0.09, -150, -86], [0.24, -150, -86], [0.36, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
     'USA-193': [[0, -34, -80], [0.4, null]], // above and a little left of the satellite until the hit: a steady slot well clear of the SM-3 pill
   },
   camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
