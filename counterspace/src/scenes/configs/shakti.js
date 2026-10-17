@@ -30,6 +30,7 @@ export const SHAKTI = {
   fitSouthTo: 0.38, // after the hit the view returns to the side view (the burst and the debris stay framed)
   preDrift: { t0: 0.16, k: 0.1, out: 0.08 }, // a slow push-in while the vehicle waits on its pad (with the vapour venting and the tower light)
   fitSouth: 52, // the view is turned toward the south, so the vehicle on its pad stands upright in the frame (seen from the side of the Earth it lay on its side)
+  lookKKeys: IS_PHONE ? undefined : [null, null, null, 0.15, 0.08, 0.08], // desktop: after the hit the globe is centred in the frame, not pushed to the left edge by the debris at its right
   lookK: 0.9, // the Earth sits nearer the middle of the frame, not against its left edge
   lightsK: 0.55, // softer city lights: the fragments read as debris, not as another town
   fitFill: IS_PHONE ? 0.62 : 0.6, // the follow camera frames the launch and the target a little tighter, so the interceptor reads as a rocket
