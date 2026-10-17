@@ -139,7 +139,7 @@ function build(q, i) {
       k: Math.max(0.74, y / top),
     }),
     line = [one(ea, la, ya), one(eb, lb, yb)];
-  const verdict = (ok) => (ok ? 'Right. That one waited longest.' : `${miss(i)} The other one waited longest.`);
+  const verdict = (ok) => (ok ? 'Right. That one waited longer.' : `${miss(i)} The other one waited longer.`);
   return { opts, truth, line, verdict, scene: [longP[0], shortP[0]].map((id) => byId[id].scene_3d).find(Boolean) };
 }
 // After a wrong answer: the scene that shows the event, and whether it has been watched yet (in memory only).

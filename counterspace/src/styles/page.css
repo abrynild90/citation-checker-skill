@@ -373,3 +373,5 @@ ul.legend li.kgroup{max-width:72ch}
   :is(#chartA,#chartC,#chartR,#chartB,#lag) .refold .rf-sec>.legend{display:block;margin:0;break-inside:auto}
   .refold .rf-sec>.legend>li{break-inside:avoid;margin:0 0 var(--s-3)}
   .refold .rf-sec>p{margin:0 0 var(--s-3);break-inside:avoid}}
+/* opened record readers: the record text keeps a readable measure however wide the well is */
+.record-find[open]>.rec-body :is(p,dd,li){max-width:70ch}
