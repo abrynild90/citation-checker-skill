@@ -762,7 +762,7 @@ export const rocketMethods = {
         if (fx.plumeDeck && outerLen > 0) {
           const sh = this.dyn.find((d) => d.obj.userData.uSea)?.obj;
           if (sh) {
-            const fl = Math.min(1.004 + 0.0072 * sh.scale.x, Math.hypot(px, py, pz) - 0.0008),
+            const fl = Math.min(1.004 + 0.0082 * sh.scale.x, Math.hypot(px, py, pz) - 0.0008),
               c2 = px * px + py * py + pz * pz - fl * fl,
               d2 = b * b - c2;
             if (c2 > 0 && d2 > 0 && -b - Math.sqrt(d2) > 0) outerLen = Math.min(outerLen, (-b - Math.sqrt(d2)) / sc);
