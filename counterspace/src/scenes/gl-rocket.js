@@ -185,13 +185,14 @@ export const rocketMethods = {
   _rocketModel(color, style) {
     const T = this.T,
       slim = style === 'slim',
+      steel = style === 'steel', // the default vehicle with a white-and-steel nose (a Thor): the nose takes no paint colour, only the heat of the climb tints it
       asat = style === 'asat', // the default vehicle with a small dark kill vehicle in place of the nose cone (an air-launched anti-satellite missile)
       Kl = new Kit(T),
       Ku = new Kit(T),
       white = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
       whiteU = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
       tipCol = new T.Color(color).lerp(new T.Color(0xffffff), 0.1),
-      nose = this._mat(slim ? 0x566074 : tipCol.getHex(), { metalness: slim ? 0.55 : 0.2, roughness: slim ? 0.4 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
+      nose = this._mat(slim ? 0x566074 : steel ? 0xc4cad4 : tipCol.getHex(), { metalness: slim ? 0.55 : steel ? 0.5 : 0.2, roughness: slim ? 0.4 : steel ? 0.34 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
       dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       darkU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(0xaab2c2, { metalness: 0.45, roughness: 0.42, vertexColors: true }), // the default vehicle: grey metal fins (only the nose carries the vehicle's colour)

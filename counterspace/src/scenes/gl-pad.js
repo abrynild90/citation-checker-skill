@@ -19,31 +19,37 @@ const rng = (s) => () => (s = (s * 16807) % 2147483647) / 2147483647;
 let islandCv = null,
   puffCv = null,
   softCv = null;
-// A top-down islet on a transparent ground: feathered turquoise shallows, a pale reef edge, sand with a wet rim, scrub, a runway and a dark apron where the pad stands.
+// A top-down atoll on a transparent ground, after Johnston Atoll: a pale, irregular reef flat (broken surf along its crest, a channel, patch reefs) round a darker lagoon, the long
+// artificial main island (sand and coral rubble, scrub, a runway along its axis, an apron where the pad stands, a few buildings and tanks), a sandy spit and two small islets.
+// The colours are muted (the ocean round it is dark): nothing glows. The pad stands at the centre of the picture.
 function islandCanvas() {
   if (islandCv) return islandCv;
-  const W = 512,
-    H = 340,
+  const W = 768,
+    H = 512,
     c = document.createElement('canvas');
   c.width = W;
   c.height = H;
   const g = c.getContext('2d'),
-    R = rng(7);
-  const blob = (cx, cy, rx, ry, jit, ph) => {
-    const n = 56;
+    R = rng(7),
+    cx = W / 2,
+    cy = H / 2;
+  // a wobbling outline (rx, ry: radii; jit: roughness; ph: phases; rot: turned by)
+  const blob = (x0, y0, rx, ry, jit, ph, rot = 0) => {
+    const n = 90,
+      cr = Math.cos(rot),
+      sr = Math.sin(rot);
     g.beginPath();
     for (let i = 0; i <= n; i++) {
       const a = (i / n) * PI * 2,
-        k = 1 + jit * (0.5 * Math.sin(2 * a + ph[0]) + 0.32 * Math.sin(3 * a + ph[1]) + 0.2 * Math.sin(5 * a + ph[2]) + 0.1 * Math.sin(9 * a + ph[0] * 2));
-      const x = cx + Math.cos(a) * rx * k,
-        y = cy + Math.sin(a) * ry * k;
+        k = 1 + jit * (0.5 * Math.sin(2 * a + ph[0]) + 0.32 * Math.sin(3 * a + ph[1]) + 0.22 * Math.sin(5 * a + ph[2]) + 0.14 * Math.sin(9 * a + ph[0] * 2) + 0.08 * Math.sin(15 * a + ph[1] * 3));
+      const px = Math.cos(a) * rx * k,
+        py = Math.sin(a) * ry * k,
+        x = x0 + px * cr - py * sr,
+        y = y0 + px * sr + py * cr;
       i ? g.lineTo(x, y) : g.moveTo(x, y);
     }
     g.closePath();
   };
-  const ph = [R() * 6.28, R() * 6.28, R() * 6.28],
-    cx = W / 2,
-    cy = H / 2;
   const fill = (style, blur, shadow) => {
     g.shadowColor = shadow || 'rgba(0,0,0,0)';
     g.shadowBlur = blur;
@@ -51,46 +57,141 @@ function islandCanvas() {
     g.fill();
     g.shadowBlur = 0;
   };
-  // shallows (outer, soft) and the lighter inner flats
-  blob(cx, cy, 196, 126, 0.1, ph);
-  fill('rgba(70,168,170,0.5)', 44, 'rgba(70,168,170,0.7)');
-  blob(cx, cy, 168, 102, 0.13, ph);
-  fill('rgba(126,210,200,0.62)', 22, 'rgba(126,210,200,0.8)');
-  // pale reef line
-  blob(cx, cy, 186, 118, 0.1, ph);
-  g.lineWidth = 3.5;
-  g.strokeStyle = 'rgba(228,248,240,0.38)';
-  g.shadowColor = 'rgba(228,248,240,0.6)';
-  g.shadowBlur = 8;
-  g.stroke();
-  g.shadowBlur = 0;
-  // sand
-  const sg = g.createLinearGradient(cx - 140, cy - 80, cx + 140, cy + 80);
-  sg.addColorStop(0, '#e6d9ad');
-  sg.addColorStop(0.55, '#cdbd8d');
-  sg.addColorStop(1, '#b5a272');
-  blob(cx + 4, cy, 134, 76, 0.2, [ph[1], ph[2], ph[0]]);
-  fill(sg, 7, 'rgba(110,92,52,0.55)');
-  g.lineWidth = 2.5;
-  g.strokeStyle = 'rgba(150,128,84,0.55)';
-  g.stroke();
-  // scrub and low vegetation
-  for (const [x, y, rx, ry] of [[-92, -10, 26, 16], [-60, 34, 20, 12], [78, -34, 22, 13], [96, 22, 24, 14], [34, -52, 16, 9], [-30, -50, 14, 8], [112, -2, 12, 8]]) {
-    blob(cx + x, cy + y, rx, ry, 0.3, [R() * 6, R() * 6, R() * 6]);
-    fill('rgba(72,100,58,0.82)', 5, 'rgba(60,84,48,0.6)');
+  const ph = [R() * 6.28, R() * 6.28, R() * 6.28],
+    ph2 = [R() * 6.28, R() * 6.28, R() * 6.28];
+  // the reef flat: a wide, shallow shelf, irregular and fading into the sea at its rim
+  blob(cx + 10, cy + 4, 330, 206, 0.16, ph, -0.12);
+  fill('rgba(52,128,142,0.34)', 40, 'rgba(52,128,142,0.45)');
+  blob(cx + 10, cy + 4, 296, 178, 0.17, ph, -0.12);
+  fill('rgba(78,156,160,0.42)', 26, 'rgba(78,156,160,0.5)');
+  // the lagoon: deeper, a darker blue, with sandy shallows and patch reefs toward the middle
+  blob(cx - 6, cy + 6, 244, 134, 0.22, ph2, -0.12);
+  fill('rgba(26,86,118,0.78)', 24, 'rgba(26,86,118,0.7)');
+  blob(cx - 40, cy + 14, 180, 78, 0.28, ph, -0.1);
+  fill('rgba(40,112,138,0.55)', 20, 'rgba(40,112,138,0.5)');
+  for (let i = 0; i < 70; i++) {
+    const a = R() * PI * 2,
+      r = Math.sqrt(R()),
+      x = cx - 6 + Math.cos(a) * 232 * r,
+      y = cy + 6 + Math.sin(a) * 124 * r,
+      s = 3 + R() * 9;
+    g.fillStyle = R() < 0.55 ? 'rgba(92,170,168,0.34)' : 'rgba(18,64,94,0.38)';
+    g.beginPath();
+    g.ellipse(x, y, s * 1.5, s, R() * 3, 0, PI * 2);
+    g.fill();
   }
-  // runway
+  // the reef crest: a pale broken line of surf round the rim, with gaps (the channel to the south-west), not a drawn outline
   g.save();
-  g.translate(cx - 6, cy + 40);
-  g.rotate(-0.1);
-  g.fillStyle = 'rgba(70,74,80,0.95)';
-  g.fillRect(-122, -5, 244, 10);
-  g.fillStyle = 'rgba(235,235,230,0.8)';
-  for (let x = -112; x < 112; x += 18) g.fillRect(x, -0.7, 9, 1.4);
+  g.lineCap = 'round';
+  for (let pass = 0; pass < 2; pass++) {
+    const rx = 312 - pass * 6,
+      ry = 194 - pass * 5,
+      n = 230;
+    for (let i = 0; i < n; i++) {
+      const a0 = (i / n) * PI * 2,
+        a1 = a0 + (PI * 2) / n * (0.5 + R() * 0.9);
+      if ((a0 > 2.3 && a0 < 2.62) || R() < 0.22) continue;
+      const kk = (a) => 1 + 0.16 * (0.5 * Math.sin(2 * a + ph[0]) + 0.32 * Math.sin(3 * a + ph[1]) + 0.22 * Math.sin(5 * a + ph[2]) + 0.14 * Math.sin(9 * a + ph[0] * 2) + 0.08 * Math.sin(15 * a + ph[1] * 3));
+      const P = (a) => {
+        const px = Math.cos(a) * rx * kk(a),
+          py = Math.sin(a) * ry * kk(a),
+          cr = Math.cos(-0.12),
+          sr = Math.sin(-0.12);
+        return [cx + 10 + px * cr - py * sr, cy + 4 + px * sr + py * cr];
+      };
+      const p0 = P(a0),
+        p1 = P(a1);
+      g.strokeStyle = `rgba(216,236,232,${0.16 + 0.26 * R()})`;
+      g.lineWidth = 1.4 + R() * 2.4;
+      g.beginPath();
+      g.moveTo(p0[0], p0[1]);
+      g.lineTo(p1[0], p1[1]);
+      g.stroke();
+    }
+  }
   g.restore();
-  // the dark apron the pad stands on
-  blob(cx, cy - 4, 72, 56, 0.06, ph);
-  fill('rgba(54,52,50,0.5)', 16, 'rgba(40,38,36,0.6)');
+  // the main island: long, flat and artificial (built up from the reef): sand over coral, a darker wet rim, rubble, scrub
+  const IA = -0.1,
+    ix = cx + 18,
+    iy = cy + 18;
+  const sg = g.createLinearGradient(ix - 210, iy - 70, ix + 210, iy + 70);
+  sg.addColorStop(0, '#d3c79c');
+  sg.addColorStop(0.5, '#bdb085');
+  sg.addColorStop(1, '#a89b72');
+  blob(ix, iy, 232, 78, 0.12, ph2, IA);
+  fill('rgba(150,140,100,0.55)', 9, 'rgba(60,92,92,0.6)'); // the wet beach rim
+  blob(ix, iy, 224, 71, 0.12, ph2, IA);
+  fill(sg, 3);
+  // the sandy spit: a thin tongue curling off the north-east end, and two small islets on the reef
+  g.save();
+  g.translate(ix + 214, iy - 34);
+  g.rotate(-0.55);
+  g.beginPath();
+  g.moveTo(0, 0);
+  g.quadraticCurveTo(46, -16, 92, -4);
+  g.quadraticCurveTo(50, -6, 0, 12);
+  g.closePath();
+  fill('#cfc397', 4, 'rgba(60,92,92,0.5)');
+  g.restore();
+  for (const [x, y, rx, ry, rot] of [[236, -118, 40, 16, 0.2], [-262, 70, 30, 13, -0.4]]) {
+    blob(cx + x, cy + y, rx, ry, 0.3, [R() * 6, R() * 6, R() * 6], rot);
+    fill('rgba(196,186,140,0.9)', 6, 'rgba(60,92,92,0.5)');
+  }
+  // coral rubble and scrub patches
+  for (const [x, y, rx, ry, col] of [[-170, 8, 34, 14, '112,126,84'], [-96, 44, 24, 10, '112,126,84'], [92, -26, 40, 12, '96,116,76'], [152, 22, 32, 11, '104,122,80'], [196, -8, 20, 8, '96,116,76'], [-20, -44, 26, 9, '112,126,84'], [30, 50, 22, 8, '140,128,92']]) {
+    blob(ix + x, iy + y, rx, ry, 0.35, [R() * 6, R() * 6, R() * 6], IA);
+    fill(`rgba(${col},0.62)`, 5);
+  }
+  for (let i = 0; i < 380; i++) {
+    const x = ix + (R() - 0.5) * 420,
+      y = iy + (R() - 0.5) * 110;
+    g.fillStyle = R() < 0.5 ? 'rgba(120,108,76,0.35)' : 'rgba(228,220,188,0.3)';
+    g.fillRect(x, y, 1 + R() * 2, 1 + R());
+  }
+  // the runway along the island's axis (asphalt with a pale centre line, the thresholds and a taxiway to the apron)
+  g.save();
+  g.translate(ix - 8, iy + 52);
+  g.rotate(IA);
+  g.fillStyle = 'rgba(66,70,76,0.96)';
+  g.fillRect(-196, -6.5, 392, 13);
+  g.fillStyle = 'rgba(214,214,208,0.8)';
+  for (let x = -176; x < 176; x += 22) g.fillRect(x, -0.6, 11, 1.2);
+  for (let k = -2; k <= 2; k++) {
+    g.fillRect(-192, k * 2.4 - 0.5, 10, 1);
+    g.fillRect(182, k * 2.4 - 0.5, 10, 1);
+  }
+  g.fillStyle = 'rgba(70,74,80,0.9)';
+  g.fillRect(-40, -52, 7, 48); // the taxiway up to the apron
+  g.fillRect(70, -34, 6, 28);
+  g.restore();
+  // the apron the pad stands on (dark concrete) at the centre, and the support area to the east: sheds, tanks and a few low buildings with short shadows
+  blob(cx, cy - 2, 70, 56, 0.05, ph, 0);
+  fill('rgba(62,62,60,0.78)', 8, 'rgba(40,40,38,0.5)');
+  const bld = (x, y, w, h, col) => {
+    g.fillStyle = 'rgba(30,34,38,0.38)';
+    g.fillRect(ix + x + 2, iy + y + 2.5, w, h);
+    g.fillStyle = col;
+    g.fillRect(ix + x, iy + y, w, h);
+    g.fillStyle = 'rgba(255,255,255,0.18)';
+    g.fillRect(ix + x, iy + y, w, 1);
+  };
+  g.save();
+  g.translate(0, 0);
+  for (const [x, y, w, h, col] of [[78, -22, 26, 11, '#b8bcc0'], [110, -20, 16, 9, '#a6abb0'], [132, -26, 22, 12, '#c4c7ca'], [92, -4, 14, 8, '#9ea4aa'], [122, -2, 30, 9, '#b3b7bb'], [162, -14, 12, 8, '#a6abb0'], [-120, -12, 22, 10, '#b8bcc0'], [-148, 0, 14, 8, '#a6abb0'], [60, 26, 18, 7, '#aeb2b6']]) bld(x, y, w, h, col);
+  for (const [x, y, r] of [[144, 8, 7], [158, 4, 6], [132, 12, 5]]) {
+    g.fillStyle = 'rgba(30,34,38,0.34)';
+    g.beginPath();
+    g.arc(ix + x + 2, iy + y + 2, r, 0, PI * 2);
+    g.fill();
+    g.fillStyle = '#d4d6d8';
+    g.beginPath();
+    g.arc(ix + x, iy + y, r, 0, PI * 2);
+    g.fill();
+    g.strokeStyle = 'rgba(80,84,88,0.5)';
+    g.lineWidth = 1;
+    g.stroke();
+  }
+  g.restore();
   islandCv = c;
   return c;
 }
@@ -151,13 +252,14 @@ function softCanvas() {
 export const padMethods = {
   // opts: it.bright (light concrete, the pad stands out on dark sea), it.island (painted islet), it.t0 (ignition), it.until (the hold: when the complex is gone)
   _padModel(pos, opts = {}) {
+    const K = opts.island ? 1.3 : opts.bright ? 1.45 : 1; // the complex's drawn size (the pad on its islet is smaller against the atoll)
     const T = this.T,
       g = new T.Group(),
       core = new T.Group(), // the complex itself (a bright, island pad draws it 1.45 times larger)
       fade = [], // materials that fade with the end of the hold
       reg = (m) => (fade.push(m), (m.transparent = true), m),
-      plate = reg(this._mat(opts.bright ? 0x9aa3b4 : 0x4c5468, { roughness: 0.85, emissive: opts.bright ? 0x20262f : 0x000000 })),
-      edge = reg(this._mat(opts.bright ? 0xe6ecf6 : 0x838ea3, { emissive: opts.bright ? 0x30363f : 0x000000 })),
+      plate = reg(this._mat(opts.island ? 0x7d8288 : opts.bright ? 0x9aa3b4 : 0x4c5468, { roughness: 0.85, emissive: opts.island ? 0x17191d : opts.bright ? 0x20262f : 0x000000 })),
+      edge = reg(this._mat(opts.island ? 0x9a9ea4 : opts.bright ? 0xe6ecf6 : 0x838ea3, { emissive: opts.island ? 0x1c1e22 : opts.bright ? 0x30363f : 0x000000 })),
       dark = reg(this._mat(0x151a26)),
       steel = reg(this._mat(0xdfe5f0, { metalness: 0.3, roughness: 0.45, emissive: 0x2a3140 })),
       red = reg(this._mat(0xb8493a, { roughness: 0.6, emissive: 0x2a0d08 })),
@@ -186,7 +288,7 @@ export const padMethods = {
     sd.normalize();
     if (opts.island) {
       const isl = new T.Mesh(
-        new T.PlaneGeometry(0.25, 0.25 * (340 / 512)),
+        new T.PlaneGeometry(0.36, 0.36 * (512 / 768)),
         reg(new T.MeshStandardMaterial({ map: this._gtex(islandCanvas(), () => Object.assign(new T.CanvasTexture(islandCanvas()), { colorSpace: T.SRGBColorSpace, anisotropy: 4 })), roughness: 0.95, metalness: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })),
       );
       isl.rotation.x = -PI / 2;
@@ -260,11 +362,11 @@ export const padMethods = {
       lamps.push(gl);
       void l;
     }
-    core.scale.setScalar(opts.bright ? 1.45 : 1);
+    core.scale.setScalar(K);
     g.add(core);
     // the tower's shadow and the plate's, on the day side only (long when the sun is low)
     if (el > 0.05) {
-      const L = Math.min(0.036, 0.7 * H / Math.max(0.3, Math.tan(Math.asin(Math.min(0.95, el))))) * (opts.bright ? 1.45 : 1),
+      const L = Math.min(0.036, 0.7 * H / Math.max(0.3, Math.tan(Math.asin(Math.min(0.95, el))))) * K,
         shM = reg(new T.MeshBasicMaterial({ color: 0x06080c, transparent: true, opacity: 0.26, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })),
         shape = new T.Shape();
       shape.moveTo(0, -0.0014);
@@ -275,12 +377,12 @@ export const padMethods = {
       const sh = new T.Mesh(new T.ShapeGeometry(shape), shM);
       sh.rotation.x = -PI / 2;
       sh.rotation.z = Math.atan2(-sd.y, sd.x); // shape x -> (sd.x, sd.y) in the (x, z) ground plane
-      sh.position.set(tx * (opts.bright ? 1.45 : 1), 0.0021, 0);
+      sh.position.set(tx * K, 0.0021, 0);
       sh.renderOrder = 3;
       g.add(sh);
     }
     // ---- ignition effects: glow in the flame trench and over the deflector, light pooling on the concrete, a ground-hugging cloud of exhaust and steam
-    const k = opts.bright ? 1.45 : 1,
+    const k = K,
       glowD = spr(this.spriteTex, 0xffa24a, 0, T.AdditiveBlending, false),
       glowT = [-1, 1].map(() => spr(this.spriteTex, 0xff7a2a, 0, T.AdditiveBlending, false)),
       pool = new T.Mesh(new T.PlaneGeometry(0.075 * k, 0.075 * k), new T.MeshBasicMaterial({ map: this.spriteTex, color: 0xff9a45, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending }));
@@ -342,7 +444,7 @@ export const padMethods = {
       for (const m of fade) m.opacity = f * (m.userData.o ?? 1);
     };
     for (const m of fade) m.userData.o = m.opacity;
-    Object.assign(g.userData, { span: opts.island ? 0.145 : opts.bright ? 0.056 : 0.0385, minPx: 40, maxPx: 60 });
+    Object.assign(g.userData, { span: opts.island ? 0.2 : opts.bright ? 0.056 : 0.0385, minPx: 40, maxPx: 60 });
     return g;
   },
 };
