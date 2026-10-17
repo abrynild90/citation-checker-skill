@@ -149,11 +149,20 @@
 .q-verdict.yes{color:var(--accent)}
 .q-verdict.no{color:var(--warn)}
 .q-gap{margin:0 2px}
-.q-foot{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--s-3) var(--s-4);margin-top:var(--s-5);padding-top:var(--s-4);border-top:1px solid var(--line)}
-.q-tally{margin:0 auto 0 0;font:600 17px/1.4 var(--serif);color:var(--text)}
+.q-foot{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:var(--s-2) var(--s-4);margin-top:var(--s-5);padding-top:var(--s-4);border-top:1px solid var(--line)}
+@media (min-width:761px){.q-foot{grid-template-columns:auto minmax(0,1fr) auto}}
+.q-acts{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-3);min-height:48px} /* the tallest the buttons get (the primary ones), so the row never changes height when the score arrives */
+.q-more{grid-column:1 / -1;display:grid}
+.q-acts{grid-column:1 / -1}
+@media (min-width:761px){.q-acts{grid-column:auto}}
+@media (max-width:760px){.q-acts{min-height:104px;align-content:flex-start}.q-acts .btn{flex:1 1 40%}.q-acts #qHero{flex-basis:100%;order:-1}} /* a phone wraps the three buttons into two rows once the score is in: both rows are kept */
+.q-more>*{grid-area:1/1;min-width:0}
+.q-more>.q-sumreal:not(.q-ghost){align-self:start}
+.q-sumreal{display:grid;gap:var(--s-1) var(--s-5);align-content:start}
+.q-more .q-sumreal>*{margin:0;max-width:none;text-wrap:pretty}
+@media (min-width:900px){.q-sumreal{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.q-tally{margin:0;min-height:24px;font:600 17px/1.4 var(--serif);color:var(--text)}
 .q-tally:not(.done){font:400 15px/1.5 var(--sans);color:var(--muted)}
-.q-sum{margin:0 auto 0 0;max-width:var(--measure)}
-.q-sum .q-tally{margin:0}
 .q-pattern{margin:var(--s-1) 0 0;font:400 15px/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) both}
 @keyframes q-rise{from{opacity:0;transform:translateY(6px)}}
 @media (prefers-reduced-motion:reduce){.q-pattern{animation:none}}
@@ -207,41 +216,38 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .q.done .q-wait{display:none}
 .q-slot>.q-out{align-self:start}
 .q-slot>.q-out:empty{display:none}
-.q-sum{display:grid}
-.q-sum>*{grid-area:1/1;min-width:0}
-.q-sum>.q-sumreal:not(.q-ghost){align-self:start}
-.q-trail[hidden]{display:block;visibility:hidden}
 
 /* The little pair-line inside an answered card: the hero's drawing in miniature (a dot for the weapon, a tick for the law, a dashed gap with the time on it),
    drawn in when the answer is given. The earlier of the two stands on the left. */
-.q-line{display:grid;gap:var(--s-3);margin:var(--s-1) 0 var(--s-1)}
-.ql{display:grid;gap:4px}
-.ql-cap{font:600 12.5px/1.3 var(--sans);color:var(--muted)}
-.ql-track{position:relative;display:flex;align-items:center;justify-content:space-between;width:calc(var(--k,1) * 100%);height:26px}
+.q-line{display:grid;gap:var(--s-2);margin:0;min-width:0}
+.ql{display:flex;align-items:center;gap:8px;min-width:0;--fixed:84px}
+.q-line.two .ql{--fixed:210px}
+.ql-cap{flex:0 0 118px;font:600 12px/1.25 var(--sans);color:var(--muted)}
+.ql-track{position:relative;flex:0 1 calc(var(--k,1) * (100% - var(--fixed)));display:flex;align-items:center;justify-content:space-between;min-width:60px;height:26px}
 .ql-end{position:relative;z-index:1;flex:none;display:block}
 .ql-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--surface),0 0 0 4px var(--accent-soft)}
-.ql-tick{width:3px;height:24px;border-radius:2px;background:var(--accent-2);transform-origin:50% 100%}
+.ql-tick{width:3px;height:22px;border-radius:2px;background:var(--accent-2);transform-origin:50% 100%}
 .ql-gap{position:absolute;left:8px;right:4px;top:0;bottom:0}
 .ql-gap::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1.6px dashed var(--muted)}
 .ql-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:1px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 12.5px/1.6 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
-.ql-years{display:flex;justify-content:space-between;width:calc(var(--k,1) * 100%);font:500 12.5px/1.2 var(--sans);color:var(--faint);font-variant-numeric:tabular-nums}
+.ql-y{flex:none;min-width:34px;font:500 12.5px/1.2 var(--sans);color:var(--faint);font-variant-numeric:tabular-nums}
 .q.done .ql-dot{animation:ql-pop 360ms var(--ease) both}
 .q.done .ql-gap::before{animation:ql-draw 720ms var(--ease) 140ms both}
 .q.done .ql-pill{animation:ql-fade 320ms var(--ease) 640ms both}
 .q.done .ql-tick{animation:ql-rise 380ms var(--ease) 760ms both}
-.q.done .ql-years{animation:ql-fade 360ms var(--ease) 700ms both}
+.q.done .ql-y{animation:ql-fade 360ms var(--ease) 700ms both}
 .q.done .ql-end:first-child.ql-tick{animation-delay:0ms}
 .q.done .ql-end:last-child.ql-dot{animation-delay:760ms}
 @keyframes ql-pop{from{transform:scale(0)}}
 @keyframes ql-draw{from{clip-path:inset(-4px 100% -4px 0)}to{clip-path:inset(-4px 0 -4px 0)}}
 @keyframes ql-fade{from{opacity:0}}
 @keyframes ql-rise{from{transform:scaleY(0)}}
-@media (prefers-reduced-motion:reduce){.q.done :is(.ql-dot,.ql-pill,.ql-tick,.ql-years),.q.done .ql-gap::before{animation:none}}
+@media (prefers-reduced-motion:reduce){.q.done :is(.ql-dot,.ql-pill,.ql-tick,.ql-y),.q.done .ql-gap::before{animation:none}}
 
 /* The flourish at three or four right: one dot under each card (filled when called, a dashed ring when missed) joined by a dashed line that draws across, ending
    in a tick, the same drawing as a link in the hero. */
-.q-trail{position:relative;height:44px;margin-top:var(--s-4)}
-.q-trail[hidden]{display:none}
+.q-trail{position:relative;height:36px;margin:0;min-width:120px} /* stands in the score row, between the score and the buttons; kept (unseen) when there is no flourish, so the row never changes */
+.q-trail.off{visibility:hidden}
 .qt-line{position:absolute;left:calc(12.5% - 6px);right:0;top:50%;border-top:1.6px dashed var(--muted);animation:qt-draw 1300ms var(--ease) 100ms both}
 .qt-dot{position:absolute;left:var(--p);top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--accent-soft);animation:qt-pop 420ms var(--ease) calc(120ms + var(--i) * 300ms) both}
 .qt-dot.miss{background:var(--bg);border:2px dashed var(--warn);box-shadow:0 0 0 3px var(--bg)}
@@ -262,79 +268,62 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 :is(#chartR) svg.k2 .dlabel.dl-hid.dl-show{opacity:1}
 @media (prefers-reduced-motion:reduce){:is(#chartR) svg.k2 .dlabel.dl-hid{transition:none}}
 
-/* An answered card says its answer a little tighter: the hint and the pale
-   option are not needed once the answer is in. */
-/* An answered card is only as tall as what it says, and the offer to watch the scene follows its last sentence. Cards side by side give every title the height of the
-   tallest title in their row (measured in quiz.js, so it follows the real text, the width and the font), and the hint keeps its place once answered, so the options start at the same height. */
+/* An answered card keeps its hint (greyed) so the options start at the same height. The answer area is laid out once (the answered markup, invisibly, under the empty
+   slot) so answering moves nothing; its design (one row on a wide window) is in the last block of this section. */
 .q-list{align-items:start}
-/* Once all four are answered and the cards stand side by side, they end on one line. The title and the hint keep their rows, real grid tracks shared by the cards
-   (subgrid), each as tall as the tallest thing any card puts in it (measured by the browser from the real text, so any width, font or wording), so the options start
-   level. Everything under them is plain flow in the card's body (options, verdict, the drawn gap(s), the explanation, the offer to watch the scene, one small gap
-   between the parts), so nothing can print over its neighbour whatever its length. The room a shorter card has is shared out in equal parts between those parts and
-   its foot, so no one space in it grows large; the card with the most to say has none to share. Where subgrid is not available the cards still share one height
-   (stretch) and simply flow. Before all four are answered an answered card is only as tall as what it says, so a card still waiting for its answer never stands in
-   empty space. */
-.q-body{display:flex;flex-direction:column;gap:var(--s-2);min-height:0}
 .q-out{display:flex;flex-direction:column;gap:var(--s-2)}
 .q-out:empty{display:none}
 .q-out>*{margin:0}
-.q-out>.q-watch{margin-top:var(--s-1)}
-@media (min-width:640px){
-  .q-list.all-done{align-items:stretch}
-  .q-list.all-done .q-body{flex:1 1 auto}
-  .q-list.all-done .q-out{flex:1 1 auto;justify-content:space-between}
-  .q-list.all-done .q-out::before,.q-list.all-done .q-out::after{content:""}
-  .q-list.all-done .q-out::before{margin-bottom:calc(var(--s-2) * -1)}
-  .q-list.all-done .q-out::after{margin-top:calc(var(--s-2) * -1)}
-  /* two drawn gaps (the "which waited longer" card) sit a little closer, so the block they share stays low */
-  .q-list.all-done .q-line.two{gap:var(--s-2)}
-  .q-list.all-done .q-line.two .ql{gap:2px}
-  .q-list.all-done .q-line.two .ql-track{height:22px}
-}
-@supports (grid-template-rows:subgrid){
-  @media (min-width:640px){
-    .q-list.all-done{row-gap:0;margin-bottom:calc(var(--s-4) * -1)} /* the space between two rows of cards is each card's own bottom margin, so the rows inside a card stay tight */
-    .q-list.all-done .q{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;margin-bottom:var(--s-4)}
-    .q-list.all-done .q>.q-ask{grid-row:1}
-    .q-list.all-done .q>.q-hint{grid-row:2;margin:var(--s-2) 0 var(--s-1)}
-    .q-list.all-done .q>.q-body{grid-row:3;margin-top:var(--s-2)}
-  }
-}
 .q.done .q-hint{color:var(--muted)}
-:is(.q.done .q-out,.q-ghost.q-out){margin-top:var(--s-1)}
 @media (min-width:1100px){
-  :is(.q.done .q-out,.q-ghost.q-out){font-size:14.5px;line-height:1.5}
-  :is(.q.done .q-out,.q-ghost.q-out) .q-verdict{font-size:16.5px}
-  :is(.q.done,.q-ghost.q-out) .q-line{gap:var(--s-2)}
   .q-foot{margin-top:var(--s-4)}
-  .q-sum{flex:1 1 0;min-width:420px;max-width:80ch}
-  .q-trail{height:36px;margin-top:var(--s-3)}
 }
 
 /* the beads between the dots: static when motion is reduced */
 .qt-bead{position:absolute;left:var(--p);top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--accent);opacity:.7;animation:qt-pop 300ms var(--ease) calc(240ms + var(--i) * 95ms) both}
 @media (prefers-reduced-motion:reduce){.qt-bead{animation:none}}
 
-/* Questions read down the page. At the left of each row the question and what it asks; at the right the two options; under both, the answer area takes the whole row, with the
-   verdict and the drawn gap in its left half and the explanation and the scene in its right half, so no column stands empty. */
-.quiz .q-list { display:block; }
-.quiz .q,.quiz .q-list.all-done .q { display:grid; grid-template-columns:minmax(220px,.85fr) minmax(0,1.5fr); grid-template-rows:auto auto; align-content:start; column-gap:32px; row-gap:12px; padding:24px 0; border:0; border-top:1px solid var(--line); border-radius:0; background:none; box-shadow:none; margin:0; }
-.quiz .q .q-head { grid-column:1; grid-row:1; display:grid; gap:6px; align-content:start; }
-.quiz .q .q-ask { min-height:0; height:auto; font-size:21px; }
-.quiz .q .q-hint { margin:0; }
-.quiz .q .q-body,.quiz .q-list.all-done .q>.q-body { display:contents; }
-.quiz .q .q-opts { grid-column:2; grid-row:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
-.quiz .q .q-slot { grid-column:1 / -1; grid-row:2; max-width:none; margin:0; }
-.quiz .q-out { max-width:none; }
-.quiz .q-out>.q-a,.quiz .q-out>.q-b { display:flex; flex-direction:column; gap:var(--s-2); min-width:0; }
-.quiz .q-out .q-truth { max-width:62ch; }
-.quiz .q-list.all-done .q-out:before,.quiz .q-list.all-done .q-out:after { display:none; }
-.quiz .q-list.all-done { margin:0; }
-@media (min-width:900px) {
- .quiz .q-out:not(:empty) { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:32px; align-items:start; }
+/* Questions read down the page. At the left of each row the question and what it asks; at the right the two options; under both, the answer area takes the whole row.
+   On a wide window the answer is one row of about 64 px, three zones side by side (the verdict, the drawn gap with its two years, and "Why this answer?" above
+   "Watch the scene"); a narrower window puts the verdict over the drawn gap on the left and the two links on the right; a phone stacks them. The reserved (ghost) copy is
+   the same markup, so the empty slot is exactly as tall as the answered one and answering moves nothing; only the opened "Why this answer?" grows, and only downward. */
+.quiz{--slot-h:64px}
+.quiz .q-list{display:block}
+.quiz .q,.quiz .q-list.all-done .q{display:grid;grid-template-columns:minmax(220px,.85fr) minmax(0,1.5fr);grid-template-rows:auto auto;align-content:start;column-gap:32px;row-gap:12px;padding:24px 0 20px;border:0;border-top:1px solid var(--line);border-radius:0;background:none;box-shadow:none;margin:0}
+.quiz .q .q-head{grid-column:1;grid-row:1;display:grid;gap:6px;align-content:start}
+.quiz .q .q-ask{min-height:0;height:auto;font-size:21px}
+.quiz .q .q-hint{margin:0}
+.quiz .q .q-body{display:contents}
+.quiz .q .q-opts{grid-column:2;grid-row:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+.quiz .q .q-slot{grid-column:1 / -1;grid-row:2;max-width:none;margin:0;padding:var(--s-2) 0 0;align-content:start}
+.quiz .q-slot>.q-wait{align-self:center;min-height:var(--slot-h);align-content:center}
+.quiz .q-out{max-width:none;margin:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-2) 0}
+.quiz .q-out:empty{display:none}
+.quiz .q-verdict{grid-area:auto}
+.quiz .q-b{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.quiz .q-explanation{margin:0;font-size:14px;line-height:1.4}
+.quiz .q-explanation summary{padding:3px 0;min-height:26px;box-sizing:border-box}
+.quiz .q-explanation .q-truth{margin:4px 0 8px;max-width:62ch}
+.quiz .q-watch{margin:0}
+@media (min-width:761px){
+  .quiz .q-out{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"v b" "l b";column-gap:32px;align-items:start}
+  .quiz .q-out>.q-verdict{grid-area:v}
+  .quiz .q-out>.q-line{grid-area:l}
+  .quiz .q-out>.q-b{grid-area:b}
 }
-@media(max-width:760px) {
- .quiz .q,.quiz .q-list.all-done .q { display:flex; gap:8px; padding:22px 0; }
- .quiz .q .q-body,.quiz .q-list.all-done .q>.q-body { display:flex; flex-direction:column; gap:var(--s-2); margin-top:8px; }
- .quiz .q-opts { grid-template-columns:minmax(0,1fr); }
+@media (min-width:960px){
+  .quiz .q-out{grid-template-columns:minmax(190px,.8fr) minmax(250px,1.3fr) minmax(250px,1fr);grid-template-areas:"v l b";column-gap:var(--s-5);row-gap:0}
+  .quiz .q-out>.q-verdict{display:flex;align-items:center;min-height:var(--slot-h)}
+  .quiz .q-out>.q-line{min-height:var(--slot-h);align-content:center}
+}
+@media (min-width:1100px){
+  .quiz .q-out{font-size:14.5px;line-height:1.5}
+  .quiz .q-out .q-verdict{font-size:16.5px}
+}
+@media(max-width:760px){
+  .quiz .ql-cap{flex:1 0 100%}
+  .quiz .q-line.two .ql{flex-wrap:wrap;gap:2px 8px;--fixed:84px}
+  .quiz .q,.quiz .q-list.all-done .q{display:flex;gap:8px;padding:22px 0}
+  .quiz .q .q-body{display:flex;flex-direction:column;gap:var(--s-2);margin-top:8px}
+  .quiz .q-opts{grid-template-columns:minmax(0,1fr)}
 }

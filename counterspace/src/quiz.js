@@ -27,6 +27,7 @@ const QUESTIONS = [
   { kind: 'order', ev: 'ru-2022-viasat', law: 'tallinn-2017', ask: 'A cyberattack and a set of expert rules', hint: 'Which came first?', first: 'ev' },
   { kind: 'wait', a: ['kp-2010-gps', 'icao-2025'], b: ['us-1962-starfish-prime', 'ltbt-1963'], ask: 'Two events, each followed by a legal step', hint: 'Which waited longer?' },
 ];
+const CAPS = { 'kp-2010-gps': 'Navigation jamming', 'us-1962-starfish-prime': 'Starfish Prime' }; // short names for the drawn gaps of the two-pair card
 const when = (r) => parse(r.date || r.start);
 const evName = (id) => WORDS[id]?.name || byId[id].system;
 const lawName = (id) => LAW_PLAIN[id] || byId[id].label;
@@ -60,8 +61,8 @@ const lineHTML = (rows) =>
     .map(
       (r) =>
         `<div class="ql" style="--k:${r.k.toFixed(3)}">${r.cap ? `<span class="ql-cap">${esc(r.cap)}</span>` : ''}` +
-        `<span class="ql-track">${endHTML(r.left)}<span class="ql-gap"><b class="ql-pill">${esc(r.text)}</b></span>${endHTML(r.right)}</span>` +
-        `<span class="ql-years"><span>${r.yl}</span><span>${r.yr}</span></span></div>`,
+        `<span class="ql-y">${r.yl}</span><span class="ql-track">${endHTML(r.left)}<span class="ql-gap"><b class="ql-pill">${esc(r.text)}</b></span>${endHTML(r.right)}</span>` +
+        `<span class="ql-y">${r.yr}</span></div>`,
     )
     .join('') +
   '</div>';
@@ -129,7 +130,7 @@ function build(q, i) {
     `<b>${esc(evName(shortP[0]))}</b> waited ${gapText(shortP[2])}: ${esc(lawName(shortP[1]))} (${esc(fmtMY(when(byId[shortP[1]])))}). This is order in time, not cause.`;
   const top = Math.max(ya, yb),
     one = (e, l, y) => ({
-      cap: evName(e),
+      cap: CAPS[e] || evName(e),
       left: 'dot',
       right: 'tick',
       yl: when(byId[e]).getUTCFullYear(),
@@ -156,7 +157,7 @@ const watchHTML = (id) => {
 // What an answered card holds. The same markup, built for the longest case (with the scene to watch), is laid under the empty answer area as an
 // invisible spacer (.q-ghost), so the card already has the height its answer will need, at every width and font, and answering moves nothing below it.
 const outHTML = (b, ok) =>
-  `<div class="q-a"><p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}</div>` +
+  `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}` +
   `<div class="q-b"><details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>${b.scene ? watchHTML(b.scene) : ''}</div>`;
 
 export function mountQuiz() {
@@ -181,13 +182,13 @@ export function mountQuiz() {
   // the card that draws two pairs (and has the longest explanation) is given a little more width, so the four cards need about the same height side by side
   const cols = QUESTIONS.map((q) => `minmax(0,${q.kind === 'wait' ? 1.4 : 1}fr)`).join(' ');
   host.innerHTML = `<div class="quiz"><ol class="q-list" style="--cols:${cols}">${cards}</ol>
-  <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
-  <div class="q-foot"><div class="q-sum"><div class="q-sumreal"><p class="q-tally" id="qTally" aria-live="polite">Four questions. Your answers are not saved.</p>
-    <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
-    <div class="q-sumreal q-ghost" aria-hidden="true" inert><p class="q-tally done">4 of 4 answered correctly.</p><p class="q-pattern">${esc(pattern())}</p><p class="q-reward">All four right. That earns a new link on the picture at the top of the page: Starfish Prime nuclear test and Limited Test Ban Treaty.</p></div></div>
-    <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
+  <div class="q-foot"><p class="q-tally" id="qTally" aria-live="polite">Four questions. Your answers are not saved.</p>
+    <div class="q-trail off" id="qTrail" aria-hidden="true"></div>
+    <div class="q-acts"><button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
-    <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a></div></div>`;
+    <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a></div>
+    <div class="q-more"><div class="q-sumreal"><p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
+    <div class="q-sumreal q-ghost" aria-hidden="true" inert><p class="q-pattern">${esc(pattern())}</p><p class="q-reward">All four right. That earns a new link on the picture at the top of the page: Starfish Prime nuclear test and Limited Test Ban Treaty.</p></div></div></div></div>`;
   // Cards side by side start their options level: every title takes the height of the tallest title in its row, measured from the real text (so it follows the width and
   // the font, and is measured again when either changes).
   const fit = () => {
@@ -233,8 +234,8 @@ export function mountQuiz() {
     again.hidden = !done;
     // three or four right: a short drawn flourish (one dot per question joined by a dashed line, ending in a tick) and a new link on the hero's picture
     const win = done === N && right >= 3;
-    trail.hidden = !win;
     trail.replaceChildren();
+    trail.className = 'q-trail off';
     rew.hidden = toHero.hidden = true;
     if (!win) return;
     const key = 'quiz' + right;
