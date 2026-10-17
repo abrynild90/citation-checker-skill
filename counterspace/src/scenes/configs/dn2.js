@@ -145,7 +145,7 @@ export const DN2 = {
   liveText: { '10,000': '10,000 km (China)', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
   liveOff: {
     'DN-2 path': [-30, -34],
-    Xichang: [-70, -56],
+    Xichang: [-62, -54],
     '10,000': [-76, 42],
     '≥30,000': [-76, -74],
     GEO: [28, 40],
@@ -154,6 +154,14 @@ export const DN2 = {
     'DN-2 path': [
       [0, -30, -34],
       [0.8, 0, -62],
+    ],
+    '10,000': [
+      [0, -76, 42],
+      [0.76, -24, -22],
+    ],
+    '≥30,000': [
+      [0, -76, -74],
+      [0.76, -60, -100],
     ],
   }, // once the rocket is back down the path pill goes straight up so its leader clears the apogee pill
   offPending: true, // the 10,000 km and apogee pills each keep their own fixed slot (one above, one below the ruler), with no swap while the rocket passes
