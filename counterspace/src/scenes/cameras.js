@@ -194,7 +194,7 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
           return fitPose(
             P,
             cfg.fitLateView && tk >= (cfg.fitLateViewFrom ?? 0.6) ? ll(cfg.fitLateView[0], cfg.fitLateView[1]) : nAt(tk),
-            scl(globeOnly ? scl(centroid(P), cfg.fitGlobeLook ?? 1) : cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), globeOnly ? 1 : (cfg.lookK ?? 0.97)),
+            scl(globeOnly ? scl(centroid(P), cfg.fitGlobeLook ?? 1) : cfg.dropCoreFrom != null && tk >= cfg.dropCoreFrom ? centroid(P) : add(scl(c0, 0.5), scl(centroid(P), 0.5)), globeOnly ? 1 : (cfg.lookKKeys?.[ki] ?? cfg.lookK ?? 0.97)), // lookKKeys (opt-in): the look-at pulled toward the Earth's centre by key (the globe centred in the frame, not drifting to a side)
             {
               dMin: cfg.fitMinKeys?.[ki] ?? cfg.fitMin ?? 0.3, // fitMinKeys (opt-in): a minimum camera distance per key time
               dMax: cfg.fitMax ?? 6.5,
