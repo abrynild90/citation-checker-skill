@@ -38,11 +38,11 @@
 /* the heading box is only as tall as its own text: the lede runs down beside the heading AND the takeaway (spanning the first two rows, the second one flexible), so a three-line lede
    never leaves blank space between the heading and the gold rule. The key and the scrub button take the next row, the find box beside them. */
 @media (min-width:1200px){
-  #lawHead{grid-template-rows:auto 1fr auto auto}
+  #lawHead{grid-template-rows:auto 1fr auto auto auto}
   #lawHead>.lede{grid-row:1 / span 2}
   #lawHead>.takeaway{grid-row:2;align-self:start}
   #lawHead>.law-choose{grid-column:1;grid-row:3;align-self:start}
-  #lawHead>.law-choice{grid-column:1;grid-row:4}
+  #lawHead>.law-choice{grid-column:1 / -1;grid-row:5}
   #lawHead>.law-row{grid-row:3;margin-top:1px} /* "How to read this chart" and "Move through the years" are level with the find box beside them (its middle, not 11 px under it) */
   #lawHead>.legal-quick-key{grid-column:2;grid-row:4}
 }

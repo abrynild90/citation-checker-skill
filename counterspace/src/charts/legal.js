@@ -1213,8 +1213,29 @@ export function drawLegalKey() {
     choose.addEventListener('change', () => {
       const law = LEGAL.find((l) => l.id === choose.value);
       choice.hidden = !law;
-      choice.innerHTML = law ? legalCard(law) + '<button class="btn small" type="button" id="clearLawChoice">Clear selection</button>' : '';
-      choice.querySelector('button')?.addEventListener('click', () => {
+      choice.replaceChildren();
+      if (!law) return;
+      // Wide: the name, date and what it is at the left, the source and the actions at the right (the two columns of the heading above); narrow: one column.
+      const tmp = document.createElement('div'),
+        main = document.createElement('div'),
+        side = document.createElement('div');
+      tmp.innerHTML = legalCard(law);
+      main.className = 'lc-main';
+      side.className = 'lc-side';
+      tmp.querySelector('.hint')?.remove();
+      const src = tmp.querySelector('.src');
+      main.append(...tmp.childNodes);
+      side.innerHTML = '<p class="lc-h">Source</p>';
+      if (src) side.append(src);
+      const acts = document.createElement('div');
+      acts.className = 'lc-acts';
+      acts.innerHTML =
+        (hasScene(law) ? '<button class="btn small" type="button" id="lawChoiceScene"><svg class="ico" aria-hidden="true"><use href="#i-cube"/></svg>See it in a scene</button>' : '') +
+        '<button class="btn small" type="button" id="clearLawChoice">Clear selection</button>';
+      side.append(acts);
+      choice.append(main, side);
+      acts.querySelector('#lawChoiceScene')?.addEventListener('click', (e) => hooks.openScene(law.scene_3d, e.currentTarget));
+      acts.querySelector('#clearLawChoice').addEventListener('click', () => {
         choice.hidden = true;
         choose.value = '';
         choose.focus();
