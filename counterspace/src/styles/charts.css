@@ -49,11 +49,11 @@
 
 /* the opened key takes the whole heading width (the closed one sits beside the find box): the symbols in columns at the left, the plain words of the abbreviations at the right,
    the find box on its own line under them, so no column is left holding one short control beside a tall one. The quick key repeats four of the key's eight symbols, so it hides while the key is open. */
+#lawHead:has(#keyLegal[open])>.legal-quick-key{display:none}
 @media (min-width:1100px){
   #lawHead:has(#keyLegal[open])>.law-row{grid-column:1 / -1;grid-row:3;margin-top:var(--s-3)}
   #lawHead:has(#keyLegal[open])>.law-choose{grid-column:1 / -1;grid-row:4}
   #lawHead:has(#keyLegal[open])>.law-choice{grid-column:1 / -1;grid-row:5}
-  #lawHead:has(#keyLegal[open])>.legal-quick-key{display:none}
   #lawHead:has(#keyLegal[open])>.law-row>#keyLegal{max-width:none}
   #keyLegal .key-body{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--s-6);align-items:start}
   #keyLegal .key-body>.legend{grid-column:1 / span 2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,auto);grid-auto-flow:column;gap:var(--s-2) var(--s-6);margin-top:var(--s-2)}
