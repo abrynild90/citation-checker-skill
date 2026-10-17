@@ -370,6 +370,7 @@ export const rocketMethods = {
       },
       outer = mk(false),
       core = mk(true),
+      ion = mk(false), // the thin ion-like trail behind the flame (fx.coastGlow vehicles only): pale blue-white at the nozzle, dissolving to violet
       spr = (c, op) => {
         const s = new T.Sprite(new T.SpriteMaterial({ map: this.spriteTex, color: c, transparent: true, opacity: op, depthWrite: false, depthTest: false, blending: T.AdditiveBlending })); // no depth test: the surface never cuts a glow in half; _rocketFrame hides them while the Earth is in the way
         s.renderOrder = 5;
@@ -380,7 +381,9 @@ export const rocketMethods = {
       hot = spr(0xfffbe8, 0.9), // a small white-hot disc at the nozzle exit, inside the orange glow
       sepFlash = spr(0xfff6e0, 0), // the flash of the separation charges at the interstage
       bloom = spr(0xff7a2a, 0); // a wide, faint warm halo round the whole exhaust (dense air only)
-    rig.add(bloom, outer, core, glow, hot, flash);
+    Object.assign(ion.material.uniforms, { uC0: { value: new T.Color(0xe4eeff) }, uC1: { value: new T.Color(0x5b6dff) }, uFall: { value: 1.7 }, uTurb: { value: 0.3 }, uFlick: { value: 0.1 }, uSeed: { value: 5.3 } });
+    ion.visible = false;
+    rig.add(bloom, outer, core, ion, glow, hot, flash);
     // coast glow (fx.coastGlow, opt-in): a soft halo round the vehicle and a short fading comet tail behind it, so a coasting rocket (no flame) still reads at a small size
     const coast = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
       const s = spr(0xffb49a, 0);
@@ -413,7 +416,7 @@ export const rocketMethods = {
     g.userData.sat = true;
     g.userData.body = lower.userData.meshes.get(white);
     inner.add(sepFlash);
-    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, glow, flash, hot, bloom, sepFlash, bell, bellU, heat, coast, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
+    g.userData.rk = { D, slim, kv: kvG, inner, lower, upper, rig, outer, core, ion, glow, flash, hot, bloom, sepFlash, bell, bellU, heat, coast, puff, vent, ring, nose, lowerMats: slim ? [white, dark, fin, accent] : [white, dark, fin], allMats: [white, whiteU, nose, dark, darkU, fin, bell, bellU].concat(slim ? [accent, accentU] : []) };
     Object.assign(g.userData, { span: 0.0615, minPx: 30, maxPx: 52 });
     return g;
   },
@@ -800,13 +803,13 @@ export const rocketMethods = {
         C = rk.core.material.uniforms;
       U.uLen.value = outerLen;
       U.uW.value = outerW;
-      U.uExp.value = e;
+      U.uExp.value = fx.coastGlow ? e * 0.4 : e; // fx.coastGlow vehicles: a tighter exhaust (the vacuum spread read as a pink cone)
       U.uInt.value = (0.95 - 0.4 * e) * thr * (1 + 0.28 * low) * flick;
       U.uTime.value = tm;
       U.uWob.value.set(wob[0] * 2.4, wob[1] * 2.4);
       C.uLen.value = outerLen * (0.52 + 0.14 * (1 - e));
       C.uW.value = outerW * (0.46 + 0.1 * (1 - e));
-      C.uExp.value = e * 0.8;
+      C.uExp.value = fx.coastGlow ? e * 0.3 : e * 0.8;
       C.uInt.value = (1.5 - 0.6 * e) * thr * (1 + 0.28 * low) * flick;
       C.uTime.value = tm;
       C.uDia.value = 2.0 * (1 - smooth(e / 0.6)) * thr; // shock diamonds: first stage, dense air (bright beads along the core, fading as the air thins and the plume spreads)
@@ -826,37 +829,48 @@ export const rocketMethods = {
       }
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
       rk.glow.visible = vis && thr > 0.004 && !hide;
-      rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)));
-      rk.glow.material.opacity = (0.85 - 0.35 * e) * thr;
+      rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)) * (fx.coastGlow ? 0.5 : 1));
+      rk.glow.material.opacity = (0.85 - 0.35 * e) * thr * (fx.coastGlow ? 0.6 : 1);
       rk.glow.position.z = -0.003;
-      // coast glow (opt-in { k, color }): a halo round the body and a comet tail behind it; it grows in after ignition and is gone with the vehicle
+      // coast glow (opt-in { k, color }): the exhaust of a vehicle that spends most of its flight coasting. While the motor burns: a white-yellow core at the nozzle, an orange body, and a thin
+      // ion-like trail that carries on behind the flame; in the coast, no flame: only a faint residual glow at the nozzle and the thin trail, fading, both attached to the nozzle (nothing floats free)
       {
         const cg = fx.coastGlow,
-          on = cg && vis && !hide ? smooth(clamp01((t - fx.t0) / 0.05)) * (1 - 0.65 * thr) : 0,
-          ck = cg?.k ?? 1;
+          ck = cg?.k ?? 1,
+          on = cg && vis && !hide ? smooth(clamp01((t - fx.t0) / 0.04)) : 0;
+        if (cg && !rec.cgTint) {
+          rec.cgTint = true;
+          rk.outer.material.uniforms.uC0.value.set(0xffc766);
+          rk.outer.material.uniforms.uC1.value.set(0xff8a2c);
+          rk.core.material.uniforms.uC1.value.set(0xffe9a0);
+        }
+        const Ui = rk.ion.material.uniforms,
+          ionOn = on * (0.5 + 0.5 * thr);
+        rk.ion.visible = ionOn > 0.01;
+        if (rk.ion.visible) {
+          Ui.uLen.value = outerLen * (1 - thr) + (outerLen + 0.095 * ck) * thr + 0.05 * ck * (1 - thr);
+          Ui.uW.value = nozW * (0.2 + 0.08 * thr);
+          Ui.uExp.value = 0.35;
+          Ui.uInt.value = 0.55 * ionOn * (1 - 0.25 * thr);
+          Ui.uTime.value = tm;
+        }
         rk.coast.forEach((sp, i) => {
-          sp.visible = on > 0.01;
+          sp.visible = on > 0.01 && i < 2;
           if (!sp.visible) return;
           if (cg.color && !sp.userData.tinted) {
             sp.material.color.set(cg.color);
             sp.userData.tinted = true;
           }
-          // sprite 0: the halo, centred on the body (the rig sits at the nozzle: the body's middle is ~0.5 length ahead); 1..4: the tail, aft of the nozzle, smaller and fainter
-          if (i === 0) {
-            sp.position.z = 0.5 * (D.zNose - D.zN);
-            sp.scale.setScalar(0.044 * ck);
-            sp.material.opacity = 0.2 * on;
-          } else {
-            sp.position.z = -0.004 - 0.0048 * i * ck;
-            sp.scale.setScalar((0.030 - 0.0020 * i) * ck);
-            sp.material.opacity = (0.24 - 0.027 * i) * on;
-          }
+          // sprite 0: a small soft glow at the nozzle (it hands over from the flame as the thrust ends); 1: a fainter, smaller one just aft of it
+          sp.position.z = -0.0012 - 0.004 * i * ck;
+          sp.scale.setScalar((0.020 - 0.006 * i) * ck);
+          sp.material.opacity = (0.16 - 0.07 * i) * on * (1 - 0.6 * thr);
         });
       }
       // bloom: wide and warm while the motor burns in dense air (thins out with height), brightest with the ignition flash
       rk.bloom.visible = vis && thr > 0.004 && !hide;
       rk.bloom.scale.setScalar((0.07 + 0.025 * low) * ak * (1 + 0.5 * (pk - 1)));
-      rk.bloom.material.opacity = (0.2 + 0.16 * Math.min(1, st.flash * 1.5)) * thr * (1 - 0.7 * e) * (0.45 + 0.55 * low);
+      rk.bloom.material.opacity = (0.2 + 0.16 * Math.min(1, st.flash * 1.5)) * thr * (1 - 0.7 * e) * (0.45 + 0.55 * low) * (fx.coastGlow ? 0.16 : 1);
       rk.bloom.position.z = -0.006;
       rk.hot.visible = vis && thr > 0.004 && !hide;
       rk.hot.scale.setScalar((0.0062 + 0.003 * thr) * ak * (1 + 0.3 * (pk - 1)) * (1 - 0.35 * e));

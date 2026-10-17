@@ -61,7 +61,7 @@ export const DN2 = {
         sizeSteps: IS_PHONE ? null : [[0.18, 1], [0.3, 0.94], [0.84, 0.94], [0.9, 1]], // through the coast the rocket keeps about 95% of its size (it was 76%: at 1440 it was a thin 80 px sliver beside 140 px pills)
         ramp: { k: IS_PHONE ? 1.8 : 1.25, until: 0.3 }, // desktop: 1.25 so the nose keeps clear of the top edge on a tall stage
         smokeK: 1.6,
-        coastGlow: IS_PHONE ? undefined : { k: 1, color: '#ff9e88' }, // desktop: a soft halo and a short comet tail so the coasting rocket reads at its small size in the wide framing
+        coastGlow: IS_PHONE ? undefined : { k: 1, color: '#ffd2a6' }, // desktop: a tight white-yellow-orange plume with a thin ion-like trail that stays on the nozzle, then a faint residual glow in the coast, so the rocket reads at its small size in the wide framing (no detached halo)
         follow: true, // a ballistic arc: the spent stage keeps its nose on the path through the coast and the fall (no tumble hanging off the path end)
         burn: 0.2, // a short powered phase, then a long coast to the apogee
         // no dropped stage: the reports speak of upper stages, but the count is not claimed, and the spent grey stub drifted unlabeled to the frame edge
