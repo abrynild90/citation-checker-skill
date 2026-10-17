@@ -76,8 +76,7 @@ const nameAt = (d, size) => {
 export const GLOSSARY = [
   ['Space Treaty', 'The Outer Space Treaty (1967).'],
   ['ABM Treaty', 'Anti-Ballistic Missile Treaty (1972). Article XII bars interference with the other side’s means of verifying the treaty.'],
-  ['ICAO', 'The International Civil Aviation Organization, the United Nations agency for civil aviation.'],
-  ['Aviation body', 'The International Civil Aviation Organization (ICAO), the United Nations agency for civil aviation.'],
+  ['ICAO, Aviation body', 'The International Civil Aviation Organization, the United Nations agency for civil aviation.'],
   ['CD', 'Conference on Disarmament.'],
   ['Cyber manual', 'Tallinn Manual 2.0: an expert manual on how international law applies to cyber operations.'],
   ['DA-ASAT', 'Direct-ascent anti-satellite: a missile launched from Earth to destroy or damage a satellite.'],

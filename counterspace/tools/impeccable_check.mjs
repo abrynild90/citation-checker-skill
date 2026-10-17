@@ -73,10 +73,12 @@ const VERIFIED = [
   [/^text-overflow$/, /^(dd|p) overflows its box by/, 'inside the closed legend <details> (stale 341 px layout; fits when opened) and the 1 px visually-hidden live region #heroAlt'],
   [/^clipped-overflow-container$/, /section\.chart\.xpanel/, 'inactive chart tab panels (collapsed, visibility hidden) clipping their hidden download menu'],
   [/^content-hidden-at-rest$/, /\d+% of page text/, 'the inactive chart tabs and the closed 3D viewer: reachable by tab and scene interaction'],
-  [/^line-length$/, /^~(8[0-9]|9[0-5]) chars on/, 'up to 95 characters a line in reference text in wide columns at 1800 px and wider (the page caps running text at about 58 characters, and a cap any tighter leaves blank columns); longer lines still fail'],
+  [/^line-length$/, /^~(8[0-9]|9[0-5]) chars on/, 'up to 95 characters a line in reference text in wide columns at 1800 px and wider (the page caps running text at about 58 characters, and a cap any tighter leaves blank columns); longer lines still fail, and below 1800 px none is tolerated', 1800],
   [/^cramped-padding$/, /pat-big/, 'static scan reads an earlier rule; the later cascade (explore.css, reference.css) sets padding 0, border 0, no fill: nothing to be flush against'],
 ];
-const known = (f) => process.env.ALLOW !== '0' && VERIFIED.some(([a, sn]) => a.test(f.antipattern) && sn.test(f.snippet || ''));
+const VP_W = +(process.env.VP || '1440x900').split('x')[0];
+// An entry's optional fourth value is the narrowest viewport width at which it is tolerated; the viewport comes from VP (default 1440).
+const known = (f) => process.env.ALLOW !== '0' && VERIFIED.some(([a, sn, , minW = 0]) => VP_W >= minW && a.test(f.antipattern) && sn.test(f.snippet || ''));
 const ignored = all.filter(known);
 all = all.filter((f) => !known(f));
 if (ignored.length) console.log(`(${ignored.length} finding(s) skipped as verified false positives: ${[...new Set(ignored.map((f) => f.antipattern))].join(', ')})`);
