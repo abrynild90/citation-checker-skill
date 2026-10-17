@@ -1389,7 +1389,7 @@ function fitDesktop() {
     // Whatever room is still left under the content is shared as even gaps (above the About / Next row, above the "Did you know" line and above the foot), so no single
     // band holds all of it. The gaps are fixed here, with the line's room counted whether or not its step has come, so nothing moves when it appears.
     const left = Math.min(...eachNow(() => bodySlack())),
-      gap = left > 24 ? Math.min(64, left / (dykOn() ? 3 : 2)) : 0;
+      gap = left > 24 ? Math.min(160, left / (dykOn() ? 3 : 2)) : 0; // equal shares: the foot is pushed to the bottom, so its band is the last share (a cap of 64 left one band twice the other)
     if (gap > 1) {
       asideBody.style.setProperty('--col-gap', gap.toFixed(1) + 'px');
       asideBody.classList.add('gapped');
