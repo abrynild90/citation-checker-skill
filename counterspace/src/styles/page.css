@@ -368,7 +368,7 @@ ul.legend li.kgroup{max-width:72ch}
 
 /* opened 'How to read this chart' sections: prose flows in two measure-wide columns on wide screens instead of one narrow column beside empty space */
 @media (min-width:1200px){.refold .rf-sec{columns:2 26rem;column-gap:var(--s-6)}.refold .rf-sec>:is(h3,h4,h5,.tscroll,table,svg,.dl-row,.scroll-hint){column-span:all}.refold .rf-sec>*{break-inside:avoid}
-  /* the key and the notes under it are one flow in two balanced columns: the key breaks between its groups and a paragraph may break between lines, so neither column ends in a blank band */
+  /* the key and the notes under it are one flow in two balanced columns: the key breaks between its groups and a paragraph never splits across the two columns (the columns balance by whole groups and paragraphs) */
   :is(#chartA,#chartC,#chartR,#chartB,#lag) .refold .rf-sec>.legend{display:block;margin:0;break-inside:auto}
   .refold .rf-sec>.legend>li{break-inside:avoid;margin:0 0 var(--s-3)}
-  .refold .rf-sec>p{margin:0 0 var(--s-3);break-inside:auto;orphans:2;widows:2}}
+  .refold .rf-sec>p{margin:0 0 var(--s-3);break-inside:avoid}}

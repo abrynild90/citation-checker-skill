@@ -2340,8 +2340,11 @@
   }
   /* before its step the line takes no room (no blank band above the first step); the list is still fitted as if it were there (fitSteps adds .reserve while it
      measures), so when the line comes in it grows into the room under the list, the foot stays where it is and nothing is squeezed */
-  .overlay .sv-dyk.pending { display: none; }
-  .overlay .sv-dyk.pending.reserve { display: block; visibility: hidden; }
+  /* before its step the box keeps its room as a quiet placeholder (a thin rule and one line of faint text; the fact itself is transparent and hidden from readers), so the column has no blank hole
+     and nothing moves when the fact comes in */
+  .overlay .sv-dyk.pending { display: block; position: relative; border-radius: 0; background: none; color: transparent; box-shadow: inset 0 1px 0 var(--line); user-select: none; pointer-events: none; }
+  .overlay .sv-dyk.pending b { color: transparent; }
+  .overlay .sv-dyk.pending::after { content: "A “Did you know” fact joins the story as it plays"; position: absolute; inset: var(--s-3) var(--s-4) auto; color: var(--faint); font: 400 14px/1.5 var(--sans); }
   .overlay .sv-dyk.nofit { display: none !important; } /* no room for it without costing the steps (fitSteps) */
   .overlay .sv-dyk.reveal { animation: dykIn 380ms var(--ease, ease) both; }
   /* the reveal never changes the line's box (it is drawn at its full height from the first frame, wiped in by a clip), so a fit that runs while it plays measures
@@ -2351,6 +2354,8 @@
   .overlay .sv-dyk b { font-weight: 600; color: var(--accent); margin-right: 4px; } /* blue, not amber: amber is kept for law and China */
 }
 .overlay .story-scroll.pin > .story-foot { margin-top: auto; }
+.overlay .story-scroll.gapped:not(.expanded) > .sv-about { margin-top: calc(var(--s-2) + var(--col-gap, 0px)); }
+.overlay .story-scroll.gapped:not(.expanded) > .sv-dyk { margin-top: calc(var(--s-3) + var(--col-gap, 0px)); }
 .overlay .story-scroll.pin { min-height: 100%; }
 .overlay .sv-lawcard .lc-gap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; margin-top: var(--s-2); font: 400 13.5px/1.45 var(--sans); color: var(--muted); }
 /* the related-law card is compact so it fits the room under the row of notes: the citation shows two lines, the link opens the whole source */
@@ -2730,6 +2735,8 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-2);
 }
+
+.overlay .story-scroll.note-over-foot > .story-foot { visibility: hidden; }
 
 /* A note open over the story column (About this picture, Where to go next) covers the "Did you know" box under it whole: a strip of that box showed under the note's lower edge
    as a faint ghost edge */

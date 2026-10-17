@@ -817,6 +817,7 @@ function togglePair(which) {
   // On a desktop window the note floats over the end of the column, under its row (like the related-law card): the column does not scroll and the list keeps its
   // place. In a stacked layout it is part of the column, and the column scrolls to it (see scenes.css).
   const float = !!which && !STACKED.matches;
+  if (!which) asideBody.classList.remove('note-over-foot');
   asideBody.classList.toggle('has-note', !!which && !float);
   Object.keys(pairBtns).forEach((k) => {
     const on = k === which;
@@ -842,14 +843,11 @@ function dockNote(note) {
   note.style.width = Math.round(x1 - x0) + 'px';
   note.style.top = top + 'px';
   note.style.maxHeight = Math.max(90, Math.round(room)) + 'px';
-  // a note that ends inside the foot (the source line, the related-law button) would leave a strip of it showing under its edge: it reaches down over the whole foot
+  // The note is as tall as its text. One that ends inside the foot (the source line, the related-law button) would leave a strip of the foot showing under its lower edge, so the foot
+  // gives way while the note is open (its room stays, nothing moves); a note that ends above the foot leaves it in view.
   const foot = $('sceneFoot'),
-    nr = note.getBoundingClientRect(),
-    last = [...foot.children].filter((c) => c.getClientRects().length).at(-1);
-  if (last && nr.bottom > foot.getBoundingClientRect().top + 1) {
-    const to = Math.min(ab.bottom - 8, Math.max(nr.bottom, last.getBoundingClientRect().bottom + 8));
-    note.style.minHeight = Math.round(to - nr.top) + 'px';
-  }
+    nr = note.getBoundingClientRect();
+  asideBody.classList.toggle('note-over-foot', nr.bottom > foot.getBoundingClientRect().top - 4);
 }
 addEventListener('resize', () => {
   const open = Object.values(pairBodies).find((n) => !n.hidden);
@@ -1070,6 +1068,8 @@ function markStep(k) {
   const dykWas = dykEl.classList.contains('pending'),
     dykNow = (steps[k]?.t ?? 0) < (FACT_FROM[cur?.id] ?? 0) - 1e-6;
   dykEl.classList.toggle('pending', dykNow);
+  if (dykNow) dykEl.setAttribute('aria-hidden', 'true');
+  else dykEl.removeAttribute('aria-hidden'); // its room shows a faint placeholder until its step; the fact is not read out early
   if (dykWas && !dykNow && dykOn()) {
     // it grows in over a third of a second (the room is under the list, so the foot does not move)
     dykEl.classList.add('reveal');
@@ -1264,6 +1264,8 @@ function fitStepsClosed() {
   stepCue.hidden = true;
   asideBody.classList.remove('st-measure');
   asideBody.classList.remove('pin'); // measured with the foot in its natural place; pinned to the bottom at the end
+  asideBody.classList.remove('gapped');
+  asideBody.style.removeProperty('--col-gap');
   overlay.classList.toggle('steps-one', false);
   fitCost = 0;
   if (!visibleStepRows().length) return;
@@ -1379,11 +1381,19 @@ function fitDesktop() {
     fitCost = fitMode;
     // the room left under the content is the least any active row leaves
     const slack = Math.min(...eachNow(() => bodySlack())),
-      sp = slack > 16 ? Math.min(WIDE.matches ? 18 : 10, (slack * 0.75) / (2 * total)) : 0;
+      sp = slack > 16 ? Math.min(WIDE.matches ? 28 : 16, (slack * 0.75) / (2 * total)) : 0;
     if (sp > 0.5) stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
     stepsEl.style.flex = '0 0 auto';
     // the list keeps the height of its tallest state (the row that plays is heavier and may wrap), so the buttons under it never move while the scene plays
     stepsEl.style.minHeight = Math.max(...eachNow(() => stepsEl.getBoundingClientRect().height)) + 'px';
+    // Whatever room is still left under the content is shared as even gaps (above the About / Next row, above the "Did you know" line and above the foot), so no single
+    // band holds all of it. The gaps are fixed here, with the line's room counted whether or not its step has come, so nothing moves when it appears.
+    const left = Math.min(...eachNow(() => bodySlack())),
+      gap = left > 24 ? Math.min(64, left / (dykOn() ? 3 : 2)) : 0;
+    if (gap > 1) {
+      asideBody.style.setProperty('--col-gap', gap.toFixed(1) + 'px');
+      asideBody.classList.add('gapped');
+    }
     return;
   }
   // Not all of them fit, even set this tight: a window of whole rows with a cue under it, using all the height there is.
