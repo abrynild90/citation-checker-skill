@@ -14,6 +14,7 @@ let root = null,
   early = 0,
   last = '';
 const MODS = new Set(['Shift', 'Control', 'Alt', 'Meta', 'CapsLock']);
+const EDGE = 12; // the chip keeps at least this far from the window's edge
 const GRACE = 1800; // the landing scroll is followed frame by frame for this long (a scroll or resize event follows it after that)
 const GIVE_UP = 8000; // a mark the page has still not brought into view by now is dropped
 
@@ -78,9 +79,13 @@ function place() {
     [x + w + gap, y + h / 2 - ch / 2],
     [x - gap - cw, y + h / 2 - ch / 2],
   ].map(([px, py], i) => {
-    const nx = Math.min(Math.max(px, 8), vw - 8 - cw),
+    const nx = Math.min(Math.max(px, EDGE), vw - EDGE - cw),
       ny = py;
     let cost = i * 0.01 + (Math.abs(nx - px) > 0.5 ? 40 + Math.abs(nx - px) : 0) + (ny < top ? 1e4 : 0) + (ny + ch > vh - 6 ? 1e4 : 0);
+    // a chip pushed along by the window's edge must still be clear of the ring (never drawn over it)
+    const rx = Math.min(nx + cw, x + w) - Math.max(nx, x),
+      ry = Math.min(ny + ch, y + h) - Math.max(ny, y);
+    if (rx > -4 && ry > -4) cost += 1e3 + Math.max(rx, 0) * Math.max(ry, 0);
     for (const { r, wt } of others) {
       const ox = Math.min(nx + cw, r.right) - Math.max(nx, r.left),
         oy = Math.min(ny + ch, r.bottom) - Math.max(ny, r.top);
@@ -89,7 +94,7 @@ function place() {
     return { nx, ny, cost };
   });
   let best = spots.reduce((m, c) => (c.cost < m.cost ? c : m));
-  if (best.cost >= 1e4) best = { nx: Math.min(Math.max(x, 8), vw - 8 - cw), ny: Math.max(top, Math.min(y, vh - 6 - ch)) }; // no room anywhere: on the ring's top edge
+  if (best.cost >= 1e4) best = { nx: Math.min(Math.max(x, EDGE), vw - EDGE - cw), ny: Math.max(top, Math.min(y, vh - 6 - ch)) }; // no room anywhere: on the ring's top edge
   chipEl.style.cssText = `left:${best.nx - x}px;top:${best.ny - y}px`;
 }
 const schedule = () => {
