@@ -665,6 +665,22 @@ export const rocketMethods = {
       const { obj, rk, fx, it } = rec,
         vis = obj.visible;
       const ud = obj.userData;
+      // fx.plumeDeck (a vehicle in a ship's cell): the part of the vehicle below the sea is cut off by a plane at the water level round the ship, so no stub of booster hangs under the keel
+      if (fx.plumeDeck && vis) {
+        const sh = this.dyn.find((d) => d.obj.userData.uSea)?.obj;
+        if (sh) {
+          const n = rec.seaN || (rec.seaN = new T.Vector3()),
+            pl = rec.seaPl || (rec.seaPl = new T.Plane());
+          n.copy(sh.position).normalize();
+          pl.setFromNormalAndCoplanarPoint(n, sh.position);
+          pl.constant -= 0.0004 * sh.scale.x + 0.004; // the water at the ship: the sea patch sits 0.0004 model units up and the globe-hugging shader lifts its middle 0.004 (see _warshipModel)
+          if (!rec.seaClip) {
+            this.renderer.localClippingEnabled = true;
+            for (const m of rk.allMats) m.clippingPlanes = [pl];
+            rec.seaClip = true;
+          }
+        }
+      }
       // the displayed scale is kept when the vehicle is not drawn (the smoke trail is sized from it)
       if (vis) {
         if (Number.isFinite(obj.scale.x)) rec.f = obj.scale.x;

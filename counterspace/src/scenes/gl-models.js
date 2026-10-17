@@ -118,6 +118,90 @@ function wakeCanvas() {
   return c;
 }
 
+// The paint of a warship's side (one strip along the hull, u = bow-ward, v = keel to gunwale; the rows match _warshipModel's levels): red anti-fouling, a dark boot-topping band at the waterline,
+// then light haze grey with a darker band low on the side (the occluded part under the flare), soft vertical weathering streaks, a few openings and an anchor pocket. Drawn once, in memory.
+let hullCv = null;
+function hullCanvas() {
+  if (hullCv) return hullCv;
+  const W = 1024,
+    H = 96,
+    c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d'),
+    rnd = ((s) => () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646)(7),
+    Y = (v) => Math.round((1 - v) * H);
+  // rows (bottom to top): v 0 .. 0.15 boot-topping and the hull under it, then the side
+  const grad = g.createLinearGradient(0, Y(0.15), 0, 0);
+  grad.addColorStop(0, '#444c57'); // low on the side: in the shade of the flare
+  grad.addColorStop(0.28, '#68717d');
+  grad.addColorStop(0.7, '#808994');
+  grad.addColorStop(1, '#929ba6'); // the sunlit upper strake
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, Y(0.15));
+  const bt = g.createLinearGradient(0, Y(0.15), 0, H);
+  bt.addColorStop(0, '#262b32'); // boot-topping: a dark band at the waterline (the sea patch hides the lower part, which fades to a dark red)
+  bt.addColorStop(0.5, '#1d2127');
+  bt.addColorStop(1, '#2a1816');
+  g.fillStyle = bt;
+  g.fillRect(0, Y(0.15), W, H - Y(0.15));
+  // weathering streaks from the deck edge: soft, short, a little dark or warm
+  for (let i = 0; i < 90; i++) {
+    const x = rnd() * W,
+      len = 6 + rnd() * 26,
+      a = 0.05 + rnd() * 0.09;
+    g.fillStyle = rnd() < 0.3 ? `rgba(110,70,45,${a})` : `rgba(25,30,38,${a})`;
+    g.fillRect(x, 0, 1 + rnd() * 1.4, len);
+  }
+  // faint plating: a seam every so often (not a picket fence)
+  g.fillStyle = 'rgba(30,36,46,0.10)';
+  for (let x = 24; x < W; x += 61) g.fillRect(x + Math.round(rnd() * 8), 0, 1, Y(0.15));
+  // openings: the replenishment stations and doors amidships, hawse-pipe and anchor pocket forward
+  const door = (u, v, w, h2) => {
+    g.fillStyle = 'rgba(14,18,24,0.62)';
+    g.fillRect(u * W, Y(v), w, h2);
+    g.fillStyle = 'rgba(170,176,186,0.5)';
+    g.fillRect(u * W - 1, Y(v) - 1, w + 2, 1);
+  };
+  door(0.40, 0.56, 7, 9);
+  door(0.585, 0.58, 9, 10);
+  door(0.30, 0.55, 5, 7);
+  door(0.735, 0.55, 5, 7);
+  g.fillStyle = 'rgba(12,15,20,0.9)';
+  g.beginPath();
+  g.ellipse(0.915 * W, Y(0.66), 4, 5, 0, 0, Math.PI * 2); // the hawse-pipe
+  g.fill();
+  g.fillStyle = 'rgba(30,34,40,0.6)';
+  g.fillRect(0.905 * W, Y(0.66) + 6, 2, 9); // the anchor chain mark
+  hullCv = c;
+  return c;
+}
+// The deck: dark non-skid with a soft grain, a pale safety line along each edge and a faint centre line. u across (0 port, 1 starboard), v along the ship.
+let deckCv = null;
+function deckCanvas() {
+  if (deckCv) return deckCv;
+  const W = 64,
+    H = 512,
+    c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d'),
+    rnd = ((s) => () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646)(11);
+  g.fillStyle = '#3a4048';
+  g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 900; i++) {
+    g.fillStyle = rnd() < 0.5 ? 'rgba(20,24,30,0.22)' : 'rgba(110,118,128,0.16)';
+    g.fillRect(rnd() * W, rnd() * H, 1 + rnd() * 2, 1);
+  }
+  g.fillStyle = 'rgba(214,218,224,0.55)';
+  g.fillRect(3, 0, 1, H);
+  g.fillRect(W - 4, 0, 1, H);
+  g.fillStyle = 'rgba(214,218,224,0.28)';
+  g.fillRect(W / 2 - 1, 0, 2, H);
+  deckCv = c;
+  return c;
+}
+
 // Part kit: a craft is built from many small boxes, cylinders and swept shapes. Each part is placed with a position and rotation (inside optional nested
 // groups), baked into its geometry, and all parts that share a material are merged into one mesh, so a whole craft costs a handful of draw calls.
 export class Kit {
@@ -1241,43 +1325,278 @@ export const modelMethods = {
     Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });
     return g;
   },
-  // Opt-in warship (ship actor `shade`; Burnt Frost's USS Lake Erie), drawn for a reader who has never seen one: a Ticonderoga-class cruiser seen as a destroyer-like
-  // hull with a raked, flared bow, a boot-topping band and a pale hull number, a raised forecastle carrying a 5-inch gun and a vertical-launch cell block (the SM-3 climbs out of it,
-  // at the model's origin), a layered superstructure (deckhouse with radar panels, bridge with wings, a mast with a radar, two raked funnels with dark exhaust uptakes, an aft
-  // house with a second mast), a second cell block, an aft gun, a helicopter deck, deck lights, and a fine white wake. Stern -0.044, bow 0.034 (the span is as before, so labels hold).
+  // Opt-in warship (ship actor `shade`; Burnt Frost's USS Lake Erie), drawn for a reader who has never seen one: a Ticonderoga-class cruiser. The hull is lofted from stations (not stacked
+  // slabs): a sharply raked, flared stem, a continuous sheer (low freeboard in the waist, rising to the bow), light haze-grey paint over a dark boot-topping with a weathered, shaded side and
+  // a pale hull number. On the deck: the 5-inch gun and a forward vertical-launch deck of hatches (the SM-3 climbs out of it, at the model's origin), a faceted, canted deckhouse with
+  // SPY-1 panels on its four corners and a bridge with wrap-round windows, two raked funnels, an aft house with a mast, a second hatch deck, a hangar and the flight deck, and a fine
+  // white wake. Stern -0.044, bow 0.034 (the span is as before, so labels hold).
   _warshipModel(pos, o = {}) {
     const T = this.T,
       g = new T.Group();
-    const BEAM = 0.0058,
+    const BEAM = 0.0050, // half-breadth of the parallel body at the waterline
       Z0 = -0.044,
       Z1 = 0.034,
-      ZB = 0.002; // the hull is full width from the stern quarter to here, then tapers to the stem
-    const hw = (z) => {
-      if (z < -0.028) return 0.0046 + ((z - Z0) / 0.016) * (BEAM - 0.0046);
+      ZB = 0.002, // the hull is full width from the stern quarter to here, then tapers to the stem
+      SEA = 0.0004, // the sea patch and the foam lie at this height; the globe-hugging shader lifts the middle of the patch by 0.004 / scale, so the waterline stands at about 0.003 amidships
+      YB = 0.0036, // top of the boot-topping
+      FORE = 0.0082, // the forecastle deck: the cell block sits on it (the missile's base is the model's origin)
+      TOPY = 0.0064, // the waist
+      RK = 0.0082; // how far the stem leans back at the keel
+    const sm = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+    const hw = (z, stem = Z1) => {
+      if (z < -0.028) return 0.0040 + ((z - Z0) / 0.016) * (BEAM - 0.0040);
       if (z < ZB) return BEAM;
-      const u = Math.min(1, (z - ZB) / (Z1 - ZB));
-      return BEAM * Math.pow(1 - Math.pow(u, 1.3), 0.95);
+      const u = Math.min(1, (z - ZB) / (stem - ZB));
+      return BEAM * Math.pow(1 - Math.pow(u, 1.5), 1.1);
     };
-    // the plan of the hull between two stations (an x, z outline; ExtrudeGeometry reads it as x, y): `inset` narrower each side, `grow` wider, `fl` extra width at the bow (flare),
-    // `bow` the z of the stem at this level (a lower level ends further aft: the raked stem)
-    const plan = (za, zb, inset = 0, grow = 1, fl = 0, bow = Z1) => {
-      const sh = new T.Shape(),
-        n = 24,
-        zs = Array.from({ length: n + 1 }, (_, i) => za + ((zb - za) * i) / n),
-        w = (z) => {
-          const zz = z > ZB ? ZB + ((z - ZB) * (Z1 - ZB)) / (bow - ZB) : z;
-          return Math.max(0, hw(Math.min(zz, Z1)) * grow * (1 + fl * Math.max(0, Math.min(1, (z - ZB + 0.004) / 0.030))) - inset);
+    // the deck: flat on the forecastle, easing down through the waist to the main deck, rising a little at the stern; the sheer rises to the stem
+    const DK = (z) => (z >= 0 ? FORE + 0.0013 * Math.pow(Math.max(0, (z - 0.0185) / (Z1 - 0.0185)), 1.7) : TOPY + (FORE - TOPY) * sm((z + 0.0215) / 0.0215) + (z < -0.034 ? 0.0004 * Math.pow((-0.034 - z) / 0.010, 2) : 0));
+    const GUN = (z) => DK(z) + 0.0005 + 0.0007 * Math.pow(Math.max(0, (z - 0.022) / (Z1 - 0.022)), 2);
+    const FLARE = (z) => 1.045 + 0.11 * sm((z - ZB + 0.004) / 0.030); // the beam at the gunwale against the waterline plan: the bow flares out
+    // the levels of the side, keel to gunwale (a: absolute height, ex: beam factor; fr: fraction of the topsides)
+    const ROWS = [{ a: 0, ex: 0.5, v: 0 }, { a: 0.0020, ex: 0.93, v: 0.07 }, { a: YB, ex: 1, v: 0.15 }, { fr: 0.25, v: 0.40 }, { fr: 0.5, v: 0.62 }, { fr: 0.78, v: 0.82 }, { fr: 1, v: 1 }];
+    const rowY = (r, z) => (r.a != null ? r.a : YB + r.fr * (GUN(z) - YB));
+    const rowStem = (r) => Z1 - RK * Math.pow(1 - rowY(r, Z1) / GUN(Z1), 1.25); // the stem leans back lower down: the rake
+    const rowX = (r, z) => hw(z, rowStem(r)) * (r.a != null ? 0.9 * r.ex : 0.9 + (FLARE(z) - 0.9) * Math.pow(r.fr, 0.9));
+    const TOPROW = ROWS[ROWS.length - 1];
+    const ctex = (cv) => {
+      const t = this._gtex(cv, () => new T.CanvasTexture(cv));
+      t.colorSpace = T.SRGBColorSpace;
+      t.anisotropy = 4;
+      return t;
+    };
+    // opaque naval-grey paint with a small neutral self-light (a fill that stands in for moon and earthshine on the night side), so the ship reads as a solid grey ship on a dark sea;
+    // the coat is a little glossy (it picks up the sun) and the environment map is kept low so it does not tint the paint
+    const paint = (c, k = 0.3, op = {}) => this._mat(c, { metalness: 0.22, roughness: 0.5, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.9, ...op });
+    const hullT = ctex(hullCanvas()),
+      deckT = ctex(deckCanvas());
+    const hullMat = this._mat(0xffffff, { map: hullT, emissiveMap: hullT, emissive: 0xffffff, emissiveIntensity: 0.19, metalness: 0.3, roughness: 0.4, envMapIntensity: 1.3 }),
+      deckMat = this._mat(0xffffff, { map: deckT, emissiveMap: deckT, emissive: 0xffffff, emissiveIntensity: 0.2, metalness: 0.1, roughness: 0.75, envMapIntensity: 0.5 }),
+      rim = paint(0xa9b0ba, 0.4),
+      houseM = paint(0x949da8, 0.26, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.2 }),
+      houseM2 = paint(0x858e9a, 0.24, { metalness: 0.28, roughness: 0.42, envMapIntensity: 1.2 }),
+      roofM = paint(0xb7bdc6, 0.34),
+      glass = paint(0x0b1017, 0.35, { metalness: 0.55, roughness: 0.2, envMapIntensity: 1.5 }),
+      frame = paint(0x4b5560, 0.3),
+      radar = paint(0x131b24, 0.35, { metalness: 0.5, roughness: 0.28, envMapIntensity: 1.5 }),
+      funnelM = paint(0x838b96, 0.26),
+      soot = paint(0x07090c, 0.12),
+      metal = paint(0xc2c6ce, 0.38, { metalness: 0.45, roughness: 0.38 }),
+      dark = paint(0x15181d, 0.12),
+      gunM = paint(0xaab0b9, 0.36, { metalness: 0.4, roughness: 0.4 }),
+      lane = paint(0x565c66, 0.22),
+      stripe = paint(0xf2f2ee, 0.5),
+      cellTop = paint(0x6a717c, 0.3),
+      cellGap = paint(0x181b21, 0.1);
+    const mesh = (geo, mat) => {
+      const m = new T.Mesh(geo, mat);
+      g.add(m);
+      return m;
+    };
+    // a triangle soup (flat or smooth normals) from a list of triangles of [x, y, z, u, v] points
+    const soup = (tris, mat, smooth = false) => {
+      const pp = [],
+        uu = [];
+      tris.forEach((p) => {
+        pp.push(p[0], p[1], p[2]);
+        uu.push(p[3] ?? 0, p[4] ?? 0);
+      });
+      const gm = new T.BufferGeometry();
+      gm.setAttribute('position', new T.Float32BufferAttribute(pp, 3));
+      gm.setAttribute('uv', new T.Float32BufferAttribute(uu, 2));
+      gm.computeVertexNormals();
+      void smooth;
+      return mesh(gm, mat);
+    };
+    // ---- the hull: a loft of stations, one grid per side (smooth normals give the soft gradient down the flared side) ----
+    const NI = 84,
+      zOf = (w, stem) => Z0 + (stem - Z0) * (1 - Math.pow(1 - w, 1.55)); // stations crowd toward the stem
+    const gridPt = (i, k, sd) => {
+      const r = ROWS[k],
+        z = zOf(i / NI, rowStem(r));
+      return [sd * rowX(r, z), rowY(r, z), z, (z - Z0) / (Z1 - Z0), r.v];
+    };
+    [-1, 1].forEach((sd) => {
+      const pp = [],
+        uu = [],
+        ix = [];
+      for (let k = 0; k < ROWS.length; k++)
+        for (let i = 0; i <= NI; i++) {
+          const p = gridPt(i, k, sd);
+          pp.push(p[0], p[1], p[2]);
+          uu.push(p[3], p[4]);
+        }
+      const id = (i, k) => k * (NI + 1) + i;
+      for (let k = 0; k < ROWS.length - 1; k++)
+        for (let i = 0; i < NI; i++) {
+          const a = id(i, k),
+            b = id(i + 1, k),
+            c = id(i, k + 1),
+            d = id(i + 1, k + 1);
+          if (sd > 0) ix.push(a, c, b, b, c, d);
+          else ix.push(a, b, c, b, d, c);
+        }
+      const gm = new T.BufferGeometry();
+      gm.setAttribute('position', new T.Float32BufferAttribute(pp, 3));
+      gm.setAttribute('uv', new T.Float32BufferAttribute(uu, 2));
+      gm.setIndex(ix);
+      gm.computeVertexNormals();
+      mesh(gm, hullMat);
+    });
+    // the transom
+    {
+      const tr = [];
+      for (let k = 0; k < ROWS.length - 1; k++) {
+        const P = (kk, sd) => {
+          const p = gridPt(0, kk, sd);
+          return [p[0], p[1], p[2], 0.01, ROWS[kk].v];
         };
-      zs.forEach((z, i) => (i ? sh.lineTo(w(z), z) : sh.moveTo(w(z), z)));
-      [...zs].reverse().forEach((z) => sh.lineTo(-w(z), z));
-      sh.closePath();
-      return sh;
+        const a = P(k, -1),
+          b = P(k, 1),
+          c = P(k + 1, -1),
+          d = P(k + 1, 1);
+        tr.push(a, c, b, b, c, d);
+      }
+      const m = soup(tr, hullMat);
+      m.material = hullMat.clone();
+      m.material.side = T.DoubleSide;
+    }
+    // the deck and the bulwark (inner face and top edge)
+    {
+      const dt = [],
+        bi = [],
+        N2 = 90,
+        S = [];
+      for (let i = 0; i <= N2; i++) {
+        const z = Z0 + (Z1 - Z0) * (1 - Math.pow(1 - i / N2, 1.4)),
+          x = rowX(TOPROW, z) - 0.0007;
+        S.push({ z, x, y: DK(z), gy: GUN(z), xo: rowX(TOPROW, z), v: (z - Z0) / (Z1 - Z0) });
+      }
+      for (let i = 0; i < N2; i++) {
+        const A = S[i],
+          B = S[i + 1];
+        const L = (s) => [-s.x, s.y, s.z, 0, s.v],
+          R = (s) => [s.x, s.y, s.z, 1, s.v];
+        dt.push(L(A), L(B), R(A), R(A), L(B), R(B));
+        [-1, 1].forEach((sd) => {
+          const q = (s, h) => [sd * s.x, h ? s.gy : s.y, s.z],
+            qo = (s) => [sd * s.xo, s.gy, s.z];
+          const a0 = q(A, 0),
+            a1 = q(A, 1),
+            b0 = q(B, 0),
+            b1 = q(B, 1);
+          if (sd > 0) bi.push(a0, b0, a1, a1, b0, b1);
+          else bi.push(a0, a1, b0, b0, a1, b1);
+          const o0 = qo(A),
+            o1 = qo(B);
+          if (sd > 0) bi.push(a1, b1, o0, o0, b1, o1);
+          else bi.push(a1, o0, b1, b1, o0, o1);
+        });
+      }
+      const dm = soup(dt, deckMat);
+      dm.material = deckMat.clone();
+      dm.material.side = T.DoubleSide;
+      const bm = soup(bi, rim);
+      bm.material = rim.clone();
+      bm.material.side = T.DoubleSide;
+    }
+    // hull number (a pale "70" on the forward flank: the paint that tells a warship from a barge), set square to the flared, tapering side
+    {
+      const cv = document.createElement('canvas');
+      cv.width = 128;
+      cv.height = 48;
+      const cx = cv.getContext('2d');
+      cx.fillStyle = '#f4f4f0';
+      cx.font = '700 44px sans-serif';
+      cx.textAlign = 'center';
+      cx.textBaseline = 'middle';
+      cx.fillText('70', 64, 26);
+      const nt = new T.CanvasTexture(cv),
+        nm = new T.MeshBasicMaterial({ map: nt, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
+      const zz = 0.0150,
+        rr = { fr: 0.52 },
+        hx = (z) => rowX({ fr: rr.fr, v: 0 }, z),
+        slope = (hx(zz + 0.0005) - hx(zz - 0.0005)) / 0.001;
+      [-1, 1].forEach((sd) => {
+        const q = new T.Mesh(new T.PlaneGeometry(0.0046, 0.0017), nm);
+        q.position.set(sd * (hx(zz) + 0.00012), rowY(rr, zz), zz);
+        q.rotation.y = Math.atan2(sd, -sd * slope);
+        g.add(q);
+      });
+    }
+    // ---- helpers for the angular parts ----
+    // a prism on a convex plan (x, z points): the top is the plan scaled by `s` about its centre and moved by (dx, dz) (a cant: the sides lean in, the front face rakes back),
+    // flat-shaded faces; mats = [sides, top]
+    const prism = (poly, y0, y1, mats, s = 1, dz = 0, dx = 0) => {
+      const n = poly.length,
+        cx = poly.reduce((a, p) => a + p[0], 0) / n,
+        cz = poly.reduce((a, p) => a + p[1], 0) / n,
+        B = poly.map(([x, z]) => [x, y0, z]),
+        Tp = poly.map(([x, z]) => [cx + (x - cx) * s + dx, y1, cz + (z - cz) * s + dz]),
+        pp = [];
+      const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+        cr = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+        dt = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+      const push = (a, b, c, out) => {
+        const nn = cr(sub(b, a), sub(c, a)),
+          mid = [(a[0] + b[0] + c[0]) / 3 - cx, (a[1] + b[1] + c[1]) / 3 - (y0 + y1) / 2, (a[2] + b[2] + c[2]) / 3 - cz],
+          up = out === 'up';
+        const ok = up ? nn[1] > 0 : dt(nn, mid) > 0;
+        (ok ? [a, b, c] : [a, c, b]).forEach((p) => pp.push(...p));
+      };
+      for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        push(B[i], B[j], Tp[j]);
+        push(B[i], Tp[j], Tp[i]);
+      }
+      const ns = pp.length / 3;
+      for (let i = 1; i < n - 1; i++) push(Tp[0], Tp[i], Tp[i + 1], 'up');
+      const gm = new T.BufferGeometry();
+      gm.setAttribute('position', new T.Float32BufferAttribute(pp, 3));
+      gm.computeVertexNormals();
+      gm.addGroup(0, ns, 0);
+      gm.addGroup(ns, pp.length / 3 - ns, 1);
+      const m = new T.Mesh(gm, mats);
+      g.add(m);
+      return { m, B, Tp, n, cx, cz, y0, y1 };
     };
-    const layer = (shape, y0, y1, mat) => {
-      const ge = new T.ExtrudeGeometry(shape, { depth: y1 - y0, bevelEnabled: false });
-      ge.rotateX(Math.PI / 2);
-      ge.translate(0, y1, 0);
-      const m = new T.Mesh(ge, mat);
+    // a flat (optionally corner-chamfered) patch laid on a prism's facet i: u along the facet, v up it
+    const patch = (pr, i, u0, u1, v0, v1, ch, mat, off = 0.00007) => {
+      const j = (i + 1) % pr.n,
+        lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t],
+        P = (u, v) => lerp(lerp(pr.B[i], pr.B[j], u), lerp(pr.Tp[i], pr.Tp[j], u), v);
+      const a = pr.B[i],
+        b = pr.B[j],
+        d = pr.Tp[i],
+        e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]],
+        e2 = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+      let nn = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+      const L = Math.hypot(...nn);
+      nn = nn.map((q) => q / L);
+      const mx = (a[0] + b[0]) / 2 - pr.cx,
+        mz = (a[2] + b[2]) / 2 - pr.cz;
+      if (nn[0] * mx + nn[2] * mz < 0) nn = nn.map((q) => -q);
+      const cu = (u1 - u0) * ch,
+        cv = (v1 - v0) * ch * 0.8;
+      const uv = ch > 0 ? [[u0 + cu, v0], [u1 - cu, v0], [u1, v0 + cv], [u1, v1 - cv], [u1 - cu, v1], [u0 + cu, v1], [u0, v1 - cv], [u0, v0 + cv]] : [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+      const W3 = uv.map(([u, v]) => P(u, v).map((q, k) => q + nn[k] * off)),
+        C3 = P((u0 + u1) / 2, (v0 + v1) / 2).map((q, k) => q + nn[k] * off),
+        pp = [];
+      for (let q = 0; q < W3.length; q++) {
+        const p1 = W3[q],
+          p2 = W3[(q + 1) % W3.length],
+          c = (p2[0] - p1[0]) * (C3[1] - p1[1]) - 0; // (winding settled below)
+        void c;
+        const cx2 = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]],
+          cy2 = [C3[0] - p1[0], C3[1] - p1[1], C3[2] - p1[2]],
+          cn = [cx2[1] * cy2[2] - cx2[2] * cy2[1], cx2[2] * cy2[0] - cx2[0] * cy2[2], cx2[0] * cy2[1] - cx2[1] * cy2[0]];
+        const ok = cn[0] * nn[0] + cn[1] * nn[1] + cn[2] * nn[2] > 0;
+        (ok ? [p1, p2, C3] : [p2, p1, C3]).forEach((p) => pp.push(...p));
+      }
+      const gm = new T.BufferGeometry();
+      gm.setAttribute('position', new T.Float32BufferAttribute(pp, 3));
+      gm.computeVertexNormals();
+      const m = new T.Mesh(gm, mat);
       g.add(m);
       return m;
     };
@@ -1293,171 +1612,110 @@ export const modelMethods = {
       g.add(q);
       return q;
     };
-    const TOP = 0.0066, // the main deck
-      FORE = 0.0082, // the forecastle deck (the cell block sits on it: the missile's base is the model's origin)
-      ZF = -0.0052; // the forecastle break
-    // Opaque naval-grey paint with a small neutral self-light (a fill that stands in for moon and earthshine on the night side), so the hull reads as a solid
-    // grey ship on a dark sea, not a blue see-through shape. Roughness is high and metalness near 0, so the cool environment map does not tint the paint.
-    const paint = (c, k = 0.3, o = {}) => this._mat(c, { metalness: 0.06, roughness: 0.74, emissive: new T.Color(c).multiplyScalar(k), emissiveIntensity: 1, envMapIntensity: 0.5, ...o });
-    const keel = paint(0x3d1816, 0.3),
-      boot = paint(0x7c2e22, 0.5),
-      bootLine = paint(0xd2d6dc, 0.5),
-      // the hull side: a mid "haze grey" (lighter than the dark sea and darker than the superstructure) with a softer coat that picks up the sun
-      side = paint(0x58616d, 0.2, { metalness: 0.35, roughness: 0.4, envMapIntensity: 1.3 }),
-      upper = paint(0x727b87, 0.26, { metalness: 0.3, roughness: 0.4, envMapIntensity: 1.3 }),
-      seam = paint(0x20252d, 0.1),
-      scuttle = paint(0x0d1015, 0.05),
-      rim = paint(0xb4bac4, 0.45),
-      deckMat = paint(0x3b4049, 0.2), // dark non-skid: the pale rooftops and the cells stand out on it
-      lane = paint(0x565c66, 0.22),
-      stripe = paint(0xf2f2ee, 0.5),
-      light = paint(0xcfd4dc, 0.28, { roughness: 0.55 }),
-      light2 = paint(0xb4bbc6, 0.26, { roughness: 0.55 }),
-      roof = paint(0xdde0e6, 0.34),
-      glass = paint(0x0c1118, 0.3, { metalness: 0.5, roughness: 0.2, envMapIntensity: 1.4 }),
-      funnel = paint(0x7d838e, 0.26),
-      soot = paint(0x07090c, 0.1),
-      metal = paint(0xc2c6ce, 0.38, { metalness: 0.45, roughness: 0.38 }),
-      dark = paint(0x15181d, 0.12),
-      radar = paint(0x1d2630, 0.3, { metalness: 0.4, roughness: 0.3, envMapIntensity: 1.4 }),
-      cellTop = paint(0x23272e, 0.2),
-      cellLid = paint(0x6f7681, 0.3);
-    // hull: the red antifouling, a boot-topping band at the waterline with a pale line above it, the grey side (the lower part, then a flared upper strake with a step), and the
-    // forecastle (the bow rises: the sheer). The stem is raked: each level ends further forward than the one below it.
-    layer(plan(Z0, Z1, 0, 0.98, 0, Z1 - 0.011), 0, 0.0014, keel);
-    layer(plan(Z0, Z1, 0, 1.0, 0, Z1 - 0.0095), 0.0014, 0.0025, boot);
-    layer(plan(Z0, Z1, 0, 1.012, 0, Z1 - 0.0088), 0.0025, 0.0028, bootLine);
-    layer(plan(Z0, Z1, 0, 1.012, 0.04, Z1 - 0.0070), 0.0028, 0.0042, side);
-    layer(plan(Z0, Z1, 0, 1.045, 0.10, Z1 - 0.0030), 0.0042, TOP, upper); // flared: wider at the deck than at the waterline
-    layer(plan(ZF, Z1, 0, 1.045, 0.10, Z1), TOP, FORE, upper);
-    layer(plan(ZF, Z1, 0, 1.055, 0.10, Z1), FORE - 0.0004, FORE, rim); // a pale sheer line along the forecastle edge
-    layer(plan(Z0, ZF, 0, 1.045, 0.10, Z1), TOP - 0.0004, TOP, rim);
-    // plating: thin dark seams down the side, a row of dark scuttles under the deck edge
-    for (let z = -0.0405; z < 0.032; z += 0.0044) {
-      const hi = z > ZF ? FORE : TOP;
-      layer(plan(z, z + 0.00028, 0, 1.05, 0.10, Z1 - 0.0010), 0.0028, hi - 0.0004, seam);
-    }
-    for (let z = -0.039; z < 0.028; z += 0.0044) {
-      const hi = z > ZF ? FORE : TOP;
-      layer(plan(z + 0.0012, z + 0.0021, 0, 1.052, 0.10, Z1), hi - 0.0016, hi - 0.0011, scuttle);
-    }
-    layer(plan(Z0 + 0.0008, ZF - 0.0004, 0.0009, 1.045, 0.10), TOP, TOP + 0.0004, deckMat);
-    layer(plan(ZF + 0.0004, Z1 - 0.0016, 0.0009, 1.045, 0.10), FORE, FORE + 0.0004, deckMat);
-    // the pale deck stripe down the middle of the forecastle and the main deck
-    box(0.0014, 0.0003, 0.0285, stripe, 0, FORE + 0.0004, 0.0125);
-    box(0.0014, 0.0003, 0.0285, stripe, 0, TOP + 0.0004, -0.0335);
-    // a hull number on each side (a pale "70" low on the forward flank: the paint that tells a warship from a barge)
-    {
-      const cv = document.createElement('canvas');
-      cv.width = 128;
-      cv.height = 48;
-      const cx = cv.getContext('2d');
-      cx.fillStyle = '#f4f4f0';
-      cx.font = '700 44px sans-serif';
-      cx.textAlign = 'center';
-      cx.textBaseline = 'middle';
-      cx.fillText('70', 64, 26);
-      const nt = new T.CanvasTexture(cv),
-        nm = new T.MeshBasicMaterial({ map: nt, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
-      [-1, 1].forEach((sd) => {
-        const q = new T.Mesh(new T.PlaneGeometry(0.0050, 0.0019), nm),
-          zz = 0.0150;
-        q.position.set(sd * (hw(zz) * (1.012 + 0.04 * 0.5) * (1 + 0.04 * 0.5) + 0.00012), 0.0047, zz);
-        q.rotation.y = sd * (Math.PI / 2);
-        g.add(q);
-      });
-    }
-    // forecastle: the 5-inch gun (an armoured turret with a barrel), the vertical-launch cell block the missile stands in (a grid of dark hatches on a raised plinth, rimmed pale),
-    // a mooring winch and the anchor chain
+    // a plan with chamfered corners: half-width a, from z front zf to z aft za, chamfers cf (front) and ca (aft)
+    const oct = (a, zf, za, cf, ca) => [[-a + cf, zf], [a - cf, zf], [a, zf - cf], [a, za + ca], [a - ca, za], [-a + ca, za], [-a, za + ca], [-a, zf - cf]];
+    // ---- forecastle: the 5-inch gun (an angular, faceted mount: the barrel is a thin tube), the forward hatch deck, the anchor winch ----
     const gunAt = (z, dir) => {
-      cyl(0.0019, 0.0021, 0.0010, paint(0x70767f, 0.32), 0, (z > ZF ? FORE : TOP) + 0.0004, z, 14); // the ring
-      const tur = new T.Mesh(new T.SphereGeometry(0.0017, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), paint(0xa7acb5, 0.4, { metalness: 0.4, roughness: 0.4 }));
-      tur.scale.set(1, 0.78, 1.25);
-      tur.position.set(0, (z > ZF ? FORE : TOP) + 0.0014, z);
-      g.add(tur);
-      const br = new T.Mesh(new T.CylinderGeometry(0.00036, 0.00044, 0.0056, 6), metal);
+      const y = DK(z);
+      cyl(0.0019, 0.0021, 0.0007, gunM, 0, y, z, 14); // the ring
+      prism([[-0.0012, 0.0011], [0.0012, 0.0011], [0.0016, 0], [0.0012, -0.0012], [-0.0012, -0.0012], [-0.0016, 0]].map(([x, zz]) => [x, dir * zz]), y + 0.0007, y + 0.0021, [gunM, roofM], 0.78, dir * 0.0003);
+      const br = new T.Mesh(new T.CylinderGeometry(0.00032, 0.00040, 0.0058, 6), metal);
       br.rotation.x = Math.PI / 2;
-      br.position.set(0, (z > ZF ? FORE : TOP) + 0.0026, z + dir * 0.0034);
+      br.position.set(0, y + 0.0016, z + dir * 0.0036);
       g.add(br);
-      box(0.0012, 0.0004, 0.0008, dark, 0, (z > ZF ? FORE : TOP) + 0.0034, z - dir * 0.0006);
+      box(0.0010, 0.0006, 0.0008, dark, 0, y + 0.0014, z + dir * 0.0012); // the gun slit
     };
     gunAt(0.0215, 1);
-    const cells = (x0, z0, nx, nz, y, pitch = 0.00074) => {
-      box(nx * pitch + 0.0008, 0.0004, nz * pitch + 0.0008, cellLid, x0, y - 0.0001, z0); // the plinth
-      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) box(0.00056, 0.00022, 0.00056, cellTop, x0 + (i - (nx - 1) / 2) * pitch, y + 0.0003, z0 + (j - (nz - 1) / 2) * pitch);
+    // a vertical-launch deck: a grid of square hatches (pale lids with dark gaps) on a low dark plinth
+    const cells = (x0, z0, nx, nz, pitch = 0.00078) => {
+      const y = DK(z0);
+      box(nx * pitch + 0.0007, 0.0004, nz * pitch + 0.0007, cellGap, x0, y - 0.0001, z0);
+      for (let i = 0; i < nx; i++)
+        for (let j = 0; j < nz; j++) {
+          const q = box(pitch * 0.82, 0.00026, pitch * 0.82, cellTop, x0 + (i - (nx - 1) / 2) * pitch, y + 0.0002, z0 + (j - (nz - 1) / 2) * pitch);
+          void q;
+        }
     };
-    cells(0, 0.0, 3, 8, FORE + 0.0003); // forward cell block (it stands under the missile)
-    box(0.0008, 0.0005, 0.0010, dark, 0, FORE + 0.0004, 0.0300); // winch
-    // the superstructure in layers: a tall main deckhouse (a band of windows, radar panels on its faces), a bridge block on it with wings, a pale roof; behind it a lower
-    // aft house carrying the two funnels; two masts with radars
-    const D0 = TOP + 0.0004;
-    const HZ0 = -0.0062; // forward face of the deckhouse
-    box(0.0086, 0.0008, 0.0120, dark, 0, D0, HZ0 - 0.0060); // dark footprint: the house sits ON the deck, not in it
-    box(0.0078, 0.0064, 0.0112, light, 0, D0, HZ0 - 0.0056); // main deckhouse
-    box(0.0080, 0.0007, 0.0114, glass, 0, D0 + 0.0030, HZ0 - 0.0056); // its band of windows
-    box(0.0080, 0.0004, 0.0114, roof, 0, D0 + 0.0064, HZ0 - 0.0056); // its roof
-    box(0.0064, 0.0034, 0.0066, light2, 0, D0 + 0.0068, HZ0 - 0.0040); // bridge block
-    box(0.0066, 0.0008, 0.0068, glass, 0, D0 + 0.0078, HZ0 - 0.0040); // bridge windows (a long dark band: the wheelhouse)
-    box(0.0070, 0.0005, 0.0074, roof, 0, D0 + 0.0102, HZ0 - 0.0040); // bridge roof
-    box(0.0100, 0.0004, 0.0016, light2, 0, D0 + 0.0072, HZ0 - 0.0056); // the bridge wings reach out past the sides
+    cells(0, 0.0, 3, 8); // forward cell block (it stands under the missile)
+    box(0.0008, 0.0005, 0.0010, dark, 0, DK(0.0300), 0.0300); // winch
+    // ---- the superstructure: a canted, faceted deckhouse (octagonal plan: a SPY-1 phased array on each of its four corners), a bridge with wrap-round windows, a mast with a search radar ----
+    const HA = oct(0.0035, -0.0048, -0.0168, 0.0025, 0.0025);
+    const y0A = DK(-0.0166) - 0.0004; // the house stands on the lower, aft end of the sloping deck; its forward foot sinks into the deck
+    const hA = prism(HA, y0A, y0A + 0.0068, [houseM, roofM], 0.84, -0.0004);
+    [1, 3, 5, 7].forEach((i) => {
+      patch(hA, i, 0.05, 0.95, 0.12, 0.93, 0.22, frame, 0.00004); // the bezel
+      patch(hA, i, 0.12, 0.88, 0.22, 0.85, 0.24, radar, 0.00008); // the array
+    });
+    patch(hA, 2, 0.10, 0.28, 0.42, 0.66, 0, dark, 0.00006); // a door
+    patch(hA, 6, 0.10, 0.28, 0.42, 0.66, 0, dark, 0.00006);
+    [0.4, 0.55, 0.7].forEach((u) => {
+      patch(hA, 2, u, u + 0.06, 0.62, 0.78, 0, glass, 0.00006);
+      patch(hA, 6, u, u + 0.06, 0.62, 0.78, 0, glass, 0.00006);
+    });
+        // the bridge: a smaller canted block with a long band of windows round its front and sides, wings out each side, a roof and a mast
+    const HB = oct(0.0027, -0.0066, -0.0128, 0.0015, 0.0010);
+    const y0B = y0A + 0.0068;
+    const hB = prism(HB, y0B, y0B + 0.0034, [houseM2, roofM], 0.92, -0.0002);
+    [7, 0, 1].forEach((i) => patch(hB, i, 0.06, 0.94, 0.50, 0.88, 0, glass, 0.00006));
+    [2, 6].forEach((i) => patch(hB, i, 0.1, 0.55, 0.50, 0.88, 0, glass, 0.00006));
+    box(0.0086, 0.0004, 0.0013, houseM2, 0, y0B + 0.0012, -0.0092); // bridge wings reach out past the sides
+    const my = y0B + 0.0038; // mast
+    box(0.0010, 0.0014, 0.0010, houseM2, 0, my - 0.0003, -0.0100);
+    cyl(0.00030, 0.00052, 0.0088, metal, 0, my, -0.0100, 6);
+    box(0.0046, 0.0003, 0.0003, metal, 0, my + 0.0050, -0.0100); // yardarm
+    box(0.0026, 0.0003, 0.0015, paint(0xcfd2d8), 0, my + 0.0086, -0.0100); // search radar
+    box(0.0006, 0.0006, 0.0006, paint(0xcfd2d8), 0, my + 0.0091, -0.0100);
+    // aft house with the two raked funnels (angular, canted, a dark exhaust opening on top), a mast between them
+    const HC = oct(0.0031, -0.0164, -0.0252, 0.0006, 0.0006);
+    const y0C = DK(-0.0252) - 0.0002;
+    const hC = prism(HC, y0C, y0C + 0.0042, [houseM, roofM], 0.9, 0);
+    patch(hC, 2, 0.1, 0.9, 0.36, 0.56, 0, glass, 0.00006);
+    patch(hC, 6, 0.1, 0.9, 0.36, 0.56, 0, glass, 0.00006);
+    const yF = y0C + 0.0042;
+    [-0.0186, -0.0230].forEach((z, k) => {
+      const fp = [[-0.0017, 0.0015], [0.0017, 0.0015], [0.0019, 0.0008], [0.0019, -0.0008], [0.0017, -0.0015], [-0.0017, -0.0015], [-0.0019, -0.0008], [-0.0019, 0.0008]].map(([x, zz]) => [x, z + zz]);
+      const f = prism(fp, yF, yF + 0.0048, [funnelM, soot], 0.8, -0.0008);
+      patch(f, 2, 0.15, 0.85, 0.12, 0.7, 0, paint(0x646c77, 0.22), 0.00005); // a darker intake grille on the side
+      patch(f, 6, 0.15, 0.85, 0.12, 0.7, 0, paint(0x646c77, 0.22), 0.00005);
+      void k;
+    });
+    cyl(0.00030, 0.00046, 0.0074, metal, 0, yF, -0.0208, 6); // the aft mast, between the funnels
+    box(0.0030, 0.0003, 0.0003, metal, 0, yF + 0.0050, -0.0208);
+    box(0.0018, 0.0003, 0.0011, paint(0xcfd2d8), 0, yF + 0.0072, -0.0208);
     [-1, 1].forEach((sd) => {
-      // the four radar panels of the phased-array: dark tilted slabs on the forward and side faces of the deckhouse
-      box(0.0001, 0.0026, 0.0032, radar, sd * 0.0040, D0 + 0.0036, HZ0 - 0.0030); // on each flank
-      box(0.0030, 0.0026, 0.0001, radar, sd * 0.0020, D0 + 0.0036, HZ0 + 0.0001); // on the face
+      box(0.0010, 0.0009, 0.0036, paint(0xe2e4e9, 0.45), sd * 0.0042, y0C + 0.0001, -0.0212); // a boat each side of the aft house
+      box(0.0004, 0.0004, 0.0027, dark, sd * 0.0047, y0C + 0.0009, -0.0212);
     });
-    cyl(0.00040, 0.00060, 0.0105, metal, 0, D0 + 0.0107, HZ0 - 0.0050, 6); // the forward mast
-    box(0.0052, 0.0004, 0.0004, metal, 0, D0 + 0.0170, HZ0 - 0.0050); // yardarm
-    box(0.0028, 0.0004, 0.0016, paint(0xcfd2d8), 0, D0 + 0.0206, HZ0 - 0.0050); // search radar
-    box(0.0007, 0.0007, 0.0007, paint(0xcfd2d8), 0, D0 + 0.0212, HZ0 - 0.0050);
-    // aft house with two raked funnels (tapered, pale, a dark exhaust uptake on the top)
-    const AZ = -0.0182;
-    box(0.0078, 0.0004, 0.0120, dark, 0, D0, AZ);
-    box(0.0070, 0.0046, 0.0112, light, 0, D0, AZ);
-    box(0.0072, 0.0004, 0.0114, roof, 0, D0 + 0.0046, AZ);
-    box(0.0072, 0.0006, 0.0114, glass, 0, D0 + 0.0022, AZ);
-    [-0.0150, -0.0214].forEach((z) => {
-      const f = cyl(0.0013, 0.0019, 0.0060, funnel, 0, D0 + 0.0050, z, 4); // a tapered stack (four-sided: the angular gas-turbine uptake)
-      f.rotation.y = Math.PI / 4;
-      f.rotation.x = -0.14; // raked aft
-      f.position.z -= 0.0004;
-      const cap = cyl(0.0013, 0.0013, 0.0006, soot, 0, D0 + 0.0109, z - 0.0013, 4); // the dark exhaust opening
-      cap.rotation.y = Math.PI / 4;
-      cap.rotation.x = -0.14;
-      box(0.0014, 0.0003, 0.0016, dark, 0, D0 + 0.0050, z); // base shadow
-    });
-    cyl(0.00036, 0.00052, 0.0100, metal, 0, D0 + 0.0050, -0.0242, 6); // the aft mast
-    box(0.0034, 0.0004, 0.0004, metal, 0, D0 + 0.0116, -0.0242);
-    box(0.0022, 0.0003, 0.0013, paint(0xcfd2d8), 0, D0 + 0.0146, -0.0242);
-    // aft: the second cell block, the aft gun (facing aft), the helicopter deck (a pale square with a ring and a bar) and two boats
-    cells(0, -0.0292, 3, 5, TOP + 0.0004);
-    gunAt(-0.0338, -1);
-    box(0.0086, 0.0003, 0.0058, lane, 0, TOP + 0.0004, -0.0405); // helicopter deck
-    cyl(0.0021, 0.0021, 0.0003, stripe, 0, TOP + 0.0006, -0.0405, 20);
-    cyl(0.0016, 0.0016, 0.0004, lane, 0, TOP + 0.0006, -0.0405, 20);
-    box(0.0030, 0.0004, 0.0004, stripe, 0, TOP + 0.0008, -0.0405);
-    [-1, 1].forEach((sd) => {
-      box(0.0012, 0.0010, 0.0040, paint(0xe2e4e9, 0.45), sd * 0.0044, D0 + 0.0004, -0.0090); // a boat each side of the aft house, forward of it
-      box(0.0004, 0.0004, 0.0030, dark, sd * 0.0050, D0 + 0.0014, -0.0090);
-    });
-    // thin pale rails along each deck edge
-    [-1, 1].forEach((sd) => {
-      box(0.00016, 0.00052, 0.0212, rim, sd * (hw(-0.0235) * 1.045 - 0.00052), TOP + 0.0004, -0.0235 - 0.0005 + 0.0000);
-      box(0.00016, 0.00052, 0.0215, rim, sd * (hw(0.0100) * 1.045 * 1.05 - 0.0006), FORE + 0.0004, 0.0110);
-    });
-    // deck lights: unlit-material beads (they stay bright on the night side): a red warning light on the mast, white masthead and radar lights, warm lamps on the
-    // bridge wings, the deckhouse flanks and the deck edge, and a green / red pair of running lights on the bridge sides
+    // aft: the second hatch deck, the hangar (doors on its after face), a close-in gun on its roof, and the flight deck (a pale square with a ring and a bar)
+    cells(0, -0.0288, 3, 5);
+    const HD = oct(0.0033, -0.0330, -0.0372, 0.0004, 0.0004);
+    const y0D = DK(-0.0372) - 0.0001;
+    const hD = prism(HD, y0D, y0D + 0.0030, [houseM, roofM], 0.94, 0);
+    patch(hD, 4, 0.08, 0.46, 0.08, 0.76, 0, dark, 0.00006); // the hangar doors, facing the flight deck
+    patch(hD, 4, 0.54, 0.92, 0.08, 0.76, 0, dark, 0.00006);
+    cyl(0.0007, 0.0008, 0.0006, metal, 0.0014, y0D + 0.0030, -0.0350, 10); // CIWS mount and dome
+    const dome = new T.Mesh(new T.SphereGeometry(0.0007, 10, 7), paint(0xe4e6ea, 0.45));
+    dome.position.set(0.0014, y0D + 0.0039, -0.0350);
+    g.add(dome);
+    const yH = DK(-0.0410) + 0.0003;
+    box(0.0070, 0.0003, 0.0068, lane, 0, yH - 0.0001, -0.0408); // the flight deck
+    cyl(0.0020, 0.0020, 0.0003, stripe, 0, yH + 0.0002, -0.0408, 20);
+    cyl(0.0015, 0.0015, 0.0004, lane, 0, yH + 0.0002, -0.0408, 20);
+    box(0.0028, 0.0004, 0.0004, stripe, 0, yH + 0.0004, -0.0408);
+    // deck lights: unlit beads (they stay bright on the night side): a red warning light on the mast, white masthead and radar lights, warm lamps on the bridge wings, the aft house and
+    // the deck edge, and a green / red pair of running lights on the bridge sides
     const lamp = (c, r, x, y, z) => {
       const q = new T.Mesh(new T.SphereGeometry(r, 6, 5), new T.MeshBasicMaterial({ color: c }));
       q.position.set(x, y, z);
       g.add(q);
     };
-    lamp(0xff3b30, 0.00046, 0, D0 + 0.0214, HZ0 - 0.0050);
-    lamp(0xfff4dc, 0.00036, 0, D0 + 0.0172, HZ0 - 0.0050);
-    lamp(0xfff4dc, 0.0003, 0, D0 + 0.0150, -0.0242);
+    lamp(0xff3b30, 0.00046, 0, my + 0.0094, -0.0100);
+    lamp(0xfff4dc, 0.00036, 0, my + 0.0052, -0.0100);
+    lamp(0xfff4dc, 0.0003, 0, yF + 0.0075, -0.0208);
     [-1, 1].forEach((sd) => {
-      lamp(sd < 0 ? 0xff5648 : 0x5dff8a, 0.00034, sd * 0.0050, D0 + 0.0078, HZ0 - 0.0056);
-      [-0.0110, -0.0190, -0.0240].forEach((z) => lamp(0xffd9a0, 0.00026, sd * 0.0037, D0 + 0.0014, z));
-      [-0.0420, -0.0345, -0.0270, -0.0120, 0.0100, 0.0200, 0.0285].forEach((z) => lamp(0xffe2b0, 0.00022, sd * (hw(z) * 1.045 - 0.0007), (z > ZF ? FORE : TOP) + 0.0009, z));
+      lamp(sd < 0 ? 0xff5648 : 0x5dff8a, 0.00034, sd * 0.0043, y0B + 0.0015, -0.0092);
+      [-0.0200, -0.0224, -0.0242].forEach((z) => lamp(0xffd9a0, 0.00024, sd * 0.0032, y0C + 0.0016, z));
+      [-0.0420, -0.0345, -0.0270, -0.0120, 0.0100, 0.0200, 0.0285].forEach((z) => lamp(0xffe2b0, 0.00022, sd * (rowX(TOPROW, z) - 0.0003), DK(z) + 0.0007, z));
     });
     // white water, soft-edged foam strips (additive, fading out): a bow wave on each side, a foam outline round the hull, a churned wake and a V astern
     const tex = this._gtex(wakeCanvas(), () => new T.CanvasTexture(wakeCanvas()));
@@ -1479,7 +1737,7 @@ export const modelMethods = {
       };
       return m;
     };
-    const Y = 0.0007,
+    const Y = SEA + 0.0003,
       white = (op) => hug(new T.MeshBasicMaterial({ map: tex, color: 0xf2f6ff, vertexColors: true, transparent: true, opacity: op, depthWrite: false, side: T.DoubleSide }));
     // the sea itself: a round patch of rippled water about the ship (bow at +z), under the foam
     {
@@ -1490,7 +1748,7 @@ export const modelMethods = {
         ps = pg.attributes.position;
       for (let i = 0; i < uv.count; i++) uv.setXY(i, ps.getX(i) / 0.17 + 0.5, 0.5 - ps.getZ(i) / 0.17);
       const sea = new T.Mesh(pg, hug(new T.MeshBasicMaterial({ map: seaTex, transparent: true, opacity: 1, depthWrite: false })));
-      sea.position.set(0, 0.0004, -0.020);
+      sea.position.set(0, SEA, -0.020);
       sea.renderOrder = -1;
       g.add(sea);
     }
@@ -1512,7 +1770,16 @@ export const modelMethods = {
       g.add(new T.Mesh(gm, white(op)));
     };
     // the foam outline: the hull's plan, a little larger, flat on the water
-    const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 0, 1.36));
+    const plan = (za, zb, grow) => {
+      const sh = new T.Shape(),
+        zs = Array.from({ length: 41 }, (_, i) => za + ((zb - za) * i) / 40),
+        w = (z) => Math.max(0, hw(Math.min(z, Z1)) * grow);
+      zs.forEach((z, i) => (i ? sh.lineTo(w(z), z) : sh.moveTo(w(z), z)));
+      [...zs].reverse().forEach((z) => sh.lineTo(-w(z), z));
+      sh.closePath();
+      return sh;
+    };
+    const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 1.36));
     ring.rotateX(Math.PI / 2);
     ring.translate(0, Y * 0.6, 0);
     g.add(new T.Mesh(ring, hug(new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.1, depthWrite: false, side: T.DoubleSide }))));
