@@ -19,6 +19,10 @@
   #chartB .chapter-head.sub>.takeaway{grid-row:2 / span 2}
   #chartB .chapter-head.sub>.lede{grid-row:1 / span 2}
   #chartB .chapter-head.sub>.note{grid-column:2;grid-row:3;margin:0}
+  /* chart C: its key sits under the lede; chart R: its caution under the takeaway and its shape key under the lede */
+  #chartC .chapter-head.sub,#chartR .chapter-head.sub{grid-template-rows:auto 1fr auto}
+  #chartC .chapter-head.sub>.chart-key-inline,#chartR .chapter-head.sub>.chart-key-inline{grid-column:2;grid-row:3;margin:0;max-width:none}
+  #chartR .chapter-head.sub>.note-line{grid-column:1;grid-row:3;margin:0}
 }
 section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5);padding-top:var(--s-6)}
 
