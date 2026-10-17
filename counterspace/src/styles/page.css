@@ -357,5 +357,5 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 .src-note,.orbit-note{max-width:52ch}
 ul.legend li.kgroup{max-width:72ch}
 #methodBody :is(p,li){max-width:60ch}
-.ref-band :is(p,li):not(.kgroup):not(.st-list li){max-width:60ch}
+.ref-band :is(p,li):not(.kgroup):not(.st-list li):not(.pat-big *){max-width:60ch}
 .q-out,.q-sumreal,.q-sum>*{max-width:62ch} /* quiz answers and the summary keep a readable line length (the reserved ghost copy shares the class, so the reserved height still matches) */
