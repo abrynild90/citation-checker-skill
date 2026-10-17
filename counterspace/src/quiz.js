@@ -173,7 +173,7 @@ export function mountQuiz() {
     <div class="q-opts" role="group" aria-labelledby="q${i}">
       ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
     </div>
-    <div class="q-slot"><p class="q-wait" aria-hidden="true">The dates and the gap appear here.</p><div class="q-out" aria-live="polite"></div>
+    <div class="q-slot"><p class="q-wait" aria-hidden="true"><svg class="q-axis" viewBox="0 0 120 20" width="120" height="20" focusable="false"><line x1="22" y1="10" x2="98" y2="10"/><circle cx="11" cy="10" r="9"/><circle cx="109" cy="10" r="9"/><text x="11" y="14.2">?</text><text x="109" y="14.2">?</text></svg><span>The dates and the gap appear here</span></p><div class="q-out" aria-live="polite"></div>
       <div class="q-out q-ghost" aria-hidden="true" inert>${outHTML(b, false)}</div></div>
   </div>
 </li>`;

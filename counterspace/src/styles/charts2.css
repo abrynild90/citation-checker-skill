@@ -196,11 +196,12 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 
 /* The answer area keeps its height from the start: the longest answer is laid under it, invisible, so answering moves nothing below it. Before an answer the area
    says what will appear there. */
-.q-slot{display:grid;margin-top:var(--s-2);padding:var(--s-3) var(--s-4);border:1px dashed var(--line);border-radius:var(--r-2);transition:border-color var(--dur-2) var(--ease)} /* the reserved answer area reads as an intended slot, not a gap; the frame fades once the answer is in */
+.q-slot{display:grid;margin-top:var(--s-2);padding:var(--s-3) var(--s-4);border:0 solid transparent;border-top:1px solid var(--line);border-bottom:1px solid transparent;transition:border-color var(--dur-2) var(--ease)} /* the reserved answer area is a quiet ghost under a thin rule (same height as before: the border still takes 2 px); the rule fades once the answer is in */
 .q.done .q-slot{border-color:transparent}
 .q-slot>*{grid-area:1/1;min-width:0}
 .q-ghost{visibility:hidden;pointer-events:none}
-.q-wait{margin:0;align-self:center;justify-self:center;text-align:center;font:400 14px/1.5 var(--sans);color:var(--faint)}
+.q-wait{margin:0;align-self:start;justify-self:center;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:var(--s-2) var(--s-3);text-align:center;font:400 14px/1.5 var(--sans);color:var(--faint)}
+.q-axis{flex:none;overflow:visible}.q-axis line{stroke:var(--line-strong);stroke-width:1.5;stroke-dasharray:3 3}.q-axis circle{fill:none;stroke:var(--line-strong);stroke-width:1.5}.q-axis text{fill:var(--faint);font:600 11px var(--sans);text-anchor:middle}
 .q.done .q-wait{display:none}
 .q-slot>.q-out{align-self:start}
 .q-slot>.q-out:empty{display:none}
