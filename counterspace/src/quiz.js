@@ -156,8 +156,8 @@ const watchHTML = (id) => {
 // What an answered card holds. The same markup, built for the longest case (with the scene to watch), is laid under the empty answer area as an
 // invisible spacer (.q-ghost), so the card already has the height its answer will need, at every width and font, and answering moves nothing below it.
 const outHTML = (b, ok) =>
-  `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>` +
-  (b.scene ? watchHTML(b.scene) : '');
+  `<div class="q-a"><p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}</div>` +
+  `<div class="q-b"><details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>${b.scene ? watchHTML(b.scene) : ''}</div>`;
 
 export function mountQuiz() {
   const host = document.getElementById('quiz');
@@ -167,8 +167,8 @@ export function mountQuiz() {
   const cards = QUESTIONS.map((q, i) => {
     const b = built[i];
     return `<li class="q" data-i="${i}">
-  <p class="q-ask" id="q${i}">${esc(q.ask)}</p>
-  <p class="q-hint">${esc(q.hint)}</p>
+  <div class="q-head"><p class="q-ask" id="q${i}">${esc(q.ask)}</p>
+  <p class="q-hint">${esc(q.hint)}</p></div>
   <div class="q-body">
     <div class="q-opts" role="group" aria-labelledby="q${i}">
       ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}

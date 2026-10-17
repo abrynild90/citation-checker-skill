@@ -153,6 +153,14 @@ export function drawMethod() {
       ends with Cosmos 1408).</li>
   </ul>
 </div>
+<div class="msec">
+  <h4 id="srcLicence">Licences and credits</h4>
+  <p class="src-intro">What may be reused, and where the pictures come from.</p>
+  ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
+      are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
+      graphics are reproduced.</p>
+    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). More detailed Earth images load from jsDelivr when you interact with the globe or open a 3D explainer. They do not load when your device is set to limit animation. Coastlines come from Natural Earth (public domain).</p>`)}
+</div>
 </div>
 <div class="mcol">
 <div class="msec">
@@ -200,14 +208,6 @@ export function drawMethod() {
         35,786 km.</li>
     <li>Debris is drawn as dots, one for each cataloged fragment, up to a limit of ${PARTICLE_BUDGET.toLocaleString()} dots on this device.</li></ul>`,
   )}
-</div>
-<div class="msec">
-  <h4 id="srcLicence">Licences and credits</h4>
-  <p class="src-intro">What may be reused, and where the pictures come from.</p>
-  ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
-      are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
-      graphics are reproduced.</p>
-    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). More detailed Earth images load from jsDelivr when you interact with the globe or open a 3D explainer. They do not load when your device is set to limit animation. Coastlines come from Natural Earth (public domain).</p>`)}
 </div>
 </div>
 </div>

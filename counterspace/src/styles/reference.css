@@ -177,7 +177,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 @media (min-width:1000px){.sources.ref-band:not(.folded) #methodBody>details.src-fold>summary{margin-left:calc(-190px - 24px);width:calc(100% + 190px + 24px)}}
 
 /* the cited-sources list keeps a readable line length on wide screens */
-#citedSources{columns:2 32rem;column-gap:var(--s-6)} #citedSources li{max-width:60ch;break-inside:avoid}
+#citedSources{columns:2 26rem;column-gap:calc(var(--s-6) + 2.6em)} /* the numbers of the second column stand in the gap: it is as wide as they are plus the usual space */ #citedSources li{max-width:60ch;break-inside:avoid}
 /* The sources most relied on: a short list on the page itself, each with its kind of source; the copy button now sits in the row of actions (no longer over the disclosure) */
 .src-top{margin:var(--s-4) 0 0}
 .src-top h4{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
