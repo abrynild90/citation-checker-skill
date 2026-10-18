@@ -465,14 +465,26 @@ export const modelMethods = {
       K.cyl(dark, 0.0034, 0.0042, 0.0008, 0, -0.0181, 0, 0, 0, 0, 20); // a thruster plate under it
       // sail: frame, cell glass (front) and back, a centre rib, two struts down to the deck
       K.group(0, 0.0062, -0.0020, 0, 0, 0, () => {
+        // a sail with thickness: a honeycomb substrate (a visible edge when it is turned edge-on), four cell blankets (two columns by two rows, each with its own cell grid)
+        // between a centre rib and a cross rib, a raised frame, and on the back a truss of two diagonals
         const w = 0.0245,
-          h = 0.0290;
-        K.box(metal, w, h, 0.0005);
-        K.plane(panel, w - 0.0012, h - 0.0012, 0, 0, 0.00029);
-        K.plane(back, w - 0.0012, h - 0.0012, 0, 0, -0.00029, 0, PI, 0);
-        K.box(metal, 0.0004, h, 0.0009, 0, 0, 0);
-        for (const sx of [-1, 1]) K.box(metal, 0.0005, h, 0.0009, sx * w * 0.5, 0, 0);
-        for (const sy of [-1, 1]) K.box(metal, w, 0.0005, 0.0009, 0, sy * h * 0.5, 0);
+          h = 0.0290,
+          t = 0.0016, // substrate thickness
+          gp = 0.0005, // the rib gap between blankets
+          pw = (w - 0.0012 - gp) / 2,
+          ph = (h - 0.0012 - gp) / 2;
+        K.box(metal, w, h, t);
+        for (const sx of [-1, 1])
+          for (const sy of [-1, 1]) {
+            K.plane(panel, pw, ph, sx * (pw + gp) / 2, sy * (ph + gp) / 2, t / 2 + 0.00005);
+            K.plane(back, pw, ph, sx * (pw + gp) / 2, sy * (ph + gp) / 2, -t / 2 - 0.00005, 0, PI, 0);
+          }
+        K.box(metal, 0.0005, h, t + 0.0007, 0, 0, 0); // the centre rib
+        K.box(metal, w, 0.0005, t + 0.0007, 0, 0, 0); // the cross rib
+        for (const sx of [-1, 1]) K.box(metal, 0.0007, h, t + 0.0012, sx * w * 0.5, 0, 0);
+        for (const sy of [-1, 1]) K.box(metal, w, 0.0007, t + 0.0012, 0, sy * h * 0.5, 0);
+        const dg = Math.atan2(w, h);
+        for (const s of [-1, 1]) K.box(back, 0.00045, Math.hypot(w, h) * 0.96, 0.0006, 0, 0, -t / 2 - 0.0004, 0, 0, s * dg);
       });
       for (const sx of [-1, 1]) K.box(metal, 0.0005, 0.0075, 0.0005, sx * 0.0085, -0.0035, -0.0020, 0, 0, -sx * 0.18);
       // instruments on the deck: a gold box with a dark aperture, a smaller white box, whips
