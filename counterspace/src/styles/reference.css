@@ -128,7 +128,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .record-count{font:400 13px/1.5 var(--sans);color:var(--muted);margin:10px 0 16px}
 .record-result{border-top:1px solid var(--line);padding:16px 0;font:400 15px/1.6 var(--sans);max-width:76ch}
 .record-result h5,.record-result .card-title{font:500 23px/1.3 var(--serif);margin:0 0 8px;color:var(--text)}
-.record-result p{margin:8px 0}.record-result dl{display:grid;grid-template-columns:minmax(110px,.4fr) minmax(0,1fr);gap:8px 20px;margin:16px 0}
+.record-result p{margin:8px 0}.record-result dl{display:grid;grid-template-columns:minmax(110px,9.5rem) minmax(0,1fr);gap:8px 20px;margin:16px 0}
 .record-result dt{font-weight:600;color:var(--muted)}.record-result dd{margin:0}.record-result .btn{margin-top:12px}.state-choose{padding-bottom:16px;max-width:420px}
 @media(max-width:640px){.record-tools{grid-template-columns:1fr}.record-result dl{grid-template-columns:1fr;gap:3px}.record-result dd{margin-bottom:10px}.record-find{padding-inline:12px}.record-find>summary>span{display:block;margin-left:0}}
 .source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
@@ -183,6 +183,20 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
   .record-find[open]>.rec-body>.record-result>:first-child{margin-top:0}
   .record-find[open]>.rec-body>.record-result>:last-child{margin-bottom:0}
 }
+/* every text block inside a record keeps the reading measure (70 characters), not only the paragraphs: the description and the note are <div>s */
+.record-result :is(div,p,dd,dt,li,h5,.note,.card-title,.src){max-width:70ch}
+/* 1100 to 1699 px: the fields keep a comfortable column and the well is one measure wide (70 characters plus its padding), so a line is never longer than the cap and the well holds no blank half */
+@media (min-width:1100px){
+  .record-find[open]>.rec-body{grid-template-columns:minmax(22rem,26rem) minmax(0,44rem);justify-content:start}
+}
+/* from 1700 px the well is wide enough for two measure-wide columns: the title spans both and the record flows down the first and on to the second, as the cited sources do */
+@media (min-width:1700px){
+  .record-find[open]>.rec-body{grid-template-columns:minmax(0,22rem) minmax(0,1fr);justify-content:normal}
+  .record-find[open]>.rec-body>.record-result:not([hidden]){columns:2 26rem;column-gap:var(--s-6)}
+  .record-result>:first-child:is(h5,.card-title){column-span:all;max-width:none}
+  .record-result>*{break-inside:avoid}
+  .record-result>.note{break-inside:auto}
+}
 @media (min-width:641px){.ref-foot{align-items:center}}
 /* All five readers (the altitude chart's and the four in the evidence band) open the same way: one box across the whole column (the fields at the left, the record's well taking all
    the width that is left), and the opening row is plain text inside it, not a second pill. Closed, the altitude chart's is a bar and the others are pills in their row. */
@@ -222,3 +236,16 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .st-more{margin:var(--s-2) 0 0;font:400 14px/1.5 var(--sans);color:var(--muted)}
 @media (max-width:720px){.st-list li{grid-template-columns:minmax(0,1fr)}.st-n{white-space:normal}}
 .source-actions{gap:var(--s-3)}
+/* the text in an opened 'about' disclosure keeps about 75 characters a line however wide the page: --measure grows to 64ch from 1800 px, which at 14 px is 90 characters or more */
+details.about>p{max-width:min(var(--measure),56ch)}
+/* sources opened, wide: the opening notes sit on the same two columns as the parts under them (how to check a fact and the main-source note at the left, how to cite at the right) instead of one narrow stack beside empty space */
+@media (min-width:1200px){
+  #methodBody>details.src-fold[open]::details-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto 1fr;column-gap:var(--s-7);align-items:start}
+  #methodBody>details.src-fold[open]>*{grid-column:1 / -1}
+  #methodBody>details.src-fold[open]>.src-check{grid-column:1;grid-row:1;margin:var(--s-4) 0 var(--s-3)}
+  #methodBody>details.src-fold[open]>#srcMore{grid-column:1;grid-row:2;margin:0}
+  #methodBody>details.src-fold[open]>.msec:has(#srcCite){grid-column:2;grid-row:1 / span 2;margin-top:var(--s-4)}
+}
+@media (min-width:1800px){
+  #methodBody#methodBody :is(p,li),#citedSources li,.src-check{max-width:54ch}
+}
