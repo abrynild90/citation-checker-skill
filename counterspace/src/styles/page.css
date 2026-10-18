@@ -102,7 +102,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 @keyframes rise{from{opacity:.5;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* legacy picture parts the scene code and the scene viewer still use (see DESIGN.md section 7 for the label look) */
-.illus{position:absolute;top:10px;left:10px;z-index:2;max-width:calc(100% - 20px);font:600 var(--fs-13)/1.3 var(--sans);color:#eef2fb;background:rgba(8,13,28,.72);
+.illus{position:absolute;top:10px;left:10px;z-index:2;max-width:calc(100% - 20px);font:600 var(--fs-13)/1.32 var(--sans);color:#eef2fb;background:rgba(8,13,28,.72);
   border:1px solid rgba(150,175,230,.35);border-radius:8px;padding:4px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hlabel{position:absolute;font:600 var(--fs-13)/1.25 var(--sans);color:#eef2fb;background:rgba(8,13,28,.72);border:1px solid rgba(150,175,230,.35);padding:4px 9px;border-radius:8px;
   pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
@@ -131,7 +131,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
   .rail ul{gap:12px}
   .rail a{width:auto;min-height:32px;justify-content:flex-end;gap:8px}
   .rail a::before{order:2}
-  .rail .r-lab{position:static;order:1;transform:none;width:108px;padding:0;border:0;background:none;box-shadow:none;opacity:1;color:var(--muted);font:500 var(--fs-13)/1.3 var(--sans);text-align:right;white-space:normal;transition:color var(--dur-1) var(--ease)}
+  .rail .r-lab{position:static;order:1;transform:none;width:108px;padding:0;border:0;background:none;box-shadow:none;opacity:1;color:var(--muted);font:500 var(--fs-13)/1.32 var(--sans);text-align:right;white-space:normal;transition:color var(--dur-1) var(--ease)}
   .rail a:hover .r-lab,.rail a:focus-visible .r-lab,.rail a[aria-current] .r-lab{color:var(--text)}
   .rail a[aria-current] .r-lab{font-weight:600}
   .rail a:focus-visible{outline-offset:2px;border-radius:var(--r-1)}

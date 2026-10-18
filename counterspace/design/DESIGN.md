@@ -88,20 +88,25 @@ labels and other quiet labels use `--accent` (cool). The "Find it on the chart" 
 Data colours (`--c-us`, `--c-ru`, `--c-cn`, ...) keep their current colour-blind-safe values. Text contrast is at least 4.5:1 everywhere (3:1 for
 text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use colour alone to carry meaning: shape, fill or a label always repeats it.
 
-### 2.2 Type (fonts are already embedded: Newsreader and IBM Plex Sans)
+### 2.2 Type (fonts are embedded: Public Sans for everything read or pressed, Libre Bodoni for display headings only)
+
+Public Sans (variable, weight 100-900, roman and italic) sets body text, the lede, callouts, buttons, tags, tables, chart, SVG and 3D-label text. Libre Bodoni
+(variable, 400-700) is a high-contrast Didone whose hairlines fail small, so it sets only h1, h2 and large numerals, never under 28 px. Italic is for titles of
+books and reports. Every size is a step of the ladder in `src/styles/tokens.css` (`--fs-12`, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28) or a fluid role built
+from two steps (`--fs-lede`, `--fs-lede-sm`, `--fs-h4` ...). Nothing in a rule is a loose px size.
 
 | Use | Spec |
 |---|---|
-| Display (page title) | Newsreader 500, `clamp(40px, 6vw, 72px)`, line 1.02, tracking -0.02em |
-| Section title (h2) | Newsreader 500, `clamp(28px, 3.4vw, 42px)`, line 1.12 |
-| Sub-title (h3) | Plex Sans 600, 20 px, line 1.3 |
-| Lede | Newsreader 400, `clamp(19px, 2vw, 23px)`, line 1.5 |
-| Body prose | Newsreader 400, 18 px, line 1.6 (reading width 66ch) |
-| Interface text | Plex Sans 400/500/600, 14-15 px |
-| Small | Plex Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
-| Short label (key group names, table headers) | Plex Sans 600, 12.5 px, uppercase only when 1 to 3 words, tracking 0.08em |
-| Numerals | Plex Sans with tabular figures |
-| Reference band (charts, then sources after the quiz) | one step down: band h2 Newsreader 500 `clamp(24px, 2.3vw, 30px)`, sans h3 600 17 px, chart title (h4) Newsreader 500 `clamp(21px, 1.9vw, 25px)`, ledes Newsreader 15 to 17 px, takeaway Newsreader 500 17 to 19.5 px, callouts 14.5 to 15.5 px |
+| Display (page title) | Libre Bodoni 500, `--fs-display` (36 to 56 px), line 1.14, tracking -0.02em; the line under it is Public Sans 400 |
+| Section title (h2) | Libre Bodoni 500, `--fs-h2` (28 to 42 px), line 1.2 |
+| Sub-title (h3), chart title (h4) | Public Sans 600: 20 px; chart titles `--fs-h3-fluid` (24 to 32 px) |
+| Lede | Public Sans 400, `--fs-lede` (18 to 22 px), line 1.55; chapter ledes `--fs-lede-sm` (18 to 20 px) |
+| Body prose, callouts | Public Sans 400, 16 to 18 px, line 1.55 to 1.6 (reading width 58 to 66ch) |
+| Interface text | Public Sans 400/500/600, 14-15 px |
+| Small | Public Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
+| Short label (key group names, table headers) | Public Sans 600, 13 px, uppercase only when 1 to 3 words, tracking 0.08em |
+| Numerals | Public Sans with tabular figures; large display numerals Libre Bodoni |
+| Reference band (charts, then sources after the quiz) | one step down: band h2 Libre Bodoni 500 `--fs-h2-sm` (28 to 30 px), sans h3 600 `--fs-h4` (22 to 26 px), chart title (h4) Public Sans 600 `--fs-h4`, ledes `--fs-lede-ref` (15 to 18 px), takeaway 500 `--fs-lede-sm`, callouts 15 to 16 px |
 
 ### 2.3 Space, shape, depth, motion
 
