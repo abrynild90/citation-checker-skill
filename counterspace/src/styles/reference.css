@@ -110,9 +110,9 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .law-choice .lc-h{margin:0 0 var(--s-1);font:600 13px/1.4 var(--sans);color:var(--muted)}.law-choice .src{max-width:60ch;margin:0}
 .law-choice .lc-acts{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-top:var(--s-3)}
 .law-choice .lc-main>:last-child{margin-bottom:0}.law-choice .lc-side{margin-top:var(--s-3)}
-/* wide: the card takes its own row, as wide as its two columns of text need (a 1.2 to 1 split: the name, date and what it is at the left, the source and actions at the right; it stops at 1100 px so a very wide window does not leave it half empty) */
+/* wide: the card takes its own row, as wide as the measure of the section above it (the name, date and what it is under the heading at the left, the source and actions under the lede at the right) */
 @media (min-width:1100px){
-  #lawHead>.law-choice{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);column-gap:var(--s-7);align-items:start;max-width:1100px}
+  #lawHead>.law-choice{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--s-8);align-items:start;max-width:none}
   #lawHead>.law-choice[hidden]{display:none}
   .law-choice .lc-side{margin-top:0}
 }
@@ -238,6 +238,13 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .source-actions{gap:var(--s-3)}
 /* the text in an opened 'about' disclosure keeps about 75 characters a line however wide the page: --measure grows to 64ch from 1800 px, which at 14 px is 90 characters or more */
 details.about>p{max-width:min(var(--measure),56ch)}
+/* the top button is transparent: its label (not its invisible box) ends on the right content edge, as the links and columns above it do */
+@media (min-width:1101px){.foot-base>.btn.quiet{margin-right:calc(-1 * (var(--s-3) + 1px))}}
+/* chart C's two notes sit on the two columns of the head above them: the second starts where the lede starts (same columns, same gap), and neither is wider than the lede */
+@media (min-width:1100px){
+  .ref-band #chartC .callout-row{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--s-6);justify-content:normal}
+  .ref-band #chartC .callout-row>.callout{max-width:min(100%,34rem)}
+}
 /* sources opened, wide: the opening notes sit on the same two columns as the parts under them (how to check a fact and the main-source note at the left, how to cite at the right) instead of one narrow stack beside empty space */
 @media (min-width:1200px){
   #methodBody>details.src-fold[open]::details-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto 1fr;column-gap:var(--s-7);align-items:start}
