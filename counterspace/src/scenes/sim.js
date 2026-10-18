@@ -332,6 +332,7 @@ export function buildSim(cfg) {
         minPx: a.minPx,
         maxPx: a.maxPx,
         camK: a.camK, // opt-in { camera index: k }: drawn k times larger on that preset only
+        sizeK: a.sizeSteps && ((f) => (t, ci) => (a.sizeCam == null || ci === a.sizeCam ? f(t) : 1))(stepsK(a.sizeSteps)), // opt-in [[t, k], ...]: a scene-time scale of the hull (a larger ship in the opening frames, easing back to its size), on camera a.sizeCam only when given
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,

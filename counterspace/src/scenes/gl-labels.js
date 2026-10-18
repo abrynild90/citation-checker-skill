@@ -391,6 +391,11 @@ const methods = {
         if (q[3]) continue;
         const u = obj.userData,
           wr = u.span ? u.span * obj.scale.x * 0.5 : (u.wr ?? 0.012);
+        if (u.hull) {
+          // a long, thin hull (the warship): a row of small circles along its length instead of one circle of half its length, which would cover the sea and sky round it
+          for (const c of this._hullCircles(obj, u.hull, scr, V, sc)) marks.push({ x: c[0], y: c[1], r: Math.max(c[2], 3 * k), it });
+          continue;
+        }
         marks.push({ x: q[0], y: q[1], r: Math.max((wr * sc) / q[2], 3 * k), it });
       } else if (it.kind === 'flash') {
         obj.getWorldPosition(W3);
@@ -456,6 +461,21 @@ const methods = {
     }
     return { marks, parts, rings, scale: 1 };
   },
+  // The circles that stand for a long, thin model (userData.hull = { z: [from, to], y, r }, in the model's own units, along its local +z): [x, y, radius] in screen px
+  // for each sample along the axis (the samples that are behind the camera or the Earth are left out). `scr` is the caller's projection: [x, y, ..., off] (off last).
+  _hullCircles(obj, hull, scr, V, sc) {
+    const out = [],
+      me = this.camera.matrixWorldInverse.elements,
+      n = 6;
+    obj.updateWorldMatrix(true, false);
+    for (let j = 0; j < n; j++) {
+      V.set(0, hull.y, hull.z[0] + ((hull.z[1] - hull.z[0]) * j) / (n - 1)).applyMatrix4(obj.matrixWorld);
+      const q = scr([V.x, V.y, V.z]),
+        d = -(me[2] * V.x + me[6] * V.y + me[10] * V.z + me[14]);
+      if (!q[q.length - 1] && d > 0.05) out.push([q[0], q[1], (hull.r * obj.scale.x * sc) / d]);
+    }
+    return out;
+  },
   // Layout probe for QA (tools/scene_check.mjs): what is drawn, in screen px for a w x h canvas: Earth disc, sprite marks (with the item index),
   // curve/beam polylines, particle samples, dome discs, referent sizes and the action-region box (referents + trails + debris).
   _probe(w, h, free = false) {
@@ -493,7 +513,8 @@ const methods = {
           px = u.span ? (u.span * obj.scale.x * sc) / d / k : 0,
           r = it.kind === 'flash' ? Math.max((u.core.scale.x * 0.35 * sc) / d, 4 * k) : Math.max(px * 0.5 * k, 3 * k);
         const rg = it.kind === 'flash' && u.ring && u.ring.material.opacity > 0.03 ? (u.ring.scale.x * 0.5 * sc) / d : 0;
-        pts.push({ x: q[0], y: q[1], r, i: items.indexOf(it), shape: it.shape || 'flash', ring: rg });
+        if (it.kind === 'point' && u.hull) for (const c of this._hullCircles(obj, u.hull, scr, W3.clone(), sc)) pts.push({ x: c[0], y: c[1], r: Math.max(c[2], 3 * k), i: items.indexOf(it), shape: it.shape });
+        else pts.push({ x: q[0], y: q[1], r, i: items.indexOf(it), shape: it.shape || 'flash', ring: rg });
         if (it.kind === 'point' && ['sat', 'plane', 'aircraft'].includes(it.shape) && !it.ctx) {
           if (it.prim) refs.push({ text: it.label || it.shape, px, x: q[0], y: q[1] });
           if (!it.small || it.label) act.push([q[0], q[1]]);
