@@ -105,6 +105,25 @@ function onKey(e) {
 }
 const onPress = () => clearLanding();
 
+// A pointer that pressed "Find it on the chart" stays where that button was while the page scrolls the chart in under it, so whatever mark ends up beneath it would show its
+// hover ring: a second, unexplained ring on some other dot (the 2006 marks in the "altitude not reported" strip). Hover rings are held off (html.lm-still, base.css) until the
+// pointer really moves.
+let ptX = null,
+  ptY = null,
+  still = null;
+addEventListener(
+  'pointermove',
+  (e) => {
+    if (still && Math.hypot(e.clientX - still[0], e.clientY - still[1]) > 3) {
+      still = null;
+      document.documentElement.classList.remove('lm-still');
+    }
+    ptX = e.clientX;
+    ptY = e.clientY;
+  },
+  { passive: true },
+);
+
 export function clearLanding() {
   if (!target && !root) return;
   if (target) target.classList.remove('hl');
@@ -128,6 +147,10 @@ export function showLanding(el, label) {
   born = performance.now();
   arrived = false;
   el.classList.add('hl');
+  if (ptX != null) {
+    still = [ptX, ptY];
+    document.documentElement.classList.add('lm-still');
+  }
   chipEl.textContent = label || '';
   chipEl.hidden = !label;
   root.hidden = false;

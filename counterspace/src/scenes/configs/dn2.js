@@ -58,7 +58,8 @@ export const DN2 = {
         glowMin: 10,
         glowMax: 16,
         pad: { minPx: IS_PHONE ? 30 : 44, maxPx: IS_PHONE ? 44 : 64 },
-        sizeSteps: IS_PHONE ? null : [[0.18, 1], [0.3, 0.94], [0.84, 0.94], [0.9, 1]], // through the coast the rocket keeps about 95% of its size (it was 76%: at 1440 it was a thin 80 px sliver beside 140 px pills)
+        detail: true, // form shading, panel lines, a shaded nose cone and fins (the skin is no longer one flat white)
+        sizeSteps: IS_PHONE ? null : [[0, 0.8], [0.16, 0.8], [0.3, 0.72], [0.84, 0.72], [0.9, 0.92]], // once the Earth is in the frame the rocket is drawn at about 70% (it stood about a quarter of the globe's width: oversized); it grows back for the re-entry close view
         ramp: { k: IS_PHONE ? 1.8 : 1.25, until: 0.3 }, // desktop: 1.25 so the nose keeps clear of the top edge on a tall stage
         smokeK: 1.6,
         coastGlow: IS_PHONE ? undefined : { k: 1, color: '#ffd2a6' }, // desktop: a tight white-yellow-orange plume with a thin ion-like trail that stays on the nozzle, then a faint residual glow in the coast, so the rocket reads at its small size in the wide framing (no detached halo)

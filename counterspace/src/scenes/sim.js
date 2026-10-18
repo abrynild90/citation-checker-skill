@@ -332,6 +332,7 @@ export function buildSim(cfg) {
         minPx: a.minPx,
         maxPx: a.maxPx,
         camK: a.camK, // opt-in { camera index: k }: drawn k times larger on that preset only
+        sizeK: a.sizeSteps && ((f) => (t, ci) => (a.sizeCam == null || ci === a.sizeCam ? f(t) : 1))(stepsK(a.sizeSteps)), // opt-in [[t, k], ...]: a scene-time scale of the hull (a larger ship in the opening frames, easing back to its size), on camera a.sizeCam only when given
         label: a.label,
         labelDx: a.dx,
         labelDy: a.dy,
@@ -717,6 +718,7 @@ export function buildSim(cfg) {
           minPx: a.rocket.minPx ?? 26,
           maxPx: a.rocket.maxPx ?? 48,
           rocketStyle: a.rocket.style,
+          rocketDetail: a.rocket.detail, // opt-in (slim vehicles): form shading, more panel lines, a shaded nose and fins (see _rocketModel)
           endHold: a.rocket.endHold, // opt-in: stays drawn on the target this long past the hit, inside the flash (no early vanish)
           preK: a.rocket.preK, // opt-in: drawn this fraction of its size while it waits at the launch point, easing to full size just after t0
           // opt-in waitLabel (live only; the pill of the path takes over at t0): the waiting vehicle is named from the first frame
@@ -1108,6 +1110,7 @@ export function buildSim(cfg) {
             kind: 'point',
             shape: 'rocket',
             rocketStyle: a.rocket.style,
+            rocketDetail: a.rocket.detail,
             ramp: a.rocket.ramp,
             sizeK: stepsK(a.rocket.sizeSteps),
             color: '#ff8a8a',

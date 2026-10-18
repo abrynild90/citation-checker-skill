@@ -75,6 +75,8 @@ export const BURNT_FROST = {
       minPx: IS_PHONE ? 72 : 170,
       maxPx: IS_PHONE ? 135 : 245,
       camK: IS_PHONE ? undefined : { 0: 1.42 }, // the default camera opens on the ship, a little larger; the whole-Earth presets keep the old size
+      sizeCam: 0, // the default camera only: the whole-Earth presets keep the hull's size
+      sizeSteps: IS_PHONE ? undefined : [[0, 1.5], [0.22, 1.5], [0.42, 1.12], [0.56, 1]], // desktop: the cruiser is large in the opening frames (it is the subject until the launch), easing back to its size as the camera pulls out to the debris
     },
     {
       type: 'target',
