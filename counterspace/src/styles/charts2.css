@@ -72,7 +72,7 @@
 #noteR0>b{display:block}
 #quoteC .q{display:block;font-size:19px;line-height:1.5}
 #quoteC .by{display:block;margin-top:6px;font:400 13px/1.4 var(--sans);color:var(--muted)}
-/* phone: the notes above the jamming and close-approach charts are compact (no icon, smaller serif text) so the chart starts sooner */
+/* phone: the notes above the jamming and close-approach charts are compact (no icon, smaller text) so the chart starts sooner */
 @media (max-width:640px){
   :is(#chartC,#chartR) .callout{margin-top:var(--s-4);padding:var(--s-3) var(--s-4);font-size:15.5px;line-height:1.45}
   :is(#chartC,#chartR) .callout::before{display:none}
@@ -123,7 +123,7 @@
 @media (min-width:640px){.q-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.q-list{grid-template-columns:var(--cols,repeat(4,minmax(0,1fr)))}}
 .q{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-4);border:var(--card-bw) solid var(--line);border-radius:var(--r-2);background:var(--surface);box-shadow:var(--card-shadow)}
-.q-ask{margin:0;font:500 19px/1.3 var(--serif);text-wrap:pretty;min-height:var(--ask-h,0)}
+.q-ask{margin:0;font:600 19px/1.3 var(--sans);text-wrap:pretty;min-height:var(--ask-h,0)}
 .q-hint{margin:0 0 var(--s-1);font:600 13px/1.3 var(--sans);color:var(--accent-2)}
 .q-opts{display:grid;gap:var(--s-2)}
 .q-opt{appearance:none;display:flex;align-items:center;gap:var(--s-2);min-height:56px;padding:var(--s-2) var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-2);background:var(--surface-2);box-shadow:var(--card-shadow);color:var(--text);font:500 15px/1.35 var(--sans);text-align:left;cursor:pointer;transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),opacity var(--dur-2) var(--ease),transform var(--dur-1) var(--ease)}
@@ -145,7 +145,7 @@
 .q-out p{margin:0}
 .q-out:empty{display:none}
 .q-out b{font-weight:600;color:var(--text)}
-.q-out .q-verdict{font:600 17px/1.3 var(--serif);text-wrap:balance}
+.q-out .q-verdict{font:600 17px/1.3 var(--sans);text-wrap:balance}
 .q-verdict.yes{color:var(--accent)}
 .q-verdict.no{color:var(--warn)}
 .q-gap{margin:0 2px}
@@ -161,7 +161,7 @@
 .q-sumreal{display:grid;gap:var(--s-1) var(--s-5);align-content:start}
 .q-more .q-sumreal>*{margin:0;max-width:none;text-wrap:pretty}
 @media (min-width:900px){.q-sumreal{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.q-tally{margin:0;min-height:24px;font:600 17px/1.4 var(--serif);color:var(--text)}
+.q-tally{margin:0;min-height:24px;font:600 17px/1.4 var(--sans);color:var(--text)}
 .q-tally:not(.done){font:400 15px/1.5 var(--sans);color:var(--muted)}
 .q-pattern{margin:var(--s-1) 0 0;font:400 15px/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) both}
 @keyframes q-rise{from{opacity:0;transform:translateY(6px)}}
@@ -171,7 +171,7 @@
 @media (prefers-reduced-motion:reduce){.q-opt,.q-mark{transition:none}}
 
 /* One plain sentence above each chart: what to notice before looking. A short rule above it marks it as the point of the chart. */
-.takeaway{position:relative;max-width:62ch;margin:var(--s-4) 0 var(--s-4);padding-top:var(--s-3);font:500 clamp(19px,1.7vw,22px)/1.4 var(--serif);color:var(--text);text-wrap:pretty}
+.takeaway{position:relative;max-width:62ch;margin:var(--s-4) 0 var(--s-4);padding-top:var(--s-3);font:500 clamp(19px,1.7vw,22px)/1.4 var(--sans);color:var(--text);text-wrap:pretty}
 .takeaway::before{content:"";position:absolute;left:0;top:0;width:40px;height:2px;border-radius:2px;background:var(--accent-2)}
 .takeaway:empty{display:none}
 #lawHead .takeaway{margin-bottom:0}

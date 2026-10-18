@@ -118,8 +118,8 @@ try {
       const b64 = await page.evaluate(
         async ({ shots, W, H, Q, titles, briefs }) => {
           // the page's own embedded fonts (a canvas does not fetch them by itself): load before any text is drawn
-          await Promise.all(['600 40px "Newsreader"', '700 40px "IBM Plex Sans"', '600 40px "IBM Plex Sans"', '400 40px "IBM Plex Sans"'].map((f) => document.fonts.load(f).catch(() => null)));
-          const SANS = '"IBM Plex Sans", sans-serif';
+          await Promise.all(['500 40px "Libre Bodoni"', '700 40px "Public Sans"', '600 40px "Public Sans"', '400 40px "Public Sans"'].map((f) => document.fonts.load(f).catch(() => null)));
+          const SANS = '"Public Sans", sans-serif';
           const c = document.createElement('canvas');
           c.width = W;
           c.height = H;
@@ -133,7 +133,7 @@ try {
             ty = H * 0.165; // and the title sits closer to them
           x.textBaseline = 'alphabetic';
           x.fillStyle = '#eef2fb';
-          x.font = '600 ' + Math.round(H * 0.058) + 'px "Newsreader", Georgia, serif';
+          x.font = '500 ' + Math.round(H * 0.058) + 'px "Libre Bodoni", Georgia, serif';
           x.fillText('Three close approaches, three places', gap, H * 0.105);
           const imgs = [];
           for (let i = 0; i < 3; i++) {

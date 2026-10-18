@@ -20,7 +20,7 @@ import { download } from './export.js';
 import { hooks, seenScenes } from './shared.js';
 import { revealIn } from './explore.js';
 import { clearLanding, showLanding } from './landmark.js';
-import { SANS, SERIF, fontsReady } from './fonts.js';
+import { SANS, fontsReady } from './fonts.js';
 import { stillFromSVG } from './scenes/svg/still-frame.js';
 import { FACTS, FACT_FROM, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 import * as THREE from 'three';

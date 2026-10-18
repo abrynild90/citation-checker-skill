@@ -2,8 +2,9 @@
    Theme-independent tokens come first, then the dark set (default, also used by dark downloads), then the light set (twice: by system
    preference when no theme was chosen, and when light is chosen). Keep the three colour sets identical in their list of names. */
 :root {
-  --serif: Newsreader, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Public Sans for everything that is read or pressed; Libre Bodoni only for display headings (h1, h2, large numerals), never under 28 px: its hairlines fail small */
+  --display: "Libre Bodoni", "Libre Bodoni Fallback", "Bodoni 72", Didot, "Iowan Old Style", Georgia, serif;
+  --sans: "Public Sans", "Public Sans Fallback", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* type scale: display never above 56 px; every role that can wrap keeps its line height at 1.3 or more except display headings */
   --fs-display: clamp(36px, 4.2vw, 56px);
   --fs-h2: clamp(28px, 3.4vw, 42px);

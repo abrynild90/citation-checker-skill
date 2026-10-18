@@ -4,10 +4,10 @@
 
 /* ---- sub-headings: the test chart and each tab's chart head a part of a chapter, not a chapter of their own */
 .chapter-head.sub{margin-bottom:var(--s-4)}
-.chapter-head.sub>:is(h3,h4){grid-column:1;margin:0;max-width:24em;font:500 clamp(24px,2.5vw,32px)/1.2 var(--serif);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
+.chapter-head.sub>:is(h3,h4){grid-column:1;margin:0;max-width:24em;font:600 clamp(24px,2.5vw,32px)/1.2 var(--sans);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
 @media (min-width:1200px){.chapter-head.sub>:is(h3,h4){grid-row:1;max-width:none}}
 /* a chart's own lede is one step quieter than a chapter's, whatever the screen width */
-.chapter-head.sub>.lede{font:400 clamp(16px,1.25vw,19px)/1.55 var(--serif)}
+.chapter-head.sub>.lede{font:400 clamp(16px,1.25vw,19px)/1.55 var(--sans)}
 /* the chart's one-sentence takeaway sits in its heading box: under the heading at the left, while the lede runs down the right beside both (it spans the first two rows, the
    second one flexible), so the gold rule is a step under the heading, not under the height of a three-line lede */
 @media (min-width:1200px){
@@ -33,7 +33,7 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 @media (min-width:700px){.pat-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.pat-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .pat-list>li{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);padding-top:var(--s-3);border-top:2px solid var(--line-strong)}
-.pat-t{margin:0;font:400 clamp(18px,1.45vw,20px)/1.45 var(--serif);color:var(--muted);text-wrap:pretty}
+.pat-t{margin:0;font:400 clamp(18px,1.45vw,20px)/1.45 var(--sans);color:var(--muted);text-wrap:pretty}
 .pat-t b{font-weight:600;color:var(--text)}
 .pat-go{display:inline-flex;align-items:center;gap:var(--s-2);min-height:32px;margin-top:auto;font:600 14px/1.3 var(--sans);color:var(--accent);text-decoration:none}
 .pat-go:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em}
@@ -44,7 +44,7 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 .pat-big{margin:0 0 var(--s-6);padding:var(--s-6) var(--s-7) var(--s-5);border-radius:var(--r-3);background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--surface-2);border:1px solid var(--line)}
 .pat-big[hidden]{display:none}
 .pb-lead{margin:0 0 var(--s-2);font:500 clamp(17px,1.6vw,20px)/1.4 var(--sans);color:var(--muted)}
-.pb-num{margin:0;font:500 clamp(40px,6.4vw,92px)/1.04 var(--serif);letter-spacing:-.02em;color:var(--text);text-wrap:balance}
+.pb-num{margin:0;font:500 clamp(40px,6.4vw,92px)/1.04 var(--display);letter-spacing:-.02em;color:var(--text);text-wrap:balance}
 .pb-num span{color:var(--accent)}
 .pb-track{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr) minmax(0,1fr);align-items:center;gap:var(--s-4);margin:var(--s-6) 0 var(--s-5)}
 .pb-end{display:grid;gap:2px;font:400 14px/1.4 var(--sans);color:var(--muted)}
@@ -182,8 +182,8 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 /* The recorded pairs carry the comparison; the range is a reading aid. */
 .pat-big { display:block; padding:0; border:0; border-radius:0; background:none; box-shadow:none; }
 .pat-big .pb-main { display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:4px 12px; }
-.pat-big .pb-lead { margin:0; font:500 20px/1.4 var(--serif); }
-.pat-big .pb-num { margin:0; font:500 24px/1.3 var(--serif); letter-spacing:0; }
+.pat-big .pb-lead { margin:0; font:600 20px/1.4 var(--sans); }
+.pat-big .pb-num { margin:0; font:600 24px/1.3 var(--sans); letter-spacing:0; }
 .pat-big .pb-note { grid-column:1 / -1; margin:8px 0 20px; max-width:75ch; }
 .pat-big .pb-track[hidden] { display:none; }
 .pat-big .pb-pairs { display:block; padding:0; border:0; }

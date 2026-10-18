@@ -208,7 +208,7 @@
   opacity:0;transform:translateY(4px);transition:opacity 110ms var(--ease),transform 110ms var(--ease)}
 .lag-pick.on{opacity:1;transform:none}
 .lag-pick p{margin:0}
-.lp-t{font:500 17px/1.3 var(--serif)}
+.lp-t{font:600 17px/1.3 var(--sans)}
 .lp-w{margin-top:var(--s-1)!important;font:400 14.5px/1.45 var(--sans);color:var(--text)}
 .lp-w b{color:var(--accent-2);font-weight:600}
 .lp-d{margin-top:2px!important;font:500 13px/1.4 var(--sans);color:var(--muted)}
@@ -296,14 +296,14 @@ td a{overflow-wrap:anywhere}
   .tscroll td::before{content:attr(data-label);color:var(--muted);font-weight:600}
 }
 
-/* ------------------------------------------------------------------ hover and focus card: serif title, a short list, a quiet source line */
+/* ------------------------------------------------------------------ hover and focus card: bold title, a short list, a quiet source line */
 .card{position:fixed;z-index:60;width:max-content;max-width:min(380px,calc(100vw - 16px));padding:var(--s-4) var(--s-4) var(--s-3);background:var(--surface);color:var(--text);
   border:var(--edge-line);border-radius:var(--r-2);box-shadow:var(--edge-shadow);font:400 13.5px/1.45 var(--sans);pointer-events:none;opacity:0;
   transition:none}
 .card.on{opacity:1}
 .card.solid{transition:none}
 @media (prefers-reduced-motion:reduce){.card{transition:none;transform:none}}
-.card .card-title,.card h4{margin:0;font:500 17px/1.3 var(--serif)}
+.card .card-title,.card h4{margin:0;font:600 17px/1.3 var(--sans)}
 .card .when{margin:3px 0 0;font:500 13px/1.4 var(--sans);color:var(--muted)}
 .card dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px var(--s-3);margin:var(--s-3) 0 0}
 .card dt{color:var(--faint);font-size:13px;line-height:1.5}

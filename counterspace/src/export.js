@@ -12,7 +12,7 @@ import { drawL } from './charts/lag.js';
 import { ABBR_NOTE, drawLegal, glyphMarkup } from './charts/legal.js';
 import { hooks } from './shared.js';
 import { guides } from './ui.js';
-import { SANS, SERIF } from './fonts.js';
+import { SANS, DISPLAY } from './fonts.js';
 const STYLE_PROPS = [
   'fill',
   'fill-opacity',
@@ -191,17 +191,13 @@ const SOURCE_LINE =
   'Source: SWF 2026 (Secure World Foundation, Global Counterspace Capabilities: An Open Source Assessment, 9th ed., Apr. 2026) and the primary sources ' +
   'cited on the page.';
 const CREDIT = 'Counterspace Timeline, companion to Space Security Law by Aaron Brynildson';
-// A standalone file has no page stylesheet, so it carries the font faces it uses (IBM Plex Sans 400 and 600, where the 600 face is declared "500 600",
-// and Newsreader for the title) as base64 @font-face rules copied from the page's <style id="cs-fonts"> (written by tools/build_page.py).
+// A standalone file has no page stylesheet, so it carries the font faces it uses (Public Sans, normal style, as one variable face for weights 100 to 900,
+// and Libre Bodoni for the title) as base64 @font-face rules copied from the page's <style id="cs-fonts"> (written by tools/build_page.py).
 function fontFaceCSS() {
   const css = document.getElementById('cs-fonts')?.textContent || '';
   return css
     .split('\n')
-    .filter(
-      (r) =>
-        r.includes('font-style:normal') &&
-        ((r.includes('font-family:"IBM Plex Sans"') && /font-weight:(400|500 600);/.test(r)) || r.includes('font-family:"Newsreader"')),
-    )
+    .filter((r) => r.includes('font-style:normal') && (r.includes('font-family:"Public Sans"') || r.includes('font-family:"Libre Bodoni"')))
     .join('\n');
 }
 // Copy computed presentation properties onto the clone so the file renders the same without the page's stylesheet.
@@ -278,7 +274,7 @@ function frameExport(spec, clones, box) {
   mk('defs', {}).appendChild(document.createElementNS(ns, 'style')).textContent = fontFaceCSS();
   mk('desc', {}, `${spec.sub} ${spec.key}`);
   mk('rect', { width: EW, height: HT, style: `fill:${bg}` });
-  mk('text', { x: PAD, y: PAD + 28, style: `fill:${fg};font:500 29px ${SERIF}` }, spec.title);
+  mk('text', { x: PAD, y: PAD + 28, style: `fill:${fg};font:500 29px ${DISPLAY}` }, spec.title);
   mk('text', { x: PAD, y: PAD + 54, style: `fill:${muted};font:400 14.5px ${SANS}` }, spec.sub);
   parts.forEach(({ c, vb, y, title }) => {
     if (title) mk('text', { x: PAD, y: y - 16, style: `fill:${fg};font:600 15px ${SANS}` }, title);

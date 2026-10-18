@@ -49,31 +49,38 @@ def pack_land(rings):
 
 
 # Embedded fonts: fonts/*.woff2 (SIL OFL; see fonts/OFL-*.txt) become base64 @font-face rules in <style id="cs-fonts">, so the page stays one
-# self-contained file. src/export.js copies the IBM Plex Sans rules into exported SVGs (it matches the exact `font-family:"IBM Plex Sans"` text, a
-# normal style and a weight of `400` or `500 600` written here), and src/fonts.js loads every face before the first text measurement.
-# Newsreader is the complete Latin variable font (weight 200-800, optical size 6-72, so display sizes get their own drawing automatically); the
-# Latin Extended face only loads for text that needs it (unicode-range). IBM Plex Sans keeps its TrueType hinting, in Latin, Latin-1 and Extended-A.
-# Each entry: (family, file, weight or weight range, style, unicode-range or None). tools/subset_fonts.py documents how the files were made.
-LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
-LATIN_EXT = ('U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,'
-             'U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF')
+# self-contained file with no font request. Two files read these rules by their exact text: src/export.js and src/scenes/svg/still-frame.js copy the
+# "Public Sans" and "Libre Bodoni" rules into exported SVGs. They match `font-family:"Public Sans"` / `font-family:"Libre Bodoni"` together with
+# `font-style:normal`, so keep the family names, their double quotes and the `font-style:normal` text as written below (the "... Fallback" rules fail that
+# match on purpose: an exported file carries real fonts). src/fonts.js loads every face before the first text measurement.
+# Public Sans is a variable font (weight 100-900, so 400/500/600/700 are real drawings, never synthesized bold) for all body, interface, chart, SVG and 3D
+# label text, roman and italic (the italic is for titles of books and reports). Libre Bodoni (variable, weight 400-700) is for display headings only: h1, h2
+# and large numerals, 28 px and up. tools/subset_fonts.py documents how the files were made.
+# The "Fallback" families are local system fonts (Arial, Times New Roman) with adjusted metrics that stand in while a face decodes (font-display:swap), so
+# the first paint wraps like the final one: size-adjust matches the average glyph width, the ascent and descent overrides match the line box.
+# Each entry: (family, file, weight or weight range, style).
 FONT_FACES = (
-    ('Newsreader', 'Newsreader-latin.woff2', '200 800', 'normal', LATIN),
-    ('Newsreader', 'Newsreader-latin-ext.woff2', '200 800', 'normal', LATIN_EXT),
-    ('Newsreader', 'Newsreader-italic-latin.woff2', '200 800', 'italic', LATIN),
-    ('IBM Plex Sans', 'IBMPlexSans-400.woff2', '400', 'normal', None),
-    ('IBM Plex Sans', 'IBMPlexSans-600.woff2', '500 600', 'normal', None),
-    ('IBM Plex Sans', 'IBMPlexSans-700.woff2', '700', 'normal', None),
+    ('Public Sans', 'PublicSans-latin.woff2', '100 900', 'normal'),
+    ('Public Sans', 'PublicSans-italic-latin.woff2', '100 900', 'italic'),
+    ('Libre Bodoni', 'LibreBodoni-latin.woff2', '400 700', 'normal'),
+)
+# family, local font names, weight range, size-adjust, ascent and descent (percent of the adjusted size)
+FALLBACK_FACES = (
+    ('Public Sans Fallback', 'local("Arial"),local("Liberation Sans"),local("Helvetica")', '100 500', 104.3, 91.1, 21.6),
+    ('Public Sans Fallback', 'local("Arial Bold"),local("Liberation Sans Bold"),local("Helvetica Bold")', '600 900', 98.9, 96.1, 22.8),
+    ('Libre Bodoni Fallback', 'local("Times New Roman"),local("Liberation Serif"),local("Times")', '400 700', 113.2, 81.7, 28.8),
 )
 
 
 def font_css():
     rules = []
-    for fam, f, wt, st, ur in FONT_FACES:
+    for fam, f, wt, st in FONT_FACES:
         b64 = base64.b64encode((R / 'fonts' / f).read_bytes()).decode()
-        rng = f'unicode-range:{ur};' if ur else ''
-        rules.append(f'@font-face{{font-family:"{fam}";font-style:{st};font-weight:{wt};font-display:swap;{rng}'
+        rules.append(f'@font-face{{font-family:"{fam}";font-style:{st};font-weight:{wt};font-display:swap;'
                      f'src:url(data:font/woff2;base64,{b64}) format("woff2")}}')
+    for fam, src, wt, adj, asc, desc in FALLBACK_FACES:
+        rules.append(f'@font-face{{font-family:"{fam}";font-style:normal;font-weight:{wt};src:{src};size-adjust:{adj}%;'
+                     f'ascent-override:{asc}%;descent-override:{desc}%;line-gap-override:0%}}')
     return '\n'.join(rules)
 
 

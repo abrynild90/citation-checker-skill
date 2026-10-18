@@ -12,7 +12,7 @@ export const INK = '#eef2fb',
 
 let mctx;
 const widths = new Map();
-// Width of a text in Plex Sans at weight 600 (measured on a canvas once the faces are loaded; the first draw waits for them).
+// Width of a text in Public Sans at weight 600 (measured on a canvas once the faces are loaded; the first draw waits for them).
 export function textW(text, fs, weight = 600) {
   const key = weight + '|' + fs + '|' + text;
   let w = widths.get(key);

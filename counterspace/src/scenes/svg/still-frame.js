@@ -1,8 +1,8 @@
 // ============================================================================
-// scenes/svg/still-frame.js: the finished frame of a saved image (3000 x 1875): the picture on top, then one calm band with the scene's title in the serif,
+// scenes/svg/still-frame.js: the finished frame of a saved image (3000 x 1875): the picture on top, then one calm band with the scene's title in Libre Bodoni,
 // one line of context, the source line and the credit line. The live 3D still (gl-still.js) and the still diagram share it, so both saves look the same.
 // ============================================================================
-import { SANS, SERIF, fontsReady } from '../../fonts.js';
+import { SANS, DISPLAY, fontsReady } from '../../fonts.js';
 import { earthImg, earthLow } from '../earth.js';
 import { stillLine } from '../still-config.js';
 
@@ -47,13 +47,13 @@ export function stillFileName(title) {
   return `counterspace-timeline-${slug}.png`;
 }
 
-// A standalone SVG has no page stylesheet, and an SVG drawn as an image cannot see the page's fonts: the diagram carries the IBM Plex Sans faces it uses
+// A standalone SVG has no page stylesheet, and an SVG drawn as an image cannot see the page's fonts: the diagram carries the Public Sans face it uses
 // as @font-face rules (copied from the page's <style id="cs-fonts">), so its labels are set in the page's own type in the saved image.
 export function fontFaceCSS() {
   const css = document.getElementById('cs-fonts')?.textContent || '';
   return css
     .split('\n')
-    .filter((r) => r.includes('font-family:"IBM Plex Sans"') && r.includes('font-style:normal') && /font-weight:(400|500 600);/.test(r))
+    .filter((r) => r.includes('font-family:"Public Sans"') && r.includes('font-style:normal'))
     .join('\n');
 }
 
@@ -114,10 +114,10 @@ export function drawBand(g, W, y0, m) {
   g.fillRect(0, y0, W, bandH);
   g.textAlign = 'left';
   g.textBaseline = 'alphabetic';
-  // title, in the serif: as large as fits one line
+  // title, in the display face (Libre Bodoni): as large as fits one line
   let px = 100 * u;
   for (; px > 62 * u; px -= 2 * u) {
-    g.font = `500 ${px}px ${SERIF}`;
+    g.font = `500 ${px}px ${DISPLAY}`;
     if (g.measureText(m.title).width <= textW) break;
   }
   g.fillStyle = INK;
@@ -145,7 +145,7 @@ export function drawBand(g, W, y0, m) {
     mw = orbitMark(g, mx, cr - 0.34 * cs, u),
     parts = [
       [`500 ${cs}px ${SANS}`, 'Counterspace Timeline · companion to '],
-      [`italic 400 ${cs * 1.06}px ${SERIF}`, 'Space Security Law'],
+      [`italic 500 ${cs}px ${SANS}`, 'Space Security Law'],
       [`500 ${cs}px ${SANS}`, ' by Aaron Brynildson'],
     ];
   let x = mx + mw + 20 * u;

@@ -144,7 +144,7 @@ export function mountReading() {
   const nav = document.createElement('nav');
   nav.className = 'reading-nav';
   nav.setAttribute('aria-label', 'Jump to a chapter');
-  nav.innerHTML = `<label><span>On this page</span><select aria-label="Jump to a chapter">${chapters.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label><a href="#top" aria-label="Back to the top">↑</a>`;
+  nav.innerHTML = `<label><span>On this page</span><select aria-label="Jump to a chapter">${chapters.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label><a href="#top" aria-label="Back to the top"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a>`;
   document.body.append(nav);
   const choose = nav.querySelector('select');
   choose.onchange = () => {
