@@ -28,7 +28,7 @@ void main(){ vUv = uv; vP = position; vN = normalize(mat3(modelMatrix) * normal)
 // the land and the city lights (a one-channel picture, see lightsFor). Sea: a sky reflection at grazing angles. Clouds come from the
 // generated map (R, thin and wispy); its G channel is fine noise that adds detail to the land when the camera is close (mipmapping fades it out at a distance).
 const EARTH_FS = `uniform sampler2D uDayA; uniform sampler2D uDayB; uniform sampler2D uLightA; uniform sampler2D uLightB; uniform sampler2D uMask; uniform sampler2D uRelief; uniform sampler2D uCloud;
-uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp; uniform float uSeaWave; uniform float uGlint; uniform vec3 uGlintDir;
+uniform vec3 uSun; uniform float uFade; uniform float uCloudAmt; uniform float uLights; uniform float uBump; uniform float uNight; uniform float uDay; uniform float uSea; uniform float uSharp; uniform float uSeaWave; uniform float uSeaSoft; uniform float uGlint; uniform vec3 uGlintDir;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying vec3 vP;
 float h13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -74,7 +74,21 @@ void main(){
     float bl = smoothstep(1.25, 1.9, day.b / (day.r + 0.02));
     day = mix(day, min(day, dBl * 1.04), 0.92 * bl);
   }
-  float swell = 1.0;
+  float swell = 1.0, swv = 0.0;
+  if (uSeaSoft > 0.0) {
+    // cfg.seaSoft (opt-in): a smooth close sea instead of speckle. Over open water the photograph is taken from a blurrier mip (no grain), then given a slow colour drift
+    // (low-frequency patches of deeper and greener water), long gentle swell bands and, below, soft glints of the sun on them
+    vec3 dSm = mix(texture2D(uDayA, vUv, 2.5).rgb, texture2D(uDayB, vUv, 2.5).rgb, uFade);
+    float soft = uSeaSoft * magL * water;
+    day = mix(day, dSm, 0.9 * min(1.0, soft));
+    vec3 qs = normalize(vP);
+    float lf = 0.6 * vn(qs * 45.0) + 0.4 * vn(qs * 120.0 + 2.0);
+    float wp = (vn(qs * 70.0) - 0.5) * 2.6; // a slow meander of the bands (large and gentle: a strong warp turns parallel swell into a marbled maze)
+    float env = smoothstep(0.25, 0.75, vn(qs * 38.0 + 7.0)); // the swell comes and goes in broad patches, so no fabric of regular stripes
+    swv = (0.7 * sin(dot(qs, vec3(0.62, 0.31, 0.72)) * 520.0 + wp * 1.6) + 0.3 * sin(dot(qs, vec3(-0.40, 0.83, 0.38)) * 880.0 + wp * 1.2 + 1.3)) * (0.35 + 0.65 * env);
+    swell = 1.0 + soft * (0.04 * swv + 0.16 * (lf - 0.5));
+    day *= swell * mix(vec3(1.0), mix(vec3(0.90, 0.96, 1.04), vec3(1.05, 1.03, 0.98), lf), min(1.0, soft));
+  }
   if (magL > 0.0 && uSeaWave > 0.0) {
     // cfg.seaWave (opt-in): fine swell texture on open water where the photograph is magnified, so a close sea is not a soft flat blue
     vec3 qs = normalize(vP);
@@ -82,7 +96,7 @@ void main(){
     swell = 0.66 + 0.5 * ((swell - 0.66) + sqrt((swell - 0.66) * (swell - 0.66) + 0.05)); // a soft floor: the troughs stay a dark swell, never black pits
     day *= swell;
   }
-  day *= 1.0 + dt * (0.7 + 0.45 * magL) * (1.0 - 0.75 * water);
+  day *= 1.0 + dt * (0.7 + 0.45 * magL) * (1.0 - (0.75 + 0.22 * min(uSeaSoft, 1.0)) * water);
   day = pow(day, vec3(0.96));
   day = mix(day, vec3(dot(day, vec3(0.2126, 0.7152, 0.0722))), 0.10);
   float dif = max(dot(Nb, L), 0.0);
@@ -105,6 +119,11 @@ void main(){
   cl *= uCloudAmt;
   float fr = pow(1.0 - ndv, 4.0);
   col += (vec3(0.20, 0.36, 0.62) * fr * 0.30) * water * dayAmt * (1.0 - cl);
+  if (uSeaSoft > 0.0) {
+    // soft glints: the sun's mirror reflection on the swell bands (a gentle highlight where a band faces the half-vector), strongest where the band crests
+    float hv = max(dot(Nb, normalize(L + V)), 0.0);
+    col += vec3(0.60, 0.76, 1.0) * pow(hv, 36.0) * smoothstep(0.0, 0.9, 0.5 + 0.5 * swv) * uSeaSoft * 0.55 * magL * water * dayAmt * (1.0 - cl);
+  }
   if (uGlint > 0.0) {
     // cfg.glintK (opt-in): a long silver path of light on the open sea toward a low light (cfg.glintAt), broken by fine wave glitter, so a low camera sees water, not a flat dark blue
     vec3 Rg = reflect(-normalize(uGlintDir), N);
@@ -286,6 +305,7 @@ export const earthMethods = {
         uNight: { value: this.sim.cfg.nightK ?? 1 }, // a scene on the dark side can lift the night ambient so land, ocean and craft separate
         uDay: { value: this.sim.cfg.dayK ?? 1 }, // cfg.dayK: an opt-in gain on the lit side (dark ocean in daylight)
         uSea: { value: this.sim.cfg.seaK ?? 0 }, // cfg.seaK: an opt-in blue lift of the sunlit sea (dark ocean in the picture)
+        uSeaSoft: { value: this.sim.cfg.seaSoft ?? 0 }, // cfg.seaSoft: an opt-in smooth close sea (blurred photograph, slow colour drift, gentle swell and glints) instead of speckle
         uSeaWave: { value: this.sim.cfg.seaWave ?? 0 }, // cfg.seaWave: an opt-in fine texture on open water while the picture is magnified
         uSharp: { value: this.sim.cfg.earthSharp ?? 0 }, // cfg.earthSharp: an opt-in unsharp mask on the day picture (close-ups of a soft photograph)
         uBump: { value: 0 },

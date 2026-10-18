@@ -57,7 +57,7 @@ export const STARFISH = {
       head: true,
       thick: 0.0035,
       ghostOpacity: 0.45,
-      rocket: { style: 'steel', minPx: IS_PHONE ? 60 : 120, maxPx: IS_PHONE ? 78 : 160, glowMin: 24, glowMax: 40, ramp: { k: IS_PHONE ? 1.8 : 1.7, until: 0.55 }, burn: 0.93, smokeK: 1.0, smokeNear: 0.25, smokeTA: 0.035, smokeLocal: 0.5, smokeTopK: 3, smokeWind: 0.4, plumeK: 1.6, stage: { s: 0.5, gap: 0.012, scale: 1.6, drift: 2.4, tumble: 2.2, puff: 2.4 }, endHold: 0.006, pad: { minPx: IS_PHONE ? 100 : 200, maxPx: IS_PHONE ? 130 : 250, bright: true, island: true, hold: 0.055 } },
+      rocket: { style: 'steel', minPx: IS_PHONE ? 60 : 120, maxPx: IS_PHONE ? 78 : 160, glowMin: 24, glowMax: 40, ramp: { k: IS_PHONE ? 1.8 : 1.7, until: 0.55 }, burn: 0.93, smokeK: 1.0, smokeNear: 0.25, smokeTA: 0.035, smokeLocal: 0.5, smokeTopK: 3, smokeWind: 0.4, plumeK: 1.6, endHold: 0.006, pad: { minPx: IS_PHONE ? 100 : 200, maxPx: IS_PHONE ? 130 : 250, bright: true, island: true, hold: 0.055 } },
       opt: true,
       dx: -96,
       dy: 4,
@@ -160,7 +160,7 @@ export const STARFISH = {
   dayK: IS_PHONE ? 1.2 : 1.05,
   nightK: 2.4, // the Pacific night side is lifted so the ocean, the island glints and the rocket separate from the dark at t=0
   phoneK: 1.05, // 375: the Earth stays at least 240 px wide; the outer field-line arches may run past the frame edge
-  seaWave: IS_PHONE ? 0 : 1.7, // desktop: fine swell texture on the Pacific while the camera is close in (t=0.15-0.25 read soft and flat)
+  seaSoft: IS_PHONE ? 0 : 1, // desktop: a smooth close-up Pacific: slow colour drift, long gentle swell and soft glints, not fine speckle (the old fine swell texture read as mottled noise)
   earthSharp: IS_PHONE ? 0 : 0.6,
   staticZoom: 1.7,
   staticCenter: [35, -205],
