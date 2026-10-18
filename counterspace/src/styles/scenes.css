@@ -81,7 +81,7 @@
 .overlay h2#sceneTitle {
   grid-area: title;
   margin: 0;
-  font: 600 26px/1.32 var(--sans);
+  font: 600 var(--fs-26)/1.32 var(--sans);
   letter-spacing: -0.008em;
   text-wrap: balance;
 }
@@ -93,7 +93,7 @@
   min-height: 24px;
 }
 .overlay .sv-count {
-  font: 500 13px/1.3 var(--sans);
+  font: 500 var(--fs-13)/1.3 var(--sans);
   font-variant-numeric: tabular-nums;
   color: var(--faint);
   white-space: nowrap;
@@ -149,7 +149,7 @@
   top: calc(100% + 6px);
   left: 50%;
   padding: 4px 9px;
-  font: 600 12.5px/1.3 var(--sans);
+  font: 600 var(--fs-13)/1.3 var(--sans);
   white-space: nowrap;
   color: #eef2fb;
   background: rgba(8, 13, 28, 0.94);
@@ -214,7 +214,7 @@
   gap: 7px;
   max-width: calc(100% - 20px);
   padding: 4px 9px;
-  font: 600 12.5px/1.3 var(--sans);
+  font: 600 var(--fs-13)/1.3 var(--sans);
   letter-spacing: 0;
   color: #eef2fb;
   background: rgba(8, 13, 28, 0.72);
@@ -248,7 +248,7 @@
 .overlay .sv-state p {
   margin: 0;
   max-width: 34ch;
-  font: 500 14.5px/1.45 var(--sans);
+  font: 500 var(--fs-15)/1.45 var(--sans);
 }
 .overlay .sv-orb {
   position: relative;
@@ -309,7 +309,7 @@
   width: max-content;
   max-width: calc(100% - 24px);
   padding: 6px 10px;
-  font: 500 12px/1.3 var(--sans);
+  font: 500 var(--fs-12)/1.3 var(--sans);
   color: #eef2fb;
   background: rgba(8, 13, 28, 0.82);
   border: 1px solid rgba(150, 175, 230, 0.35);
@@ -407,14 +407,14 @@
 .overlay .sv-lede {
   margin: 0 0 var(--s-6);
   max-width: 32em;
-  font: 400 18px/1.6 var(--sans);
+  font: 400 var(--fs-18)/1.6 var(--sans);
   letter-spacing: 0.004em;
   color: var(--text);
   text-wrap: pretty;
 }
 .overlay .sv-steps h3 {
   margin: 0;
-  font: 600 15px/1.3 var(--sans);
+  font: 600 var(--fs-15)/1.3 var(--sans);
   color: var(--text);
 }
 .overlay .sv-steps ol {
@@ -438,7 +438,7 @@
   padding: 0 12px 0 10px;
   text-align: left;
   color: var(--faint);
-  font: 400 14.5px/1.45 var(--sans);
+  font: 400 var(--fs-15)/1.45 var(--sans);
   background: none;
   border: 0;
   border-radius: var(--r-1);
@@ -449,7 +449,7 @@
 }
 .overlay .st-time {
   padding-top: 11px;
-  font: 500 12.5px/1.45 var(--sans);
+  font: 500 var(--fs-13)/1.45 var(--sans);
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
@@ -568,11 +568,11 @@
 .overlay .sv-about {
   margin: var(--s-4) 0 0;
   max-width: none;
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   line-height: 1.55;
 }
 .overlay .sv-about > summary {
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   line-height: 1.4;
   color: var(--muted);
 }
@@ -596,7 +596,7 @@
   max-height: 9em;
   overflow: auto;
   overflow-wrap: anywhere;
-  font: 400 13px/1.5 var(--sans);
+  font: 400 var(--fs-13)/1.5 var(--sans);
   color: var(--muted);
 }
 .overlay .sv-src a {
@@ -619,7 +619,7 @@
   height: auto;
   min-height: 40px;
   padding: 9px 16px 9px 14px;
-  font-size: 14px;
+  font-size: var(--fs-14);
   line-height: 1.3;
   white-space: normal;
   text-align: left;
@@ -659,7 +659,7 @@
 .overlay .tm {
   grid-area: time;
   min-width: 6.4em;
-  font: 500 14px/1.3 var(--sans);
+  font: 500 var(--fs-14)/1.3 var(--sans);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--muted);
@@ -762,7 +762,7 @@
   align-items: center;
   gap: var(--s-3);
   margin: 0;
-  font: 400 14px/1.45 var(--sans);
+  font: 400 var(--fs-14)/1.45 var(--sans);
   color: var(--muted);
 }
 .overlay .static-note .btn {
@@ -783,7 +783,7 @@
   min-width: 0;
 }
 .overlay .views-label {
-  font: 500 13px/1.4 var(--sans);
+  font: 500 var(--fs-13)/1.4 var(--sans);
   color: var(--faint);
 }
 .overlay .seg {
@@ -820,7 +820,7 @@
   max-width: min(420px, calc(100% - 2 * var(--sv-pad)));
   margin: 0;
   padding: 10px 14px;
-  font: 500 13.5px/1.4 var(--sans);
+  font: 500 var(--fs-14)/1.4 var(--sans);
   color: var(--text);
   background: var(--surface-3);
   border: 1px solid var(--line-strong);
@@ -896,7 +896,7 @@
   }
   .overlay h2#sceneTitle {
     padding-right: 52px;
-    font-size: 22px;
+    font-size: var(--fs-22);
     line-height: 1.32;
   }
   .overlay #scPrev {
@@ -905,7 +905,7 @@
   .overlay #sceneDate {
     grid-area: count;
     padding: 0 var(--s-1);
-    font-size: 14px;
+    font-size: var(--fs-14);
     text-align: center;
   }
   .overlay #scNext {
@@ -928,7 +928,7 @@
     gap: var(--s-2);
     min-height: 44px;
     padding: 0 var(--s-3);
-    font: 500 14px/1.3 var(--sans);
+    font: 500 var(--fs-14)/1.3 var(--sans);
     color: var(--accent);
     background: none;
     border: 0;
@@ -960,7 +960,7 @@
   }
   .overlay .sheet-head h3 {
     margin: 0;
-    font: 600 22px/1.3 var(--sans);
+    font: 600 var(--fs-22)/1.3 var(--sans);
   }
   .overlay .sheet-list {
     flex: 1;
@@ -979,7 +979,7 @@
     width: 100%;
     min-height: 48px;
     padding: var(--s-2) var(--s-3);
-    font: 500 16px/1.35 var(--sans);
+    font: 500 var(--fs-16)/1.35 var(--sans);
     text-align: left;
     color: var(--text);
     background: none;
@@ -995,7 +995,7 @@
     background: var(--surface-3);
   }
   .overlay .sheet-item .sh-n {
-    font: 600 14px/1 var(--sans);
+    font: 600 var(--fs-14)/1 var(--sans);
     font-variant-numeric: tabular-nums;
     color: var(--faint);
   }
@@ -1012,7 +1012,7 @@
     padding: 20px var(--sv-pad) 44px;
   }
   .overlay .sv-lede {
-    font-size: 17px;
+    font-size: var(--fs-18);
   }
   /* A still diagram (no 3D): a shorter picture and more room for the steps, which are the point here */
   .overlay.is-static .panel {
@@ -1023,7 +1023,7 @@
     color: var(--text);
   }
   .overlay.is-static .static-note {
-    font-size: 13px;
+    font-size: var(--fs-13);
     line-height: 1.4;
   }
   .overlay .ctrl {
@@ -1073,7 +1073,7 @@
   .overlay .seg button {
     --h: 40px;
     padding: 0 7px;
-    font-size: 13px;
+    font-size: var(--fs-13);
     background: var(--surface-2);
     box-shadow: inset 0 0 0 1px var(--line);
   }
@@ -1088,7 +1088,7 @@
     padding: 0 var(--s-3);
     gap: var(--s-2);
     border-radius: var(--r-pill);
-    font-size: 14px;
+    font-size: var(--fs-14);
     white-space: nowrap;
   }
   .overlay .sv-toast {
@@ -1120,7 +1120,7 @@
     display: none;
   }
   .overlay h2#sceneTitle {
-    font-size: 19px;
+    font-size: var(--fs-20);
     line-height: 1.32;
   }
   .overlay .illus .full {
@@ -1136,7 +1136,7 @@
     padding: 16px var(--sv-pad) 24px;
   }
   .overlay .sv-lede {
-    font-size: 17px;
+    font-size: var(--fs-18);
     margin-bottom: var(--s-4);
   }
   .overlay .ctrl {
@@ -1252,7 +1252,7 @@
     min-height: 44px;
     margin: 0;
     padding: 0 var(--s-3) 0 var(--s-2);
-    font: 500 14px/1.3 var(--sans);
+    font: 500 var(--fs-14)/1.3 var(--sans);
     color: var(--accent);
     border-radius: var(--r-pill);
   }
@@ -1283,7 +1283,7 @@
     grid-row: 2;
     grid-column: 1;
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-14);
   }
   .overlay.is-static #scExport {
     grid-area: auto;
@@ -1336,7 +1336,7 @@
   .overlay .sv-src {
     display: block;
     max-height: 6.2em;
-    font-size: 12.5px;
+    font-size: var(--fs-13);
     line-height: 1.45;
   }
   .overlay .sv-src a {
@@ -1345,7 +1345,7 @@
   .overlay .aside-law .btn {
     min-height: 36px;
     padding: 6px 12px;
-    font-size: 13px;
+    font-size: var(--fs-13);
   }
   .overlay .story-scroll {
     padding: 18px 20px 40px;
@@ -1449,7 +1449,7 @@
   min-height: 36px;
   margin: 0 0 var(--s-2) -8px;
   padding: 0 var(--s-3) 0 var(--s-2);
-  font: 500 14px/1.3 var(--sans);
+  font: 500 var(--fs-14)/1.3 var(--sans);
   color: var(--accent);
   background: none;
   border: 0;
@@ -1482,7 +1482,7 @@
 .overlay .sv-note {
   flex: none;
   margin: var(--s-1) 0 0;
-  font: 400 13px/1.45 var(--sans);
+  font: 400 var(--fs-13)/1.45 var(--sans);
   color: var(--faint);
 }
 .overlay .sv-all {
@@ -1562,7 +1562,7 @@
 }
 @media (max-width: 1180px) and (min-width: 761px) {
   .overlay .sv-lede {
-    font-size: 16.5px;
+    font-size: var(--fs-16);
     line-height: 1.5;
   }
 }
@@ -1604,7 +1604,7 @@
     gap: 6px;
     min-height: 44px;
     padding: 0 13px;
-    font: 500 13.5px/1.2 var(--sans);
+    font: 500 var(--fs-14)/1.2 var(--sans);
     color: var(--accent);
     white-space: nowrap;
     text-decoration: none;
@@ -1641,7 +1641,7 @@
     max-height: 52dvh;
     overflow: auto;
     padding: 12px 14px;
-    font: 400 13.5px/1.5 var(--sans);
+    font: 400 var(--fs-14)/1.5 var(--sans);
     color: var(--muted);
     background: var(--surface-3);
     border: 1px solid var(--line-strong);
@@ -1673,7 +1673,7 @@
     padding: 14px var(--sv-pad, 16px) 8px;
   }
   .overlay .sv-lede {
-    font-size: 16px;
+    font-size: var(--fs-16);
     line-height: 1.5;
   }
   .overlay .views-label {
@@ -1724,7 +1724,7 @@
   .overlay .sl-btn,
   .overlay .sv-srcrow .pill {
     padding: 0 11px;
-    font-size: 13px;
+    font-size: var(--fs-13);
   }
 }
 
@@ -1781,7 +1781,7 @@
 }
 @media (max-width: 760px) and (min-height: 541px), (max-width: 760px) and (max-aspect-ratio: 11/10), (max-width: 599px) {
   .overlay #sceneSteps .step {
-    font-size: 14px;
+    font-size: var(--fs-14);
     line-height: 1.4;
   }
   .overlay #sceneSteps .st-text {
@@ -1789,7 +1789,7 @@
   }
   .overlay #sceneSteps .st-time {
     padding-top: calc(9px + var(--sp, 0px));
-    font-size: 12px;
+    font-size: var(--fs-12);
   }
   .overlay #sceneSteps .st-rail::after {
     top: calc(11.5px + var(--sp, 0px));
@@ -1812,7 +1812,7 @@
     top: 2px;
   }
   .overlay h2#sceneTitle {
-    font-size: 20px;
+    font-size: var(--fs-20);
   }
 }
 
@@ -1894,7 +1894,7 @@
 /* Narrow story column (tablet landscape, small laptop): the source pills are a little tighter so the three of them keep one line */
 @media (min-width: 761px) and (max-width: 1180px) {
   .overlay .sv-srcrow { gap: 4px; padding-inline: 12px; }
-  .overlay .sl-btn, .overlay .sv-srcrow .pill { padding: 0 10px; font-size: 13px; gap: 5px; }
+  .overlay .sl-btn, .overlay .sv-srcrow .pill { padding: 0 10px; font-size: var(--fs-13); gap: 5px; }
   .overlay .sl-links { gap: 4px; }
 }
 /* Tablet in portrait: with the first sentence showing, the story column gets a little more of the height so two or three steps still fit */
@@ -2110,7 +2110,7 @@
   border-radius: var(--r-1);
   background: transparent;
   color: var(--muted);
-  font: 600 13.5px/1.3 var(--sans);
+  font: 600 var(--fs-14)/1.3 var(--sans);
   text-align: left;
   cursor: pointer;
 }
@@ -2128,7 +2128,7 @@
   box-shadow: inset 3px 0 0 var(--accent-2, currentColor);
 }
 .overlay .more-menu kbd {
-  font: 500 12px/1 var(--sans);
+  font: 500 var(--fs-12)/1 var(--sans);
   color: var(--faint);
 }
 
@@ -2139,7 +2139,7 @@
     padding-bottom: 14px;
   }
   .overlay .sv-lede {
-    font-size: 16.5px;
+    font-size: var(--fs-16);
     line-height: 1.5;
     margin-bottom: 4px;
   }
@@ -2192,7 +2192,7 @@
   border-radius: var(--r-pill);
   background: transparent;
   color: var(--text);
-  font: 500 13.5px/1.2 var(--sans);
+  font: 500 var(--fs-14)/1.2 var(--sans);
   cursor: pointer;
   transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
@@ -2207,12 +2207,12 @@
 
 /* ---------- The tour pill, the "scenes seen" line and the summary after the tour */
 .overlay .sv-meta { flex-wrap: wrap; row-gap: var(--s-1); }
-.overlay .sv-seen { font: 500 13px/1.3 var(--sans); color: var(--muted); white-space: nowrap; }
+.overlay .sv-seen { font: 500 var(--fs-13)/1.3 var(--sans); color: var(--muted); white-space: nowrap; }
 .overlay .sv-seen::before { content: ""; display: inline-block; width: 1px; height: 12px; margin-right: var(--s-3); vertical-align: -1px; background: var(--line-strong); }
-.overlay .sv-tour { display: inline-flex; align-items: center; gap: var(--s-2); padding: 4px 4px 4px 12px; border: 1px solid var(--accent); border-radius: var(--r-pill); background: var(--accent-soft); font: 600 13px/1.3 var(--sans); color: var(--text); }
+.overlay .sv-tour { display: inline-flex; align-items: center; gap: var(--s-2); padding: 4px 4px 4px 12px; border: 1px solid var(--accent); border-radius: var(--r-pill); background: var(--accent-soft); font: 600 var(--fs-13)/1.3 var(--sans); color: var(--text); }
 .overlay .sv-tour[hidden] { display: none; }
 .overlay .sv-tour-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-.overlay .sv-tour .btn.small { --h: 28px; padding: 0 10px 0 8px; gap: 5px; font-size: 13px; }
+.overlay .sv-tour .btn.small { --h: 28px; padding: 0 10px 0 8px; gap: 5px; font-size: var(--fs-13); }
 .overlay .sv-tour .btn .ico { width: 15px; height: 15px; }
 .overlay .sv-recap { position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 0; border-radius: 16px; background: var(--bg-2); }
 .overlay .sv-recap[hidden] { display: none; }
@@ -2223,30 +2223,30 @@
 .overlay .sv-recap-body { flex: 0 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-4); padding-bottom: var(--s-6); overscroll-behavior: contain; }
 .overlay .sv-recap-body > * { flex: none; }
 .overlay .sv-recap-body.more { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 56px), transparent); }
-.overlay .sv-recap-cue { position: absolute; left: 50%; bottom: var(--s-2); transform: translateX(-50%); z-index: 2; appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface-2); color: var(--accent); font: 600 13.5px/1.3 var(--sans); cursor: pointer; box-shadow: var(--shadow-1, 0 2px 8px rgba(0, 0, 0, 0.25)); }
+.overlay .sv-recap-cue { position: absolute; left: 50%; bottom: var(--s-2); transform: translateX(-50%); z-index: 2; appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface-2); color: var(--accent); font: 600 var(--fs-14)/1.3 var(--sans); cursor: pointer; box-shadow: var(--shadow-1, 0 2px 8px rgba(0, 0, 0, 0.25)); }
 .overlay .sv-recap-cue[hidden] { display: none; }
 .overlay .sv-recap-cue .ico { width: 16px; height: 16px; }
 .overlay .sv-recap-cue:hover { border-color: var(--accent); }
 .overlay .sv-recap-cue:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .overlay .sv-recap h2 { margin: 0; font: 500 clamp(30px, 3.4vw, 42px)/1.2 var(--display); }
 .overlay .sv-recap h2:focus { outline: none; }
-.overlay .sv-recap-sum { margin: 0; max-width: 40em; font: 400 19px/1.55 var(--sans); color: var(--text); }
+.overlay .sv-recap-sum { margin: 0; max-width: 40em; font: 400 var(--fs-20)/1.55 var(--sans); color: var(--text); }
 .overlay .sv-recap-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
-.overlay .sv-recap-list button { appearance: none; min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: transparent; color: var(--text); font: 500 13.5px/1.3 var(--sans); cursor: pointer; }
+.overlay .sv-recap-list button { appearance: none; min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: transparent; color: var(--text); font: 500 var(--fs-14)/1.3 var(--sans); cursor: pointer; }
 .overlay .sv-recap-list button:hover { background: var(--surface-3); border-color: var(--accent); }
 .overlay .sv-recap-list button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.overlay .sv-recap-h { margin: var(--s-5) 0 0; font: 600 15px/1.3 var(--sans); color: var(--muted); }
+.overlay .sv-recap-h { margin: var(--s-5) 0 0; font: 600 var(--fs-15)/1.3 var(--sans); color: var(--muted); }
 .overlay .sv-recap-links, .overlay .sv-recap-acts { margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-3); }
 .overlay .sv-recap-links .btn { color: var(--accent); }
 .overlay .sv-recap-acts { flex: none; width: 100%; margin: 0; padding: var(--s-4) 0 var(--s-5); border-top: 1px solid var(--line); }
 .overlay .sv-recap-hero { margin: 0; }
 .overlay .sv-recap-hero[hidden] { display: none; }
-.overlay .sv-recap-hero a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--accent); font: 600 16px/1.4 var(--sans); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.overlay .sv-recap-hero a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--accent); font: 600 var(--fs-16)/1.4 var(--sans); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 .overlay .sv-recap-hero a:hover { text-decoration-thickness: 2px; }
 .overlay .sv-recap-hero a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: var(--r-1); }
 .overlay .sv-recap-hero .ico { width: 18px; height: 18px; }
 .overlay .sv-recap-more { width: 100%; }
-.overlay .sv-recap-more > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font: 600 15px/1.3 var(--sans); color: var(--accent); }
+.overlay .sv-recap-more > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font: 600 var(--fs-15)/1.3 var(--sans); color: var(--accent); }
 .overlay .sv-recap-more > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: var(--r-1); }
 /* the opened block spaces its parts with margins (a browser wraps them in one box, where a grid gap would not reach them) */
 .overlay .sv-recap-more[open] > summary { margin-bottom: var(--s-1); }
@@ -2256,14 +2256,14 @@
 /* 1800 px and up: a wider viewer and a roomier story column */
 @media (min-width: 1800px) {
   .overlay .panel { width: min(1680px, 100%); grid-template-columns: minmax(0, 1fr) clamp(480px, 41%, 700px); }
-  .overlay .sv-lede { font-size: 18px; }
+  .overlay .sv-lede { font-size: var(--fs-18); }
   .overlay.is-static .panel { width: min(1480px, 100%); }
 }
 
 /* ---------- "About this picture" and "Where to go next": two quiet buttons in one row; the note opened sits under the row, in the story column */
 .overlay .sv-pair { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-4); margin: var(--s-2) 0 0; }
 .overlay .sv-pbtn { appearance: none; display: inline-flex; align-items: center; gap: var(--s-2); min-height: 36px; margin: 0 0 0 -8px; padding: 0 var(--s-3) 0 var(--s-2); border: 0; border-radius: var(--r-pill); background: transparent;
-  color: var(--muted); font: 600 13.5px/1.3 var(--sans); cursor: pointer; transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease); }
+  color: var(--muted); font: 600 var(--fs-14)/1.3 var(--sans); cursor: pointer; transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease); }
 .overlay .sv-pbtn::before { content: ""; width: 14px; height: 14px; flex: none; background: currentColor; transition: transform var(--dur-2) var(--ease);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat; }
@@ -2273,7 +2273,7 @@
 .overlay .sv-pbody { margin: var(--s-1) 0 0; padding: var(--s-3) var(--s-4); border-radius: var(--r-2); background: var(--surface-2); }
 .overlay .sv-pbody[hidden] { display: none; }
 .overlay .story-scroll > .sv-pbody { margin: var(--s-1) 0 var(--s-2); border: 1px solid var(--line); animation: sv-pop var(--dur-3) var(--ease) both; }
-.overlay .sv-pbody p { margin: 0; max-width: 36em; font: 400 13.5px/1.55 var(--sans); color: var(--muted); }
+.overlay .sv-pbody p { margin: 0; max-width: 36em; font: 400 var(--fs-14)/1.55 var(--sans); color: var(--muted); }
 .overlay .sv-pbody .sv-next-links { padding: 0; }
 @media (pointer: coarse) { .overlay .sv-pbtn { min-height: 44px; } }
 
@@ -2301,11 +2301,11 @@
 @keyframes sv-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .overlay .story-wrap > .sv-pbody { animation: none; } }
 .overlay .sv-lawcard p { margin: 0; max-width: 40em; }
-.overlay .sv-lawcard .lc-title { font: 600 18px/1.3 var(--sans); color: var(--text); }
-.overlay .sv-lawcard .lc-when { margin-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--accent-2); }
-.overlay .sv-lawcard .lc-note { margin-top: var(--s-2); font: 400 14px/1.5 var(--sans); color: var(--muted); }
-.overlay .sv-lawcard .lc-bind { margin-top: var(--s-2); font: 600 14px/1.45 var(--sans); color: var(--text); }
-.overlay .sv-lawcard .lc-src { margin-top: var(--s-2); font: 400 13px/1.5 var(--sans); color: var(--muted); }
+.overlay .sv-lawcard .lc-title { font: 600 var(--fs-18)/1.3 var(--sans); color: var(--text); }
+.overlay .sv-lawcard .lc-when { margin-top: 3px; font: 600 var(--fs-13)/1.4 var(--sans); color: var(--accent-2); }
+.overlay .sv-lawcard .lc-note { margin-top: var(--s-2); font: 400 var(--fs-14)/1.5 var(--sans); color: var(--muted); }
+.overlay .sv-lawcard .lc-bind { margin-top: var(--s-2); font: 600 var(--fs-14)/1.45 var(--sans); color: var(--text); }
+.overlay .sv-lawcard .lc-src { margin-top: var(--s-2); font: 400 var(--fs-13)/1.5 var(--sans); color: var(--muted); }
 .overlay .sv-lawcard .lc-src a { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; color: var(--accent); }
 .overlay .sv-lawcard .lc-src a .ico { width: 14px; height: 14px; }
 .overlay .sv-lawcard .lc-acts { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
@@ -2317,11 +2317,11 @@
 .overlay .sv-nextup .nu-pic[hidden] { display: none; }
 .overlay .sv-nextup img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .overlay .sv-nextup .nu-t { display: grid; gap: 1px; min-width: 0; }
-.overlay .sv-nextup .nu-h { font: 600 12px/1.3 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
-.overlay .sv-nextup .nu-n { font: 600 15px/1.3 var(--sans); }
+.overlay .sv-nextup .nu-h { font: 600 var(--fs-12)/1.3 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
+.overlay .sv-nextup .nu-n { font: 600 var(--fs-15)/1.3 var(--sans); }
 .overlay .sv-nextup:hover { border-color: var(--accent); background: var(--surface-2); }
 .overlay .sv-nextup:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.overlay .sv-recap-line { margin: 0; max-width: 40em; font: 400 17px/1.55 var(--sans); color: var(--muted); }
+.overlay .sv-recap-line { margin: 0; max-width: 40em; font: 400 var(--fs-18)/1.55 var(--sans); color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .overlay .sv-nextup { animation: none; } }
 
 /* ---------- Wide window (1500 px and up): a "Did you know" line sits in the free room under the list (above the foot), and the foot of the column rests at the bottom of it.
@@ -2335,7 +2335,7 @@
     max-width: 32em;
     border-radius: var(--r-2);
     background: var(--accent-soft);
-    font: 400 15px/1.5 var(--sans);
+    font: 400 var(--fs-15)/1.5 var(--sans);
     color: var(--text);
   }
   /* before its step the line takes no room (no blank band above the first step); the list is still fitted as if it were there (fitSteps adds .reserve while it
@@ -2344,7 +2344,7 @@
      and nothing moves when the fact comes in */
   .overlay .sv-dyk.pending { display: block; position: relative; border-radius: 0; background: none; color: transparent; box-shadow: inset 0 1px 0 var(--line); user-select: none; pointer-events: none; }
   .overlay .sv-dyk.pending b { color: transparent; }
-  .overlay .sv-dyk.pending::after { content: "A “Did you know” fact joins the story as it plays"; position: absolute; inset: var(--s-3) var(--s-4) auto; color: var(--faint); font: 400 14px/1.5 var(--sans); }
+  .overlay .sv-dyk.pending::after { content: "A “Did you know” fact joins the story as it plays"; position: absolute; inset: var(--s-3) var(--s-4) auto; color: var(--faint); font: 400 var(--fs-14)/1.5 var(--sans); }
   .overlay .sv-dyk.nofit { display: none !important; } /* no room for it without costing the steps (fitSteps) */
   .overlay .sv-dyk.reveal { animation: dykIn 380ms var(--ease, ease) both; }
   /* the reveal never changes the line's box (it is drawn at its full height from the first frame, wiped in by a clip), so a fit that runs while it plays measures
@@ -2357,11 +2357,11 @@
 .overlay .story-scroll.gapped:not(.expanded) > .sv-about { margin-top: calc(var(--s-2) + var(--col-gap, 0px)); }
 .overlay .story-scroll.gapped:not(.expanded) > .sv-dyk { margin-top: calc(var(--s-3) + var(--col-gap, 0px)); }
 .overlay .story-scroll.pin { min-height: 100%; }
-.overlay .sv-lawcard .lc-gap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; margin-top: var(--s-2); font: 400 13.5px/1.45 var(--sans); color: var(--muted); }
+.overlay .sv-lawcard .lc-gap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; margin-top: var(--s-2); font: 400 var(--fs-14)/1.45 var(--sans); color: var(--muted); }
 /* the related-law card is compact so it fits the room under the row of notes: the citation shows two lines, the link opens the whole source */
 .overlay .sv-lawcard { padding: var(--s-3) var(--s-4) var(--s-2); }
-.overlay .sv-lawcard .lc-title { font-size: 17px; }
-.overlay .sv-lawcard .lc-bind { margin-top: 6px; font-size: 13.5px; }
+.overlay .sv-lawcard .lc-title { font-size: var(--fs-18); }
+.overlay .sv-lawcard .lc-bind { margin-top: 6px; font-size: var(--fs-14); }
 .overlay .sv-lawcard .lc-src { margin-top: 6px; }
 .overlay .sv-lawcard .lc-cite { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .overlay .sv-lawcard .lc-acts { margin-top: var(--s-2); }
@@ -2384,11 +2384,11 @@
   .overlay .sv-recap-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); align-content: start; align-items: start; gap: var(--s-4) 56px; }
   .overlay .sv-recap-body > * { grid-column: 1; }
   .overlay .sv-recap-body > #svRecapPairs { grid-column: 2; grid-row: 1 / span 5; padding-top: var(--s-2); }
-  .overlay .sv-recap-sum { font-size: 21px; }
-  .overlay .sv-recap-line { font-size: 18px; }
+  .overlay .sv-recap-sum { font-size: var(--fs-22); }
+  .overlay .sv-recap-line { font-size: var(--fs-18); }
   .overlay .sv-recap-links2 .rc-links { gap: 14px; }
-  .overlay .sv-recap-links2 .rc-links li { font-size: 15px; }
-  .overlay .sv-recap-links2 .rc-pill { font-size: 13px; }
+  .overlay .sv-recap-links2 .rc-links li { font-size: var(--fs-15); }
+  .overlay .sv-recap-links2 .rc-pill { font-size: var(--fs-13); }
 }
 @media (min-width: 1500px) {
   .overlay .sv-recap-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
@@ -2405,31 +2405,31 @@
   .overlay .sv-recap-in { width: min(1560px, 100%); padding-top: var(--s-5); }
   .overlay .sv-recap h2 { font-size: 64px; }
   .overlay .sv-recap-body { gap: var(--s-5) 72px; }
-  .overlay .sv-recap-sum { font-size: 28px; max-width: 30em; }
-  .overlay .sv-recap-line { font-size: 21px; max-width: 34em; }
-  .overlay .sv-recap-hero a { font-size: 19px; }
-  .overlay .sv-recap-more > summary { font-size: 18px; }
+  .overlay .sv-recap-sum { font-size: var(--fs-28); max-width: 30em; }
+  .overlay .sv-recap-line { font-size: var(--fs-22); max-width: 34em; }
+  .overlay .sv-recap-hero a { font-size: var(--fs-20); }
+  .overlay .sv-recap-more > summary { font-size: var(--fs-18); }
   .overlay .sv-recap-links2 .rc-links { gap: 34px; }
-  .overlay .sv-recap-links2 .rc-links li { font-size: 18px; line-height: 1.35; }
-  .overlay .sv-recap-links2 .rc-pill { font-size: 15px; }
+  .overlay .sv-recap-links2 .rc-links li { font-size: var(--fs-18); line-height: 1.35; }
+  .overlay .sv-recap-links2 .rc-pill { font-size: var(--fs-15); }
   .overlay .sv-recap-links2 .rc-b { flex-basis: 230px; max-width: 230px; }
   .overlay .sv-recap-links2 .rc-link { flex-basis: max(calc((100% - 230px) * var(--k, 1)), calc(var(--hw, 64px) * 2 + 40px)); }
-  .overlay .sv-recap-links2 .rc-drawn { font-size: 16px; }
-  .overlay .sv-recap-acts .btn { font-size: 16px; }
+  .overlay .sv-recap-links2 .rc-drawn { font-size: var(--fs-16); }
+  .overlay .sv-recap-acts .btn { font-size: var(--fs-16); }
 }
 
 /* A compact phone title and a complete camera menu leave room for the picture. */
 @media(max-width:760px){
- .overlay h2#sceneTitle{font-size:21px;line-height:1.15}
+ .overlay h2#sceneTitle{font-size:var(--fs-22);line-height:1.15}
  .overlay #scCams{overflow:visible;mask-image:none;-webkit-mask-image:none;flex-wrap:nowrap}
- .overlay #scCams button{font-size:12px;padding-inline:9px;white-space:nowrap}
+ .overlay #scCams button{font-size:var(--fs-12);padding-inline:9px;white-space:nowrap}
  .overlay .more-menu{min-width:200px;max-width:calc(100vw - 48px)}
  .overlay .more-menu button{min-height:42px}
 }
 
 /* A reader can reach any phase without scrolling away from the scene. */
-.overlay .step-choose{display:none;gap:5px;margin:8px 0 12px;font:500 13px/1.4 var(--sans);color:var(--muted)}
-.overlay .step-choose select{width:100%;min-width:0;min-height:44px;font:400 14px/1.4 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px}
+.overlay .step-choose{display:none;gap:5px;margin:8px 0 12px;font:500 var(--fs-13)/1.4 var(--sans);color:var(--muted)}
+.overlay .step-choose select{width:100%;min-width:0;min-height:44px;font:400 var(--fs-14)/1.4 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px}
 @media(max-width:760px) and (min-height:541px){
  .overlay .panel.reading-account{grid-template-rows:auto minmax(0,26%) minmax(0,1fr) auto}
  .overlay .reading-account .story-scroll{padding-bottom:24px}
@@ -2444,7 +2444,7 @@
     display: block;
     margin: 8px 0 0;
     min-height: 3em;
-    font-size: 14px;
+    font-size: var(--fs-14);
     line-height: 1.5;
     color: var(--text);
     overflow-wrap: break-word;
@@ -2462,7 +2462,7 @@
 /* Episode names remain beside the narrative while the camera changes. */
 .overlay .scene-episodes { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
 .overlay .scene-episodes[hidden] { display:none; }
-.overlay .scene-episodes button { font:500 13px/1.4 var(--sans); color:var(--muted); background:transparent; border:1px solid var(--line-strong); border-radius:8px; padding:8px 10px; text-align:left; cursor:pointer; }
+.overlay .scene-episodes button { font:500 var(--fs-13)/1.4 var(--sans); color:var(--muted); background:transparent; border:1px solid var(--line-strong); border-radius:8px; padding:8px 10px; text-align:left; cursor:pointer; }
 .overlay .scene-episodes button[aria-pressed="true"] { background:var(--accent-soft); color:var(--text); border-color:var(--accent); }
 .overlay .scene-episodes button:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
 @media(max-width:760px) {
@@ -2470,12 +2470,12 @@
   .overlay #sceneCtrl { display:grid; grid-template-columns:44px minmax(0,1fr); grid-template-rows:56px auto; gap:4px 12px; padding:8px 16px max(8px,env(safe-area-inset-bottom)); }
   .overlay #scPlay { grid-column:1; grid-row:1; }
   .overlay #scrubWrap { grid-column:2 / -1; grid-row:1; width:100%; min-width:0; height:40px; align-self:end; }
-  .overlay #scTime { grid-column:2 / -1; grid-row:1; width:auto; font-size:12px; align-self:start; justify-self:end; line-height:16px; }
+  .overlay #scTime { grid-column:2 / -1; grid-row:1; width:auto; font-size:var(--fs-12); align-self:start; justify-self:end; line-height:16px; }
   .overlay #scViews { grid-column:1 / -1; grid-row:2; width:100%; margin:0; }
   .overlay #scStatic { grid-column:1 / -1; grid-row:1 / -1; }
   .overlay .sl-pop #scExport { margin-top:12px; min-height:44px; }
   .overlay .scene-episodes { gap:5px; margin:8px 0; }
-  .overlay .scene-episodes button { flex:1 1 28%; min-height:44px; padding:7px; font-size:12px; }
+  .overlay .scene-episodes button { flex:1 1 28%; min-height:44px; padding:7px; font-size:var(--fs-12); }
   .overlay #scenePanel:has(.scene-episodes:not([hidden])):not(.reading-account) { grid-template-rows:auto minmax(0,32%) minmax(0,1fr) auto; }
 }
 
@@ -2492,7 +2492,7 @@
 }
 
 @media(max-width:760px) {
-  #sceneSrcLine > #sceneMore { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 14px; min-height: 44px; border: 1px solid var(--line); border-radius: 24px; color: var(--text); font-size: 13px; }
+  #sceneSrcLine > #sceneMore { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 14px; min-height: 44px; border: 1px solid var(--line); border-radius: 24px; color: var(--text); font-size: var(--fs-13); }
   #sceneSrcLine > #sceneMore[hidden] { display: none; }
   #slPop .sl-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 }
@@ -2523,7 +2523,7 @@
 
 @media(max-width:760px) {
   .overlay .large-type .sv-seen { display: none; }
-  .overlay .large-type .sv-list-btn { font-size: 12px; padding-inline: 8px; }
+  .overlay .large-type .sv-list-btn { font-size: var(--fs-12); padding-inline: 8px; }
   .overlay .large-type .sv-list-btn .ico { display: none; }
 }
 
@@ -2552,7 +2552,7 @@
   display: block;
 }
 .scene-evidence-date {
-  font-size: 14px;
+  font-size: var(--fs-14);
   font-weight: 600;
 }
 .scene-evidence-value {
@@ -2562,10 +2562,10 @@
   margin: 4px 0;
 }
 .scene-evidence-detail {
-  font-size: 14px;
+  font-size: var(--fs-14);
 }
 .scene-evidence-note {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: #b5c1d8;
   margin-top: 10px;
 }
@@ -2575,7 +2575,7 @@
     padding: 10px 16px;
   }
   .scene-evidence-value {
-    font-size: 28px;
+    font-size: var(--fs-28);
   }
 }
 
@@ -2609,7 +2609,7 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
   min-height: 28px;
   margin: 2px 0 0 4px;
   padding: 0 12px 0 10px;
-  font: 500 13px/1.3 var(--sans);
+  font: 500 var(--fs-13)/1.3 var(--sans);
   font-variant-numeric: tabular-nums;
   color: var(--accent);
   background: none;
@@ -2684,7 +2684,7 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
     padding-bottom: 8px;
   }
   .overlay .story-scroll.st-tight .sv-lede {
-    font-size: 15.5px;
+    font-size: var(--fs-16);
     line-height: 1.35;
     margin-bottom: 0;
   }
@@ -2700,7 +2700,7 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
     margin-top: 0;
   }
   .overlay .story-scroll.st-tight .sv-steps h3 {
-    font-size: 14px;
+    font-size: var(--fs-14);
     line-height: 1.15;
   }
   .overlay .story-scroll.st-tight > .story-foot {

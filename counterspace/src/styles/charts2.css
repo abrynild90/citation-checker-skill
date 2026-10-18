@@ -7,30 +7,30 @@
 
 /* ---- the drawings: type roles */
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band{fill:var(--band)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-title{fill:var(--text);font:600 14px var(--sans);letter-spacing:normal}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-gloss{fill:var(--muted);font:400 13px var(--sans);letter-spacing:normal}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-title{fill:var(--text);font:600 var(--fs-14) var(--sans);letter-spacing:normal}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .band-gloss{fill:var(--muted);font:400 var(--fs-13) var(--sans);letter-spacing:normal}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 :is(.band-title,.band-gloss,.lbl){paint-order:stroke;stroke:var(--band);stroke-width:4px}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .lbl{fill:var(--text);font:400 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .lbl{fill:var(--text);font:400 var(--fs-13) var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .plate{fill:var(--band)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .lbl .who{font-weight:600}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote-box{fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote{fill:var(--text);font:400 17px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote-by{fill:var(--muted);font:400 13px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis text{fill:var(--muted);font:500 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote{fill:var(--text);font:400 var(--fs-18) var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .quote-by{fill:var(--muted);font:400 var(--fs-13) var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis text{fill:var(--muted);font:500 var(--fs-13) var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 :is(.axis path,.axis line){stroke:var(--line)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .gridline line{stroke:var(--grid)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff line{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:2 3}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff circle{fill:var(--warn)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff text{fill:var(--warn);font:600 13px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .first-note text{fill:var(--muted);font:400 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .handoff text{fill:var(--warn);font:600 var(--fs-13) var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .first-note text{fill:var(--muted);font:400 var(--fs-13) var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .first-note line{stroke:var(--faint);stroke-width:1.5;stroke-dasharray:.1 5}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .span{stroke-width:3;stroke-opacity:.45}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-swf{fill:var(--accent-soft)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-label{fill:var(--muted);font:600 13px var(--sans);letter-spacing:normal}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-label{fill:var(--muted);font:600 var(--fs-13) var(--sans);letter-spacing:normal}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .panel-label .panel-sub{font-weight:400}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis-title{fill:var(--muted);font:500 13px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .fig{fill:var(--text);font:600 18px var(--sans)}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .range{fill:var(--muted);font:400 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .axis-title{fill:var(--muted);font:500 var(--fs-13) var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .fig{fill:var(--text);font:600 var(--fs-18) var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .range{fill:var(--muted);font:400 var(--fs-13) var(--sans)}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .whisker{fill:none;stroke:var(--text);stroke-width:1.6}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .whisker-halo{fill:none;stroke:var(--bg);stroke-width:4.6}
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .bar.recon{opacity:.55}
@@ -38,7 +38,7 @@
 :is(#chartC,#chartR,#chartB,.xbox) svg.k2 .xaxis .domain{stroke:var(--line-strong)}
 :is(#chartC,#chartR,#chartB) svg.k2 .bar{transition:opacity var(--dur-1) var(--ease)}
 :is(#chartC,#chartR,#chartB) svg.k2 :is(.mark:hover,.mark:focus-visible) .bar.recon{opacity:.85}
-:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .zoom-flag{fill:var(--accent-2);font:600 13px var(--sans)}
+:is(#chartC,#chartR,#chartB,.xbox) svg.k2 .zoom-flag{fill:var(--accent-2);font:600 var(--fs-13) var(--sans)}
 
 /* ---- the drawings: marks. Each mark is a separating outline in the page colour under the painted shape; a soft ring and a slight growth show on hover and focus. */
 :is(#chartC,#chartR,#chartB) svg.k2 .mark{cursor:pointer}
@@ -54,41 +54,41 @@
 :is(#chartC,#chartR,#chartB) svg.k2 .mark:focus-visible .hit{stroke:var(--focus);stroke-width:3px}
 
 /* ---- notes, keys */
-:is(#chartC,#chartR,#chartB) p.note{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 14px/1.5 var(--sans);color:var(--muted)}
-:is(#chartC,#chartR,#chartB) .zbadge{margin-right:var(--s-2);padding:2px 8px;font:600 12px/1.2 var(--sans);background:transparent;color:var(--muted);border:1px solid var(--line-strong);border-radius:var(--r-pill)}
-:is(#chartC,#chartR,#chartB) .legend{display:flex;flex-wrap:wrap;gap:var(--s-3) var(--s-6);margin:var(--s-4) 0 0;padding:0;list-style:none;font:400 13.5px/1.4 var(--sans);color:var(--muted)}
+:is(#chartC,#chartR,#chartB) p.note{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 var(--fs-14)/1.5 var(--sans);color:var(--muted)}
+:is(#chartC,#chartR,#chartB) .zbadge{margin-right:var(--s-2);padding:2px 8px;font:600 var(--fs-12)/1.2 var(--sans);background:transparent;color:var(--muted);border:1px solid var(--line-strong);border-radius:var(--r-pill)}
+:is(#chartC,#chartR,#chartB) .legend{display:flex;flex-wrap:wrap;gap:var(--s-3) var(--s-6);margin:var(--s-4) 0 0;padding:0;list-style:none;font:400 var(--fs-14)/1.4 var(--sans);color:var(--muted)}
 :is(#chartC,#chartR,#chartB) .legend .kgroup{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-4)}
-:is(#chartC,#chartR,#chartB) .legend .khead{font:600 13px/1.3 var(--sans);color:var(--text)}
+:is(#chartC,#chartR,#chartB) .legend .khead{font:600 var(--fs-13)/1.3 var(--sans);color:var(--text)}
 :is(#chartC,#chartR,#chartB) .legend .kitem{display:inline-flex;align-items:center;gap:var(--s-2)}
 :is(#chartC,#chartR,#chartB) .legend .kitem svg{flex:none;overflow:visible}
 :is(#chartC,#chartR,#chartB) .legend .badge3d circle{fill:var(--bg);stroke:var(--text);stroke-width:1.1}
 :is(#chartC,#chartR,#chartB) .legend .badge3d path.top{fill:var(--text)}
-:is(#chartC,#chartR,#chartB) .legend .kwide{flex-basis:100%;font:400 13.5px/1.4 var(--sans)}
+:is(#chartC,#chartR,#chartB) .legend .kwide{flex-basis:100%;font:400 var(--fs-14)/1.4 var(--sans)}
 :is(#chartC,#chartR,#chartB) .callout{margin-top:var(--s-5)}
 
 
 /* callouts on chapters C and R share one look: a one-line heading, then at most three lines */
 :is(#chartC,#chartR) .callout{max-width:780px}
 #noteR0>b{display:block}
-#quoteC .q{display:block;font-size:19px;line-height:1.5}
-#quoteC .by{display:block;margin-top:6px;font:400 13px/1.4 var(--sans);color:var(--muted)}
+#quoteC .q{display:block;font-size:var(--fs-20);line-height:1.5}
+#quoteC .by{display:block;margin-top:6px;font:400 var(--fs-13)/1.4 var(--sans);color:var(--muted)}
 /* phone: the notes above the jamming and close-approach charts are compact (no icon, smaller text) so the chart starts sooner */
 @media (max-width:640px){
-  :is(#chartC,#chartR) .callout{margin-top:var(--s-4);padding:var(--s-3) var(--s-4);font-size:15.5px;line-height:1.45}
+  :is(#chartC,#chartR) .callout{margin-top:var(--s-4);padding:var(--s-3) var(--s-4);font-size:var(--fs-16);line-height:1.45}
   :is(#chartC,#chartR) .callout::before{display:none}
-  :is(#chartC,#chartR) #quoteC .q{font-size:16px;line-height:1.45}
+  :is(#chartC,#chartR) #quoteC .q{font-size:var(--fs-16);line-height:1.45}
 }
-:is(#chartR) svg.k2 .dlabel{fill:var(--text);font:600 13px var(--sans);paint-order:stroke;stroke:var(--band);stroke-width:4px;stroke-linejoin:round}
+:is(#chartR) svg.k2 .dlabel{fill:var(--text);font:600 var(--fs-13) var(--sans);paint-order:stroke;stroke:var(--band);stroke-width:4px;stroke-linejoin:round}
 :is(#chartB,.xbox) svg.k2 .panel-label.panel-in{paint-order:stroke;stroke:var(--band);stroke-width:4px;stroke-linejoin:round}
 
 /* the zoom notice sits on one line beside the segmented control; the close-approach caution is one line with the rest behind a disclosure */
 :is(#chartC,#chartR) .tools{align-items:center;gap:var(--s-2) var(--s-4)}
 :is(#chartC,#chartR) .tools p.note{margin:0;flex:1 1 280px;max-width:none}
-.note-line{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 15px/1.5 var(--sans);color:var(--text)}
+.note-line{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 var(--fs-15)/1.5 var(--sans);color:var(--text)}
 .note-line>p{margin:0}
 .note-line b{font-weight:600}
 .note-line details.about{margin-top:var(--s-1)}
-.note-line details.about>p{margin:var(--s-2) 0 0;color:var(--muted);font-size:14px}
+.note-line details.about>p{margin:var(--s-2) 0 0;color:var(--muted);font-size:var(--fs-14)}
 #chartC #quoteC{margin-top:var(--s-5)}
 
 :is(#chartC,#chartR) .tools p.note{max-width:66ch}
@@ -110,7 +110,7 @@
   #chartB>:is(ul.legend,.callout,details,.dl-row){order:2}
 }
 
-.ckey{display:flex;flex-wrap:wrap;gap:4px 14px;margin:var(--s-2) 0 0;font:500 13px/1.4 var(--sans);color:var(--muted);flex-basis:100%}
+.ckey{display:flex;flex-wrap:wrap;gap:4px 14px;margin:var(--s-2) 0 0;font:500 var(--fs-13)/1.4 var(--sans);color:var(--muted);flex-basis:100%}
 .ckey .ck{display:inline-flex;align-items:center;gap:6px}
 .ckey i{display:inline-block;width:10px;height:10px;border-radius:50%}
 
@@ -123,10 +123,10 @@
 @media (min-width:640px){.q-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.q-list{grid-template-columns:var(--cols,repeat(4,minmax(0,1fr)))}}
 .q{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-4);border:var(--card-bw) solid var(--line);border-radius:var(--r-2);background:var(--surface);box-shadow:var(--card-shadow)}
-.q-ask{margin:0;font:600 19px/1.3 var(--sans);text-wrap:pretty;min-height:var(--ask-h,0)}
-.q-hint{margin:0 0 var(--s-1);font:600 13px/1.3 var(--sans);color:var(--accent-2)}
+.q-ask{margin:0;font:600 var(--fs-20)/1.3 var(--sans);text-wrap:pretty;min-height:var(--ask-h,0)}
+.q-hint{margin:0 0 var(--s-1);font:600 var(--fs-13)/1.3 var(--sans);color:var(--accent-2)}
 .q-opts{display:grid;gap:var(--s-2)}
-.q-opt{appearance:none;display:flex;align-items:center;gap:var(--s-2);min-height:56px;padding:var(--s-2) var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-2);background:var(--surface-2);box-shadow:var(--card-shadow);color:var(--text);font:500 15px/1.35 var(--sans);text-align:left;cursor:pointer;transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),opacity var(--dur-2) var(--ease),transform var(--dur-1) var(--ease)}
+.q-opt{appearance:none;display:flex;align-items:center;gap:var(--s-2);min-height:56px;padding:var(--s-2) var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-2);background:var(--surface-2);box-shadow:var(--card-shadow);color:var(--text);font:500 var(--fs-15)/1.35 var(--sans);text-align:left;cursor:pointer;transition:background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),opacity var(--dur-2) var(--ease),transform var(--dur-1) var(--ease)}
 .q-opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface-3)}
 .q-opt:active:not(:disabled){transform:scale(.99)}
 .q-opt:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -141,11 +141,11 @@
 .q-opt.right{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
 .q-opt.wrong{border-style:dashed;border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
 .q.done .q-opt:not(.right):not(.wrong){opacity:.62}
-.q-out{margin:var(--s-2) 0 0;font:400 15px/1.55 var(--sans);color:var(--muted)}
+.q-out{margin:var(--s-2) 0 0;font:400 var(--fs-15)/1.55 var(--sans);color:var(--muted)}
 .q-out p{margin:0}
 .q-out:empty{display:none}
 .q-out b{font-weight:600;color:var(--text)}
-.q-out .q-verdict{font:600 17px/1.3 var(--sans);text-wrap:balance}
+.q-out .q-verdict{font:600 var(--fs-18)/1.3 var(--sans);text-wrap:balance}
 .q-verdict.yes{color:var(--accent)}
 .q-verdict.no{color:var(--warn)}
 .q-gap{margin:0 2px}
@@ -161,9 +161,9 @@
 .q-sumreal{display:grid;gap:var(--s-1) var(--s-5);align-content:start}
 .q-more .q-sumreal>*{margin:0;max-width:none;text-wrap:pretty}
 @media (min-width:900px){.q-sumreal{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.q-tally{margin:0;min-height:24px;font:600 17px/1.4 var(--sans);color:var(--text)}
-.q-tally:not(.done){font:400 15px/1.5 var(--sans);color:var(--muted)}
-.q-pattern{margin:var(--s-1) 0 0;font:400 15px/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) both}
+.q-tally{margin:0;min-height:24px;font:600 var(--fs-18)/1.4 var(--sans);color:var(--text)}
+.q-tally:not(.done){font:400 var(--fs-15)/1.5 var(--sans);color:var(--muted)}
+.q-pattern{margin:var(--s-1) 0 0;font:400 var(--fs-15)/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) both}
 @keyframes q-rise{from{opacity:0;transform:translateY(6px)}}
 @media (prefers-reduced-motion:reduce){.q-pattern{animation:none}}
 .q-foot .btn .ico{margin-inline:0 6px}
@@ -171,7 +171,7 @@
 @media (prefers-reduced-motion:reduce){.q-opt,.q-mark{transition:none}}
 
 /* One plain sentence above each chart: what to notice before looking. A short rule above it marks it as the point of the chart. */
-.takeaway{position:relative;max-width:62ch;margin:var(--s-4) 0 var(--s-4);padding-top:var(--s-3);font:500 clamp(19px,1.7vw,22px)/1.4 var(--sans);color:var(--text);text-wrap:pretty}
+.takeaway{position:relative;max-width:62ch;margin:var(--s-4) 0 var(--s-4);padding-top:var(--s-3);font:500 var(--fs-pull)/1.4 var(--sans);color:var(--text);text-wrap:pretty}
 .takeaway::before{content:"";position:absolute;left:0;top:0;width:40px;height:2px;border-radius:2px;background:var(--accent-2)}
 .takeaway:empty{display:none}
 #lawHead .takeaway{margin-bottom:0}
@@ -186,12 +186,12 @@
 
 /* The jamming chapter's two notes stand above the chart as one slim row, so the caution is read before the bars and the page below the chart is shorter */
 #chartC .callout-row{margin:var(--s-3) 0 var(--s-2);gap:var(--s-3) var(--s-4)}
-#chartC .callout-row>.callout{margin:0;padding:var(--s-3) var(--s-4);font-size:15.5px;line-height:1.45;max-width:60ch}
+#chartC .callout-row>.callout{margin:0;padding:var(--s-3) var(--s-4);font-size:var(--fs-16);line-height:1.45;max-width:60ch}
 #chartC .callout-row>.callout::before{display:none}
 /* the notes folded into "How to read this chart" are plain paragraphs under the key */
-details.about>.words-line,details.about>.b-read,details.about>p{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 14px/1.55 var(--sans);color:var(--muted)}
+details.about>.words-line,details.about>.b-read,details.about>p{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 var(--fs-14)/1.55 var(--sans);color:var(--muted)}
 details.about>.b-read b,details.about>.words-line b{color:var(--text)}
-#quoteC .q{display:block;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:15.5px;line-height:1.45}
+#quoteC .q{display:block;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:var(--fs-16);line-height:1.45}
 #quoteC .by{margin-top:2px}
 #chartC .callout-row>#quoteC{margin:0} /* the two notes share one top edge */
 @media (min-width:1100px){#chartC .callout-row{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:stretch}}
@@ -202,7 +202,7 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .q-go .ico{width:14px;height:14px;margin:0}
 .q-go.seen{color:var(--muted)}
 .q-go.seen .ico{stroke:var(--accent);fill:none;stroke-width:2.4}
-.q-go-name{font:500 14px/1.4 var(--sans);color:var(--muted)}
+.q-go-name{font:500 var(--fs-14)/1.4 var(--sans);color:var(--muted)}
 @media (pointer:coarse){.q-go{--h:44px}}
 
 /* The answer area keeps its height from the start: the longest answer is laid under it, invisible, so answering moves nothing below it. Before an answer the area
@@ -211,8 +211,8 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .q.done .q-slot{border-color:transparent}
 .q-slot>*{grid-area:1/1;min-width:0}
 .q-ghost{visibility:hidden;pointer-events:none}
-.q-wait{margin:0;align-self:start;justify-self:center;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:var(--s-2) var(--s-3);text-align:center;font:400 14px/1.5 var(--sans);color:var(--faint)}
-.q-axis{flex:none;overflow:visible}.q-axis line{stroke:var(--line-strong);stroke-width:1.5;stroke-dasharray:3 3}.q-axis circle{fill:none;stroke:var(--line-strong);stroke-width:1.5}.q-axis text{fill:var(--faint);font:600 11px var(--sans);text-anchor:middle}
+.q-wait{margin:0;align-self:start;justify-self:center;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:var(--s-2) var(--s-3);text-align:center;font:400 var(--fs-14)/1.5 var(--sans);color:var(--faint)}
+.q-axis{flex:none;overflow:visible}.q-axis line{stroke:var(--line-strong);stroke-width:1.5;stroke-dasharray:3 3}.q-axis circle{fill:none;stroke:var(--line-strong);stroke-width:1.5}.q-axis text{fill:var(--faint);font:600 var(--fs-12) var(--sans);text-anchor:middle}
 .q.done .q-wait{display:none}
 .q-slot>.q-out{align-self:start}
 .q-slot>.q-out:empty{display:none}
@@ -222,15 +222,15 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .q-line{display:grid;gap:var(--s-2);margin:0;min-width:0}
 .ql{display:flex;align-items:center;gap:8px;min-width:0;--fixed:84px}
 .q-line.two .ql{--fixed:210px}
-.ql-cap{flex:0 0 118px;font:600 12px/1.25 var(--sans);color:var(--muted)}
+.ql-cap{flex:0 0 118px;font:600 var(--fs-12)/1.25 var(--sans);color:var(--muted)}
 .ql-track{position:relative;flex:0 1 calc(var(--k,1) * (100% - var(--fixed)));display:flex;align-items:center;justify-content:space-between;min-width:60px;height:26px}
 .ql-end{position:relative;z-index:1;flex:none;display:block}
 .ql-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--surface),0 0 0 4px var(--accent-soft)}
 .ql-tick{width:3px;height:22px;border-radius:2px;background:var(--accent-2);transform-origin:50% 100%}
 .ql-gap{position:absolute;left:8px;right:4px;top:0;bottom:0}
 .ql-gap::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1.6px dashed var(--muted)}
-.ql-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:1px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 12.5px/1.6 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
-.ql-y{flex:none;min-width:34px;font:500 12.5px/1.2 var(--sans);color:var(--faint);font-variant-numeric:tabular-nums}
+.ql-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:1px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 var(--fs-13)/1.6 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ql-y{flex:none;min-width:34px;font:500 var(--fs-13)/1.2 var(--sans);color:var(--faint);font-variant-numeric:tabular-nums}
 .q.done .ql-dot{animation:ql-pop 360ms var(--ease) both}
 .q.done .ql-gap::before{animation:ql-draw 720ms var(--ease) 140ms both}
 .q.done .ql-pill{animation:ql-fade 320ms var(--ease) 640ms both}
@@ -258,7 +258,7 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 @keyframes qt-rise{from{transform:scaleY(0)}}
 @keyframes qt-ring{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.6)}}
 @media (prefers-reduced-motion:reduce){.qt-line,.qt-dot,.qt-tick,.q-trail.perfect .qt-tick::after{animation:none}}
-.q-reward{margin:var(--s-2) 0 0;font:500 15px/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) 1500ms both}
+.q-reward{margin:var(--s-2) 0 0;font:500 var(--fs-15)/1.5 var(--sans);color:var(--text);animation:q-rise 320ms var(--ease) 1500ms both}
 .q-reward[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.q-reward{animation:none}}
 .q-foot .btn .ico.up{margin:0 6px 0 0}
@@ -291,7 +291,7 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .quiz .q-list{display:block}
 .quiz .q,.quiz .q-list.all-done .q{display:grid;grid-template-columns:minmax(220px,.85fr) minmax(0,1.5fr);grid-template-rows:auto auto;align-content:start;column-gap:32px;row-gap:12px;padding:24px 0 20px;border:0;border-top:1px solid var(--line);border-radius:0;background:none;box-shadow:none;margin:0}
 .quiz .q .q-head{grid-column:1;grid-row:1;display:grid;gap:6px;align-content:start}
-.quiz .q .q-ask{min-height:0;height:auto;font-size:21px}
+.quiz .q .q-ask{min-height:0;height:auto;font-size:var(--fs-22)}
 .quiz .q .q-hint{margin:0}
 .quiz .q .q-body{display:contents}
 .quiz .q .q-opts{grid-column:2;grid-row:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
@@ -301,7 +301,7 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .quiz .q-out:empty{display:none}
 .quiz .q-verdict{grid-area:auto}
 .quiz .q-b{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
-.quiz .q-explanation{margin:0;font-size:14px;line-height:1.4}
+.quiz .q-explanation{margin:0;font-size:var(--fs-14);line-height:1.4}
 .quiz .q-explanation summary{padding:3px 0;min-height:26px;box-sizing:border-box}
 .quiz .q-explanation .q-truth{margin:4px 0 8px;max-width:62ch}
 .quiz .q-watch{margin:0}
@@ -317,8 +317,8 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
   .quiz .q-out>.q-line{min-height:var(--slot-h);align-content:center}
 }
 @media (min-width:1100px){
-  .quiz .q-out{font-size:14.5px;line-height:1.5}
-  .quiz .q-out .q-verdict{font-size:16.5px}
+  .quiz .q-out{font-size:var(--fs-15);line-height:1.5}
+  .quiz .q-out .q-verdict{font-size:var(--fs-16)}
 }
 @media(max-width:760px){
   .quiz .ql-cap{flex:1 0 100%}

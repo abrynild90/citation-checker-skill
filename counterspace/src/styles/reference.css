@@ -5,52 +5,52 @@
 /* ---- the band's own head: one hairline, a title and one line, both smaller than a chapter's */
 .ref-band.explore{padding:var(--s-6) 0 var(--s-4)}
 .ref-head{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-1) var(--s-6);align-items:baseline;margin:0 0 var(--s-4);padding-bottom:var(--s-3);border-bottom:1px solid var(--line)}
-.ref-head h2{font:500 clamp(28px,2.3vw,30px)/1.2 var(--display);letter-spacing:-.01em;max-width:none}
-.ref-head .lede{margin:0;max-width:62ch;font:400 clamp(15px,1.2vw,17px)/1.5 var(--sans);color:var(--muted)}
+.ref-head h2{font:500 var(--fs-h2-sm)/1.2 var(--display);letter-spacing:-.01em;max-width:none}
+.ref-head .lede{margin:0;max-width:62ch;font:400 var(--fs-lede-ref)/1.5 var(--sans);color:var(--muted)}
 @media (min-width:1100px){.ref-head{grid-template-columns:auto minmax(0,1fr);column-gap:var(--s-7)}}
-@media (min-width:1800px){.ref-head h2{font-size:32px}.ref-head .lede{font-size:18px}}
+@media (min-width:1800px){.ref-head h2{font-size:32px}.ref-head .lede{font-size:var(--fs-18)}}
 
 /* a sub-title inside the band: a short sans title and one quiet line on the same row */
 .ref-sub{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--s-4);margin:0 0 var(--s-3)}
-.ref-sub h3{margin:0;font:600 17px/1.3 var(--sans);color:var(--text)}
-.ref-sub p{margin:0;font:400 14.5px/1.45 var(--sans);color:var(--muted);max-width:54ch}
-@media (min-width:1800px){.ref-sub h3{font-size:18px}.ref-sub p{font-size:15.5px}}
+.ref-sub h3{margin:0;font:600 var(--fs-18)/1.3 var(--sans);color:var(--text)}
+.ref-sub p{margin:0;font:400 var(--fs-15)/1.45 var(--sans);color:var(--muted);max-width:54ch}
+@media (min-width:1800px){.ref-sub h3{font-size:var(--fs-18)}.ref-sub p{font-size:var(--fs-16)}}
 
 /* ---- the four cards: a picture at the left, the name and one line at the right (a row of four takes about 80 px, not 190) */
 .ref-band .xcards{gap:var(--s-3)}
 .ref-band .xcard{grid-template-columns:88px minmax(0,1fr);grid-template-rows:auto auto;column-gap:var(--s-3);row-gap:2px;align-items:center;align-content:center;padding:var(--s-2) var(--s-3)}
 .ref-band .xc-pic{grid-row:1 / span 2;grid-column:1;align-self:center}
-.ref-band .xc-t{grid-column:2;grid-row:1;align-self:end;font-size:14.5px}
-.ref-band .xc-l{grid-column:2;grid-row:2;align-self:start;font-size:13px;line-height:1.35}
+.ref-band .xc-t{grid-column:2;grid-row:1;align-self:end;font-size:var(--fs-15)}
+.ref-band .xc-l{grid-column:2;grid-row:2;align-self:start;font-size:var(--fs-13);line-height:1.35}
 @media (max-width:899px){.ref-band .xcard{grid-template-columns:72px minmax(0,1fr)}}
 @media (max-width:420px){.ref-band .xcard{grid-template-columns:minmax(0,1fr);}.ref-band .xc-pic{display:none}.ref-band .xc-t,.ref-band .xc-l{grid-column:1}}
 
 /* ---- one chart at a time, closer to its cards and set a size down */
 .ref-band section.chart.xpanel{padding:calc(var(--s-5) + 28px) 0 var(--s-2)} /* room between the row of cards and the panel's heading */
 .ref-band .chapter-head.sub{margin-bottom:var(--s-3);gap:var(--s-1) var(--s-6)}
-.ref-band .chapter-head.sub>h4{grid-column:1;margin:0;max-width:24em;font:600 clamp(21px,1.9vw,25px)/1.2 var(--sans);letter-spacing:-.008em;text-wrap:balance;color:var(--text)}
+.ref-band .chapter-head.sub>h4{grid-column:1;margin:0;max-width:24em;font:600 var(--fs-h4)/1.2 var(--sans);letter-spacing:-.008em;text-wrap:balance;color:var(--text)}
 @media (min-width:1200px){.ref-band .chapter-head.sub>h4{grid-row:1;max-width:none}}
-.ref-band .chapter-head.sub>.lede{font:400 clamp(15px,1.15vw,16.5px)/1.5 var(--sans)}
+.ref-band .chapter-head.sub>.lede{font:400 var(--fs-lede-ref)/1.5 var(--sans)}
 .ref-band .chapter-head>.tools{margin-top:var(--s-2)}
-.ref-band .takeaway{margin:var(--s-2) 0 var(--s-3);padding-top:var(--s-2);font-size:clamp(17px,1.4vw,19.5px);line-height:1.4;max-width:70ch}
+.ref-band .takeaway{margin:var(--s-2) 0 var(--s-3);padding-top:var(--s-2);font-size:var(--fs-lede-sm);line-height:1.4;max-width:70ch}
 .ref-band .takeaway::before{width:32px}
 .ref-band #chartC .callout-row{margin:var(--s-2) 0 var(--s-2)}
-.ref-band #chartC .callout-row>.callout{padding:var(--s-2) var(--s-3);font-size:14.5px;line-height:1.45}
-.ref-band #quoteC .q{font-size:14.5px}
+.ref-band #chartC .callout-row>.callout{padding:var(--s-2) var(--s-3);font-size:var(--fs-15);line-height:1.45}
+.ref-band #quoteC .q{font-size:var(--fs-15)}
 .ref-band .callout{margin-top:var(--s-3)}
-.ref-band #chartB .callout-row>.callout{padding:var(--s-3) var(--s-4) var(--s-3) 56px;font-size:15.5px;line-height:1.5;margin-top:var(--s-3)}
+.ref-band #chartB .callout-row>.callout{padding:var(--s-3) var(--s-4) var(--s-3) 56px;font-size:var(--fs-16);line-height:1.5;margin-top:var(--s-3)}
 .ref-band #chartB .callout::before{left:var(--s-4);top:calc(var(--s-3) + 1px)}
-.ref-band .note-line{margin-top:var(--s-2);font-size:14px}
-.ref-band p.note{font-size:13.5px}
+.ref-band .note-line{margin-top:var(--s-2);font-size:var(--fs-14)}
+.ref-band p.note{font-size:var(--fs-14)}
 
 /* ---- one disclosure a chart: key, data table and download */
 .refold{margin:var(--s-3) 0 0}
 .refold>summary{min-height:40px}
 .refold .rf-body{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-5);padding:var(--s-4) 0 var(--s-2)}
 .refold .rf-sec{min-width:0}
-.refold .rf-sec>.sub-h{margin:0 0 var(--s-2);font:600 14px/1.3 var(--sans);color:var(--text)}
+.refold .rf-sec>.sub-h{margin:0 0 var(--s-2);font:600 var(--fs-14)/1.3 var(--sans);color:var(--text)}
 .refold .rf-sec>.legend{margin-top:0}
-.refold .rf-sec>p{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 14px/1.55 var(--sans);color:var(--muted)}
+.refold .rf-sec>p{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 var(--fs-14)/1.55 var(--sans);color:var(--muted)}
 .refold .rf-sec>p b{color:var(--text);font-weight:600}
 .refold .tscroll{margin-top:0}
 .refold .dl-row{height:auto;margin:0;position:static}
@@ -62,25 +62,25 @@
 /* ---- sources: the band's second half, a head of one line and one disclosure */
 .sources.ref-band{padding:var(--s-3) 0 var(--s-6);border-top:0}
 .sources.ref-band .src-head{margin:0 0 var(--s-3);padding-top:var(--s-4);border-top:1px solid var(--line)}
-.sources.ref-band .src-head h3{font:600 clamp(21px,1.8vw,26px)/1.2 var(--sans);letter-spacing:-.01em} /* the band's heading is set as a heading (semibold, one size above the chart titles), not as a small label */
+.sources.ref-band .src-head h3{font:600 var(--fs-h4)/1.2 var(--sans);letter-spacing:-.01em} /* the band's heading is set as a heading (semibold, one size above the chart titles), not as a small label */
 .sources.ref-band .sources-layout{gap:var(--s-4)}
 .sources.ref-band .hero-more{margin:0 0 var(--s-3)}
 
 /* ---- footer: three short columns, set tighter */
 .site-foot{padding:var(--s-5) 0 var(--s-4)}
-.site-foot h2{margin:0 0 var(--s-2);font-size:17px}
-.site-foot p{font-size:15px;line-height:1.55;margin:0 0 var(--s-1)}
-.site-foot small{font-size:14px} /* the browser's default for <small> made the "Page updated" line 12 px */
-.foot-base,.foot-nav a{font-size:14px}
+.site-foot h2{margin:0 0 var(--s-2);font-size:var(--fs-18)}
+.site-foot p{font-size:var(--fs-15);line-height:1.55;margin:0 0 var(--s-1)}
+.site-foot small{font-size:var(--fs-14)} /* the browser's default for <small> made the "Page updated" line 12 px */
+.foot-base,.foot-nav a{font-size:var(--fs-14)}
 .foot-cols{gap:var(--s-5)}
 .foot-base{margin-top:var(--s-4);padding-top:var(--s-3)}
-@media (min-width:1800px){.site-foot p{font-size:16px}}
+@media (min-width:1800px){.site-foot p{font-size:var(--fs-16)}}
 
 /* ---- layer one, set a little tighter so the whole page runs shorter (heads sit closer to what they introduce) */
 .law-intro .chapter-head,.pattern .chapter-head,.quiz-head{margin-bottom:var(--s-4)}
 .pattern{padding:var(--s-6) 0 var(--s-5)}
 .pat-big{margin-bottom:var(--s-5);padding:var(--s-5) var(--s-6) var(--s-4)}
-.pat-t{font-size:clamp(17px,1.3vw,19px);line-height:1.45}
+.pat-t{font-size:var(--fs-lede-sm);line-height:1.45}
 .quiz-band{padding:var(--s-5) 0 var(--s-5)}
 section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 
@@ -93,21 +93,21 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 @media (max-width:640px){.ref-foot{flex-direction:column}.ref-foot>.xnext{align-self:flex-end}}
 .law-intro{padding-top:var(--s-6)}
 
-.source-find{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font:500 14px/1.5 var(--sans);margin:16px 0 8px}
-.source-find input{font:400 16px/1.5 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;min-width:0;width:min(100%,340px)}
+.source-find{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font:500 var(--fs-14)/1.5 var(--sans);margin:16px 0 8px}
+.source-find input{font:400 var(--fs-16)/1.5 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;min-width:0;width:min(100%,340px)}
 .source-find input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cites>li[hidden]{display:none}
 @media(max-width:640px){.ref-band.explore{padding-top:28px}.ref-head{margin-bottom:16px}.xnav{gap:8px}.ref-band section.chart.xpanel{padding-top:24px}}
 
-.law-choose{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font:500 14px/1.5 var(--sans);margin:16px 0}
-.law-choose select{max-width:100%;min-width:0;width:min(100%,420px);font:400 14px/1.5 var(--sans);border:1px solid var(--line-strong);border-radius:8px;padding:10px;background:var(--surface-2);color:var(--text)}
+.law-choose{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font:500 var(--fs-14)/1.5 var(--sans);margin:16px 0}
+.law-choose select{max-width:100%;min-width:0;width:min(100%,420px);font:400 var(--fs-14)/1.5 var(--sans);border:1px solid var(--line-strong);border-radius:8px;padding:10px;background:var(--surface-2);color:var(--text)}
 .law-choose select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.law-choice{padding:16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface-2);font:400 14px/1.6 var(--sans);max-width:72ch}
-.law-choice .card-title{font:600 21px/1.3 var(--sans);margin-bottom:8px}
+.law-choice{padding:16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface-2);font:400 var(--fs-14)/1.6 var(--sans);max-width:72ch}
+.law-choice .card-title{font:600 var(--fs-22)/1.3 var(--sans);margin-bottom:8px}
 .law-choice[hidden]{display:none}
 .law-choice .hint{display:none}
 .law-choice .lc-main>p{margin:0 0 var(--s-2);max-width:60ch}.law-choice .lc-main>p.card-title{margin-bottom:var(--s-2)}.law-choice .lc-main>.when{color:var(--muted)}
-.law-choice .lc-h{margin:0 0 var(--s-1);font:600 13px/1.4 var(--sans);color:var(--muted)}.law-choice .src{max-width:60ch;margin:0}
+.law-choice .lc-h{margin:0 0 var(--s-1);font:600 var(--fs-13)/1.4 var(--sans);color:var(--muted)}.law-choice .src{max-width:60ch;margin:0}
 .law-choice .lc-acts{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-top:var(--s-3)}
 .law-choice .lc-main>:last-child{margin-bottom:0}.law-choice .lc-side{margin-top:var(--s-3)}
 /* wide: the card takes its own row, as wide as the measure of the section above it (the name, date and what it is under the heading at the left, the source and actions under the lede at the right) */
@@ -116,27 +116,27 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
   #lawHead>.law-choice[hidden]{display:none}
   .law-choice .lc-side{margin-top:0}
 }
-@media(max-width:640px){#chartC .callout-row{margin-block:12px}#chartC .callout-row>.callout:not(.quote){font-size:14px;line-height:1.5;padding-block:12px}.xcards{gap:8px}.xcard{padding:10px}.xc-l{font-size:12px}}
+@media(max-width:640px){#chartC .callout-row{margin-block:12px}#chartC .callout-row>.callout:not(.quote){font-size:var(--fs-14);line-height:1.5;padding-block:12px}.xcards{gap:8px}.xcard{padding:10px}.xc-l{font-size:var(--fs-12)}}
 
 /* Record readers expose the same sources and uncertainty as the visual marks. */
 .record-find{margin:16px 0 20px;padding:0 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface)}
-.record-find>summary{display:flex;align-items:center;gap:var(--s-2);list-style:none;cursor:pointer;min-height:48px;padding:12px 0;font:600 14px/1.5 var(--sans);color:var(--accent)}
-.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans);white-space:nowrap}
+.record-find>summary{display:flex;align-items:center;gap:var(--s-2);list-style:none;cursor:pointer;min-height:48px;padding:12px 0;font:600 var(--fs-14)/1.5 var(--sans);color:var(--accent)}
+.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 var(--fs-12)/1.4 var(--sans);white-space:nowrap}
 .record-tools{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(0,1.3fr);gap:16px}
-.record-tools label,.state-choose{display:grid;gap:6px;font:500 14px/1.5 var(--sans);color:var(--text)}
-.record-find input,.record-find select{min-width:0;width:100%;min-height:44px;font:400 16px/1.4 var(--sans);padding:10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
-.record-count{font:400 13px/1.5 var(--sans);color:var(--muted);margin:10px 0 16px}
-.record-result{border-top:1px solid var(--line);padding:16px 0;font:400 15px/1.6 var(--sans);max-width:76ch}
-.record-result h5,.record-result .card-title{font:600 23px/1.3 var(--sans);margin:0 0 8px;color:var(--text)}
+.record-tools label,.state-choose{display:grid;gap:6px;font:500 var(--fs-14)/1.5 var(--sans);color:var(--text)}
+.record-find input,.record-find select{min-width:0;width:100%;min-height:44px;font:400 var(--fs-16)/1.4 var(--sans);padding:10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
+.record-count{font:400 var(--fs-13)/1.5 var(--sans);color:var(--muted);margin:10px 0 16px}
+.record-result{border-top:1px solid var(--line);padding:16px 0;font:400 var(--fs-15)/1.6 var(--sans);max-width:76ch}
+.record-result h5,.record-result .card-title{font:600 var(--fs-24)/1.3 var(--sans);margin:0 0 8px;color:var(--text)}
 .record-result p{margin:8px 0}.record-result dl{display:grid;grid-template-columns:minmax(110px,9.5rem) minmax(0,1fr);gap:8px 20px;margin:16px 0}
 .record-result dt{font-weight:600;color:var(--muted)}.record-result dd{margin:0}.record-result .btn{margin-top:12px}.state-choose{padding-bottom:16px;max-width:420px}
 @media(max-width:640px){.record-tools{grid-template-columns:1fr}.record-result dl{grid-template-columns:1fr;gap:3px}.record-result dd{margin-bottom:10px}.record-find{padding-inline:12px}.record-find>summary>span{display:block;margin-left:0}}
 .source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
 @media(max-width:760px){
  .source-actions .btn{min-height:44px}
- .ref-band .ref-sub p,.refold .rf-sec>p,.site-foot p{font-size:16px;line-height:1.6}
- .law-choose select,.scene-choose select,.overlay .step-choose select{font-size:16px}
- .sources .msec p,.sources .cites{font-size:16px;line-height:1.65}
+ .ref-band .ref-sub p,.refold .rf-sec>p,.site-foot p{font-size:var(--fs-16);line-height:1.6}
+ .law-choose select,.scene-choose select,.overlay .step-choose select{font-size:var(--fs-16)}
+ .sources .msec p,.sources .cites{font-size:var(--fs-16);line-height:1.65}
  .sources .cites>li{padding-block:16px}
 }
 .record-result>.btn{margin-right:8px}
@@ -147,11 +147,11 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 @media(max-width:639px) {
  #svgB { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-color:var(--accent) var(--surface); scrollbar-width:thin; }
  #svgB:focus-visible { outline:3px solid var(--focus); outline-offset:4px; }
- .phone-chart-hint { display:block; font:400 14px/1.5 var(--sans); color:var(--muted); }
+ .phone-chart-hint { display:block; font:400 var(--fs-14)/1.5 var(--sans); color:var(--muted); }
 }
 .sources.ref-band .sources-layout { gap:24px; }
-.sources.ref-band .cites { font-size:16px; line-height:1.6; }
-.sources.ref-band .cites .cd { font-size:15px; line-height:1.6; }
+.sources.ref-band .cites { font-size:var(--fs-16); line-height:1.6; }
+.sources.ref-band .cites .cd { font-size:var(--fs-15); line-height:1.6; }
 .sources.ref-band .cites>li { padding-block:10px; border-bottom:1px solid var(--line); }
 .ref-band .record-find { background:none; border-radius:0; border:0; border-top:1px solid var(--line); margin-top:20px; }
 .pat-big { padding:0; }
@@ -174,7 +174,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
   .record-find[open]>.rec-body>.record-count{margin:var(--s-3) 0 0}
   .record-find[open]>.rec-body>:is(.record-result,.rec-empty){grid-column:2;grid-row:1 / span 4;align-self:stretch;box-sizing:border-box;min-height:11rem;margin:0;padding:var(--s-4) var(--s-5);border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
   .record-find[open]>.rec-body>.record-result:not([hidden])+.rec-empty{display:none}
-  .record-find[open]>.rec-body>.rec-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s-2);text-align:center;color:var(--muted);font:400 15px/1.5 var(--sans)}
+  .record-find[open]>.rec-body>.rec-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s-2);text-align:center;color:var(--muted);font:400 var(--fs-15)/1.5 var(--sans)}
   .rec-empty::before{content:"";width:28px;height:28px;background:currentColor;opacity:.55;-webkit-mask:var(--rec-icon) center / contain no-repeat;mask:var(--rec-icon) center / contain no-repeat}
   .rec-empty[data-i="search"]{--rec-icon:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2210.8%22 cy=%2210.8%22 r=%226.2%22/%3E%3Cpath d=%22M15.4 15.4L20 20%22/%3E%3C/svg%3E")}
   .rec-empty[data-i="globe"]{--rec-icon:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%228.6%22/%3E%3Cpath d=%22M3.4 12h17.2%22/%3E%3Cpath d=%22M12 3.4c2.4 2.4 3.6 5.3 3.6 8.6s-1.2 6.2-3.6 8.6c-2.4-2.4-3.6-5.3-3.6-8.6S9.6 5.8 12 3.4z%22/%3E%3C/svg%3E")}
@@ -227,13 +227,13 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 #citedSources{columns:2 26rem;column-gap:calc(var(--s-6) + 2.6em)} /* the numbers of the second column stand in the gap: it is as wide as they are plus the usual space */ #citedSources li{max-width:60ch;break-inside:avoid}
 /* The sources most relied on: a short list on the page itself, each with its kind of source; the copy button now sits in the row of actions (no longer over the disclosure) */
 .src-top{margin:var(--s-4) 0 0}
-.src-top h4{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
+.src-top h4{margin:0 0 var(--s-2);font:600 var(--fs-15)/1.3 var(--sans);color:var(--text)}
 .st-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.st-list li{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) auto;gap:var(--s-1) var(--s-4);align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font:400 15px/1.45 var(--sans)}
-.st-kind{font:600 13px/1.4 var(--sans);color:var(--muted)}
+.st-list li{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) auto;gap:var(--s-1) var(--s-4);align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font:400 var(--fs-15)/1.45 var(--sans)}
+.st-kind{font:600 var(--fs-13)/1.4 var(--sans);color:var(--muted)}
 .st-list a{font-weight:500;color:var(--accent);overflow-wrap:anywhere}
-.st-n{font-size:14px;color:var(--muted);white-space:nowrap}
-.st-more{margin:var(--s-2) 0 0;font:400 14px/1.5 var(--sans);color:var(--muted)}
+.st-n{font-size:var(--fs-14);color:var(--muted);white-space:nowrap}
+.st-more{margin:var(--s-2) 0 0;font:400 var(--fs-14)/1.5 var(--sans);color:var(--muted)}
 @media (max-width:720px){.st-list li{grid-template-columns:minmax(0,1fr)}.st-n{white-space:normal}}
 .source-actions{gap:var(--s-3)}
 /* the text in an opened 'about' disclosure keeps about 75 characters a line however wide the page: --measure grows to 64ch from 1800 px, which at 14 px is 90 characters or more */

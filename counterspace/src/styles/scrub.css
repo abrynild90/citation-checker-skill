@@ -19,7 +19,7 @@
 .yr-play .ico{width:18px;height:18px}
 .yr-line{grid-column:2 / 4;grid-row:1;display:flex;align-items:baseline;gap:var(--s-4);min-width:0;min-height:16px;padding-right:calc(68px * var(--cs))}
 .yr-bar.is-finale .yr-line{padding-right:0}
-.yr-title,.yr-cap{margin:0;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 13px/16px var(--sans);color:var(--text)}
+.yr-title,.yr-cap{margin:0;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 var(--fs-13)/16px var(--sans);color:var(--text)}
 .yr-cap[hidden],.yr-title[hidden]{display:none}
 .yr-cap b{font-weight:600}
 .yr-cap.fade{opacity:0;transition:opacity 320ms var(--ease)}
@@ -28,13 +28,13 @@
 .yr-cap a{margin-left:.3em;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
 .yr-cap a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:2px}
 .yr-bar.is-finale .yr-title{display:none}
-.yr-tally{margin:0 0 0 auto;flex:0 1 auto;min-width:0;text-align:right;font:500 13px/16px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.yr-tally{margin:0 0 0 auto;flex:0 1 auto;min-width:0;text-align:right;font:500 var(--fs-13)/16px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .yr-bar.is-on .yr-tally,.yr-bar.is-finale .yr-tally{color:var(--text)}
 .yr-bar.is-finale .yr-tally{flex:1 1 auto;margin:0;text-align:left;white-space:normal;color:var(--accent-2);font-weight:600;text-wrap:balance}
 @media (prefers-reduced-motion:no-preference){.yr-cap:not([hidden]){animation:yr-cap 260ms var(--ease) both}}
 /* a tablet window: the longest-wait sentence is set a size smaller so it keeps to the row's one line (the row never grows when Play ends) */
-@media (max-width:900px){.yr-bar.is-finale .yr-tally{font-size:11.5px;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-@media (min-width:1800px){.yr-line{min-height:19px}.yr-title,.yr-cap,.yr-tally{font-size:15px;line-height:19px}}
+@media (max-width:900px){.yr-bar.is-finale .yr-tally{font-size:var(--fs-12);letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media (min-width:1800px){.yr-line{min-height:19px}.yr-title,.yr-cap,.yr-tally{font-size:var(--fs-15);line-height:19px}}
 @keyframes yr-cap{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 .yr-rail{grid-column:2;grid-row:2;margin:0;padding:0}
@@ -57,7 +57,7 @@
 .yr-gap::before{content:"";position:absolute;left:0;right:0;top:-1px;border-top:2px dashed var(--accent-2)}
 .yr-gd{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg)}
 .yr-gt{position:absolute;right:-1px;top:-11px;width:3px;height:22px;border-radius:2px;background:var(--accent-2);box-shadow:0 0 0 2px var(--bg)}
-.yr-gp{position:absolute;left:50%;top:-12px;transform:translateX(-50%);padding:1px 11px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 13px/22px var(--sans);white-space:nowrap}
+.yr-gp{position:absolute;left:50%;top:-12px;transform:translateX(-50%);padding:1px 11px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 var(--fs-13)/22px var(--sans);white-space:nowrap}
 @media (prefers-reduced-motion:no-preference){.yr-bar.is-finale .yr-gap::before{animation:yr-draw 900ms var(--ease) both}.yr-bar.is-finale .yr-gp{animation:yr-pill 400ms var(--ease) 700ms both}}
 @keyframes yr-draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
 @keyframes yr-pill{from{opacity:0}to{opacity:1}}

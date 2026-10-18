@@ -124,7 +124,7 @@ function rovingTiles(grid) {
     tiles[Math.min(tiles.length - 1, Math.max(0, to))].focus();
   });
 }
-// The hover caption over a poster is a strip over its lower part (at most CAPTION_SHARE of the picture): its text is set so that every line is whole. If the fact is too long at 14 px it steps down to 13 px and 12.5 px,
+// The hover caption over a poster is a strip over its lower part (at most CAPTION_SHARE of the picture): its text is set so that every line is whole. If the fact is too long at 14 px it steps down to 13 px and 12 px,
 // and a fact that still does not fit stops at a whole line with an ellipsis (never cut through a line). The measure is redone when the cards change size.
 const CAPTION_SHARE = 0.6; // the hover caption covers at most the lower 60% of a poster, so the picture stays in view
 function fitFacts(grid) {
@@ -136,7 +136,7 @@ function fitFacts(grid) {
       f.classList.remove('clamp');
       f.style.maxHeight = 'none';
       let done = false;
-      for (const px of ['', '13px', '12.5px']) {
+      for (const px of ['', '13px', '12px']) {
         f.style.fontSize = px;
         if (f.offsetHeight <= room - 1) {
           done = true;

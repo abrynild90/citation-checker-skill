@@ -4,10 +4,10 @@
 
 /* ---- sub-headings: the test chart and each tab's chart head a part of a chapter, not a chapter of their own */
 .chapter-head.sub{margin-bottom:var(--s-4)}
-.chapter-head.sub>:is(h3,h4){grid-column:1;margin:0;max-width:24em;font:600 clamp(24px,2.5vw,32px)/1.2 var(--sans);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
+.chapter-head.sub>:is(h3,h4){grid-column:1;margin:0;max-width:24em;font:600 var(--fs-h3-fluid)/1.2 var(--sans);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
 @media (min-width:1200px){.chapter-head.sub>:is(h3,h4){grid-row:1;max-width:none}}
 /* a chart's own lede is one step quieter than a chapter's, whatever the screen width */
-.chapter-head.sub>.lede{font:400 clamp(16px,1.25vw,19px)/1.55 var(--sans)}
+.chapter-head.sub>.lede{font:400 var(--fs-lede-xs)/1.55 var(--sans)}
 /* the chart's one-sentence takeaway sits in its heading box: under the heading at the left, while the lede runs down the right beside both (it spans the first two rows, the
    second one flexible), so the gold rule is a step under the heading, not under the height of a three-line lede */
 @media (min-width:1200px){
@@ -33,9 +33,9 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 @media (min-width:700px){.pat-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.pat-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .pat-list>li{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);padding-top:var(--s-3);border-top:2px solid var(--line-strong)}
-.pat-t{margin:0;font:400 clamp(18px,1.45vw,20px)/1.45 var(--sans);color:var(--muted);text-wrap:pretty}
+.pat-t{margin:0;font:400 var(--fs-lede-sm)/1.45 var(--sans);color:var(--muted);text-wrap:pretty}
 .pat-t b{font-weight:600;color:var(--text)}
-.pat-go{display:inline-flex;align-items:center;gap:var(--s-2);min-height:32px;margin-top:auto;font:600 14px/1.3 var(--sans);color:var(--accent);text-decoration:none}
+.pat-go{display:inline-flex;align-items:center;gap:var(--s-2);min-height:32px;margin-top:auto;font:600 var(--fs-14)/1.3 var(--sans);color:var(--accent);text-decoration:none}
 .pat-go:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em}
 .pat-go:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:var(--r-1)}
 @media (pointer:coarse){.pat-go{min-height:44px}}
@@ -43,19 +43,19 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 /* the opening statement: the range of the waits in one large line, and the longest pair drawn between its two dates on a quiet tinted panel */
 .pat-big{margin:0 0 var(--s-6);padding:var(--s-6) var(--s-7) var(--s-5);border-radius:var(--r-3);background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--surface-2);border:1px solid var(--line)}
 .pat-big[hidden]{display:none}
-.pb-lead{margin:0 0 var(--s-2);font:500 clamp(17px,1.6vw,20px)/1.4 var(--sans);color:var(--muted)}
+.pb-lead{margin:0 0 var(--s-2);font:500 var(--fs-lede-sm)/1.4 var(--sans);color:var(--muted)}
 .pb-num{margin:0;font:500 clamp(40px,6.4vw,92px)/1.04 var(--display);letter-spacing:-.02em;color:var(--text);text-wrap:balance}
 .pb-num span{color:var(--accent)}
 .pb-track{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr) minmax(0,1fr);align-items:center;gap:var(--s-4);margin:var(--s-6) 0 var(--s-5)}
-.pb-end{display:grid;gap:2px;font:400 14px/1.4 var(--sans);color:var(--muted)}
-.pb-end b{font:600 15px/1.3 var(--sans);color:var(--text);font-variant-numeric:tabular-nums}
+.pb-end{display:grid;gap:2px;font:400 var(--fs-14)/1.4 var(--sans);color:var(--muted)}
+.pb-end b{font:600 var(--fs-15)/1.3 var(--sans);color:var(--text);font-variant-numeric:tabular-nums}
 .pb-end.a{text-align:right}
 .pb-rail{position:relative;display:flex;align-items:center;height:28px}
 .pb-draw{position:absolute;left:5px;right:2px;top:50%;border-top:2px dashed var(--text);opacity:.55}
 .pb-dot{position:relative;z-index:1;flex:none;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--surface-2)}
 .pb-tick{position:absolute;right:0;top:2px;bottom:2px;width:3px;border-radius:2px;background:var(--accent-2)}
-.pb-pill{position:absolute;left:50%;top:50%;z-index:1;transform:translate(-50%,-50%);padding:3px 12px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);font:600 13px/1.45 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
-.pb-note{margin:0;max-width:62ch;font:400 15px/1.5 var(--sans);color:var(--muted)}
+.pb-pill{position:absolute;left:50%;top:50%;z-index:1;transform:translate(-50%,-50%);padding:3px 12px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);font:600 var(--fs-13)/1.45 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
+.pb-note{margin:0;max-width:62ch;font:400 var(--fs-15)/1.5 var(--sans);color:var(--muted)}
 /* armed by script only: without it, or with reduced motion, the whole panel is simply there */
 .pat-big[data-armed]:not(.in) .pb-draw{clip-path:inset(0 100% 0 0)}
 .pat-big[data-armed]:not(.in) .pb-pill,.pat-big[data-armed]:not(.in) .pb-tick,.pat-big[data-armed]:not(.in) .pb-end.b{opacity:0}
@@ -108,9 +108,9 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 .xc-a{fill:var(--accent)}
 .xc-b{fill:var(--faint);opacity:.55}
 .xc-axis{stroke:var(--line-strong);stroke-width:1;fill:none}
-.xc-t{font:600 15px/1.3 var(--sans)}
-.xc-l{font:400 13.5px/1.4 var(--sans);color:var(--muted)}
-@media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:14px}.xc-l{font-size:13px}}
+.xc-t{font:600 var(--fs-15)/1.3 var(--sans)}
+.xc-l{font:400 var(--fs-14)/1.4 var(--sans);color:var(--muted)}
+@media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:var(--fs-14)}.xc-l{font-size:var(--fs-13)}}
 #exploreTabs{scroll-margin-top:var(--s-3)}
 .explore #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
 @media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}
@@ -128,9 +128,9 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
   .pb-n1{display:none}
   .pb-n2{display:inline}
   .pb-pairs li.is-long .rc-pill{border-color:var(--accent);font-weight:700}
-  .pb-ph{margin:0 0 var(--s-3);font:600 14px/1.3 var(--sans);color:var(--muted)}
+  .pb-ph{margin:0 0 var(--s-3);font:600 var(--fs-14)/1.3 var(--sans);color:var(--muted)}
   .pb-pairs .rc-links{gap:12px}
-  .pb-pairs .rc-links li{grid-template-columns:minmax(0,.85fr) minmax(0,2fr);font-size:14px;line-height:1.3}
+  .pb-pairs .rc-links li{grid-template-columns:minmax(0,.85fr) minmax(0,2fr);font-size:var(--fs-14);line-height:1.3}
   .pb-pairs .rc-a{color:var(--text)}
   .pb-pairs .rc-b{flex-basis:180px;max-width:180px;color:var(--accent-2)}
   .pb-pairs .rc-link{flex-basis:max(calc((100% - 180px) * var(--k,1)),calc(var(--hw,64px) * 2 + 40px))}
@@ -150,10 +150,10 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
   .pat-big{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);column-gap:var(--s-6);padding-inline:var(--s-5)}
   .pb-pairs{padding-left:var(--s-4)}
   .pb-pairs .rc-links{gap:10px}
-  .pb-pairs .rc-links li{grid-template-columns:minmax(0,.78fr) minmax(0,1.8fr);gap:var(--s-2);font-size:13px}
+  .pb-pairs .rc-links li{grid-template-columns:minmax(0,.78fr) minmax(0,1.8fr);gap:var(--s-2);font-size:var(--fs-13)}
   .pb-pairs .rc-b{flex-basis:152px;max-width:152px;padding-left:8px}
   .pb-pairs .rc-link{flex-basis:max(calc((100% - 152px) * var(--k,1)),calc(var(--hw,64px) * 2 + 40px))}
-  .pb-pairs .rc-pill{padding:1px 8px;font-size:11.5px}
+  .pb-pairs .rc-pill{padding:1px 8px;font-size:var(--fs-12)}
 }
 }
 
@@ -182,19 +182,19 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 /* The recorded pairs carry the comparison; the range is a reading aid. */
 .pat-big { display:block; padding:0; border:0; border-radius:0; background:none; box-shadow:none; }
 .pat-big .pb-main { display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:4px 12px; }
-.pat-big .pb-lead { margin:0; font:600 20px/1.4 var(--sans); }
-.pat-big .pb-num { margin:0; font:600 24px/1.3 var(--sans); letter-spacing:0; }
+.pat-big .pb-lead { margin:0; font:600 var(--fs-20)/1.4 var(--sans); }
+.pat-big .pb-num { margin:0; font:600 var(--fs-24)/1.3 var(--sans); letter-spacing:0; }
 .pat-big .pb-note { grid-column:1 / -1; margin:8px 0 20px; max-width:75ch; }
 .pat-big .pb-track[hidden] { display:none; }
 .pat-big .pb-pairs { display:block; padding:0; border:0; }
 .pair-comparison { list-style:none; padding:0; margin:0; }
-.pair-comparison li { display:grid; grid-template-columns:minmax(0,1fr) minmax(160px,1.25fr) minmax(0,1fr); align-items:center; gap:24px; padding:18px 0; border-top:1px solid var(--line); font:400 15px/1.4 var(--sans); }
+.pair-comparison li { display:grid; grid-template-columns:minmax(0,1fr) minmax(160px,1.25fr) minmax(0,1fr); align-items:center; gap:24px; padding:18px 0; border-top:1px solid var(--line); font:400 var(--fs-15)/1.4 var(--sans); }
 .pair-event,.pair-law { display:grid; gap:4px; }
 .pair-event b,.pair-law b { font-weight:500; }
-.pair-event>span,.pair-law>span { color:var(--muted); font-size:13px; }
+.pair-event>span,.pair-law>span { color:var(--muted); font-size:var(--fs-13); }
 .pair-law b { color:var(--accent-2); }
 .pair-duration { display:grid; gap:8px; }
-.pair-duration strong { font-size:14px; font-weight:600; }
+.pair-duration strong { font-size:var(--fs-14); font-weight:600; }
 .pair-track { display:block; height:10px; position:relative; }
 .pair-track:before { content:''; position:absolute; inset:4px 0 auto; border-top:1px solid var(--line); }
 .pair-track i { position:relative; display:block; height:10px; border-top:2px solid var(--accent); top:3px; }
