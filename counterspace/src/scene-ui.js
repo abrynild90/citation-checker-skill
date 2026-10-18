@@ -723,6 +723,11 @@ function anchorNote(note) {
       br = lawBtn.getBoundingClientRect();
     if (br.height && nr.bottom > br.top - 4 && nr.bottom < br.bottom + 8)
       note.style.minHeight = Math.round(Math.min(br.bottom + 8, wr.bottom - 8) - nr.top) + 'px';
+    // a card that ends inside the foot (the source line above the button) would leave the top of that line showing under its lower edge: the foot gives way while the card
+    // is open, as it does under the other notes (its room stays; nothing moves, and the card has its own Close)
+    const foot = $('sceneFoot');
+    if (foot?.getClientRects().length && !STACKED.matches)
+      asideBody.classList.toggle('note-over-foot', note.getBoundingClientRect().bottom > foot.getBoundingClientRect().top - 4);
   }
 }
 // The law card's citation shows two lines; one that is longer ends on a whole word and an ellipsis (the line clamp alone cuts mid-word: "see Office of th...").
@@ -1381,7 +1386,7 @@ function fitDesktop() {
     fitCost = fitMode;
     // the room left under the content is the least any active row leaves
     const slack = Math.min(...eachNow(() => bodySlack())),
-      sp = slack > 16 ? Math.min(WIDE.matches ? 28 : 16, (slack * 0.75) / (2 * total)) : 0;
+      sp = slack > 16 ? Math.min(WIDE.matches ? 12 : 16, (slack * 0.75) / (2 * total)) : 0;
     if (sp > 0.5) stepsEl.style.setProperty('--sp', sp.toFixed(2) + 'px');
     stepsEl.style.flex = '0 0 auto';
     // the list keeps the height of its tallest state (the row that plays is heavier and may wrap), so the buttons under it never move while the scene plays
@@ -2005,6 +2010,7 @@ function fillLawCard(cfg) {
   lawCard.querySelector('#lcTimeline').onclick = (e) => seeLawOnTimeline(e.detail === 0);
 }
 function toggleLawCard(open) {
+  if (!open && !lawCard.hidden) asideBody.classList.remove('note-over-foot');
   lawCard.hidden = !open;
   lawBtn.setAttribute('aria-expanded', String(!!open));
   if (open) (togglePair(null), toggleSrc(false), toggleNextPop(false), anchorNote(lawCard));
