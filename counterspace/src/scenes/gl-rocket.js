@@ -147,19 +147,31 @@ function bodyProfile(r0, r1, z0, z1, lines = [], shade = 1, groove = 0.7, grad =
 // A cool rim light (sky and Earth-shine) along the silhouette of a vehicle material, so the white body keeps its edge against the dark side of the Earth and space.
 // panels (opt-in): the body is also given a little life, a slightly different tone for each skin panel (rings of panels along the axis, six round it) and faint
 // streaks of grime that run down from the engines' end of the vehicle (all from the model-space position: no texture to download).
-function rimify(m, k = 0.5, panels = false) {
+// form (opt-in { rings: [z, ...], k }): the surface gets volume instead of a flat tone: a limb darkening (the side turned from the viewer falls off, so a white tube reads round)
+// and a soft ambient-occlusion band beside each ring z (the interstage, the stripes, the nose joint), where one body meets the next.
+function rimify(m, k = 0.5, panels = false, form = null) {
   m.onBeforeCompile = (sh) => {
+    const ao = form ? form.rings.map((z) => `ao *= 1.0 - ${(form.ao ?? 0.3).toFixed(2)} * exp(-pow((vOP.z - ${z.toFixed(5)}) / 0.0011, 2.0));`).join('\n') : '';
     sh.fragmentShader = sh.fragmentShader.replace(
       '#include <lights_fragment_end>',
       `#include <lights_fragment_end>
       { float rimF = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 2.4);
+        ${
+          form
+            ? `float ndvF = clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0);
+        float ao = mix(${(1 - (form.k ?? 0.42)).toFixed(2)}, 1.0, smoothstep(0.04, 0.78, ndvF));
+        ${ao}
+        reflectedLight.directDiffuse *= ao; reflectedLight.indirectDiffuse *= ao;`
+            : ''
+        }
         reflectedLight.directDiffuse += vec3(0.50, 0.68, 1.0) * rimF * ${k.toFixed(2)}; }`,
     );
-    if (!panels) return;
+    if (!panels && !form) return;
     sh.vertexShader = 'varying vec3 vOP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vOP = position;');
+    sh.fragmentShader = 'varying vec3 vOP;\n' + sh.fragmentShader;
+    if (!panels) return;
     sh.fragmentShader =
-      `varying vec3 vOP;
-      float hh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      `float hh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float vn2(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
         return mix(mix(hh(i), hh(i + vec2(1.0, 0.0)), f.x), mix(hh(i + vec2(0.0, 1.0)), hh(i + vec2(1.0, 1.0)), f.x), f.y); }
       ` +
@@ -173,7 +185,7 @@ function rimify(m, k = 0.5, panels = false) {
           diffuseColor.rgb *= 1.0 + pv * 0.09 - 0.1 * st * low; }`,
       );
   };
-  m.customProgramCacheKey = () => 'rkrim' + k + (panels ? 'p' : '');
+  m.customProgramCacheKey = () => 'rkrim' + k + (panels ? 'p' : '') + (form ? 'f' + form.rings.join('_') + (form.k ?? '') + (form.ao ?? '') : '');
   return m;
 }
 
@@ -182,20 +194,21 @@ export const rocketMethods = {
   // Two vehicles, nose along +z, about 0.062 long: the default (a white stage, a coloured ogive nose and four swept fins) and `slim` (a slender booster
   // under a narrower second body, an interstage taper, a dark nose and small dark fins). Both are built as an upper and a lower part so a scene that
   // states a separation (cfg rocket.stage) can drop the lower part away; the exhaust rig sits at the nozzle and moves to the upper nozzle after it.
-  _rocketModel(color, style) {
+  _rocketModel(color, style, detail = false) {
     const T = this.T,
       slim = style === 'slim',
+      dt = !!detail && slim, // detail (opt-in, cfg rocket.detail; slim only): a rocket with form: a limb-darkened, ambient-occluded skin, more panel lines, a shaded nose and shaded fins
       steel = style === 'steel', // the default vehicle with a white-and-steel nose (a Thor): the nose takes no paint colour, only the heat of the climb tints it
       asat = style === 'asat', // the default vehicle with a small dark kill vehicle in place of the nose cone (an air-launched anti-satellite missile)
       Kl = new Kit(T),
       Ku = new Kit(T),
-      white = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
-      whiteU = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: 0.36, vertexColors: true, emissive: slim ? 0x2c3342 : 0x000000 }),
+      white = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: dt ? 0.3 : 0.36, vertexColors: true, emissive: slim ? (dt ? 0x1b2130 : 0x2c3342) : 0x000000 }), // detail: less self-light, so the sunlit and the shaded side differ
+      whiteU = this._mat(slim ? 0xe3e7ee : 0xf2f4f9, { metalness: 0.3, roughness: dt ? 0.3 : 0.36, vertexColors: true, emissive: slim ? (dt ? 0x1b2130 : 0x2c3342) : 0x000000 }),
       tipCol = new T.Color(color).lerp(new T.Color(0xffffff), 0.1),
-      nose = this._mat(slim ? 0x566074 : steel ? 0xc4cad4 : tipCol.getHex(), { metalness: slim ? 0.55 : steel ? 0.5 : 0.2, roughness: slim ? 0.4 : steel ? 0.34 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
+      nose = this._mat(slim ? (dt ? 0x6b768e : 0x566074) : steel ? 0xc4cad4 : tipCol.getHex(), { metalness: slim ? 0.55 : steel ? 0.5 : 0.2, roughness: slim ? 0.4 : steel ? 0.34 : 0.4, vertexColors: true, emissive: 0xff5a1c, emissiveIntensity: 0 }),
       dark = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
       darkU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true }),
-      fin = slim ? this._mat(0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(0xaab2c2, { metalness: 0.45, roughness: 0.42, vertexColors: true }), // the default vehicle: grey metal fins (only the nose carries the vehicle's colour)
+      fin = slim ? this._mat(dt ? 0x3a4254 : 0x262b36, { metalness: 0.6, roughness: 0.45, vertexColors: true }) : this._mat(0xaab2c2, { metalness: 0.45, roughness: 0.42, vertexColors: true }), // the default vehicle: grey metal fins (only the nose carries the vehicle's colour)
       bell = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true, emissive: 0xff6a1c, emissiveIntensity: 0 }), // engine bells: they glow when the motor burns
       bellU = this._mat(0x2a303d, { metalness: 0.6, roughness: 0.45, vertexColors: true, emissive: 0xff6a1c, emissiveIntensity: 0 }),
       // slim only: an accent in the vehicle's own colour (stage stripes), so the close-up reads as a built rocket and not as one white tube
@@ -212,7 +225,7 @@ export const rocketMethods = {
       Kl.geo(bell, lathe(T, [[D.rL * 0.84, D.zN - 0.0002, 1.0], [D.rL * 0.8, D.zN + 0.0002, 0.75], [D.rL * 0.62, D.zN + 0.002, 0.6], [D.rL * 0.45, D.zN + 0.0038, 0.5], [D.rL * 0.34, D.zN + 0.0054, 0.45], [D.rL * 0.5, D.zN + 0.0058, 0.5]], 18), 0, 0, 0, rx);
     else Kl.geo(bell, lathe(T, [[D.rL * 0.58, D.zN, 0.7], [D.rL * 0.6, D.zN + 0.0004, 0.55], [D.rL * 0.4, D.zN + 0.0042, 0.5], [D.rL * 0.36, D.zN + 0.0048, 0.5]], 16), 0, 0, 0, rx);
     Kl.geo(dark, lathe(T, [[D.rL * 0.8, D.zB - 0.0035, 0.8], [D.rL * 1.0, D.zB, 0.9]], 18), 0, 0, 0, rx);
-    const linesL = slim ? [-0.0185, -0.0125, -0.0065] : [-0.0125, -0.0085];
+    const linesL = slim ? (dt ? [-0.0215, -0.0185, -0.0125, -0.0095, -0.0065, -0.0030] : [-0.0185, -0.0125, -0.0065]) : [-0.0125, -0.0085];
     Kl.geo(white, lathe(T, bodyProfile(D.rL, D.rL, D.zB, D.zS, linesL, 1, 0.7, [0.6, 1.0]), 22), 0, 0, 0, rx); // sooty near the engines, clean above
     if (!slim) {
       // the spent booster is a closed cylinder: a dark interstage collar with a domed top (the upper part's own base hides it until the separation)
@@ -229,7 +242,8 @@ export const rocketMethods = {
       // the upper stage's own engine bell and the dark base plate it stands on (what shows once the lower stage has dropped away)
       Ku.geo(bellU, lathe(T, [[D.rU * 0.95, D.zS - 0.0004, 0.75], [D.rU * 0.8, D.zS - 0.0012, 0.65], [D.rU * 0.62, D.zS - 0.0023, 0.55], [D.rU * 0.5, D.zS - 0.0031, 0.5]], 16), 0, 0, 0, rx);
       Ku.geo(darkU, lathe(T, [[D.rL * 1.0, D.zS + 0.0001, 0.6], [D.rU * 0.9, D.zS - 0.0004, 0.6]], 20), 0, 0, 0, rx);
-      Ku.geo(whiteU, lathe(T, bodyProfile(D.rU, D.rU, D.zI, D.zT, [0.0145]), 20), 0, 0, 0, rx);
+      Ku.geo(whiteU, lathe(T, dt ? bodyProfile(D.rU, D.rU, D.zI, D.zT, [0.0062, 0.0145, 0.0176], 1, 0.62, [0.9, 1]) : bodyProfile(D.rU, D.rU, D.zI, D.zT, [0.0145]), 20), 0, 0, 0, rx);
+      if (dt) Ku.geo(darkU, lathe(T, [[D.rU * 1.02, D.zT - 0.0005, 0.8], [D.rU * 1.02, D.zT + 0.0002, 0.8]], 20), 0, 0, 0, rx); // a dark joint where the nose cone meets the body
       // two stripes on the body: a dark band and one in the vehicle's colour
       Ku.geo(darkU, lathe(T, [[D.rU * 1.03, 0.0086, 0.85], [D.rU * 1.03, 0.0098, 0.85]], 20), 0, 0, 0, rx);
       Ku.geo(accentU, lathe(T, [[D.rU * 1.03, 0.0104, 0.95], [D.rU * 1.03, 0.0118, 0.95]], 20), 0, 0, 0, rx);
@@ -242,7 +256,8 @@ export const rocketMethods = {
       np = [];
     for (let i = 0; i <= 12; i++) {
       const x = (i / 12) * L; // from the tip
-      np.push([Math.max(0.00004, ogive(D.rU, L, x)), D.zNose - x, i < 2 ? 0.55 : 1]); // the last bit of the tip is darker (heat shield)
+      // the last bit of the tip is darker (heat shield); detail: the cone is shaded along its length, light at the base and darker toward the tip, with a bright band low on it
+      np.push([Math.max(0.00004, ogive(D.rU, L, x)), D.zNose - x, dt ? Math.min(1.1, 0.5 + 0.62 * Math.pow(x / L, 0.7) + (x / L > 0.1 && x / L < 0.2 ? 0.12 : 0)) * (i < 2 ? 0.8 : 1) : i < 2 ? 0.55 : 1]);
     }
     np.reverse(); // base first, tip last
     let kvG = null;
@@ -294,7 +309,7 @@ export const rocketMethods = {
         nor = g.attributes.normal,
         col = new Float32Array(pos.count * 3);
       for (let i = 0; i < pos.count; i++) {
-        const shade = Math.abs(nor.getZ(i)) > 0.95 ? 1 : 0.38; // flat faces vs the bevelled rim
+        const shade = (Math.abs(nor.getZ(i)) > 0.95 ? 1 : 0.38) * (dt ? 0.6 + 0.4 * clamp01((pos.getX(i) - r0) / (r1 - r0)) : 1); // flat faces vs the bevelled rim; detail: shaded where the fin meets the body (occluded), lighter toward the tip
         col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = shade;
         pos.setZ(i, pos.getZ(i) * (1 - 0.6 * clamp01((pos.getX(i) - r0) / (r1 - r0)))); // thinner towards the tip
       }
@@ -308,7 +323,8 @@ export const rocketMethods = {
       if (slim) Kl.geo(fin, finGeo(D.rL * 0.9, 0.0068, -0.0264, -0.0165, -0.0226, 0.0009), 0, 0, 0, 0, 0, a);
       else Kl.geo(fin, finGeo(D.rL * 0.9, 0.0076, -0.0182, -0.0092, -0.0140, 0.0010), 0, 0, 0, 0, 0, a);
     }
-    for (const m of [white, whiteU, nose, dark, darkU, fin, bell, bellU, accent, accentU]) if (m) rimify(m, m === nose ? 0.4 : 0.5, m === white || m === whiteU);
+    const FORM = dt ? { rings: [-0.0245, -0.0185, -0.0065, -0.0005, 0.0035, 0.0086, 0.0118, 0.0215], k: 0.4, ao: 0.2 } : null;
+    for (const m of [white, whiteU, nose, dark, darkU, fin, bell, bellU, accent, accentU]) if (m) rimify(m, m === nose ? 0.4 : 0.5, m === white || m === whiteU, m === bell || m === bellU ? null : FORM);
     const lower = Kl.build(),
       upper = Ku.build(),
       g = new T.Group(),

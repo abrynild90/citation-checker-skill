@@ -718,6 +718,7 @@ export function buildSim(cfg) {
           minPx: a.rocket.minPx ?? 26,
           maxPx: a.rocket.maxPx ?? 48,
           rocketStyle: a.rocket.style,
+          rocketDetail: a.rocket.detail, // opt-in (slim vehicles): form shading, more panel lines, a shaded nose and fins (see _rocketModel)
           endHold: a.rocket.endHold, // opt-in: stays drawn on the target this long past the hit, inside the flash (no early vanish)
           preK: a.rocket.preK, // opt-in: drawn this fraction of its size while it waits at the launch point, easing to full size just after t0
           // opt-in waitLabel (live only; the pill of the path takes over at t0): the waiting vehicle is named from the first frame
@@ -1109,6 +1110,7 @@ export function buildSim(cfg) {
             kind: 'point',
             shape: 'rocket',
             rocketStyle: a.rocket.style,
+            rocketDetail: a.rocket.detail,
             ramp: a.rocket.ramp,
             sizeK: stepsK(a.rocket.sizeSteps),
             color: '#ff8a8a',
