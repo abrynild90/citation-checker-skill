@@ -1712,8 +1712,10 @@ export const modelMethods = {
     const yH = DK(-0.0410) + 0.0003;
     box(0.0070, 0.0003, 0.0068, lane, 0, yH - 0.0001, -0.0408); // the flight deck
     cyl(0.0020, 0.0020, 0.0003, stripe, 0, yH + 0.0002, -0.0408, 20);
-    cyl(0.0015, 0.0015, 0.0004, lane, 0, yH + 0.0002, -0.0408, 20);
-    box(0.0028, 0.0004, 0.0004, stripe, 0, yH + 0.0004, -0.0408);
+    cyl(0.0016, 0.0016, 0.0004, lane, 0, yH + 0.0002, -0.0408, 20);
+    // a plain white H inside the ring (two bars along the ship and a cross-bar), the mark of a helicopter deck: no logo-like stroke across the circle
+    [-1, 1].forEach((sd) => box(0.00026, 0.00042, 0.0021, stripe, sd * 0.00078, yH + 0.0003, -0.0408));
+    box(0.0016, 0.00042, 0.00026, stripe, 0, yH + 0.0003, -0.0408);
     // deck lights: unlit beads (they stay bright on the night side): a red warning light on the mast, white masthead and radar lights, warm lamps on the bridge wings, the aft house and
     // the deck edge, and a green / red pair of running lights on the bridge sides
     const lamp = (c, r, x, y, z) => {
@@ -1829,13 +1831,26 @@ export const modelMethods = {
     // the Kelvin arms: fine V lines of foam that leave the quarters and spread slowly, thin and broken
     [-1, 1].forEach((sd) => strip(sd * 0.0046, Z0 + 0.003, sd * 0.0150, Z0 - 0.048, 0.0022, 0.0046, 0.5, 0));
     [-1, 1].forEach((sd) => strip(sd * 0.0050, Z0 + 0.0015, sd * 0.0092, Z0 - 0.030, 0.0016, 0.0028, 0.4, 0));
-    [-1, 1].forEach((sd) => strip(sd * 0.0062, 0.0200, sd * 0.0092, 0.0035, 0.0020, 0.0028, 0.42, 0)); // the bow wave: a short white wedge off each bow quarter
+    // the bow wave: the stem throws a white V of water off each bow quarter that runs aft along the hull and fades (a short wedge, a longer faint one beside it, and a pale
+    // lump of broken water where the stem enters the sea)
+    [-1, 1].forEach((sd) => strip(sd * 0.0050, 0.0245, sd * 0.0092, 0.0045, 0.0016, 0.0034, 0.62, 0));
+    [-1, 1].forEach((sd) => strip(sd * 0.0078, 0.0200, sd * 0.0128, -0.0040, 0.0020, 0.0040, 0.30, 0));
+    strip(0, Z1 + 0.0035, 0, Z1 - 0.0110, 0.0030, 0.0075, 0.45, 0);
     g.position.y = 0;
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
     g.rotateY(o.heading ?? 0.6);
     // hull: a label keeps off the ship by a row of small circles along the hull (stern to bow, at deck height), not by one circle of half its length
-    Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70, hull: { z: [-0.040, 0.030], y: 0.006, r: 0.0085 } });
+    // hull.out: the hull's outline in model units (the gunwale and the waterline, both sides, stern to stem): a leader may end on the nearest point of the hull's silhouette
+    const out = [];
+    for (let i = 0; i <= 16; i++) {
+      const z = Z0 + ((Z1 - Z0) * i) / 16;
+      [-1, 1].forEach((sd) => {
+        out.push([sd * rowX(TOPROW, z), GUN(z), z]);
+        out.push([sd * rowX(ROWS[2], z), YB, z]);
+      });
+    }
+    Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70, hull: { z: [-0.040, 0.030], y: 0.006, r: 0.0085, out } });
     return g;
   },
 };

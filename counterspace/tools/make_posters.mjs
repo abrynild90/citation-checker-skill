@@ -45,7 +45,7 @@ const POSTER_VIEW = {
   fengyun: { back: 0.85, boost: 1.25, right: 0.08 },
   dn2: { back: 1.05, boost: 1.8, right: 0.45, lift: -0.2 }, // in on the Earth and the rocket: the ring runs past the frame, no empty margins
   laser: { cam: 1, back: 1.9, right: -0.1, boost: 2.6, lift: 0.1 }, // pulled back from the ground: the satellite and its halo, the beam, sharp limb haze and night lights, space on the left (the close view was half a frame of blurry terrain)
-  'burnt-frost': { boost: 1.25, rel: { from: 'USS Lake Erie', to: 'USA-193', el: 5, az: -100, D: 0.4, lift: 0.02 } }, // seen from the side of the ship, low over the horizon: the ship lies along the limb, the SM-3 climbs from it and the satellite is clear above it (head-on, the three stood in one line like a spear)
+  'burnt-frost': { boost: 1.25, rel: { from: 'USS Lake Erie', to: 'USA-193', el: 22, az: -100, D: 0.45, lift: 0.03 } }, // seen from the side of the ship, about 20 degrees above the horizon (an oblique view of the hull and decks): the ship lies along the limb, the SM-3 climbs from it and the satellite is clear above it (head-on, the three stood in one line like a spear)
 };
 const TRIPTYCH = [[0.2, 1], [0.62, 2], [0.88, 3]]; // [t, camera preset, optional dolly-out factor] per episode (RPO poster; the LEO panel at 0.62 keeps USA 245 inside the frame)
 const TRIPTYCH_TITLES = ['GEO, 2025', 'LEO, 2019–20', 'GEO, 2025'];
