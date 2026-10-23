@@ -130,7 +130,7 @@ export const DN2 = {
   ],
   nightK: 1.8, // a lifted night ambient: the dark side of the globe keeps its land and ocean readable and stops reading as a dark glass ball against the sky
   still: 0.62,
-  stillOff: { 'DN-2 path': [-106, -50] }, // the still: the path label sits above the globe, not on it
+  stillOff: { 'DN-2 path': [-20, -50], Xichang: [-110, -80] }, // the still: the path label sits above the globe, not on it
   camDist: 7.5,
   narrowK: 1.1, // phone: the tracking view backs out a little (the rocket and the ring stay whole)
   stillCam: { at: [22, 8, 7.9], look: [0, 90, 0.7] },

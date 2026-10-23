@@ -405,7 +405,7 @@ export const RPO = {
   ],
   still: 0.3,
   stillShort: ['USA 271', 'USA 245', 'Cosmos 2542'],
-  stillOff: { 'USA 245': [-110, 175] }, // the live still: shorter names keep leaders short and the two Cosmos chips apart
+  stillOff: { 'USA 245': [-110, 175], 'Cosmos 2543': [258, -97] }, // the live still: shorter names keep leaders short and the two Cosmos chips apart
   staticCenter: [28, 92],
   staticStatus: 'Three separate episodes shown together: (1) China and the US in GEO, 2025; (2) Russia in LEO, 2019–20; (3) the US and the UK in GEO, 2025',
   captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence

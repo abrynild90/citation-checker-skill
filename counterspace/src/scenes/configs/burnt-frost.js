@@ -37,7 +37,7 @@ export const BURNT_FROST = {
     'SM-3': [[0, 130, 20], [0.09, -150, -86], [0.24, -150, -86], [0.36, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
     'USA-193': [[0, -34, -80], [0.4, null]], // above and a little left of the satellite until the hit: a steady slot well clear of the SM-3 pill
   },
-  camOff: { 2: { 'USA-193': [160, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
+  camOff: { 1: { 'USA-193': [116, -44] }, 2: { 'USA-193': [44, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
   dropCoreFrom: 0.55, // after the fall begins the camera frames the debris, not the ship

@@ -359,7 +359,7 @@ export const SPACEPLANES = {
     },
   ],
   camHide: { 2: ['GEO ring'] },
-  camOff: { 2: { 'GEO ring': [-30, -64], 'X-37B OTV-7': [-70, -85], Highest: [-110, -55] }, 3: { 'CSSHQ orbit': [-24, 66] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
+  camOff: { 2: { 'GEO ring': [-30, -64], 'X-37B OTV-7': [-70, -85], Highest: [-110, -55] }, 3: { 'CSSHQ orbit': [-24, 66] }, 5: { Highest: [26, -24] } }, // China view: the long orbit name keeps 24 px or more from the left edge of the picture
 
   phoneCamOff: { 2: { 'X-37B OTV-7': [-80, 65], 'OTV-7': [-80, 65] } },
   liveOff: { 'CSSHQ orbit': [-24, 66] }, // the big CSSHQ model needs the orbit name well clear of it (below-left, on the dark sky beside the limb)
@@ -376,6 +376,7 @@ export const SPACEPLANES = {
   insetCornerPhone: 'bl',
   phoneHide: ['GEO', 'OTV-7 orbit', 'CSSHQ orbit', '~600'], // 375: at most two labels over the picture
   still: 0.5,
+  stillOff: { 'OTV-7 orbit': [-234, 10] }, // the PNG still: the long orbit name sits left of its point, clear of the Earth's disc
   stillCam: { at: [36, 20, 7.2], look: [0, 0, 0], hideShell: true },
   captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence
   // spelled out in the step list where each term first appears (the wording is the account's own: see the caption above and the ledger notes)

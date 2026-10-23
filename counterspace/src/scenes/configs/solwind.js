@@ -68,7 +68,7 @@ export const SOLWIND = {
     Solwind: [178, -24],
   }, // the missile's pill sits above the F-15 with a leader down to the arc
   offSteps: { Solwind: [[0, -150, -6], [0.3, -172, 24]], 'ASM-135': [[0, -105, 46], [0.25, 105, -96], [0.285, -80, -62]] }, // ASM-135: up and right of the missile while it is under the F-15 (a leader from the left ran over the nose), then above-left once it has climbed away; // the opening: the satellite is small and high at the left, its name sits beside it in space, clear of the Earth's glow
-  camOff: { 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
+  camOff: { 2: { 'ASM-135': [-10, -100] }, 1: { Solwind: [138, -22], Impact: [152, -22] }, 3: { 'ASM-135': [-88, 30] } }, // Polar: the missile pill sits clear of the Earth disc
   countFrom: 0.08,
   narrowK: 1.08, // compact views leave a margin around the late debris cloud
   narrowShift: 0.05, // phone: the view slides so the impact label and badge clear the right edge
