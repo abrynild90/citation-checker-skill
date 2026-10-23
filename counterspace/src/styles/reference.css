@@ -34,7 +34,7 @@
 .ref-band .chapter-head>.tools{margin-top:var(--s-2)}
 .ref-band .takeaway{margin:var(--s-2) 0 var(--s-3);padding-top:var(--s-2);font-size:var(--fs-lede-sm);line-height:1.4;max-width:70ch}
 .ref-band .takeaway::before{width:32px}
-.ref-band #chartC .callout-row{margin:var(--s-2) 0 var(--s-2)}
+.ref-band #chartC .callout-row{margin:var(--s-4) 0 var(--s-5)}
 .ref-band #chartC .callout-row>.callout{padding:var(--s-2) var(--s-3);font-size:var(--fs-15);line-height:1.45}
 .ref-band #quoteC .q{font-size:var(--fs-15)}
 .ref-band .callout{margin-top:var(--s-3)}
