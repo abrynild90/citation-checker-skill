@@ -67,11 +67,11 @@ export const BURNT_FROST = {
     {
       type: 'ship',
       at: [22.0, -179.0],
-      heading: -0.7, // lies across the picture from the pull-back on (it stood up the frame, bow to the limb, like a cut-out); the opening shows it side on
+      heading: IS_PHONE ? 0 : -0.7, // lies across the picture from the pull-back on (it stood up the frame, bow to the limb, like a cut-out); the opening shows it side on
       label: 'USS Lake Erie',
       shade: true,
-      leaderHull: true, // the name's leader ends on the hull's outline, not across the deck
-      labelUntil: 0.34, // the name retires as the camera turns to follow the interceptor: from there the ship lies along the limb with no clear slot for a pill at the narrower widths
+      leaderHull: !IS_PHONE, // the name's leader ends on the hull's outline, not across the deck
+      labelUntil: IS_PHONE ? 0.56 : 0.34, // the name retires as the camera turns to follow the interceptor: from there the ship lies along the limb with no clear slot for a pill at the narrower widths
       hideFrom: 0.58,
       dx: 0,
       dy: 44,
