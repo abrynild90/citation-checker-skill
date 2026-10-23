@@ -198,6 +198,7 @@ const methods = {
         color,
         avoidDisc: !!L.item?.offGlobe && (!L.item.stillOnly || noBanner),
         noLeader: !!L.item?.noLeader,
+        hullObj: L.item?.leaderHull ? this.dyn.find((d) => d.it === L.item)?.obj : null, // opt-in (ship actor leaderHull): the leader ends on the hull's silhouette, not at the model's origin
         leaderK: L.role === 'place' && (!this.sim.cfg.leaderCams || this.sim.cfg.leaderCams.includes(this.camIdx)) ? this.sim.cfg.leaderK : undefined, // cfg.leaderCams: only these presets
         onDisc: this.el.clientWidth < 520 && !!this.sim.cfg.phoneOnDisc?.some((h) => text.startsWith(h)), // phone: dark ocean under a label beats a long leader
       });
@@ -353,6 +354,56 @@ const methods = {
         Object.assign(pl[i], { x: n[0], y: n[1], leader: !r.noLeader && Math.hypot(qx - r.px, qy - r.py) > r.h * (r.leaderK ?? 0.9), ax: r.px, ay: r.py, qx, qy });
       }
     }
+    // Opt-in (item.leaderHull): a pill that names a ship points at the nearest point of the hull's silhouette (the screen outline of userData.hull.out), so its leader never runs
+    // across the deck to the model's origin amidships. A pill that stands over the hull keeps its own anchor.
+    raw.forEach((r, i) => {
+      const q = pl[i],
+        hl = r?.hullObj?.userData.hull;
+      if (!q || !hl?.out) return;
+      const o = r.hullObj,
+        V = new T.Vector3();
+      o.updateWorldMatrix(true, false);
+      const P = hl.out.map((c) => {
+        V.set(c[0], c[1], c[2]).applyMatrix4(o.matrixWorld).project(this.camera);
+        return [((V.x + 1) / 2) * w, ((1 - V.y) / 2) * h];
+      });
+      // the convex outline of the projected points (monotone chain)
+      const S = P.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]),
+        cr = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]),
+        lo = [],
+        up = [];
+      for (const p of S) {
+        while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop();
+        lo.push(p);
+      }
+      for (const p of S.slice().reverse()) {
+        while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop();
+        up.push(p);
+      }
+      const poly = lo.slice(0, -1).concat(up.slice(0, -1)),
+        bx0 = q.x - r.w / 2,
+        bx1 = q.x + r.w / 2,
+        by0 = q.y - r.h / 2,
+        by1 = q.y + r.h / 2,
+        dBox = (x, y) => Math.hypot(Math.max(bx0 - x, 0, x - bx1), Math.max(by0 - y, 0, y - by1));
+      let best = null,
+        bd = 1e9;
+      for (let e = 0; e < poly.length; e++) {
+        const a = poly[e],
+          b = poly[(e + 1) % poly.length];
+        for (let k = 0; k < 16; k++) {
+          const x = a[0] + ((b[0] - a[0]) * k) / 16,
+            y = a[1] + ((b[1] - a[1]) * k) / 16,
+            d = dBox(x, y);
+          if (d < bd) {
+            bd = d;
+            best = [x, y];
+          }
+        }
+      }
+      if (!best || bd < 1) return; // the pill touches the hull: leave it
+      Object.assign(q, { ax: best[0], ay: best[1], qx: Math.max(bx0, Math.min(bx1, best[0])), qy: Math.max(by0, Math.min(by1, best[1])), leader: true });
+    });
     return raw.map((r, i) => r && pl[i] && { ...pl[i], text: r.text, color: r.color, w: r.w, h: r.h });
   },
   // Everything drawn that a label must stay off, in screen px for a w x h canvas: sprites (marks, with their drawn radius), dense particle

@@ -47,10 +47,10 @@ void main(){ vU = uv.x; vP = position; vec3 ax = position - normal * uR; float d
 float r = min(uR, uMaxPx * d / uScale) * mix(uTaper, 1.0, pow(uv.x, 1.2));
 vec4 mv = modelViewMatrix * vec4(ax + normal * r, 1.0); mv.z -= uPush; gl_Position = projectionMatrix * mv; }`;
 // uHead > 0: the tube fades from its tail (vU = 0) to the head (vU = uHead), so a growing trail is a fading path, not a rigid rod.
-const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail;
+const TUBE_FS = `uniform vec3 uColor; uniform float uOp; uniform float uHead; uniform float uTail; uniform float uFloor;
 uniform vec4 uGap0; uniform vec4 uGap1; uniform vec4 uNear; uniform float uFar; uniform float uDisc; uniform float uDiscMin; uniform float uDash; varying float vU; varying vec3 vP;
 // uTail > 0: only the last uTail of the tube length behind the head is visible (a capped wake)
-void main(){ float f = uHead > 0.0 ? mix(0.05, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
+void main(){ float f = uHead > 0.0 ? mix(uFloor, 1.0, pow(clamp(vU / uHead, 0.0, 1.0), 1.7)) : 1.0;
 if (uTail > 0.0) f *= clamp((vU - (uHead - uTail)) / uTail, 0.0, 1.0);
 // uGap*: the line fades out around a craft (xyz, radius w), so an orbit never runs through a model
 // uFar > 0 (opt-in): the line is thin and fades with its angle to the viewer; the far side of the orbit is dimmer and dashed
@@ -134,6 +134,7 @@ const methods = {
           uHead: { value: 0 },
           uTaper: { value: 1 },
           uTail: { value: 0 },
+          uFloor: { value: 0.05 },
           uGap0: { value: new T.Vector4(0, 0, 0, 0) },
           uGap1: { value: new T.Vector4(0, 0, 0, 0) },
           uNear: { value: new T.Vector4(0, 0, 0, 0) },
@@ -283,6 +284,7 @@ const methods = {
         if (typeof it.fadeDisc === 'number') tube.material.uniforms.uDiscMin.value = it.fadeDisc; // a number < 1: the line stays that faint over the disc
         if (it.gapIds) (this.gapRings ||= []).push({ mat: tube.material, ids: it.gapIds, near: it.arcNear });
         if (it.fadeT || it.fadeInT) (this.fadeRings ||= []).push({ mat: tube.material, op: it.opacity ?? 1, T: it.fadeT || [9, 10], In: it.fadeInT, cams: it.fadeCams, mesh: tube }); // fadeInT [t0, t1] (opt-in): the line fades in over that span
+        if (it.wakeFloor != null) tube.material.uniforms.uFloor.value = it.wakeFloor; // opt-in: the oldest part of a growing trail stays at least this bright (default 0.05), so a label's leader ends on a visible line
         if (it.tail) tube.material.uniforms.uTail.value = it.tail; // capped wake length (fraction of the whole path)
         if (it.taper != null) tube.material.uniforms.uTaper.value = it.taper; // thin at the start, full width at the far end: reads apart from the orbit line it crosses
         if (it.push) tube.material.uniforms.uPush.value = it.push; // orbit line pushed back from the camera: craft on it are drawn in front
@@ -307,7 +309,17 @@ const methods = {
                 rk.obj.updateMatrixWorld(true);
                 const w = rk.rk.kv.getWorldPosition((this._kvw ||= new T.Vector3()));
                 la = [w.x, w.y, w.z];
-              } else la = [rk.obj.position.x, rk.obj.position.y, rk.obj.position.z];
+              } else {
+                la = [rk.obj.position.x, rk.obj.position.y, rk.obj.position.z];
+                // fx.deck (opt-in, vertical launch from a ship): while the missile is still down in its cell the leader ends at the cell on the deck, then follows the missile once it has risen above it
+                const sh = rk.fx.deck && this.dyn.find((d) => d.obj.userData.uSea)?.obj;
+                if (sh) {
+                  const u = sh.position.clone().normalize(),
+                    h = la[0] * u.x + la[1] * u.y + la[2] * u.z - sh.position.dot(u),
+                    need = rk.fx.deck * sh.scale.x;
+                  if (h < need) la = [la[0] + u.x * (need - h), la[1] + u.y * (need - h), la[2] + u.z * (need - h)];
+                }
+              }
             }
             return it.labelEnd != null && t > it.labelEnd ? null : it.labelStart != null && t < it.labelStart ? null : it.dynamic || it.gate ? (it.pts(t).length > 2 ? la : null) : la;
           },
@@ -372,7 +384,13 @@ const methods = {
       if (it.label)
         this._label(
           it.label,
-          (t) => it.pos(t),
+          (t) => {
+            const p = it.pos(t),
+              sh = it.waitLift && p && this.dyn.find((d) => d.obj.userData.uSea)?.obj; // waitLift (opt-in): the waiting vehicle's pill points at its cell on the ship's deck, not at the waterline under it
+            if (!sh) return p;
+            const k = (it.waitLift * sh.scale.x) / Math.hypot(...p);
+            return [p[0] * (1 + k), p[1] * (1 + k), p[2] * (1 + k)];
+          },
           null,
           it,
           it.labelDy ?? (it.shape === 'site' || it.shape === 'ship' || it.shape === 'jammer' ? 28 : 0),

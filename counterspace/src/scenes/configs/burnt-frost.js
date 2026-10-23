@@ -34,10 +34,11 @@ export const BURNT_FROST = {
   liveOff: { Impact: [-108, -20], 'Larger pieces': [168, -62], 'USS Lake Erie': [150, -4] }, // the collision frame: Impact to the left, the falling pieces to the right
   offSteps: {
     Impact: [[0, -108, -20], [0.9, -70, -48]], // the collision frame: to the left; the final count (from 0.9) sits close to the limb, clear of Japan's city lights
-    'SM-3': [[0, 130, 20], [0.09, -150, -86], [0.24, -150, -86], [0.36, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
-    'USA-193': [[0, -34, -80], [0.4, null]], // above and a little left of the satellite until the hit: a steady slot well clear of the SM-3 pill
+    'SM-3': [[0, 118, -48], [0.17, 118, -48], [0.27, -150, -86, 'ease'], [0.3, -150, -86], [0.38, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
+    'USS Lake Erie': [[0, 20, 62], [0.19, 20, 62], [0.3, 150, -4, 'ease'], [0.4, 186, -48, 'ease']], // under the hull's flank in the opening (clear of the SM-3 pill on the right), then right of the ship once the camera pulls out
+    'USA-193': [[0, -34, -80], [0.34, 76, -66], [0.44, null]], // above and a little left of the satellite until the interceptor closes on it, then up and to its right (clear of the interceptor and the ship's pill)
   },
-  camOff: { 1: { 'USA-193': [116, -44] }, 2: { 'USA-193': [44, -58] } }, // From orbit: the satellite pill sits off the disc, right of the limb
+  camOff: { 1: { 'USA-193': [116, -44] }, 2: { 'USA-193': [44, -58], 'USS Lake Erie': [-120, -90] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
   dropCoreFrom: 0.55, // after the fall begins the camera frames the debris, not the ship
@@ -51,6 +52,7 @@ export const BURNT_FROST = {
   fitFillKeys: IS_PHONE ? [0.82, 0.9] : [0.9, 0.9], // desktop: the opening frames the ship and the satellite close, so the interceptor in its cell reads
   burstPadFrom: IS_PHONE ? undefined : 0.3, // desktop: the early keys are fitted to the craft alone (the burst ring is not in frame yet)
   fitTilt: IS_PHONE ? undefined : 38,
+  fitTiltKeys: IS_PHONE ? undefined : [null, null, 58, 58, 52, 44, null, null, null, null], // desktop: through the launch and climb the camera leans well off the vertical, so the ship is seen from an oblique angle (flank, decks, mast), not as a plan; the later keys keep the usual view
   fillK: 0.25, // a neutral fill: the ship and satellite keep their paint on the night side // desktop: the view is turned about 15 degrees from the default
   hit: {
     lat: 29.0,
@@ -65,10 +67,11 @@ export const BURNT_FROST = {
     {
       type: 'ship',
       at: [22.0, -179.0],
-      heading: 0, // lies across the picture from the pull-back on (it stood up the frame, bow to the limb, like a cut-out); the opening shows it side on
+      heading: -0.7, // lies across the picture from the pull-back on (it stood up the frame, bow to the limb, like a cut-out); the opening shows it side on
       label: 'USS Lake Erie',
       shade: true,
-      labelUntil: 0.56,
+      leaderHull: true, // the name's leader ends on the hull's outline, not across the deck
+      labelUntil: 0.46, // the name retires just after the hit: later the ship sits at the limb under the burst rings with no clear slot for a pill
       hideFrom: 0.58,
       dx: 0,
       dy: 44,
@@ -114,7 +117,7 @@ export const BURNT_FROST = {
       label: 'SM-3 interceptor',
       short: 'SM-3',
       labelFollow: true, // the leader ends on the missile's head, not on a fixed point of its arc
-      rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', plumeDeck: true, preK: 1.0, waitRing: true, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
+      rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', plumeDeck: true, preK: 1.0, waitRing: true, ringK: 0.7, deck: 0.0095, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,

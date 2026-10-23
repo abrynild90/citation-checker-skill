@@ -334,6 +334,7 @@ export function buildSim(cfg) {
         camK: a.camK, // opt-in { camera index: k }: drawn k times larger on that preset only
         sizeK: a.sizeSteps && ((f) => (t, ci) => (a.sizeCam == null || ci === a.sizeCam ? f(t) : 1))(stepsK(a.sizeSteps)), // opt-in [[t, k], ...]: a scene-time scale of the hull (a larger ship in the opening frames, easing back to its size), on camera a.sizeCam only when given
         label: a.label,
+        leaderHull: a.leaderHull, // opt-in: the label's leader ends on the nearest point of the hull's silhouette (gl-labels.js), not at the ship's origin
         labelDx: a.dx,
         labelDy: a.dy,
         ...(a.labelUntil != null
@@ -723,7 +724,7 @@ export function buildSim(cfg) {
           preK: a.rocket.preK, // opt-in: drawn this fraction of its size while it waits at the launch point, easing to full size just after t0
           // opt-in waitLabel (live only; the pill of the path takes over at t0): the waiting vehicle is named from the first frame
           ...(a.rocket.waitLabel
-            ? { label: a.label, short: a.short, labelDx: a.rocket.waitDx ?? 0, labelDy: a.rocket.waitDy ?? 0, labelFn: (t, narrow) => (t < a.t0 && !narrow ? a.label : null), statusColor: () => a.color }
+            ? { label: a.label, short: a.short, labelDx: a.rocket.waitDx ?? 0, labelDy: a.rocket.waitDy ?? 0, waitLift: a.rocket.deck, labelFn: (t, narrow) => (t < a.t0 && !narrow ? a.label : null), statusColor: () => a.color }
             : {}),
           ramp: a.rocket.ramp, // opt-in { k, until }: drawn k times larger at the pad, easing to its normal size by this fraction of the flight (see _fitModels)
           sizeK: stepsK(a.rocket.sizeSteps),
@@ -738,6 +739,8 @@ export function buildSim(cfg) {
             stand: !!a.rocket.pad,
             vent: !!a.rocket.vent, // opt-in: vapour vents off the vehicle and pools at the pad while it waits
             waitRing: !!a.rocket.waitRing, // opt-in: a thin highlight ring round the vehicle while it waits for launch
+            deck: a.rocket.deck, // opt-in (vertical launch from a ship): the height of the deck above the path's start in the ship's model units; the ring and the waiting pill sit at the cell on the deck, not at the waterline under it
+            ringK: a.rocket.ringK, // opt-in: the waiting ring's size factor
             smokeK: a.rocket.smokeK,
             smokeNear: a.rocket.smokeNear, smokeTA: a.rocket.smokeTA,
             stage: a.rocket.stage,
@@ -1025,6 +1028,7 @@ export function buildSim(cfg) {
         all,
         thick: a.thick,
         wakeOp: a.wakeOp ?? (a.rocket ? 0.3 : undefined),
+        wakeFloor: a.wakeFloor,
         color: a.color,
         width: 2,
         label: a.label,

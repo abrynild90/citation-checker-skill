@@ -843,11 +843,27 @@ export const rocketMethods = {
           env = (1 - smooth((se - 0.35) / 1.15)) * (1 - smooth(st.alt / 150)) * smooth(se / 0.15);
         this._shakeA = Math.max(this._shakeA, thr * env);
       }
+      // fx.deck (opt-in, vertical launch from a ship): while the nozzle is still down in the cell, the glow, bloom, hot core and ignition flash (sprites that show through the hull) are held at the
+      // deck, the mouth of the cell, instead of hanging on the hull's side; dz is that lift in the vehicle's own units
+      let dz = 0,
+        deckR = 0;
+      if (fx.deck && vis) {
+        const sh = this.dyn.find((d) => d.obj.userData.uSea)?.obj;
+        if (sh) {
+          const sc = obj.scale.x,
+            uu = (rec.upS ||= new T.Vector3()).copy(sh.position).normalize(),
+            dvv = rec.v1.set(0, 0, 1).applyQuaternion(obj.quaternion),
+            rzz = (rk.rig.position.z + (rec.lift || 0)) * sc,
+            hN = (obj.position.x - sh.position.x + dvv.x * rzz) * uu.x + (obj.position.y - sh.position.y + dvv.y * rzz) * uu.y + (obj.position.z - sh.position.z + dvv.z * rzz) * uu.z;
+          deckR = sh.position.length() + fx.deck * sh.scale.x * 0.95;
+          dz = Math.max(0, fx.deck * sh.scale.x - hN) / Math.max(1e-6, sc);
+        }
+      }
       // glow and the ignition flash (the first frames of a motor are a bright burst well beyond the plume)
       rk.glow.visible = vis && thr > 0.004 && !hide;
       rk.glow.scale.setScalar((0.013 + 0.01 * thr + 0.008 * e) * ak * (1 + 0.4 * (pk - 1)) * (fx.coastGlow ? 0.5 : 1));
       rk.glow.material.opacity = (0.85 - 0.35 * e) * thr * (fx.coastGlow ? 0.6 : 1);
-      rk.glow.position.z = -0.003;
+      rk.glow.position.z = -0.003 + dz;
       // coast glow (opt-in { k, color }): the exhaust of a vehicle that spends most of its flight coasting. While the motor burns: a white-yellow core at the nozzle, an orange body, and a thin
       // ion-like trail that carries on behind the flame; in the coast, no flame: only a faint residual glow at the nozzle and the thin trail, fading, both attached to the nozzle (nothing floats free)
       {
@@ -887,11 +903,11 @@ export const rocketMethods = {
       rk.bloom.visible = vis && thr > 0.004 && !hide;
       rk.bloom.scale.setScalar((0.07 + 0.025 * low) * ak * (1 + 0.5 * (pk - 1)));
       rk.bloom.material.opacity = (0.2 + 0.16 * Math.min(1, st.flash * 1.5)) * thr * (1 - 0.7 * e) * (0.45 + 0.55 * low) * (fx.coastGlow ? 0.16 : 1);
-      rk.bloom.position.z = -0.006;
+      rk.bloom.position.z = -0.006 + dz;
       rk.hot.visible = vis && thr > 0.004 && !hide;
       rk.hot.scale.setScalar((0.0062 + 0.003 * thr) * ak * (1 + 0.3 * (pk - 1)) * (1 - 0.35 * e));
       rk.hot.material.opacity = Math.min(1, 1.1 * thr) * (1 - 0.5 * e);
-      rk.hot.position.z = -0.0016;
+      rk.hot.position.z = -0.0016 + dz;
       // exhaust glow on the ground at low altitude: a warm pool on the surface under the vehicle that fades out over the first ~15 km of the climb
       {
         const gg = (rec.gg ||= (() => {
@@ -904,7 +920,7 @@ export const rocketMethods = {
         const lg = thr > 0.004 ? thr * (1 - smooth((st.alt - 0.6) / 14)) : 0;
         gg.visible = vis && lg > 0.01 && !hide;
         if (gg.visible) {
-          const q = rec.v1.set(obj.position.x, obj.position.y, obj.position.z).normalize().multiplyScalar(1.0022);
+          const q = rec.v1.set(obj.position.x, obj.position.y, obj.position.z).normalize().multiplyScalar(deckR || 1.0022); // a vehicle on a ship's deck: the pool of light lies at the deck, not on the sea under the hull
           gg.position.copy(q);
           gg.scale.setScalar(Lr * (0.5 + 0.35 * lg) * (1 + 0.4 * (flick - 1)));
           gg.material.opacity = 0.5 * lg;
@@ -925,10 +941,10 @@ export const rocketMethods = {
       const reLit = sepNow && t >= rec.burns[rec.burns.length - 1][0]; // the upper stage's own ignition: a small flash, not the first launch burst
       rk.flash.scale.setScalar((0.016 + 0.03 * st.flash) * (reLit ? 0.5 : 1) * ak);
       rk.flash.material.opacity = Math.min(0.85, st.flash) * (reLit ? 0.6 : 1);
-      rk.flash.position.z = -0.004;
+      rk.flash.position.z = -0.004 + dz;
       // puff: a pop of gas at the separation, a burst of steam at the cold-launch pop
       let puff = 0,
-        puffZ = rk.rig.position.z + 0.002;
+        puffZ = rk.rig.position.z + 0.002 + dz;
       if (sepNow && sepAge < 0.3) puff = Math.max(puff, (1 - sepAge / 0.3) * 0.7) * (sepAge < 0.03 ? sepAge / 0.03 : 1); // a small puff of gas, over about 1.5% of the scene
       if (fx.cold && t >= fx.t0 && t < fx.t0 + rec.popT + 0.01) puff = Math.max(puff, 0.8 * clamp01(1 - (t - fx.t0) / (rec.popT + 0.01)));
       rk.puff.visible = vis && puff > 0.01 && !hide;
@@ -981,7 +997,10 @@ export const rocketMethods = {
       rk.ring.visible = vis && wr > 0.01 && !hide;
       if (rk.ring.visible) {
         const pulse = 0.5 + 0.5 * Math.sin(tm * 5);
-        rk.ring.scale.setScalar(0.066 + 0.005 * pulse);
+        rk.ring.scale.setScalar((0.066 + 0.005 * pulse) * (fx.ringK ?? 1));
+        // fx.deck (opt-in): the ring is centred on the cell on the ship's deck (the path starts at the waterline under it)
+        const shd = fx.deck && this.dyn.find((d) => d.obj.userData.uSea)?.obj;
+        rk.ring.position.z = shd ? (fx.deck * shd.scale.x) / Math.max(1e-6, obj.scale.x) : 0;
         rk.ring.material.opacity = wr * (0.4 + 0.2 * pulse);
       }
       if (rk.kv && fx.kv) this._kvFrame(rec, t, vis, hide);
