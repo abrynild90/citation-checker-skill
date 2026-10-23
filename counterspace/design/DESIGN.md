@@ -93,20 +93,20 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 Public Sans (variable, weight 100-900, roman and italic) sets body text, the lede, callouts, buttons, tags, tables, chart, SVG and 3D-label text. Libre Bodoni
 (variable, 400-700) is a high-contrast Didone whose hairlines fail small, so it sets only h1, h2 and large numerals, never under 28 px. Italic is for titles of
 books and reports. Every size is a step of the ladder in `src/styles/tokens.css` (`--fs-12`, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28) or a fluid role built
-from two steps (`--fs-lede`, `--fs-lede-sm`, `--fs-h4` ...). Nothing in a rule is a loose px size.
+from two steps (`--fs-lede`, `--fs-lede-sm`, `--fs-chart-title` ...). Nothing in a rule is a loose px size.
 
 | Use | Spec |
 |---|---|
 | Display (page title) | Libre Bodoni 500, `--fs-display` (36 to 56 px), line 1.14, tracking -0.02em; the line under it is Public Sans 400 |
-| Section title (h2) | Libre Bodoni 500, `--fs-h2` (28 to 42 px), line 1.2 |
-| Sub-title (h3), chart title (h4) | Public Sans 600: 20 px; chart titles `--fs-h3-fluid` (24 to 32 px) |
+| Section title (h2) | Libre Bodoni 500, `--fs-h2` (28 to 42 px), line 1.2; every chapter and band title, "Charts and sources" and "Where every fact comes from" included, is this one treatment |
+| Sub-title (h3), chart title (h3 or h4) | Public Sans 600: 20 px; every chart title (chart A and the four in the reference band) is one step, `--fs-chart-title` (24 to 28 px). The rule: a title is Libre Bodoni only when it is a section title at 28 px or more; anything below that is Public Sans |
 | Lede | Public Sans 400, `--fs-lede` (18 to 22 px), line 1.55; chapter ledes `--fs-lede-sm` (18 to 20 px) |
 | Body prose, callouts | Public Sans 400, 16 to 18 px, line 1.55 to 1.6 (reading width 58 to 66ch) |
 | Interface text | Public Sans 400/500/600, 14-15 px |
 | Small | Public Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
 | Short label (key group names, table headers) | Public Sans 600, 13 px, uppercase only when 1 to 3 words, tracking 0.08em |
-| Numerals | Public Sans with tabular figures; large display numerals Libre Bodoni |
-| Reference band (charts, then sources after the quiz) | one step down: band h2 Libre Bodoni 500 `--fs-h2-sm` (28 to 30 px), sans h3 600 `--fs-h4` (22 to 26 px), chart title (h4) Public Sans 600 `--fs-h4`, ledes `--fs-lede-ref` (15 to 18 px), takeaway 500 `--fs-lede-sm`, callouts 15 to 16 px |
+| Numerals | Public Sans, proportional figures in names, dates, pills, cards and 3D labels; tabular figures (`font-variant-numeric`) only where digits must line up: counters, the play clock, chart axes (`.axis text`), numeric table columns (`th.num`, `td.num`). Large display numerals Libre Bodoni |
+| Reference band (charts, then sources after the quiz) | one step down in everything but the headings: band h2 Libre Bodoni 500 `--fs-h2` (the chapter size), sans h3 labels 14 to 18 px, chart title (h4) Public Sans 600 `--fs-chart-title`, ledes `--fs-lede-ref` (15 to 18 px), takeaway 500 `--fs-lede-sm`, callouts 15 to 16 px |
 
 ### 2.3 Space, shape, depth, motion
 
