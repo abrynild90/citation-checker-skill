@@ -30,9 +30,10 @@
   /* fluid roles: each runs between two steps of the ladder */
   --fs-display: clamp(36px, 4.2vw, 56px);
   --fs-h2: clamp(28px, 3.4vw, 42px);
-  --fs-h2-sm: clamp(var(--fs-28), 2.3vw, 30px); /* the reference band's heading */
-  --fs-h3-fluid: clamp(var(--fs-24), 2.5vw, 32px); /* chart titles */
-  --fs-h4: clamp(var(--fs-22), 1.9vw, var(--fs-26)); /* titles inside the reference band */
+  --fs-h2-sm: clamp(var(--fs-28), 2.3vw, 30px); /* unused since the reference band took the chapter size; the name stays */
+  --fs-chart-title: clamp(var(--fs-24), 1.9vw, var(--fs-28)); /* every chart title (chart A and the four in the reference band): Public Sans semibold, one step below the Libre Bodoni chapter titles */
+  --fs-h3-fluid: var(--fs-chart-title);
+  --fs-h4: var(--fs-chart-title);
   --fs-lede: clamp(var(--fs-18), 1.45vw, var(--fs-22)); /* the opening paragraph */
   --fs-lede-sm: clamp(var(--fs-18), 1.6vw, var(--fs-20)); /* a chapter's one-sentence lede, the pattern lines */
   --fs-lede-xs: clamp(var(--fs-16), 1.25vw, var(--fs-20)); /* the line under a chart title */

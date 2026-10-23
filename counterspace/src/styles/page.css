@@ -156,8 +156,8 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 @media (min-width:1200px){.mcol{display:block}}
 @media (max-width:1199px){.mcol>.msec{margin-bottom:var(--s-7)}} /* stacked, each part keeps the room the two-column layout gives it: "Licences and credits" and "All cited sources" no longer sit 0 to 15 px under the row above */
 #methodBody{font:400 var(--fs-16)/1.65 var(--sans);color:var(--muted);min-width:0}
-#methodBody h4{margin:var(--s-8) 0 var(--s-2);color:var(--text);font-size:var(--fs-22);line-height:1.25;scroll-margin-top:16px}
-#methodBody h4:first-child{margin-top:0}
+#methodBody h3{margin:var(--s-8) 0 var(--s-2);color:var(--text);font-size:var(--fs-22);line-height:1.25;scroll-margin-top:16px}
+#methodBody h3:first-child{margin-top:0}
 #methodBody>.msec{margin-bottom:var(--s-8)}
 #methodBody p{margin:0 0 var(--s-3);max-width:var(--measure)}
 #methodBody .src-intro{max-width:var(--measure);margin:0 0 var(--s-4);color:var(--text);font-size:var(--fs-18);line-height:1.55}

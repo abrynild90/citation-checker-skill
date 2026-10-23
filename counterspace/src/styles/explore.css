@@ -4,7 +4,7 @@
 
 /* ---- sub-headings: the test chart and each tab's chart head a part of a chapter, not a chapter of their own */
 .chapter-head.sub{margin-bottom:var(--s-4)}
-.chapter-head.sub>:is(h3,h4){grid-column:1;margin:0;max-width:24em;font:600 var(--fs-h3-fluid)/1.2 var(--sans);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
+.chapter-head.sub>:is(h3,h4){grid-column:1;margin:0;max-width:24em;font:600 var(--fs-chart-title)/1.2 var(--sans);letter-spacing:-.01em;text-wrap:balance;color:var(--text)}
 @media (min-width:1200px){.chapter-head.sub>:is(h3,h4){grid-row:1;max-width:none}}
 /* a chart's own lede is one step quieter than a chapter's, whatever the screen width */
 .chapter-head.sub>.lede{font:400 var(--fs-lede-xs)/1.55 var(--sans)}
