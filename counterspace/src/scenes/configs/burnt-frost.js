@@ -35,10 +35,10 @@ export const BURNT_FROST = {
   offSteps: {
     Impact: [[0, -108, -20], [0.9, -70, -48]], // the collision frame: to the left; the final count (from 0.9) sits close to the limb, clear of Japan's city lights
     'SM-3': [[0, 118, -48], [0.17, 118, -48], [0.27, -150, -86, 'ease'], [0.3, -150, -86], [0.38, -190, 0, 'ease'], [0.44, null]], // the SM-3 pill: right of the missile at the opening, then left of it; it drifts down and left to clear the satellite's pill as the two close (one side, no hop), and the placer's own slot after the hit
-    'USS Lake Erie': [[0, 20, 62], [0.19, 20, 62], [0.3, 150, -4, 'ease'], [0.4, 186, -48, 'ease']], // under the hull's flank in the opening (clear of the SM-3 pill on the right), then right of the ship once the camera pulls out
+    'USS Lake Erie': [[0, 20, 62], [0.19, 20, 62], [0.3, 150, -4, 'ease']], // under the hull's flank in the opening (clear of the SM-3 pill on the right), then right of the ship once the camera pulls out
     'USA-193': [[0, -34, -80], [0.34, 76, -66], [0.44, null]], // above and a little left of the satellite until the interceptor closes on it, then up and to its right (clear of the interceptor and the ship's pill)
   },
-  camOff: { 1: { 'USA-193': [116, -44] }, 2: { 'USA-193': [44, -58], 'USS Lake Erie': [-120, -90] } }, // From orbit: the satellite pill sits off the disc, right of the limb
+  camOff: { 1: { 'USA-193': [140, -10] }, 2: { 'USA-193': [44, -58], 'USS Lake Erie': [-120, -90] } }, // From orbit: the satellite pill sits off the disc, right of the limb
   offFrom: { 'USA-193': 0.3 }, // the fixed From orbit offset applies once the interceptor is near the satellite
   earlyKey: true,
   dropCoreFrom: 0.55, // after the fall begins the camera frames the debris, not the ship
@@ -71,7 +71,7 @@ export const BURNT_FROST = {
       label: 'USS Lake Erie',
       shade: true,
       leaderHull: true, // the name's leader ends on the hull's outline, not across the deck
-      labelUntil: 0.46, // the name retires just after the hit: later the ship sits at the limb under the burst rings with no clear slot for a pill
+      labelUntil: 0.34, // the name retires as the camera turns to follow the interceptor: from there the ship lies along the limb with no clear slot for a pill at the narrower widths
       hideFrom: 0.58,
       dx: 0,
       dy: 44,
