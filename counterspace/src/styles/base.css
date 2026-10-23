@@ -150,6 +150,7 @@ section.chart{padding:var(--s-7) 0;scroll-margin-top:8px;border-top:1px solid va
 @media (prefers-reduced-motion:reduce){.lm-on .lm-ring::after{animation:none}}
 .lm-chip{position:absolute;max-width:min(340px,calc(100vw - 16px));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 11px;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent);box-shadow:0 0 0 2px var(--bg),var(--shadow-1);font:600 var(--fs-13)/1.32 var(--sans)}
 .lm-chip[hidden]{display:none}
+html.lm-still .mark:not(.hl):hover .hit{fill-opacity:0;stroke-opacity:0}
 @media print{.landmark{display:none}}
 /* Touch screens: page-level controls reach 44 px (WCAG 2.2 AAA); the scene viewer sets its own sizes (all at least 24 px, the AA minimum). */
 @media (pointer:coarse){

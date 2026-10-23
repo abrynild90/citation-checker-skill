@@ -465,14 +465,26 @@ export const modelMethods = {
       K.cyl(dark, 0.0034, 0.0042, 0.0008, 0, -0.0181, 0, 0, 0, 0, 20); // a thruster plate under it
       // sail: frame, cell glass (front) and back, a centre rib, two struts down to the deck
       K.group(0, 0.0062, -0.0020, 0, 0, 0, () => {
+        // a sail with thickness: a honeycomb substrate (a visible edge when it is turned edge-on), four cell blankets (two columns by two rows, each with its own cell grid)
+        // between a centre rib and a cross rib, a raised frame, and on the back a truss of two diagonals
         const w = 0.0245,
-          h = 0.0290;
-        K.box(metal, w, h, 0.0005);
-        K.plane(panel, w - 0.0012, h - 0.0012, 0, 0, 0.00029);
-        K.plane(back, w - 0.0012, h - 0.0012, 0, 0, -0.00029, 0, PI, 0);
-        K.box(metal, 0.0004, h, 0.0009, 0, 0, 0);
-        for (const sx of [-1, 1]) K.box(metal, 0.0005, h, 0.0009, sx * w * 0.5, 0, 0);
-        for (const sy of [-1, 1]) K.box(metal, w, 0.0005, 0.0009, 0, sy * h * 0.5, 0);
+          h = 0.0290,
+          t = 0.0016, // substrate thickness
+          gp = 0.0005, // the rib gap between blankets
+          pw = (w - 0.0012 - gp) / 2,
+          ph = (h - 0.0012 - gp) / 2;
+        K.box(metal, w, h, t);
+        for (const sx of [-1, 1])
+          for (const sy of [-1, 1]) {
+            K.plane(panel, pw, ph, sx * (pw + gp) / 2, sy * (ph + gp) / 2, t / 2 + 0.00005);
+            K.plane(back, pw, ph, sx * (pw + gp) / 2, sy * (ph + gp) / 2, -t / 2 - 0.00005, 0, PI, 0);
+          }
+        K.box(metal, 0.0005, h, t + 0.0007, 0, 0, 0); // the centre rib
+        K.box(metal, w, 0.0005, t + 0.0007, 0, 0, 0); // the cross rib
+        for (const sx of [-1, 1]) K.box(metal, 0.0007, h, t + 0.0012, sx * w * 0.5, 0, 0);
+        for (const sy of [-1, 1]) K.box(metal, w, 0.0007, t + 0.0012, 0, sy * h * 0.5, 0);
+        const dg = Math.atan2(w, h);
+        for (const s of [-1, 1]) K.box(back, 0.00045, Math.hypot(w, h) * 0.96, 0.0006, 0, 0, -t / 2 - 0.0004, 0, 0, s * dg);
       });
       for (const sx of [-1, 1]) K.box(metal, 0.0005, 0.0075, 0.0005, sx * 0.0085, -0.0035, -0.0020, 0, 0, -sx * 0.18);
       // instruments on the deck: a gold box with a dark aperture, a smaller white box, whips
@@ -1769,20 +1781,47 @@ export const modelMethods = {
       gm.setIndex([0, 2, 1, 1, 2, 3]);
       g.add(new T.Mesh(gm, white(op)));
     };
-    // the foam outline: the hull's plan, a little larger, flat on the water
-    const plan = (za, zb, grow) => {
-      const sh = new T.Shape(),
-        zs = Array.from({ length: 41 }, (_, i) => za + ((zb - za) * i) / 40),
-        w = (z) => Math.max(0, hw(Math.min(z, Z1)) * grow);
-      zs.forEach((z, i) => (i ? sh.lineTo(w(z), z) : sh.moveTo(w(z), z)));
-      [...zs].reverse().forEach((z) => sh.lineTo(-w(z), z));
-      sh.closePath();
-      return sh;
-    };
-    const ring = new T.ShapeGeometry(plan(Z0 - 0.002, Z1 + 0.003, 1.36));
-    ring.rotateX(Math.PI / 2);
-    ring.translate(0, Y * 0.6, 0);
-    g.add(new T.Mesh(ring, hug(new T.MeshBasicMaterial({ color: 0xe4eeff, transparent: true, opacity: 0.1, depthWrite: false, side: T.DoubleSide }))));
+    // the foam round the hull: a feathered halo (a texture, not a polygon): the alpha falls off smoothly with the distance from the hull's plan, a little wider along the sides
+    // and trailing off astern, with fine streaks, so no outline or rectangle of the patch is ever drawn
+    {
+      const HX = 0.0150, // half width of the patch (x) and its extent in z
+        HZ0 = Z0 - 0.016,
+        HZ1 = Z1 + 0.014,
+        cw = 96,
+        ch = 384,
+        cv = document.createElement('canvas');
+      cv.width = cw;
+      cv.height = ch;
+      const cg = cv.getContext('2d'),
+        im = cg.createImageData(cw, ch),
+        sstep = (a, b, x) => {
+          const q = Math.min(1, Math.max(0, (x - a) / (b - a)));
+          return q * q * (3 - 2 * q);
+        };
+      for (let j = 0; j < ch; j++) {
+        const z = HZ0 + ((HZ1 - HZ0) * j) / (ch - 1); // the top row is the stern (the plane's +y turns to -z)
+        for (let i = 0; i < cw; i++) {
+          const x = -HX + (2 * HX * i) / (cw - 1),
+            w = hw(Math.min(Math.max(z, Z0), Z1)) * 1.05,
+            dxo = Math.max(0, Math.abs(x) - w), // across the plan's edge
+            dzo = z < Z0 ? Z0 - z : z > Z1 ? z - Z1 : 0, // beyond its ends
+            d = Math.hypot(dxo, dzo * 1.5),
+            streak = 1 - 0.18 * (0.5 + 0.5 * Math.sin(z * 260 + 1.3)) * Math.min(1, dxo / 0.002), // a gentle long ripple along the sides, nothing that aliases
+            a = (Math.exp(-((d / 0.0036) ** 2)) * 0.8 + Math.exp(-((d / 0.0085) ** 2)) * 0.2) * (1 - sstep(0.0115, 0.0150, Math.abs(x))) * (1 - sstep(HZ1 - 0.008, HZ1, z)) * sstep(HZ0, Z0 - 0.004, z) * streak,
+            k = (j * cw + i) * 4;
+          im.data[k] = 228;
+          im.data[k + 1] = 238;
+          im.data[k + 2] = 255;
+          im.data[k + 3] = Math.round(Math.min(1, a) * 255);
+        }
+      }
+      cg.putImageData(im, 0, 0);
+      const hg = new T.PlaneGeometry(2 * HX, HZ1 - HZ0, 12, 40); // subdivided: the globe-hugging shader bends it vertex by vertex
+      hg.rotateX(-Math.PI / 2);
+      const halo = new T.Mesh(hg, hug(new T.MeshBasicMaterial({ map: this._gtex(cv, () => new T.CanvasTexture(cv)), transparent: true, opacity: 0.34, depthWrite: false, side: T.DoubleSide })));
+      halo.position.set(0, Y * 0.6, (HZ0 + HZ1) / 2);
+      g.add(halo);
+    }
     // churned wake astern: white foam as wide as the transom that spreads, breaks into patches and thins out with distance, with a thin Kelvin arm each side
     // (the wake is short: past the limb it would float in space)
     strip(0, Z0 + 0.001, 0, Z0 - 0.050, 0.0058, 0.0100, 0.75);
@@ -1795,7 +1834,8 @@ export const modelMethods = {
     // no tintMat: the item's status colour (a pale blue) would repaint the hull every frame and turn the grey paint into a bluish see-through shape
     g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(...norm(pos)));
     g.rotateY(o.heading ?? 0.6);
-    Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70 });
+    // hull: a label keeps off the ship by a row of small circles along the hull (stern to bow, at deck height), not by one circle of half its length
+    Object.assign(g.userData, { span: 0.078, baseScale: 0.85, minPx: 18, maxPx: 70, hull: { z: [-0.040, 0.030], y: 0.006, r: 0.0085 } });
     return g;
   },
 };
