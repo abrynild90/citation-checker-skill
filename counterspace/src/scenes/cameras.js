@@ -128,7 +128,10 @@ export function buildCameras({ cfg, items, H, tgt, aircraftPos, focus, anchors, 
       n = nSouth,
       // fitSouthTo (opt-in, scene time): the keys after it return to the usual side view (the burst and the debris are framed from the side, as before)
       // fitSouthBlend (opt-in, [from, to] scene time): instead of a switch, the view turns from the south view to the side view gradually between these times
+      // fitTiltKeys (opt-in, degrees per key, null = fitTilt): the view of that key leans further from the local vertical (a warship seen at an oblique angle, not plan view)
       nAt = (tk) => {
+        const kt = cfg.fitTiltKeys?.[keys.indexOf(tk)];
+        if (kt != null) return norm(add(scl(cn, Math.cos(kt * DEG)), scl(norm(sd), Math.sin(kt * DEG) * (cfg.fitSide ?? 1))));
         if (south && cfg.fitSouthBlend) {
           const w = smooth((tk - cfg.fitSouthBlend[0]) / (cfg.fitSouthBlend[1] - cfg.fitSouthBlend[0]));
           return norm(add(scl(nSouth, 1 - w), scl(nTilt, w)));
