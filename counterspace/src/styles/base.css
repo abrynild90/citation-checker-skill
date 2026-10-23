@@ -23,7 +23,8 @@ h3{font-family:var(--sans);font-weight:600;font-size:var(--fs-20);line-height:1.
 .lede{font:400 var(--fs-lede)/1.55 var(--sans);color:var(--muted);margin:0}
 .nb{white-space:nowrap}
 em,i{font-style:italic}
-table,.legal-list,.tm,.count,.card,svg text,.hlabel,time{font-variant-numeric:tabular-nums}
+/* Tabular figures only where digits must line up: counters, the play clock, chart axes and numeric table columns (th.num, td.num). Names, dates and running text keep the font's proportional figures, which space "1" and "408" evenly. */
+.tm,.count,.axis text{font-variant-numeric:tabular-nums}
 button,input,select,textarea{font-family:inherit}
 [hidden]{display:none!important}
 

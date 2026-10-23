@@ -140,7 +140,7 @@
 .legal-tap .btn{margin-top:var(--s-2)}
 .legal-list{list-style:none;margin:var(--s-2) 0 0;padding:0;font-size:var(--fs-14);line-height:1.45}
 .legal-list li{padding:10px 0;border-bottom:1px solid var(--grid);color:var(--muted)}
-.legal-list .ld{display:inline-block;min-width:72px;color:var(--accent-2);font-weight:600;font-variant-numeric:tabular-nums}
+.legal-list .ld{display:inline-block;min-width:72px;color:var(--accent-2);font-weight:600}
 .legal-list b{color:var(--text);font-weight:600}
 .legal-list .ls{display:block;margin-top:2px}
 /* abbreviations: a two-column list of terms and meanings */
@@ -197,7 +197,7 @@
 .lag-title .quiet{fill:var(--muted)}
 .lag-note{fill:var(--muted);font:400 var(--fs-13) var(--sans)}
 .lag-title,.lag-note,.lag-fig{paint-order:stroke;stroke:var(--ground);stroke-width:3.5px;stroke-linejoin:round}
-.lag-fig .num{fill:var(--text);font:600 var(--fs-22) var(--sans);font-variant-numeric:tabular-nums}
+.lag-fig .num{fill:var(--text);font:600 var(--fs-22) var(--sans)}
 .lag-fig .unit{fill:var(--muted);font:600 var(--fs-13) var(--sans)}
 .lag-bar{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
 .lag-track{stroke:var(--line);stroke-width:4;stroke-linecap:round}
@@ -250,7 +250,7 @@ tbody tr:last-child td{border-bottom:0}
   .tscroll td:first-child{z-index:2}
 }
 th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
-td.date{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.date{white-space:nowrap}
 caption{caption-side:top;padding:10px 14px;text-align:left;font-size:var(--fs-13);color:var(--muted)}
 td a{overflow-wrap:anywhere}
 .pin-f{display:none}
@@ -553,11 +553,11 @@ details.table>summary{scroll-margin-top:110px}
 .lk-ring{fill:none;stroke:var(--text);stroke-width:1.8}
 .lk-line{stroke:var(--text);stroke-width:1.6;stroke-dasharray:5 4;stroke-linecap:round;opacity:.8}
 .lk-pill{fill:var(--surface);stroke:var(--line-strong);stroke-width:1}
-.lk-tag{fill:var(--text);font:600 var(--fs-13) var(--sans);font-variant-numeric:tabular-nums}
+.lk-tag{fill:var(--text);font:600 var(--fs-13) var(--sans)}
 @media print{.link-layer{display:none}}
 .lk-dim{opacity:.12!important;transition:opacity 120ms var(--ease)}
 /* the time between a weapon and the first later law: the same small pill everywhere (the picture, the scene's law card, the quiz answer) */
-.gap-pill,.q-gap{display:inline-block;padding:1px 10px;margin-right:6px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface-2);color:var(--text);font:600 var(--fs-13)/1.6 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+.gap-pill,.q-gap{display:inline-block;padding:1px 10px;margin-right:6px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface-2);color:var(--text);font:600 var(--fs-13)/1.6 var(--sans);white-space:nowrap}
 .card .nolaw{margin:var(--s-2) 0 0;color:var(--faint);font:500 var(--fs-13)/1.4 var(--sans)}
 
 .legal-quick-key{margin:10px 0 12px;gap:6px 18px;font-size:var(--fs-12)}

@@ -461,7 +461,7 @@ export function pillCss({ place = false, warm = false, block = false } = {}) {
   return (
     `position:absolute;transform:translate(-50%,-50%);display:${block ? 'block' : 'flex'};align-items:center;gap:${LABEL.gap}px;box-sizing:border-box;` +
     `padding:${LABEL.padY}px ${LABEL.padX}px;border:${LABEL.border}px solid ${LABEL.edge};border-radius:${LABEL.radius}px;background:${LABEL.bg};` +
-    `color:${warm ? LABEL.warm : LABEL.text};font:600 ${fs}px/${line}px ${SANS};font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;` +
+    `color:${warm ? LABEL.warm : LABEL.text};font:600 ${fs}px/${line}px ${SANS};white-space:nowrap;pointer-events:none;` +
     (place ? `opacity:${LABEL.place};` : '')
   );
 }

@@ -42,7 +42,7 @@
 .pc-fact.clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--fl,4);overflow:hidden;padding-bottom:0;border-bottom:var(--s-3) solid rgba(5,8,19,.92)} /* the bottom room is a border: the clipped lines cannot show in it */
 .pc-fact b{display:block;margin-bottom:2px;font:600 var(--fs-12)/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#ffc86b}
 .pc-fact-s{display:none}
-.pc-year{grid-column:1;align-self:baseline;font:600 var(--fs-13)/1.4 var(--sans);font-variant-numeric:tabular-nums;color:var(--accent-2)}
+.pc-year{grid-column:1;align-self:baseline;font:600 var(--fs-13)/1.4 var(--sans);color:var(--accent-2)}
 .pc-name{grid-column:1 / -1;font:600 var(--fs-20)/1.3 var(--sans);text-wrap:balance}
 @media (hover:hover){
   .pc-btn:hover .pc-fact,.pc-btn:focus-visible .pc-fact{transform:none}

@@ -229,7 +229,7 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 .ql-tick{width:3px;height:22px;border-radius:2px;background:var(--accent-2);transform-origin:50% 100%}
 .ql-gap{position:absolute;left:8px;right:4px;top:0;bottom:0}
 .ql-gap::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1.6px dashed var(--muted)}
-.ql-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:1px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 var(--fs-13)/1.6 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ql-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:1px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--text);font:600 var(--fs-13)/1.6 var(--sans);white-space:nowrap}
 .ql-y{flex:none;min-width:34px;font:500 var(--fs-13)/1.2 var(--sans);color:var(--faint);font-variant-numeric:tabular-nums}
 .q.done .ql-dot{animation:ql-pop 360ms var(--ease) both}
 .q.done .ql-gap::before{animation:ql-draw 720ms var(--ease) 140ms both}
