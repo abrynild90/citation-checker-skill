@@ -49,6 +49,7 @@ export const DN2 = {
       dx: -40,
       dy: -50,
       head: true,
+      wakeFloor: 0.34, // the early path (under the name's leader) stays a clear red line behind the rocket, not a hairline that the leader's end seems to miss
       wakeOp: 0.62, // the path behind the rocket stays readable (the coast through the apogee and the fall are slow on screen)
       ghostOpacity: 0.25, // the whole planned path stays readable before the rocket flies it
       rocket: {
