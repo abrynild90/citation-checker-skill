@@ -180,11 +180,19 @@ function stripControls(grid) {
     const pic = grid.querySelector('.pc-pic');
     if (pic && grid.parentElement) grid.parentElement.style.setProperty('--edge-top', Math.round(pic.offsetTop + pic.offsetHeight * 0.2) + 'px');
     // a card cut by either edge shows its picture only: its title never ends in half a word
+    const frame = grid.parentElement.getBoundingClientRect();
+    let sliverL = null,
+      sliverR = null;
     for (const c of grid.querySelectorAll('.pcard')) {
       const r = c.getBoundingClientRect(),
         b = grid.getBoundingClientRect();
       c.classList.toggle('cut', r.left < b.left - 4 || r.right > b.right + 4);
+      if (r.left < b.left - 4 && r.right > b.left + 24) sliverL = (b.left + r.right) / 2;
+      if (r.right > b.right + 4 && r.left < b.right - 24 && sliverR == null) sliverR = (r.left + b.right) / 2;
     }
+    // each edge arrow stands in the middle of the card it sits on, never on that card's edge (the visible sliver is 70 to 95 px wide, the arrow 44)
+    grid.parentElement.style.setProperty('--edge-r', sliverR == null ? '2px' : Math.round(frame.right - sliverR - 22) + 'px');
+    grid.parentElement.style.setProperty('--edge-l', sliverL == null ? '2px' : Math.round(sliverL - 22 - frame.left) + 'px');
     if (count) {
       const cards = [...grid.querySelectorAll('.pcard:has(.pc-btn)')],
         box = grid.getBoundingClientRect(),

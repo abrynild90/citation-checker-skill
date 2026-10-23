@@ -43,7 +43,7 @@
 .pc-fact b{display:block;margin-bottom:2px;font:600 var(--fs-12)/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#ffc86b}
 .pc-fact-s{display:none}
 .pc-year{grid-column:1;align-self:baseline;font:600 var(--fs-13)/1.4 var(--sans);color:var(--accent-2)}
-.pc-name{grid-column:1 / -1;font:600 var(--fs-20)/1.3 var(--sans);text-wrap:balance}
+.pc-name{grid-column:1 / -1;font:600 var(--fs-20)/1.3 var(--sans);letter-spacing:-.012em;text-wrap:balance} /* the tracking lets "Fengyun-1C: China destroys" (262 px) fit the 259 px card, so the title breaks in two even lines, not three with a short middle one */
 @media (hover:hover){
   .pc-btn:hover .pc-fact,.pc-btn:focus-visible .pc-fact{transform:none}
   .pc-btn:hover .pc-play,.pc-btn:focus-visible .pc-play{transform:scale(1.12);background:var(--accent);color:#06101f}
@@ -134,8 +134,8 @@
 .pstrip-arrow{appearance:none;position:absolute;top:var(--edge-top,30%);z-index:3;width:44px;height:44px;margin-top:-22px;padding:0;display:grid;place-items:center;border-radius:50%;cursor:pointer;
   background:rgba(7,11,22,.88);color:#eef2fb;border:1px solid rgba(150,175,230,.45);box-shadow:0 4px 18px rgba(0,0,0,.45);transition:opacity var(--dur-2) var(--ease),transform var(--dur-2) var(--ease),background var(--dur-2) var(--ease)}
 .pstrip-arrow .ico{width:20px;height:20px}
-.pstrip-arrow.next{right:2px}
-.pstrip-arrow.prev{left:2px}
+.pstrip-arrow.next{right:var(--edge-r,2px)}
+.pstrip-arrow.prev{left:var(--edge-l,2px)}
 .pstrip-arrow:hover{background:var(--accent);color:#06101f;border-color:var(--accent)}
 .pstrip-arrow[disabled]{opacity:0;pointer-events:none;transform:scale(.9)}
 @media (max-width:519px){.pstrip-arrow{display:none}.pstrip-count{display:none}}

@@ -46,7 +46,7 @@
   #lawHead>.law-choose{grid-column:1;grid-row:3;align-self:start}
   #lawHead>.law-choice{grid-column:1 / -1;grid-row:5}
   #lawHead>.law-row{grid-row:3;margin-top:1px} /* "How to read this chart" and "Move through the years" are level with the find box beside them (its middle, not 11 px under it) */
-  #lawHead>.legal-quick-key{grid-column:2;grid-row:4}
+  #lawHead>.legal-quick-key{grid-column:2;grid-row:4;display:grid;grid-template-columns:repeat(2,minmax(0,max-content));gap:6px 28px} /* two by two: four symbols in a flowing row left "Scene" alone on a second line */
 }
 
 /* the opened key takes the whole heading width (the closed one sits beside the find box): the symbols in columns at the left, the plain words of the abbreviations at the right,
