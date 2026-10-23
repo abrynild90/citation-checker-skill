@@ -769,7 +769,7 @@ function toggleSrc(open) {
 function snapPop(pop) {
   pop.style.minHeight = '';
   pop.style.left = pop.style.right = '';
-  pop.classList.remove('snap');
+  pop.classList.remove('snap', 'over-stage');
   let pr = pop.getBoundingClientRect();
   const sr = stepsEl.getBoundingClientRect();
   if (!pr.height || !sr.height) return;
@@ -782,6 +782,21 @@ function snapPop(pop) {
       pop.style.right = Math.round((box.right - sr.right - parseFloat(cs.borderRightWidth)) * 10) / 10 + 'px';
     }
     return;
+  }
+  // A note that would sit over rows of the list moves over the picture instead (the picture is paused while a note is open): it stands in the lower part of the stage, beside
+  // the column, so every step stays readable. The stage is the area to the left of the column; with the picture above the list (stacked layouts) this branch does not apply.
+  const view = $('sceneView')?.getBoundingClientRect();
+  if (view && view.right <= sr.left + 4 && view.width >= 420) {
+    const box = pop.offsetParent?.getBoundingClientRect();
+    if (box) {
+      const cs = getComputedStyle(pop.offsetParent),
+        x0 = view.left + 16,
+        x1 = sr.left - 10;
+      pop.style.left = Math.round((x0 - box.left - parseFloat(cs.borderLeftWidth)) * 10) / 10 + 'px';
+      pop.style.right = Math.round((box.right - x1 - parseFloat(cs.borderRightWidth)) * 10) / 10 + 'px';
+      pop.classList.add('over-stage');
+      return;
+    }
   }
   // the note covers the list's whole column (the rows' own left and right edges, and the time labels in them), so no sliver of a row's label shows beside it
   // (rows with no box, display:none, report left = right = 0 and are left out: they would stretch the note to the window's edge)
