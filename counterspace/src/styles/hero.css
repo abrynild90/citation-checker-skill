@@ -3,7 +3,7 @@
 .hero-grid{--edge:max(var(--gutter),calc((100% - var(--container)) / 2 + var(--gutter)));display:grid;grid-template-columns:minmax(0,1fr);
   grid-template-areas:"copy" "pic" "acts" "done";padding-bottom:var(--s-5)}
 .hero-copy{grid-area:copy;position:relative;z-index:2;padding:var(--s-4) var(--gutter) 0}
-.hero-title{font-size:clamp(36px,6vw,52px);line-height:1.04;animation:rise var(--dur-hero) var(--ease) both}
+.hero-title{font-size:clamp(36px,calc(6vw + 14px),52px);line-height:1.04;letter-spacing:-.01em;animation:rise var(--dur-hero) var(--ease) both}
 .h1-main,.h1-sub{display:block}
 .h1-sub{margin-top:var(--s-2);font-size:clamp(20px,3vw,24px);font-weight:400;line-height:1.25;letter-spacing:-.005em;color:var(--muted)}
 .hero-text{margin-top:var(--s-3);animation:rise var(--dur-hero) var(--ease) 90ms both}
@@ -15,7 +15,7 @@
 .stage{position:relative;--stage-h:400px;height:var(--stage-h);overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent)}
 .hero .stage svg{position:absolute;left:0;top:0;display:block;width:100%;height:100%}
 /* a phone keeps the title, the picture, its key and both actions on the first screen (390 x 844) */
-@media (max-width:639px){.hero-copy{padding-top:var(--s-3)}.hero-figure{margin-top:var(--s-2)}.stage{--stage-h:326px}}
+@media (max-width:639px){.hero-copy{padding-top:var(--s-3)}.hero-figure{margin-top:var(--s-2)}.stage{--stage-h:326px}.hero-text .lede{font-size:17px;line-height:1.5}}
 .hero-cap{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-3) var(--gutter) 0}
 .hero-cap p{margin:0;max-width:72ch;font:400 14px/1.5 var(--sans);color:var(--muted)}
 .hero-cap .btn{flex:none}
@@ -75,16 +75,20 @@
 @media (min-width:900px){
   .hero-grid{grid-template-areas:"pic" "acts" "done"}
   .hero-copy{grid-area:pic;align-self:start;padding:var(--s-6) var(--edge) 0 var(--edge);width:100%;pointer-events:none}
+  /* the title at display scale (DESIGN 2.2): it sets its own width, so the copy zone the picture keeps clear (hero-timeline.js) is exactly as wide as the words */
   .hero-title,.hero-text{max-width:640px;pointer-events:auto}
-  .hero-title{font-size:clamp(40px,3.6vw,50px)}
+  .hero-title{max-width:none;width:fit-content;font-size:var(--fs-display);line-height:1.02;letter-spacing:-.02em}
   .h1-main{white-space:nowrap}
-  .h1-sub{font-size:clamp(22px,1.95vw,24px)}
+  .h1-sub{margin-top:var(--s-3);font-size:26px;letter-spacing:-.01em}
+  .hero-text{margin-top:var(--s-4)}
   .hero-figure{margin:0}
   .stage{--stage-h:clamp(496px,calc(92vh - 72px - 64px - 24px),716px)}
   .hero-cap{padding:var(--s-3) var(--edge) 0;justify-content:flex-start;align-items:flex-start;gap:var(--s-3)}
   .hero-actions{padding:var(--s-3) var(--edge) 0}
-  /* Replay stands level with the key's line of text (its top edge, not its middle, was level with the line: it sat 7 px low) */
+  /* Replay is a tertiary text button at the end of the key line, level with its text (the key keeps only its own width, so the button follows its last item) */
+  .hero-cap .hero-cap-main{flex:0 1 auto}
   .hero-cap .btn{margin-top:-7px}
+  .hero-cap .hero-replay{padding-inline:var(--s-2);color:var(--hero-accent)}
 }
 @supports (height:100svh){
   @media (min-width:900px){.stage{--stage-h:clamp(496px,calc(92svh - 72px - 64px - 24px),716px)}}
@@ -126,9 +130,7 @@
 /* A wide window (1600 px and more): the hero's words grow by about a tenth (the picture's own labels follow through --htk) and the empty space under the
    actions is taken in. */
 @media (min-width:1600px){
-  .hero-title{font-size:55px}
-  .h1-sub{font-size:26px}
-  .hero-title,.hero-text{max-width:700px}
+  .hero-text{max-width:700px}
   .hero-text .lede{font-size:25px}
   .hero-cap p{font-size:15.5px}
   .ht-pop{width:300px}

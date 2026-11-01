@@ -10,38 +10,46 @@
 .chapter-head.sub>.lede{font:400 clamp(16px,1.25vw,19px)/1.55 var(--serif)}
 section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5);padding-top:var(--s-6)}
 
-/* ---- what the pattern shows: the opening line, the longest pair on the shared years, the caution, then the four chart cards */
-.pattern{padding:var(--s-6) 0 var(--s-6);border-top:1px solid var(--line)}
-.pattern .chapter-head{margin-bottom:var(--s-4)}
+/* ---- what the pattern shows: the opening (a tinted band: the heading, one serif sentence, the longest pair on the shared years and its caution), then the four
+   chart cards and the charts on the page's own ground */
+.pattern{padding:0 0 var(--s-6)}
+.pat-open{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:var(--chapter-gap) 0 var(--s-8)}
+.pattern .chapter-head{margin-bottom:var(--s-5)}
+.pattern .explore{padding-top:var(--s-6)}
 
-/* the opening statement: the range of the waits in one large line, and the longest pair drawn between its two dates on the 1957 to 2026 axis */
-.pat-big{margin:0 0 var(--s-5)}
+/* the opening statement is one sentence set as display type (not a number with a label under it), then one drawn pair */
+.pat-big{margin:0}
 .pat-big[hidden]{display:none}
-/* the lead and the range are two paragraphs read as one display sentence */
-.pb-lead,.pb-num{display:inline;margin:0;font:500 clamp(30px,3.6vw,48px)/1.15 var(--serif);letter-spacing:-.015em}
-.pb-lead{color:var(--muted)}
-.pb-num{color:var(--text)}
-.pb-lead::after{content:" "}
-.pb-track{position:relative;margin:var(--s-5) 0 var(--s-4);padding-bottom:var(--s-7)}
+.pb-line{margin:0;max-width:none;font:500 clamp(32px,4vw,52px)/1.1 var(--serif);letter-spacing:-.015em;color:var(--text);text-wrap:pretty}
+@media (min-width:640px){.pb-num{white-space:nowrap}} /* the range keeps to one line where it fits */
+@media (max-width:639px){.pb-num{display:block}} /* on a phone the range starts its own line (it still wraps at 200% text) */
+.pb-track{position:relative;margin:var(--s-6) 0 var(--s-5);padding-bottom:var(--s-7)}
 .pb-axis{position:relative;height:56px}
-.pb-axis::before{content:"";position:absolute;left:0;right:0;top:32px;border-top:1px solid var(--line-strong)}
-.pb-yr{position:absolute;top:38px;transform:translateX(-50%);font:500 12px/1.4 var(--sans);font-variant-numeric:tabular-nums;color:var(--muted)}
+.pb-axis::before{content:"";position:absolute;left:0;right:0;top:31px;border-top:2px solid var(--grid)}
+.pb-yr{position:absolute;top:40px;transform:translateX(-50%);font:500 12px/1.4 var(--sans);font-variant-numeric:tabular-nums;color:var(--muted)}
 .pb-span{position:absolute;top:0;height:33px}
-.pb-draw{position:absolute;left:0;right:0;top:31px;border-top:2px dashed var(--text);opacity:.55}
-.pb-pill{position:absolute;left:50%;top:0;transform:translateX(-50%);padding:2px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);font:600 13px/1.45 var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
-.pb-dot{position:absolute;top:26px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg)}
-.pb-tick{position:absolute;top:22px;width:3px;height:20px;margin-left:-1.5px;border-radius:2px;background:var(--accent-2)}
-.pb-end{position:absolute;top:60px;right:calc(100% - var(--at));margin:0;display:grid;gap:2px;max-width:none;text-align:right;font:400 14px/1.4 var(--sans);color:var(--muted)}
+.pb-draw{position:absolute;left:6px;right:2px;top:31px;border-top:2px dashed var(--text);opacity:.6}
+.pb-dot{position:absolute;top:27px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg-2)}
+.pb-tick{position:absolute;top:25px;width:3px;height:14px;margin-left:-1.5px;border-radius:2px;background:var(--accent-2);box-shadow:0 0 0 2px var(--bg-2)}
+.pb-end{position:absolute;top:62px;right:calc(100% - var(--at));margin:0;display:grid;gap:2px;max-width:none;text-align:right;font:400 14px/1.4 var(--sans);color:var(--muted)}
 .pb-end.a{padding-right:var(--s-3)}
+.pb-end.b{margin-right:-1.5px}
 .pb-end b{font:600 15px/1.3 var(--sans);color:var(--text)}
 .pb-end.b b{color:var(--accent-2)}
+.pb-k{display:none}
 .pb-note{margin:0;max-width:62ch;font:400 15px/1.5 var(--sans);color:var(--muted)}
 @media (max-width:899px){
-  .pb-track{padding-bottom:0}
+  .pb-track{margin:var(--s-5) 0 var(--s-4);padding-bottom:0}
   .pb-end{position:static;text-align:left;margin-top:var(--s-2);padding:0}
   .pb-end.a{padding:0}
-  .pb-pill{left:auto;right:0;transform:none} /* held inside the axis at any text size: centred on a short span near the edge it ran past the window */
+  .pb-end.b{margin-right:0}
+  .pb-end b{display:flex;align-items:center;gap:var(--s-2)}
+  .pb-end span{padding-left:calc(10px + var(--s-2))}
+  .pb-k{display:block;flex:none}
+  .pb-k.dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  .pb-k.tick{width:3px;height:14px;margin-inline:3.5px;border-radius:2px;background:var(--accent-2)}
 }
+@media (max-width:760px){.pat-open{padding:var(--chapter-gap) 0 var(--s-6)}}
 
 /* ---- explore the data */
 .explore{--xt-h:0px}
@@ -56,8 +64,8 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 }
 @media (max-width:760px){
   section.chart.xpanel{scroll-margin-top:calc(52px + var(--s-3))}
-  .explore{padding:var(--s-6) 0 var(--s-5)}
-  .pattern{padding:var(--s-6) 0 var(--s-5)}
+  .pattern .explore{padding:var(--s-5) 0 0}
+  .pattern{padding:0 0 var(--s-5)}
 }
 /* the way on to the next chart, at the foot of each tab */
 .xnext{display:flex;justify-content:flex-end;margin:var(--s-4) 0 0;padding-top:var(--s-4);border-top:1px solid var(--line)}
@@ -71,20 +79,23 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 /* the four cards are the tabs */
 .xcards{margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
 @media (min-width:900px){.xcards{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-4)}}
-.xcard{appearance:none;display:grid;gap:6px;width:100%;height:100%;padding:var(--s-3);border:1px solid var(--line-strong);border-radius:var(--r-3,14px);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;transition:border-color 120ms var(--ease),background 120ms var(--ease),transform 120ms var(--ease)}
-.xcard:hover{border-color:var(--accent);background:var(--surface-2)}
+.xcard{appearance:none;display:grid;grid-template-rows:auto auto 1fr;align-content:start;gap:var(--s-2);width:100%;height:100%;padding:var(--s-3) var(--s-3) var(--s-4);border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;box-shadow:var(--card-shadow);transition:border-color 120ms var(--ease),background 120ms var(--ease),transform 120ms var(--ease)}
+.xcard:hover{border-color:var(--line-strong);background:var(--surface-2)}
 .xcard:active{transform:translateY(1px)}
 .xcard:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.xcard[aria-selected="true"]{border-color:var(--accent);background:var(--surface-2);box-shadow:0 0 0 1px var(--accent)}
-.xcard[aria-selected="true"] .xc-pic{background:var(--surface-3)}
+/* the open chart's card: a pressed surface with a stronger hairline, its name at full strength (no coloured stripe or glow) */
+.xcard[aria-selected="true"]{border-color:var(--line-strong);background:var(--surface-3);box-shadow:none}
+.xcard[aria-selected="true"] .xc-pic{background:var(--surface-2)}
+.xcard[aria-selected="true"] .xc-t{color:var(--text)}
 .xc-pic{display:block;aspect-ratio:160/64;border-radius:8px;background:var(--bg-2);overflow:hidden}
 .xc-pic svg{display:block;width:100%;height:100%}
 .xc-a{fill:var(--accent)}
 .xc-b{fill:var(--faint);opacity:.55}
 .xc-axis{stroke:var(--line-strong);stroke-width:1;fill:none}
-.xc-t{font:600 15px/1.3 var(--sans)}
-.xc-l{font:400 13.5px/1.4 var(--sans);color:var(--muted)}
-@media (max-width:639px){.xcard{padding:var(--s-2)}.xc-t{font-size:14px}.xc-l{font-size:13px}}
+/* the chart's name is the short label; the finding is the card's line, in the serif */
+.xc-t{margin-top:var(--s-1);font:600 13px/1.3 var(--sans);color:var(--muted)}
+.xc-l{font:500 17px/1.3 var(--serif);color:var(--text);text-wrap:pretty}
+@media (max-width:639px){.xcard{padding:var(--s-2) var(--s-2) var(--s-3)}.xc-l{font-size:16px}}
 #exploreTabs{scroll-margin-top:var(--s-3)}
 .explore #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
 @media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}

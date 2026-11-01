@@ -245,6 +245,20 @@ function build(stage) {
   S.earthImg = el('image', { x: 0, y: yL, width: W, height: groundH, preserveAspectRatio: 'none' }, earth);
   el('path', { d: limbPath, class: 'ht-limb' }, svg);
 
+  // ---- the copy zone: the orbit guides (the low-orbit band, the dashed zone lines and the decade lines) are decoration, so they fade out behind the title and
+  // the lede instead of running under the words. A soft-edged mask over the measured words; no dot, tick or year moves.
+  let guideAttrs = {};
+  if (words.length) {
+    const cx1 = Math.max(...words.map((b) => b.x1)),
+      cy1 = wordsBottom,
+      mask = el('mask', { id: 'htCopyMask', maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: W, height: H }, defs),
+      blur = el('filter', { id: 'htCopyFade', x: '-10%', y: '-10%', width: '120%', height: '120%' }, defs);
+    el('feGaussianBlur', { stdDeviation: 9 }, blur);
+    el('rect', { x: 0, y: 0, width: W, height: H, fill: '#fff' }, mask);
+    el('rect', { x: -40, y: -40, width: cx1 + 40, height: cy1 + 40, fill: '#000', filter: 'url(#htCopyFade)' }, mask);
+    guideAttrs = { mask: 'url(#htCopyMask)' };
+  }
+  const guides = el('g', guideAttrs, svg);
   // ---- orbit zones: one quiet band and two thin lines, drawn along the same curve as the limb
   const curve = (a) => 'M' + steps.map((px) => `${px},${yAlt(a, px).toFixed(1)}`).join('L');
   el(
@@ -256,16 +270,16 @@ function build(stage) {
         .join('L')}Z`,
       class: 'ht-band-leo',
     },
-    svg,
+    guides,
   );
-  [LEO[1], MEO, GEO].forEach((a) => el('path', { d: curve(a), class: 'ht-band-line' }, svg));
+  [LEO[1], MEO, GEO].forEach((a) => el('path', { d: curve(a), class: 'ht-band-line' }, guides));
 
   // ---- decade lines from the limb up, labelled on the ground
   const decades = d3.utcYear
     .every(10)
     .range(DOMAIN[0], DOMAIN[1])
     .filter((d) => d.getUTCFullYear() % (phone ? 20 : 10) === 0);
-  decades.forEach((d) => el('line', { x1: x(d), x2: x(d), y1: limbY(x(d)), y2: 14, class: 'ht-year' }, svg));
+  decades.forEach((d) => el('line', { x1: x(d), x2: x(d), y1: limbY(x(d)), y2: 14, class: 'ht-year' }, guides));
 
   // ---- the flat dark band the ground labels stand on: a fixed, quiet ground for words over the photograph
   el('rect', { x: 0, y: bandTop, width: W, height: H - bandTop, fill: 'rgba(5,8,19,.8)' }, svg);

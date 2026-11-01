@@ -93,7 +93,9 @@ export function findings() {
   };
 }
 
-// The range of the waits in one large line, then the longest pair drawn on the shared year axis (1957 to 2026) between its two dates, and the caution.
+// The range of the waits in one serif sentence, then the longest pair drawn on the shared year axis (1957 to 2026) between its two dates, and the caution.
+// The sentence already says how long the wait was, so the drawing carries no time tag of its own: an axis, the weapon's dot, the law's tick, the dashed link and the
+// two dated names as direct labels (each led by its own small mark, so on a phone, where the names stack under the axis, they still read as the dot's and the tick's).
 const AX0 = 1957,
   AX1 = 2026;
 function patBig(waits, g, longP, longW) {
@@ -111,10 +113,10 @@ function patBig(waits, g, longP, longW) {
     decades = [1960, 1970, 1980, 1990, 2000, 2010, 2020];
   document.getElementById('pbTrack').innerHTML =
     `<div class="pb-axis">${decades.map((y) => `<span class="pb-yr" style="left:${(((y - AX0) / (AX1 - AX0)) * 100).toFixed(2)}%">${y}</span>`).join('')}` +
-    `<span class="pb-span" style="left:${pc(t0)};right:calc(100% - ${pc(t1)})"><i class="pb-draw"></i><span class="pb-pill">${esc(g(longW))}</span></span>` +
+    `<span class="pb-span" style="left:${pc(t0)};right:calc(100% - ${pc(t1)})"><i class="pb-draw"></i></span>` +
     `<i class="pb-dot" style="left:${pc(t0)}"></i><i class="pb-tick" style="left:${pc(t1)}"></i></div>` +
-    `<p class="pb-end a" style="--at:${pc(t0)}"><b>${esc(evName)}</b><span>${esc(fmtMY(t0))}</span></p>` +
-    `<p class="pb-end b" style="--at:${pc(t1)}"><b>${esc(lawName)}</b><span>${esc(fmtMY(t1))}</span></p>`;
+    `<p class="pb-end a" style="--at:${pc(t0)}"><b><i class="pb-k dot"></i>${esc(evName)}</b><span>${esc(fmtMY(t0))}</span></p>` +
+    `<p class="pb-end b" style="--at:${pc(t1)}"><b><i class="pb-k tick"></i>${esc(lawName)}</b><span>${esc(fmtMY(t1))}</span></p>`;
   document.getElementById('pbNote').textContent = `The longest, from ${evName} to the ${lawName}, took ${g(longW)}. This is order in time, not cause.`;
   box.hidden = false;
 }

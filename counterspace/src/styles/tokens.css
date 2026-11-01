@@ -4,8 +4,9 @@
 :root {
   --serif: Newsreader, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* type scale: display never above 56 px; every role that can wrap keeps its line height at 1.3 or more except display headings */
-  --fs-display: clamp(36px, 4.2vw, 56px);
+  /* type scale: the page title is 36 to 40 px on a phone and clamp(56px, 5vw, 72px) from 900 px (hero.css), never above the 72 px cap of DESIGN 2.2;
+     every role that can wrap keeps its line height at 1.3 or more except display headings */
+  --fs-display: clamp(56px, 5vw, 72px);
   --fs-h2: clamp(28px, 3.4vw, 42px);
   --fs-h3: 20px;
   --fs-lede: clamp(18px, 1.45vw, 21px);
@@ -120,17 +121,17 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --bg: #f3f5f9;
-    --bg-2: #e9edf4;
+    --bg: #fbfbf9;
+    --bg-2: #f2f2ee;
     --surface: #ffffff;
-    --surface-2: #eef1f6;
-    --surface-3: #e2e7f0;
-    --line: rgba(20, 30, 60, 0.14);
-    --line-strong: rgba(20, 30, 60, 0.3);
-    --grid: rgba(20, 30, 60, 0.1);
-    --text: #0e1422;
-    --muted: #3c4660;
-    --faint: #566079;
+    --surface-2: #f4f4f1;
+    --surface-3: #e9e9e4;
+    --line: rgba(17, 20, 28, 0.12);
+    --line-strong: rgba(17, 20, 28, 0.28);
+    --grid: rgba(17, 20, 28, 0.09);
+    --text: #111418;
+    --muted: #3f434b;
+    --faint: #575b63;
     --accent: #1b5aa6;
     --accent-2: #8a5a00;
     --accent-soft: rgba(27, 90, 166, 0.1);
@@ -141,9 +142,9 @@
     --focus: #b36b00;
     --selection: rgba(27, 90, 166, 0.22);
     --glass: rgba(255, 255, 255, 0.8);
-    --leo: rgba(40, 90, 190, 0.07);
-    --meo: rgba(100, 60, 200, 0.05);
-    --geo: rgba(190, 120, 0, 0.1);
+    --leo: rgba(27, 90, 166, 0.05);
+    --meo: rgba(17, 20, 28, 0.035);
+    --geo: rgba(138, 90, 0, 0.06);
     --recon: rgba(0, 0, 0, 0.035);
     --c-us: #0072b2;
     --c-ru: #c4501a;
@@ -159,11 +160,11 @@
     --cat-ew: #0072b2;
     --cat-de: #8e44ad;
     --cat-cy: #007a5a;
-    --shadow-1: 0 1px 2px rgba(20, 30, 60, 0.08), 0 2px 8px rgba(20, 30, 60, 0.06);
-    --shadow-2: 0 8px 24px rgba(20, 30, 60, 0.12), 0 2px 6px rgba(20, 30, 60, 0.08);
-    --shadow-3: 0 24px 64px rgba(20, 30, 60, 0.22), 0 6px 16px rgba(20, 30, 60, 0.1);
+    --shadow-1: 0 1px 2px rgba(17, 20, 28, 0.08), 0 2px 8px rgba(17, 20, 28, 0.06);
+    --shadow-2: 0 8px 24px rgba(17, 20, 28, 0.12), 0 2px 6px rgba(17, 20, 28, 0.08);
+    --shadow-3: 0 24px 64px rgba(17, 20, 28, 0.22), 0 6px 16px rgba(17, 20, 28, 0.1);
     --shadow: var(--shadow-2);
-    --edge: rgba(20, 28, 50, 0.28);
+    --edge: rgba(17, 20, 28, 0.28);
     --card-bw: 0px;
     --card-shadow: var(--shadow-1);
   }
@@ -173,17 +174,17 @@
 .xbox.xlight,
 .scope-light {
   color-scheme: light;
-  --bg: #f3f5f9;
-  --bg-2: #e9edf4;
+  --bg: #fbfbf9;
+  --bg-2: #f2f2ee;
   --surface: #ffffff;
-  --surface-2: #eef1f6;
-  --surface-3: #e2e7f0;
-  --line: rgba(20, 30, 60, 0.14);
-  --line-strong: rgba(20, 30, 60, 0.3);
-  --grid: rgba(20, 30, 60, 0.1);
-  --text: #0e1422;
-  --muted: #3c4660;
-  --faint: #566079;
+  --surface-2: #f4f4f1;
+  --surface-3: #e9e9e4;
+  --line: rgba(17, 20, 28, 0.12);
+  --line-strong: rgba(17, 20, 28, 0.28);
+  --grid: rgba(17, 20, 28, 0.09);
+  --text: #111418;
+  --muted: #3f434b;
+  --faint: #575b63;
   --accent: #1b5aa6;
   --accent-2: #8a5a00;
   --accent-soft: rgba(27, 90, 166, 0.1);
@@ -194,9 +195,9 @@
   --focus: #b36b00;
   --selection: rgba(27, 90, 166, 0.22);
   --glass: rgba(255, 255, 255, 0.8);
-  --leo: rgba(40, 90, 190, 0.07);
-  --meo: rgba(100, 60, 200, 0.05);
-  --geo: rgba(190, 120, 0, 0.1);
+  --leo: rgba(27, 90, 166, 0.05);
+  --meo: rgba(17, 20, 28, 0.035);
+  --geo: rgba(138, 90, 0, 0.06);
   --recon: rgba(0, 0, 0, 0.035);
   --c-us: #0072b2;
   --c-ru: #c4501a;
@@ -212,11 +213,11 @@
   --cat-ew: #0072b2;
   --cat-de: #8e44ad;
   --cat-cy: #007a5a;
-  --shadow-1: 0 1px 2px rgba(20, 30, 60, 0.08), 0 2px 8px rgba(20, 30, 60, 0.06);
-  --shadow-2: 0 8px 24px rgba(20, 30, 60, 0.12), 0 2px 6px rgba(20, 30, 60, 0.08);
-  --shadow-3: 0 24px 64px rgba(20, 30, 60, 0.22), 0 6px 16px rgba(20, 30, 60, 0.1);
+  --shadow-1: 0 1px 2px rgba(17, 20, 28, 0.08), 0 2px 8px rgba(17, 20, 28, 0.06);
+  --shadow-2: 0 8px 24px rgba(17, 20, 28, 0.12), 0 2px 6px rgba(17, 20, 28, 0.08);
+  --shadow-3: 0 24px 64px rgba(17, 20, 28, 0.22), 0 6px 16px rgba(17, 20, 28, 0.1);
   --shadow: var(--shadow-2);
-  --edge: rgba(20, 28, 50, 0.28);
+  --edge: rgba(17, 20, 28, 0.28);
   --card-bw: 0px;
   --card-shadow: var(--shadow-1);
 }

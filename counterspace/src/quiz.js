@@ -153,8 +153,7 @@ const watchHTML = (id) => {
     '</span>'
   );
 };
-// What an answered card holds. The same markup, built for the longest case (with the scene to watch), is laid under the empty answer area as an
-// invisible spacer (.q-ghost), so the card already has the height its answer will need, at every width and font, and answering moves nothing below it.
+// What an answered card holds. It is written into the empty live region (.q-out) when the answer is given, and comes in where it stands (charts2.css).
 const outHTML = (b, ok) =>
   `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>` +
   (b.scene ? watchHTML(b.scene) : '');
@@ -173,18 +172,14 @@ export function mountQuiz() {
     <div class="q-opts" role="group" aria-labelledby="q${i}">
       ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
     </div>
-    <div class="q-slot"><p class="q-wait" aria-hidden="true">The dates and the gap appear here.</p><div class="q-out" aria-live="polite"></div>
-      <div class="q-out q-ghost" aria-hidden="true" inert>${outHTML(b, false)}</div></div>
+    <div class="q-out" aria-live="polite"></div>
   </div>
 </li>`;
   }).join('');
-  // the card that draws two pairs (and has the longest explanation) is given a little more width, so the four cards need about the same height side by side
-  const cols = QUESTIONS.map((q) => `minmax(0,${q.kind === 'wait' ? 1.4 : 1}fr)`).join(' ');
-  host.innerHTML = `<div class="quiz"><ol class="q-list" style="--cols:${cols}">${cards}</ol>
+  host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
   <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
   <div class="q-foot"><div class="q-sum"><div class="q-sumreal"><p class="q-tally" id="qTally" aria-live="polite">Four questions. Your answers are not saved.</p>
-    <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div>
-    <div class="q-sumreal q-ghost" aria-hidden="true" inert><p class="q-tally done">4 of 4 answered correctly.</p><p class="q-pattern">${esc(pattern())}</p><p class="q-reward">All four right. That earns a new link on the picture at the top of the page: Starfish Prime nuclear test and Limited Test Ban Treaty.</p></div></div>
+    <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
     <a class="btn small" id="qGaps" href="#lag"><span>See all the gaps</span><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a></div></div>`;
@@ -224,7 +219,6 @@ export function mountQuiz() {
     if (!done) tally.textContent = 'Four questions. Your answers are not saved.';
     else tally.textContent = done < N ? `${right} of ${done} answered correctly so far.` : `${right} of ${N} answered correctly.`;
     tally.classList.toggle('done', done === N);
-    host.querySelector('.q-list').classList.toggle('all-done', done === N); // the four answered cards then share one height (charts2.css)
     // all answered: the score is joined by what the four pairs have in common, and the way to the chart that shows every pair becomes the main step
     pat.textContent = done === N ? pattern() : '';
     pat.hidden = done !== N || !pat.textContent;
@@ -281,7 +275,7 @@ export function mountQuiz() {
       o.classList.toggle('wrong', j === k && !ok);
       o.querySelector('.q-t').insertAdjacentHTML('beforeend', b.opts[j].right ? '<span class="sr"> (the right answer)</span>' : '');
     });
-    li.querySelector('.q-out:not(.q-ghost)').innerHTML = outHTML(b, ok);
+    li.querySelector('.q-out').innerHTML = outHTML(b, ok);
     sync();
     // The last answer opens the score, the pattern and the new link under the cards, which can land past the bottom of a short window. Unless the reader has
     // scrolled in the meantime, the page moves by just enough (smoothly, or at once for reduced motion) to bring the whole summary row into view with a little
@@ -324,7 +318,7 @@ export function mountQuiz() {
     state.fill(null);
     host.querySelectorAll('.q').forEach((li) => {
       li.classList.remove('done');
-      li.querySelector('.q-out:not(.q-ghost)').replaceChildren();
+      li.querySelector('.q-out').replaceChildren();
       li.querySelectorAll('.q-opt').forEach((o) => {
         o.disabled = false;
         o.setAttribute('aria-pressed', 'false');

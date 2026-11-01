@@ -18,12 +18,15 @@ const label = (e) => `${(e.date || e.start).slice(0, 4)} · ${e.state || e.actor
 const card = (e) => (e.domain === 'kinetic' ? kinCard(e) : e.domain === 'non_kinetic' ? nkCard(e) : coCard(e, false));
 
 function finder(id, entries, render = card) {
-  // The finder is the first part of the chart's one fold ("Key, data table and download"), before the key and the table.
+  // The finder is the first part of the chart's one fold ("Key, data table and download"), before the key and the table (after the main source's quotation, where a fold opens with one).
   const section = document.getElementById(id),
     fold = document.createElement('div');
   fold.className = 'rf-sec rf-find';
   fold.innerHTML = `<h4 class="sub-h">Find an entry</h4><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div>`;
-  section.querySelector('.refold .rf-body').prepend(fold);
+  const body = section.querySelector('.refold .rf-body'),
+    quote = body.querySelector(':scope > .rf-quote');
+  if (quote) quote.after(fold);
+  else body.prepend(fold);
   const input = fold.querySelector('input'),
     select = fold.querySelector('select'),
     result = fold.querySelector('.record-result'),

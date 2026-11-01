@@ -58,30 +58,32 @@ together, fix in one batch, confirm once, stop.
 
 ## 2. Look and feel
 
-**Idea: an observatory atlas.** Deep ink-blue night for the dark theme, warm paper for the light theme. Precise thin lines like a printed atlas, with
+**Idea: an observatory atlas.** Deep ink-blue night for the dark theme, a neutral editorial white (not grey, not cream) for the light theme. Precise thin lines like a printed atlas, with
 light that seems to come from the data itself. Serif for ideas, sans for facts and controls.
 
 ### 2.1 Colour (CSS variables in `src/styles/tokens.css`; both themes must define every role)
 
 | Role | Dark | Light |
 |---|---|---|
-| `--bg` page | `#070b16` | `#f6f4ee` |
-| `--bg-2` alternate band | `#0b1224` | `#efece3` |
+| `--bg` page | `#070b16` | `#fbfbf9` |
+| `--bg-2` alternate band | `#0b1224` | `#f2f2ee` |
 | `--surface` card or panel | `#0f172b` | `#ffffff` |
-| `--surface-2` control | `#16203b` | `#f1efe8` |
-| `--surface-3` pressed or selected | `#1d2848` | `#e6e2d6` |
-| `--line` hairline | `rgba(150,175,230,.16)` | `rgba(30,35,55,.16)` |
-| `--line-strong` | `rgba(150,175,230,.30)` | `rgba(30,35,55,.30)` |
-| `--grid` chart grid | `rgba(150,175,230,.10)` | `rgba(30,35,55,.10)` |
-| `--text` | `#eef2fb` | `#151a28` |
-| `--muted` | `#b3bdd6` | `#424a5e` |
-| `--faint` | `#8791ae` | `#596176` |
+| `--surface-2` control | `#16203b` | `#f4f4f1` |
+| `--surface-3` pressed or selected | `#1d2848` | `#e9e9e4` |
+| `--line` hairline | `rgba(150,175,230,.18)` | `rgba(17,20,28,.12)` |
+| `--line-strong` | `rgba(150,175,230,.32)` | `rgba(17,20,28,.28)` |
+| `--grid` chart grid | `rgba(150,175,230,.10)` | `rgba(17,20,28,.09)` |
+| `--text` | `#eef2fb` | `#111418` |
+| `--muted` | `#b3bdd6` | `#3f434b` |
+| `--faint` | `#8791ae` | `#575b63` |
 | `--accent` cool | `#7cc4ff` | `#1b5aa6` |
 | `--accent-2` warm | `#ffc86b` | `#8a5a00` |
 | `--focus` | `#ffd24d` | `#b36b00` |
 | `--warn` red-orange | `#ff9b7a` | `#b2401c` |
+| `--leo` / `--meo` / `--geo` orbit band fills | `rgba(120,170,255,.10)` / `rgba(160,130,255,.08)` / `rgba(255,200,110,.13)` | `rgba(27,90,166,.05)` / `rgba(17,20,28,.035)` / `rgba(138,90,0,.06)` |
 
-Amber (`--accent-2`) carries two data meanings: law (ticks, law years, the guide line) and China (`--c-cn`). Do not use it for a state such as "wrong" or for a label that is not about law. The quiz's wrong answer
+Amber (`--accent-2`) carries two data meanings: law (ticks, law years, law names, the guide line) and China (`--c-cn`). Do not use it for a state such as "wrong" or for a label that is not about law:
+poster years in the 3D strip use `--hero-muted`, quiz hints `--muted`, the takeaway's rule is a 1 px by 32 px `--line-strong` mark, zoom flags and badges are neutral, and tests stay cool (`--accent`). The quiz's wrong answer
 and the missed dot on its trail use `--warn` (red-orange) with a dashed edge and a cross icon, so they are never told apart by colour alone. "Did you know"
 labels and other quiet labels use `--accent` (cool). The "Find it on the chart" landing mark uses `--accent` (see section 2.4).
 
@@ -92,7 +94,8 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 
 | Use | Spec |
 |---|---|
-| Display (page title) | Newsreader 500, `clamp(40px, 6vw, 72px)`, line 1.02, tracking -0.02em |
+| Display (page title) | Newsreader 500, `clamp(56px, 5vw, 72px)` from 900 px (`--fs-display`; 72 px at 1440), line 1.02, tracking -0.02em, with the sub-line at 26 px; 36 to 40 px on a phone with the lede at 17 px, line 1.5 |
+| Pattern sentence (the opening of "What the pattern shows") | Newsreader 500, `clamp(32px, 4vw, 52px)`, line 1.1: one sentence, no number-and-label block under it |
 | Section title (h2) | Newsreader 500, `clamp(28px, 3.4vw, 42px)`, line 1.12 |
 | Sub-title (h3) | Plex Sans 600, 20 px, line 1.3 |
 | Lede | Newsreader 400, `clamp(19px, 2vw, 23px)`, line 1.5 |
@@ -101,11 +104,13 @@ text of 24 px or more). Check with `node tools/contrast_check.mjs`. Never use co
 | Small | Plex Sans 13 px. **Nothing smaller than 12 px anywhere, including inside charts.** |
 | Short label (key group names, table headers) | Plex Sans 600, 12.5 px, uppercase only when 1 to 3 words, tracking 0.08em |
 | Numerals | Plex Sans with tabular figures |
+| Chart card | the chart's name as a short label (Plex Sans 600, 13 px), then its finding as the card's line (Newsreader 500, 17 px); cards in a row share one height; the open one is `--surface-3` with a 1 px `--line-strong` edge |
 | The four chart cards and the sources (the quiet half) | one step down: sources h2 Newsreader 500 `clamp(21px, 1.8vw, 26px)`, chart title (h3) Newsreader 500 `clamp(21px, 1.9vw, 25px)`, ledes Newsreader 15 to 17 px, takeaway Newsreader 500 17 to 19.5 px, callouts 14.5 to 15.5 px |
 
 ### 2.3 Space, shape, depth, motion
 
 - Space scale (px): 4, 8, 12, 16, 24, 32, 48, 72, 112. Chapters are 96 px apart on desktop and 64 px on a phone.
+- Band rhythm: hero (dark), 3D scenes (dark `--hero-bg` band in both themes, hero text tokens, 96 px padding, 64 px on a phone), timeline (page), the opening of "What the pattern shows" (full-bleed `--bg-2` tint), the chart cards and panels (page: charts keep the page as ground), the quiz (`--bg-2` tint), sources (page), footer. Each tinted band ends in a 1 px `--line` hairline. The pinned law strip steps aside before a tinted band.
 - Page container: max 1240 px, side gutters 24 px (20 px on a phone). Reading column 66ch.
 - Radii: 8 for controls, 14 for cards and panels, 22 for the hero and the scene viewer, 999 for pills.
 - Shadows: three levels (`--shadow-1`, `--shadow-2`, `--shadow-3`), softer and wider in light, deeper in dark. No glows on text.
@@ -198,7 +203,7 @@ no wording errors.
 
 1. **Hero.** Full width, dark in both themes (the subject is space). Display title and lede at the upper left of the picture, which is the page's thesis: every test with a reported
    altitude as a dot rising from the Earth's limb, every law as a tick on the ground, on the shared years. Under it one key line with a small drawn sign for each mark (dot: a test in
-   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of two actions: "See the timeline" (primary) and "Take the 3D tour". ("Surprise me" is the first tile of the 3D strip, and the quiz is a chapter, not a hero button.) On a window of 900 px or more the hero fills the first screen exactly and the picture takes the spare height. On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right; where a dot stands in that corner (the 2013 rocket does at 1800 px and more), they stand
+   orbit; tick on the ground: a law or policy; dashed line: a test and the first law after it; ring: a 3D scene) and one row of two actions: "See the timeline" (primary) and "Take the 3D tour". Replay is a tertiary text button at the end of the key line. The orbit guides (the low-orbit band, the dashed zone lines and the decade lines) fade out over the title and lede (a soft mask over the measured words), so the copy sits on clean sky; no dot, tick or year moves. ("Surprise me" is the first tile of the 3D strip, and the quiz is a chapter, not a hero button.) On a window of 900 px or more the hero fills the first screen exactly and the picture takes the spare height. On windows of 1600 px and more, three plain sentences counted from the data fill the empty sky at the top right; where a dot stands in that corner (the 2013 rocket does at 1800 px and more), they stand
    in one column in the sky between the headline's words and that dot instead. Once, after the first paint and only at the top of
    the page, a sweep draws each linked pair (dashed line growing from the weapon to the law, then "N years later") one after another, with that pair's sentence from
    the data replacing the key line and ending in "Watch ... in 3D" where the pair has a scene (the key leaves before the sentence arrives and the other way round, so the two never overlap).
@@ -222,8 +227,9 @@ no wording errors.
    and print shows every tab. The cards follow the ARIA tabs pattern (arrow keys, Home, End, one tab stop), and an address that names a chart or something inside one (`#chartC`, `#lag`,
    `#tableC`) opens its tab first; `#explore` lands on the cards. Panels not chosen stay laid out at full width, out of sight (`data-off`), so every chart is drawn at its true size whichever
    tab is open. The order of the page: hero, 3D strip, law and weapons timeline (with "Move through the years"), what the pattern shows (with its four charts), the quiz, then the sources.
-4. **Chapters and charts.** Each chapter has a title (h2), one plain-language sentence saying what to look for, its chart or charts and, for each chart, an optional callout and exactly one
-   disclosure under the drawing, "Key, data table and download". Inside that one fold, in this order: "Find an entry" (the search box and the list that read any entry with its source; the
+4. **Chapters and charts.** Each chapter has a title (h2), one plain-language sentence saying what to look for, its chart or charts and, for each chart, at most one callout above the drawing (the jamming chart keeps its soft-law and ITU Article 48 callout and its
+   attribution key inline, because "Dashed: alleged, unconfirmed" is a caution; its year note is the one small line that describes the year control) and exactly one
+   disclosure under the drawing, "Key, data table and download". Inside that one fold, in this order (the jamming chart opens it with the main source's own finding, quoted with its page): "Find an entry" (the search box and the list that read any entry with its source; the
    capability chart has "The 2020s assessment by state" after its key instead), "How to read this chart" (the key and any reading notes), "The data behind this chart" (the table, in its own
    scroll box on a phone) and the Download button. The law timeline keeps one visible key line beside its finder ("Find a law or policy") and has the same single fold, "Key, data table and
    download · 19 entries" (the full key, the words line, the abbreviations, the table and the download), in one row with "Zoom in on 2021–2026". No label above a title, no number. Heading

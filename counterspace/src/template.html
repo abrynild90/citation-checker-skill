@@ -68,7 +68,7 @@
             <p class="hero-cue" id="heroCue"><span class="cue-point">Point at any dot or tick to see what followed it</span><span class="cue-touch">Tap any dot or tick to see what followed it</span></p>
             <p class="hero-live" id="heroLive" aria-hidden="true"></p>
           </div>
-          <button class="btn small" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
+          <button class="btn small quiet hero-replay" id="heroReplay" type="button" aria-label="Replay the history" title="Replay the history"><svg class="ico" aria-hidden="true"><use
             href="#i-replay"/></svg><span>Replay</span></button>
         </figcaption>
         <p class="cdn-fail" id="cdnFail" role="alert">The charts could not load. Reload the page to try again.<button class="btn small" type="button" onclick="location.reload()"><svg
@@ -95,7 +95,7 @@
 </header>
 
 <main>
-<section class="scenes" id="scenes" aria-labelledby="hScenes">
+<section class="scenes scope-dark" id="scenes" aria-labelledby="hScenes">
   <div class="wrap">
     <header class="chapter-head scenes-head">
       <h2 data-avoid id="hScenes">Thirteen events, up close</h2>
@@ -171,7 +171,6 @@
         <p data-avoid class="takeaway" id="tkA"></p>
         <div class="tools"><button class="btn small phone-only-btn" id="aZoom" aria-pressed="false" type="button"></button></div>
       </header>
-      <p class="chart-key-inline key-items"><span>Point = one test</span> <span>Bubble = catalogued debris</span> <span>Dashed ring = reported maximum height</span> <span>Play&nbsp;symbol&nbsp;=&nbsp;scene</span> <span class="key-note">Select a point for its source.</span></p>
       <div class="yr-bar" id="yrBar" role="group" aria-labelledby="yrTitle">
         <button class="yr-play" id="yrPlay" type="button" aria-label="Play from 1957" title="Play from 1957"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
         <div class="yr-line">
@@ -200,19 +199,20 @@
   </div>
 
   <section class="pattern" id="pattern" aria-labelledby="hPattern">
+    <div class="pat-open">
     <div class="wrap">
       <header class="chapter-head">
         <h2 data-avoid id="hPattern">What the pattern shows</h2>
         <p data-avoid class="lede">Four things stand out in our records, and each one opens the chart behind it.</p>
       </header>
       <div class="pat-big" id="patBig" hidden>
-        <div class="pb-main">
-          <p class="pb-lead">In every pair, the law came second:</p>
-          <p class="pb-num" id="pbNum"></p>
-          <div class="pb-track" id="pbTrack" aria-hidden="true"></div>
-          <p class="pb-note" id="pbNote"></p>
-        </div>
+        <p class="pb-line">In every pair, the law came second: <span class="pb-num" id="pbNum"></span></p>
+        <div class="pb-track" id="pbTrack" aria-hidden="true"></div>
+        <p class="pb-note" id="pbNote"></p>
       </div>
+    </div>
+    </div>
+    <div class="wrap">
       <div class="explore ref-band" id="explore">
       <div class="xpanels" id="xpanels">
         <section class="chart xpanel" id="chartC" role="tabpanel" aria-labelledby="xct-chartC" tabindex="-1">
@@ -222,22 +222,22 @@
           </header>
           <p data-avoid class="takeaway" id="tkC"></p>
           <div class="callout-row">
-          <p data-avoid class="callout quote" id="quoteC"></p>
           <p data-avoid class="callout">The rules that govern these operations are soft law (expert manuals that are not binding) or carry military exemptions, such as
             Article 48 of the Constitution of the International Telecommunication Union (ITU), the United Nations agency for radio and telecommunications.</p>
           </div>
           <p class="chart-key-inline key-items"><span>Solid fill: attributed by governments or an international body</span> <span>Outline: researchers or analysts</span> <span>Dashed: alleged, unconfirmed</span> <span class="key-note">Select an entry for its source.</span></p>
           <div class="tools chart-tools">
-            <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart">
+            <span class="seg" role="group" aria-label="Years shown in the jamming, laser and cyber chart" aria-describedby="noteC">
               <button class="btn small" id="cFull" aria-pressed="true" type="button">Full span 1957–2026</button>
               <button class="btn small" id="cFocus" aria-pressed="false" type="button">Zoom 1995–2026</button>
             </span>
-            <p data-avoid class="note block" id="noteC"></p>
+            <p data-avoid class="note seg-note" id="noteC"></p>
             <p class="ckey" id="ckeyC" role="group" aria-label="Colour of each country"></p>
           </div>
           <div class="svgbox" id="svgC"></div>
           <details class="table refold" id="foldC"><summary>Key, data table and download</summary>
             <div class="rf-body">
+              <div class="rf-sec rf-quote"><h4 class="sub-h">What the main source finds</h4><p data-avoid class="callout quote" id="quoteC"></p></div>
               <div class="rf-sec"><h4 class="sub-h">How to read this chart</h4><ul data-avoid class="legend" id="legendC" aria-label="Key to the jamming, laser and cyber chart"></ul></div>
               <div class="rf-sec"><h4 class="sub-h">The data behind this chart</h4><div class="tscroll" id="tableC"></div></div>
               <div class="dl-row"><button class="btn small" data-export="C" type="button"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Download chart</button></div>
@@ -323,7 +323,6 @@
 
           </header>
           <p data-avoid class="takeaway" id="tkL"></p>
-          <p data-avoid class="note block">Each bar starts at zero on the same scale. Longer bars mean longer waits.</p>
           <div class="svgbox" id="svgL"></div>
           <details class="table refold" id="foldL"><summary>Key, data table and download</summary>
             <div class="rf-body">
@@ -333,6 +332,7 @@
             </div></details>
         </section>
       </div>
+    </div>
     </div>
   </section>
 </div>

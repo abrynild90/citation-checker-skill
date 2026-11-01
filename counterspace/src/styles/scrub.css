@@ -20,13 +20,13 @@
 .yr-cap b{font-weight:600}
 .yr-cap.fade{opacity:0;transition:opacity 320ms var(--ease)}
 @media (prefers-reduced-motion:reduce){.yr-cap.fade{transition:none}}
-.yr-cap .yr-year{color:var(--accent-2);font-variant-numeric:tabular-nums}
+.yr-cap .yr-year{color:var(--accent);font-variant-numeric:tabular-nums}
 .yr-cap a{margin-left:.3em;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
 .yr-cap a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:2px}
 .yr-bar.is-finale .yr-title{display:none}
 .yr-tally{margin:0 0 0 auto;flex:0 1 auto;min-width:0;text-align:right;font:500 13px/16px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .yr-bar.is-on .yr-tally,.yr-bar.is-finale .yr-tally{color:var(--text)}
-.yr-bar.is-finale .yr-tally{flex:1 1 auto;margin:0;text-align:left;white-space:normal;color:var(--accent-2);font-weight:600;text-wrap:balance}
+.yr-bar.is-finale .yr-tally{flex:1 1 auto;margin:0;text-align:left;white-space:normal;color:var(--text);font-weight:600;text-wrap:balance}
 @media (prefers-reduced-motion:no-preference){.yr-cap:not([hidden]){animation:yr-cap 260ms var(--ease) both}}
 /* a tablet window: the longest-wait sentence is set a size smaller so it keeps to the row's one line (the row never grows when Play ends) */
 @media (max-width:900px){.yr-bar.is-finale .yr-tally{font-size:11.5px;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
@@ -61,7 +61,7 @@
 /* the fog drawn on the strip and the chart: everything after the slider is a faint ghost, and a thin line marks the slider's year */
 .scrub-veil{pointer-events:none}
 .sv-fog{fill:var(--ground);fill-opacity:.95;pointer-events:none}
-.sv-edge{stroke:var(--accent-2);stroke-width:1.5;pointer-events:none}
+.sv-edge{stroke:var(--muted);stroke-width:1.5;pointer-events:none}
 .mark.scrub-future{pointer-events:none}
 .ann-g.scrub-future,.lab.scrub-future,.lbls line.scrub-future{opacity:.05;pointer-events:none}
 @media (prefers-reduced-motion:no-preference){.ann-g,.lab,.lbls line{transition:opacity 240ms var(--ease)}}
