@@ -80,6 +80,8 @@ function pairWaits() {
   const at = (id) => D.events.find((e) => e.id === id) || {};
   return D.lag_pairs.pairs.map((p) => yearsBetween(parse(at(p.event).date || at(p.event).start), parse(D.legal.find((l) => l.id === p.law).start)));
 }
+// A finding that needs its caution beside it carries a short second line on its card: the capability counts before the 2020s are reconstructed.
+export const FINDING_NOTES = { chartB: 'Only the 2020s figure is the Secure World Foundation’s own assessment.' };
 // The four findings, in the order of the story (law late, tests stopped, close approaches, states); each is the line of the card that opens its chart.
 export function findings() {
   const waits = pairWaits(),

@@ -1,5 +1,5 @@
 // ============================================================================
-// charts/legal.js: the law timeline (sticky band, dodged symbols, 2021 to 2026 zoom, phone strip with tap-to-name), its key, glossary and table.
+// charts/legal.js: the law timeline (sticky band, dodged symbols, 2021 to 2026 zoom, phone strip with tap-to-name), its key, glossary, phone list and table.
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
@@ -1192,7 +1192,23 @@ addEventListener('load', () => setTimeout(legalScroll, 400));
 
 // ---------------------------------------------------------------- key, list, glossary and table
 const dateWords = (l) => (l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start)));
+// On a phone the strip is too narrow to name its items, so a fold under it lists every one in date order (the same items as the table in the fold).
+function drawLegalList() {
+  const ul = document.getElementById('legalList');
+  if (!ul) return;
+  ul.innerHTML = LEGAL.slice()
+    .sort((a, b) => (a.start < b.start ? -1 : 1))
+    .map(
+      (l) =>
+        `<li><span class="ld">${l.end ? fmtY(parse(l.start)) + '–' + fmtY(parse(l.end)) : fmtMY(parse(l.start))}</span> <b>${esc(l.title)}</b>` +
+        `<span class="ls">${esc(l.short_note)}</span></li>`,
+    )
+    .join('');
+  const s = document.querySelector('#legalPhone summary');
+  if (s) s.textContent = `All ${LEGAL.length} law and policy items, in date order`;
+}
 export function drawLegalKey() {
+  drawLegalList();
   const choose = document.getElementById('legalChoose'),
     choice = document.getElementById('legalChoice');
   if (choose && !choose.dataset.set) {

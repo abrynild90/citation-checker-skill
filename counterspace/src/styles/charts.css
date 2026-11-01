@@ -81,8 +81,14 @@
 @media (max-width:640px){
   .law-detail{display:flex;flex-direction:column}
   .law-detail>.law-tools{display:contents}
-  .law-tools>.zoom-wrap{order:0}.law-tools>#legalKey{order:1}
+  .law-tools>.zoom-wrap{order:0}.law-detail>#legalPhone{order:1}.law-tools>#legalKey{order:2}
 }
+/* the phone's list of every law and policy item, in date order (legal.js) */
+.legal-list{list-style:none;margin:var(--s-2) 0 0;padding:0;font-size:14px;line-height:1.45;font-variant-numeric:tabular-nums}
+.legal-list li{padding:10px 0;border-bottom:1px solid var(--grid);color:var(--muted)}
+.legal-list .ld{display:inline-block;min-width:72px;color:var(--accent-2);font-weight:600}
+.legal-list b{color:var(--text);font-weight:600}
+.legal-list .ls{display:block;margin-top:2px}
 .zoom-note{font-size:14px;line-height:1.4;color:var(--muted)}
 .zoom-ctl .btn .ico{width:17px;height:17px}
 .zoom-wrap{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows 320ms var(--ease),visibility 0s 320ms}

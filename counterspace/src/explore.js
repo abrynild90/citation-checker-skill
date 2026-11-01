@@ -4,9 +4,7 @@
 // Links to a chart (#chartC, #lag, a table or key inside a panel) and "Find it on the chart" open the right tab first. Print shows every tab (CSS only).
 // Needs: shared.js (hooks). legal.js reads #explore[data-years] to know whether the pinned law strip lines up with the open chart.
 // ============================================================================
-import { CO, D, NK, byId, parse } from './app.js';
-import { yearsBetween } from './links.js';
-import { findings } from './takeaways.js';
+import { FINDING_NOTES, findings } from './takeaways.js';
 import { fragmentId, hooks } from './shared.js';
 
 // years: the chart uses the shared year axis, so the pinned law strip above it lines up. svg: the box the chart is drawn into.
@@ -67,60 +65,8 @@ function fromHash() {
 }
 
 // ---------------------------------------------------------------- the four entry cards above the tabs
-// Each card is a small picture of its chart, drawn from the same data, and one line: the finding its chart shows. A card opens its tab, like the tab does.
-const yr = (e) => +String(e.date || e.start).slice(0, 4),
-  X0 = 1957,
-  X1 = 2026,
-  tx = (y) => 6 + ((y - X0) / (X1 - X0)) * 148,
-  svg = (inner) => `<svg viewBox="0 0 160 64" aria-hidden="true" focusable="false">${inner}<path d="M6 58H154" class="xc-axis"/></svg>`;
-const THUMBS = {
-  // one dot for each operation, on the year it began
-  chartC: () => {
-    const rows = [0, 0, 0, 0];
-    return svg(
-      NK.map((e) => {
-        const i = rows.reduce((m, n, k) => (n < rows[m] ? k : m), 0);
-        const y = yr(e);
-        rows[i] = tx(y) + 7;
-        return `<circle cx="${tx(y).toFixed(1)}" cy="${14 + i * 11}" r="3.4" class="xc-a"/>`;
-      }).join(''),
-    );
-  },
-  // dots stacked in each three-year slot: a histogram of the close approaches
-  chartR: () => {
-    const slots = {};
-    return svg(
-      CO.map((e) => {
-        const s = Math.floor((yr(e) - X0) / 3),
-          n = (slots[s] = (slots[s] || 0) + 1);
-        return `<circle cx="${tx(X0 + s * 3 + 1.5).toFixed(1)}" cy="${(54 - (n - 1) * 5.2).toFixed(1)}" r="2.1" class="xc-a"/>`;
-      }).join(''),
-    );
-  },
-  // the number of capability entries in each decade; the 2020s bar is the one SWF assessed
-  chartB: () => {
-    const dec = D.caps.decades,
-      counts = dec.map((d) => Object.values(D.caps.coding).reduce((n, cat) => n + Object.keys(cat[d] || {}).length, 0)),
-      top = Math.max(...counts);
-    return svg(
-      counts
-        .map((n, i) => {
-          const h = (n / top) * 44;
-          return `<rect x="${(9 + i * 18.2).toFixed(1)}" y="${(56 - h).toFixed(1)}" width="12" height="${h.toFixed(1)}" rx="1.5" class="${i === counts.length - 1 ? 'xc-a' : 'xc-b'}"/>`;
-        })
-        .join(''),
-    );
-  },
-  // one bar for each linked pair, as long as the wait
-  lag: () => {
-    const ws = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start))),
-      top = Math.max(...ws);
-    return svg(
-      ws.map((w, i) => `<rect x="6" y="${(7 + i * 8.2).toFixed(1)}" width="${((w / top) * 140 + 4).toFixed(1)}" height="5" rx="2.5" class="xc-a"/>`).join(''),
-    );
-  },
-};
-// The cards are the tablist: one control per chart, a picture and a line each. Arrow keys move and open together, Home and End jump.
+// Each card is the chart's name and one line: the finding its chart shows (with its caution, where it needs one). A card opens its tab, like the tab does.
+// The cards are the tablist: one control per chart, a name and a finding each. Arrow keys move and open together, Home and End jump.
 function mountCards() {
   const lines = findings(); // the four findings of "What the pattern shows": each card's line says what its chart shows
   bar = document.createElement('div');
@@ -130,7 +76,7 @@ function mountCards() {
   bar.setAttribute('aria-label', 'Charts to explore');
   bar.innerHTML = TABS.map(
     (t, i) =>
-      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-pic">${THUMBS[t.id]()}</span><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${lines[t.id]}</span></button>`,
+      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${lines[t.id]}</span>${FINDING_NOTES[t.id] ? `<span class="xc-n">${FINDING_NOTES[t.id]}</span>` : ''}</button>`,
   ).join('');
   $('xpanels').before(bar);
   const cards = [...bar.children];

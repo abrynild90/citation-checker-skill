@@ -153,10 +153,13 @@ const watchHTML = (id) => {
     '</span>'
   );
 };
-// What an answered card holds. It is written into the empty live region (.q-out) when the answer is given, and comes in where it stands (charts2.css).
+// What an answered card holds. It is written into the empty live region (.q-out) when the answer is given. The same markup, built for the longest case (a wrong
+// answer, with the scene to watch), lies under it as an invisible copy (.q-ghost), so each card already has the height its answer needs, at every width and font,
+// and answering moves nothing below it: not the next card, not the score row.
 const outHTML = (b, ok) =>
-  `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>` +
-  (b.scene ? watchHTML(b.scene) : '');
+  `<p class="q-verdict ${ok ? 'yes' : 'no'}">${esc(b.verdict(ok))}</p>${lineHTML(b.line)}<div class="q-more"><details class="q-explanation"><summary>Why this answer?</summary><p class="q-truth">${b.truth}</p></details>` +
+  (b.scene ? watchHTML(b.scene) : '') +
+  '</div>';
 
 export function mountQuiz() {
   const host = document.getElementById('quiz');
@@ -172,7 +175,8 @@ export function mountQuiz() {
     <div class="q-opts" role="group" aria-labelledby="q${i}">
       ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
     </div>
-    <div class="q-out" aria-live="polite"></div>
+    <div class="q-slot"><p class="q-wait" aria-hidden="true"><span class="qw-track"><i class="qw-dot"></i><i class="qw-tick"></i></span>The dates and the gap appear here.</p>
+      <div class="q-out" aria-live="polite"></div><div class="q-out q-ghost" aria-hidden="true" inert>${outHTML(b, false)}</div></div>
   </div>
 </li>`;
   }).join('');
@@ -275,7 +279,7 @@ export function mountQuiz() {
       o.classList.toggle('wrong', j === k && !ok);
       o.querySelector('.q-t').insertAdjacentHTML('beforeend', b.opts[j].right ? '<span class="sr"> (the right answer)</span>' : '');
     });
-    li.querySelector('.q-out').innerHTML = outHTML(b, ok);
+    li.querySelector('.q-out:not(.q-ghost)').innerHTML = outHTML(b, ok);
     sync();
     // The last answer opens the score, the pattern and the new link under the cards, which can land past the bottom of a short window. Unless the reader has
     // scrolled in the meantime, the page moves by just enough (smoothly, or at once for reduced motion) to bring the whole summary row into view with a little
@@ -305,7 +309,7 @@ export function mountQuiz() {
   });
   // a scene watched (here or anywhere else on the page): its button, if shown, says "Watched" (updated in place, so a focused button keeps its focus)
   document.addEventListener('cs:seen', () =>
-    host.querySelectorAll('.q-go').forEach((g) => {
+    host.querySelectorAll('.q-out:not(.q-ghost) .q-go').forEach((g) => {
       const seen = seenScenes.has(g.dataset.scene),
         name = SHORT[g.dataset.scene] || '';
       g.classList.toggle('seen', seen);
@@ -318,7 +322,7 @@ export function mountQuiz() {
     state.fill(null);
     host.querySelectorAll('.q').forEach((li) => {
       li.classList.remove('done');
-      li.querySelector('.q-out').replaceChildren();
+      li.querySelector('.q-out:not(.q-ghost)').replaceChildren();
       li.querySelectorAll('.q-opt').forEach((o) => {
         o.disabled = false;
         o.setAttribute('aria-pressed', 'false');

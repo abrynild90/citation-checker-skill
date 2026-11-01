@@ -117,8 +117,9 @@
 .quiz-band{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:var(--chapter-gap) 0 var(--s-7);scroll-margin-top:16px;overflow-x:clip} /* the ring that ends the perfect-score line grows past the tick; on a narrow window it must not leave the page wider than the window */
 .quiz-head{margin-bottom:var(--s-4)}
 .quiz{margin:0}
-/* Four compact cards, two by two from 900 px (one column below). A card is only as tall as what it says: answering one never stretches its neighbour. */
-.q-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-4);align-items:start}
+/* Four cards, two by two from 900 px (one column below). Each holds the room its answer will take (the slot below), and the two cards of a row share one height,
+   so answering moves nothing: not the neighbour, not the next row, not the score. */
+.q-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-4);align-items:stretch}
 @media (min-width:900px){.q-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-4) var(--s-5)}}
 .q{display:flex;flex-direction:column;gap:var(--s-1);padding:var(--s-4) var(--s-5) var(--s-5);border:var(--card-bw) solid var(--line);border-radius:var(--r-2);background:var(--surface);box-shadow:var(--card-shadow)}
 @media (max-width:519px){.q{padding:var(--s-4)}}
@@ -149,6 +150,8 @@
 .q-verdict.no{color:var(--warn)}
 .q-gap{margin:0 2px}
 .q-foot{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--s-3) var(--s-4);margin-top:var(--s-5);padding-top:var(--s-4);border-top:1px solid var(--line)}
+.q-foot>.q-again[hidden]{display:inline-flex!important;visibility:hidden} /* "Try again" keeps its place before the first answer, so the first answer does not reflow the row */
+@media (max-width:639px){.q-foot>.q-sum{flex:0 0 100%}} /* on a phone the score has a line of its own, so a shorter score never pulls a button up beside it */
 .q-tally{margin:0 auto 0 0;font:600 17px/1.4 var(--serif);color:var(--text)}
 .q-tally:not(.done){font:400 15px/1.5 var(--sans);color:var(--muted)}
 .q-sum{margin:0 auto 0 0;max-width:var(--measure)}
@@ -196,8 +199,19 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 @media (pointer:coarse){.q-go{--h:44px}}
 
 /* The answer comes in where it stands, under the options: a short fade and a 4 px rise that the reader's own choice sets off (no height is animated). The live
-   region is in the card from the start, empty until then, so the answer is read out. No room is held for an answer or for the summary under the cards. */
-.q-out:not(:empty){animation:q-in 200ms var(--ease) both}
+   region is in the card from the start, empty until then, so the answer is read out. Its room is held by the invisible copy under it (.q-ghost, quiz.js); until
+   the answer is in, that room shows a faint outline of the pair-line the answer draws, and one quiet line. */
+.q-slot{flex:1 1 auto;display:grid;margin-top:var(--s-3)}
+.q-slot>*{grid-area:1/1;min-width:0}
+.q-slot>.q-out{align-self:start}
+.q-ghost{visibility:hidden;pointer-events:none}
+.q-wait{align-self:center;display:grid;justify-items:center;gap:var(--s-2);margin:0;padding:var(--s-3) 0;font:400 14px/1.45 var(--sans);color:var(--faint);text-align:center}
+.qw-track{position:relative;display:flex;align-items:center;justify-content:space-between;width:min(240px,70%);height:20px}
+.qw-track::before{content:"";position:absolute;left:10px;right:6px;top:50%;border-top:1.4px dashed var(--line-strong)}
+.qw-dot{position:relative;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--line-strong)}
+.qw-tick{position:relative;width:3px;height:18px;border-radius:2px;background:var(--line-strong)}
+.q.done .q-wait{display:none}
+.q-out:not(:empty):not(.q-ghost){animation:q-in 200ms var(--ease) both}
 @keyframes q-in{from{opacity:0;transform:translateY(4px)}}
 @media (prefers-reduced-motion:reduce){.q-out:not(:empty){animation:none}}
 
@@ -254,16 +268,19 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 /* Cards side by side give every title the height of the tallest title in their row (measured in quiz.js, so it follows the real text, the width and the font), so
    the options start level. */
 /* the live region stays rendered while it is empty (no height, no gap), so a screen reader is already listening to it when the answer arrives */
-.q-body{display:flex;flex-direction:column;min-height:0}
+.q-body{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .q-out{display:flex;flex-direction:column;gap:var(--s-2)}
 .q-out>*{margin:0}
-.q-out>.q-watch{margin-top:var(--s-1)}
+/* "Why this answer?" and the scene to watch share one row, so the room an answer holds stays short; an opened explanation takes the full width */
+.q-more{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-5);margin-top:var(--s-1)}
+.q-more>.q-explanation{margin:0}
+.q-more>.q-explanation[open]{flex-basis:100%}
+.q-more>.q-watch{margin:0}
 .q.done .q-hint{color:var(--muted)}
-.q.done .q-out{margin-top:var(--s-3)}
 @media (min-width:1100px){
-  .q.done .q-out{font-size:14.5px;line-height:1.5}
-  .q.done .q-out .q-verdict{font-size:16.5px}
-  .q.done .q-line{gap:var(--s-2)}
+  :is(.q.done .q-out,.q-ghost){font-size:14.5px;line-height:1.5}
+  :is(.q.done .q-out,.q-ghost) .q-verdict{font-size:16.5px}
+  :is(.q.done,.q-ghost) .q-line{gap:var(--s-2)}
   .q-foot{margin-top:var(--s-4)}
   .q-sum{flex:1 1 0;min-width:420px;max-width:80ch}
   .q-trail{height:36px;margin-top:var(--s-3)}

@@ -1,10 +1,10 @@
 /* Scene gallery, "Surprise me" and reveal. A poster per 3D scene; on hover or focus the picture eases in and a "Did you know" line rises over it.
    The gallery is the second dark band (a cinema strip under the dark hero, in both themes): the section carries .scope-dark, so every token in it is the dark set,
    and its words use the hero's own text colours. */
-.scenes{position:relative;padding:96px 0;background:var(--hero-bg);color:var(--hero-text);scroll-margin-top:16px;border-top:1px solid var(--hero-line)}
+.scenes{position:relative;padding:96px 0 72px;background:var(--hero-bg);color:var(--hero-text);scroll-margin-top:16px;border-top:1px solid var(--hero-line);border-bottom:1px solid var(--hero-line)} /* the band ends in a hairline in both themes, so in the dark theme its end is seen, not guessed */
 .scenes .chapter-head h2{color:var(--hero-text)}
 .scenes .chapter-head .lede,.scenes .scene-choose{color:var(--hero-muted)}
-@media (max-width:760px){.scenes{padding:64px 0}}
+@media (max-width:760px){.scenes{padding:64px 0 56px}}
 .scenes>.wrap{position:relative}
 /* the dark hero ends in a soft fade into the page, never a hard edge (it matters most in the light theme) */
 .scenes-head{margin-bottom:var(--s-4)}

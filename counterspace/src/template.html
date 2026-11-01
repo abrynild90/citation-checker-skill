@@ -35,6 +35,7 @@
       <div class="brand">
         <svg class="ico brand-mark" aria-hidden="true"><use href="#i-orbit"/></svg>
         <div class="brand-text">
+          <span class="brand-name">Counterspace Timeline</span>
           <span class="brand-credit">A companion to <i>Space Security Law</i> by Aaron Brynildson</span>
         </div>
       </div>
@@ -89,6 +90,7 @@
         <a class="btn primary" id="heroGo" href="#timeline">See the timeline</a>
         <button class="btn" id="tourBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Take the 3D tour</button>
         <p class="hero-seen" id="heroSeen" aria-live="polite" hidden></p>
+        <nav class="hero-jumps" aria-label="Start exploring"><span class="hj-lab">Or go to</span><a href="#scenes">3D scenes</a><a href="#pattern">The pattern</a><a href="#quizBand">Test yourself</a><a href="#sources">Sources</a></nav>
       </div>
     </div>
   </section>
@@ -142,6 +144,7 @@
     </div>
   </div>
   <div class="wrap law-detail">
+    <details class="table only-phone" id="legalPhone"><summary>All 19 law and policy items, in date order</summary><ul class="legal-list" id="legalList"></ul></details>
       <div class="dl-group law-tools">
     <div class="zoom-ctl"><button class="btn small" id="zoomBtn" type="button" aria-expanded="false" aria-controls="legalZoomWrap"><svg class="ico" aria-hidden="true"><use href="#i-zoom"/></svg><span>Zoom in on 2021–2026</span></button><span class="zoom-note">The shaded years are crowded. The zoom names every item in them.</span></div>
     <div class="zoom-wrap" id="legalZoomWrap"><div class="zoom-in">
@@ -203,12 +206,17 @@
     <div class="wrap">
       <header class="chapter-head">
         <h2 data-avoid id="hPattern">What the pattern shows</h2>
-        <p data-avoid class="lede">Four things stand out in our records, and each one opens the chart behind it.</p>
+        <p data-avoid class="lede">First, the order that every linked attack and law share. Then four findings from our records, each opening the chart that shows it.</p>
       </header>
       <div class="pat-big" id="patBig" hidden>
         <p class="pb-line">In every pair, the law came second: <span class="pb-num" id="pbNum"></span></p>
         <div class="pb-track" id="pbTrack" aria-hidden="true"></div>
+        <div class="pb-notes">
         <p class="pb-note" id="pbNote"></p>
+        <p class="pb-eg">One example: the Limited Test Ban Treaty was signed 13 months after Starfish Prime, a US nuclear test in space. That sequence alone does not show that the test caused the
+          agreement; the US State Department’s Office of the Historian points to the Cuban Missile Crisis and concern about radioactive fallout. <a href="https://history.state.gov/milestones/1961-1968/limited-ban"
+          target="_blank" rel="noopener">Read the historical context<span class="sr"> (opens in a new tab)</span></a></p>
+        </div>
       </div>
     </div>
     </div>

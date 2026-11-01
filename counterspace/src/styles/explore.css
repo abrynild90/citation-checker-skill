@@ -37,7 +37,12 @@ section.chart.chart-first{border-top:1px solid var(--line);margin-top:var(--s-5)
 .pb-end b{font:600 15px/1.3 var(--sans);color:var(--text)}
 .pb-end.b b{color:var(--accent-2)}
 .pb-k{display:none}
-.pb-note{margin:0;max-width:62ch;font:400 15px/1.5 var(--sans);color:var(--muted)}
+/* the caution under the drawing: the general one (order in time, not cause) and one worked example, side by side on a wide window */
+.pb-notes{display:grid;gap:var(--s-3) var(--s-7);align-items:start}
+@media (min-width:900px){.pb-notes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1200px){.pb-notes{column-gap:var(--s-8)}} /* the example lines up with the chapter lede above it */
+.pb-note,.pb-eg{margin:0;max-width:62ch;font:400 15px/1.5 var(--sans);color:var(--muted)}
+.pb-eg a{color:var(--accent);text-underline-offset:.2em}
 @media (max-width:899px){
   .pb-track{margin:var(--s-5) 0 var(--s-4);padding-bottom:0}
   .pb-end{position:static;text-align:left;margin-top:var(--s-2);padding:0}
@@ -79,23 +84,18 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 /* the four cards are the tabs */
 .xcards{margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
 @media (min-width:900px){.xcards{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-4)}}
-.xcard{appearance:none;display:grid;grid-template-rows:auto auto 1fr;align-content:start;gap:var(--s-2);width:100%;height:100%;padding:var(--s-3) var(--s-3) var(--s-4);border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;box-shadow:var(--card-shadow);transition:border-color 120ms var(--ease),background 120ms var(--ease),transform 120ms var(--ease)}
+.xcard{appearance:none;display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-1);width:100%;height:100%;padding:var(--s-3) var(--s-4) var(--s-4);border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;box-shadow:var(--card-shadow);transition:border-color 120ms var(--ease),background 120ms var(--ease),transform 120ms var(--ease)}
 .xcard:hover{border-color:var(--line-strong);background:var(--surface-2)}
 .xcard:active{transform:translateY(1px)}
 .xcard:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* the open chart's card: a pressed surface with a stronger hairline, its name at full strength (no coloured stripe or glow) */
 .xcard[aria-selected="true"]{border-color:var(--line-strong);background:var(--surface-3);box-shadow:none}
-.xcard[aria-selected="true"] .xc-pic{background:var(--surface-2)}
 .xcard[aria-selected="true"] .xc-t{color:var(--text)}
-.xc-pic{display:block;aspect-ratio:160/64;border-radius:8px;background:var(--bg-2);overflow:hidden}
-.xc-pic svg{display:block;width:100%;height:100%}
-.xc-a{fill:var(--accent)}
-.xc-b{fill:var(--faint);opacity:.55}
-.xc-axis{stroke:var(--line-strong);stroke-width:1;fill:none}
-/* the chart's name is the short label; the finding is the card's line, in the serif */
-.xc-t{margin-top:var(--s-1);font:600 13px/1.3 var(--sans);color:var(--muted)}
+/* the chart's name is the short label; the finding is the card's line, in the serif; a caution the finding needs follows it, quieter */
+.xc-t{font:600 13px/1.3 var(--sans);color:var(--muted)}
 .xc-l{font:500 17px/1.3 var(--serif);color:var(--text);text-wrap:pretty}
-@media (max-width:639px){.xcard{padding:var(--s-2) var(--s-2) var(--s-3)}.xc-l{font-size:16px}}
+.xc-n{margin-top:2px;font:400 13px/1.4 var(--sans);color:var(--muted);text-wrap:pretty}
+@media (max-width:639px){.xcard{padding:var(--s-2) var(--s-3) var(--s-3)}.xc-l{font-size:16px}}
 #exploreTabs{scroll-margin-top:var(--s-3)}
 .explore #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}
 @media (max-width:760px){#exploreTabs{scroll-margin-top:calc(52px + var(--s-3))}}

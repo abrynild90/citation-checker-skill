@@ -11,14 +11,8 @@
 .ref-sub p{margin:0;font:400 14.5px/1.45 var(--sans);color:var(--muted);max-width:54ch}
 @media (min-width:1800px){.ref-sub p{font-size:15.5px}}
 
-/* ---- the four cards: a picture at the left, the name and one line at the right (a row of four takes about 80 px, not 190) */
+/* ---- the four cards: the chart's name over its finding, one short row of four */
 .ref-band .xcards{gap:var(--s-3)}
-.ref-band .xcard{grid-template-columns:88px minmax(0,1fr);grid-template-rows:auto auto;column-gap:var(--s-3);row-gap:3px;align-items:center;align-content:center;padding:var(--s-3)}
-.ref-band .xc-pic{grid-row:1 / span 2;grid-column:1;align-self:center}
-.ref-band .xc-t{grid-column:2;grid-row:1;align-self:end;margin:0;font-size:13px}
-.ref-band .xc-l{grid-column:2;grid-row:2;align-self:start;font-size:17px;line-height:1.3}
-@media (max-width:899px){.ref-band .xcard{grid-template-columns:72px minmax(0,1fr)}}
-@media (max-width:420px){.ref-band .xcard{grid-template-columns:minmax(0,1fr);}.ref-band .xc-pic{display:none}.ref-band .xc-t,.ref-band .xc-l{grid-column:1}}
 
 /* ---- one chart at a time, closer to its cards and set a size down */
 .ref-band section.chart.xpanel{padding:calc(var(--s-5) + 28px) 0 var(--s-2)} /* room between the row of cards and the panel's heading */
@@ -154,7 +148,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .src-top{margin:var(--s-5) 0 0}
 .src-top h3{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
 .st-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.st-list li{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) auto;gap:var(--s-1) var(--s-4);align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font:400 15px/1.45 var(--sans)}
+.st-list li{display:grid;grid-template-columns:minmax(110px,150px) minmax(0,1fr) auto;gap:var(--s-1) var(--s-4);align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font:400 15px/1.45 var(--sans)}
 .st-kind{font:600 13px/1.4 var(--sans);color:var(--muted)}
 .st-list a{font-weight:500;color:var(--accent);overflow-wrap:anywhere}
 .st-n{font-size:14px;color:var(--muted);white-space:nowrap}

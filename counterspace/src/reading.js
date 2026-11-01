@@ -129,7 +129,7 @@ export function mountReading() {
   const nav = document.createElement('nav');
   nav.className = 'reading-nav';
   nav.setAttribute('aria-label', 'Jump to a chapter');
-  nav.innerHTML = `<label><span>On this page</span><select aria-label="Jump to a chapter">${chapters.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label><a href="#top" aria-label="Back to the top">↑</a>`;
+  nav.innerHTML = `<label><span>On this page</span><select aria-label="Jump to a chapter">${chapters.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label><a href="#top" aria-label="Back to the top"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a>`;
   document.body.append(nav);
   const choose = nav.querySelector('select');
   choose.onchange = () => {
@@ -148,11 +148,12 @@ export function mountReading() {
   addEventListener('scroll', sync, { passive: true });
   sync();
   document.addEventListener('focusin', (e) => {
-    if (nav.hidden || !matchMedia('(max-width:760px)').matches || e.target.closest('.reading-nav, #overlay')) return;
+    if (nav.hidden || !matchMedia('(max-width:1359px)').matches || e.target.closest('.reading-nav, #overlay')) return;
     requestAnimationFrame(() => {
       const r = e.target.getBoundingClientRect(),
-        n = nav.getBoundingClientRect();
-      if (document.activeElement === e.target && r.bottom > n.top && r.top < innerHeight) scrollBy({ top: r.bottom - n.top + 12, behavior: 'instant' });
+        n = nav.getBoundingClientRect(); // a full-width bar on a phone, a pill in the lower right corner on wider windows: only a control it covers is moved
+      if (document.activeElement === e.target && r.bottom > n.top && r.top < innerHeight && r.right > n.left && r.left < n.right)
+        scrollBy({ top: r.bottom - n.top + 12, behavior: 'instant' });
     });
   });
 }
