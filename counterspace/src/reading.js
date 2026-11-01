@@ -18,11 +18,12 @@ const label = (e) => `${(e.date || e.start).slice(0, 4)} · ${e.state || e.actor
 const card = (e) => (e.domain === 'kinetic' ? kinCard(e) : e.domain === 'non_kinetic' ? nkCard(e) : coCard(e, false));
 
 function finder(id, entries, render = card) {
+  // The finder is the first part of the chart's one fold ("Key, data table and download"), before the key and the table.
   const section = document.getElementById(id),
-    fold = document.createElement('details');
-  fold.className = 'record-find';
-  fold.innerHTML = `<summary>Find an entry <span>${entries.length} records</span></summary><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div>`;
-  section.querySelector('.refold').before(fold);
+    fold = document.createElement('div');
+  fold.className = 'rf-sec rf-find';
+  fold.innerHTML = `<h4 class="sub-h">Find an entry</h4><div class="record-tools"><label>Search records<input type="search" placeholder="Name, state or year" aria-controls="find-${id}"></label><label>Choose an entry<select id="find-${id}"></select></label></div><p class="record-count" role="status"></p><div class="record-result" hidden></div>`;
+  section.querySelector('.refold .rf-body').prepend(fold);
   const input = fold.querySelector('input'),
     select = fold.querySelector('select'),
     result = fold.querySelector('.record-result'),
@@ -85,10 +86,11 @@ function capabilities() {
   const states = [
     ...new Set(Object.values(CAPS.coding).flatMap((dec) => Object.keys(dec['2020s'] || {}).map((s) => (s === 'USSR/Russia' ? 'Russia' : s)))),
   ].sort();
-  const fold = document.createElement('details');
-  fold.className = 'record-find';
-  fold.innerHTML = `<summary>Read the 2020s assessment by state <span>${states.length} states</span></summary><label class="state-choose">Choose a state<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div>`;
-  document.querySelector('#chartB .refold').before(fold);
+  // A second part of the capability chart's fold, after its key: each state's 2020s assessment, one state at a time.
+  const fold = document.createElement('div');
+  fold.className = 'rf-sec rf-find rf-state';
+  fold.innerHTML = `<h4 class="sub-h">The 2020s assessment by state</h4><label class="state-choose">Choose one of the ${states.length} states<select id="stateAssessment"><option value="">Choose a state…</option>${states.map((s) => `<option>${esc(s)}</option>`).join('')}</select></label><div class="record-result" hidden></div>`;
+  document.querySelector('#foldB .rf-body > .rf-sec').after(fold);
   const result = fold.querySelector('.record-result');
   fold.querySelector('select').onchange = (e) => {
     const state = e.target.value;

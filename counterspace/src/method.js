@@ -114,15 +114,13 @@ export function drawMethod() {
         n = legal ? 'Legal item on the timeline' : `Cited for ${rs.length} timeline entries`;
       return `<li><span class="st-kind">${legal ? esc(legalKindWords(r)) : 'Main source'}</span><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${legal ? esc(title) : title}<span class="sr"> (opens in a new tab)</span></a><span class="st-n">${n}</span></li>`;
     });
-  document.getElementById('sourceActions').insertAdjacentHTML(
-    'beforebegin',
-    `<div class="src-top"><h4 id="srcTopH">The sources most relied on</h4><ol class="st-list" aria-labelledby="srcTopH">${top.join('')}</ol><p class="st-more">All ${groups.size} sources are in the full list under “Read the sources and method”, with the page or table each is cited for.</p></div>`,
-  );
+  const topBlock = `<div class="src-top"><h3 id="srcTopH">The sources most relied on</h3><ol class="st-list" aria-labelledby="srcTopH">${top.join('')}</ol><p class="st-more">All ${groups.size} sources are in the full list below, with the page or table each is cited for.</p></div>`;
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
   document.getElementById('methodBody').innerHTML = `<details class="table src-fold" id="srcDetails"><summary>Read the sources and method<span class="cnt">${cites.length} sources</span></summary>
+${topBlock}
 <p class="src-check">To check a fact, open the data table behind its chart, note the source and page reference for the entry, then find that source in the list of all cited sources.</p>
 <div class="msec">
-  <h4 id="srcCite">How to cite this page</h4>
+  <h3 id="srcCite">How to cite this page</h3>
   <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
   <div class="panel-card cite-card">
     <p class="cite-text" id="citeText">Aaron Brynildson, “Counterspace Timeline, 1957–2026,” companion to <i>Space Security Law: Governance Beyond the Atmosphere</i>
@@ -133,9 +131,9 @@ export function drawMethod() {
 <div class="mcols">
 <div class="mcol">
 <div class="msec">
-  <h4 id="srcEditions">Editions and dates</h4>
+  <h3 id="srcEditions">Editions and dates</h3>
   <p class="src-intro">Which editions the data rests on, and how current it is.</p>
-  <h5 class="sub-h">What the data rests on</h5>
+  <h4 class="sub-h">What the data rests on</h4>
   <ul>
     <li><b>Main source:</b> Secure World Foundation (SWF), <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen
       Brett, eds., 9th ed., April 2026). It covers 13 countries and five categories of capability. The count of 13 countries is a 2026 figure, not a fixed
@@ -144,7 +142,7 @@ export function drawMethod() {
       2025</i> was used only to cross-check. No entry, page reference or citation depends on it. The 2026 edition was not yet published on ${DATA_DATE}.</li>
     <li><b>Data last updated:</b> ${DATA_DATE}.</li>
   </ul>
-  <h5 class="sub-h">Checks we ran</h5>
+  <h4 class="sub-h">Checks we ran</h4>
   <ul>
     <li><b>Where the opening claim comes from:</b> The statement at the top of the page that only non-destructive capabilities are in active use is SWF’s
       finding, quoted from SWF 2026, Executive Summary, p.&nbsp;xxiii (PDF p.&nbsp;21): “only non-destructive capabilities are actively being used against satellites
@@ -156,7 +154,7 @@ export function drawMethod() {
 </div>
 <div class="mcol">
 <div class="msec">
-  <h4 id="codingRules" tabindex="-1">How we classified the data</h4>
+  <h3 id="codingRules" tabindex="-1">How we classified the data</h3>
   <p class="src-intro">The rules each chart follows when it counts and places an entry. Open one to read its rules.</p>
   ${rule('What counts as an anti-satellite test', scopeRule, true)}
   ${rule(
@@ -202,7 +200,7 @@ export function drawMethod() {
   )}
 </div>
 <div class="msec">
-  <h4 id="srcLicence">Licences and credits</h4>
+  <h3 id="srcLicence">Licences and credits</h3>
   <p class="src-intro">What may be reused, and where the pictures come from.</p>
   ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
       are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
@@ -212,12 +210,11 @@ export function drawMethod() {
 </div>
 </div>
 <div class="msec">
-  <h4 id="srcList">All cited sources (${cites.length})</h4>
+  <h3 id="srcList">All cited sources (${cites.length})</h3>
   <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
   <label class="source-find">Find a source <input id="sourceFind" type="search" placeholder="Title, institution or year" aria-controls="citedSources"></label>
   <p class="note" id="sourceCount" role="status">${cites.length} sources</p>
   <ol class="cites" id="citedSources">${cites.join('')}</ol>
-  <p class="only-phone"><a class="to-top" href="#top">Back to the top</a></p>
   <p>The data table behind each chart lists every entry with its source and page reference.</p></div>
 </details>`;
 
@@ -235,8 +232,11 @@ export function drawMethod() {
   const syncFold = () => section.classList.toggle('folded', !fold.open);
   fold.addEventListener('toggle', syncFold);
   syncFold();
-  const more = document.getElementById('srcMore'); // the main-source note belongs with the rest of the reading material
-  if (more) fold.querySelector('.src-check').after(more);
+  const notes = document.getElementById('srcNotes'); // the main-source quotation and the orbit note belong with the rest of the reading material
+  if (notes) {
+    fold.querySelector('.src-check').after(notes);
+    notes.hidden = false;
+  }
 
   // Copy the citation: the clipboard when the browser allows it; otherwise the text is selected so a reader can copy it by hand.
   const text = document.getElementById('citeText'),

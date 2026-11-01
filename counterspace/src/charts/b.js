@@ -151,7 +151,7 @@ function drawPhoneB() {
     .map((u) => {
       const rows = series.filter((s) => s.unit.key === u.key),
         total = rows.reduce((n, s) => n + s.vals[i], 0);
-      return `<section class="cap-phone-row"><h5>${u.label}<span>${total} ${total === 1 ? 'state' : 'states'}</span></h5><div class="cap-phone-bar" aria-hidden="true" style="--cap-color:var(${u.v})">${rows.map((s) => `<span class="cap-status-${s.status}" style="width:${(100 * s.vals[i]) / max}%"></span>`).join('')}</div><p>${
+      return `<section class="cap-phone-row"><h4>${u.label}<span>${total} ${total === 1 ? 'state' : 'states'}</span></h4><div class="cap-phone-bar" aria-hidden="true" style="--cap-color:var(${u.v})">${rows.map((s) => `<span class="cap-status-${s.status}" style="width:${(100 * s.vals[i]) / max}%"></span>`).join('')}</div><p>${
         rows
           .filter((s) => s.vals[i])
           .map((s) => `<span><b>${s.vals[i]}</b> ${names[s.status]}</span>`)

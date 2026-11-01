@@ -1,20 +1,15 @@
-/* The reference band: the charts (after the pattern) and the sources (after the quiz). "The evidence, when you want it" holds the four extra charts (as cards, one chart at a time) and the sources.
-   It is the page's quiet half: a smaller type scale, tighter spacing, and every key, table and download behind one disclosure a chart. Loaded last so these
-   rules win on equal specificity. Section 4 of design/DESIGN.md describes the band. */
+/* The quiet half of the page: the four chart cards inside "What the pattern shows" (one chart at a time) and the sources after the quiz.
+   A smaller type scale, tighter spacing, and every key, finder, table and download behind one disclosure a chart. Loaded last so these
+   rules win on equal specificity. Section 4 of design/DESIGN.md describes it. */
 
-/* ---- the band's own head: one hairline, a title and one line, both smaller than a chapter's */
-.ref-band.explore{padding:var(--s-6) 0 var(--s-4)}
-.ref-head{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-1) var(--s-6);align-items:baseline;margin:0 0 var(--s-4);padding-bottom:var(--s-3);border-bottom:1px solid var(--line)}
-.ref-head h2{font:500 clamp(24px,2.3vw,30px)/1.2 var(--serif);letter-spacing:-.01em;max-width:none}
-.ref-head .lede{margin:0;max-width:62ch;font:400 clamp(15px,1.2vw,17px)/1.5 var(--serif);color:var(--muted)}
-@media (min-width:1100px){.ref-head{grid-template-columns:auto minmax(0,1fr);column-gap:var(--s-7)}}
-@media (min-width:1800px){.ref-head h2{font-size:32px}.ref-head .lede{font-size:18px}}
+/* ---- the cards and their charts sit directly under the pattern's opening, inside its chapter */
+.ref-band.explore{padding:var(--s-2) 0 0;border-top:0}
 
-/* a sub-title inside the band: a short sans title and one quiet line on the same row */
+/* the sources' head: a title and one quiet line on the same row */
 .ref-sub{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--s-4);margin:0 0 var(--s-3)}
-.ref-sub h3{margin:0;font:600 17px/1.3 var(--sans);color:var(--text)}
+.ref-sub h2{margin:0}
 .ref-sub p{margin:0;font:400 14.5px/1.45 var(--sans);color:var(--muted);max-width:54ch}
-@media (min-width:1800px){.ref-sub h3{font-size:18px}.ref-sub p{font-size:15.5px}}
+@media (min-width:1800px){.ref-sub p{font-size:15.5px}}
 
 /* ---- the four cards: a picture at the left, the name and one line at the right (a row of four takes about 80 px, not 190) */
 .ref-band .xcards{gap:var(--s-3)}
@@ -28,8 +23,8 @@
 /* ---- one chart at a time, closer to its cards and set a size down */
 .ref-band section.chart.xpanel{padding:calc(var(--s-5) + 28px) 0 var(--s-2)} /* room between the row of cards and the panel's heading */
 .ref-band .chapter-head.sub{margin-bottom:var(--s-3);gap:var(--s-1) var(--s-6)}
-.ref-band .chapter-head.sub>h4{grid-column:1;margin:0;max-width:24em;font:500 clamp(21px,1.9vw,25px)/1.2 var(--serif);letter-spacing:-.008em;text-wrap:balance;color:var(--text)}
-@media (min-width:1200px){.ref-band .chapter-head.sub>h4{grid-row:1;max-width:none}}
+.ref-band .chapter-head.sub>h3{grid-column:1;margin:0;max-width:24em;font:500 clamp(21px,1.9vw,25px)/1.2 var(--serif);letter-spacing:-.008em;text-wrap:balance;color:var(--text)}
+@media (min-width:1200px){.ref-band .chapter-head.sub>h3{grid-row:1;max-width:none}}
 .ref-band .chapter-head.sub>.lede{font:400 clamp(15px,1.15vw,16.5px)/1.5 var(--serif)}
 .ref-band .chapter-head>.tools{margin-top:var(--s-2)}
 .ref-band .takeaway{margin:var(--s-2) 0 var(--s-3);padding-top:var(--s-2);font-size:clamp(17px,1.4vw,19.5px);line-height:1.4;max-width:70ch}
@@ -62,9 +57,8 @@
 /* ---- sources: the band's second half, a head of one line and one disclosure */
 .sources.ref-band{padding:var(--s-3) 0 var(--s-6);border-top:0}
 .sources.ref-band .src-head{margin:0 0 var(--s-3);padding-top:var(--s-4);border-top:1px solid var(--line)}
-.sources.ref-band .src-head h3{font:500 clamp(21px,1.8vw,26px)/1.2 var(--serif);letter-spacing:-.01em} /* the band's heading is set like the other sections' (serif), not as a small sans label */
+.sources.ref-band .src-head h2{font:500 clamp(21px,1.8vw,26px)/1.2 var(--serif);letter-spacing:-.01em} /* the band's heading is set like the other sections' (serif), not as a small sans label */
 .sources.ref-band .sources-layout{gap:var(--s-4)}
-.sources.ref-band .hero-more{margin:0 0 var(--s-3)}
 
 /* ---- footer: three short columns, set tighter */
 .site-foot{padding:var(--s-5) 0 var(--s-4)}
@@ -79,8 +73,6 @@
 /* ---- layer one, set a little tighter so the whole page runs shorter (heads sit closer to what they introduce) */
 .law-intro .chapter-head,.pattern .chapter-head,.quiz-head{margin-bottom:var(--s-4)}
 .pattern{padding:var(--s-6) 0 var(--s-5)}
-.pat-big{margin-bottom:var(--s-5);padding:var(--s-5) var(--s-6) var(--s-4)}
-.pat-t{font-size:clamp(17px,1.3vw,19px);line-height:1.45}
 .quiz-band{padding:var(--s-5) 0 var(--s-5)}
 section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 
@@ -97,7 +89,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .source-find input{font:400 16px/1.5 var(--sans);color:var(--text);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;min-width:0;width:min(100%,340px)}
 .source-find input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cites>li[hidden]{display:none}
-@media(max-width:640px){.ref-band.explore{padding-top:28px}.ref-head{margin-bottom:16px}.xnav{gap:8px}.ref-band section.chart.xpanel{padding-top:24px}}
+@media(max-width:640px){.ref-band.explore{padding-top:var(--s-1)}.xnav{gap:8px}.ref-band section.chart.xpanel{padding-top:24px}}
 
 .law-choose{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font:500 14px/1.5 var(--sans);margin:16px 0}
 .law-choose select{max-width:100%;min-width:0;width:min(100%,420px);font:400 14px/1.5 var(--sans);border:1px solid var(--line-strong);border-radius:8px;padding:10px;background:var(--surface-2);color:var(--text)}
@@ -108,19 +100,17 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .law-choice .hint{display:none}
 @media(max-width:640px){#chartC .callout-row{margin-block:12px}#chartC .callout-row>.callout:not(.quote){font-size:14px;line-height:1.5;padding-block:12px}.xcards{gap:8px}.xcard{padding:10px}.xc-l{font-size:12px}}
 
-/* Record readers expose the same sources and uncertainty as the visual marks. */
-.record-find{margin:16px 0 20px;padding:0 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface)}
-.record-find>summary{display:list-item;cursor:pointer;min-height:48px;padding:12px 0;font:600 14px/1.5 var(--sans);color:var(--accent)}
-.record-find>summary>span{margin-left:8px;font-weight:400;color:var(--muted);white-space:nowrap}
+/* Record readers ("Find an entry", the 2020s assessment by state) are the first parts of a chart's fold; they expose the same sources and uncertainty as the marks. */
+.refold .rf-sec.rf-find{columns:auto}
 .record-tools{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(0,1.3fr);gap:16px}
 .record-tools label,.state-choose{display:grid;gap:6px;font:500 14px/1.5 var(--sans);color:var(--text)}
-.record-find input,.record-find select{min-width:0;width:100%;min-height:44px;font:400 16px/1.4 var(--sans);padding:10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
+.rf-find input,.rf-find select{min-width:0;width:100%;min-height:44px;font:400 16px/1.4 var(--sans);padding:10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
 .record-count{font:400 13px/1.5 var(--sans);color:var(--muted);margin:10px 0 16px}
 .record-result{border-top:1px solid var(--line);padding:16px 0;font:400 15px/1.6 var(--sans);max-width:76ch}
 .record-result h5,.record-result .card-title{font:500 23px/1.3 var(--serif);margin:0 0 8px;color:var(--text)}
 .record-result p{margin:8px 0}.record-result dl{display:grid;grid-template-columns:minmax(110px,.4fr) minmax(0,1fr);gap:8px 20px;margin:16px 0}
 .record-result dt{font-weight:600;color:var(--muted)}.record-result dd{margin:0}.record-result .btn{margin-top:12px}.state-choose{padding-bottom:16px;max-width:420px}
-@media(max-width:640px){.record-tools{grid-template-columns:1fr}.record-result dl{grid-template-columns:1fr;gap:3px}.record-result dd{margin-bottom:10px}.record-find{padding-inline:12px}.record-find>summary>span{display:block;margin-left:0}}
+@media(max-width:640px){.record-tools{grid-template-columns:1fr}.record-result dl{grid-template-columns:1fr;gap:3px}.record-result dd{margin-bottom:10px}}
 .source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
 @media(max-width:760px){
  .source-actions .btn{min-height:44px}
@@ -130,8 +120,6 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
  .sources .cites>li{padding-block:16px}
 }
 .record-result>.btn{margin-right:8px}
-/* The capability chart's old reference ordering must not bury its record reader. */
-#chartB>details.record-find{order:0}
 
 .phone-chart-hint { display:none; }
 @media(max-width:639px) {
@@ -143,19 +131,11 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .sources.ref-band .cites { font-size:16px; line-height:1.6; }
 .sources.ref-band .cites .cd { font-size:15px; line-height:1.6; }
 .sources.ref-band .cites>li { padding-block:10px; border-bottom:1px solid var(--line); }
-.ref-band .record-find { background:none; border-radius:0; border:0; border-top:1px solid var(--line); margin-top:20px; }
-.pat-big { padding:0; }
 
-/* The reader that opens with "Find an entry" (or "Read the 2020s assessment by state") shares the row of the key-table-download pill: the same pill, the same
-   baseline; opened, it takes the row's whole width and its fields drop under its own button. */
-.ref-foot>.record-find{flex:0 0 auto;margin:0;padding:0;border:0;border-radius:0;background:none}
-.ref-foot>.record-find[open]{flex:1 0 100%}
-.ref-foot>.record-find>summary>span{margin-left:var(--s-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);font:600 12px/1.4 var(--sans)}
-.ref-foot>.record-find>.record-tools,.ref-foot>.record-find>.state-choose{margin-top:var(--s-3)}
 @media (min-width:641px){.ref-foot{align-items:center}}
 
 /* short blurbs and ledes never leave a single word alone on their last line */
-.chapter-head>.lede,.chapter-head>.takeaway,.pat-t,.lede{text-wrap:balance}
+.chapter-head>.lede,.chapter-head>.takeaway,.lede{text-wrap:balance}
 .site-foot p,.words-line,.note-line{text-wrap:pretty}
 
 /* footer row on the same three columns as the blocks above: the name on the first column edge, the links on the second, the top button on the third; one baseline */
@@ -171,8 +151,8 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 /* the cited-sources list keeps a readable line length on wide screens */
 #citedSources{columns:2 32rem;column-gap:var(--s-6)} #citedSources li{max-width:60ch;break-inside:avoid}
 /* The sources most relied on: a short list on the page itself, each with its kind of source; the copy button now sits in the row of actions (no longer over the disclosure) */
-.src-top{margin:var(--s-4) 0 0}
-.src-top h4{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
+.src-top{margin:var(--s-5) 0 0}
+.src-top h3{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans);color:var(--text)}
 .st-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .st-list li{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) auto;gap:var(--s-1) var(--s-4);align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font:400 15px/1.45 var(--sans)}
 .st-kind{font:600 13px/1.4 var(--sans);color:var(--muted)}
@@ -180,4 +160,10 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .st-n{font-size:14px;color:var(--muted);white-space:nowrap}
 .st-more{margin:var(--s-2) 0 0;font:400 14px/1.5 var(--sans);color:var(--muted)}
 @media (max-width:720px){.st-list li{grid-template-columns:minmax(0,1fr)}.st-n{white-space:normal}}
-.source-actions{gap:var(--s-3)}
+/* one row: the disclosure, and the copy button at its end (opened, the reading runs under the summary and the button stays level with it) */
+.src-row{display:flex;align-items:flex-start;gap:var(--s-3)}
+.src-row>.sources-layout{flex:1 1 auto;min-width:0}
+.src-row>.source-actions{flex:none;margin:0;min-height:var(--h,44px);align-items:center}
+@media (max-width:640px){.src-row{flex-direction:column;gap:var(--s-2)}}
+.src-more>p{margin:var(--s-3) 0 0;font:400 15px/1.6 var(--sans);color:var(--muted)}
+.src-more{margin:0 0 var(--s-5)}

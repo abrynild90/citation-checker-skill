@@ -30,20 +30,31 @@ try {
     await page.waitForFunction(() => window.__cs && document.querySelector('#svgA svg'));
     await page.evaluate(() => window.__cs.audit());
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}: overflow`);
-    // The hero's jump links sit under the picture's invisible hit layer on wide screens: each must take a real click and move the page.
-    for (let i = 0; i < 3; i++) {
+    // The hero's two actions sit under the picture's invisible hit layer on wide screens: each must take a real click at its centre. "See the timeline" moves the
+    // page; "Take the 3D tour" opens the scene viewer.
+    for (const id of ['heroGo', 'tourBtn']) {
       await page.evaluate(() => scrollTo(0, 0));
-      const box = await page.evaluate((i) => {
-        const a = document.querySelectorAll('.hero-jumps a')[i],
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))); // the phone's "On this page" bar leaves with the scroll back to the top
+      const box = await page.evaluate((id) => {
+        const a = document.getElementById(id),
           r = a.getBoundingClientRect(),
           x = r.x + r.width / 2,
           y = r.y + r.height / 2;
-        return { x, y, on: document.elementFromPoint(x, y) === a, name: a.textContent };
-      }, i);
-      assert.equal(box.on, true, `${width}: hero link "${box.name}" is covered at its centre`);
+        return { x, y, on: a.contains(document.elementFromPoint(x, y)), name: a.textContent.trim() };
+      }, id);
+      assert.equal(box.on, true, `${width}: hero action "${box.name}" is covered at its centre`);
       await page.mouse.click(box.x, box.y);
-      await page.waitForFunction(() => scrollY > 100, null, { timeout: 8000 }).catch(() => {});
-      assert.equal(await page.evaluate(() => scrollY > 100), true, `${width}: a click on the hero link "${box.name}" did not navigate`);
+      if (id === 'heroGo') {
+        await page.waitForFunction(() => scrollY > 100, null, { timeout: 8000 }).catch(() => {});
+        assert.equal(await page.evaluate(() => scrollY > 100), true, `${width}: a click on "${box.name}" did not navigate`);
+        await page.waitForTimeout(800); // the landing's own second look (boot.js jumpToHash) is over before the test scrolls back up
+      } else {
+        const open = () => document.getElementById('overlay').getAttribute('aria-hidden') === 'false';
+        await page.waitForFunction(open, null, { timeout: 8000 }).catch(() => {});
+        assert.equal(await page.evaluate(open), true, `${width}: a click on "${box.name}" did not open the 3D viewer`);
+        await page.evaluate(() => window.__cs.closeScene());
+        await page.waitForFunction(() => !(document.getElementById('overlay').getAttribute('aria-hidden') === 'false'), null, { timeout: 8000 });
+      }
     }
     await page.evaluate(() => scrollTo(0, 0));
     const clippedAltitudeLabels = await page.evaluate(() =>
@@ -91,9 +102,10 @@ try {
     assert.match(await page.locator('#legalChoice').innerText(), /Outer Space Treaty/);
     await page.locator('#clearLawChoice').click();
     assert.equal(await page.locator('#legalChoice').isVisible(), false);
-    // Reading a dense chart must not depend on selecting a small SVG mark.
-    const findA = page.locator('#chartA .record-find');
-    await findA.locator('summary').click();
+    // Reading a dense chart must not depend on selecting a small SVG mark: each chart's one fold opens on its "Find an entry" reader.
+    const foldA = page.locator('#chartA .refold'),
+      findA = foldA.locator('.rf-find');
+    await foldA.locator('summary').click();
     await findA.locator('input').fill('fengyun 2007');
     assert.equal(await findA.locator('select option').count(), 2);
     await findA.locator('select').selectOption({ index: 1 });
@@ -103,19 +115,19 @@ try {
     assert.equal(await findA.locator('select').isDisabled(), true);
     assert.equal(await findA.locator('.record-result').isVisible(), false);
     await findA.locator('input').fill('');
-    await findA.locator('summary').click();
+    await foldA.locator('summary').click();
     await page.evaluate(() => window.__cs.showTab('chartB'));
-    await page.locator('#chartB .record-find > summary').click();
+    await page.locator('#foldB > summary').click();
     assert.equal(
       await page.evaluate(
-        () => document.querySelector('#chartB .record-find').getBoundingClientRect().top > document.getElementById('svgB').getBoundingClientRect().top,
+        () => document.querySelector('#foldB .rf-state').getBoundingClientRect().top > document.getElementById('svgB').getBoundingClientRect().top,
       ),
       true,
     );
     assert.equal(await page.locator('#stateAssessment option').count(), 14);
     await page.locator('#stateAssessment').selectOption('Russia');
-    assert.match(await page.locator('#chartB .record-result').innerText(), /Direct-ascent weapons\s+Demonstrated/);
-    await page.locator('#chartB .record-find > summary').click();
+    assert.match(await page.locator('#foldB .rf-state .record-result').innerText(), /Direct-ascent weapons\s+Demonstrated/);
+    await page.locator('#foldB > summary').click();
     if (width <= 400) {
       await page.evaluate(() => window.__cs.openScene('starfish'));
       await page.waitForFunction(() => document.getElementById('overlay').getAttribute('aria-hidden') === 'false');

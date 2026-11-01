@@ -1,8 +1,8 @@
 // ============================================================================
-// takeaways.js: one plain sentence above each chart that says what to notice, before the reader meets the marks, and the four that head "What the pattern
-// shows". Every number is counted from the data. Provides: fillTakeaways(). Needs: app.js (the data).
+// takeaways.js: one plain sentence above each chart that says what to notice, before the reader meets the marks, the opening of "What the pattern shows"
+// and its four findings (the lines of the chart cards). Every number is counted from the data. Provides: fillTakeaways(), findings(). Needs: app.js (the data).
 // ============================================================================
-import { CAPS, CO, D, KIN, LAST_DA, LEGAL, NK, byId, esc, fmtMY, fmtMonthYear, parse } from './app.js';
+import { CO, D, KIN, LAST_DA, LEGAL, NK, byId, esc, fmtMY, fmtMonthYear, parse } from './app.js';
 import { LAW_WORDS, WORDS as PAIR_WORDS, gap, yearsBetween } from './charts/lag.js';
 import { capSentence } from './charts/b.js';
 
@@ -57,17 +57,9 @@ export function fillTakeaways() {
     `In our records, ${recent} of the ${CO.length} close approaches began in 2020 or later${recent * 2 > CO.length ? ', which is more than half' : ''}.`,
   );
   // Capabilities: how many states hold at least one, by decade.
-  const states = (dec) => new Set(Object.values(CAPS.coding).flatMap((c) => Object.keys(c[dec] || {}).map((s) => s.replace('USSR/Russia', 'Russia')))).size,
-    first = CAPS.decades[0],
-    last = CAPS.decades.at(-1);
   set('tkB', capSentence('cat'));
   // The wait for the law: the range, and how often it was short.
-  const waits = D.lag_pairs.pairs.map((p) =>
-      yearsBetween(
-        parse((D.events.find((e) => e.id === p.event) || {}).date || (D.events.find((e) => e.id === p.event) || {}).start),
-        parse(D.legal.find((l) => l.id === p.law).start),
-      ),
-    ),
+  const waits = pairWaits(),
     short = waits.filter((y) => y < 2).length,
     g = (y) => {
       const x = gap(y);
@@ -77,59 +69,52 @@ export function fillTakeaways() {
     'tkL',
     `The wait ran from ${g(Math.min(...waits))} to ${g(Math.max(...waits))}. In ${word(short)} of the ${word(waits.length)} pairs it was under two years.`,
   );
-  // What the pattern shows: the four findings that open the charts of "Explore the data", in the order of the story (law late, tests stopped, close approaches, states).
-  const finding = (id, lead, rest) => {
-    const n = document.getElementById(id);
-    if (n) n.innerHTML = `<b>${lead}</b> ${rest}`;
-  };
+  // What the pattern shows: the display line, the longest pair and its caution. The four findings are the lines of the chart cards (findings(), read by explore.js).
   const pairs = D.lag_pairs.pairs,
-    longI = waits.indexOf(Math.max(...waits)),
-    longP = pairs[longI];
-  finding(
-    'pt1',
-    `${cap(word(short))} of the ${word(waits.length)} waits were under two years.`,
-    `The longest, from ${PAIR_WORDS[longP.event]?.name ?? byId[longP.event].system} to the ${LAW_WORDS[longP.law] ?? byId[longP.law].title}, took ${g(waits[longI])}.`,
-  );
-  patBig(waits, g);
-  finding(
-    'pt2',
-    'Some attacks stopped. Others did not.',
-    `Tests that destroy a satellite have paused since ${fmtMonthYear(parse(LAST_DA))}, yet ${word(going)} of ${word(NK.length)} jamming, laser and cyber operations are still going.`,
-  );
-  finding(
-    'pt3',
-    recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.',
-    `${cap(word(recent))} of the ${CO.length} in our records began in 2020 or later.`,
-  );
-  finding(
-    'pt4',
-    'More states can do more.',
-    `The number of states with a capability grew from ${word(states(first))} in the ${first} to ${word(states(last))} in the ${last}; only the ${last} figure is the Secure World Foundation’s own assessment.`,
-  );
+    longI = waits.indexOf(Math.max(...waits));
+  patBig(waits, g, pairs[longI], waits[longI]);
 }
 
-// All six recorded pairs use the same duration scale; the dates and qualifications stay visible.
-function patBig(waits, g) {
+// The waits between each linked weapon and the first later legal step, in years, in the order of the pair data.
+function pairWaits() {
+  const at = (id) => D.events.find((e) => e.id === id) || {};
+  return D.lag_pairs.pairs.map((p) => yearsBetween(parse(at(p.event).date || at(p.event).start), parse(D.legal.find((l) => l.id === p.law).start)));
+}
+// The four findings, in the order of the story (law late, tests stopped, close approaches, states); each is the line of the card that opens its chart.
+export function findings() {
+  const waits = pairWaits(),
+    short = waits.filter((y) => y < 2).length,
+    recent = CO.filter((e) => e.start >= '2020').length;
+  return {
+    lag: `${cap(word(short))} of the ${word(waits.length)} waits were under two years.`,
+    chartC: 'Some attacks stopped. Others did not.',
+    chartR: recent * 2 > CO.length ? 'Close approaches are mostly recent.' : 'Close approaches span many years.',
+    chartB: 'More states can do more.',
+  };
+}
+
+// The range of the waits in one large line, then the longest pair drawn on the shared year axis (1957 to 2026) between its two dates, and the caution.
+const AX0 = 1957,
+  AX1 = 2026;
+function patBig(waits, g, longP, longW) {
   const box = document.getElementById('patBig');
   if (!box) return;
-  const limit = Math.ceil(Math.max(...waits));
-  document.getElementById('pbNum').textContent = `${g(Math.min(...waits))} to ${g(Math.max(...waits))}`;
-  document.getElementById('pbTrack').hidden = true;
-  document.getElementById('pbNote').textContent =
-    `Six pairs from our records. Each line uses the same scale, up to ${limit} years. This is order in time, not cause.`;
-  document.getElementById('pbPairs').innerHTML =
-    '<ol class="pair-comparison">' +
-    D.lag_pairs.pairs
-      .map((p, i) => {
-        const ev = byId[p.event],
-          law = byId[p.law];
-        return (
-          `<li><span class="pair-event"><b>${esc(PAIR_WORDS[p.event]?.name ?? ev.system)}</b><span>${esc(fmtMY(parse(ev.date || ev.start)))}</span></span>` +
-          `<span class="pair-duration"><strong>${esc(g(waits[i]))}</strong><span class="pair-track" aria-hidden="true"><i style="width:${(waits[i] / limit) * 100}%"></i></span></span>` +
-          `<span class="pair-law"><b>${esc(LAW_WORDS[p.law] ?? law.title)}</b><span>${esc(fmtMY(parse(law.start)))}</span></span></li>`
-        );
-      })
-      .join('') +
-    '</ol>';
+  document.getElementById('pbNum').textContent = `${g(Math.min(...waits))} to ${g(Math.max(...waits))}.`;
+  const ev = byId[longP.event],
+    law = byId[longP.law],
+    evName = PAIR_WORDS[longP.event]?.name ?? ev.system,
+    lawName = LAW_WORDS[longP.law] ?? law.title,
+    t0 = parse(ev.date || ev.start),
+    t1 = parse(law.start),
+    yf = (d) => d.getUTCFullYear() + d.getUTCMonth() / 12,
+    pc = (d) => (((yf(d) - AX0) / (AX1 - AX0)) * 100).toFixed(2) + '%',
+    decades = [1960, 1970, 1980, 1990, 2000, 2010, 2020];
+  document.getElementById('pbTrack').innerHTML =
+    `<div class="pb-axis">${decades.map((y) => `<span class="pb-yr" style="left:${(((y - AX0) / (AX1 - AX0)) * 100).toFixed(2)}%">${y}</span>`).join('')}` +
+    `<span class="pb-span" style="left:${pc(t0)};right:calc(100% - ${pc(t1)})"><i class="pb-draw"></i><span class="pb-pill">${esc(g(longW))}</span></span>` +
+    `<i class="pb-dot" style="left:${pc(t0)}"></i><i class="pb-tick" style="left:${pc(t1)}"></i></div>` +
+    `<p class="pb-end a" style="--at:${pc(t0)}"><b>${esc(evName)}</b><span>${esc(fmtMY(t0))}</span></p>` +
+    `<p class="pb-end b" style="--at:${pc(t1)}"><b>${esc(lawName)}</b><span>${esc(fmtMY(t1))}</span></p>`;
+  document.getElementById('pbNote').textContent = `The longest, from ${evName} to the ${lawName}, took ${g(longW)}. This is order in time, not cause.`;
   box.hidden = false;
 }

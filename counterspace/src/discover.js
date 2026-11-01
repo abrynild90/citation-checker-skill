@@ -241,7 +241,7 @@ function heroSeen() {
   el.hidden = n === 0;
   const all = n >= STRIP.length;
   el.classList.toggle('done', all);
-  if (go) go.textContent = all ? 'Whole timeline' : 'Timeline';
+  if (go) go.textContent = all ? 'See the whole timeline' : 'See the timeline';
   const main = document.createElement('span');
   main.className = 'hs-main';
   if (!all) {

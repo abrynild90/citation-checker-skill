@@ -1,9 +1,5 @@
 /* "Scrub through time": a thin year slider that stays under the pinned law strip while the test chart is read. Its line starts and ends where the charts' year
    axes do (--cs is the chart scale on wide windows), so the thumb sits straight above the edge of the fog it draws on the strip and on the chart. */
-.law-row{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-4)}
-.law-row>.keybox{flex:1 1 auto;min-width:0}
-.yr-intro{flex:none;margin-top:calc(var(--s-4) + 3px)}
-@media (max-width:760px){.yr-intro,.yr-bar{display:none}}
 
 /* One thin sticky row under the pinned law strip: the round Play button sits in the left margin of the axis, a line of words (the title, or a caption when the slider
    passes a named event, and the running tally) over the line itself. Pinned, it is about 36 px tall, so the strip and the row take about 112 px of a 900 px window.
@@ -69,7 +65,8 @@
 .mark.scrub-future{pointer-events:none}
 .ann-g.scrub-future,.lab.scrub-future,.lbls line.scrub-future{opacity:.05;pointer-events:none}
 @media (prefers-reduced-motion:no-preference){.ann-g,.lab,.lbls line{transition:opacity 240ms var(--ease)}}
-@media print{.yr-bar,.yr-intro{display:none}.scrub-veil{display:none}}
+@media print{.yr-bar{display:none}.scrub-veil{display:none}}
 
 /* Phone readers use the chart range button; the crowded year-play row adds no needed control. */
-@media(max-width:760px){.yr-intro,.yr-bar{display:none}}
+/* phones have no slider (after the row's own display rule, so it wins) */
+@media (max-width:760px){.yr-bar{display:none}}

@@ -40,25 +40,22 @@ try {
     await p.goto(url);
     await p.waitForFunction(() => window.__cs);
     await p.addScriptTag({ path: new URL('node_modules/axe-core/axe.min.js', import.meta.url).pathname });
-    await p.locator('#firstLookOpen').tap();
-    await p.locator('#firstLookNext').tap();
-    assert.equal(await p.locator('#firstLookTreaty').isVisible(), true);
-    await p.locator('#firstLookNext').tap();
-    assert.match(await p.locator('#firstLookCopy').textContent(), /does not show/);
-    await p.locator('#firstLook').evaluate((e) => e.scrollIntoView({ block: 'start', behavior: 'instant' }));
-    if (out) await p.screenshot({ path: path.join(out, `${engine}-${theme}-intro.png`) });
-    assert.deepEqual(await p.evaluate(async () => (await axe.run(document.getElementById('firstLook'))).violations.map((v) => v.id)), []);
+    // "What the pattern shows": the opening line, the longest pair, its caution and the four chart cards.
+    await p.locator('#pattern').evaluate((e) => e.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    assert.match(await p.locator('#pbNote').textContent(), /order in time, not cause/);
+    if (out) await p.screenshot({ path: path.join(out, `${engine}-${theme}-pattern.png`) });
+    assert.deepEqual(await p.evaluate(async () => (await axe.run(document.getElementById('pattern'))).violations.map((v) => v.id)), []);
     await p.locator('#xct-chartB').click({ force: true });
     await p.locator('#chartB').evaluate((e) => e.scrollIntoView({ block: 'start', behavior: 'instant' }));
     await p.waitForFunction(() => document.getElementById('capPhoneRows').children.length > 0);
     assert.equal(await p.locator('#svgB').isVisible(), false);
-    assert.equal(await p.locator('#capPhoneRows h5').count(), 2);
+    assert.equal(await p.locator('#capPhoneRows h4').count(), 2);
     assert.match(await p.locator('#capPhoneRows').textContent(), /12 states/);
     await p.locator('#capDecade').selectOption('1950s');
     assert.match(await p.locator('#capPhoneNote').textContent(), /did not assess/);
     await p.locator('#capDecade').selectOption('2020s');
     await p.locator('#grpMore').tap();
-    assert.equal(await p.locator('#capPhoneRows h5').count(), 5);
+    assert.equal(await p.locator('#capPhoneRows h4').count(), 5);
     if (out) await p.locator('#capPhone').screenshot({ path: path.join(out, `${engine}-${theme}-capabilities.png`) });
     assert.deepEqual(await p.evaluate(async () => (await axe.run(document.getElementById('chartB'))).violations.map((v) => v.id)), []);
     await p.locator('#capHistory').tap();
@@ -99,11 +96,10 @@ try {
       assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     }
     await p.addStyleTag({ content: 'html { -webkit-text-size-adjust: 200%; text-size-adjust: 200%; }' });
-    await p.locator('#firstLookOpen').click();
     assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
-    await p.locator('#firstLookBack').focus();
-    await p.keyboard.press('Enter');
-    assert.equal(await p.locator('[data-look="1"]').getAttribute('aria-current'), 'step');
+    await p.locator('#tab-chartC').focus();
+    await p.keyboard.press('ArrowRight');
+    assert.equal(await p.locator('#tab-chartR').getAttribute('aria-selected'), 'true');
     if (out) await p.screenshot({ path: path.join(out, `${engine}-${theme}-enlarged-text.png`) });
     for (const height of [844, 667]) {
       await p.setViewportSize({ width: 390, height });
@@ -125,7 +121,7 @@ try {
       theme,
       cpuThrottling: engine === 'chromium' ? '4x synthetic slowdown' : 'none',
       checks:
-        'intro, decade/filter data, full history, touch full account and source, orientation, 200% CSS text-size adjustment, keyboard navigation, axe accessibility, no document overflow',
+        'pattern chapter, decade/filter data, full history, touch full account and source, orientation, 200% CSS text-size adjustment, keyboard navigation, axe accessibility, no document overflow',
       layoutShiftSum: await p.evaluate(() => window.__shifts?.reduce((a, b) => a + b, 0) ?? null),
       timing: await p.evaluate(() =>
         performance.getEntriesByType('navigation').map((n) => ({ domContentLoaded: n.domContentLoadedEventEnd, load: n.loadEventEnd })),

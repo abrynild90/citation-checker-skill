@@ -149,15 +149,6 @@ async function pagePass(label, opts) {
   const t = await p.evaluate(pageText);
   add(`${label} page`, t.text);
   add(`${label} page (read aloud)`, t.attrs);
-  await p.evaluate(() => document.getElementById('firstLookOpen').click());
-  for (const step of [0, 1, 2]) {
-    await p.evaluate((step) => document.querySelector(`[data-look="${step}"]`).click(), step);
-    add(`${label} introduction ${step + 1}`, await p.locator('#firstLook').innerText());
-  }
-  await p.evaluate(() => {
-    document.getElementById('firstLook').hidden = true;
-    document.getElementById('firstLookOpen').setAttribute('aria-expanded', 'false');
-  });
   for (const decade of await p.locator('#capDecade option').allTextContents()) {
     await p.locator('#capDecade').evaluate((n, d) => { n.value = d; n.dispatchEvent(new Event('change', { bubbles: true })); }, decade);
     add(`${label} phone comparison ${decade}`, await p.locator('#capPhone').textContent());
@@ -172,11 +163,11 @@ async function pagePass(label, opts) {
   // Inline readers expose text that cannot be reached by hovering chart points.
   const readers = await p.evaluate(() => {
     const out = [];
-    for (const select of document.querySelectorAll('.record-find select')) {
+    for (const select of document.querySelectorAll('.rf-find select')) {
       for (const option of [...select.options].filter(o => o.value)) {
         select.value = option.value;
         select.dispatchEvent(new Event('change', { bubbles: true }));
-        out.push([select.id, select.closest('.record-find').querySelector('.record-result').innerText]);
+        out.push([select.id, select.closest('.rf-find').querySelector('.record-result').innerText]);
       }
     }
     return out;

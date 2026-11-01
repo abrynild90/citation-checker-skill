@@ -5,7 +5,8 @@
 // Needs: shared.js (hooks). legal.js reads #explore[data-years] to know whether the pinned law strip lines up with the open chart.
 // ============================================================================
 import { CO, D, NK, byId, parse } from './app.js';
-import { gap, yearsBetween } from './links.js';
+import { yearsBetween } from './links.js';
+import { findings } from './takeaways.js';
 import { fragmentId, hooks } from './shared.js';
 
 // years: the chart uses the shared year axis, so the pinned law strip above it lines up. svg: the box the chart is drawn into.
@@ -66,7 +67,7 @@ function fromHash() {
 }
 
 // ---------------------------------------------------------------- the four entry cards above the tabs
-// Each card is a small picture of its chart, drawn from the same data, and one line saying what is in it. A card opens its tab, like the tab does.
+// Each card is a small picture of its chart, drawn from the same data, and one line: the finding its chart shows. A card opens its tab, like the tab does.
 const yr = (e) => +String(e.date || e.start).slice(0, 4),
   X0 = 1957,
   X1 = 2026,
@@ -119,17 +120,9 @@ const THUMBS = {
     );
   },
 };
-const LINES = {
-  chartC: () => `${NK.length} operations, the first in ${Math.min(...NK.map(yr))}`,
-  chartR: () => `${CO.length} close approaches, the first in ${Math.min(...CO.map(yr))}`,
-  chartB: () => `States and capabilities, decade by decade`,
-  lag: () => {
-    const ws = D.lag_pairs.pairs.map((p) => yearsBetween(parse(byId[p.event].date || byId[p.event].start), parse(byId[p.law].start)));
-    return `${ws.length} pairs, ${gap(Math.min(...ws)).num} ${gap(Math.min(...ws)).unit} to ${gap(Math.max(...ws)).num} years`;
-  },
-};
 // The cards are the tablist: one control per chart, a picture and a line each. Arrow keys move and open together, Home and End jump.
 function mountCards() {
+  const lines = findings(); // the four findings of "What the pattern shows": each card's line says what its chart shows
   bar = document.createElement('div');
   bar.className = 'xcards';
   bar.id = 'exploreTabs';
@@ -137,7 +130,7 @@ function mountCards() {
   bar.setAttribute('aria-label', 'Charts to explore');
   bar.innerHTML = TABS.map(
     (t, i) =>
-      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-pic">${THUMBS[t.id]()}</span><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${LINES[t.id]()}</span></button>`,
+      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-pic">${THUMBS[t.id]()}</span><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${lines[t.id]}</span></button>`,
   ).join('');
   $('xpanels').before(bar);
   const cards = [...bar.children];

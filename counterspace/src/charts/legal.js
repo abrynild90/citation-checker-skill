@@ -1,5 +1,5 @@
 // ============================================================================
-// charts/legal.js: the law timeline (sticky band, dodged symbols, 2021 to 2026 zoom, phone strip with tap-to-name), its key, glossary, list and table.
+// charts/legal.js: the law timeline (sticky band, dodged symbols, 2021 to 2026 zoom, phone strip with tap-to-name), its key, glossary and table.
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
@@ -880,7 +880,7 @@ export function setZoomOpen(open, scrollTo, instant) {
   wrap.classList.toggle('open', open);
   wrap.classList.remove('settled');
   btn.setAttribute('aria-expanded', String(open));
-  btn.querySelector('span').textContent = open ? 'Hide recent developments' : 'Show recent developments: 2021–2026';
+  btn.querySelector('span').textContent = open ? 'Hide the 2021–2026 zoom' : 'Zoom in on 2021–2026';
   btn.querySelector('use').setAttribute('href', open ? '#i-minus' : '#i-zoom');
   const done = () => wrap.classList.toggle('settled', wrap.classList.contains('open'));
   clearTimeout(setZoomOpen.t);
@@ -892,7 +892,9 @@ export function setZoomOpen(open, scrollTo, instant) {
   if (open && !was && scrollTo) requestAnimationFrame(() => legalScroll());
 }
 export function initZoomControl() {
-  setZoomOpen(true, false, true); // open from the first frame: a fold that grew after the page had landed on a chart below it would push that chart down
+  // Folded from the first frame on wide windows, so the first screen of the timeline shows laws and tests together; open on a phone, where it is the readable copy of
+  // the crowded years. Anything that opens it by code (an address inside it, a 2021–2026 choice in the finder) does so before the page lands, never after.
+  setZoomOpen(isPhoneNow(), false, true);
   document.getElementById('zoomBtn')?.addEventListener('click', () => setZoomOpen(!document.getElementById('legalZoomWrap').classList.contains('open')));
   addEventListener('beforeprint', () => setZoomOpen(true));
 }
@@ -1190,19 +1192,7 @@ addEventListener('load', () => setTimeout(legalScroll, 400));
 
 // ---------------------------------------------------------------- key, list, glossary and table
 const dateWords = (l) => (l.end ? `${fmtY(parse(l.start))}–${fmtY(parse(l.end))}` : fmt(parse(l.start)));
-function drawLegalList() {
-  const ul = document.getElementById('legalList');
-  ul.innerHTML = LEGAL.slice()
-    .sort((a, b) => (a.start < b.start ? -1 : 1))
-    .map(
-      (l) =>
-        `<li><span class="ld">${l.end ? fmtY(parse(l.start)) + '–' + fmtY(parse(l.end)) : fmtMY(parse(l.start))}</span> <b>${esc(l.title)}</b>` +
-        `<span class="ls">${esc(l.short_note)}</span></li>`,
-    )
-    .join('');
-}
 export function drawLegalKey() {
-  drawLegalList();
   const choose = document.getElementById('legalChoose'),
     choice = document.getElementById('legalChoice');
   if (choose && !choose.dataset.set) {
@@ -1214,6 +1204,7 @@ export function drawLegalKey() {
     choose.addEventListener('change', () => {
       const law = LEGAL.find((l) => l.id === choose.value);
       choice.hidden = !law;
+      if (law && parse(law.start) >= ZOOM[0]) setZoomOpen(true, false, true); // the zoom is where every item of 2021 to 2026 has its full name
       choice.innerHTML = law ? legalCard(law) + '<button class="btn small" type="button" id="clearLawChoice">Clear selection</button>' : '';
       choice.querySelector('button')?.addEventListener('click', () => {
         choice.hidden = true;
@@ -1242,18 +1233,7 @@ export function drawLegalKey() {
     'Select a play symbol to open a scene',
   );
   K.done();
-  // The key is folded at every width; its summary opens it.
-  const kb = document.getElementById('keyLegal'),
-    mq = matchMedia('(max-width: 640px)');
-  if (kb && !kb.dataset.set) {
-    kb.dataset.set = '1';
-    kb.open = false; // the key is one click away at every width, so the whole timeline fits in one view
-    void mq;
-  }
   document.getElementById('glossaryLegal').innerHTML = GLOSSARY.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('');
-  // app.js writes this summary once when the page loads; say it again here so the wording lives with the list it introduces
-  const s = document.querySelector('#legalPhone summary');
-  if (s) s.textContent = `All ${LEGAL.length} law and policy items, in date order`;
   table(
     'tableLegal',
     ['Short name', 'Full name', 'Date', 'Kind', 'What it is'],

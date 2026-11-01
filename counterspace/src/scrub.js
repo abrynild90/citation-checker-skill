@@ -373,13 +373,4 @@ export function mountScrub() {
     if (k === ' ' || k === 'Enter') return (ev.preventDefault(), playing ? showFinale() : bring(play));
     if (k === 'Escape' && playing) return (ev.preventDefault(), showFinale());
   });
-  // the entry in the chapter's head: bring the slider into place, then play (by hand under reduced motion: the slider goes to 1957 and takes the focus)
-  $('yrIntro')?.addEventListener('click', () => {
-    bring(() => {
-      if (REDUCED) {
-        setYear(Y0);
-        track.focus({ preventScroll: true });
-      } else play();
-    });
-  });
 }

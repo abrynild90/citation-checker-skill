@@ -123,9 +123,6 @@ document.getElementById('asof').innerHTML =
     if (text[li.dataset.ch]) a.setAttribute('aria-description', text[li.dataset.ch]);
   });
 }
-// The phone list's heading keeps its own wording; only a count in it follows the data.
-const legalSum = document.querySelector('#legalPhone summary');
-if (legalSum) legalSum.textContent = legalSum.textContent.replace(/\d+/, LEGAL.length);
 // ---------------------------------------------------------------- palette & helpers
 const STATE_VAR = {
   'United States': '--c-us',

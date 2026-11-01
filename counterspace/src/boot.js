@@ -1,4 +1,3 @@
-import './first-look.js';
 // ============================================================================
 // boot.js: first draw, lazy drawing, resize, theme toggle and the window.__cs test hooks.
 // Needs: every other module. Runs last.
@@ -10,7 +9,7 @@ import { chipsB, drawB } from './charts/b.js';
 import { drawL } from './charts/lag.js';
 import { drawMethod } from './method.js';
 import { timed } from './app.js';
-import { drawLegal, drawLegalKey, initZoomControl, landOnMark, legalOff, legalScroll, prepareTimelineLanding } from './charts/legal.js';
+import { drawLegal, drawLegalKey, initZoomControl, landOnMark, legalOff, legalScroll, prepareTimelineLanding, setZoomOpen } from './charts/legal.js';
 import { fragmentId, hooks, markFirstDrawn, settled } from './shared.js';
 import { guides, hideCard } from './ui.js';
 import { drawA } from './charts/a.js';
@@ -147,6 +146,9 @@ function openAround(id) {
     hooks.drawRest?.();
     t = document.getElementById(id);
   }
+  // the 2021 to 2026 zoom is a fold of its own (not a <details>): opened at once, so the landing is measured with it open
+  const zw = t?.closest('#legalZoomWrap');
+  if (zw && !zw.classList.contains('open')) ((opened = true), setZoomOpen(true, false, true));
   let d = t?.closest('details');
   while (d) {
     if (!d.open) ((d.open = true), (opened = true));
