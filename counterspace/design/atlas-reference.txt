@@ -1,0 +1,134 @@
+COUNTERSPACE — SCIENTIFIC ATLAS REFERENCE
+Draft direction, 11 October 2026
+Source baseline: e2e31aec9b58dbac917d3cc0a6162bcca8eb1be2
+
+STATUS
+Prepared from the owner's 25-step brief and the existing source, PRODUCT.md,
+DESIGN.md and scene reviews. This is a proposed direction, not a rendered
+review or an implementation claim. Fresh browser evidence is still required.
+The separately mentioned Counterspace-visual-plan.txt was not available.
+The repository's recorded Impeccable guidance informs this sheet; the live
+Impeccable skill and detector have not been installed or run in this session.
+
+EDITORIAL IDEA
+A scientific atlas: a strong reading spine, precise comparative graphics and
+documentary scene plates. One dominant relationship per picture. The reader
+should see weapons and law on the same year axis within about a minute, then
+follow each observation to a source. Visual drama comes from composition,
+scale and light, with explanatory qualifications beside the picture.
+
+TYPOGRAPHY
+Retain embedded Newsreader for headlines and explanatory prose; IBM Plex Sans
+for labels, controls, dates and quantities. Start with the current 36–56 px
+display range and 28–42 px chapter range. Choose breaks by meaning after
+rendering; avoid fixed breaks that fail on phones or enlarged text.
+Protect a headline and lede column from scene marks and annotation leaders.
+Keep ordinary prose at 18 px and 1.6 line height, tuned to approximately
+65–75 characters in the actual font. Target 14 px captions where space permits;
+never solve chart density by shrinking meaningful labels below 12 px.
+Use tabular numerals for comparable dates, durations, counts and scales.
+Make annotations secondary to the main relationship, while retaining contrast.
+
+COMPOSITION AND RHYTHM
+Align chapter headings, introductory prose and plot edges to a shared spine.
+Use the existing 4/8/12/16/24/32/48/72/112 px spacing scale; begin with the
+96 px desktop and 64 px phone chapter gaps. Tune from the baseline, not by
+adding space indiscriminately. A chapter presents its question, the graphic
+that answers it and a concise sourced explanation. Supporting material gets
+less separation. Avoid nested panels and repetitive equal-size card grids.
+In the opening graphic, reserve the reading area before fitting the Earth
+horizon. Give the three main historical annotations separate positions and
+subordinate chronology labels. On phones, recompose instead of scaling down.
+
+COLOUR AND SYMBOLS
+Dark: ink navy, readable cool-white type, restrained blue and amber emphasis.
+Light: the existing cool-paper background, dark ink, separately calibrated
+blue and ochre. Preserve established country colours and category meanings.
+Use one semantic role per colour within a graphic; repeat meaning in shape,
+line style or text. Selection needs a clear outline and an accessible control
+state; uncertainty needs an explicit qualification, not only lower opacity.
+Binding treaties, non-binding resolutions, expert manuals and policy retain
+their separate symbols and nearby legal definitions.
+Use the existing drawn icon sprite. Scene links consistently use its play
+symbol; align optical size and stroke with event and legal marks.
+Current paths are strongest; previous paths are quieter; hypothetical paths
+use a named dashed treatment; reference orbits are thin and neutral. Every
+chart and scene key explains the distinctions it actually uses.
+
+CHARTS
+Keep evidence marks stronger than grids. Share margin logic, axis typography,
+direct-label spacing and selection treatments while allowing each chart the
+height its information needs. Measure legal label lanes at dense recent years.
+Overview and enlargement use the same records and endpoint identities.
+Altitude compression must be visible in the scale explanation. Bubble area
+must follow its stated quantity; records with unknown height need a separate
+place and description, never an invented coordinate.
+Capabilities: label distinct states and state–capability combinations as
+different quantities, including their denominators. Reconstructed periods
+need a visible boundary, pattern and wording, with no implied SWF assessment.
+Operations and close approaches use direct names and collision-free rows;
+completed/ongoing and approach/dock/tow/release remain distinguishable.
+Time-gap graphics align endpoint symbols and duration scales; retain the
+chronology-versus-causation qualification in the immediate reading area.
+
+EARTH AND HARDWARE
+Use the embedded NASA imagery with restrained ocean saturation and cloud
+brightness. A thin atmospheric edge explains the globe without a neon halo.
+The day–night transition should read as illumination, not a decorative wash.
+Choose geographic emphasis for the explanatory relationship and label it.
+Spacecraft silhouettes follow documented broad shapes. Materials separate
+arrays, bodies and thermal surfaces without adding unsupported mechanisms.
+Document each hardware reference and explicitly identify generic symbols.
+Keep distances, speeds, sizes and trajectories qualified as illustrative.
+
+SCENE PLATES AND STORYBOARDS
+Each sequence establishes context, reveals a relationship, shows the event,
+then ends on a useful explanatory frame. Poster frames show the mechanism;
+they need not all use the same camera angle. Review them at thumbnail size.
+
+Starfish: field-line cross-section and trapped electrons; distinguish the
+explosion moment from the subsequent radiation belt. End on the explanation.
+Solwind: distinctive wheel-and-sail silhouette and interceptor relationship;
+separate collision, fragment spread and the sourced later debris count.
+Fengyun: two long arrays, target orbit and an oblique debris ring; particles
+are illustrative and are separate from sourced catalogue totals.
+Burnt Frost: interceptor and low-altitude target; compact collision effect,
+then decay and the separately dated later count.
+DN-2: restrained suborbital vehicle beside the qualified altitude comparison;
+keep China's stated altitude and the SWF-cited estimate visually separate.
+Shakti: target/interceptor relationship, crisp fragments and clear decay;
+end with the sourced later-count account rather than persistent particles.
+Cosmos 1408: relate the historical cloud to ISS orbital height; retire that
+cloud before the five-survivor source card, without invented survivor positions.
+GNSS: satellite signal, receiver and local interference; communicate that the
+satellite continues transmitting. Geographic jammer extent stays illustrative.
+Viasat: ground management and affected modems, with the spacecraft separately
+shown as working. Device symbols convey mechanism, not counts or locations.
+Laser: a clear ground-to-space line of sight and target; illumination must
+not imply a publicly established damage outcome.
+SJ-21: before/after orbit relationship and the towing pair; keep unknown
+docking hardware unknown. End on the explanatory disposal-orbit comparison.
+Close approaches: distinct episode pictures with readable craft identities;
+approach alone does not establish hostile intent. Keep trails subordinate.
+Spaceplanes: fit the complete selected orbit with minimum/maximum labels;
+each episode gets its own still. Offer following views without losing context.
+
+MOTION AND ANNOTATIONS
+Author camera paths around the mechanism, with quiet holds only when reading
+requires them. Camera, caption, step and highlighted object change together.
+Keep text stable as objects move; precise leaders anchor to the intended
+object without crossing other labels. Reserve label space before camera fit.
+Pause, seek, episode selection, diagram selection and drag interrupt promptly.
+Finish on a useful held frame. Replay is explicit. Backgrounding pauses;
+returning does not restart motion without the reader's choice.
+Reduced motion provides the full mechanism and selected episode in still form.
+Exports preserve episode identity, picture qualifications and source framing.
+
+EVIDENCE STANDARD
+Use fresh matched captures at 1440×900 and 390×844 in both themes, plus 375 px
+and enlarged-text checks. Record playback, first-open, pause, seek, replay,
+episode selection, hidden-tab return and reduced-motion states. Compare the
+four implementation groups to the initial baseline. Automated checks support
+the visual review; a numeric grade never substitutes for inspected evidence.
+Physical iPhone, Android and assistive-technology findings require real devices.
+If unavailable, state that limit separately from emulated browser results.

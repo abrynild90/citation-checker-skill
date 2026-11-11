@@ -1,0 +1,103 @@
+COUNTERSPACE — VISUAL REFINEMENT COMPLETION RECORD
+Prepared 11 October 2026; baseline e2e31aec9b58dbac917d3cc0a6162bcca8eb1be2
+
+The 25 steps below come from the owner's brief. Acceptance criteria are proposed
+here because the separately mentioned Counterspace-visual-plan.txt was not
+available. They do not reproduce or claim approval of its unseen scoring rubric.
+Status: source cloned; reference direction drafted; no visual changes made.
+
+FOUNDATION — review before implementation
+1. Baseline: capture every section and all 13 scenes on desktop/phone in both
+   themes. Include scene opening, mechanism and ending frames, stills and episode
+   alternatives. Reproduce animation-start failure with console, visibility,
+   renderer, motion-preference and playback evidence. Status: browser blocked.
+2. Direction: reference sheet specifies type, colours, symbols, Earth, documented
+   craft shapes, annotation grammar and camera/pacing rules. Status: draft prepared
+   in atlas-reference.txt; rendered calibration pending.
+
+PAGE AND CHARTS — compare to baseline and correct before scene polish
+3. Opening: headline area is free of marks/leaders; horizon anchors the picture;
+   historical annotations have one clear priority at desktop and phone widths.
+4. Type: meaningful headline breaks, readable prose measure, usable captions,
+   tabular comparable values; no loss at enlarged text. Pending.
+5. Rhythm: consistent heading/prose/plot alignments; chapter/support spacing reads
+   deliberately across the full page, in both themes. Pending.
+6. Colour: theme-specific measured contrast; event/law/selection/uncertainty roles
+   are consistent and have a non-colour cue. Pending.
+7. Symbols: legal categories, events and scene links retain distinct meanings;
+   stroke, optical size, selected states and nearby keys agree. Pending.
+8. Charts: deliberate plot proportions, margins, direct labels and legends;
+   marks dominate quiet grids; desktop and phone remain readable. Pending.
+9. Law: dense recent labels and leaders do not collide; enlargement preserves
+   record identity, endpoints, legal type and source access. Pending.
+10. Altitude/debris: compression is explained, bubble quantity/size key is
+    accurate, unknown heights never imply an altitude. Pending.
+11. Capabilities: distinct states and state–capability combinations have separate
+    labels/denominators; reconstructed and SWF-assessed periods differ visibly;
+    selected decade, filtering, tables and exports agree. Pending.
+12. Operations: clear lanes/names; completed/continuing activity and jamming,
+    laser and cyber operations remain distinguishable. Pending.
+13. Close approaches: mission names fit; overlapping entries have readable rows;
+    approach, docking, towing and releasing are distinguished without inferring
+    hostility from proximity. Pending.
+14. Time gaps: endpoints align, duration comparison uses a explained consistent
+    scale, chronology/causation qualification stays prominent. Pending.
+
+IMAGERY AND MOTION — compare mechanism frames, recordings and exports
+15. Posters: all 13 communicate their distinct mechanism at gallery size; crops,
+    selected time, episode, qualification and source are recorded. Pending.
+16. Earth: texture, lighting, atmosphere and terminator read cleanly in live,
+    still and exported images; geography helps where relevant. Pending.
+17. Craft: documented silhouettes, restrained materials and clearly qualified
+    schematic hardware; no invented attachment or mechanism. Pending.
+18. Paths: current/previous/hypothetical/reference treatments are consistent,
+    legible and explained; they do not cross craft unnecessarily. Pending.
+19. Labels: stable type and precise leaders, no collisions/clipping across
+    intended camera views, narrow screens and exports. Pending.
+20. Effects: radiation/debris/laser/interference/network disruption differ in
+    explanatory mechanism; counts/intensity/geometry imply no invented facts.
+    Pending.
+21. Cameras: all 13 have reviewed context/reveal/event/end storyboards; subjects,
+    full required paths and relevant labels fit each authored frame. Pending.
+22. Pacing: steps, captions, labels and cameras agree; no unexplained idle time;
+    pause/seek/drag/episode changes interrupt; no unwanted background resume.
+    Pending.
+23. Stills/exports: selected episode retained, spacing/source/qualification fit
+    in screen and saved output, all diagrams work without animation. Pending.
+
+VERIFICATION AND RELEASE
+24. Phone/accessibility: 375/390 px portrait, landscape, enlarged text, keyboard,
+    focus, touch, reduced motion and accessibility checks pass. Measure actual
+    iPhone/Android and assistive technology where available; identify emulation
+    and physical-device limits separately. Pending.
+25. Final: inspect fresh matched screenshots and recordings; correct findings;
+    data validation, build, behavior, motion, accessibility, copy, contrast,
+    Chromium/WebKit mobile and scene checks pass. Generated index.html matches
+    a clean source build. Final repository checks pass on the exact head before
+    release. Pending.
+
+PROPOSED REVIEW RUBRIC — not the missing attachment's rubric
+Rate hierarchy, chart clarity, scene explanation, motion, visual consistency,
+responsive composition and accessibility from 0 to 4:
+0 = inaccessible or misleading; 1 = major defects; 2 = material fixes needed;
+3 = strong with identified minor defects; 4 = no material defects in reviewed
+samples. Each rating needs evidence paths, viewport/theme/state and findings.
+Missing evidence is unreviewed, not zero or a pass. Do not publish an aggregate
+score that hides blockers. No score has been assigned in this session.
+
+CURRENT BLOCKERS AND SOURCE INVESTIGATION
+The cloud browser control tool is not exposed in this session. The browser skill
+was found/read, but its required Node REPL js tool and tool-discovery surface are
+unavailable. No browser fallback was used. Existing CI results belong to the
+previous source state; they are not a fresh visual baseline for this work.
+
+Source inspection found a hypothesis for the animation-start report:
+src/scenes/gl-host.js play() exits its frame loop when document.hidden is true,
+without updating the playing flag. src/scene-ui.js interrupts on a later hidden
+visibility event, but first-open while already hidden needs reproduction. Test
+visible first-open, hidden first-open then foreground, background/return,
+reduced motion, diagram fallback, replay and immediate user interruption before
+choosing a fix. This is a hypothesis, not a confirmed diagnosis.
+
+No website source, underlying data, scholarly qualifications or generated page
+has been changed. No publication or new visual verification has occurred.
