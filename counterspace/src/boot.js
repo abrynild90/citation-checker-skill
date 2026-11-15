@@ -186,11 +186,15 @@ function jumpToHash(again) {
     const css = getComputedStyle(t),
       want = (parseFloat(css.scrollMarginTop) || 0) + (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0),
       to = Math.min(Math.max(0, scrollY + r.top - want), document.documentElement.scrollHeight - innerHeight);
+    // The target is where it was on the page, but the page is no longer where the landing left it: it was scrolled away (by a script or a control, which do not
+    // count as the reader's touch). That is not a landing to correct, so it is left alone.
+    if (landed && landed.id === id && Math.abs(scrollY + r.top - landed.doc) <= 2 && Math.abs(scrollY - landed.at) > 2) return;
     if (!(landed && landed.id === id && Math.abs(r.top - landed.top) > 2) && Math.abs(to - scrollY) <= 2) return;
   }
   t.scrollIntoView({ block: 'start', behavior: 'auto' });
   hooks.legalScroll?.();
-  landed = { id, top: t.getBoundingClientRect().top };
+  const top = t.getBoundingClientRect().top;
+  landed = { id, top, at: scrollY, doc: scrollY + top };
 }
 addEventListener('hashchange', () => {
   const id = hashId();
