@@ -83,6 +83,10 @@ def earth_json():
     out = {}
     for key, f in (('day', 'earth-day.jpg'), ('night', 'earth-night.jpg')):
         out[key] = 'data:image/jpeg;base64,' + base64.b64encode((R / 'src/assets' / f).read_bytes()).decode()
+    # the hero's Earth limb, rendered in Blender (tools/blender/hero.py) with its edge straightened onto the top row; optional
+    hero = R / 'src/assets/hero-limb.jpg'
+    if hero.exists():
+        out['hero'] = 'data:image/jpeg;base64,' + base64.b64encode(hero.read_bytes()).decode()
     return out
 
 

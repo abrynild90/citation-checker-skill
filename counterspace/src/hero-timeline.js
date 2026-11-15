@@ -10,7 +10,7 @@ import { SCENES } from './scenes/config.js';
 import { SHORT } from './discover-data.js';
 import { posterURL } from './scenes/posters.js';
 import { LAW_WORDS, WORDS } from './charts/lag.js';
-import { earthSource, loadEmbeddedEarth } from './scenes/earth.js';
+import { earthSource, heroLimb, loadEmbeddedEarth } from './scenes/earth.js';
 
 const NS = 'http://www.w3.org/2000/svg',
   EASE = 'cubic-bezier(.16,1,.3,1)',
@@ -1511,7 +1511,33 @@ function texture() {
   texCache = { src, w, h, d: g.getImageData(0, 0, w, h).data };
   return texCache;
 }
+// The Blender limb (tools/blender/hero.py): a wide strip of Europe and Africa from orbit whose edge lies on its top row. Each column is moved down onto
+// this layout's curve; the strip is cropped from the centre to the picture's proportions, so it is never stretched.
+function paintLimb(S, strip) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1),
+    cw = Math.round(S.W * dpr),
+    ch = Math.round(S.groundH * dpr),
+    c = document.createElement('canvas'),
+    sw = strip.naturalWidth,
+    sh = strip.naturalHeight,
+    aspect = S.W / S.groundH,
+    srcW = Math.min(sw, sh * aspect),
+    srcH = Math.min(sh, srcW / aspect),
+    x0 = (sw - srcW) / 2,
+    colW = srcW / cw;
+  c.width = cw;
+  c.height = ch;
+  const g = c.getContext('2d');
+  g.fillStyle = '#0a1730';
+  g.fillRect(0, 0, cw, ch);
+  for (let i = 0; i < cw; i++) {
+    const dy = (S.limbY((i + 0.5) / dpr) - S.yL) * dpr;
+    g.drawImage(strip, x0 + i * colW, 0, colW, srcH, i, dy, 1, ch);
+  }
+  S.earthImg.setAttribute('href', c.toDataURL('image/jpeg', 0.9));
+}
 function paintEarth(S) {
+  if (heroLimb && S.earthImg.isConnected) return paintLimb(S, heroLimb);
   const tex = texture();
   if (!tex || !S.earthImg.isConnected) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1),

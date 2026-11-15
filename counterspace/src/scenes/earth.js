@@ -236,6 +236,7 @@ export function lightsFor(img) {
 // when they arrive. earthSource() is whichever is best right now (full-size, else embedded).
 export let earthLow = null,
   earthNightLow = null,
+  heroLimb = null, // the hero's Earth limb (Blender render, edge on the top row), when the build embedded one
   embeddedPromise = null;
 export function loadEmbeddedEarth() {
   if (embeddedPromise) return embeddedPromise;
@@ -250,10 +251,11 @@ export function loadEmbeddedEarth() {
         im.src = src;
       });
   embeddedPromise = data
-    ? Promise.all([decode(data.day), decode(data.night)]).then(([d, n]) => {
+    ? Promise.all([decode(data.day), decode(data.night), data.hero ? decode(data.hero) : null]).then(([d, n, h]) => {
         earthLow = d;
         earthNightLow = n;
-        return !!d;
+        heroLimb = h;
+        return !!(d || h);
       })
     : Promise.resolve(false);
   return embeddedPromise;

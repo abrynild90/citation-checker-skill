@@ -20,4 +20,17 @@ For broader visual QA, run `npm run qa`. For scene framing and label checks, run
 
 Edit `src/`, then rebuild; do not edit the generated `index.html` directly. To validate and regenerate the underlying data and verification documents, run `python3 tools/build_data.py` from `counterspace/`. The website reports its source edition and data cutoff; it does not claim to be a live feed.
 
+## Rendered pictures (Blender)
+
+The thirteen 3D-explainer posters (`src/assets/posters/*.webp`) and the hero's Earth limb (`src/assets/hero-limb.jpg`) are rendered with Blender (Cycles; made with 5.3) from the NASA textures in `src/assets`. To regenerate them, from `counterspace/`:
+
+```sh
+blender -b -P tools/blender/posters.py          # add -- --only starfish,rpo for some scenes
+blender -b -P tools/blender/hero.py
+python3 tools/blender/finish.py                 # posters: bloom, vignette, 960 px WebP
+python3 tools/blender/finish.py --hero          # hero limb: straightened strip
+```
+
+Then rebuild. `tools/make_posters.mjs` still captures posters from the live WebGL scenes, if you prefer those.
+
 The source data and interpretation rules are documented in `methodology.md` and `ledger.md`. Fonts retain their OFL licenses under `fonts/`; D3 and Three.js license notices are reproduced in `THIRD_PARTY_NOTICES.md`.
