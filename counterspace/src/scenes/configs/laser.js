@@ -4,22 +4,18 @@ import { C } from './shared.js';
 
 export const LASER = {
   id: 'laser',
-  explanationAlt: 'Schematic horizon view: a ground station at White Sands aims a laser toward MSTI-3 while it is above the horizon. The drawn beam and satellite shape are illustrative; detailed test results are not public.',
+  explanationAlt:
+    'A ground station at White Sands aims a laser at MSTI-3 while it is above the horizon. Beam and satellite shape are illustrative; detailed results are not public.',
   date: '1997-10-17',
   title: 'MIRACL: a US laser fired at a satellite (1997)',
   shells: ['LEO'],
   duration: 12,
-  lede: 'In October 1997 the United States fired the MIRACL chemical laser at MSTI-3, a retired Air Force experimental satellite with infrared sensors. Detailed results of the test are not public.',
+  lede: 'In October 1997 the United States fired the MIRACL chemical laser at MSTI-3, a retired Air Force experimental satellite. Detailed results are not public.',
   caption:
-    'In October 1997 the United States fired the MIRACL chemical laser at ' +
-    'MSTI-3, a retired Air Force experimental satellite with infrared sensors. ' +
-    'Detailed results of the test are not public. ' +
-    'MIRACL is now part of a facility at White Sands Missile Range, New ' +
-    'Mexico, where this diagram places it. The beam is drawn for illustration. ' +
-    'A low-power beam can dazzle a sensor, which means briefly blinding it. A high-power beam could damage it. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, describes Russia’s ' +
-    'Peresvet as a mobile laser dazzler. The Russia view shows only its shelter sites. ' +
-    'No legal item in our records is tied to this test. That is a gap in our records, not a finding that no rule exists.',
+    'In October 1997 the United States fired the MIRACL chemical laser at MSTI-3, a retired Air Force experimental satellite. ' +
+    'Detailed results are not public. ' +
+    'The Secure World Foundation (SWF) describes Russia’s Peresvet as a mobile laser dazzler, a weapon that briefly blinds sensors; the Russia view shows only its shelter sites. ' +
+    'No law in our records is tied to this test: a gap in our records, not a finding that no rule exists.',
   cite: 'Secure World Foundation, 2026: p. 01-35 (MIRACL); pp. 02-35 to 02-36 (Peresvet shelter sites; site markers approximate).',
   related: null,
   event: 'us-1997-miracl',
@@ -43,7 +39,7 @@ export const LASER = {
   staticBeamLabelFrac: 0.85, // static: MIRACL label anchored near the satellite end, above the limb
   staticK: 1.9, // static: MSTI-3 drawn further out in space so it clears the Earth limb
   actors: [
-    { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range, New Mexico', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
+    { type: 'site', at: [32.4, -106.4], label: 'White Sands Missile Range', short: 'White Sands', color: C.ground, dx: -96, dy: 30 },
     { type: 'target', label: 'MSTI-3 (US test target)', short: 'MSTI-3', color: C.tgt, noHit: true, fadeDisc: true, orbitThick: 0.0016, big: 2.4, minPx: 64, maxPx: 118, dx: 30, dy: 50 },
     {
       type: 'beam',
@@ -106,8 +102,8 @@ export const LASER = {
   still: 0.5,
   status: [
     [0, 'MSTI-3 rises over White Sands'],
-    [0.15, 'MIRACL beam tracks the satellite while it is above the horizon', 'MIRACL beam tracks the satellite'],
-    [0.78, 'Peresvet: Russia’s mobile laser dazzler (SWF). Shelter sites shown', 'Peresvet: a mobile laser dazzler (SWF)'],
+    [0.15, 'MIRACL beam tracks the satellite', 'MIRACL beam tracks the satellite'],
+    [0.78, 'Peresvet shelter sites: a mobile laser dazzler (SWF)', 'Peresvet: a mobile laser dazzler (SWF)'],
   ],
   cameras: [
     { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55, fill: 0.66 } },
@@ -125,7 +121,7 @@ export const LASER = {
       drift: [22, 12], // a slow pan east across the shelter sites: the view differs at every t
       ref: false,
       hide: ['MSTI-3', 'MIRACL', 'White Sands'],
-      status: ['Peresvet shelter sites, approximate (SWF): a mobile laser dazzler', 'Peresvet shelter sites (approximate)'],
+      status: ['Peresvet shelter sites, approximate (SWF)', 'Peresvet shelter sites (approximate)'],
     },
   ],
 };

@@ -175,14 +175,14 @@ export function mountQuiz() {
     <div class="q-opts" role="group" aria-labelledby="q${i}">
       ${b.opts.map((o, k) => `<button type="button" class="q-opt" data-k="${k}" aria-pressed="false">${mark}<span class="q-t">${esc(o.text)}</span></button>`).join('')}
     </div>
-    <div class="q-slot"><p class="q-wait" aria-hidden="true"><span class="qw-track"><i class="qw-dot"></i><i class="qw-tick"></i></span>The dates and the gap appear here.</p>
+    <div class="q-slot"><p class="q-wait" aria-hidden="true"><span class="qw-track"><i class="qw-dot"></i><i class="qw-tick"></i></span></p>
       <div class="q-out" aria-live="polite"></div><div class="q-out q-ghost" aria-hidden="true" inert>${outHTML(b, false)}</div></div>
   </div>
 </li>`;
   }).join('');
   host.innerHTML = `<div class="quiz"><ol class="q-list">${cards}</ol>
   <div class="q-trail" id="qTrail" aria-hidden="true" hidden></div>
-  <div class="q-foot"><div class="q-sum"><div class="q-sumreal"><p class="q-tally" id="qTally" aria-live="polite">Four questions. Your answers are not saved.</p>
+  <div class="q-foot"><div class="q-sum"><div class="q-sumreal"><p class="q-tally" id="qTally" aria-live="polite">Your answers are not saved.</p>
     <p class="q-pattern" id="qPattern" hidden></p><p class="q-reward" id="qReward" aria-live="polite" hidden></p></div></div>
     <button type="button" class="btn small q-again" id="qAgain" hidden><svg class="ico" aria-hidden="true"><use href="#i-replay"/></svg>Try again</button>
     <button type="button" class="btn small primary" id="qHero" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg>Show me the new link</button>
@@ -220,7 +220,7 @@ export function mountQuiz() {
   const sync = () => {
     const done = state.filter((s) => s !== null).length,
       right = state.filter(Boolean).length;
-    if (!done) tally.textContent = 'Four questions. Your answers are not saved.';
+    if (!done) tally.textContent = 'Your answers are not saved.';
     else tally.textContent = done < N ? `${right} of ${done} answered correctly so far.` : `${right} of ${N} answered correctly.`;
     tally.classList.toggle('done', done === N);
     // all answered: the score is joined by what the four pairs have in common, and the way to the chart that shows every pair becomes the main step
@@ -255,7 +255,7 @@ export function mountQuiz() {
         .join('') +
       '<i class="qt-tick"></i>';
     if (r) {
-      rew.textContent = `${right === N ? 'All four right.' : 'Three right.'} That earns a new link on the picture at the top of the page: ${r.event} and ${r.law}.`;
+      rew.textContent = `${right === N ? 'All four right.' : 'Three right.'} New link on the top picture: ${r.event} and ${r.law}.`;
       rew.hidden = toHero.hidden = false;
       toHero.dataset.key = r.key;
     }

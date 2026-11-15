@@ -4,25 +4,23 @@ import { C, PK } from './shared.js';
 
 export const SJ21_TUG = {
   id: 'sj21-tug',
-  explanationAlt: 'Before towing, defunct Compass G2 occupied the working geostationary belt. SJ-21 docked with it by an undescribed method and towed both objects above that belt. The before-and-after diagram is schematic; no docking hardware or exact trajectory is shown.',
+  explanationAlt: 'Before the tow, defunct Compass G2 sat in the working geostationary belt. SJ-21 docked with it by an undescribed method and towed both above that belt. Schematic: no hardware or exact path is shown.',
   date: '2022-01-21',
   title: 'China’s SJ-21 tows a dead satellite into a higher orbit (2022)',
   shells: [],
   duration: 24,
-  lede: 'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit, about 36,000 km up. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the belt where working satellites sit, then came back down close to it.',
+  lede: 'In December 2021 China’s SJ-21 reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit, about 36,000 km up. Around 21 January 2022 it pulled both objects above the belt where working satellites sit, then came back down.',
   caption:
-    'In December 2021 China’s SJ-21 satellite reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, reports that SJ-21 “docked to it at some point”. Around 21 January 2022 SJ-21 used its own propulsion to pull both objects above the GEO belt, the band of orbits where working satellites sit, then came back down close to GEO. ' +
-    'SWF’s table says SJ-21 pulled Compass G2 well past the graveyard orbit, the disposal region above GEO for retired satellites. ' +
-    'SWF does not say how SJ-21 captured or docked with it. The spacecraft shapes, spacing and motion are illustrative. ' +
-    'No legal item in our records is tied to this event.',
+    'In December 2021 China’s SJ-21 reached Compass G2, a defunct Chinese navigation satellite in geostationary orbit (GEO), about 36,000 km up. ' +
+    'The Secure World Foundation (SWF) reports that SJ-21 “docked to it at some point”; it does not say how. ' +
+    'Around 21 January 2022 SJ-21 used its own propulsion to pull both above the GEO belt, where working satellites sit, then came back down close to GEO.',
   cite:
     'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15.',
   related: null,
   event: 'cn-2022-sj21-compass-g2',
   inset: 'Top view',
   insetNoPhone: true, // on a phone the inset would cover the docked pair
-  scaleNote: 'The heights above the belt, the spacing between the two spacecraft and their position along the belt are drawn for illustration.',
+  scaleNote: 'Heights above the belt and the spacing between the craft are illustrative.',
   anchors: { g: { geo: { lon: 105 } } },
   actors: [
     {
@@ -170,17 +168,16 @@ export const SJ21_TUG = {
   atmoFloor: 0.4,
   still: 0.78,
   staticT: 0.805, // static: just after the docked window, so the two craft are drawn apart (a gap, each at full size) above the belt
-  staticStatus: 'SJ-21 pulls Compass G2 above the GEO belt (height and spacing exaggerated)',
+  staticStatus: 'SJ-21 pulls Compass G2 above the GEO belt (exaggerated)',
   staticCraftScale: { sj21: 2.2, cg2: 2.2 },
   captionShort: true, // the picture's caption is the short text at every width; the step list keeps the full sentence
   status: [
-    [0, 'SJ-21 (China) approaches the defunct Compass G2 (25 Dec. 2021)', 'SJ-21 approaches defunct Compass G2'],
-    [0.2, 'For several weeks SJ-21 stays very close to Compass G2', 'SJ-21 stays close to G2 for weeks'],
-    [0.34, 'SWF: the two dock at some point; how is not described', 'SWF: they dock at some point'],
-    [0.5, 'About 21 Jan. 2022: SJ-21 pulls both objects up with its own propulsion', 'About 21 Jan.: SJ-21 pulls both up'],
-    [0.72, 'By 27 Jan. both are 290 to 3,100 km above the protected GEO zone (height exaggerated)', 'By 27 Jan.: 290–3,100 km above GEO zone'],
-    [0.8, 'SWF does not describe the separation; it says SJ-21 later lowered its orbit back close to GEO', 'SJ-21 later lowered its orbit near GEO'],
-    [0.96, 'SJ-21 is near GEO again; SWF’s table says Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
+    [0, 'SJ-21 approaches the defunct Compass G2 (25 Dec. 2021), then stays close for weeks', 'SJ-21 approaches Compass G2'],
+    [0.34, 'SWF: they dock at some point; method not described', 'SWF: they dock at some point'],
+    [0.5, 'About 21 Jan. 2022: SJ-21 pulls both up with its own propulsion', 'About 21 Jan.: SJ-21 pulls both up'],
+    [0.72, 'By 27 Jan. both are 290 to 3,100 km above the protected GEO zone', '27 Jan.: 290–3,100 km above GEO'],
+    [0.8, 'SWF does not describe the separation; SJ-21 later lowered its orbit near GEO', 'SJ-21 later lowers its orbit'],
+    [0.96, 'SWF’s table: Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
   cameras: [
     {

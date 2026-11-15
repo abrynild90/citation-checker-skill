@@ -103,7 +103,7 @@ const dl = (rows) => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).j
 
 // Whole sentences only: as many as fit in about `max` characters (always the first one), so a compact card never stops mid-sentence.
 const ABBR = /(?:\b(?:Gen|Maj|Col|Lt|Adm|Sgt|Capt|Dr|Mr|Mrs|Ms|Prof|St|Sen|Rep|Gov|No|Nos|vs|Inc|Corp|Co|Ltd|Jr|Sr|approx|etc|e\.g|i\.e|U\.S|U\.N|Dep't|Dept|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)|\b[A-Z])\.$/;
-export function sentencesUpTo(text, max = 230) {
+export function sentencesUpTo(text, max = 130) {
   const parts = [];
   let cur = '';
   text.split(/(\s+)/).forEach((tok) => {
@@ -135,7 +135,7 @@ export function nkCard(e, compact = false) {
       ]) +
       `<div class="clip3">${esc(sentencesUpTo(plain(e.effect)))}</div>` +
       noLater(e) +
-      (hasScene(e) ? sceneHint : '<div class="hint plain">Select the bar, or press Enter, for the full entry.</div>')
+      (hasScene(e) ? sceneHint : '<div class="hint plain">Select for the full entry.</div>')
     );
   return (
     `<p class="card-title">${esc(e.target_system)}</p>` +
@@ -161,7 +161,7 @@ export const coWhen = (e) => {
 // Compact form (desktop hover on the dense close-approach chart): the key facts only, so the card stays small and hides few neighbouring points.
 // Click or Enter shows the full card (description, notes, source). Phones dock the full card, which scrolls inside itself.
 export function coCard(e, compact = false) {
-  const hint = hasScene(e) ? sceneHint : compact ? '<div class="hint plain">Select the point, or press Enter, for the full entry.</div>' : '';
+  const hint = hasScene(e) ? sceneHint : compact ? '<div class="hint plain">Select for the full entry.</div>' : '';
   const rows = [
     ['When', coWhen(e)],
     compact ? null : ['Actor', esc(e.actor)],
@@ -175,7 +175,7 @@ export function coCard(e, compact = false) {
   const note = noteOf(e);
   return (
     `${head}<div>${esc(plain(e.description))}</div>${note ? `<div class="note">${esc(note)}</div>` : ''}${noLater(e)}${srcLine(e)}` +
-    `<div class="hint plain">A proximity operation is not an attack, and SWF is cautious in how it describes intent.</div>${hasScene(e) ? sceneHint : ''}`
+    `<div class="hint plain">A proximity operation is not an attack.</div>${hasScene(e) ? sceneHint : ''}`
   );
 }
 

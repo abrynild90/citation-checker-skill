@@ -5,21 +5,20 @@ import { C } from './shared.js';
 export const DN2 = {
   id: 'dn2',
   explanationAlt:
-    'Two accounts of the rocket’s highest point: China stated 10,000 km; analysis cited by the Secure World Foundation estimated 30,000 km or more. Geostationary orbit is at 35,786 km. These are separate reported figures, not successive measurements of a known trajectory. No target was hit.',
+    'Two accounts of the rocket’s highest point: China said 10,000 km; an analysis cited by SWF says 30,000 km or more. Geostationary orbit is at 35,786 km. No target was hit.',
   date: '2013-05-13',
   title: 'DN-2: China’s “high-altitude science” rocket launch (2013)',
   shells: ['LEO', 'MEO', 'GEO'],
   duration: 14,
   scaleNote:
-    'The launch and reported heights are sourced. The flight path, rocket shape, timing and re-entry position are illustrative, not a reconstructed trajectory.',
-  lede: 'On 13 May 2013 China launched a DN-2 rocket from Xichang on a path that reaches space and falls back without completing an orbit. It climbed toward geostationary orbit, the ring about 36,000 km above the equator, and it had no target.',
+    'Heights are reported figures; the path, rocket shape and timing are illustrative.',
+  lede: 'On 13 May 2013 China launched a DN-2 rocket from Xichang toward geostationary orbit, about 36,000 km up. It had no target.',
   caption:
-    'On 13 May 2013 China launched a DN-2 rocket from Xichang on a suborbital path, a flight that reaches space and falls back without completing an orbit. ' +
-    'It climbed toward geostationary orbit (GEO), the ring about 36,000 km above the equator where a satellite stays above the same point on the Earth. ' +
-    'China said it reached 10,000 km. The US military said it went “nearly to GEO”, and US officials said the upper stages re-entered “over the Indian Ocean”. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, cites an analysis that puts the highest point, its apogee, at 30,000 km or more. ' +
-    'There was no target, so this was not an intercept (a missile hitting its target). The launch showed how far the rocket could reach. ' +
-    'No treaty or resolution on this page’s law timeline is tied to this launch.',
+    'On 13 May 2013 China launched a DN-2 rocket on a suborbital path, which falls back without completing an orbit. ' +
+    'It climbed toward geostationary orbit (GEO), about 36,000 km up. China said it reached 10,000 km. ' +
+    'The Secure World Foundation (SWF) cites an analysis putting the highest point at 30,000 km or more. ' +
+    'US officials said the upper stages re-entered “over the Indian Ocean”. ' +
+    'It had no target.',
   cite: 'Secure World Foundation, 2026, pp. 03-20, 03-22.',
   related: null,
   event: 'cn-2013-dn2',
@@ -72,7 +71,7 @@ export const DN2 = {
       marks: [
         {
           alt: 10000,
-          label: '10,000 km · China’s stated figure',
+          label: '10,000 km (China’s figure)',
           short: '10,000 km (China)',
           phoneFrom: 0.3,
           from: 0.2, // the tick (and its pill) wait until the view has finished pulling back from the pad (between 0.14 and 0.17 no slot is free for the pill, so a bare diamond floated over the ocean)
@@ -87,7 +86,7 @@ export const DN2 = {
         },
         {
           alt: 30000,
-          label: 'Apogee ≥30,000 km (SWF-cited)',
+          label: 'Highest point ≥30,000 km (SWF)',
           short: '≥30,000 km (SWF)',
           opt: true,
           color: '#ff9c9c',
@@ -133,15 +132,15 @@ export const DN2 = {
   narrowK: 1.1, // phone: the tracking view backs out a little (the rocket and the ring stay whole)
   stillCam: { at: [22, 8, 7.9], look: [0, 90, 0.7] },
   status: [
-    [0, 'The DN-2 rocket climbs from Xichang toward GEO'],
-    [0.4, 'Analysis cited by SWF: apogee ≥30,000 km, toward GEO (35,786 km)', 'SWF-cited analysis: apogee ≥30,000 km'],
-    [0.8, 'Re-entry “over the Indian Ocean”, say US officials', 'US officials: re-entry “over the Indian Ocean”'],
+    [0, 'DN-2 climbs from Xichang toward GEO'],
+    [0.4, 'SWF-cited analysis: highest point ≥30,000 km', 'SWF-cited: ≥30,000 km'],
+    [0.8, 'US officials: re-entry “over the Indian Ocean”', 'US officials: re-entry “over the Indian Ocean”'],
   ],
   // live desktop, default camera (px from their referents): 10,000 km sits above its own marker and Apogee just below it, left of the head's glow,
   // each with a short
   // leader that crosses nothing; GEO (short text) hangs under its marker; the path label sits just above its arc
   liveShort: ['GEO'],
-  liveText: { '10,000': '10,000 km (China)', Apogee: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
+  liveText: { '10,000': '10,000 km (China)', Highest: '≥30,000 km (SWF)' }, // short enough to sit above its marker, clear of the Earth and of the rocket's glow
   liveOff: {
     'DN-2 path': [-30, -34],
     Xichang: [-70, -56],

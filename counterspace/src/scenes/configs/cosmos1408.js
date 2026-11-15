@@ -5,7 +5,7 @@ import { IS_PHONE } from '../core.js';
 export const COSMOS1408 = {
   id: 'cosmos1408',
   explanationAlt:
-    'The historical debris cloud crossed the ISS’s orbital height after the 2021 collision at about 470 km. A separate February 2026 count reports five of more than 1,800 tracked fragments remaining. Cloud extent is schematic; dots are not fragment counts.',
+    'The 2021 debris cloud crossed the ISS’s orbital height. A February 2026 count reports five of more than 1,800 tracked fragments remaining. The cloud is schematic.',
   fitPct: 0.92,
   latePct: 0.8, // later keys frame the bulk of the cloud and the ISS crossing, so the globe does not shrink to a ball
   fitCross: true,
@@ -26,17 +26,13 @@ export const COSMOS1408 = {
   title: 'Cosmos 1408: Russia destroys one of its satellites (2021)',
   shells: ['LEO'],
   duration: 16,
-  lede: 'On 15 November 2021 Russia fired a Nudol missile from Plesetsk and destroyed Cosmos 1408, a defunct Russian satellite, about 470 km above the Earth. The debris cloud spread across heights that include the orbit of the International Space Station, and its crew sheltered in their docked spacecraft.',
+  lede: 'On 15 November 2021 Russia fired a Nudol missile from Plesetsk and destroyed Cosmos 1408, a defunct Russian satellite, about 470 km up. The debris spread across heights that include the orbit of the International Space Station.',
   caption:
-    'On 15 November 2021 Russia fired a Nudol missile from Plesetsk and destroyed ' +
-    'Cosmos 1408, a defunct Russian satellite, about 470 km above the Earth. ' +
-    'The debris cloud spread across heights that include the orbit of the International Space Station ' +
-    '(ISS), which is drawn schematically, and the ISS crew sheltered in their docked spacecraft. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, counts more ' +
-    'than 1,800 tracked fragments, 5 of them still in orbit as of February 2026. ' +
-    'In April 2022 the United States pledged not to conduct destructive ' +
-    '“direct-ascent” anti-satellite missile tests, meaning tests launched from Earth. ' +
-    'It is a unilateral pledge, not a treaty. Other states followed; SWF counts 38 countries in all.',
+    'On 15 November 2021 Russia fired a Nudol missile and destroyed Cosmos 1408, a defunct Russian satellite, about 470 km up. ' +
+    'Debris spread across the orbit of the International Space Station (ISS). ' +
+    'The Secure World Foundation (SWF) counts more than 1,800 tracked fragments, 5 still in orbit as of February 2026. ' +
+    'In April 2022 the United States pledged not to test destructive anti-satellite missiles launched from Earth. ' +
+    'It is a unilateral pledge, not a treaty; SWF counts 38 countries in all.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; Table 2-4, p. 02-21.',
   related: 'us-moratorium-2022',
   event: 'ru-2021-cosmos1408',
@@ -161,10 +157,10 @@ export const COSMOS1408 = {
   offSteps: { Plesetsk: [[0, -96, 44], [0.34, -50, 20]] }, // once the view pulls back to the whole globe the Plesetsk pill hugs its site (it sat over Greenland, a long leader away)
   stillOff: { 'ISS orbit': [235, -30] }, // the still: the ISS label sits just right of the globe's edge
   status: [
-    [0, 'Nudol rises toward Cosmos 1408; the ISS orbit is drawn below it', 'Nudol rises toward Cosmos 1408'],
-    [0.32, 'Collision at about 470 km: debris spreads and crosses the ISS orbit', 'Collision at about 470 km; debris spreads'],
-    [0.6, '2021: debris spreads across the ISS’s orbital height; the crew sheltered', '2021: debris crosses the ISS’s orbital height'],
-    [0.76, 'Time passes. The historical cloud fades; it is not a map of surviving fragments', 'Historical cloud fades; later count follows'],
-    [0.84, 'February 2026: SWF’s count of the fragments still in orbit', 'February 2026: SWF’s count of fragments in orbit'], // the card under the globe carries the numbers; the caption does not say them again
+    [0, 'Nudol rises toward Cosmos 1408'],
+    [0.32, 'Collision at about 470 km; debris spreads', 'Collision at about 470 km; debris spreads'],
+    [0.6, 'Debris crosses the ISS orbit; the crew sheltered', 'Debris crosses the ISS orbit'],
+    [0.76, 'The historical cloud fades; it is not a map of surviving fragments', 'Historical cloud fades'],
+    [0.84, 'February 2026: SWF count of fragments still in orbit', 'February 2026: SWF count in orbit'], // the card under the globe carries the numbers; the caption does not say them again
   ],
 };

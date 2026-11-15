@@ -27,7 +27,6 @@ const LAW_NAMES = {
   'ltbt-1963': {
     text: 'Limited Test Ban Treaty, 1963',
     phone: 'Test Ban Treaty, 1963',
-    more: 'The earliest law here. It bans nuclear tests in space.',
     row: 1,
     prow: 1,
   },
@@ -167,8 +166,7 @@ export const pulseReveal = (key) => drawn?.reveal?.pulse(key);
 function writeText(stage) {
   const withAlt = KIN.filter((e) => e.altitude_km != null),
     first = [...KIN].sort((a, b) => (a.date < b.date ? -1 : 1))[0],
-    top = KIN.filter((e) => e.type === 'destructive').sort((a, b) => b.altitude_km - a.altitude_km)[0],
-    fmt = d3.utcFormat('%-d %B %Y');
+    top = KIN.filter((e) => e.type === 'destructive').sort((a, b) => b.altitude_km - a.altitude_km)[0];
   stage.setAttribute(
     'aria-label',
     `A picture of anti-satellite tests and other tests in orbit, 1957 to 2026. Each is placed by year, left to right, and by height above the Earth's ` +
@@ -176,17 +174,16 @@ function writeText(stage) {
       `reached ${top.altitude_km} km, in ${fmtY(parse(top.date))}. The last was in ${fmtMonthYear(parse(LAST_DA))}. Laws and policies stand as ticks on the ground at their ` +
       `own years, beginning with the Limited Test Ban Treaty in 1963. The charts below let you select each event with a keyboard.`,
   );
-  const items = [...withAlt]
-    .sort((a, b) => (a.date < b.date ? -1 : 1))
-    .map((e) => `<li>${fmt(parse(e.date))}: ${e.system}, ${e.state}, ${e.altitude_km} km. ${KIND_PLAIN[e.type]}.</li>`)
-    .join('');
-  const laws = [...LEGAL]
-    .sort((a, b) => (a.start < b.start ? -1 : 1))
-    .map((l) => `<li>${fmt(parse(l.start))}: ${l.label}</li>`)
-    .join('');
+  const kills = withAlt
+      .filter((e) => e.type === 'destructive')
+      .sort((a, b) => (a.date < b.date ? -1 : 1))
+      .map((e) => `${e.system} (${e.state}, ${fmtY(parse(e.date))}, ${e.altitude_km} km)`)
+      .join('; '),
+    lawYears = [...LEGAL].map((l) => +l.start.slice(0, 4));
+  // The whole list of tests and of laws is in the data tables below each chart, so this stays a summary.
   document.getElementById('heroAlt').innerHTML =
-    `<p>Tests with a reported altitude, in date order. Tests with no reported altitude are not drawn here.</p><ul>${items}</ul>` +
-    `<p>Laws and policies, in date order.</p><ul>${laws}</ul>`;
+    `<p>${withAlt.length} tests have a reported altitude. Tests that destroyed a satellite: ${kills}.</p>` +
+    `<p>${LEGAL.length} laws and policies, ${Math.min(...lawYears)} to ${Math.max(...lawYears)}. Every test and law is listed in the data tables below.</p>`;
 }
 
 // ---------------------------------------------------------------- the drawing
@@ -345,7 +342,7 @@ function build(stage) {
         m: markOf(topD.id),
         t: phone
           ? `${fmtY(parse(topD.date))}: China destroyed Fengyun-1C at ${topD.altitude_km} km, the highest such test.`
-          : `${fmtY(parse(topD.date))}: China destroyed its Fengyun-1C satellite at ${topD.altitude_km} km, the highest test of that kind.`,
+          : `${fmtY(parse(topD.date))}: China destroyed Fengyun-1C at ${topD.altitude_km} km, the highest test of that kind.`,
         order: ['left', 'up-end', 'up-start', 'down-end'],
         phone: true,
       },
@@ -353,7 +350,7 @@ function build(stage) {
         m: markOf(lastD.id),
         t: phone
           ? `November 2021: last destructive test (Cosmos 1408).`
-          : `${fmtMonthYear(parse(lastD.date))}: Russia destroyed its Cosmos 1408 satellite at ${lastD.altitude_km} km, the last such test.`,
+          : `${fmtMonthYear(parse(lastD.date))}: Russia destroyed Cosmos 1408 at ${lastD.altitude_km} km, the last such test.`,
         order: ['up-end', 'down-end', 'left'],
         phone: true,
       },
@@ -635,13 +632,13 @@ const thumb = (id) => {
 // A law with no 3D scene would otherwise show only its name, its date and one button: this adds one plain line on what kind of thing it is and whether our
 // records pair it with a weapon (kind and pairs only; nothing is typed in per law).
 const LAW_ABOUT = {
-  treaty: 'A treaty: it binds the states that joined it.',
-  resolution: 'Not binding: a call or a finding, not a rule with enforcement.',
+  treaty: 'It binds the states that joined it.',
+  resolution: 'Not binding: a call or a finding.',
   unilateral: 'A pledge by one country, not a treaty.',
-  soft: 'An expert manual: soft law, so it binds no one.',
-  veto: 'A veto in the Security Council: the draft did not pass.',
-  draft: 'A draft treaty put forward in talks.',
-  span: 'A period of talks, not a single act.',
+  soft: 'Soft law: it binds no one.',
+  veto: 'The draft did not pass.',
+  draft: 'A draft put forward in talks.',
+  span: 'A period of talks, not one act.',
 };
 function lawLine(l) {
   const about = LAW_ABOUT[legalKindOf(l)] || '',

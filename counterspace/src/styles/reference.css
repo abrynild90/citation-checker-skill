@@ -23,8 +23,6 @@
 .ref-band .chapter-head>.tools{margin-top:var(--s-2)}
 .ref-band .takeaway{margin:var(--s-2) 0 var(--s-3);padding-top:var(--s-2);font-size:clamp(17px,1.4vw,19.5px);line-height:1.4;max-width:70ch}
 .ref-band .takeaway::before{width:32px}
-.ref-band #chartC .callout-row{margin:var(--s-2) 0 var(--s-2)}
-.ref-band #chartC .callout-row>.callout{padding:var(--s-2) var(--s-3);font-size:14.5px;line-height:1.45}
 .ref-band #quoteC .q{font-size:14.5px}
 .ref-band .callout{margin-top:var(--s-3)}
 .ref-band #chartB .callout-row>.callout{padding:var(--s-3) var(--s-4) var(--s-3) 56px;font-size:15.5px;line-height:1.5;margin-top:var(--s-3)}
@@ -92,7 +90,7 @@ section.chart.chart-first{margin-top:var(--s-4);padding:var(--s-5) 0 var(--s-5)}
 .law-choice .card-title{font:500 21px/1.3 var(--serif);margin-bottom:8px}
 .law-choice[hidden]{display:none}
 .law-choice .hint{display:none}
-@media(max-width:640px){#chartC .callout-row{margin-block:12px}#chartC .callout-row>.callout:not(.quote){font-size:14px;line-height:1.5;padding-block:12px}.xcards{gap:8px}.xcard{padding:10px}.ref-band .xc-l{font-size:15px}}
+@media(max-width:640px){.xcards{gap:8px}.xcard{padding:10px}.ref-band .xc-l{font-size:15px}}
 
 /* Record readers ("Find an entry", the 2020s assessment by state) are the first parts of a chart's fold; they expose the same sources and uncertainty as the marks. */
 .refold .rf-sec.rf-find{columns:auto}

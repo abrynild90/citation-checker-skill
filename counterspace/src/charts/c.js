@@ -25,25 +25,23 @@ import {
 } from '../app.js';
 import { ATTRIBUTION_LABEL, CATEGORY_LABEL, SURE_WORD, TARGET_LABEL } from '../cards2.js';
 import { activate, addGuide, bindMark, nkCard, quiet, rove, srcCell, table } from '../ui.js';
-import { bar, barPath, circlePath, dot, fullNote, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
+import { bar, barPath, circlePath, dot, glyph, keyMarkup, setKey, swatch, wrapBalanced, wrapLines, zoomNote, TOP_AXIS_H, topAxis } from './kit.js';
 
 const GROUPS = [
   {
     title: 'Jamming satellite communications',
-    gloss: 'Radio noise that drowns out the signals going up to a satellite (uplink) or coming down from it (downlink).',
     cats: ['ew_uplink', 'ew_downlink'],
   },
   {
     title: 'Jamming and spoofing satellite navigation',
-    gloss: 'Jamming blocks satellite navigation signals (GNSS, such as GPS); spoofing sends false ones, so a receiver shows the wrong position or time.',
+    gloss: 'Jamming blocks navigation signals (GNSS, such as GPS). Spoofing sends false ones.',
     cats: ['gnss_jamming', 'gnss_spoofing'],
   },
   {
     title: 'Lasers that dazzle or damage satellites',
-    gloss: 'Lasers aimed at a satellite to blind its sensors for a time, or to damage them.',
     cats: ['directed_energy'],
   },
-  { title: 'Cyber attacks', gloss: 'Hacking the computers and networks that run a satellite service.', cats: ['cyber'] },
+  { title: 'Cyber attacks', cats: ['cyber'] },
 ];
 // SWF 2026, Executive Summary, p. xxiii (PDF p. 21): thirteen words, quoted exactly; the capital O is the only change and is shown in brackets.
 const QUOTE = '“[O]nly non-destructive capabilities are actively being used against satellites in current military operations.”';
@@ -154,7 +152,7 @@ export function drawC(el = document.getElementById('svgC')) {
   const planHeader = (g) => {
     const avail = Math.min(R - L - 2 * PADX, 760),
       title = wrapBalanced(g.title, avail, (s) => tw(s, titleSize, 600)),
-      gloss = wrapBalanced(g.gloss, avail, (s) => tw(s, 13, 400));
+      gloss = g.gloss ? wrapBalanced(g.gloss, avail, (s) => tw(s, 13, 400)) : [];
     return { title, gloss, h: 18 + title.length * LH + 3 + gloss.length * 17 + 10 };
   };
 
@@ -398,15 +396,10 @@ export function drawC(el = document.getElementById('svgC')) {
     queueMicrotask(() => dispatchEvent(new Event('scroll')));
   }
   document.getElementById('noteC').innerHTML = zoom
-    ? zoomNote('1995 to 2026', stateC.focus === null, 'the earliest entry in our records is from 1997')
-    : fullNote() + (phone ? ` Nothing is in our records before ${firstYr}.` : '');
-  const ck = document.getElementById('ckeyC');
-  if (ck) {
-    const names = [...new Set(NK.map((e) => actorKey(e.actor) || 'Several or other'))];
-    ck.innerHTML = names
-      .map((n) => `<span class="ck"><i style="background:${n === 'Several or other' ? 'var(--c-multi)' : colorOf(n)}"></i>${n}</span>`)
-      .join('');
-  }
+    ? zoomNote('1995 to 2026')
+    : phone
+      ? `Nothing is in our records before ${firstYr}.`
+      : '';
   document.getElementById('quoteC').innerHTML = `<span class="q">${QUOTE}</span><span class="by">${QUOTE_BY}</span>`;
   document.getElementById('cFocus').setAttribute('aria-pressed', zoom);
   document.getElementById('cFull').setAttribute('aria-pressed', !zoom);

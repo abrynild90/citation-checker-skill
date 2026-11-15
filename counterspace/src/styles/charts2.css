@@ -108,9 +108,6 @@
   #chartB>:is(ul.legend,.callout,details,.dl-row){order:2}
 }
 
-.ckey{display:flex;flex-wrap:wrap;gap:4px 14px;margin:var(--s-2) 0 0;font:500 13px/1.4 var(--sans);color:var(--muted);flex-basis:100%}
-.ckey .ck{display:inline-flex;align-items:center;gap:6px}
-.ckey i{display:inline-block;width:10px;height:10px;border-radius:50%}
 
 /* "Test yourself: which came first?": its own band after "What the pattern shows". Four cards, a pick commits (the pair locks), the verdict and the real gap are shown
    in words and in a tick or a cross (never colour alone), and a small tally counts. */
@@ -177,17 +174,11 @@
   .callout-row>.b-read{margin-top:var(--s-5);align-self:center}
 }
 
-/* The jamming chapter's two notes stand above the chart as one slim row, so the caution is read before the bars and the page below the chart is shorter */
-#chartC .callout-row{margin:var(--s-3) 0 var(--s-2);gap:var(--s-3) var(--s-4)}
-#chartC .callout-row>.callout{margin:0;padding:var(--s-3) var(--s-4);font-size:15.5px;line-height:1.45;max-width:60ch}
-#chartC .callout-row>.callout::before{display:none}
 /* the notes folded into "How to read this chart" are plain paragraphs under the key */
 details.about>.words-line,details.about>.b-read,details.about>p{margin:var(--s-3) 0 0;max-width:var(--measure);font:400 14px/1.55 var(--sans);color:var(--muted)}
 details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 #quoteC .q{display:block;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:15.5px;line-height:1.45}
 #quoteC .by{margin-top:2px}
-#chartC .callout-row>#quoteC{margin:0} /* the two notes share one top edge */
-@media (min-width:1100px){#chartC .callout-row{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:stretch}}
 
 /* after a wrong answer: the scene that shows the event, as a plain button ("Watch the scene", then "Watched") with the scene's name beside it */
 .q-watch{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-1) var(--s-3);margin-top:var(--s-2);color:var(--text)}
@@ -292,7 +283,6 @@ details.about>.b-read b,details.about>.words-line b{color:var(--text)}
 
 /* The jamming chart's year note is the description of its year control (aria-describedby): one small line beside the two buttons, not a paragraph of its own */
 #chartC .tools p.seg-note{flex:1 1 0;min-width:min(100%,280px);font-size:13px;line-height:1.4}
-#chartC .tools .ckey{flex-basis:100%}
 #chartC .tools p.seg-note .zbadge{padding:1px 7px}
 /* The main source's quotation opens the jamming chart's fold: it is read with the key and the table, attributed and unchanged */
 #chartC .rf-quote #quoteC{margin:var(--s-2) 0 0;max-width:62ch}

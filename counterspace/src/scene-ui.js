@@ -462,9 +462,9 @@ function syncMore() {
       ? 'Full account'
       : capFolded
         ? steps.length > 4
-          ? 'Read the full account and every step'
-          : 'Read the full account'
-        : 'Show every step';
+          ? 'Full account and steps'
+          : 'Full account'
+        : 'All steps';
 }
 function setMore(open) {
   expanded = open;
@@ -576,8 +576,8 @@ function fillStory(cfg) {
     'Drawn for illustration. Orbit heights are squeezed so every orbit fits.',
     cfg.scaleNote,
     cfg.modelNote,
-    'Earth imagery: NASA Blue Marble and Black Marble (public domain). A simple map is drawn if the photograph cannot load.',
-    REDUCED ? 'Your device is set to limit animation, so a still diagram is shown.' : '',
+    'Earth imagery: NASA Blue Marble and Black Marble (public domain).',
+    REDUCED ? 'Animation is switched off on this device.' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -652,7 +652,7 @@ function fillNext(cfg) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'sv-next-btn chart';
-    b.innerHTML = CHART_ICON + 'Find it on the chart';
+    b.innerHTML = CHART_ICON + 'On the chart';
     b.onclick = () => findOnChart(cfg);
     box.appendChild(b);
   }
@@ -673,7 +673,7 @@ function fillNext(cfg) {
     const c = document.createElement('button');
     c.type = 'button';
     c.className = 'pill sl-x sl-chart';
-    c.innerHTML = CHART_ICON + 'Find it on the chart';
+    c.innerHTML = CHART_ICON + 'On the chart';
     c.onclick = () => findOnChart(cfg);
     slLinks.appendChild(c);
   }
@@ -979,41 +979,32 @@ const STEP_NAMES = {
   gnss: ['Before entering the zone', 'Inside the jammer zone'],
   viasat: ['Normal service', 'Attack begins', 'Modems disabled', 'Satellite unaffected', 'Attribution'],
   laser: ['Satellite rises', 'MIRACL tracks the target', 'Separate case: Peresvet'],
-  'sj21-tug': ['Approach', 'Close proximity', 'Docking', 'Tow begins', 'Higher orbit', 'Separation not described', 'Return toward GEO'],
+  'sj21-tug': ['Approach', 'Docking', 'Tow begins', 'Higher orbit', 'Separation not described', 'Return toward GEO'],
   rpo: [
-    'SJ-21 approaches SJ-25',
-    'GSSAP positions',
+    'SJ-21 approaches',
+    'GSSAP flanking',
     'Possible docking',
-    'Possible docking again',
     'Docked pair',
     'Separation',
-    'January approaches',
     'Cosmos 2543 released',
-    'Close to Cosmos 2542',
-    'Orbit raised',
+    'Near Cosmos 2542',
     'Near USA 245',
     'Russia’s statement',
     'USA 271 approaches',
-    'Orbit adjustment',
     'Closest approach',
-    'End of the approach',
   ],
   spaceplanes: [
     'OTV-1 to OTV-6',
-    'Low-orbit flights',
-    'Runway landings',
-    'SWF’s assessment',
-    'OTV-7’s elongated orbit',
-    'Unclear purpose',
-    'Lowering the orbit',
+    'No approaches',
+    'OTV-7 orbit',
+    'Orbit lowered',
     'OTV-8 launch',
     'China’s flights',
-    'First flight',
-    'Object J appears',
+    'Object J',
     'Approaches to Object J',
     'Object G released',
-    'PLA’s assessment',
-    'SWF’s interpretation',
+    'PLA’s view',
+    'SWF’s view',
     'Fourth flight',
   ],
 };
@@ -1668,7 +1659,7 @@ function syncScrub(t) {
     a1 = epi ? epi.a1 - (epi.last ? 0 : 0.001) : 1,
     v = Math.max(0, Math.min(1, (t - a0) / (a1 - a0))),
     len = (a1 - a0) * dur,
-    txt = `${Math.round(v * len)} s of ${Math.round(len)} s`;
+    txt = `${Math.round(v * len)} / ${Math.round(len)} s`;
   scrub.value = v * 1000;
   scrub.style.setProperty('--f', v.toFixed(4));
   if (txt !== timeTxt) {
@@ -1692,18 +1683,18 @@ function staticMode(on) {
   overlay.classList.toggle('is-static', on);
   if (on) {
     staticTxt.textContent = REDUCED
-      ? 'Your device is set to limit animation, so this is a still diagram.'
-      : 'The animation could not start, so a still diagram is shown. Try again, or read the account and steps below.';
+      ? 'Animation is switched off on this device, so this is a still diagram.'
+      : 'The animation could not start, so a still diagram is shown. Try again, or read the steps below.';
     $('scRetry').hidden = REDUCED; // with animation switched off, trying again changes nothing
     setPlayBtn(false);
   } else setPlayBtn(true);
   stepsNote.textContent = on
     ? curSim?.cfg.explanationByStep
-      ? 'Select an episode or step to change this still diagram. Animation is not running.'
+      ? 'Select an episode or step to change the still diagram.'
       : curSim?.cfg.explanationAlt
-        ? 'The diagram explains the event. The steps below give its sequence; animation is not running.'
-        : 'The diagram shows the highlighted step. Steps are for reading only, because the animation is not running.'
-    : 'Select a step to jump to it.';
+        ? 'The steps below give the sequence.'
+        : 'The diagram shows the highlighted step.'
+    : '';
   if (on && curSim) {
     stepIdx = stepAt(curSim.cfg.explanationByStep ? (diagramTime ?? curSim.still) : (curSim.cfg.staticT ?? curSim.still ?? 0));
     markStep(stepIdx); // the step the still shows
@@ -1727,7 +1718,7 @@ diagramBtn.onclick = () => {
     diagramTime = host.t;
     renderSVG(curSim, view, diagramTime);
     staticMode(true);
-    staticTxt.textContent = 'This diagram shows the relationship. Choose Animation to return to the paused scene.';
+    staticTxt.textContent = 'Choose Animation to return to the paused scene.';
     $('scRetry').hidden = true;
     diagramBtn.textContent = 'Animation';
     diagramBtn.setAttribute('aria-label', 'Return to paused animation');
@@ -2218,7 +2209,7 @@ let tour = null; // { i, timer } while the tour runs
 function markSeen(cfg) {
   seen.add(cfg.id);
   document.dispatchEvent(new CustomEvent('cs:seen', { detail: cfg.id }));
-  seenEl.textContent = `${seen.size} of ${ORDER.length} scenes viewed`;
+  seenEl.textContent = `${seen.size} of ${ORDER.length} viewed`;
   tourEl.hidden = !tour;
   if (tour) $('svTourTxt').textContent = `Tour: scene ${tour.i + 1} of ${ORDER.length}`;
 }

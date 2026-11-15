@@ -5,7 +5,7 @@ import { IS_PHONE } from '../core.js';
 export const SOLWIND = {
   id: 'solwind',
   explanationAlt:
-    'Sequence of the Solwind interception: collision at about 530 km, spreading fragments, and a later Secure World Foundation count of none remaining from 285 tracked fragments. Symbols and timing are illustrative.',
+    'Sequence of the Solwind interception: collision at about 530 km, spreading fragments, and a later SWF count of none left from 285 tracked fragments. Illustrative.',
   noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   fitPct: 0.99,
   date: '1985-09-13',
@@ -13,16 +13,14 @@ export const SOLWIND = {
   shells: ['LEO'],
   shellShort: IS_PHONE ? { LEO: 'LEO' } : undefined, // phone: a short ring label keeps its leader short in the orbit view
   duration: 12,
-  lede: 'On 13 September 1985 a US F-15 fighter fired an anti-satellite missile that destroyed the Solwind P78-1 satellite, about 530 km above the Earth. The missile’s homing vehicle steered itself and destroyed the satellite by collision.',
+  lede: 'On 13 September 1985 a US F-15 fired an anti-satellite missile that destroyed the Solwind P78-1 satellite, about 530 km up.',
   caption:
-    'On 13 September 1985 a US F-15 fighter fired an ASM-135 anti-satellite missile that destroyed the Solwind P78-1 satellite, about 530 km above the Earth. ' +
-    'The F-15 climbed steeply at supersonic speed (a “zoom climb”) before it released the missile. The missile’s miniature homing vehicle, which steers itself, then rose and destroyed the satellite by collision. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, gives the height as 530 km in its Table 5-1 and 555 km in its text, and counts 285 tracked fragments; all have since fallen out of orbit. ' +
-    'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons. ' +
-    'The positions and the debris spread are drawn to show the idea. They are not calculated.',
-  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (285 tracked, 0 still in orbit); Table 1-4, p. 01-24; ASM-135 and the zoom climb, Figure 1-8 text.',
+    'On 13 September 1985 a US F-15 fired an ASM-135 anti-satellite missile and destroyed the Solwind P78-1 satellite, about 530 km up. ' +
+    'The Secure World Foundation (SWF) counts 285 tracked fragments; all have since fallen out of orbit. ' +
+    'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons.',
+  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (530 km); Table 1-4, p. 01-24 (555 km in the text); ASM-135 and the zoom climb, Figure 1-8 text.',
   modelNote:
-    'Solwind’s broad shape follows NASA’s P78-1 photograph: a wheel-shaped body beneath an upright solar sail. Its size, orientation and motion here are illustrative.',
+    'Shape follows NASA’s P78-1 photograph; size and motion are illustrative.',
   modelSource: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/p78-1.html',
   related: null,
   event: 'us-1985-solwind',
@@ -104,11 +102,9 @@ export const SOLWIND = {
       minPx: IS_PHONE ? 46 : 44,
       maxPx: IS_PHONE ? 62 : 64, // readable before the intercept, clear of the aircraft and smaller than the missile's kill vehicle's approach path
       bright: true,
-      impactLabel: 'Impact: Solwind P78-1',
-      impactShort: 'Impact: Solwind P78-1',
-      impactDy: IS_PHONE ? -81 : undefined,
+            impactDy: IS_PHONE ? -81 : undefined,
       tickUntil: 0.88, // the tick retires with the last fragment
-      endLabel: 'Impact point: 0 of 285 in orbit',
+      endLabel: 'Impact: 0 of 285 in orbit',
       endShort: '0 of 285 in orbit',
       endFrom: 0.88,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked
@@ -161,11 +157,11 @@ export const SOLWIND = {
   ],
   still: 0.45,
   status: [
-    [0, 'F-15 in a steep, supersonic climb'],
-    [0.24, 'Missile released; homing vehicle rises to the satellite', 'Missile released; vehicle rises to satellite'],
+    [0, 'F-15 climbs steeply'],
+    [0.24, 'Missile released; its homing vehicle rises', 'Missile released'],
     [0.52, 'Collision at about 530 km', 'Collision at about 530 km'],
-    [0.62, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],
-    [0.75, 'Time passes: fragments fall out of orbit', 'Time passes: fragments fall out of orbit'],
-    [0.88, 'SWF, 2026: 0 of 285 tracked fragments remain in orbit', 'Later count: 0 of 285 remain (SWF)'],
+    [0.62, 'Fragments spread', 'Fragments spread'],
+    [0.75, 'Fragments fall out of orbit', 'Fragments fall out of orbit'],
+    [0.88, 'SWF: 0 of 285 tracked fragments remain', 'SWF: 0 of 285 remain'],
   ],
 };

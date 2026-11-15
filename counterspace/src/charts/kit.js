@@ -111,14 +111,8 @@ export const dot = (r = 6) => `<path d="${circlePath(0, 0, r)}" {p}/>`;
 
 // ---------------------------------------------------------------- notes
 // "Zoomed" flag shown above a chart whose axis is not the shared one.
-export const zoomNote = (years, isDefault, why = '') =>
-  `<span class="zbadge">Zoomed</span><span class="ztext">${years}${isDefault && why ? ', because ' + why : ''}. ` +
-  (innerWidth > 760 ? '' : 'The years no longer line up with the law timeline. ') +
-  'Choose “Full span” to see 1957 to 2026.</span>';
-// The note under a chapter heading when the chart shows the shared years.
-export const fullNote = () =>
-  `Full span, 1957 to 2026. The years line up with the law timeline above${innerWidth > 760 ? ', which stays in view as you scroll' : ''}.`;
-
+export const zoomNote = (years) =>
+  `<span class="zbadge">Zoomed</span><span class="ztext">${years}.${innerWidth > 760 ? '' : ' The years no longer line up with the law timeline.'}</span>`;
 // A zoomed chart repeats its year axis at the top, so the years stay readable beside the first rows (the page draws it; downloads do not).
 export const TOP_AXIS_H = 22;
 export function topAxis(svg, x, y, every) {

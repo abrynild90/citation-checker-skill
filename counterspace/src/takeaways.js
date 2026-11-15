@@ -49,12 +49,12 @@ export function fillTakeaways() {
   );
   // Jamming, lasers and cyber: how many are still going.
   const going = NK.filter((e) => !e.end).length;
-  set('tkC', `${cap(word(going))} of these ${NK.length} operations are still going. Destructive tests have stopped since ${fmtMonthYear(parse(LAST_DA))}.`);
+  set('tkC', `${cap(word(going))} of these ${NK.length} operations are still going.`);
   // Close approaches: how many began in the 2020s.
   const recent = CO.filter((e) => e.start >= '2020').length;
   set(
     'tkR',
-    `In our records, ${recent} of the ${CO.length} close approaches began in 2020 or later${recent * 2 > CO.length ? ', which is more than half' : ''}.`,
+    `${recent} of the ${CO.length} close approaches began in 2020 or later.`,
   );
   // Capabilities: how many states hold at least one, by decade.
   set('tkB', capSentence('cat'));
@@ -72,7 +72,7 @@ export function fillTakeaways() {
   // What the pattern shows: the display line, the longest pair and its caution. The four findings are the lines of the chart cards (findings(), read by explore.js).
   const pairs = D.lag_pairs.pairs,
     longI = waits.indexOf(Math.max(...waits));
-  patBig(waits, g, pairs[longI], waits[longI]);
+  patBig(waits, g, pairs[longI]);
 }
 
 // The waits between each linked weapon and the first later legal step, in years, in the order of the pair data.
@@ -100,7 +100,7 @@ export function findings() {
 // two dated names as direct labels (each led by its own small mark, so on a phone, where the names stack under the axis, they still read as the dot's and the tick's).
 const AX0 = 1957,
   AX1 = 2026;
-function patBig(waits, g, longP, longW) {
+function patBig(waits, g, longP) {
   const box = document.getElementById('patBig');
   if (!box) return;
   document.getElementById('pbNum').textContent = `${g(Math.min(...waits))} to ${g(Math.max(...waits))}.`;
@@ -119,6 +119,6 @@ function patBig(waits, g, longP, longW) {
     `<i class="pb-dot" style="left:${pc(t0)}"></i><i class="pb-tick" style="left:${pc(t1)}"></i></div>` +
     `<p class="pb-end a" style="--at:${pc(t0)}"><b><i class="pb-k dot"></i>${esc(evName)}</b><span>${esc(fmtMY(t0))}</span></p>` +
     `<p class="pb-end b" style="--at:${pc(t1)}"><b><i class="pb-k tick"></i>${esc(lawName)}</b><span>${esc(fmtMY(t1))}</span></p>`;
-  document.getElementById('pbNote').textContent = `The longest, from ${evName} to the ${lawName}, took ${g(longW)}. This is order in time, not cause.`;
+  document.getElementById('pbNote').textContent = `The longest pair. Order in time, not cause.`;
   box.hidden = false;
 }

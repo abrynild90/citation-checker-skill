@@ -6,25 +6,20 @@ const PH = IS_PHONE ? 1.05 : 1; // phoneK, the distance factor of the 375 stage
 
 export const STARFISH = {
   id: 'starfish',
-  explanationAlt: 'Schematic magnetic-field cross-section. Electrons from the nuclear blast follow field lines and also spread around Earth. The field shape, belt extent and dots are illustrative.',
+  explanationAlt: 'Magnetic-field cross-section: electrons from the blast follow field lines and spread around Earth. Shapes are illustrative.',
   date: '1962-07-09',
   title: 'Starfish Prime: a nuclear explosion in space (1962)',
   shells: ['LEO'],
   duration: 14,
-  lede: 'On 9 July 1962 the United States detonated a nuclear warhead about 400 km above Johnston Island in the Pacific Ocean. Electrons from the blast were trapped by Earth’s magnetic field and formed an artificial radiation belt around the planet.',
+  lede: 'On 9 July 1962 the United States detonated a nuclear warhead about 400 km above Johnston Island. Electrons from the blast were trapped by Earth’s magnetic field and formed an artificial radiation belt.',
   caption:
-    'On 9 July 1962 the United States detonated a 1.4-megaton nuclear warhead (equal to ' +
-    '1.4 million tonnes of TNT) about 400 km above Johnston Island in the Pacific Ocean. ' +
-    'Electrons from the blast were trapped by Earth’s magnetic field. ' +
-    'They spread along the field lines and drifted around the planet, forming an artificial radiation belt. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, says such tests are known ' +
-    'to have produced effects that damaged or destroyed satellites in orbit at the time. ' +
-    'The Limited Test Ban Treaty of 1963 bans nuclear tests in outer space. ' +
-    'It followed Starfish Prime. ' +
-    'The belt’s spread is drawn to show the idea. It is not a calculation.',
+    'On 9 July 1962 the United States detonated a nuclear warhead about 400 km above Johnston Island. ' +
+    'Electrons from the blast were trapped by Earth’s magnetic field and formed an artificial radiation belt. ' +
+    'The Secure World Foundation (SWF) says such tests damaged or destroyed satellites then in orbit. ' +
+    'The 1963 Limited Test Ban Treaty followed and bans nuclear tests in space.',
   cite:
-    'US Department of Energy, DOE/NV-209 Rev. 16 (Starfish Prime, 9 July 1962); ' +
-    'Secure World Foundation, 2026, p. 12-05 (satellite damage from such tests).',
+    'US Department of Energy, DOE/NV-209 Rev. 16; ' +
+    'Secure World Foundation, 2026, p. 12-05.',
   related: 'ltbt-1963',
   event: 'us-1962-starfish-prime',
   actors: [
@@ -169,10 +164,10 @@ export const STARFISH = {
   stillCam: { at: [16, -160, 4.2], look: [0, 0, 0], hideShell: true },
   captionShort: true, // the picture's caption is the short text: the step list beside it carries the full sentence
   status: [
-    [0, 'Thor rocket climbs toward about 400 km', 'Thor climbs to ~400 km'],
-    [0.14, 'Detonation: electrons caught in Earth’s magnetic field', 'Detonation: electrons trapped'],
-    [0.3, 'Trapped electrons spread north, south, east and west along field lines', 'Electrons spread along field lines'],
-    [0.75, 'The belt has drifted around Earth', 'Belt drifts around Earth'],
-    [0.82, 'SWF: tests like this damaged or destroyed satellites then in orbit', 'SWF: such tests damaged satellites'],
+    [0, 'Thor rocket climbs to about 400 km', 'Thor climbs to ~400 km'],
+    [0.14, 'Detonation: electrons trapped by the magnetic field', 'Detonation: electrons trapped'],
+    [0.3, 'Electrons spread along field lines', 'Electrons spread along field lines'],
+    [0.75, 'The belt drifts around Earth', 'Belt drifts around Earth'],
+    [0.82, 'SWF: such tests damaged or destroyed satellites', 'SWF: such tests damaged satellites'],
   ],
 };

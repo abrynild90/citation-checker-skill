@@ -16,8 +16,8 @@ const NAMES = {
   'abm-1972': { t: 'ABM Treaty, Article XII', m: 'ABM Treaty Art. XII', s: 'ABM Treaty' },
   'paros-1981': {
     t: 'UN General Assembly agenda item on preventing an arms race in outer space',
-    l: 'UN General Assembly agenda item on preventing an arms race in outer space, since 1981',
-    m: 'UN General Assembly agenda item (PAROS), since 1981',
+    l: 'UN General Assembly agenda item (PAROS), since 1981',
+    m: 'UN agenda item (PAROS), since 1981',
     s: 'PAROS agenda item, since 1981',
   },
   'cd-paros-committee': {
@@ -437,7 +437,7 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     // The densest cluster is named directly: a short line in the free top row, to the left of the window (no label of the strip reaches that row).
     if (page && !compact && !strip) {
       const n = pts.filter(crowd).length,
-        line = [`2021–26: ${n} items, named in the zoom panel`, `2021–26: ${n} items`].find((t) => zx0 - 8 - tw(t, FS, 600) >= M.l + 4);
+        line = [`2021–26: ${n} items, in the zoom`, `2021–26: ${n} items`].find((t) => zx0 - 8 - tw(t, FS, 600) >= M.l + 4);
       if (n && line) svg.append('text').attr('class', 'zoom-lab').attr('x', zx0 - 8).attr('y', 13).attr('text-anchor', 'end').attr('aria-hidden', 'true').text(line);
     }
     if (page && !compact && !strip) linkBox = { zx0, zx1, W };
@@ -1215,7 +1215,7 @@ export function drawLegalKey() {
     choose.dataset.set = '1';
     choose.innerHTML += [...LEGAL]
       .sort((a, b) => a.start.localeCompare(b.start))
-      .map((l) => `<option value="${esc(l.id)}">${fmtY(parse(l.start))} · ${esc(l.title)}</option>`)
+      .map((l) => `<option value="${esc(l.id)}">${fmtY(parse(l.start))}: ${esc(nameAt(l, 1).replace(/\*$/, ' (soft law)'))}</option>`)
       .join('');
     choose.addEventListener('change', () => {
       const law = LEGAL.find((l) => l.id === choose.value);

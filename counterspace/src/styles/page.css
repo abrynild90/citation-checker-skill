@@ -160,7 +160,6 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 #methodBody .src-top h3{margin:0 0 var(--s-2);font:600 15px/1.3 var(--sans)}
 #methodBody>.msec{margin-bottom:var(--s-8)}
 #methodBody p{margin:0 0 var(--s-3);max-width:var(--measure)}
-#methodBody .src-intro{max-width:var(--measure);margin:0 0 var(--s-4);color:var(--text);font-size:17px;line-height:1.55}
 #methodBody ul{margin:0 0 var(--s-3);padding-left:1.25em;max-width:var(--measure)}
 #methodBody li{margin:0 0 var(--s-2)}
 #methodBody li b,#methodBody p b{color:var(--text);font-weight:600}
@@ -210,7 +209,7 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 @media (min-width:1200px){
   .mcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s-7);align-items:start}
   .mcol>.msec{margin-bottom:var(--s-7)}
-  #methodBody p,#methodBody ul,#methodBody .src-intro{max-width:none}
+  #methodBody p,#methodBody ul{max-width:none}
   #methodBody .cites{max-width:none}
   #methodBody>.msec:has(details.rule){padding-bottom:36px}
 }
@@ -267,7 +266,6 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 /* Key items sit in a wrapping row separated by a gap, so no separator mark can ever end (or start) a line. */
 .key-items{display:flex;flex-wrap:wrap;gap:0 1.5em;max-width:none}
 .key-items>span{text-wrap:balance}
-.key-items>.key-note{flex-basis:100%}
 .q-explanation{margin-top:12px;font:400 14px/1.6 var(--sans)}
 .q-explanation summary{cursor:pointer;font-weight:500;color:var(--text);padding:6px 0}
 
@@ -333,14 +331,12 @@ header.top::before{content:"";position:absolute;inset:0 0 auto 0;height:min(100%
 }
 
 /* reading measure on wide screens (last in the cascade so no section rule widens it again) */
-.src-note,.orbit-note{max-width:52ch}
+.orbit-note{max-width:52ch}
 ul.legend li.kgroup{max-width:72ch}
 #methodBody :is(p,li):not(details details *):not(.st-list li){max-width:60ch}
 .ref-band :is(p,li):not(.kgroup):not(.st-list li):not(.pat-big *){max-width:60ch}
 .q-out,.q-sumreal,.q-sum>*{max-width:62ch} /* quiz answers and the summary keep a readable line length */
 
-/* chapter-C notes: two columns of the reading measure, flush left, so the pair reads as one block; the sub-chapter lede fills its column at a size that keeps ~70 characters a line */
-@media (min-width:1100px){#chartC .callout-row{grid-template-columns:repeat(2,minmax(0,60ch));justify-content:start}}
 .chapter-head.sub>.lede{max-width:none;font-size:clamp(17px,1.4vw,20px)}
 @media (min-width:1600px){.chapter-head.sub>.lede{max-width:62ch}}
 

@@ -97,12 +97,11 @@ export function capSentence(group = 'cat') {
     last = CAPS.decades.at(-1),
     a = totalsB(first, group),
     b = totalsB(last, group),
-    start = `In the ${first}, ${numWord(a.states)} state${a.states === 1 ? ' had' : 's had'} ${a.tot === 1 ? 'a single capability' : `${numWord(a.tot)} between them`}. `,
-    end = ` Only the ${last} figures are the Secure World Foundation’s own assessment.`;
+    start = `In the ${first}, ${numWord(a.states)} state${a.states === 1 ? ' had' : 's had'} ${a.tot === 1 ? 'a single capability' : `${numWord(a.tot)} between them`}. `;
   if (group === 'cat')
-    return `${start}By the ${last}, ${numWord(b.states)} states hold ${b.tot} between them: ${b.dem} tested or used, the rest still in development.${end}`;
+    return `${start}By the ${last}, ${numWord(b.states)} states hold ${b.tot} between them: ${b.dem} tested or used, the rest still in development.`;
   const both = b.per[0] + b.per[1] - b.states;
-  return `${numWord(b.states).replace(/^./, (c) => c.toUpperCase())} distinct states in the ${last}: ${b.per[0]} with kinetic capabilities, ${b.per[1]} with non-kinetic capabilities, ${both} with both.${end}`;
+  return `${numWord(b.states).replace(/^./, (c) => c.toUpperCase())} distinct states in the ${last}: ${b.per[0]} with kinetic capabilities, ${b.per[1]} with non-kinetic capabilities, ${both} with both.`;
 }
 
 function countsB() {
@@ -163,7 +162,7 @@ function drawPhoneB() {
     (phoneDecade === '2020s'
       ? 'Based on SWF’s 2026 assessment. The distinction between tested or used and developing is our reading of its text.'
       : 'Reconstructed from historical records; SWF did not assess this decade.') +
-    ' Bars use the same scale in every decade. Each state counts once within a group and may appear in more than one group.';
+    ' Each state counts once per group.';
 }
 phoneSelect.onchange = () => {
   phoneDecade = phoneSelect.value;
@@ -482,10 +481,10 @@ export function drawB(el = document.getElementById('svgB')) {
     `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('tkB').textContent = capSentence(stateB.group);
   document.getElementById('noteB').textContent = plain
-    ? 'Each state counts once for kinetic capabilities and once for non-kinetic capabilities. A state with both counts twice. Darker parts are tested or used; lighter parts are in development.'
+    ? 'A state counts once in each group it belongs to. Darker parts are tested or used; lighter parts are in development.'
     : kin
-      ? 'Each state counts once per group. A state with both kinetic and non-kinetic capabilities counts twice.'
-      : 'Each state counts once per capability category. A state with capabilities in several categories counts in each.';
+      ? 'A state counts once in each group it belongs to.'
+      : 'A state counts once in each category it belongs to.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
   setKey(

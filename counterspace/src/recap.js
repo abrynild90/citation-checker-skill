@@ -70,5 +70,5 @@ export function recapLine() {
     say = (g) => `${g.num} ${g.unit}`,
     lo = r.reduce((m, x) => (x.years < m.years ? x : m)),
     hi = r.reduce((m, x) => (x.years > m.years ? x : m));
-  return `In all ${pairWord()} pairs our records link, the law came later: after ${say(lo.g)} at the quickest and ${say(hi.g)} at the slowest. That is the order of events, not a claim about cause.`;
+  return `In all ${pairWord()} pairs the law came later: after ${say(lo.g)} at the quickest and ${say(hi.g)} at the slowest. This is order in time, not cause.`;
 }

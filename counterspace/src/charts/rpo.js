@@ -47,7 +47,7 @@ export const R_STYLE_KEY = [
     28,
   ],
 ];
-export const R_VERT_NOTE = 'Height inside a band only keeps the points apart and carries no meaning. Time runs from left to right.';
+export const R_VERT_NOTE = 'Height inside a band only separates points. Time runs left to right.';
 const STYLE_OF = { high: 'solid', medium: 'outline', low: 'dashed' };
 
 const ROW = 26, // every row is at least 24 px tall so each point is a comfortable target (WCAG 2.2 AA) and none overlaps the next
@@ -567,7 +567,7 @@ export function drawR(el = document.getElementById('svgR')) {
   }
   document.getElementById('noteR').textContent = zoomed
     ? '2000–2026. The first recorded operation began in 2003.'
-    : '1957–2026, the same years as the law timeline.';
+    : '';
   const allBtn = document.getElementById('rAll'),
     nHi = CO.filter(isHighlight).length;
   allBtn.textContent = stateR.all ? 'Show highlights only' : `Show all ${CO.length}`;

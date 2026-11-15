@@ -76,7 +76,6 @@
   .law-tools>#legalKey{order:1;margin:0;flex:0 1 auto}
   .law-tools>.zoom-wrap{order:2;flex:0 0 100%}
   .law-tools>#legalKey[open]{order:3;flex:0 0 100%;margin-top:var(--s-2)}
-  .law-tools .zoom-note{display:none}
 }
 @media (max-width:640px){
   .law-detail{display:flex;flex-direction:column}
@@ -89,7 +88,6 @@
 .legal-list .ld{display:inline-block;min-width:72px;color:var(--accent-2);font-weight:600}
 .legal-list b{color:var(--text);font-weight:600}
 .legal-list .ls{display:block;margin-top:2px}
-.zoom-note{font-size:14px;line-height:1.4;color:var(--muted)}
 .zoom-ctl .btn .ico{width:17px;height:17px}
 .zoom-wrap{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows 320ms var(--ease),visibility 0s 320ms}
 .zoom-wrap.open{grid-template-rows:1fr;visibility:visible;transition-delay:0s}

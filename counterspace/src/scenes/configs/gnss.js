@@ -5,7 +5,7 @@ import { IS_PHONE } from '../core.js';
 export const GNSS = {
   id: 'gnss',
   explanationAlt:
-    'GPS satellites keep working. Their signals reach aircraft receivers, but radio noise from a ground jammer prevents reception inside its local zone. The diagram explains receiver interference; it does not establish the jammer’s location or zone boundary.',
+    'GPS satellites keep working. Radio noise from a ground jammer blocks reception by aircraft receivers inside its local zone. Location and zone boundary are illustrative.',
   date: '2023-12-01',
   title: 'Jamming satellite navigation (GNSS) over the Baltic',
   shells: ['LEO', 'MEO'],
@@ -18,16 +18,14 @@ export const GNSS = {
   staticTextPhone: [[' · GPS signal ', ' · ']], // 375 static: "Airliner 1 · lost"
   duration: 16,
   scaleNote:
-    'The jammer’s location, the zone boundary and the aircraft routes are illustrative. The map does not establish the measured extent of interference.',
-  lede: 'Since late 2023, ground jamming has repeatedly cut satellite navigation signals, such as GPS, for aircraft and ships around the Baltic Sea. A jammer drowns out the weak signals only inside its local zone, and it does not attack any satellite.',
+    'Jammer location, zone boundary and aircraft routes are illustrative.',
+  lede: 'Since late 2023, ground jamming has repeatedly cut satellite navigation signals, such as GPS, for aircraft and ships around the Baltic Sea. A jammer interferes with receivers; it does not attack any satellite.',
   caption:
-    'Since late 2023, ground jamming has repeatedly cut satellite navigation signals (GNSS), such as GPS, for aircraft and ships around the Baltic Sea. ' +
-    'Jamming means drowning out a signal with radio noise. In April 2024 Finnair paused its flights to Tartu. ' +
-    'GPS satellites orbit in medium Earth orbit (MEO), about 20,000 km up. A jammer swamps their weak signals only inside its local effect zone, so aircraft that cross it lose their position fix. ' +
-    'The satellites are unaffected: the jammer interferes with receivers and does not attack any satellite. ' +
-    'In October 2025 the International Civil Aviation Organization (ICAO) endorsed a finding that recurring interference with satellite navigation from North Korea and from Russian territory is an “infraction” of the 1944 Chicago Convention. ' +
-    'This is a finding by an international body, not a court judgment, and it carries no enforcement. The jammer’s position is drawn for illustration.',
-  cite: 'Secure World Foundation, 2026: pp. 02-29 to 02-30; p. 12-05 (jamming of receivers has no effect on the satellites).',
+    'Since late 2023, ground jamming has repeatedly cut satellite navigation (GNSS) signals, such as GPS, around the Baltic Sea. ' +
+    'A jammer drowns out the weak signals with radio noise inside a local zone; it does not attack any satellite. ' +
+    'In October 2025 the International Civil Aviation Organization (ICAO) endorsed a finding that recurring satellite-navigation interference from North Korea and from Russian territory is an “infraction” of the 1944 Chicago Convention. ' +
+    'It is a finding, not a court judgment, and carries no enforcement.',
+  cite: 'Secure World Foundation, 2026: pp. 02-29 to 02-30; p. 12-05.',
   related: 'icao-2025',
   event: 'ru-2023-baltic',
   actors: [
@@ -156,12 +154,12 @@ export const GNSS = {
     },
   ],
   status: [
-    [0, 'Outside the red jammer zone, aircraft receive GPS signals (green)', 'Green: GPS received; red: signal lost', 'Green: GPS received; red: signal lost'],
+    [0, 'Outside the jammer zone, aircraft receive GPS (green)', 'Green: GPS received; red: signal lost', 'Green: GPS received; red: signal lost'],
     [
       0.3,
-      'Inside the zone GNSS is lost (red); outside it, OK (green). Satellites unaffected',
+      'Inside the zone GNSS is lost (red); the satellites are unaffected',
       'Inside the zone GNSS is lost (red)',
-      'Zone: GNSS lost (red). Outside: fine. Satellites unaffected',
+      'Zone: GNSS lost (red). Satellites unaffected',
     ],
   ],
 };

@@ -524,7 +524,7 @@ export class GLHost {
           0,
           acts.findIndex((a, k) => t >= a.t0 && (t < a.t1 || k === acts.length - 1)),
         ),
-        txt = `Episode ${ai + 1} of ${acts.length}: ${this.sim.cfg.epChip[ai]}`;
+        txt = `${ai + 1} of ${acts.length}: ${this.sim.cfg.epChip[ai]}`;
       // cfg.epChipMerge (opt-in, phone width): one chip, not two: the episode rides in the "Drawn for illustration" banner (short names from cfg.epChipShort)
       const ban = this.el.clientWidth < 520 && this.sim.cfg.epChipMerge ? this.el.querySelector(':scope > .illus') : null;
       if (ban) {

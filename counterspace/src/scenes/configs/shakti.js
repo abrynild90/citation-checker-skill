@@ -5,20 +5,17 @@ import { IS_PHONE } from '../core.js';
 export const SHAKTI = {
   id: 'shakti',
   explanationAlt:
-    'Sequence of Mission Shakti: collision at about 300 km, spreading fragments, and a later Secure World Foundation count of none remaining from 130 tracked fragments. Symbols and timing are illustrative.',
+    'Sequence of Mission Shakti: collision at about 300 km, spreading fragments, and a later SWF count of none left from 130 tracked fragments. Illustrative.',
   noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   date: '2019-03-27',
   title: 'Mission Shakti: India destroys a satellite (2019)',
   shells: ['LEO'],
   duration: 12,
-  lede: 'On 27 March 2019 India fired an interceptor missile from Abdul Kalam Island and destroyed the Microsat-R satellite about 300 km above the Earth. Indian officials said the debris would fall back into the atmosphere within 45 days.',
+  lede: 'On 27 March 2019 India fired an interceptor missile from Abdul Kalam Island and destroyed the Microsat-R satellite about 300 km up.',
   caption:
-    'On 27 March 2019 India fired a PDV Mk-II interceptor, a missile built to hit a target, from ' +
-    'Abdul Kalam Island and destroyed the Microsat-R satellite about 300 km above the Earth. ' +
-    'Indian officials said the debris would re-enter, meaning fall back into the atmosphere, within 45 days. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, counts 130 tracked fragments, none still in orbit. ' +
-    'In 2022 the UN General Assembly called on states not to conduct destructive “direct-ascent” ' +
-    'anti-satellite missile tests, meaning tests launched from Earth (resolution 77/41). ' +
+    'On 27 March 2019 India fired a PDV Mk-II interceptor and destroyed the Microsat-R satellite about 300 km up. ' +
+    'The Secure World Foundation (SWF) counts 130 tracked fragments, none still in orbit. ' +
+    'In 2022 the UN General Assembly called on states not to test destructive anti-satellite missiles launched from Earth (resolution 77/41). ' +
     'The call is not binding.',
   cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01; p. 04-04.',
   related: 'unga-77-41',
@@ -74,14 +71,14 @@ export const SHAKTI = {
       bright: true,
       impactUntil: 0.88, // the Impact pill stays until the count's own pill takes over (from 0.75 to 0.88 a bare, unlabelled diamond marked the point)
       tickUntil: 0.88,
-      endLabel: 'Later count: 0 of 130 in orbit (SWF)',
+      endLabel: 'Later count: 0 of 130 in orbit',
       endShort: '0 of 130 in orbit (SWF)',
       endFrom: 0.88,
       impactDx: -170,
       impactDy: -100,
       impactLabel: 'Impact: Microsat-R debris',
       impactShort: 'Impact',
-    },
+          },
     {
       type: 'intercept',
       from: [20.75, 87.08],
@@ -133,8 +130,8 @@ export const SHAKTI = {
   status: [
     [0, 'PDV Mk-II rises from Abdul Kalam Island'],
     [0.4, 'Collision at about 300 km', 'Collision at about 300 km'],
-    [0.52, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],
-    [0.65, 'Time passes: debris falls back into the atmosphere', 'Time passes: debris falls back'],
-    [0.88, 'SWF, 2026: 0 of 130 tracked fragments remain in orbit', 'Later count: 0 of 130 remain (SWF)'],
+    [0.52, 'Fragments spread', 'Fragments spread'],
+    [0.65, 'Debris falls back into the atmosphere', 'Debris falls back'],
+    [0.88, 'SWF: 0 of 130 tracked fragments remain', 'SWF: 0 of 130 remain'],
   ],
 };

@@ -114,38 +114,34 @@ export function drawMethod() {
         n = legal ? 'Legal item on the timeline' : `Cited for ${rs.length} timeline entries`;
       return `<li><span class="st-kind">${legal ? esc(legalKindWords(r)) : 'Main source'}</span><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${legal ? esc(title) : title}<span class="sr"> (opens in a new tab)</span></a><span class="st-n">${n}</span></li>`;
     });
-  const topBlock = `<div class="src-top"><h3 id="srcTopH">The sources most relied on</h3><ol class="st-list" aria-labelledby="srcTopH">${top.join('')}</ol><p class="st-more">All ${groups.size} sources are in the full list below, with the page or table each is cited for.</p></div>`;
+  const topBlock = `<div class="src-top"><h3 id="srcTopH">The sources most relied on</h3><ol class="st-list" aria-labelledby="srcTopH">${top.join('')}</ol><p class="st-more">All ${groups.size} sources are in the full list below.</p></div>`;
   const rule = (title, body, open) => `<details class="rule"${open ? ' open' : ''}><summary>${title}</summary><div class="rb">${body}</div></details>`;
   document.getElementById('methodBody').innerHTML = `<details class="table src-fold" id="srcDetails"><summary>Read the sources and method<span class="cnt">${cites.length} sources</span></summary>
 ${topBlock}
 <p class="src-check">To check a fact, open the data table behind its chart, note the source and page reference for the entry, then find that source in the list of all cited sources.</p>
 <div class="msec">
   <h3 id="srcCite">How to cite this page</h3>
-  <p class="src-intro">A suggested citation for the page as a whole, and what to cite for a single fact.</p>
   <div class="panel-card cite-card">
     <p class="cite-text" id="citeText">Aaron Brynildson, “Counterspace Timeline, 1957–2026,” companion to <i>Space Security Law: Governance Beyond the Atmosphere</i>
       (data from the Secure World Foundation, <i>Global Counterspace Capabilities</i>, 9th ed., April 2026; last updated ${DATA_DATE}).</p>
   </div>
-  <p>To cite an individual fact, cite the SWF edition and the source it rests on. The details shown for each point on a chart, and the data tables, give the page reference.</p>
+  <p>To cite one fact, cite the SWF edition and its source. Each point’s details and the data tables give the page reference.</p>
 </div>
 <div class="mcols">
 <div class="mcol">
 <div class="msec">
   <h3 id="srcEditions">Editions and dates</h3>
-  <p class="src-intro">Which editions the data rests on, and how current it is.</p>
   <h4 class="sub-h">What the data rests on</h4>
   <ul>
     <li><b>Main source:</b> Secure World Foundation (SWF), <i>Global Counterspace Capabilities: An Open Source Assessment</i> (Victoria Samson &amp; Kathleen
-      Brett, eds., 9th ed., April 2026). It covers 13 countries and five categories of capability. The count of 13 countries is a 2026 figure, not a fixed
-      number. Debris counts are as of February 2026 (SWF Table 5-1).</li>
+      Brett, eds., 9th ed., April 2026). It covers 13 countries and five categories of capability.  Debris counts are as of February 2026 (SWF Table 5-1).</li>
     <li><b>Consulted, not cited:</b> The Center for Strategic and International Studies (CSIS) Aerospace Security Project’s <i>Space Threat Assessment
-      2025</i> was used only to cross-check. No entry, page reference or citation depends on it. The 2026 edition was not yet published on ${DATA_DATE}.</li>
+      2025</i> was used only to cross-check; nothing depends on it. Its 2026 edition was not yet published on ${DATA_DATE}.</li>
     <li><b>Data last updated:</b> ${DATA_DATE}.</li>
   </ul>
   <h4 class="sub-h">Checks we ran</h4>
   <ul>
-    <li><b>Where the opening claim comes from:</b> The statement at the top of the page that only non-destructive capabilities are in active use is SWF’s
-      finding, quoted from SWF 2026, Executive Summary, p.&nbsp;xxiii (PDF p.&nbsp;21): “only non-destructive capabilities are actively being used against satellites
+    <li><b>Main quotation:</b> SWF 2026, Executive Summary, p.&nbsp;xxiii (PDF p.&nbsp;21): “only non-destructive capabilities are actively being used against satellites
       in current military operations.”</li>
     <li><b>Check on the last destructive test:</b> No destructive direct-ascent anti-satellite test appears after ${fmtLong(parse(LAST_DA))} in SWF 2026 (Table 5-1
       ends with Cosmos 1408).</li>
@@ -155,7 +151,6 @@ ${topBlock}
 <div class="mcol">
 <div class="msec">
   <h3 id="codingRules" tabindex="-1">How we classified the data</h3>
-  <p class="src-intro">The rules each chart follows when it counts and places an entry. Open one to read its rules.</p>
   ${rule('What counts as an anti-satellite test', scopeRule, true)}
   ${rule(
     'Anti-satellite tests: altitude and dates',
@@ -166,16 +161,15 @@ ${topBlock}
     <li>Soviet co-orbital (IS) tests are left out of this chart and counted only in the chart of capabilities by decade.</li>
     <li>Starfish Prime is the only nuclear test shown.</li>
     <li><b>Debris:</b> the area of each bubble is proportional to the number of <i>cataloged</i> fragments. Fragments still in orbit are a different
-        quantity, so they appear only in the details shown for each point and in the data tables.</li></ul>`,
+        count, shown in each point’s details and the data tables.</li></ul>`,
   )}
   ${rule(
     'Jamming, lasers and cyber operations',
     `<ul class="sub"><li>An operation is recorded only when a named source documents it.</li>
     <li>Attribution is recorded exactly as the source states it and is never upgraded.</li>
     <li>Sustained campaigns are shown as spans of time, not as counts of incidents.</li>
-    <li>Jamming from the ground affects satellite-navigation receivers within range of the jammer, not the satellites. We list it with attacks on
-        satellite-navigation (GNSS) signals because the signals it targets come from satellites in medium Earth orbit, and the 3D explainer and the
-        details shown for each point say so expressly.</li></ul>`,
+    <li>Ground jamming affects navigation receivers near the jammer, not the satellites. We list it with GNSS attacks because the signals it targets
+        come from satellites in medium Earth orbit; the 3D explainer and each point’s details say so.</li></ul>`,
   )}
   ${rule('Close approaches (rendezvous and proximity operations, RPOs)', coRule)}
   ${rule(
@@ -193,29 +187,24 @@ ${topBlock}
     'The 3D explainers',
     `<ul class="sub"><li>They are drawn for illustration. Do not read distances, speeds or counts from them.</li>
     <li>Orbit heights are squeezed so every orbit fits on screen. The Earth is drawn to scale.</li>
-    <li>Low Earth orbit (LEO) reaches up to about 2,000 km and holds imaging satellites, the International Space Station and broadband constellations. GPS
-        satellites sit in medium Earth orbit (MEO) at about 20,200 km. Broadcast and communications satellites sit in the geostationary belt (GEO) at about
-        35,786 km.</li>
     <li>Debris is drawn as dots, one for each cataloged fragment, up to a limit of ${PARTICLE_BUDGET.toLocaleString()} dots on this device.</li></ul>`,
   )}
 </div>
 <div class="msec">
   <h3 id="srcLicence">Licences and credits</h3>
-  <p class="src-intro">What may be reused, and where the pictures come from.</p>
   ${rule('Licence terms and image credits', `<p>SWF material is licensed CC BY-NC 4.0 (Creative Commons Attribution-NonCommercial 4.0). This page uses its facts only. The charts, graphics and prose
       are original, apart from short quotations from SWF (15 words or fewer each), which are always quoted and attributed. No SWF or CSIS figures or
       graphics are reproduced.</p>
-    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). More detailed Earth images load from jsDelivr when you interact with the globe or open a 3D explainer. They do not load when your device is set to limit animation. Coastlines come from Natural Earth (public domain).</p>`)}
+    <p>Earth images in the 3D explainers are NASA’s Blue Marble and Black Marble (U.S. government works, in the public domain). Detailed Earth images load from jsDelivr when you open a 3D explainer or use the globe, unless your device limits animation. Coastlines come from Natural Earth (public domain).</p>`)}
 </div>
 </div>
 </div>
 <div class="msec">
   <h3 id="srcList">All cited sources (${cites.length})</h3>
-  <p class="src-intro">Every source the entries rest on, with the tables or pages each is cited for.</p>
   <label class="source-find">Find a source <input id="sourceFind" type="search" placeholder="Title, institution or year" aria-controls="citedSources"></label>
   <p class="note" id="sourceCount" role="status">${cites.length} sources</p>
   <ol class="cites" id="citedSources">${cites.join('')}</ol>
-  <p>The data table behind each chart lists every entry with its source and page reference.</p></div>
+</div>
 </details>`;
 
   const find = document.getElementById('sourceFind'), sourceItems = [...document.querySelectorAll('#citedSources > li')];

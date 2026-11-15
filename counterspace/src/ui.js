@@ -10,7 +10,7 @@ const card = document.getElementById('card');
 function showCard(html, evt, el, full = false) {
   const byKey = !!el?.matches?.(':focus-visible') && !matchMedia('(hover: none)').matches;
   // a card opened by keyboard carries the one-line key help, so nothing else has to float over the chart
-  card.innerHTML = byKey && !html.includes('kb-line') ? html + '<p class="kb-line">Arrow keys move between points. Enter opens details. Escape closes this card.</p>' : html;
+  card.innerHTML = byKey && !html.includes('kb-line') ? html + '<p class="kb-line">Arrow keys move. Enter opens. Escape closes.</p>' : html;
   card.classList.toggle('full', full);
   // On a narrow page a hover card for a mark on the law band is slim (name, kind and date): the full text opens on click or Enter, so the card fits the empty
   // part of the band instead of covering the zoom panel, the axis or the chapter heading.
@@ -324,7 +324,7 @@ export function kinCard(e) {
   const alt = e.altitude_km == null ? 'Not reported' : `${num(e.altitude_km)} km at ${ALT_KIND[e.altitude_kind] || e.altitude_kind}`;
   const mdo =
     e.id === 'us-2008-burnt-frost'
-      ? '<p class="note">A missile-defense interceptor (SM-3) used against a satellite: this is where missile defense and anti-satellite weapons overlap.</p>'
+      ? '<p class="note">A missile-defense interceptor (SM-3) used against a satellite.</p>'
       : '';
   return (
     `<p class="card-title">${esc(e.system)}</p><p class="when">${esc(e.state)} · ${fmtD(e)}</p><dl><dt>Target</dt><dd>${esc(targetWords(e.target))}</dd>` +
@@ -484,7 +484,7 @@ function cardSpeech() {
 function announceCard() {
   const say = cardSpeech();
   live.textContent = '';
-  setTimeout(() => (live.textContent = `Details shown. ${say} There is no 3D explainer for this item.`), 60);
+  setTimeout(() => (live.textContent = `${say} There is no 3D explainer for this item.`), 60);
 }
 const cardFor = (d, full) => (d.domain === 'kinetic' ? kinCard(d) : d.domain === 'co_orbital' ? coCard(d, !full) : d.domain ? nkCard(d) : legalCard(d));
 export const activate = (d, el, ev) => {
@@ -495,7 +495,7 @@ export const activate = (d, el, ev) => {
   }
   // No scene: show the full card with a visible confirmation line at its top; announceCard() reads it out.
   showCard(
-    '<div class="ack-line"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Details shown. No 3D explainer for this item.</div>' +
+    '<div class="ack-line"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>No 3D explainer for this item.</div>' +
       cardFor(d, true),
     ev,
     el,
@@ -564,13 +564,13 @@ export function rove(sel) {
     const hid = 'kh-' + (box.id || 'chart');
     let h = document.getElementById(hid);
     if (!h) {
-      document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between points. Enter opens details. Escape closes a card. Tab leaves the chart.</p>`);
+      document.body.insertAdjacentHTML('beforeend', `<p class="kbd-hint" id="${hid}" aria-hidden="false">Arrow keys move between points. Enter opens details. Escape closes the card.</p>`);
       h = document.getElementById(hid);
     }
     nodes.forEach((n) => n.setAttribute('aria-describedby', hid));
     // the chart's key line says how to use the keyboard, so the hint is there before anyone tabs in
     const lg = box.closest('section')?.querySelector('ul.legend');
-    if (lg && !lg.nextElementSibling?.classList.contains('kb-key')) lg.insertAdjacentHTML('afterend', '<p class="kb-key">Tab once to enter a chart; arrow keys move between points.</p>');
+    if (lg && !lg.nextElementSibling?.classList.contains('kb-key')) lg.insertAdjacentHTML('afterend', '<p class="kb-key">Tab once to enter the chart, then use the arrow keys.</p>');
   }
   nodes.forEach((n, i) => {
     n.addEventListener('keydown', (ev) => {

@@ -150,7 +150,7 @@ export function drawA(el = document.getElementById('svgA')) {
     'var(--meo)',
     phone
       ? ['Medium Earth orbit']
-      : ['Medium Earth orbit (MEO), including navigation satellites at about 20,200 km', 'Medium Earth orbit (MEO)', 'Medium Earth orbit'],
+      : ['Medium Earth orbit (MEO), about 20,200 km', 'Medium Earth orbit (MEO)', 'Medium Earth orbit'],
     y(35000) + 26,
   );
   zone(
@@ -359,11 +359,11 @@ export function drawA(el = document.getElementById('svgA')) {
   if (!phone) {
     ann(
       'cn-2013-dn2',
-      'China’s DN-2 rocket, 2013: toward geostationary orbit',
-      'About 30,000 km at its highest point. It did not hit a target (hollow circle).',
+      'China’s DN-2 rocket, 2013: about 30,000 km, no target hit',
+      null,
       [...around(40, 28), ...sweep()],
     );
-    ann('cn-2007-fy1c', 'Highest intercept: China’s Fengyun-1C satellite, 2007, at 880 km', 'No intercept has reached that height since.', [
+    ann('cn-2007-fy1c', 'Highest intercept: Fengyun-1C, 2007, 880 km', null, [
       [-36, -44, 'end'],
       [-36, -62, 'end'],
       ...around(36, 44),
@@ -389,37 +389,28 @@ export function drawA(el = document.getElementById('svgA')) {
       const nx = ys[i + 1];
       if (nx && yr(nx) - yr(e) >= 6) gaps.push({ a: yr(e) + 1, b: yr(nx) - 1, x0: x(parse(e.date)) + 9, x1: x(parse(nx.date)) - 9 });
     });
-    const ds = ys.filter((e) => e.type === 'destructive');
-    let dg = null;
-    ds.forEach((e, i) => {
-      const nx = ds[i + 1];
-      if (nx && (!dg || yr(nx) - yr(e) > yr(dg[1]) - yr(dg[0]))) dg = [e, nx];
-    });
     const rng = (g) => (g.a === g.b ? `${g.a}` : `${g.a}–${String(g.b).slice(((g.a / 100) | 0) === ((g.b / 100) | 0) ? 2 : 0)}`);
-    const nm = (e) => e.target.split(/ \(|,| P\d/)[0];
-    const l1 = gaps.length ? (phone ? 'No tests, ' : 'No test by any country in our records, ') + gaps.map(rng).join(' or ') : '',
-      l2 = !phone && dg ? `No destructive test between ${nm(dg[0])} (${yr(dg[0])}) and ${nm(dg[1])} (${yr(dg[1])})` : '';
+    const l1 = gaps.length ? (phone ? 'No tests, ' : 'No tests in our records, ') + gaps.map(rng).join(' or ') : '';
     if (gaps.length) {
       const gx0 = Math.min(...gaps.map((q) => q.x0)),
         gx1 = Math.max(...gaps.map((q) => q.x1)),
         gm = (gx0 + gx1) / 2,
-        w = Math.max(tw(l1, 13), l2 ? tw(l2, 13) : 0),
+        w = tw(l1, 13),
         gy = y(32); // the empty lower part of the plot: a calm place for the note, away from the marks
       let placed = null;
-      for (const withL2 of l2 ? [true, false] : [false]) {
+      {
         const cand = [];
         for (let dy = -(gy + 4 - top - 30); dy <= top + plotH - 4 - gy - 4; dy += 7)
           for (let dx = -480; dx <= 480; dx += 30) cand.push([dx, dy, Math.abs(dx) / 30 + (Math.abs(dy) / 14) * 1.2]);
         for (const [dx, dy] of cand.sort((p, q) => p[2] - q[2])) {
           const ty = gy + 4 + dy,
             cxx = gm + dx,
-            q = [cxx - w / 2, ty - 31, cxx + w / 2, ty + (withL2 ? 19 : 4)];
+            q = [cxx - w / 2, ty - 31, cxx + w / 2, ty + 4];
           if (q[0] >= M.l + 2 && q[2] <= W - M.r - 18 && q[1] >= top + 24 && q[3] <= top + plotH - 4 && pl.free(q, [], 3)) {
-            placed = { ty, q, withL2, cxx };
+            placed = { ty, q, cxx };
             break;
           }
         }
-        if (placed) break;
       }
       if (placed) {
         pl.add(placed.q);
@@ -433,8 +424,7 @@ export function drawA(el = document.getElementById('svgA')) {
               .attr('aria-hidden', 'true');
         });
         const tt = ng.append('text').attr('class', 'empty-note').attr('text-anchor', 'middle').attr('x', placed.cxx).attr('y', placed.ty);
-        tt.append('tspan').attr('x', placed.cxx).text(l1);
-        if (placed.withL2) tt.append('tspan').attr('x', placed.cxx).attr('dy', 16).text(l2);
+        tt.text(l1);
       }
     }
   }
@@ -501,7 +491,7 @@ export function drawA(el = document.getElementById('svgA')) {
   };
   K.raw(
     `<li class="bubbles"><svg width="${bw}" height="${bh}" viewBox="0 0 ${bw} ${bh}" aria-hidden="true">${sizes.map(bubble).join('')}</svg>` +
-      '<span>Bubble area shows cataloged fragments (as of February 2026). Fragments still in orbit are in each card and in the table.</span></li>',
+      '<span>Bubble area shows cataloged fragments (as of February 2026).</span></li>',
   );
   K.group('3D explainers');
   li(

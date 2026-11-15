@@ -9,20 +9,15 @@ export const FENGYUN = {
   title: 'Fengyun-1C: China destroys a weather satellite (2007)',
   shells: [], // the debris ring is the subject; a second orbit-zone ellipse obscures its shape
   duration: 16,
-  lede: 'On 11 January 2007 China fired a ground-launched anti-satellite missile and destroyed Fengyun-1C, a Chinese weather satellite, about 880 km above the Earth. At that height, fragments stay in orbit for decades and spread into a ring around the planet.',
+  lede: 'On 11 January 2007 China fired a ground-launched anti-satellite missile and destroyed Fengyun-1C, a Chinese weather satellite, about 880 km up. At that height, fragments stay in orbit for decades.',
   caption:
-    'On 11 January 2007 China fired an SC-19 (a ground-launched anti-satellite missile) from Xichang and ' +
-    'destroyed Fengyun-1C, a Chinese weather satellite, about 880 km above the Earth. ' +
-    'At that height, fragments stay in orbit for decades. ' +
-    'They spread along the old orbit into a ring around the planet. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, lists no ' +
-    'other test in its Table 5-1 that produced as many tracked fragments. ' +
-    'In 2022 the UN General Assembly called on states not to conduct destructive “direct-ascent” ' +
-    'anti-satellite missile tests, meaning tests launched from Earth (resolution 77/41). ' +
+    'On 11 January 2007 China fired an SC-19 missile and destroyed Fengyun-1C, a Chinese weather satellite, about 880 km up. ' +
+    'The Secure World Foundation (SWF) lists no other test with as many tracked fragments. ' +
+    'In 2022 the UN General Assembly called on states not to test destructive anti-satellite missiles launched from Earth (resolution 77/41). ' +
     'The call is not binding.',
-  cite: 'Secure World Foundation, 2026, Table 5-1, p. 05-01 (3,532 cataloged; 2,351 in orbit as of Feb. 2026).',
+  cite: 'Secure World Foundation, 2026, Table 5-1, p. 05-01.',
   modelNote:
-    'Fengyun-1C is shown with a box-shaped body and two long solar arrays. NASA describes two 1.5 × 4 m arrays. Its size, orientation and motion here are illustrative.',
+    'Box body and two solar arrays, as NASA describes them; size and motion are illustrative.',
   modelSource: 'https://orbitaldebris.jsc.nasa.gov/quarterly-news/pdfs/odqnv13i3.pdf',
   related: 'unga-77-41',
   event: 'cn-2007-fy1c',
@@ -104,8 +99,8 @@ export const FENGYUN = {
   still: 0.85,
   status: [
     [0, 'SC-19 rises toward Fengyun-1C'],
-    [0.32, 'Collision at ~880 km: debris spreads along the old orbit', 'Collision at ~880 km'],
-    [0.6, 'A ring forms around the planet', 'A ring forms around Earth'],
-    [0.76, 'Fast-forward: the ring spreads wider and thinner. SWF: 2,351 of 3,532 still in orbit (Feb. 2026)', 'SWF: 2,351 of 3,532 still in orbit'],
+    [0.32, 'Collision at ~880 km; debris spreads', 'Collision at ~880 km'],
+    [0.6, 'Debris forms a ring', 'Debris forms a ring'],
+    [0.76, 'SWF, Feb. 2026: 2,351 of 3,532 still in orbit', 'SWF: 2,351 of 3,532 still in orbit'],
   ],
 };

@@ -26,20 +26,19 @@ export const SPACEPLANES = {
   title: 'Reusable spaceplanes: the US X-37B and China’s experimental craft (2010–2026)',
   shells: [],
   duration: 32,
-  lede: 'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions, and six of them lasted 224 to 908 days. China’s reusable experimental spacecraft has flown three missions, and a fourth launched in February 2026.',
+  lede: 'Since 2010 the US X-37B, a reusable uncrewed spaceplane, has flown eight missions; six lasted 224 to 908 days. China’s reusable experimental spacecraft has flown three, and a fourth launched in February 2026.',
   caption:
-    'Since 2010 the US X-37B spaceplane, a reusable uncrewed spacecraft that lands on a runway, has flown eight missions (OTV-1 to OTV-8, for Orbital Test Vehicle). ' +
-    'Six lasted 224 to 908 days. OTV-7 flew in an orbit reaching 38,838 km, and OTV-8 launched in August 2025. ' +
-    'China’s reusable experimental spacecraft (CSSHQ) has flown three missions, lasting 2 to 276 days, and a fourth launched in February 2026. After flights 2 and 3 it repeatedly approached objects that the space-tracking catalog lists as released from it. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, says the X-37B has so far approached no other object. The purposes of the missions are not stated. ' +
-    'A 2019 analysis by China’s People’s Liberation Army (PLA), as SWF reports it, warned that the X-37B could turn into an “aggressive” fighter in space. ' +
-    'No treaty or resolution on this page’s law timeline is tied to these flights.',
+    'Since 2010 the US X-37B, a reusable uncrewed spaceplane, has flown eight missions. ' +
+    'China’s reusable experimental spacecraft (CSSHQ) has flown three. ' +
+    'After flights 2 and 3 it repeatedly approached objects that the tracking catalog lists as released from it. ' +
+    'The Secure World Foundation (SWF) says the X-37B has so far approached no other object. ' +
+    'The purposes of the missions are not stated.',
   cite: 'Secure World Foundation, 2026: Table 1-1 (p. 01-08), Figure 1-3 (p. 01-07), pp. 01-04 to 01-09; Table 3-1 (p. 03-08), pp. 03-06 to 03-08.',
   related: null,
   event: 'us-2023-otv7',
   noInset: true,
   scaleNote:
-    'The reported orbital heights and tilt are sourced. Orbit heights are squeezed to fit; orientation, spacecraft sizes, distances to released objects and motion are illustrative.',
+    'Heights and tilt are reported figures. Orientation, craft sizes, distances and motion are illustrative.',
   anchors: {
     us: { orbit: { alt: 350, inc: 45, raan: 288, u0: 0.47, du: 3.4 } },
     heo: { ellipse: HEO_ORBIT },
@@ -143,7 +142,7 @@ export const SPACEPLANES = {
       fade: true,
       acts: [1],
       push: 0.15,
-      label: 'OTV-7 orbit: 323 to 38,838 km up, tilt 59.1° (Feb. 2024)',
+      label: 'OTV-7 orbit: 323 to 38,838 km, tilt 59.1°',
       short: 'OTV-7 orbit',
       labelIdx: 180,
       labelNear: 'x37h', // the name rides the orbit near the craft, so it stays in the following frame with a leader
@@ -387,26 +386,18 @@ export const SPACEPLANES = {
     ['PLA', 'PLA (People’s Liberation Army)'],
   ],
   status: [
-    [0, 'X-37B, OTV-1 to OTV-6 (2010–2022): flights of 224, 469, 675, 718, 780 and 908 days (SWF)', 'X-37B OTV-1 to 6: 224 to 908 days'],
-    [0.1, 'SWF: X-37B orbits were 300–400 km up, tilted 38°–54° to the equator (hobbyist tracking)', '300–400 km, tilt 38°–54° (SWF)'],
-    [0.2, 'Runway landings: Vandenberg AFB (OTV-1 to OTV-3) and Kennedy Space Center (OTV-4 to OTV-6)', 'Landings: Vandenberg, then Kennedy'],
-    [0.26, 'SWF: to date the X-37B “has not approached nor rendezvoused with any other space objects”', 'SWF: X-37B approached no other object'],
-    [0.3, 'OTV-7 (launched 28 Dec. 2023): an elongated orbit, 323 to 38,838 km up, tilt 59.1° (Feb. 2024)', 'OTV-7: 323 to 38,838 km up, tilt 59.1°'],
-    [0.38, 'SWF: may have tested a new sensor or payload; what and why are unclear', 'SWF: purpose and payload unclear'],
-    [0.46, 'Oct. 2024: uses air drag to lower its orbit; landed at Vandenberg 7 Mar. 2025 (434 days)', 'Landed 7 Mar. 2025 after 434 days'],
-    [0.51, 'Next flight: OTV-8 launched 21 Aug. 2025; SWF says it was still in orbit in Feb. 2026', 'Next: OTV-8 launched 21 Aug. 2025'],
-    [0.54, 'China’s CSSHQ: flights of 2, 276 and 268 days; a fourth launched 6 Feb. 2026 (SWF)', 'CSSHQ: flights of 2, 276, 268 days'],
-    [0.56, 'Flight 1 (launched 4 Sept. 2020) spent 2 days in orbit', 'CSSHQ flight 1: 2 days in orbit'],
-    [0.575, 'Flight 2 (2022–23): orbit raised to about 597–607 km; Object J cataloged, apparently released', 'Flight 2: Object J apparently released'],
+    [0, 'X-37B OTV-1 to OTV-6 (2010–2022): 224 to 908 days in orbits 300–400 km up (SWF; hobbyist tracking)', 'OTV-1 to 6: 224 to 908 days'],
+    [0.26, 'SWF: to date the X-37B “has not approached nor rendezvoused with any other space objects”', 'SWF: no approach to other objects so far'],
+    [0.3, 'OTV-7: elongated orbit, 323 to 38,838 km up (Feb. 2024); SWF: may have tested a new sensor or payload', 'OTV-7: 323 to 38,838 km up'],
+    [0.46, 'Air drag lowers its orbit; landed 7 Mar. 2025', 'Landed 7 Mar. 2025'],
+    [0.51, 'OTV-8 launched 21 Aug. 2025; in orbit in Feb. 2026 (SWF)', 'OTV-8 launched 21 Aug. 2025'],
+    [0.54, 'China’s CSSHQ: flights of 2, 276 and 268 days (SWF)', 'CSSHQ: 2, 276, 268 days'],
+    [0.575, 'Flight 2: Object J cataloged, apparently released', 'Flight 2: Object J apparently released'],
     [0.625, 'LeoLabs: approaches to Object J, “[at] least two and possibly three capture/docking operations”', 'LeoLabs: approaches to Object J'],
-    [0.76, 'Flight 3 (2023–24): Object G released 24 May 2024; approaches in June, within 1 km on 12 June', 'Flight 3: Object G released 24 May 2024'],
-    [
-      0.86,
-      'A 2019 PLA analysis (not SWF’s view): ' + 'the X-37B could become an “aggressive unmanned intelligent fighter”',
-      'A 2019 PLA analysis, not SWF’s view',
-    ],
-    [0.93, 'SWF: Chinese concern about the X-37B is thought to have driven China to build its own spaceplane', 'SWF: X-37B thought to have driven CSSHQ'],
-    [0.975, 'Flight 4 launched from Jiuquan on 6 Feb. 2026; SWF reports no landing yet', 'Flight 4 launched 6 Feb. 2026'],
+    [0.76, 'Flight 3: Object G released 24 May 2024', 'Object G released 24 May 2024'],
+    [0.86, 'A 2019 PLA analysis (not SWF’s view): the X-37B could become an “aggressive” fighter', 'A 2019 PLA analysis, not SWF’s view'],
+    [0.93, 'SWF: concern about the X-37B is thought to have driven CSSHQ', 'SWF: X-37B thought to have driven CSSHQ'],
+    [0.975, 'Flight 4 launched 6 Feb. 2026; SWF reports no landing yet', 'Flight 4 launched 6 Feb. 2026'],
   ],
   cameras: [
     {

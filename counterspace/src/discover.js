@@ -6,7 +6,7 @@ import { REDUCED, esc, escNb } from './app.js';
 import { drawnPara, pairWord, recapLine, recapLinks } from './recap.js';
 import { ORDER, openScene } from './scene-ui.js';
 import { posterURL } from './scenes/posters.js';
-import { FACTS, pickSurprise } from './discover-data.js';
+import { FACTS, SHORT, pickSurprise } from './discover-data.js';
 import { seenScenes } from './shared.js';
 import { earn, freshCount, freshLine, heroInView, offerLink, pulseInPlace, showInHero, toHero } from './rewards.js';
 import { playPairs, revealCapacity, revealedCount } from './hero-timeline.js';
@@ -42,7 +42,7 @@ function drawGallery() {
 </li>`;
   }).join('') + surprise;
   const chooser = document.getElementById('sceneChoose');
-  chooser.innerHTML += STRIP.map(s => `<option value="${esc(s.id)}">${esc(yearOf(s))} · ${esc(nameOf(s))}</option>`).join('');
+  chooser.innerHTML += STRIP.map(s => `<option value="${esc(s.id)}">${esc(yearOf(s))}: ${esc(SHORT[s.id] || nameOf(s))}</option>`).join('');
   chooser.addEventListener('change', () => { if (chooser.value) { openScene(chooser.value, chooser); chooser.value = ''; } });
   grid.addEventListener('click', (e) => {
     const b = e.target.closest('.pc-btn');
@@ -98,7 +98,7 @@ document.addEventListener('cs:closed', (e) => {
     shown = true;
     pending = false;
     if (heroInView()) return setTimeout(() => playPairs(), 250);
-    return offerLink(`All ${STRIP.length} scenes seen. The pairs draw themselves on the hero picture.`, () => drawIn());
+    return offerLink(`All ${STRIP.length} scenes seen. The pairs are drawn on the hero picture.`, () => drawIn());
   }
   if (!k) return;
   if (heroInView()) return setTimeout(() => pulseInPlace(k), 250);
@@ -260,7 +260,7 @@ function heroSeen() {
     el.replaceChildren(main, rule);
     return;
   }
-  main.append(`You have seen all ${STRIP.length} scenes. In every pair our records link, the law came later. `);
+  main.append(`You have seen all ${STRIP.length} scenes. `);
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'hs-again';

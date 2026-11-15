@@ -4,20 +4,19 @@ import { C } from './shared.js';
 
 export const VIASAT = {
   id: 'viasat',
-  explanationAlt: 'Schematic network diagram: AcidRain commands pass through the ground management network to wipe user modems. The KA-SAT satellite continues to work. Symbols represent roles, not device counts or geographic locations.',
+  explanationAlt:
+    'Network diagram: AcidRain commands pass through the ground management network and wipe user modems. The KA-SAT satellite keeps working. Symbols stand for roles, not device counts or places.',
   inset: 'Top view: KA-SAT in GEO',
   date: '2022-02-24',
   title: 'Viasat KA-SAT: a cyberattack on a satellite network (2022)',
   staticMarkerCap: { 'KA-SAT (GEO, unaffected)': 48 }, // KA-SAT is the satellite the story is about (48 px at the 22 px reference stage)
   shells: ['GEO'],
   duration: 14,
-  lede: 'On 24 February 2022, within hours of Russia’s invasion of Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems across Europe. The satellite itself kept working, because the attack hit the network on the ground.',
+  lede: 'On 24 February 2022, within hours of Russia’s invasion of Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems across Europe. The satellite kept working.',
   caption:
     'On 24 February 2022, within hours of Russia’s invasion of Ukraine, attackers later attributed to Russia wiped tens of thousands of satellite modems across Europe. ' +
-    'Their “AcidRain” malware, software that erases a device’s data, reached the modems through the ground management network of KA-SAT, a communications satellite in geostationary orbit (GEO) about 36,000 km up. ' +
-    'The satellite itself kept working. The attack hit the network on the ground. ' +
-    'The Tallinn Manual 2.0 is an expert manual on how international law applies to cyber operations. It is soft law, meaning not binding, and dates from 2017, before the attack. ' +
-    'The ground network and the order in which regions go dark are drawn for illustration.',
+    'The attack hit the ground network that manages KA-SAT, a satellite in geostationary orbit. The satellite kept working. ' +
+    'The Tallinn Manual 2.0 (2017), an expert guide to international law on cyber operations, is soft law: not binding.',
   cite: 'Secure World Foundation, 2026, pp. 15-06 to 15-07 (Viasat case study).',
   related: 'tallinn-2017',
   event: 'ru-2022-viasat',
@@ -71,7 +70,7 @@ export const VIASAT = {
       t0: 0.3,
       t1: 0.62,
       labelOffDisc: true, // stills: the label sits beside the globe, not on it
-      label: 'Ground terminals (modems)',
+      label: 'Ground terminals',
       short: 'Terminals',
       labelDx: IS_PHONE ? 125 : 168,
       labelDy: IS_PHONE ? -104 : -150,
@@ -83,11 +82,11 @@ export const VIASAT = {
     { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
   ],
   steps: [
-    [0, 'Normal service: KA-SAT serves modems across Ukraine and Europe'],
-    [0.1, 'Attackers send AcidRain, a data-erasing program, into the ground network'],
-    [0.3, 'Commands reach modems region by region; they are wiped and go offline'],
-    [0.62, 'Tens of thousands of modems are offline; the satellite keeps working'],
-    [0.8, 'Attributed to Russia’s military intelligence (GRU) by the US, UK and EU in May 2022 (SWF, p. 15-07)'],
+    [0, 'Normal service: KA-SAT serves modems across Europe'],
+    [0.1, 'Attackers send AcidRain malware into the ground network'],
+    [0.3, 'Modems are wiped region by region and go offline'],
+    [0.62, 'Tens of thousands of modems offline; the satellite keeps working'],
+    [0.8, 'May 2022: the US, UK and EU attribute it to Russia’s military intelligence (GRU) (SWF)'],
   ],
 
   insetHalo: true, // dark casing on the inset's KA-SAT text (it sat on the blue globe)

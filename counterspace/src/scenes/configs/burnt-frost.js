@@ -5,19 +5,18 @@ import { IS_PHONE } from '../core.js';
 export const BURNT_FROST = {
   id: 'burnt-frost',
   explanationAlt:
-    'Sequence of the Burnt Frost interception: collision at about 220 km, spreading fragments, and a later count of none remaining from 175 tracked fragments. They fell out of orbit in about 20 months. Symbols and timing are illustrative.',
+    'Sequence of the Burnt Frost interception: collision at about 220 km, spreading fragments, and a later count of none left from 175 tracked fragments, which fell out of orbit in about 20 months. Illustrative.',
   noSimCount: true, // Only sourced counts belong in captions; particle decay is illustrative.
   date: '2008-02-20',
   title: 'Burnt Frost: the US destroys a failing satellite (2008)',
   shells: ['LEO'],
   duration: 12,
-  lede: 'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile at USA-193, a failing US satellite, and destroyed it about 220 km above the Earth. The SM-3 is a missile-defense interceptor, so its use against a satellite shows the overlap between missile defense and anti-satellite capability.',
+  lede: 'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile at USA-193, a failing US satellite, and destroyed it about 220 km up.',
   caption:
-    'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 missile at USA-193, a failing US satellite, and destroyed it about 220 km above the Earth. ' +
-    'The SM-3 is a missile-defense interceptor, built to shoot down other missiles, so its use against a satellite shows the overlap between missile defense and anti-satellite capability. ' +
-    'The Secure World Foundation (SWF), a space-security nonprofit, gives the height as 220 km in its Table 5-1 and 240 km in its text. At that height the 175 trackable pieces took about 20 months to fall out of orbit. The animation speeds that up. ' +
+    'On 20 February 2008 the US Navy cruiser USS Lake Erie fired a modified SM-3 interceptor at USA-193, a failing US satellite, and destroyed it about 220 km up. ' +
+    'The Secure World Foundation (SWF) counts 175 trackable pieces; all fell out of orbit within about 20 months (sped up here). ' +
     'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons.',
-  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (175 cataloged; 0 in orbit); time to re-enter and the 240 km figure in the text, p. 01-24.',
+  cite: 'Secure World Foundation, 2026: Table 5-1, p. 05-01 (220 km); time to re-enter and the 240 km figure in the text, p. 01-24.',
   related: null,
   event: 'us-2008-burnt-frost',
   phoneK: 1.15,
@@ -87,7 +86,7 @@ export const BURNT_FROST = {
       impactDx: -150,
       impactDy: -30,
       tickUntil: 0.9, // the tick marks the point until the last count, then the count's own pill takes over
-      endLabel: 'Impact point: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
+      endLabel: 'Impact: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
       endShort: '0 of 175 in orbit',
       endFrom: 0.9,
       endDx: 40, // the end label sits right of the impact point, off the Japanese city lights
@@ -152,11 +151,11 @@ export const BURNT_FROST = {
   ],
   still: 0.47,
   status: [
-    [0, 'The ship readies an interceptor for the satellite'],
-    [0.25, 'Interceptor closes on the satellite', 'Interceptor closing in'],
+    [0, 'The ship readies an interceptor'],
+    [0.25, 'Interceptor closes in', 'Interceptor closing in'],
     [0.44, 'Collision at about 220 km', 'Collision at about 220 km'],
-    [0.54, 'Fragments spread after the collision; positions are illustrative', 'Fragments spread after collision'],
-    [0.65, 'Time passes: debris falls back into the atmosphere', 'Time passes: debris falls back'],
-    [0.9, 'SWF: 0 of 175 tracked fragments remain; all fell out of orbit in about 20 months', 'Later count: 0 of 175 remain (SWF)'],
+    [0.54, 'Fragments spread', 'Fragments spread'],
+    [0.65, 'Debris falls back into the atmosphere', 'Debris falls back'],
+    [0.9, 'SWF: 0 of 175 tracked fragments remain after about 20 months', 'SWF: 0 of 175 remain'],
   ],
 };
