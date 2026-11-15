@@ -82,7 +82,7 @@ def main() -> None:
     if a.hero:
         hero(src, ROOT / 'src/assets')
         return
-    files = [src / f'{i}.png' for i in a.ids] if a.ids else sorted(src.glob('*.png'))
+    files = [src / f'{i}.png' for i in a.ids] if a.ids else sorted(f for f in src.glob('*.png') if not f.stem.startswith('hero'))  # hero*: see --hero
     missing = [f for f in files if not f.exists()]
     if missing or not files:
         raise SystemExit(f'no renders to finish (missing: {[f.name for f in missing]}); run posters.py first')

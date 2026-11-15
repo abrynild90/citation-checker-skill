@@ -11,7 +11,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import kit  # noqa: E402
-from posters import orbit_view, base  # noqa: E402
+from compose import orbit_view, base  # noqa: E402
 
 SUN = kit.ll(22, 95)  # morning over Europe, the Sun beyond the limb
 W, H, LENS = 3600, 1400, 100  # far and long: only a gentle arc of the limb crosses the strip, so every column meets the planet

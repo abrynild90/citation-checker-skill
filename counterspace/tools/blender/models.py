@@ -1,33 +1,41 @@
-# Spacecraft, rockets and aircraft for the poster renders, built from primitives. Each builder returns the list of parts in model space
-# (+X forward/nose, +Z up, about one unit across); kit.group() parents, scales and aims them. Illustrative shapes, not engineering models.
+# Missiles and rockets for the poster renders, in metres, nose toward +X, centred on the middle of the vehicle, built as lathed bodies with
+# stage joints, bands, conduits, prism fins and bell nozzles (the F-15 is in f15.py, the satellites in sats.py). Builders: asm135() (the
+# US anti-satellite missile of 1985), sm3() (the Aegis interceptor of 2008) and upper_stage() (a Chinese-style upper stage, for DN-2).
+# kit.group() parents, scales and aims the returned parts. Illustrative shapes of the real vehicles, not engineering models.
 import math
 
 import bpy
+from mathutils import Vector
 
 import kit
+import surface as S
 
 _M = {}
 
 
+def _materials():
+    panels = S.panel_lines(seed=11, min_px=200, max_px=900, rivet_step=17)
+    return {
+        'white': S.aircraft_paint('rk-white', light='#aeb3b8', panels=panels, two_tone=False, rough=0.42, grime=0.45, tile=0.5),
+        'grey': S.aircraft_paint('rk-grey', light='#8d949b', panels=panels, two_tone=False, rough=0.45, grime=0.3, tile=0.5),
+        'orange': S.aircraft_paint('rk-orange', light='#c9501c', panels=panels, two_tone=False, rough=0.5, grime=0.3, tile=0.5),
+        'red': kit.mat('rk-red', '#b3191c', rough=0.45, coat=0.2),
+        'black': kit.mat('rk-black', '#101215', rough=0.55),
+        'dark': kit.mat('rk-dark', '#383d44', metallic=0.4, rough=0.45),
+        'steel': kit.mat('rk-steel', '#b9bec6', metallic=1.0, rough=0.28),
+        'gold': kit.mat('rk-gold', '#c9983c', metallic=1.0, rough=0.3),
+        'bell': kit.mat('rk-bell', '#2d2824', metallic=1.0, rough=0.38),
+        'window': kit.mat('rk-window', '#06090f', metallic=0.6, rough=0.04, coat=1.0),
+        'cable': kit.mat('rk-cable', '#26282b', rough=0.5),
+    }
+
+
 def m(key):
     """Shared materials, made once per scene."""
-    if key in _M and _M[key].name in bpy.data.materials:
-        return _M[key]
-    make = {
-        'gold': lambda: kit.mli_gold('mli-gold'),
-        'silver': lambda: kit.mli_gold('mli-silver', '#8e939c', '#e6e8ee'),
-        'cells': lambda: kit.solar_cells(),
-        'cells-iss': lambda: kit.solar_cells('#5a3d14', 5.0, '#7a5520'),
-        'white': lambda: kit.mat('white', '#c9cdd3', rough=0.5, coat=0.15),
-        'grey': lambda: kit.mat('grey', '#8a9099', metallic=0.2, rough=0.5),
-        'darkgrey': lambda: kit.mat('darkgrey', '#3a3f47', metallic=0.3, rough=0.45),
-        'black': lambda: kit.mat('black', '#121418', rough=0.6),
-        'alu': lambda: kit.mat('alu', '#c8ccd3', metallic=1.0, rough=0.22),
-        'dish': lambda: kit.mat('dish', '#f4f4f0', rough=0.3, coat=0.4),
-        'glass': lambda: kit.mat('glass', '#0d1622', metallic=0.8, rough=0.08, coat=1.0),
-        'nozzle': lambda: kit.mat('nozzle', '#2a2420', metallic=1.0, rough=0.35),
-    }[key]
-    _M[key] = make()
+    if _M and next(iter(_M.values())).name not in bpy.data.materials:
+        _M.clear()  # the scene was reset since
+    if not _M:
+        _M.update(_materials())
     return _M[key]
 
 
@@ -35,138 +43,138 @@ def reset_materials():
     _M.clear()
 
 
-def _wing(name, span, chord, thick=0.012, gap=0.08, side=1, segments=3, mat_key='cells'):
-    """A solar array wing along ±Y: a boom then `segments` panels."""
-    parts = [kit.cyl(f'{name}-boom', 0.012, gap, loc=(0, side * gap / 2, 0), rot=(math.pi / 2, 0, 0), material=m('alu'), verts=12)]
-    seg = span / segments
-    for i in range(segments):
-        y = side * (gap + seg * (i + 0.5))
-        parts.append(kit.box(f'{name}-p{i}', (chord, seg * 0.97, thick), loc=(0, y, 0), material=m(mat_key)))
-    return parts
+def lathe(name, profile, material, seg=48, x0=0.0):
+    """A smooth body of revolution about X from (x, radius) points; the ends are capped unless the radius there is zero."""
+    verts, faces, idx = [], [], []
+    for x, r in profile:
+        idx.append((len(verts), 1 if r <= 1e-6 else seg))
+        ring = [(x0 + x, r * math.cos(2 * math.pi * j / seg), r * math.sin(2 * math.pi * j / seg)) for j in range(seg)]
+        verts += ring[:1] if r <= 1e-6 else ring
+    for (a, na), (b, nb) in zip(idx, idx[1:]):
+        for j in range(seg):
+            j1 = (j + 1) % seg
+            if na == 1:
+                faces.append((a, b + j, b + j1))
+            elif nb == 1:
+                faces.append((a + j1, a + j, b))
+            else:
+                faces.append((a + j, b + j, b + j1, a + j1))
+    for (a, n), flip in ((idx[0], True), (idx[-1], False)):
+        if n > 1:
+            faces.append(tuple(reversed(range(a, a + n))) if flip else tuple(range(a, a + n)))
+    ob = kit.mesh(name, verts, faces, material, smooth=True)
+    return ob
 
 
-def sat_box(name, size=(1.0, 0.9, 1.1), mli='gold', span=2.4, chord=0.8, dish=True, dish_r=0.32, panels=2, reflectors=0):
-    """A box bus in foil with one or two solar wings and a dish on its forward face."""
-    sx, sy, sz = size
-    parts = [kit.box(f'{name}-bus', size, material=m(mli), bevel=0.02)]
-    parts.append(kit.box(f'{name}-deck', (sx * 1.02, sy * 1.02, 0.05), loc=(0, 0, sz / 2 + 0.02), material=m('white')))
-    for side in ((1, -1) if panels == 2 else (1,)):
-        for p in _wing(f'{name}-w{side}', span, chord, side=side):
-            p.location.y += side * sy / 2
-            parts.append(p)
-    if dish:
-        parts.append(kit.sphere(f'{name}-dish', dish_r, loc=(sx / 2 + 0.06, 0, sz * 0.12), material=m('dish'), scale=(0.28, 1, 1)))
-        parts.append(kit.cyl(f'{name}-feed', 0.018, 0.22, loc=(sx / 2 + 0.16, 0, sz * 0.12), rot=(0, math.pi / 2, 0), material=m('alu'), verts=12))
-    for k in range(reflectors):  # large reflectors on GEO communications satellites
-        y = (k - (reflectors - 1) / 2) * sy * 1.1
-        parts.append(kit.sphere(f'{name}-rf{k}', 0.42, loc=(sx * 0.2, y, sz / 2 + 0.25), material=m('dish'), scale=(1, 1, 0.22)))
-    parts.append(kit.cyl(f'{name}-nz', 0.07, 0.12, loc=(-sx / 2 - 0.05, 0, 0), rot=(0, math.pi / 2, 0), material=m('nozzle'), r2=0.04, verts=24))
-    parts.append(kit.cyl(f'{name}-ant', 0.008, 0.35, loc=(sx * 0.3, sy * 0.3, sz / 2 + 0.2), material=m('alu'), verts=8))
-    return parts
+def ogive(x0, x1, r0, r1, n=14):
+    """Profile points of a nose from radius r0 at x0 to r1 at x1."""
+    return [(x0 + (x1 - x0) * t, r0 + (r1 - r0) * (1 - (1 - t) ** 2.1)) for t in (i / n for i in range(n + 1))]
 
 
-def sat_drum(name, r=0.45, h=1.0, paddles=True):
-    """A cylindrical body covered in cells (Solwind P78-1, Cosmos 1408 class) with two paddles."""
-    parts = [kit.cyl(f'{name}-body', r, h, rot=(0, math.pi / 2, 0), material=m('cells'), verts=16, smooth=False)]
-    for k, x in (('A', h / 2), ('B', -h / 2)):
-        parts.append(kit.cyl(f'{name}-cap{k}', r * 1.02, 0.06, loc=(x, 0, 0), rot=(0, math.pi / 2, 0), material=m('silver'), verts=16))
-    parts.append(kit.cyl(f'{name}-mast', 0.03, 0.7, loc=(h / 2 + 0.35, 0, 0), rot=(0, math.pi / 2, 0), material=m('alu'), verts=12))
-    if paddles:
-        for side in (1, -1):
-            for p in _wing(f'{name}-pd{side}', 1.4, 0.55, side=side, segments=2):
-                p.location.y += side * r
-                parts.append(p)
-    return parts
-
-
-def rocket(name, length=1.0, r=0.05, body='white', bands=2, fins=True):
-    """A slender rocket, nose toward +X, nozzle at x = -length/2."""
-    parts = [kit.cyl(f'{name}-body', r, length * 0.82, rot=(0, math.pi / 2, 0), material=m(body), verts=32)]
-    parts.append(kit.cyl(f'{name}-nose', r, length * 0.18, loc=(length * 0.5, 0, 0), rot=(0, math.pi / 2, 0), material=m(body), r2=0.002, verts=32))
-    for i in range(bands):
-        x = -length * 0.3 + i * length * 0.32
-        parts.append(kit.cyl(f'{name}-band{i}', r * 1.01, length * 0.03, loc=(x, 0, 0), rot=(0, math.pi / 2, 0), material=m('black'), verts=32))
-    parts.append(kit.cyl(f'{name}-ring', r * 1.03, length * 0.02, loc=(length * 0.12, 0, 0), rot=(0, math.pi / 2, 0), material=m('darkgrey'), verts=32))
-    parts.append(kit.cyl(f'{name}-bell', r * 0.75, length * 0.06, loc=(-length * 0.44, 0, 0), rot=(0, -math.pi / 2, 0), material=m('nozzle'), r2=r * 0.45, verts=24))
-    if fins:
-        for k in range(4):
-            fin = kit.mesh(f'{name}-fin{k}', [(-length * 0.41, 0, 0), (-length * 0.25, 0, 0), (-length * 0.41, 0, r * 2.2)], [(0, 1, 2)], m('darkgrey'))
-            fin.rotation_euler = (k * math.pi / 2, 0, 0)
-            parts.append(fin)
-    return parts
-
-
-def _plate(name, outline, thick, mat_obj, z=0.0):
-    """Extrude a flat outline (list of (x, y)) into a thin plate."""
+def prism(name, outline, thick, material):
+    """A fin: the (x, z) outline extruded to a thickness along Y."""
     n = len(outline)
-    V = [(x, y, z - thick / 2) for x, y in outline] + [(x, y, z + thick / 2) for x, y in outline]
-    F = [tuple(range(n))[::-1], tuple(range(n, 2 * n))] + [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n)]
-    return kit.mesh(name, V, F, mat_obj)
+    t = thick / 2
+    verts = [(x, -t, z) for x, z in outline] + [(x, t, z) for x, z in outline]
+    faces = [tuple(reversed(range(n))), tuple(range(n, 2 * n))]
+    faces += [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n)]
+    return kit.mesh(name, verts, faces, material)
 
 
-def f15(name):
-    """An F-15-like fighter, nose +X (about 1 unit long)."""
-    grey = kit.mat(name + '-paint', '#9aa3ad', metallic=0.25, rough=0.45)
-    fus = kit.cyl(f'{name}-fus', 0.055, 0.8, rot=(0, math.pi / 2, 0), material=grey, verts=24)
-    fus.scale = (1, 1.35, 0.9)
-    parts = [fus]
-    parts.append(kit.cyl(f'{name}-nose', 0.055, 0.22, loc=(0.51, 0, 0), rot=(0, math.pi / 2, 0), material=grey, r2=0.004, verts=24))
-    parts.append(kit.sphere(f'{name}-canopy', 0.05, loc=(0.27, 0, 0.045), material=m('glass'), scale=(2.2, 0.8, 0.8)))
-    parts.append(_plate(f'{name}-wing', [(0.12, 0), (-0.22, 0.42), (-0.32, 0.42), (-0.3, 0), (-0.32, -0.42), (-0.22, -0.42)], 0.016, grey))
-    parts.append(_plate(f'{name}-stab', [(-0.3, 0), (-0.42, 0.2), (-0.47, 0.2), (-0.45, 0), (-0.47, -0.2), (-0.42, -0.2)], 0.012, grey))
-    for side in (1, -1):
-        t = _plate(f'{name}-tail{side}', [(-0.28, 0), (-0.42, 0), (-0.47, 0.2), (-0.41, 0.2)], 0.01, grey)
-        t.rotation_euler = (math.pi / 2 - side * 0.12, 0, 0)
-        t.location = (0, side * 0.07, 0.04)
-        parts.append(t)
-        parts.append(kit.cyl(f'{name}-eng{side}', 0.035, 0.08, loc=(-0.44, side * 0.04, 0), rot=(0, math.pi / 2, 0), material=m('nozzle'), verts=16))
+def around(ob, k, n):
+    """Rotate a part about the X axis to station k of n."""
+    ob.rotation_euler = (2 * math.pi * k / n, 0, 0)
+    return ob
+
+
+def band(name, x, r, w, material, seg=48):
+    return lathe(name, [(x - w / 2, r), (x - w / 2, r * 1.012), (x + w / 2, r * 1.012), (x + w / 2, r)], material, seg)
+
+
+def strut(name, a, b, r, material):
+    ob = kit.cyl(name, r, (b - a).length, loc=(a + b) / 2, material=material, verts=8)
+    ob.rotation_euler = (b - a).to_track_quat('Z', 'Y').to_euler()
+    return ob
+
+
+def conduit(name, x0, x1, r, material, k=2):
+    """Thin cable runs along the body."""
+    return [kit.cyl(f'{name}-c{i}', 0.022, x1 - x0, loc=((x0 + x1) / 2, math.cos(2.5 + i * math.pi) * (r + 0.01), math.sin(2.5 + i * math.pi) * (r + 0.01)),
+                    rot=(0, math.pi / 2, 0), material=material, verts=10) for i in range(k)]
+
+
+def nozzle(name, x, r, length, material, seg=40):
+    """An exhaust bell opening aft from its throat at x."""
+    prof = [(0, r * 0.38), (-length * 0.35, r * 0.5), (-length * 0.8, r * 0.78), (-length, r * 0.92), (-length * 1.02, r * 0.88)]
+    return lathe(name, prof, material, seg, x0=x)
+
+
+def asm135(name='asm'):
+    """The ASM-135 ASAT, 5.4 m long and 0.5 m across: an SRAM booster with four tail fins, a short interstage, the Altair III second stage and
+    the Miniature Homing Vehicle with a blunt infrared-seeker nose, ringed by its small attitude rockets. Carried on the F-15's centreline."""
+    X0 = -2.7
+    parts = [lathe(f'{name}-s1', [(X0, 0.2), (X0, 0.25), (X0 + 2.9, 0.25), (X0 + 3.1, 0.25), (X0 + 3.35, 0.19)], m('white'))]
+    parts.append(nozzle(f'{name}-nz', X0 + 0.1, 0.22, 0.35, m('bell')))
+    for x, key in ((0.28, 'dark'), (1.0, 'red'), (1.95, 'dark'), (2.9, 'dark')):
+        parts.append(band(f'{name}-b{x}', X0 + x, 0.25, 0.06, m(key)))
+    parts.append(lathe(f'{name}-s2', [(X0 + 3.3, 0.19), (X0 + 3.55, 0.185), (X0 + 4.25, 0.185), (X0 + 4.35, 0.17)], m('white')))
+    parts.append(band(f'{name}-b2', X0 + 3.55, 0.185, 0.04, m('black')))
+    parts.append(lathe(f'{name}-mhv', [(X0 + 4.3, 0.17), (X0 + 4.3, 0.2), (X0 + 4.8, 0.2), (X0 + 4.9, 0.17)], m('dark')))
+    for k in range(24):  # the vehicle's ring of tiny rockets
+        a = 2 * math.pi * k / 24
+        parts.append(kit.cyl(f'{name}-ar{k}', 0.018, 0.14, loc=(X0 + 4.62, 0.205 * math.cos(a), 0.205 * math.sin(a)), rot=(0, math.pi / 2, 0), material=m('gold'), verts=8))
+    parts.append(lathe(f'{name}-nose', [(X0 + 4.9, 0.17), (X0 + 5.12, 0.13), (X0 + 5.3, 0.08), (X0 + 5.4, 0.0)], m('window')))
+    parts += conduit(f'{name}-cd', X0 + 0.4, X0 + 3.2, 0.25, m('cable'))
+    for k in range(4):  # cropped delta tail fins at the booster's aft end
+        parts.append(around(prism(f'{name}-fin{k}', [(X0 + 0.05, 0.24), (X0 + 0.9, 0.25), (X0 + 0.35, 0.6), (X0 + 0.05, 0.6)], 0.035, m('grey')), k, 4))
+    for k in range(4):  # small control fins on the second stage
+        parts.append(around(prism(f'{name}-cf{k}', [(X0 + 3.6, 0.18), (X0 + 3.95, 0.18), (X0 + 3.8, 0.34), (X0 + 3.62, 0.34)], 0.025, m('dark')), k + 0.5, 4))
     return parts
 
 
-def x37b(name):
-    """An X-37B-like spaceplane: white upper body, black heat-shield belly, small delta wing, V-tail, bay doors open with a small array."""
-    white = m('white')
-    fus = kit.cyl(f'{name}-fus', 0.1, 0.9, rot=(0, math.pi / 2, 0), material=white, verts=32)
-    fus.scale = (1, 1.3, 0.85)
-    parts = [fus]
-    parts.append(kit.sphere(f'{name}-nose', 0.1, loc=(0.45, 0, 0), material=m('black'), scale=(1.6, 1.3, 0.85)))
-    parts.append(kit.box(f'{name}-belly', (0.92, 0.25, 0.04), loc=(0, 0, -0.075), material=m('black'), bevel=0.01))
-    parts.append(_plate(f'{name}-wing', [(0.05, 0.1), (-0.35, 0.42), (-0.46, 0.42), (-0.46, -0.42), (-0.35, -0.42), (0.05, -0.1)], 0.02, m('black'), z=-0.06))
-    for side in (1, -1):
-        t = _plate(f'{name}-tail{side}', [(-0.32, 0), (-0.47, 0), (-0.5, 0.2), (-0.42, 0.2)], 0.012, white)
-        t.rotation_euler = (math.pi / 2 - side * 0.55, 0, 0)
-        t.location = (0, side * 0.08, 0.05)
-        parts.append(t)
-        parts.append(kit.box(f'{name}-door{side}', (0.5, 0.11, 0.01), loc=(0.02, side * 0.15, 0.13), rot=(side * 0.9, 0, 0), material=m('alu')))
-    parts.append(kit.box(f'{name}-array', (0.34, 0.5, 0.008), loc=(0.02, 0, 0.18), material=m('cells')))
-    parts.append(kit.cyl(f'{name}-eng', 0.04, 0.06, loc=(-0.47, 0, 0), rot=(0, math.pi / 2, 0), material=m('nozzle'), verts=16))
+def sm3(name='sm3'):
+    """The SM-3 Block IA, 6.5 m long: the wider Mk 72 booster with its four tail fins, the 0.34 m Mk 104 second stage with strakes, the Mk 136
+    third stage and the kinetic warhead under a white nose cone with a dark tip."""
+    X0 = -3.27
+    parts = [lathe(f'{name}-bst', [(X0, 0.24), (X0, 0.265), (X0 + 2.4, 0.265), (X0 + 2.7, 0.17)], m('white'))]
+    parts.append(nozzle(f'{name}-nz', X0 + 0.1, 0.24, 0.4, m('bell')))
+    for x, key in ((0.28, 'dark'), (1.2, 'orange'), (2.3, 'dark')):
+        parts.append(band(f'{name}-bb{x}', X0 + x, 0.265, 0.07, m(key)))
+    parts.append(lathe(f'{name}-s2', [(X0 + 2.7, 0.17), (X0 + 4.3, 0.17)], m('white')))
+    parts.append(band(f'{name}-b23', X0 + 4.3, 0.17, 0.06, m('black')))
+    parts.append(lathe(f'{name}-s3', [(X0 + 4.3, 0.17), (X0 + 5.4, 0.17), (X0 + 5.45, 0.145)], m('grey')))
+    parts.append(lathe(f'{name}-kw', [(X0 + 5.4, 0.145), (X0 + 5.75, 0.14)] + ogive(X0 + 5.75, X0 + 6.54, 0.14, 0.0, 12)[1:], m('white')))
+    parts.append(lathe(f'{name}-tip', [(X0 + 6.38, 0.03), (X0 + 6.46, 0.016), (X0 + 6.54, 0.0)], m('black')))
+    parts += conduit(f'{name}-cd', X0 + 0.5, X0 + 2.5, 0.265, m('cable'))
+    for k in range(4):  # the booster's tail fins
+        parts.append(around(prism(f'{name}-fin{k}', [(X0, 0.26), (X0 + 0.9, 0.265), (X0 + 0.45, 0.72), (X0, 0.72)], 0.04, m('grey')), k, 4))
+    for k in range(4):  # the second stage's long strakes
+        parts.append(around(prism(f'{name}-st{k}', [(X0 + 2.75, 0.17), (X0 + 4.1, 0.17), (X0 + 3.6, 0.27), (X0 + 2.95, 0.27)], 0.02, m('dark')), k + 0.5, 4))
     return parts
 
 
-def iss(name):
-    """A space-station silhouette: a long truss, eight gold-brown arrays, pressurised modules and white radiators."""
-    parts = [kit.box(f'{name}-truss', (0.08, 2.2, 0.08), material=m('alu'))]
-    for side in (1, -1):
-        for k in range(2):
-            y = side * (0.82 + k * 0.28)
-            for z in (1, -1):
-                parts.append(kit.box(f'{name}-arr{side}{k}{z}', (0.012, 0.22, 0.8), loc=(0, y, z * 0.47), material=m('cells-iss')))
-        parts.append(kit.box(f'{name}-rad{side}', (0.3, 0.02, 0.22), loc=(0.1, side * 0.4, -0.2), material=m('white')))
-    parts.append(kit.cyl(f'{name}-mod', 0.07, 1.1, rot=(0, math.pi / 2, 0), material=m('white'), verts=24))
-    parts.append(kit.cyl(f'{name}-mod2', 0.06, 0.5, loc=(0.2, 0, 0), rot=(math.pi / 2, 0, 0), material=m('white'), verts=24))
-    return parts
-
-
-def airliner(name, paint='#f2f4f7'):
-    w = kit.mat(name + '-paint', paint, rough=0.35, coat=0.3)
-    parts = [kit.cyl(f'{name}-fus', 0.05, 0.9, rot=(0, math.pi / 2, 0), material=w, verts=24)]
-    parts.append(kit.sphere(f'{name}-nose', 0.05, loc=(0.45, 0, 0), material=w, scale=(1.8, 1, 1)))
-    parts.append(kit.cyl(f'{name}-tailc', 0.05, 0.16, loc=(-0.53, 0, 0.01), rot=(0, -math.pi / 2, 0), material=w, r2=0.012, verts=24))
-    parts.append(_plate(f'{name}-wing', [(0.1, 0), (-0.12, 0.5), (-0.2, 0.5), (-0.08, 0), (-0.2, -0.5), (-0.12, -0.5)], 0.012, w))
-    parts.append(_plate(f'{name}-stab', [(-0.48, 0), (-0.56, 0.16), (-0.6, 0.16), (-0.58, 0), (-0.6, -0.16), (-0.56, -0.16)], 0.01, w))
-    fin = _plate(f'{name}-fin', [(-0.44, 0), (-0.6, 0), (-0.64, 0.2), (-0.57, 0.2)], 0.01, w)
-    fin.rotation_euler = (math.pi / 2, 0, 0)
-    parts.append(fin)
-    for side in (1, -1):
-        parts.append(kit.cyl(f'{name}-eng{side}', 0.025, 0.1, loc=(0.02, side * 0.2, -0.04), rot=(0, math.pi / 2, 0), material=m('grey'), verts=16))
+def upper_stage(name='dn2'):
+    """A Chinese-style kick stage, 10 m long and 2.8 m across: a white lower stage with thin dark bands and a bell, an open truss interstage
+    showing the engine dome, a smaller third stage with thruster pods, and a blunt payload fairing with a gold seam."""
+    X0 = -5.0
+    parts = [lathe(f'{name}-s2', [(X0, 1.0), (X0, 1.4), (X0 + 3.9, 1.4), (X0 + 4.0, 1.35)], m('white'), seg=64)]
+    parts.append(nozzle(f'{name}-nz', X0 + 0.15, 1.1, 1.0, m('bell')))
+    for x, w in ((0.45, 0.1), (1.3, 0.06), (2.55, 0.08), (3.8, 0.1)):
+        parts.append(band(f'{name}-b{x}', X0 + x, 1.4, w, m('dark'), seg=64))
+    for k in range(10):  # the open interstage: struts from the lower stage's rim to the upper stage's, around a bare dome
+        a = 2 * math.pi * k / 10
+        a0 = Vector((X0 + 4.0, 1.28 * math.cos(a), 1.28 * math.sin(a)))
+        a1 = Vector((X0 + 5.2, 0.92 * math.cos(a + 0.35), 0.92 * math.sin(a + 0.35)))
+        parts.append(strut(f'{name}-ts{k}', a0, a1, 0.05, m('steel')))
+    parts.append(lathe(f'{name}-dome', [(X0 + 4.0, 0.0), (X0 + 4.2, 0.55), (X0 + 4.5, 0.9), (X0 + 4.9, 1.0), (X0 + 5.2, 0.95)], m('dark')))
+    parts.append(lathe(f'{name}-s3', [(X0 + 5.2, 0.92), (X0 + 5.35, 0.95), (X0 + 7.2, 0.95), (X0 + 7.3, 0.9)], m('white'), seg=64))
+    parts.append(band(f'{name}-b3', X0 + 5.4, 0.95, 0.1, m('dark'), seg=64))
+    parts.append(band(f'{name}-b4', X0 + 7.2, 0.95, 0.08, m('dark'), seg=64))
+    for k in range(4):  # attitude-control thruster pods on the third stage
+        a = 2 * math.pi * k / 4 + math.pi / 4
+        parts.append(kit.box(f'{name}-pod{k}', (0.5, 0.16, 0.16), loc=(X0 + 6.9, 0.99 * math.cos(a), 0.99 * math.sin(a)), material=m('dark'), bevel=0.02, rot=(a, 0, 0)))
+        parts.append(kit.cyl(f'{name}-rn{k}', 0.05, 0.12, loc=(X0 + 6.6, 1.06 * math.cos(a), 1.06 * math.sin(a)), rot=(0, -math.pi / 2, 0), material=m('bell'), r2=0.025, verts=12))
+    parts.append(lathe(f'{name}-fair', [(X0 + 7.3, 0.9), (X0 + 7.45, 0.95), (X0 + 8.2, 0.95)] + ogive(X0 + 8.2, X0 + 10.0, 0.95, 0.0, 16)[1:], m('white'), seg=64))
+    parts.append(band(f'{name}-seam', X0 + 8.2, 0.95, 0.07, m('gold'), seg=64))
+    parts += conduit(f'{name}-cd', X0 + 0.6, X0 + 3.7, 1.4, m('cable'), k=2)
     return parts

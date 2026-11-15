@@ -33,4 +33,10 @@ python3 tools/blender/finish.py --hero          # hero limb: straightened strip
 
 Then rebuild. `tools/make_posters.mjs` still captures posters from the live WebGL scenes, if you prefer those.
 
+How the Blender code is laid out, all in `tools/blender/`:
+
+- `kit.py` is the shared Earth, atmosphere, stars and effects; `compose.py` is the camera and screen-placement helpers; `surface.py` is the lofting, texture and material tools.
+- The thirteen pictures are in four files by kind: `scenes_kinetic.py` (Starfish Prime, Fengyun-1C, Mission Shakti), `scenes_launch.py` (Solwind, Burnt Frost, DN-2), `scenes_leo.py` (Cosmos 1408, GNSS jamming, MIRACL, spaceplanes) and `scenes_geo.py` (Viasat, SJ-21, the close approaches). Each has its own helper modules (`kinetic_*.py`, `launch_*.py`, `leo_*.py`, `geo_sats.py`).
+- The models are built in code at real dimensions: `f15.py` (the F-15A), `sats.py` (satellites and the International Space Station), `x37b.py`, `airliner.py`, and `models.py` (the ASM-135, the SM-3 and the DN-2 upper stage).
+
 The source data and interpretation rules are documented in `methodology.md` and `ledger.md`. Fonts retain their OFL licenses under `fonts/`; D3 and Three.js license notices are reproduced in `THIRD_PARTY_NOTICES.md`.
