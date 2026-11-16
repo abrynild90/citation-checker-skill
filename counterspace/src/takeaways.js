@@ -99,7 +99,8 @@ export function findings() {
 // The sentence already says how long the wait was, so the drawing carries no time tag of its own: an axis, the weapon's dot, the law's tick, the dashed link and the
 // two dated names as direct labels (each led by its own small mark, so on a phone, where the names stack under the axis, they still read as the dot's and the tick's).
 const AX0 = 1957,
-  AX1 = 2026;
+  AX1 = 2026,
+  RULES_FIRST = { law: 'tallinn-2017', event: 'ru-2022-viasat' }; // not a linked pair: the rules came before the attack (the quiz asks about it)
 function patBig(waits, g, longP) {
   const box = document.getElementById('patBig');
   if (!box) return;
@@ -119,6 +120,16 @@ function patBig(waits, g, longP) {
     `<i class="pb-dot" style="left:${pc(t0)}"></i><i class="pb-tick" style="left:${pc(t1)}"></i></div>` +
     `<p class="pb-end a" style="--at:${pc(t0)}"><b><i class="pb-k dot"></i>${esc(evName)}</b><span>${esc(fmtMY(t0))}</span></p>` +
     `<p class="pb-end b" style="--at:${pc(t1)}"><b><i class="pb-k tick"></i>${esc(lawName)}</b><span>${esc(fmtMY(t1))}</span></p>`;
-  document.getElementById('pbNote').textContent = `The longest pair. Order in time, not cause.`;
+  // The headline counts only the pairs the records link (a weapon, then the law tied to it), and says so; the one case that ran the other way is named beside it,
+  // so the quiz's "this time the rules came first" does not contradict it.
+  const later = waits.filter((y) => y > 0).length,
+    n = word(waits.length);
+  document.getElementById('pbLead').textContent =
+    later === waits.length ? `In all ${n} pairs our records link, the law came second:` : `In ${word(later)} of the ${n} pairs our records link, the law came second:`;
+  const rules = byId[RULES_FIRST.law],
+    attack = byId[RULES_FIRST.event],
+    yr = (x) => parse(x.date || x.start).getUTCFullYear(),
+    other = rules && attack && yr(rules) < yr(attack) ? ` One case ran the other way: the Tallinn Manual 2.0 (${yr(rules)}), which is not binding, came before the Viasat cyberattack (${yr(attack)}).` : '';
+  document.getElementById('pbNote').textContent = `The longest pair. Order in time, not cause.${other}`;
   box.hidden = false;
 }

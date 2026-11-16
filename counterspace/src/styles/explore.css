@@ -95,6 +95,13 @@ section.chart.xpanel{border-top:0;padding:var(--s-7) 0 var(--s-4);outline:none}
 .xc-t{font:600 13px/1.3 var(--sans);color:var(--muted)}
 .xc-l{font:500 17px/1.3 var(--serif);color:var(--text);text-wrap:pretty}
 .xc-n{margin-top:2px;font:400 13px/1.4 var(--sans);color:var(--muted);text-wrap:pretty}
+/* the cards read as a choice: a prompt above them, and on each card what pressing it does (the open one says where its chart is) */
+.xcards-h{margin:0 0 var(--s-2);font:600 13px/1.4 var(--sans);color:var(--muted)}
+.xc-go{margin-top:auto;padding-top:var(--s-2);font:600 13px/1.3 var(--sans);color:var(--accent)}
+.xc-go::after{content:"Show this chart \203A"}
+.xcard[aria-selected="true"] .xc-go{color:var(--muted)}
+.xcard[aria-selected="true"] .xc-go::after{content:"Showing below \2193"}
+@media print{.xcards-h{display:none}}
 @media (max-width:639px){.xcard{padding:var(--s-2) var(--s-3) var(--s-3)}.xc-l{font-size:16px}}
 #exploreTabs{scroll-margin-top:var(--s-3)}
 .explore #exploreTabs{scroll-margin-top:calc(var(--s-3) - var(--band-h,0px))}

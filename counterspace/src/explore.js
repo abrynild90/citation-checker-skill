@@ -76,9 +76,13 @@ function mountCards() {
   bar.setAttribute('aria-label', 'Charts to explore');
   bar.innerHTML = TABS.map(
     (t, i) =>
-      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${lines[t.id]}</span>${FINDING_NOTES[t.id] ? `<span class="xc-n">${FINDING_NOTES[t.id]}</span>` : ''}</button>`,
+      `<button type="button" class="xcard" role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-controls="${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"><span class="xc-t" id="xct-${t.id}">${t.name}</span><span class="xc-l">${lines[t.id]}</span>${FINDING_NOTES[t.id] ? `<span class="xc-n">${FINDING_NOTES[t.id]}</span>` : ''}<span class="xc-go" aria-hidden="true"></span></button>`,
   ).join('');
-  $('xpanels').before(bar);
+  // Readers took the cards for quotations: a line above says they are a choice, and each card says what pressing it does (the words are in explore.css)
+  const prompt = document.createElement('p');
+  prompt.className = 'xcards-h';
+  prompt.textContent = 'Choose a chart to show it below.';
+  $('xpanels').before(prompt, bar);
   const cards = [...bar.children];
   bar.addEventListener('click', (e) => {
     const b = e.target.closest('.xcard');
