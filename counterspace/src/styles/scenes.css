@@ -2324,10 +2324,10 @@
 .overlay .sv-recap-line { margin: 0; max-width: 40em; font: 400 17px/1.55 var(--sans); color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .overlay .sv-nextup { animation: none; } }
 
-/* ---------- Wide window (1500 px and up): a "Did you know" line sits in the free room under the list (above the foot), and the foot of the column rests at the bottom of it.
-   It is below the caption and steps, so when its step comes in nothing above it moves. */
+/* ---------- Laptop and wider (1100 px and up, the same width as WIDE in scene-ui.js): an "In context" line sits in the free room under the list (above the foot),
+   and the foot of the column rests at the bottom of it. It says what the source says about why the event is on the timeline. */
 .overlay .sv-dyk { display: none; }
-@media (min-width: 1500px) {
+@media (min-width: 1100px) {
   .overlay .sv-dyk:not([hidden]) {
     display: block;
     margin: var(--s-3) 0 0;
@@ -2338,17 +2338,10 @@
     font: 400 15px/1.5 var(--sans);
     color: var(--text);
   }
-  /* before its step the line takes no room (no blank band above the first step); the list is still fitted as if it were there (fitSteps adds .reserve while it
-     measures), so when the line comes in it grows into the room under the list, the foot stays where it is and nothing is squeezed */
-  .overlay .sv-dyk.pending { display: none; }
-  .overlay .sv-dyk.pending.reserve { display: block; visibility: hidden; }
-  .overlay .sv-dyk.nofit { display: none !important; } /* no room for it without costing the steps (fitSteps) */
-  .overlay .sv-dyk.reveal { animation: dykIn 380ms var(--ease, ease) both; }
-  /* the reveal never changes the line's box (it is drawn at its full height from the first frame, wiped in by a clip), so a fit that runs while it plays measures
-     the room the line really takes and the list above is never fitted to a half-grown line */
-  @keyframes dykIn { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
-  @media (prefers-reduced-motion: reduce) { .overlay .sv-dyk.reveal { animation: none; } }
+  .overlay .sv-dyk.nofit { display: none !important; } /* no room for it without folding away too much of the list (fitSteps) */
+  @media (max-width: 1499px) { .overlay .sv-dyk:not([hidden]) { margin-top: var(--s-2); padding: var(--s-2) var(--s-3); max-width: none; font-size: 14px; line-height: 1.45; } } /* a laptop: the line is set smaller so it fits under more lists */
   .overlay .sv-dyk b { font-weight: 600; color: var(--accent); margin-right: 4px; } /* blue, not amber: amber is kept for law and China */
+  .overlay .sv-steps { padding-bottom: 2px; } /* with the line in the column the list is fitted to the last pixel: this keeps it clear of the row of buttons under it */
   .overlay .story-scroll.pin > .story-foot { margin-top: auto; }
   .overlay .story-scroll.pin { min-height: 100%; }
 }
@@ -2731,7 +2724,7 @@ html.ptr .overlay :is(.btn, button, a):focus-visible { outline: none !important;
   box-shadow: var(--shadow-2);
 }
 
-/* A note open over the story column (About this picture, Where to go next) covers the "Did you know" box under it whole: a strip of that box showed under the note's lower edge
+/* A note open over the story column (About this picture, Where to go next) covers the "In context" box under it whole: a strip of that box showed under the note's lower edge
    as a faint ghost edge */
 .overlay .story-scroll:has(> .sv-pbody:not([hidden])) > .sv-dyk,
 .overlay .story-wrap:has(> .sv-pbody:not([hidden])) .sv-dyk { visibility: hidden; }

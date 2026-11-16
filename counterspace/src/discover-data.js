@@ -18,8 +18,24 @@ export const FACTS = {
   spaceplanes: 'The X-37B has flown eight missions. Six lasted 224 to 908 days.',
 };
 
-// The scene time from which each "Did you know" line matches what the animation shows (wide window); the others hold from the first frame.
-export const FACT_FROM = { starfish: 0.1, solwind: 0.24, fengyun: 0.3, 'burnt-frost': 0.4, shakti: 0.38, cosmos1408: 0.3, 'sj21-tug': 0.5 };
+// One line of context per scene, shown in the story column of the 3D explainer: what the source says about why the event is on this timeline.
+// Nothing here is new. Each line restates the scene's own account (its `caption` or `lede`) or the ledger note for its event, with the same figures and the
+// same hedges; where the line comes from the ledger or the method file, the page of the Secure World Foundation's report is given beside it.
+export const CONTEXT = {
+  starfish: 'The Secure World Foundation says such tests damaged or destroyed satellites then in orbit. The 1963 Limited Test Ban Treaty followed and bans nuclear tests in space.', // account
+  solwind: 'The Outer Space Treaty of 1967 bars nuclear weapons in orbit but is silent on conventional anti-satellite weapons.', // account
+  laser: 'A low-power beam can dazzle a sensor, which means briefly blinding it. A high-power beam could damage it. Detailed results of this test are not public.', // the scene's account as it stood before the text cut (the two sentences on beams); account (results)
+  fengyun: 'At that height, fragments stay in orbit for decades. The Secure World Foundation lists no other test with as many tracked fragments.', // account
+  'burnt-frost': 'A missile-defense interceptor, modified for the task, did it. All 175 trackable pieces fell out of orbit within about 20 months.', // account; ledger: p. 01-24
+  dn2: 'The Secure World Foundation lists the launch in its table of China’s anti-satellite missile tests. The US military said it went “nearly to GEO”.', // ledger note 39 and its verification entry (quotation verified); Table 3-3, p. 03-22; p. 03-20
+  shakti: 'Indian officials said all the debris would fall within 45 days. The Secure World Foundation says the last tracked piece came down in June 2022, 3.2 years after the test.', // ledger: p. 04-04
+  cosmos1408: 'It is the last destructive test in the Secure World Foundation’s table. In April 2022 the United States pledged not to test destructive anti-satellite missiles launched from Earth.', // ledger: Table 5-1; account
+  'sj21-tug': 'The Secure World Foundation says SJ-21’s known activities included no explicit test of offensive capabilities. It notes that the technologies could be used offensively in future.', // methodology section 6: p. 03-16
+  viasat: 'It came within hours of Russia’s invasion of Ukraine. In May 2022 the United States, the United Kingdom and the European Union attributed it to Russia’s military intelligence service.', // ledger: pp. 15-06, 15-07
+  gnss: 'In October 2025 the International Civil Aviation Organization endorsed a finding that recurring interference from North Korea and from Russian territory is an “infraction” of the 1944 Chicago Convention. The finding carries no enforcement.', // account
+  spaceplanes: 'The Secure World Foundation says the X-37B has so far approached no other object. China’s craft repeatedly approached objects that the tracking catalog lists as released from it.', // account
+  rpo: 'The Secure World Foundation hedges the intent behind the first two. The third was jointly announced by the United States and the United Kingdom.', // account
+};
 
 // Short names for the "Where to go next" row.
 export const SHORT = {

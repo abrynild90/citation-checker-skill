@@ -22,7 +22,7 @@ import { revealIn } from './explore.js';
 import { clearLanding, showLanding } from './landmark.js';
 import { SANS, SERIF, fontsReady } from './fonts.js';
 import { stillFromSVG } from './scenes/svg/still-frame.js';
-import { FACTS, FACT_FROM, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
+import { CONTEXT, KIND as KINDS, SHORT as SHORT_NAME, nextScenes } from './discover-data.js';
 import * as THREE from 'three';
 export let host = null,
   glOK = null;
@@ -389,7 +389,7 @@ export async function openScene(id, originEl, viaTour) {
 
 // The account shows its first sentences, whole (never cut mid-sentence); the button opens the rest. How many sentences show depends on the room:
 // fitSteps() tries two sentences, then one, then none, so the step list always keeps at least three or four whole rows.
-const WIDE = matchMedia('(min-width: 1500px)');
+const WIDE = matchMedia('(min-width: 1100px)'); // where the context line has a place in the story column (scenes.css uses the same width)
 const moreBtn = $('sceneMore');
 const stepChoose = $('sceneStepChoose');
 stepChoose.onchange = () => {
@@ -433,11 +433,10 @@ function setLede(level, count) {
   // The first sentence always shows, at every width: it says what the scene is before the steps say what happens. (The lede gives way from two sentences to one.)
   // The intro is two sentences at every width (one when the room is tight); the full account is behind "Read the full account".
   const max = expanded ? Infinity : Math.max(1, count ?? (level === 0 ? 2 : 1));
-  // On a wide window the story opens with a "Did you know" line; an intro sentence that says the same thing is left out of the intro (the full account keeps it)
-  const dyk = dykOn(),
-    pool = dyk ? (expanded ? splitSentences(full) : sentences).filter((t, i) => !i || !same(t, FACTS[cur.id])) : sentences;
-  // The full account leaves out the sentence the "Did you know" line above it already says, so no sentence shows twice
-  let shown = expanded ? (dyk ? pool.join(' ') : full) : pool.slice(0, max).join(' ');
+  // On a wide window the story carries an "In context" line; an intro sentence that says the same thing is left out of the intro while that line shows
+  const pool = dykOn() ? sentences.filter((t, i) => !i || !same(t, CONTEXT[cur.id])) : sentences;
+  // The full account is always whole: a sentence the "In context" line repeats is harmless, a caution dropped from the account is not
+  let shown = expanded ? full : pool.slice(0, max).join(' ');
   if (!expanded && max === 2 && shown.length > 340) shown = pool[0];
   if (!expanded) shown = SCENE_SUMMARIES[cur.id] || shown;
   captionEl.textContent = shown;
@@ -544,11 +543,10 @@ function fillStory(cfg) {
   panel.setAttribute('aria-label', `3D explainer: ${cfg.title}`);
   countEl.textContent = `${n} / ${ORDER.length}`;
   sentences = splitSentences(cfg.lede || cfg.caption);
-  dykEl.innerHTML = FACTS[cfg.id] ? `<b>Did you know</b> ${esc(FACTS[cfg.id])}` : '';
-  dykEl.classList.toggle('pending', (FACT_FROM[cfg.id] ?? 0) > 0); // held back until the step it describes
-  // the "Did you know" line is left out when the account's own first sentence already says it
-  dykEl.hidden = !FACTS[cfg.id] || same(splitSentences(cfg.caption || cfg.lede || '')[0] || '', FACTS[cfg.id]);
-  requestAnimationFrame(() => requestAnimationFrame(fitSteps)); // the list is fitted again with the line state known (held back: its room is reserved while it measures)
+  // what the source says about why the event is here; it holds from the first frame (it is about the event, not about one step)
+  dykEl.innerHTML = CONTEXT[cfg.id] ? `<b>In context</b> ${esc(CONTEXT[cfg.id])}` : '';
+  dykEl.hidden = !CONTEXT[cfg.id];
+  requestAnimationFrame(() => requestAnimationFrame(fitSteps)); // the list is fitted again with the "In context" line state known (its room is reserved while it measures)
   expanded = false;
   asideBody.classList.remove('expanded');
   panel.classList.remove('reading-account');
@@ -1057,16 +1055,6 @@ function stepAt(t) {
   return k;
 }
 function markStep(k) {
-  // the "Did you know" line appears once the active step is the one it describes (its place stays reserved, so nothing shifts)
-  const dykWas = dykEl.classList.contains('pending'),
-    dykNow = (steps[k]?.t ?? 0) < (FACT_FROM[cur?.id] ?? 0) - 1e-6;
-  dykEl.classList.toggle('pending', dykNow);
-  if (dykWas && !dykNow && dykOn()) {
-    // it grows in over a third of a second (the room is under the list, so the foot does not move)
-    dykEl.classList.add('reveal');
-    clearTimeout(dykTimer);
-    dykTimer = setTimeout(() => dykEl.classList.remove('reveal'), 450);
-  }
   $('sceneCurrentStep').textContent = steps[k]?.text || '';
   const act = cur?.acts?.findIndex((a) => (steps[k]?.t ?? 0) >= a.t0 && (steps[k]?.t ?? 0) < a.t1);
   $('sceneEpisodes')
@@ -1190,7 +1178,7 @@ const listScrolls = () => stepsEl.scrollHeight > stepsEl.clientHeight + 2 && get
 // "st-compact" and "st-tight" modes of the column). Only when even the tightest setting cannot hold them all does the list become a window of whole rows
 // that uses all the height there is, with a cue under it that counts the rows beyond ("2 more steps") and a step that follows the animation.
 const STEP_MODES = ['', 'st-compact', 'st-tight'];
-let fitCost = 0; // what the last fit left out of the list: rows hidden (x10) plus how tight the mode is, so the "Did you know" line can tell what it costs
+let fitCost = 0; // what the last fit left out of the list: rows hidden (x10) plus how tight the mode is, so the "In context" line can tell what it costs
 const stepCue = $('stepsCue');
 function setStepMode(i) {
   STEP_MODES.forEach((c, k) => c && asideBody.classList.toggle(c, k === i));
@@ -1204,30 +1192,25 @@ function resetList() {
   stepsEl.style.clipPath = '';
 }
 // A note opened under "About this picture" or "Where to go next" sits in the column, so the column scrolls; it is measured as if the note were closed.
-let dykTimer = 0;
-// The "Did you know" line shows only when it costs the steps nothing: if the list is shorter with the line than without it (a row clipped, a window
-// of fewer rows, blank room above the line), the line stays out for that scene and window size.
+// The "In context" line is worth a little of the list: the rows may be set closer together to make room for it, and up to CONTEXT_ROWS of them may
+// fold behind the "more steps" cue, as long as CONTEXT_KEEP whole rows still show. If it would cost more than that, the line stays out for that scene and window size.
+const CONTEXT_ROWS = 2,
+  CONTEXT_KEEP = 3;
 const dykOn = () => WIDE.matches && !dykEl.hidden && !dykEl.classList.contains('nofit');
 function fitSteps() {
-  // the line holds no room before its step, but the list is fitted as if it did (it grows into that room when the line comes in)
-  const held = dykEl.classList.contains('pending') && !dykEl.classList.contains('reserve'),
-    want = WIDE.matches && !dykEl.hidden;
+  const want = WIDE.matches && !dykEl.hidden;
   dykEl.classList.remove('nofit');
-  if (held) dykEl.classList.add('reserve');
-  try {
-    if (want) {
-      dykEl.classList.add('nofit');
-      fitStepsNoted();
-      const bare = fitCost;
-      dykEl.classList.remove('nofit');
-      fitStepsNoted();
-      if (fitCost > bare) {
-        dykEl.classList.add('nofit');
-        fitStepsNoted();
-      }
-    } else fitStepsNoted();
-  } finally {
-    if (held) dykEl.classList.remove('reserve');
+  if (!want) return fitStepsNoted();
+  dykEl.classList.add('nofit');
+  fitStepsNoted();
+  const bare = fitCost;
+  dykEl.classList.remove('nofit');
+  fitStepsNoted();
+  const hid = Math.floor(fitCost / 10),
+    rows = visibleStepRows().length;
+  if (hid - Math.floor(bare / 10) > CONTEXT_ROWS || (hid > 0 && rows - hid < CONTEXT_KEEP)) {
+    dykEl.classList.add('nofit');
+    fitStepsNoted();
   }
 }
 function fitStepsNoted() {

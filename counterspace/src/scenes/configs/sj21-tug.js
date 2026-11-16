@@ -15,7 +15,7 @@ export const SJ21_TUG = {
     'The Secure World Foundation (SWF) reports that SJ-21 “docked to it at some point”; it does not say how. ' +
     'Around 21 January 2022 SJ-21 used its own propulsion to pull both above the GEO belt, where working satellites sit, then came back down close to GEO.',
   cite:
-    'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2) and Table 3-2, p. 03-15.',
+    'Secure World Foundation, 2026: p. 03-11 (SJ-21 and Compass G2); Table 3-2, p. 03-15; p. 03-16 (no explicit offensive testing; possible future use).',
   related: null,
   event: 'cn-2022-sj21-compass-g2',
   inset: 'Top view',
