@@ -97,6 +97,14 @@ export const FENGYUN = {
     },
   ],
   still: 0.85,
+  endShift: IS_PHONE ? undefined : { from: 0.68, to: 0.76, k: 0.22 }, // desktop: the picture slides up, clear of the card at the foot of the stage
+  factCard: {
+    from: 0.76,
+    title: 'February 2026',
+    value: '2,351',
+    detail: 'of 3,532 tracked fragments still in orbit',
+    note: 'SWF, 2026 · the ring is illustrative',
+  },
   status: [
     [0, 'SC-19 rises toward Fengyun-1C'],
     [0.32, 'Collision at ~880 km; debris spreads', 'Collision at ~880 km'],

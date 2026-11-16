@@ -14,6 +14,9 @@ const HEO_ORBIT = {
   revs: 3.4,
 };
 const HEO_PATH = ellipsePath(HEO_ORBIT, 180);
+// released objects J and G: offsets are illustrative; narrower on a phone so both stay in the frame
+const OFS = IS_PHONE ? 0.4 : 1,
+  spread = (keys) => keys.map(([t, x, y, z]) => [t, x * OFS, y * OFS, z * OFS]);
 const MX = IS_PHONE ? 108 : 216; // spaceplane model size cap (px): smaller on a phone so a craft never sits oversized on the limb
 
 export const SPACEPLANES = {
@@ -157,6 +160,7 @@ export const SPACEPLANES = {
       maxPx: IS_PHONE ? 64 : 100,
       anchor: 'heo',
       acts: [1],
+      vis: [0, 0.455], // landed 7 Mar. 2025 (step 4): the craft leaves the orbit
       model: 'plane',
       color: C.us,
       bright: true,
@@ -174,7 +178,7 @@ export const SPACEPLANES = {
       type: 'trail',
       craft: 'x37h',
       t0: 0.24,
-      t1: 0.54,
+      t1: 0.455,
       N: 160,
       color: C.us,
       acts: [1],
@@ -241,7 +245,7 @@ export const SPACEPLANES = {
       dx: 36,
       dy: -66,
       staticAt: [0.1, 0.27],
-      labelFn: (t, n) => (t < 0.765 ? (n ? 'CSSHQ flight 2' : 'CSSHQ flight' + ' 2 (China)') : n ? 'CSSHQ flight 3' : 'CSSHQ flight 3 (China)'),
+      labelFn: (t, n) => (t < 0.76 ? (n ? 'CSSHQ flight 2' : 'CSSHQ flight' + ' 2 (China)') : n ? 'CSSHQ flight 3' : 'CSSHQ flight 3 (China)'),
       key: [
         [0.54, 0, 0, 0],
         [1, 0, 0, 0],
@@ -254,45 +258,27 @@ export const SPACEPLANES = {
       maxPx: IS_PHONE ? 72 : 84,
       anchor: 'cn',
       acts: [2],
-      vis: [0.585, 0.755],
+      vis: [0.575, 0.755],
       small: true,
       scale: 1.6 * PK,
       color: C.cn,
-      label: 'Released object J',
+      label: 'Object J, apparently released',
       short: 'Obj. J',
       dx: -58,
       dy: 46,
       staticAt: [0.1, 0.46],
-      key: [
-        [0.585, 0, 0, 0],
-        [0.605, 0.1, 0.01, 0.02],
-        [0.625, 0.2, 0.012, 0.03],
-        [0.64, 0.062, 0, 0],
-        [0.655, 0.2, 0.012, 0.03],
-        [0.676, 0.062, 0, 0],
-        [0.69, 0.21, 0, 0.03],
-        [0.72, 0.075, 0.004, 0.01],
-        [0.735, 0.18, 0.01, 0.03],
-        [0.755, 0.16, 0.01, 0.03],
-      ],
-    },
-    {
-      type: 'link',
-      a: 'csshq',
-      b: 'objJ',
-      t0: 0.635,
-      t1: 0.647,
-      color: '#fff1c1',
-      width: 0.009,
-    },
-    {
-      type: 'link',
-      a: 'csshq',
-      b: 'objJ',
-      t0: 0.671,
-      t1: 0.683,
-      color: '#fff1c1',
-      width: 0.009,
+      key: spread([
+        [0.575, 0, 0, 0],
+        [0.605, 0.3, 0.03, 0.06],
+        [0.625, 0.6, 0.036, 0.09],
+        [0.64, 0.3, 0.01, 0.03],
+        [0.655, 0.6, 0.036, 0.09],
+        [0.676, 0.3, 0.01, 0.03],
+        [0.69, 0.63, 0, 0.09],
+        [0.72, 0.32, 0.012, 0.03],
+        [0.735, 0.54, 0.03, 0.09],
+        [0.755, 0.48, 0.03, 0.09],
+      ]), // illustrative spacing, never touching: the source gives no distances, and a tracking company's "possibly" is not drawn as a contact
     },
     {
       type: 'craft',
@@ -301,7 +287,7 @@ export const SPACEPLANES = {
       maxPx: IS_PHONE ? 72 : 84,
       anchor: 'cn',
       acts: [2],
-      vis: [0.8, 0.985],
+      vis: [0.76, 0.985],
       small: true,
       scale: 1.6 * PK,
       color: C.cn,
@@ -310,14 +296,14 @@ export const SPACEPLANES = {
       dx: -46,
       dy: 20,
       staticAt: [0.1, 0.7],
-      key: [
-        [0.8, 0, 0, 0],
-        [0.815, 0.09, 0.01, 0.03],
-        [0.86, 0.24, 0.02, 0.04],
-        [0.895, 0.08, 0.005, 0.02],
-        [0.93, 0.1, 0.005, 0.02],
-        [0.96, 0.08, 0.005, 0.02],
-      ],
+      key: spread([
+        [0.76, 0, 0, 0],
+        [0.78, 0.27, 0.03, 0.09],
+        [0.86, 0.72, 0.06, 0.12],
+        [0.895, 0.3, 0.015, 0.06],
+        [0.93, 0.33, 0.015, 0.06],
+        [0.96, 0.27, 0.015, 0.06],
+      ]),
     },
     {
       type: 'trail',
@@ -334,7 +320,7 @@ export const SPACEPLANES = {
     {
       type: 'trail',
       craft: 'objJ',
-      t0: 0.585,
+      t0: 0.575,
       t1: 0.755,
       until: 0.82,
       color: C.cn,
@@ -347,7 +333,7 @@ export const SPACEPLANES = {
     {
       type: 'trail',
       craft: 'objG',
-      t0: 0.8,
+      t0: 0.76,
       t1: 0.985,
       color: C.cn,
       acts: [2],

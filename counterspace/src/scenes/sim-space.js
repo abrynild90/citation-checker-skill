@@ -394,7 +394,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       text: (t, still, phone) => {
         if (phone) {
           if (t < a.pulse0) return 'Before the attack: modems online';
-          if (t < a.t0) return 'Attackers reach the ground network';
+          if (t < a.t0) return 'AcidRain malware sent to ground network';
           return t < a.t1 ? 'Malware wipes modems; they go offline' : 'Modems offline · satellite kept working';
         }
         if (a.compactStatus) {
@@ -403,7 +403,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
             t < a.pulse0
               ? 'Before the attack: modems online (green)'
               : t < a.t0
-                ? 'Attackers push malicious commands'
+                ? 'Attackers send AcidRain malware into the ground network'
                 : t < a.t1
                   ? 'Modems wiped (SWF: ~45 min): red = offline'
                   : 'Modems offline (red) · satellite kept working';
@@ -413,7 +413,7 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           t < a.pulse0
             ? 'Before the attack: user modems online (green), KA-SAT serving Europe'
             : t < a.t0
-              ? 'Attackers reach the ground network and push malicious commands'
+              ? 'Attackers send AcidRain malware into the ground network'
               : t < a.t1
                 ? 'Malware overwrites modems (SWF: ~45 min): red = offline'
                 : 'Modems offline (red) · the satellite kept working';
