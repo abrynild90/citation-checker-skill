@@ -3,7 +3,7 @@
 // Provides: drawLegal(), drawLegalKey(), legalGlyph(), glyphMarkup(), legalScroll(), probeBand(), GLOSSARY.
 // ============================================================================
 // Imports: the names this module uses from other modules (tools/build_page.py bundles src/boot.js as a module graph).
-import { D, DOMAIN, EXPORTING, chartWindow, KIN, LEGAL, Placer, badge, SCENE_BADGE_MARKUP, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
+import { D, DOMAIN, EXPORTING, chartScale, chartWindow, KIN, LEGAL, Placer, badge, SCENE_BADGE_MARKUP, esc, fmt, fmtMY, fmtY, hasScene, isPhoneNow, layout, parse, tw } from '../app.js';
 import { activate, addGuide, bindMark, legalCard, legalKindOf, legalKindWords, legend, rove, setGuide, table } from '../ui.js';
 import { hooks } from '../shared.js';
 
@@ -149,6 +149,24 @@ function zoomGutters(el, M) {
   return { l: Math.max(8, M.l - pl), r: Math.max(8, M.r - pr) };
 }
 let linkBox = null; // where the shaded window sits on the band (read when the connector to the zoom panel is drawn)
+// The host's own x scale (its svg starts at its content edge and is scaled by chartScale) that puts every date at the same page x as the chart's published
+// scale, so looking straight down from a law symbol meets its year on the chart below. It runs from lo to hi, cut to the dates the chart shows.
+// `pub` is a chartWindow entry; null, or a chart not laid out, gives the full span.
+function sharedX(pub, host, lo, hi) {
+  const svg = pub?.el.querySelector('svg'),
+    full = d3.scaleUtc().domain(DOMAIN).range([lo, hi]);
+  if (!svg?.viewBox.baseVal?.width) return full;
+  const r = svg.getBoundingClientRect(),
+    k = r.width / svg.viewBox.baseVal.width,
+    left = host.getBoundingClientRect().left + host.clientLeft + parseFloat(getComputedStyle(host).paddingLeft),
+    local = (px) => (r.left + px * k - left) / chartScale(),
+    [a, b] = pub.x.range().map(local),
+    x = d3.scaleUtc().domain(pub.x.domain()).range([a, b]),
+    l = Math.max(lo, a),
+    h = Math.min(hi, b);
+  return x.domain([x.invert(l), x.invert(h)]).range([l, h]);
+}
+const scaleKey = (pub) => (pub ? [...pub.x.domain().map(Number), ...pub.x.range()].join() : '');
 export function drawLegal(el = document.getElementById('legalSvg'), zoom = false) {
   el.innerHTML = '';
   const page = !EXPORTING && el.id === 'legalSvg',
@@ -174,9 +192,11 @@ export function drawLegal(el = document.getElementById('legalSvg'), zoom = false
     el.removeAttribute('role');
     el.removeAttribute('aria-label');
   }
-  const win = zoom ? ZOOM : compact && stripDom ? stripDom : DOMAIN,
+  const L0 = layout(el, DOMAIN, strip ? 1100 : 300),
+    sx = compact && stripDom && !zoom ? sharedX(stripDom, el, L0.M.l, L0.W - L0.M.r) : null,
+    win = zoom ? ZOOM : sx ? sx.domain() : DOMAIN,
     windowed = win !== DOMAIN,
-    L = layout(el, win, strip ? 1100 : 300),
+    L = sx ? { W: L0.W, M: { l: sx.range()[0], r: L0.W - sx.range()[1] }, x: sx } : layout(el, win, strip ? 1100 : 300),
     W = L.W,
     // The zoom panel has no y axis to leave room for, so on a phone its time axis runs almost edge to edge; on a wide screen it shares the main chart's gutters so the two axes line up.
     M = zoom ? (isPhoneNow() ? { l: 18, r: 18 } : zoomGutters(el, L.M)) : L.M,
@@ -791,7 +811,8 @@ function tapLegal(d, el) {
 }
 // Phone only: a slim copy of the law timeline (about 40 px) stays at the top of the screen while the anti-satellite, jamming and close-approach charts are
 // read, on the same years as those charts, so each chart can still be read against the law.
-let miniFor = 'chartA';
+let miniFor = 'chartA',
+  miniKey = '';
 export function drawLawMini() {
   const host = document.getElementById('lawMini'),
     inner = host?.firstElementChild;
@@ -803,11 +824,12 @@ export function drawLawMini() {
   }
   const L1 = layout(host),
     W = L1.W,
-    M = { l: miniFor === 'chartA' ? 50 : 40, r: L1.M.r }, // the anti-satellite chart leaves room for its altitude numbers
-    x = d3
-      .scaleUtc()
-      .domain(DOMAIN)
-      .range([M.l, W - M.r]);
+    pub = chartWindow[miniFor],
+    // the anti-satellite chart leaves room for its altitude numbers; the name "Law" stays clear of the line
+    x = sharedX(pub, host, miniFor === 'chartA' ? 50 : 40, W - L1.M.r),
+    M = { l: x.range()[0], r: W - x.range()[1] },
+    inView = (px) => px >= M.l - 0.5 && px <= W - M.r + 0.5;
+  miniKey = scaleKey(pub);
   const H = 40,
     yL = 24;
   const g = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'presentation');
@@ -818,9 +840,11 @@ export function drawLawMini() {
     .attr('y1', yL)
     .attr('y2', yL)
     .attr('class', 'lm-axis');
+  // talks are cut at the visible dates; a symbol outside them is left out
   LEGAL.filter((l) => l.kind === 'negotiation_span' && (l.end || l.id === 'paros-1981')).forEach((l) => {
-    const a = x(parse(l.start)),
-      b = l.end ? x(parse(l.end)) : x(DOMAIN[1]);
+    const a = Math.max(M.l, x(parse(l.start))),
+      b = Math.min(W - M.r, l.end ? x(parse(l.end)) : x(DOMAIN[1]));
+    if (b < M.l || a > W - M.r) return;
     g.append('rect')
       .attr('x', a)
       .attr('y', yL - 2)
@@ -829,13 +853,17 @@ export function drawLawMini() {
       .attr('rx', 2)
       .attr('style', BAR_STYLE);
   });
-  LEGAL.filter((l) => l.kind !== 'negotiation_span').forEach((l) => {
+  LEGAL.filter((l) => l.kind !== 'negotiation_span' && inView(x(parse(l.start)))).forEach((l) => {
     g.append('g')
       .attr('transform', `translate(${x(parse(l.start))},${yL - 9}) scale(.58)`)
       .html(glyphMarkup(legalKindOf(l)));
   });
-  [1960, 1980, 2000, 2020].forEach((yr) => {
+  // the years follow the window: every 20 years over the whole span, closer together over a zoomed chart
+  const span = x.domain()[1].getUTCFullYear() - x.domain()[0].getUTCFullYear(),
+    step = span > 40 ? 20 : 10;
+  d3.range(1960, 2030, step).forEach((yr) => {
     const px = x(parse(`${yr}-01-01`));
+    if (!inView(px)) return;
     g.append('line')
       .attr('x1', px)
       .attr('x2', px)
@@ -858,8 +886,9 @@ function miniShow() {
     inA = a.top <= 2 && a.bottom > 60,
     inX = ex.dataset.years === '1' && e.top <= 2 && e.bottom > 60;
   host.classList.toggle('on', inA || inX);
-  const now = inX ? 'chartC' : 'chartA';
-  if (now !== miniFor) {
+  // the chart under it decides its years: the test chart, or whichever of the jamming and close-approach tabs is open (each zooms on its own)
+  const now = !inX ? 'chartA' : document.getElementById('chartR')?.hasAttribute('data-off') === false ? 'chartR' : 'chartC';
+  if (now !== miniFor || scaleKey(chartWindow[now]) !== miniKey) {
     miniFor = now;
     drawLawMini();
   }
@@ -868,7 +897,7 @@ let legalCompact = false;
 let bandFullH = 0;
 let stripChart = ''; // the chart the pinned strip is currently over (named in its corner)
 const CHART_NAME = { chartA: 'How high the tests went', chartC: 'Jamming, lasers and cyber', chartR: 'Close approaches' };
-let stripDom = null; // the window the sticky strip shows while a zoomed chart is under it
+let stripDom = null; // the published scale (chartWindow) of the jamming or close-approach chart under the sticky strip; null: the full span
 // The 2021 to 2026 zoom starts folded, so the first screen of the timeline shows laws and tests together. The button opens it; it also opens for print and for a
 // keyboard or link visit to anything inside it. Folded, it stays laid out at full width (only its height is 0), so its drawing never needs redoing.
 export function setZoomOpen(open, scrollTo, instant) {
@@ -982,7 +1011,7 @@ function legalScrollMain() {
     const tag = document.querySelector('#legalSvg .band-chart');
     if (tag) tag.textContent = chartNm ? ` · same years as: ${chartNm}` : '';
   }
-  const changed = stuck && want !== stripDom;
+  const changed = stuck && scaleKey(want) !== scaleKey(stripDom);
   // While a data table is open on screen the strip shrinks to its one row of names, so the table's headings and first rows stay clear of it. This happens only
   // once the strip is in its short form: its full height is measured (bandFullH, --band-full-h) with the strip whole, never while it is cut to its one row, so
   // the room kept for it below, and everything under that, is the same however the page was reached.

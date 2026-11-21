@@ -46,7 +46,7 @@ export const COSMOS1408 = {
   phoneK: 1.16,
   narrowK: 1, // phone: the fitted frame already keeps Cosmos 1408 above the caption
   fitFill: IS_PHONE ? 0.8 : 0.94, // desktop and phone: the follow frame pulled back about 10% so the ISS ring is not clipped
-  liveText: { 'ISS orbit': 'ISS orbit' }, // the shorter text keeps its leader within the limit at 900 px
+  liveText: { ISS: 'ISS' }, // the shorter text keeps its leader within the limit at 900 px
   noSimCount: true,
   actors: [
     {
@@ -68,8 +68,8 @@ export const COSMOS1408 = {
       opacity: 0.85,
       sat: {
         speed: 0.16,
-        label: 'ISS orbit (schematic)',
-        short: 'ISS orbit',
+        label: 'ISS (schematic orbit)', // the pill points at the station, so it names the station; the caption names the orbit the debris crossed
+        short: 'ISS',
         iss: true,
         from: 0.35, // the station is drawn once it is clear of the foot of the frame (before, it rode the bottom edge and the caption)
         big: IS_PHONE ? 1.35 : 2,
@@ -147,15 +147,15 @@ export const COSMOS1408 = {
     detail: 'tracked fragments remained',
     note: 'More than 1,800 tracked initially · SWF, 2026',
   },
-  phoneOff: { 'ISS orbit': [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
+  phoneOff: { ISS: [90, -30] }, // 375: the label hangs below the (smaller) ISS model, off the craft
   liveOff: {
     'Cosmos 1408': [-100, 14],
     Plesetsk: [-96, 44],
-    'ISS orbit': [150, -54],
+    ISS: [150, -54],
     Impact: [140, -88],
   }, // desktop: the pill sits below-left of the satellite, clear of the key legend in the lower right
   offSteps: { Plesetsk: [[0, -96, 44], [0.34, -50, 20]] }, // once the view pulls back to the whole globe the Plesetsk pill hugs its site (it sat over Greenland, a long leader away)
-  stillOff: { 'ISS orbit': [235, -30] }, // the still: the ISS label sits just right of the globe's edge
+  stillOff: { ISS: [235, -30] }, // the still: the ISS label sits just right of the globe's edge
   status: [
     [0, 'Nudol rises toward Cosmos 1408'],
     [0.32, 'Collision at about 470 km; debris spreads', 'Collision at about 470 km; debris spreads'],

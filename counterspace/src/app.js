@@ -180,8 +180,9 @@ export function setExporting(exporting, forceDesktop) {
   EXPORTING = exporting;
   FORCE_DESKTOP = forceDesktop;
 }
-// The time window each zoomed chart shows (null when it shows the full span); the sticky law strip follows the chart under it so the years line up.
-export const chartWindow = { chartC: null, chartR: null };
+// The year scale each chart on the shared years last drew with ({ x, el }: its d3 scale and its box), so the pinned law strip and the phone's slim copy can put
+// every date at the same page x as the chart under them (the charts' margins and zooms differ).
+export const chartWindow = { chartA: null, chartC: null, chartR: null };
 export const PHONE_MAX = 640; // px: below this width the page uses its phone layouts
 export const isPhoneNow = () => !FORCE_DESKTOP && innerWidth < PHONE_MAX;
 // On a wide window (1600 px and more) every chart is drawn on a canvas up to 10% narrower than its box and shown scaled up, so words, marks and lines all grow

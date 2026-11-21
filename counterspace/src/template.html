@@ -43,7 +43,7 @@
   </div>
 
   <div class="bar-tools" role="group" aria-label="Page options">
-    <button class="btn icon theme-btn" id="themeBtn" type="button" aria-label="Switch to light page colours (the opening picture, the timeline strip and the 3D viewer stay dark)" title="Switch to light page colours (the opening picture, the timeline strip and the 3D viewer stay dark)"><svg
+    <button class="btn icon theme-btn" id="themeBtn" type="button" aria-label="Switch to light page colours (the opening picture and the 3D viewer stay dark)" title="Switch to light page colours (the opening picture and the 3D viewer stay dark)"><svg
       class="ico i-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="ico i-moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
   <section class="hero" aria-labelledby="pageTitle">
@@ -62,7 +62,7 @@
             <ul class="hero-key" aria-label="How to read the picture">
               <li><svg class="kg" viewBox="0 0 24 18" aria-hidden="true"><circle cx="12" cy="9" r="5.5" class="k-dot"/></svg>Dot: a test in orbit</li>
               <li><svg class="kg" viewBox="0 0 24 18" aria-hidden="true"><path d="M12 1v16" class="k-tick"/></svg>Tick: a law or policy</li>
-              <li><svg class="kg wide" viewBox="0 0 40 18" aria-hidden="true"><path d="M2 14L38 4" class="k-dash"/><circle cx="2" cy="14" r="3" class="k-dot"/></svg>Dashed line: a test to its first law</li>
+              <li><svg class="kg wide" viewBox="0 0 40 18" aria-hidden="true"><path d="M2 14L38 4" class="k-dash"/><circle cx="2" cy="14" r="3" class="k-dot"/></svg>Dashed line: a test and the first law after it</li>
               <li><svg class="kg" viewBox="0 0 24 18" aria-hidden="true"><circle cx="12" cy="9" r="8" class="k-ring"/><circle cx="12" cy="9" r="4.5" class="k-dot"/></svg>Ring: a 3D scene</li>
             </ul>
             <p class="hero-cue" id="heroCue"><span class="cue-point">Point at a dot or tick</span><span class="cue-touch">Tap a dot or tick</span></p>
@@ -110,11 +110,7 @@
         </span>
       </div>
     </header>
-    <div class="posters-frame">
-      <ol class="posters" id="posterGrid"></ol>
-      <button class="pstrip-arrow prev" id="pstripPrev" type="button" tabindex="-1" aria-hidden="true" disabled><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
-      <button class="pstrip-arrow next" id="pstripNext" type="button" tabindex="-1" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
-    </div>
+    <ol class="posters" id="posterGrid"></ol>
   </div>
 </section>
 

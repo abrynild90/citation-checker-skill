@@ -441,7 +441,7 @@ export function buildSim(cfg) {
         bright: !!a.bright,
         pos: (t) => (a.noHit || t <= tgt.t ? tgt.pos(t) : null),
         staticPos: (a.staticK ?? cfg.staticK) ? (t) => scl(tgt.pos(t), a.staticK ?? cfg.staticK) : null,
-        glow: a.noHit ? (t) => Math.abs(t - tgt.t) < 0.08 : null,
+        glow: null, // no halo on a target that is not hit (MIRACL's MSTI-3): a glow at the pass would show an effect the sources do not report
       });
     }
     // impactFollow (opt-in): the impact marker glides from the hit point to the debris cloud's centre, so its label stays beside the fragments

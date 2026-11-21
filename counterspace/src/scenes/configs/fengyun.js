@@ -109,6 +109,6 @@ export const FENGYUN = {
     [0, 'SC-19 rises toward Fengyun-1C'],
     [0.32, 'Collision at ~880 km; debris spreads', 'Collision at ~880 km'],
     [0.6, 'Debris forms a ring', 'Debris forms a ring'],
-    [0.76, 'SWF, Feb. 2026: 2,351 of 3,532 still in orbit', 'SWF: 2,351 of 3,532 still in orbit'],
+    [0.76, 'February 2026: SWF count of fragments still in orbit', 'February 2026: SWF count in orbit'], // the card carries the numbers; the caption does not say them again (as in Cosmos 1408)
   ],
 };

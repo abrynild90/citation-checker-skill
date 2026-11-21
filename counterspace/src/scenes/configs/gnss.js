@@ -67,7 +67,7 @@ export const GNSS = {
       type: 'aircraft',
       path: [
         [53.0, 8.0],
-        [61.0, 32.0],
+        [60.4, 29.5], // ends inside the zone: it enters at t ≈ 0.17 (the second step) and does not leave before the end, so picture and steps agree
       ],
       alt: 11,
       lift: IS_PHONE ? 0.022 : 0, // 375: drawn a little higher above the ground so an airliner never touches the jammer marker
@@ -156,7 +156,7 @@ export const GNSS = {
   status: [
     [0, 'Outside the jammer zone, aircraft receive GPS (green)', 'Green: GPS received; red: signal lost', 'Green: GPS received; red: signal lost'],
     [
-      0.3,
+      0.17, // the moment Airliner 1 crosses into the zone (its label turns to "GPS signal lost")
       'Inside the zone GNSS is lost (red); the satellites are unaffected',
       'Inside the zone GNSS is lost (red)',
       'Zone: GNSS lost (red). Satellites unaffected',

@@ -157,7 +157,8 @@ export const RPO = {
       short: 'SJ-21',
       dx: 30,
       dy: -44,
-      labelFn: (t, n) => (t >= 0.27 && t < 0.335 ? (n ? 'SJ-21 + SJ-25' : 'SJ-21 + SJ-25' + ' (docked)') : 'SJ-21 (China)'),
+      // "(docked)" only once the caption quotes SWF's "remained docked"; before that the caption says "possibly docked"
+      labelFn: (t, n) => (t >= 0.29 && t < 0.335 ? (n ? 'SJ-21 + SJ-25' : 'SJ-21 + SJ-25' + ' (docked)') : 'SJ-21 (China)'),
       dock: { with: 'sj25', t0: 0.27, t1: 0.335 },
       key: [
         [0, 0.62, 0, 0.01],
@@ -247,15 +248,7 @@ export const RPO = {
       label: 'Just under 3 km',
       short: '< 3 km',
     },
-    {
-      type: 'burst',
-      craft: 'c2542',
-      t0: 0.447,
-      color: '#ffd9c0',
-      ringColor: C.ru,
-      size: 0.1,
-      span: 0.05,
-    },
+    // no flash at the release or at the US–UK approach: a burst is the intercept scenes' sign for a collision, and nothing here collided
     {
       type: 'craft',
       id: 'c2543',
@@ -382,16 +375,6 @@ export const RPO = {
       short: '~ 13 km',
     },
     {
-      type: 'burst',
-      craft: 'usa271b',
-      tail: 0.15, wakeOp: 0.35, taper: true,
-      t0: 0.82,
-      color: '#cfe8ff',
-      ringColor: C.us,
-      size: 0.1,
-      span: 0.05,
-    },
-    {
       type: 'trail',
       craft: 'usa271b',
       tail: 0.15, wakeOp: 0.35, taper: true,
@@ -421,7 +404,7 @@ export const RPO = {
     [0.34, '25 Nov.: SJ-25 fires to separate; 13 Jan.: closest, just under 3 km', '25 Nov.: separation; 13 Jan.: just under 3 km'],
     [0.42, 'LEO, Dec. 2019: Cosmos 2542 releases 2543', 'Cosmos 2542 releases 2543'],
     [0.47, 'Cosmos 2543 stays within 2 km, then raises its highest point to 590 km', 'Within 2 km; highest point 590 km'],
-    [0.6, 'Amateur analysis: aim was to watch USA 245', 'Aim: to watch USA 245'],
+    [0.6, 'Amateur analysis: aim was to watch USA 245', 'Amateur analysis: aim was to watch USA 245'], // the picture keeps the attribution: without it the aim reads as established
     [0.665, 'Russia: Cosmos 2543 posed no threat', 'Russia: no threat'],
     [0.72, 'GEO, Sept. 2025: USA 271 drifts west and stops near SKYNET 5A (4 Sept.)', 'USA 271 stops near SKYNET 5A'],
     [0.84, 'Closest about 13 km (joint US–UK approach); SWF: it lasted roughly 5–11 Sept.', 'Closest about 13 km'],

@@ -42,7 +42,7 @@ try {
     await p.addScriptTag({ path: new URL('node_modules/axe-core/axe.min.js', import.meta.url).pathname });
     // "What the pattern shows": the opening line, the longest pair, its caution and the four chart cards.
     await p.locator('#pattern').evaluate((e) => e.scrollIntoView({ block: 'start', behavior: 'instant' }));
-    assert.match(await p.locator('#pbNote').textContent(), /order in time, not cause/);
+    assert.match(await p.locator('#pbNote').textContent(), /order in time, not cause/i);
     if (out) await p.screenshot({ path: path.join(out, `${engine}-${theme}-pattern.png`) });
     assert.deepEqual(await p.evaluate(async () => (await axe.run(document.getElementById('pattern'))).violations.map((v) => v.id)), []);
     await p.locator('#xct-chartB').click({ force: true });

@@ -82,8 +82,8 @@ const EXPORT_SPEC = {
       'Solid fill: capability demonstrated (tested or used). Striped fill: developing or latent, as the SWF country tables support. Dotted fill: ' +
       'developing, our reading, for 2020s entries where the SWF tables show no data. Faded fill with a dashed edge: decades before the 2020s, which we ' +
       'reconstructed from SWF’s test tables and country chapters; SWF did not assess them. The range above each decade runs from capabilities ' +
-      'demonstrated only (low end) to demonstrated plus developing (high end). Bar height counts each state once for every capability it holds, so a ' +
-      'state with two capabilities counts twice.',
+      'demonstrated only (low end) to demonstrated plus developing (high end). With the two groups, each bar counts the states in one group (kinetic or ' +
+      'non-kinetic), so a state in both groups appears in both bars. With five capabilities, bar height counts each state once for every capability it holds.',
   },
   C: {
     id: 'svgC',

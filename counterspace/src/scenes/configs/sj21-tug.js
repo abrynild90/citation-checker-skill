@@ -98,10 +98,10 @@ export const SJ21_TUG = {
         [1, 0.07, 0, 0],
       ],
     },
-    { type: 'burst', craft: 'sj21', t0: 0.4, color: '#fff1c1', ringColor: C.cn, size: 0.12, span: 0.07 },
+    // no flash at the docking: SWF says they dock at some point but not how, so the picture marks no instant of contact
     { type: 'trail', craft: 'sj21', t0: 0.47, t1: 0.97, color: C.cn, byIndex: true },
     { type: 'trail', craft: 'cg2', t0: 0.5, t1: 0.8, color: C.dead, byIndex: true },
-    // Follow views show almost no Earth: mark the belt itself, the height above it (SWF: 290 to 3,100 km by 27 Jan.) and what each trail is.
+    // Follow views show almost no Earth: mark the belt itself and what each trail is.
     // the marker sits on the drawn belt arc (the ring is gapped around the pair, so it moves along the arc once the pair has risen)
     {
       type: 'tag',
@@ -131,38 +131,7 @@ export const SJ21_TUG = {
       dx: 100,
       dy: -40,
     },
-    {
-      type: 'path',
-      anchor: 'g',
-      offs: [
-        [0.2, 0, 0],
-        [0.2, 0.22, 0],
-        [0.2, 0.44, 0],
-      ],
-      noInset: true,
-      staticHide: true,
-      stillHide: true,
-      staticKeep: false,
-      vis: [0.72, 0.97],
-      color: '#ffe6a8',
-      opacity: 0.85,
-      thick: 0.0018,
-      dash: 16,
-    },
-    {
-      type: 'tag',
-      anchor: 'g',
-      off: [0.2, 0.22, 0],
-      leader: true,
-      liveOnly: true,
-      stillHide: true,
-      vis: [0.72, 0.97],
-      color: '#ffe6a8',
-      label: '290 to 3,100 km above GEO (SWF)',
-      short: '290–3,100 km above GEO',
-      dx: -128,
-      dy: -26,
-    },
+    // the height is in the caption, not drawn: SWF measures it above the protected GEO zone, which the exaggerated picture cannot show apart from the belt line
   ],
   atmoK: 1.5, // the Earth is only a sliver in the follow views: a faint blue limb glow, lit or not, shows where it is
   atmoFloor: 0.4,
@@ -175,7 +144,7 @@ export const SJ21_TUG = {
     [0, 'SJ-21 approaches the defunct Compass G2 (25 Dec. 2021), then stays close for weeks', 'SJ-21 approaches Compass G2'],
     [0.34, 'SWF: they dock at some point; method not described', 'SWF: they dock at some point'],
     [0.5, 'About 21 Jan. 2022: SJ-21 pulls both up with its own propulsion', 'About 21 Jan.: SJ-21 pulls both up'],
-    [0.72, 'By 27 Jan. both are 290 to 3,100 km above the protected GEO zone', '27 Jan.: 290–3,100 km above GEO'],
+    [0.72, 'By 27 Jan. both are 290 to 3,100 km above the protected GEO zone', '27 Jan.: 290–3,100 km above the GEO zone'],
     [0.8, 'SWF does not describe the separation; SJ-21 later lowered its orbit near GEO', 'SJ-21 later lowers its orbit'],
     [0.96, 'SWF’s table: Compass G2 was pulled “well past graveyard orbit”', 'G2 pulled “well past graveyard orbit”'],
   ],
@@ -256,9 +225,7 @@ export const SJ21_TUG = {
   ],
   liveOff: { 'SJ-21': [-98, -6], 'Compass G2': [122, -4] }, // once undocked each name sits beside its own satellite, left and right, clear of the models
   offFrom: { 'SJ-21': 0.84, 'Compass G2': 0.84 },
-  camHide: { 1: ['GEO belt line', '290'], 2: ['GEO belt line', '290'], 5: ['GEO belt line', '290'] },
-  stillHideText: ['290'], // the print frame leaves out the height gauge
-  phoneHide: ['290'], // 375: the status line carries the gauge
+  camHide: { 1: ['GEO belt line'], 2: ['GEO belt line'], 5: ['GEO belt line'] },
   stillCam: { at: [24, 12, 4.7], look: [0, 105, 1.25], hideShell: true },
   staticCenter: [25, 72],
   staticCraftMax: 120,

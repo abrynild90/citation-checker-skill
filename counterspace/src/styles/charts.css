@@ -154,9 +154,10 @@
 /* marks: a 24 px target around every symbol; a soft ring on hover, a strong ring on keyboard focus */
 .mark{cursor:pointer}
 .mark:focus{outline:none}
-.hit{fill:transparent;stroke:none;transition:fill var(--dur-1) var(--ease),stroke var(--dur-1) var(--ease)}
-.mark:hover .hit,.mark.hl .hit{fill:var(--accent);fill-opacity:.14;stroke:var(--accent);stroke-opacity:.5;stroke-width:1.5px}
-.mark:focus-visible .hit{fill:var(--accent);fill-opacity:.1;stroke:var(--focus);stroke-opacity:1;stroke-width:3px}
+/* the fill keeps its colour and only its opacity moves: fading the colour while the opacity snapped back to 1 flashed a full accent block on leaving */
+.hit{fill:var(--accent);fill-opacity:0;stroke:none;transition:fill-opacity var(--dur-1) var(--ease),stroke-opacity var(--dur-1) var(--ease)}
+.mark:hover .hit,.mark.hl .hit{fill-opacity:.14;stroke:var(--accent);stroke-opacity:.5;stroke-width:1.5px}
+.mark:focus-visible .hit{fill-opacity:.1;stroke:var(--focus);stroke-opacity:1;stroke-width:3px}
 .mark .glyph{transform-box:fill-box;transform-origin:center;transition:transform var(--dur-1) var(--ease)}
 .mark:hover .glyph,.mark:focus-visible .glyph{transform:scale(1.15)}
 @media (prefers-reduced-motion:reduce){.mark .glyph{transition:none}}

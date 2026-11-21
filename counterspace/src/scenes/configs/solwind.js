@@ -104,7 +104,7 @@ export const SOLWIND = {
       bright: true,
             impactDy: IS_PHONE ? -81 : undefined,
       tickUntil: 0.88, // the tick retires with the last fragment
-      endLabel: 'Impact: 0 of 285 in orbit',
+      endLabel: 'Later count: 0 of 285 in orbit',
       endShort: '0 of 285 in orbit',
       endFrom: 0.88,
       impactUntil: 0.75, // the pill retires with its step (step 3); a quiet tick keeps the point marked

@@ -562,7 +562,7 @@ export function drawR(el = document.getElementById('svgR')) {
 
   // ---------------------------------------------------------------- note, key and data table
   if (!EXPORTING) {
-    chartWindow.chartR = zoomed ? R_FOCUS() : null;
+    chartWindow.chartR = { x, el };
     queueMicrotask(() => dispatchEvent(new Event('scroll')));
   }
   document.getElementById('noteR').textContent = zoomed

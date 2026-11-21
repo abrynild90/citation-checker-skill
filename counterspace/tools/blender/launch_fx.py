@@ -60,14 +60,3 @@ def frame(shot, point, sx, sy, iterations=4):
         d = (point - cam.location).length
         target = point - (axes @ Vector((sx * shot.tx, sy * shot.ty, 0))) * d
         kit.look_at(cam, target, (0, 0, 1))
-
-
-def exhaust(name, base, direction, length, radius, color='#9fc4ff', strength=0.6, alpha=0.12):
-    """A faint, soft exhaust cone from `base` along `direction` (a small thruster firing in vacuum): wide at the nozzle, fading to a point."""
-    d = Vector(direction).normalized()
-    ob = kit.cyl(name, radius, length, material=kit.glow_mat(name + '-m', color, strength, fresnel=True, alpha=alpha, power=1.4), r2=radius * 0.05, verts=32)
-    ob.location = Vector(base) + d * length / 2
-    ob.rotation_euler = d.to_track_quat('Z', 'Y').to_euler()
-    ob.visible_shadow = False
-    return ob
-

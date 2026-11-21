@@ -224,7 +224,8 @@ export function drawL(el = document.getElementById('svgL')) {
     const { p, c, l, w, years, g } = r;
     const col = catColor(c),
       yy = y0 + r.block + 24,
-      xe = l ? Math.max(x(0) + 26, x(Math.min(years, MAX_YEARS))) : x(0);
+      // every end sits at its true length, however short: a floor would draw 4 months, 5 months and 1.1 years the same (the hexagon stands clear, left of 0)
+      xe = l ? x(Math.min(years, MAX_YEARS)) : x(0);
     const say = l ? `${g.num} ${g.unit}` : NONE;
     const row = svg
       .append('g')

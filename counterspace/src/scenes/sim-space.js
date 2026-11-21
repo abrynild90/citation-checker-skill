@@ -117,7 +117,8 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           rr = L * Math.cos(la) ** 2;
         pts.push(ll(la / DEG, a.lon, rAlt((rr - 1) * 6371)));
       }
-      items.push({ kind: 'curve', avoid: true, soft: true, pts: () => pts, color: a.color, opacity: a.opacity ?? 0.6, thick: 0.0035 });
+      // a.t0: the lines appear with the event that makes them matter (Starfish: the detonation), not over the launch pad
+      items.push({ kind: 'curve', avoid: true, soft: true, pts: () => pts, color: a.color, opacity: a.opacity ?? 0.6, thick: 0.0035, ...(a.t0 && { fadeIn: [a.t0, a.t0 + 0.06] }) });
     });
   }
   if (a.type === 'constellation') {
@@ -256,8 +257,8 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
       const hub = a.hub,
         N = 40,
         pulse = a.pulse;
-      // Ground segment under attack (SWF 15-06/15-07): the hub is compromised first (turns red, repeated red rings), malicious commands then run
-      // out along every management link (three packets per link, red trail), and each regional node flashes and turns red when the commands arrive.
+      // Ground segment under attack (SWF 15-06/15-07): the hub is compromised first (turns red), malicious commands then run
+      // out along every management link (three packets per link, red trail), and each regional node turns red when the commands arrive.
       items.push({
         kind: 'point',
         shape: 'site',
@@ -312,19 +313,8 @@ export function buildSpaceActor(a, { cfg, items, rnd, tgt, setFocus }) {
           statusColor: (t) => (t >= arr ? '#ff5d5d' : '#7fd6ff'),
           pos: () => all[N],
         });
-        items.push({ kind: 'flash', pos: all[N], t0: arr, color: '#ffc0c0', ringColor: '#ff6b6b', size: 0.16, span: 0.09 });
+        // the node turns red when the commands arrive (no flash ring: this is malware, not a blast)
       });
-      [0, 0.05, 0.1].forEach((dt) =>
-        items.push({
-          kind: 'flash',
-          pos: ll(hub[0], hub[1], 1.01),
-          t0: pulse[0] + dt,
-          color: '#ffb3b3',
-          ringColor: '#ff6b6b',
-          size: 0.2,
-          span: 0.16,
-        }),
-      );
     }
     setFocus([30, a.lon]);
   }

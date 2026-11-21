@@ -86,7 +86,7 @@ export const BURNT_FROST = {
       impactDx: -150,
       impactDy: -30,
       tickUntil: 0.9, // the tick marks the point until the last count, then the count's own pill takes over
-      endLabel: 'Impact: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
+      endLabel: 'Later count: 0 of 175 in orbit', // the last frames (the cloud has all decayed) keep the impact point and the final count
       endShort: '0 of 175 in orbit',
       endFrom: 0.9,
       endDx: 40, // the end label sits right of the impact point, off the Japanese city lights
@@ -111,7 +111,7 @@ export const BURNT_FROST = {
       label: 'SM-3 interceptor',
       short: 'SM-3',
       labelFollow: true, // the leader ends on the missile's head, not on a fixed point of its arc
-      rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', plumeDeck: true, preK: 1.0, waitRing: true, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
+      rocket: { style: 'slim', minPx: IS_PHONE ? 92 : 125, maxPx: IS_PHONE ? 125 : 165, glowMin: 14, glowMax: 24, launch: 'vls', plumeDeck: true, preK: 1.0, waitLabel: true, ramp: IS_PHONE ? { k: 1.2, until: 0.35 } : { k: 0.88, until: 0.5 }, smokeK: 1.6 }, // launch 'vls': a vertical-launch cold-gas pop lifts it out of its cell, then the motor lights
       flash: 0.24,
       flashCap: 0.8,
       coreK: 0.55,

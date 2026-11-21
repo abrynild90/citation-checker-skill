@@ -460,9 +460,7 @@ function syncMore() {
     : COMPACT.matches
       ? 'Full account'
       : capFolded
-        ? steps.length > 4
-          ? 'Full account and steps'
-          : 'Full account'
+        ? 'Full account' // the step rows already show beside it (fitDesktop), so the button promises only the account
         : 'All steps';
 }
 function setMore(open) {

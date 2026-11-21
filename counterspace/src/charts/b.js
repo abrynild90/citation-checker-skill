@@ -32,7 +32,7 @@ const KIN = [
     gloss: 'Electronic warfare, directed energy and cyber',
   },
 ];
-// Opens plain: two groups in solid colour. "More detail" brings back the five kinds with stripes and dots (detail: true, group: 'cat').
+// Opens plain: two groups side by side, without range bars. "More detail" brings back the five kinds and the range bars (detail: true, group: 'cat').
 export const stateB = { group: 'kin', detail: false, on: new Set(CATS.map((c) => c.key)), onKin: new Set(KIN.map((u) => u.key)) };
 const stateSet = () => (stateB.group === 'cat' ? stateB.on : stateB.onKin);
 
@@ -189,19 +189,16 @@ export function drawB(el = document.getElementById('svgB')) {
     bandsX = decs.map((d, i) => [x(xs[i]), x(xs[i + 1])]),
     X2020 = x(parse('2020-01-01'));
   const { series, units } = countsB();
-  const stack = d3
-    .stack()
-    .keys(series.map((s) => s.key))
-    .offset(d3.stackOffsetNone)(
-    decs.map((d, i) => {
-      const o = {};
-      series.forEach((s) => (o[s.key] = s.vals[i]));
-      return o;
-    }),
-  );
   const dem = decs.map((d, i) => series.filter((s) => !s.dev).reduce((a, s) => a + s.vals[i], 0)),
-    tot = decs.map((d, i) => series.reduce((a, s) => a + s.vals[i], 0)),
-    maxY = Math.max(4, ...tot);
+    tot = decs.map((d, i) => series.reduce((a, s) => a + s.vals[i], 0));
+  // The two groups stand side by side, each bar the states in that group: stacked, they summed to a total that counts every state in both groups twice.
+  // The five kinds keep one stacked bar per decade, whose total is pairs of a state and a capability.
+  const cols = (kin ? units.map((u) => series.filter((s) => s.unit === u)) : [series]).map((ss) => ({
+      ss,
+      tot: decs.map((d, i) => ss.reduce((a, s) => a + s.vals[i], 0)),
+      dem: decs.map((d, i) => ss.filter((s) => !s.dev).reduce((a, s) => a + s.vals[i], 0)),
+    })),
+    maxY = Math.max(4, ...cols.flatMap((c) => c.tot));
   // The tallest bar leaves room above it for its figure and the label of the assessed decade.
   const plotH = phone ? 300 : 340,
     top = 54,
@@ -229,15 +226,17 @@ export function drawB(el = document.getElementById('svgB')) {
   svg
     .append('desc')
     .text(
-      `Stacked bars of the number of ${kin ? 'states in each of two groups' : 'pairs of a state and a capability'} for each decade from the 1950s to the 2020s. ` +
+      `${kin ? 'Bars, side by side, of the number of states in each of two groups' : 'Stacked bars of the number of pairs of a state and a capability'}` +
+        ' for each decade from the 1950s to the 2020s. ' +
         'Solid fills are demonstrated capabilities, striped fills are developing or latent ones and faded bars are decades reconstructed without an SWF assessment. ' +
         'A data table follows the chart.',
     );
 
-  // stripes for developing, dots for developing by our reading (SWF's table has no data)
+  // stripes for developing, dots for developing by our reading (SWF's table has no data), in the plain view too:
+  // two pale fills of one colour could not be told apart
   const defs = svg.append('defs');
   series
-    .filter((s) => s.dev && !plain)
+    .filter((s) => s.dev)
     .forEach((s) => {
       const p = defs
         .append('pattern')
@@ -263,7 +262,9 @@ export function drawB(el = document.getElementById('svgB')) {
     .append('path')
     .attr('class', 'panel-swf')
     .attr('d', topRoundPath(X2020, top, R - X2020, plotH, 10));
-  const yticks = d3.range(0, Math.ceil(maxY / 10) * 10 + 1, 10); // the axis stops at the last round number the data reaches; the room above is for the labels
+  // the axis stops at the last round number the data reaches; the room above is for the labels (side by side, the groups reach 12, so steps of 5)
+  const step = maxY <= 15 ? 5 : 10,
+    yticks = d3.range(0, Math.ceil(maxY / step) * step + 1, step).filter((t) => t <= ymax);
   const gy = svg.append('g').attr('class', 'gridline');
   yticks.forEach((t) => gy.append('line').attr('x1', M.l).attr('x2', R).attr('y1', y(t)).attr('y2', y(t)));
   const ay = svg.append('g').attr('class', 'axis');
@@ -280,7 +281,7 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr('class', 'axis-title')
     .attr('x', phone ? 0 : 12)
     .attr('y', 14)
-    .text('Capabilities counted');
+    .text(kin ? 'States in each group' : 'Capabilities counted');
   // decade boundaries share the other charts' year ticks
   const gx = svg.append('g').attr('class', 'gridline');
   bandsX.slice(1).forEach(([xa]) =>
@@ -326,7 +327,11 @@ export function drawB(el = document.getElementById('svgB')) {
     .attr(
       'aria-label',
       (d) =>
-        `${d.info.title}: ${tot[d.i]} ${kin ? 'states counted across the groups' : 'pairs of a state and a capability'}, ${dem[d.i]} demonstrated. ${d.info.note}`,
+        `${d.info.title}: ${
+          kin
+            ? units.map((u, k) => `${u.label}: ${cols[k].tot[d.i]} states, ${cols[k].dem[d.i]} demonstrated`).join('; ') // each group's own count
+            : `${tot[d.i]} pairs of a state and a capability, ${dem[d.i]} demonstrated`
+        }. ${d.info.note}`,
     );
   g.each(function (d) {
     const s = d3.select(this),
@@ -334,9 +339,9 @@ export function drawB(el = document.getElementById('svgB')) {
       [xa, xb] = bandsX[i],
       bx = xa + inset,
       bw = Math.max(6, xb - xa - 2 * inset),
-      cx = bx + bw / 2,
       recon = decs[i] !== '2020s',
-      hiY = tot[i] > 0 ? Math.min(y(tot[i]), y(0) - 9) : y(tot[i]); // a bar of one or two states still shows at least 9 px
+      GAP = 3, // between the two groups' bars
+      cw = (bw - GAP * (cols.length - 1)) / cols.length;
     if (!EXPORTING)
       s.append('rect')
         .attr('class', 'rowhl hit')
@@ -346,51 +351,61 @@ export function drawB(el = document.getElementById('svgB')) {
         .attr('height', plotH - 2)
         .attr('rx', 8);
     const bar = s.append('g').attr('class', recon ? 'bar recon' : 'bar');
-    if (tot[i] > 0) {
-      const id = `bclip-${i}`;
+    cols.forEach((col, ci) => {
+      const t = col.tot[i],
+        dm = col.dem[i];
+      if (!(t > 0)) return;
+      const cbx = bx + ci * (cw + GAP),
+        cx = cbx + cw / 2,
+        slot = (xb - xa) / cols.length, // the room this bar's words may take
+        hiY = Math.min(y(t), y(0) - 9), // a bar of one or two states still shows at least 9 px
+        id = `bclip-${i}-${ci}`;
       defs
         .append('clipPath')
         .attr('id', id)
         .append('path')
-        .attr('d', roundRectPath(bx, hiY, bw, base - hiY + 12, Math.min(7, bw / 2)));
+        .attr('d', roundRectPath(cbx, hiY, cw, base - hiY + 12, Math.min(7, cw / 2)));
       const seg = bar.append('g').attr('clip-path', `url(#${id})`);
-      const topJ = series.reduce((a, sr, j) => (stack[j][i][1] > stack[j][i][0] ? j : a), -1);
-      series.forEach((sr, j) => {
-        const [y0, y1] = stack[j][i];
-        if (y1 <= y0) return;
-        const yt = j === topJ ? hiY : y(y1);
+      const topJ = col.ss.reduce((a, sr, j) => (sr.vals[i] > 0 ? j : a), -1);
+      let below = 0; // the series stack in their order: each sits on the ones before it
+      col.ss.forEach((sr, j) => {
+        const v = sr.vals[i];
+        if (!v) return;
+        const yt = j === topJ ? hiY : y(below + v);
         seg
           .append('rect')
-          .attr('x', bx - 1)
-          .attr('width', bw + 2)
+          .attr('x', cbx - 1)
+          .attr('width', cw + 2)
           .attr('y', yt)
-          .attr('height', y(y0) - yt)
-          .style('fill', sr.dev && !plain ? `url(#hatch-${sr.key.replace(':', '-')})` : `var(${sr.v})`)
-          .style('fill-opacity', sr.dev ? (plain ? 0.38 : 1) : 0.9)
+          .attr('height', y(below) - yt)
+          .style('fill', sr.dev ? `url(#hatch-${sr.key.replace(':', '-')})` : `var(${sr.v})`)
+          .style('fill-opacity', sr.dev ? 1 : 0.9)
           .style('stroke', 'var(--bg)')
           .style('stroke-width', 1.2);
+        below += v;
       });
       if (recon)
         bar
           .append('path')
           .attr('class', 'bar-edge')
-          .attr('d', roundRectPath(bx, hiY, bw, base - hiY, Math.min(7, bw / 2)));
+          .attr('d', roundRectPath(cbx, hiY, cw, base - hiY, Math.min(7, cw / 2)));
       // the range bar: from the demonstrated-only count up to demonstrated plus developing
-      if (!plain && dem[i] < tot[i] && bw > 24) {
-        const wd = `M${cx - 4.5},${y(dem[i])}h9M${cx},${y(dem[i])}V${y(tot[i])}M${cx - 4.5},${y(tot[i])}h9`;
+      if (!plain && dm < t && cw > 24) {
+        const wd = `M${cx - 4.5},${y(dm)}h9M${cx},${y(dm)}V${y(t)}M${cx - 4.5},${y(t)}h9`;
         s.append('path').attr('class', 'whisker-halo').attr('d', wd).attr('stroke-linecap', 'round');
         s.append('path').attr('class', 'whisker').attr('d', wd).attr('stroke-linecap', 'round');
       }
       // the figure above the bar, and the range as a quiet second line
-      let range = plain ? '' : dem[i] < tot[i] ? `${dem[i]}–${tot[i]}` : 'no range';
-      if (range && range !== 'no range' && !phone && xb - xa >= 100) range = `range ${range}`;
-      if (range && tw(range, 13, 400) > xb - xa + (range === 'no range' ? -6 : 14)) range = ''; // a note that would touch the axis is left to the card
+      let range = plain ? '' : dm < t ? `${dm}–${t}` : 'no range';
+      if (range && range !== 'no range' && !phone && slot >= 100) range = `range ${range}`;
+      // a note that would touch the axis or its neighbour is left to the card
+      if (range && tw(range, 13, 400) > slot + (range === 'no range' ? -6 : cols.length > 1 ? -4 : 14)) range = '';
       s.append('text')
         .attr('class', 'fig')
         .attr('x', cx)
         .attr('y', hiY - (range ? 26 : 9))
         .attr('text-anchor', 'middle')
-        .text(tot[i]);
+        .text(t);
       if (range)
         s.append('text')
           .attr('class', 'range')
@@ -398,7 +413,7 @@ export function drawB(el = document.getElementById('svgB')) {
           .attr('y', hiY - 9)
           .attr('text-anchor', 'middle')
           .text(range);
-    }
+    });
     if (!EXPORTING)
       s.append('rect')
         .attr('class', 'hit')
@@ -480,58 +495,46 @@ export function drawB(el = document.getElementById('svgB')) {
     `Jamming and spoofing is the most widespread capability: ${ew20} states in the 2020s. Missiles that can destroy a satellite have stayed with ` +
     `${WORD[da20.length] ?? da20.length} states: ${da20.slice(0, -1).join(', ')} and ${da20.at(-1)}.`;
   document.getElementById('tkB').textContent = capSentence(stateB.group);
-  document.getElementById('noteB').textContent = plain
-    ? 'A state counts once in each group it belongs to. Darker parts are tested or used; lighter parts are in development.'
-    : kin
-      ? 'A state counts once in each group it belongs to.'
-      : 'A state counts once in each category it belongs to.';
+  document.getElementById('noteB').textContent =
+    (kin ? 'A state counts once in each group it belongs to.' : 'A state counts once in each category it belongs to.') +
+    ' Solid parts are tested or used; striped and dotted parts are in development.';
   const ink = 'var(--muted)',
     sw = (extra) => `<rect x="-12" y="-7" width="24" height="14" rx="3" ${extra}/>`;
+  // the same fills in both views (the bars draw stripes and dots in the plain view too); the range bar is drawn only with more detail
   setKey(
     'legendB',
     keyMarkup(
-      plain
-        ? [
-            {
-              head: 'Fill',
-              items: [
-                [sw(`style="fill:${ink};fill-opacity:.9"`), 'Darker: tested or used', 28],
-                [sw(`style="fill:${ink};fill-opacity:.38"`), 'Lighter: still in development', 28],
-                [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
-              ],
-            },
-          ]
-        : [
-            {
-              head: 'Fill',
-              items: [
-                [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
-                [
-                  `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
-                    sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
-                  'Developing or latent',
-                  28,
-                ],
-                [
-                  `<defs><pattern id="kD" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" style="fill:${ink};fill-opacity:.1"/><circle cx="3" cy="3" r="1.6" style="fill:${ink}"/></pattern></defs>` +
-                    sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
-                  'Developing, our reading (SWF’s table has no data)',
-                  28,
-                ],
-                [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
-              ],
-            },
-            {
-              head: 'Range bar',
-              items: [
-                [
-                  '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
-                  'Demonstrated only (low end) to demonstrated plus developing (high end)',
-                  18,
-                ],
-              ],
-            },
+      [
+        {
+          head: 'Fill',
+          items: [
+            [sw(`style="fill:${ink};fill-opacity:.9"`), 'Demonstrated: tested or used', 28],
+            [
+              `<defs><pattern id="kH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:${ink};fill-opacity:.16"/><line y2="6" style="stroke:${ink};stroke-width:2.4"/></pattern></defs>` +
+                sw(`fill="url(#kH)" style="stroke:${ink};stroke-width:1"`),
+              'Developing or latent',
+              28,
+            ],
+            [
+              `<defs><pattern id="kD" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" style="fill:${ink};fill-opacity:.1"/><circle cx="3" cy="3" r="1.6" style="fill:${ink}"/></pattern></defs>` +
+                sw(`fill="url(#kD)" style="stroke:${ink};stroke-width:1"`),
+              'Developing, our reading (SWF’s table has no data)',
+              28,
+            ],
+            [sw(`style="fill:${ink};fill-opacity:.4;stroke:${ink};stroke-width:1;stroke-dasharray:3 3"`), 'Faded: reconstructed (not SWF-assessed)', 28],
           ],
+        },
+        {
+          head: 'Range bar',
+          items: [
+            [
+              '<path d="M-4.5,-8h9M0,-8V8M-4.5,8h9" style="stroke:var(--text);stroke-width:1.6;fill:none;stroke-linecap:round"/>',
+              'Demonstrated only (low end) to demonstrated plus developing (high end)',
+              18,
+            ],
+          ],
+        },
+      ].slice(0, plain ? 1 : 2),
     ),
   );
   const cnt = (d, p) => `<span class="nw"><b>${d}</b> demonstrated</span>, <span class="nw"><b>${p}</b> developing</span>`;

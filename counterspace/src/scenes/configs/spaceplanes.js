@@ -217,6 +217,7 @@ export const SPACEPLANES = {
       fade: true,
       acts: [2],
       push: 0.1,
+      vis: [0.54, 0.975], // the flights 2 and 3 orbit: gone at the flight 4 step
       label: 'CSSHQ orbit: about 600 km, 50° (SWF)',
       short: '~600 km · 50°',
       opt: true,
@@ -246,6 +247,7 @@ export const SPACEPLANES = {
       dy: -66,
       staticAt: [0.1, 0.27],
       labelFn: (t, n) => (t < 0.76 ? (n ? 'CSSHQ flight 2' : 'CSSHQ flight' + ' 2 (China)') : n ? 'CSSHQ flight 3' : 'CSSHQ flight 3 (China)'),
+      vis: [0.54, 0.975], // flights 2 and 3 only: at the flight 4 step the craft, its orbit and its wake go, and the caption stands over the Earth (SWF gives no flight 4 orbit)
       key: [
         [0.54, 0, 0, 0],
         [1, 0, 0, 0],
@@ -287,7 +289,7 @@ export const SPACEPLANES = {
       maxPx: IS_PHONE ? 72 : 84,
       anchor: 'cn',
       acts: [2],
-      vis: [0.76, 0.985],
+      vis: [0.76, 0.975], // Object G was flight 3's: it goes when the flight 4 step begins
       small: true,
       scale: 1.6 * PK,
       color: C.cn,
@@ -309,7 +311,7 @@ export const SPACEPLANES = {
       type: 'trail',
       craft: 'csshq',
       t0: 0.54,
-      t1: 1,
+      t1: 0.975,
       color: C.cn,
       acts: [2],
       thick: 0.0018,
@@ -334,7 +336,7 @@ export const SPACEPLANES = {
       type: 'trail',
       craft: 'objG',
       t0: 0.76,
-      t1: 0.985,
+      t1: 0.975,
       color: C.cn,
       acts: [2],
       thick: 0.0022,

@@ -57,11 +57,12 @@ export const VIASAT = {
     },
     {
       type: 'terminals',
+      // one wave for every region: modems go dark at random across Europe over the same window (SWF gives no order by region)
       boxes: [
         [44, 52, 22, 40, 0.34, 0],
-        [47, 55, 6, 22, 0.28, 1],
-        [43, 50, -6, 8, 0.2, 2],
-        [54, 60, 6, 26, 0.18, 3],
+        [47, 55, 6, 22, 0.28, 0],
+        [43, 50, -6, 8, 0.2, 0],
+        [54, 60, 6, 26, 0.18, 0],
       ],
       count: 900,
       compactStatus: true,
@@ -75,16 +76,12 @@ export const VIASAT = {
       labelDx: IS_PHONE ? 125 : 168,
       labelDy: IS_PHONE ? -104 : -150,
     },
-    // One shock ring per region, in the order the modems go dark (illustrative regions; SWF gives no region order).
-    { type: 'flash', at: [48, 31, 0], t0: 0.3, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
-    { type: 'flash', at: [51, 14, 0], t0: 0.38, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
-    { type: 'flash', at: [46, 1, 0], t0: 0.46, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
-    { type: 'flash', at: [57, 16, 0], t0: 0.54, color: '#ffb3b3', ringColor: '#ff6b6b', size: 0.2, span: 0.14 },
+    // no shock rings: a wiped modem is not a physical blast, and SWF gives no order in which regions went dark
   ],
   steps: [
     [0, 'Normal service: KA-SAT serves modems across Europe'],
     [0.1, 'Attackers send AcidRain malware into the ground network'],
-    [0.3, 'Modems are wiped region by region and go offline'],
+    [0.3, 'Modems are wiped and go offline'],
     [0.62, 'Tens of thousands of modems offline; the satellite keeps working'],
     [0.8, 'May 2022: the US, UK and EU attribute it to Russia’s military intelligence (GRU) (SWF)'],
   ],

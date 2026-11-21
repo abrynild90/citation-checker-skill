@@ -392,7 +392,7 @@ export function drawC(el = document.getElementById('svgC')) {
   // ---------------------------------------------------------------- note, key and data table
   const firstYr = Math.min(...NK.map((e) => +e.start.slice(0, 4)));
   if (!EXPORTING) {
-    chartWindow.chartC = zoom ? C_FOCUS() : null;
+    chartWindow.chartC = { x, el };
     queueMicrotask(() => dispatchEvent(new Event('scroll')));
   }
   document.getElementById('noteC').innerHTML = zoom

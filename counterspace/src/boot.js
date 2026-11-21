@@ -34,8 +34,8 @@ const root = document.documentElement,
   lightQuery = matchMedia('(prefers-color-scheme: light)');
 const currentTheme = () => root.dataset.theme || (lightQuery.matches ? 'light' : 'dark');
 function nameThemeButton() {
-  // The light page keeps the opening picture, the pinned strip and the 3D viewer dark on purpose; the label says so before anyone is surprised by it.
-  const label = currentTheme() === 'light' ? 'Switch to dark colours' : 'Switch to light page colours (the opening picture, the timeline strip and the 3D viewer stay dark)';
+  // The light page keeps the opening picture and the 3D viewer dark on purpose (the pinned law strip turns light with the page); the label says so before anyone is surprised by it.
+  const label = currentTheme() === 'light' ? 'Switch to dark colours' : 'Switch to light page colours (the opening picture and the 3D viewer stay dark)';
   themeBtn.setAttribute('aria-label', label);
   themeBtn.title = label;
 }

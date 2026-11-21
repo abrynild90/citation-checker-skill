@@ -299,10 +299,11 @@ function build(stage) {
     const px = x(parse(e.date)),
       py = yAlt(e.altitude_km, px),
       inner = el('g', {}, el('g', { transform: `translate(${px.toFixed(1)},${py.toFixed(1)})` }, pts)),
-      r = e.type === 'nuclear' ? 11 : e.type === 'destructive' ? 7.5 : 5.5;
-    if (e.type === 'nuclear') el('path', { d: star(11), class: 'ht-ev' }, inner);
+      // smaller on a phone, where the early tests sit a few px apart and merged into one blot (pointing finds the nearest dot, so the touch reach is unchanged)
+      r = phone ? (e.type === 'nuclear' ? 8 : e.type === 'destructive' ? 5 : 3.5) : e.type === 'nuclear' ? 11 : e.type === 'destructive' ? 7.5 : 5.5;
+    if (e.type === 'nuclear') el('path', { d: star(r), class: 'ht-ev' }, inner);
     else el('circle', { r, class: e.type === 'destructive' ? 'ht-ev' : 'ht-ev ring' }, inner);
-    if (hasScene(e)) el('circle', { r: r + 4.5, class: 'ht-scene' }, inner); // a thin outer ring: this one has a 3D scene
+    if (hasScene(e)) el('circle', { r: r + (phone ? 2.5 : 4.5), class: 'ht-scene' }, inner); // a thin outer ring: this one has a 3D scene
     marks.push({ e, px, py, r });
     S.hits.push({ k: 'ev', id: e.id, date: e.date, e, px, py, r });
     obstacles.push({ x0: px - r - 3, x1: px + r + 3, y0: py - r - 3, y1: py + r + 3 });

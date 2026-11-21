@@ -29,7 +29,7 @@ def _aurora(lat, lon, span, seed):
         path = [(lat + 2.0 * math.sin((lo + i * 0.1) * 0.5) + 0.8 * math.sin(i * 0.2 + ph), lo + span / parts * 1.5 * i / n) for i in range(n + 1)]
         top = rng.uniform(700, 1300)
         tops = [top * (0.6 + 0.4 * math.sin(i * 0.25 + ph) ** 2) for i in range(n + 1)]
-        mat = fx.curtain_mat(f'aurora-m{k}', '#7dffb0', rng.uniform(0.5, 1.0), ((0, 0), (0.25, 0.8), (0.5, 1), (0.8, 0.8), (1, 0)), ((0, 0), (0.2, 0.7), (0.5, 0.4), (1, 0)),
+        mat = fx.curtain_mat(f'aurora-m{k}', '#7dffb0', rng.uniform(0.25, 0.5), ((0, 0), (0.25, 0.8), (0.5, 1), (0.8, 0.8), (1, 0)), ((0, 0), (0.2, 0.7), (0.5, 0.4), (1, 0)),
                              colors=((0, '#7dffb0'), (0.3, '#3dff8a'), (0.6, '#d8ff70'), (0.85, '#ff6a6a'), (1, '#ff3a5a')), rays=(9, 1.5), streak=0.7, seed=seed + k)
         fx.strip(f'aurora{k}', [ll(a, b, 90) for a, b in path], [ll(a, b, h) for (a, b), h in zip(path, tops)], mat)
     kit.ground_disc('aurora-glow', lat, lon, 10, '#4dff9a', 0.35, 0.14, lift_km=40)
@@ -43,8 +43,8 @@ def starfish():
     kit.sun(ll(25, -215), strength=0.7, color=(0.6, 0.72, 1.0))  # faint moonlight so the night ocean and clouds keep their form
     cam = ll(2, -212, 2600)
     Shot(cam, ll(6.5, -150, 900), lens=22, up=cam + Vector((0, 0, 1)).cross(cam) * 0.12)
-    fx.fireball('burst', burst, 0.14, strength=0.32)
-    kit._point_light('burst-light', burst * 1.9, 40.0, '#ffc690', 0.9)  # high and large: a broad soft warm light on the cloud tops, no hard highlight
+    fx.fireball('burst', burst, 0.14, strength=0.16)
+    kit._point_light('burst-light', burst * 1.9, 20.0, '#ffc690', 0.9)  # high and large: a broad soft warm light on the cloud tops, no hard highlight
     L0 = burst.length / math.cos(math.radians(16.7)) ** 2
     rng = random.Random(5)
     # seven ribbons at uneven spacing: two thin and bright, five wide and faint; white-pink at the burst, violet over the arch, green at the aurora
@@ -59,7 +59,8 @@ def starfish():
 
 
 def fengyun():
-    """2007: an SC-19 from Xichang destroys Fengyun-1C at 865 km before dawn; the debris spreads along its orbit, then all the way around."""
+    """2007: an SC-19 from Xichang destroyed Fengyun-1C at 865 km before dawn. The picture is the aftermath: the wreckage and the debris spreading
+    along its orbit, then all the way around (no interceptor, fireball or shock ring)."""
     base(ll(-22, -148), clouds=0.3)
     kit.sun(ll(30, 20), strength=2.6, color=(0.35, 0.5, 1.0))  # faint cool moonlight on the night side, so it is blue-grey with cloud form, not brown
     hit = ll(35.5, 106.5, 865)
@@ -70,10 +71,6 @@ def fengyun():
     cam = hit - t * 0.1 + up * 0.36 + side * 0.34
     sh = Shot(cam, hit + up * 0.02, lens=34, up=up)
     R, U = (sh.cam.matrix_world.to_3x3() @ Vector(v) for v in ((1, 0, 0), (0, 1, 0)))  # screen right and up
-    kit.trail('sc19', climb(ll(28.2, 102.0), hit, 90, 0.5), C['int'], 0.0012, 8)
-    kit.curve('sc19-smoke', climb(ll(28.2, 102.0), hit, 90, 0.5), 0.004, kit.glow_mat('sc19-smoke-m', C['int'], 0.8, fresnel=True, alpha=0.25, power=2.0), taper=(0.1, 1.0))
-    fx.fireball('hit', hit, 0.03, strength=0.14, halo='#ffb070', aura='#ffd0a0', body=0.5)
-    fx.ring_disc('shock', hit, cam - hit, 0.03, '#ffd9b0', 0.25, 0.03, 0.8)
 
     def fan(rng):  # mostly along the orbit, either way, with a wide spread
         phi, az = abs(rng.gauss(0, 0.6)), rng.uniform(0, math.tau)
@@ -100,8 +97,7 @@ def shakti():
     kit.trail('pdv', path, C['ind'], 0.0014, 10)
     kit.curve('pdv-smoke', path, 0.0035, kit.glow_mat('pdv-smoke-m', C['ind'], 0.7, fresnel=True, alpha=0.2, power=2.0), taper=(0.1, 1.0))
     kit.plume('pdv-head', path[88], path[78] - path[88], 0.03, 0.0009, C['ind'], light=0.0)
-    fx.fireball('hit', hit, 0.02, strength=0.09, halo='#ffd09a', aura='#ffe0b0', body=0.0)
-    fx.ring_disc('shock', hit, cam - hit, 0.02, '#fff0d8', 0.1, 0.02, 0.9)
+    fx.fireball('hit', hit, 0.01, strength=0.09, halo='#ffd09a', aura='#ffe0b0', body=0.0)
 
     def burst(rng):
         return Vector((rng.gauss(0, 1), rng.gauss(0, 1), rng.gauss(0, 1))).normalized()

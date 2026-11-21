@@ -111,8 +111,7 @@ export const DN2 = {
         },
       ],
     },
-    // a short re-entry flash where the path ends, so the rocket does not just vanish (illustrative: the reports give only "over the Indian Ocean")
-    { type: 'flash', at: [-20.0, 78.0, 0], t0: 0.87, color: '#ffe2b0', ringColor: '#ffb27a', size: 0.17, span: 0.09, strong: true },
+    // no re-entry flash: a blast at one spot pinned the re-entry more exactly than "over the Indian Ocean"; the caption carries the location
     {
       type: 'ring',
       alt: GEO_ALT,

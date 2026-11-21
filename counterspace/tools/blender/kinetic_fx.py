@@ -1,4 +1,4 @@
-# Effects for the kinetic poster scenes (scenes_kinetic.py): layered fireballs, flat shock rings, translucent curtains (field-line ribbons,
+# Effects for the kinetic poster scenes (scenes_kinetic.py): layered fireballs, translucent curtains (field-line ribbons,
 # aurora) and tapered motion streaks. Everything is pure emission, so the shapes are made by how the glow falls off, not by lighting.
 import math
 import random
@@ -75,34 +75,6 @@ def fireball(name, loc, r, strength=1.0, seed=1.0, hot='#fff4d8', mid='#ffb060',
         ob = kit.sphere(f'{name}-{i}', r * share, Vector(loc) + offsets[i], glow(f'{name}-m{i}', col, s * strength, r * share, seed=seed + i, **kw), seg=64)
         objs.append(_glow_only(ob))
     return objs
-
-
-def ring_disc(name, centre, normal, r, color, strength=3.0, width=0.07, ragged=0.5):
-    """A flat soft ring of radius `r` facing `normal` (a shock front seen as a halo): bright on the circle, fading to either side and broken
-    up into arcs by noise."""
-    centre, nrm = Vector(centre), Vector(normal).normalized()
-    a = nrm.orthogonal().normalized()
-    b = nrm.cross(a)
-    n, rows, outer = 120, 30, r * 1.5
-    V, F = [], []
-    for i in range(1, rows + 1):
-        for j in range(n):
-            t = 2 * math.pi * j / n
-            V.append(centre + (a * math.cos(t) + b * math.sin(t)) * outer * i / rows)
-    V.append(centre)
-    for i in range(rows - 1):
-        for j in range(n):
-            F.append((i * n + j, i * n + (j + 1) % n, (i + 1) * n + (j + 1) % n, (i + 1) * n + j))
-    for j in range(n):
-        F.append((rows * n, (j + 1) % n, j))
-    m, nt = _scaffold(name + '-m')
-    obj = nt.nodes.new('ShaderNodeTexCoord').outputs['Object']
-    d = _v(nt, 'DISTANCE', obj, tuple(centre))
-    x = _m(nt, 'DIVIDE', _m(nt, 'SUBTRACT', d, r), r * width)
-    k = _m(nt, 'EXPONENT', _m(nt, 'MULTIPLY', _m(nt, 'MULTIPLY', x, x), -1.0))
-    arcs = _mix(nt, _smooth(nt, _noise(nt, _v(nt, 'SCALE', obj, s=1.0 / r), 4.0, 4, 0.6), 0.35, 0.65), 1.0 - ragged, 1.0, 'FLOAT')
-    _finish(nt, _col(color), _m(nt, 'MULTIPLY', _m(nt, 'MULTIPLY', k, arcs), strength))
-    return _glow_only(kit.mesh(name, V, F, m, smooth=True))
 
 
 def strip(name, edge_a, edge_b, material):

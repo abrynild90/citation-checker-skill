@@ -167,18 +167,11 @@ function stripControls(grid) {
     grid.style.setProperty('--cards', String(grid.children.length - 1));
     grid.classList.add('has-pad');
   }
-  // The same two arrows again at the picture's edges (aria-hidden and out of the tab order: the pair above is the one for assistive technology and keyboards), and a count
-  // of the cards in view ("1 to 4 of 13"), so the strip says both that it goes on and how far.
-  const ePrev = document.getElementById('pstripPrev'),
-    eNext = document.getElementById('pstripNext'),
-    count = document.getElementById('stripCount');
+  // A count of the cards in view ("1 to 4 of 13") beside the one pair of arrows, so the strip says both that it goes on and how far.
+  const count = document.getElementById('stripCount');
   const sync = () => {
     prev.disabled = grid.scrollLeft < 4;
     next.disabled = grid.scrollLeft + grid.clientWidth > grid.scrollWidth - 4;
-    if (ePrev) ePrev.disabled = prev.disabled;
-    if (eNext) eNext.disabled = next.disabled;
-    const pic = grid.querySelector('.pc-pic');
-    if (pic && grid.parentElement) grid.parentElement.style.setProperty('--edge-top', Math.round(pic.offsetTop + pic.offsetHeight * 0.2) + 'px');
     // a card cut by either edge shows its picture only: its title never ends in half a word
     for (const c of grid.querySelectorAll('.pcard')) {
       const r = c.getBoundingClientRect(),
@@ -209,8 +202,6 @@ function stripControls(grid) {
   };
   prev.onclick = () => go(-1);
   next.onclick = () => go(1);
-  if (ePrev) ePrev.onclick = () => go(-1);
-  if (eNext) eNext.onclick = () => go(1);
   grid.addEventListener('scroll', sync, { passive: true });
   addEventListener('resize', sync);
   sync();

@@ -11,6 +11,7 @@ import {
   Placer,
   badge, SCENE_BADGE_MARKUP,
   byId,
+  chartWindow,
   colorOf,
   fmtD,
   fmtMY,
@@ -199,6 +200,20 @@ export function drawA(el = document.getElementById('svgA')) {
     .attr('x', 0)
     .attr('y', 14)
     .text(phone ? 'Altitude in km, logarithmic scale' : 'Altitude above Earth in km, logarithmic scale');
+  // What the big circles are, beside the scale note, with the key's own dashed circle: otherwise they read as halos of emphasis until the folded key is opened.
+  {
+    const BUB = 'Bubble area shows cataloged fragments',
+      bx = tw(phone ? 'Altitude in km, logarithmic scale' : 'Altitude above Earth in km, logarithmic scale', 13, 600) + 28;
+    if (bx + 16 + tw(BUB, 13, 600) <= W - M.r) {
+      svg.append('circle').attr('cx', bx).attr('cy', 9.5).attr('r', 6).style('fill', 'none').style('stroke', 'var(--muted)').style('stroke-dasharray', '2 2');
+      svg
+        .append('text')
+        .attr('class', 'axis-title')
+        .attr('x', bx + 12)
+        .attr('y', 14)
+        .text(BUB);
+    }
+  }
   // ---- strip for unreported altitudes
   const sy = top + plotH + capH,
     stripY = (e) => sy + 16 + (e._row || 0) * ROWH;
@@ -456,6 +471,8 @@ export function drawA(el = document.getElementById('svgA')) {
       .attr('y', 36)
       .text(`Zoomed to 2004–2026: ${KIN.length - KV.length} earlier tests hidden`);
   if (!EXPORTING) {
+    chartWindow.chartA = { x, el };
+    queueMicrotask(() => dispatchEvent(new Event('scroll'))); // the phone's slim law strip redraws on the new years
     const b = document.getElementById('aZoom');
     b.setAttribute('aria-pressed', !!zoomed);
     b.innerHTML = `<svg class="ico" aria-hidden="true"><use href="#i-zoom"/></svg>${zoomed ? 'Show full span 1957–2026' : 'Zoom to 2004–2026'}`;

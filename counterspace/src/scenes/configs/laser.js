@@ -51,7 +51,7 @@ export const LASER = {
       short: 'MIRACL beam',
       width: 0.034,
       labelFrac: 0.7,
-      ends: IS_PHONE ? 0.022 : 0.05, // 375: a smaller glow at the satellite end, so the model is not blown out
+      ends: IS_PHONE ? 0.018 : 0.028, // a small point where the beam meets each end; larger read as a flare on MSTI-3, an effect the account says is not public
       dx: 62,
       dy: 0, // the pill sits right beside the beam (a short leader, not a long one along it)
       labelOffDisc: true,
@@ -103,7 +103,7 @@ export const LASER = {
   status: [
     [0, 'MSTI-3 rises over White Sands'],
     [0.15, 'MIRACL beam tracks the satellite', 'MIRACL beam tracks the satellite'],
-    [0.78, 'Peresvet shelter sites: a mobile laser dazzler (SWF)', 'Peresvet: a mobile laser dazzler (SWF)'],
+    [0.78, 'A separate Russian case: Peresvet shelter sites, a mobile laser dazzler (SWF)', 'A separate Russian case: Peresvet (SWF)'], // the cut to Russia is not MIRACL's next phase: the picture says so (the lede's own words)
   ],
   cameras: [
     { name: 'Follow the satellite', fit: { site: [32.4, -106.4], tilt: 55, fill: 0.66 } },
@@ -121,7 +121,7 @@ export const LASER = {
       drift: [22, 12], // a slow pan east across the shelter sites: the view differs at every t
       ref: false,
       hide: ['MSTI-3', 'MIRACL', 'White Sands'],
-      status: ['Peresvet shelter sites, approximate (SWF)', 'Peresvet shelter sites (approximate)'],
+      status: ['A separate Russian case: Peresvet shelter sites, approximate (SWF)', 'Separate case: Peresvet sites, approximate'], // the picture's own caption on this view also says it is not MIRACL's next phase
     },
   ],
 };
